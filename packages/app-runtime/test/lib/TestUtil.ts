@@ -9,7 +9,7 @@ import { LogLevel } from "typescript-logging";
 import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { NativeBootstrapperMock } from "../mocks/NativeBootstrapperMock";
 import { FakeUIBridge } from "./FakeUIBridge";
-@nmshd
+
 export class TestUtil {
     public static async createRuntime(configOverride?: any): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);

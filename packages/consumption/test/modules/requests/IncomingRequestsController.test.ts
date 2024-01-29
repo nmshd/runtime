@@ -69,7 +69,7 @@ describe("IncomingRequestsController", function () {
             const request = TestObjectFactory.createRequestWithOneItem({ id: await CoreId.generate() });
 
             await When.iCreateAnIncomingRequestWith({ receivedRequest: request });
-            await Then.theRequestHasTheId(request.id);
+            await Then.theRequestHasTheId(request.id!);
         });
 
         test("cannot create incoming Request with an outgoing Message as source", async function () {
