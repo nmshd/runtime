@@ -1,0 +1,8 @@
+node_modules
+dist-test
+lib-web
+dist
+*.log
+*.db
+*.db~
+_archive

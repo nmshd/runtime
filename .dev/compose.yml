@@ -1,0 +1,22 @@
+name: runtime
+
+services:
+  runtime-mongo:
+    image: mongo
+    container_name: runtime-mongo
+    ports:
+      - "27021:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  runtime-ferret:
+    image: ghcr.io/ferretdb/ferretdb:latest
+    container_name: runtime-ferretdb
+    ports:
+      - "27022:27017"
+    environment:
+      FERRETDB_HANDLER: sqlite
+      FERRETDB_SQLITE_URL: file:./
+      FERRETDB_TELEMETRY: disable
+      FERRETDB_LOG_LEVEL: error

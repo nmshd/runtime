@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: perf-test
+spec:
+  selector:
+    matchLabels:
+      app: perf-test
+  template:
+    metadata:
+      labels:
+        app: perf-test
+    spec:
+      containers:
+        - name: perf-test
+          image: cns-transport-library-perf-tests
+          imagePullPolicy: Never
+  replicas: 5

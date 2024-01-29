@@ -1,0 +1,108 @@
+{
+    "name": "@nmshd/transport",
+    "version": "2.2.1",
+    "description": "The transport library handles backbone communication and content encryption.",
+    "homepage": "https://enmeshed.eu",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nmshd/runtime",
+        "directory": "packages/transport"
+    },
+    "license": "MIT",
+    "author": "j&s-soft GmbH",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "lib-web/nmshd.transport.js",
+        "lib-web/nmshd.transport.min.js",
+        "lib-web/nmshd.transport.js.map",
+        "lib-web/nmshd.transport.min.js.map",
+        "ui5.yaml"
+    ],
+    "scripts": {
+        "build": "npm run build:node  && npm run bundle",
+        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh && npm run bundle",
+        "build:node": "tsc -p tsconfig.json && madge --circular dist",
+        "build:notest": "npm run build:node  && npm run bundle:notest",
+        "bundle": "npm run bundle:lib && npm run bundle:min",
+        "bundle:lib": "webpack --stats-all --config webpack.config.js",
+        "bundle:min": "webpack --stats-all --config webpack.min.config.js",
+        "bundle:notest": "npm run bundle:lib && npm run bundle:min",
+        "cdep": "tsc && madge --circular dist",
+        "lint": "npm run lint:prettier && npm run lint:eslint && npm run lint:tsc",
+        "lint:eslint": "eslint --ext ts ./src ./test",
+        "lint:prettier": "prettier --check .",
+        "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
+        "test": "npm run test:lokijs && npm run test:mongodb",
+        "test:ci": "npm run test:ci:lokijs && npm run test:ci:mongodb",
+        "test:ci:lokijs": "npm run test:lokijs -- -i",
+        "test:ci:mongodb": "npm run test:mongodb -- -i",
+        "test:local:ferretdb": ". ../../.dev/testSetupFerret.sh && npm run test:mongodb",
+        "test:local:lokijs": "npm run test:lokijs",
+        "test:local:mongodb": ". ../../.dev/testSetup.sh && npm run test:mongodb",
+        "test:local:teardown": "docker compose -p transport-tests -f test/docker-compose.yml down -v",
+        "test:lokijs": "USE_LOKIJS=true jest",
+        "test:mongodb": "jest",
+        "test:performance:kube:start": "kubectl apply -f ./test/performance/k8s.yaml",
+        "test:performance:kube:stop": "kubectl delete -f ./test/performance/k8s.yaml"
+    },
+    "jest": {
+        "maxWorkers": 5,
+        "preset": "ts-jest",
+        "setupFilesAfterEnv": [
+            "./test/customMatchers.ts",
+            "jest-expect-message"
+        ],
+        "testEnvironment": "node",
+        "testPathIgnorePatterns": [
+            "/test/performance/",
+            "/node_modules/"
+        ],
+        "testTimeout": 60000,
+        "transform": {
+            "^.+\\.ts$": [
+                "ts-jest",
+                {
+                    "tsconfig": "test/tsconfig.json"
+                }
+            ]
+        }
+    },
+    "dependencies": {
+        "@js-soft/docdb-access-abstractions": "1.0.3",
+        "@js-soft/logging-abstractions": "^1.0.1",
+        "@js-soft/simple-logger": "1.0.4",
+        "@js-soft/ts-utils": "^2.3.3",
+        "axios": "^1.6.5",
+        "fast-json-patch": "^3.1.1",
+        "form-data": "^4.0.0",
+        "json-stringify-safe": "^5.0.1",
+        "lodash": "^4.17.21",
+        "luxon": "^3.4.4",
+        "qs": "^6.11.2",
+        "reflect-metadata": "^0.2.1",
+        "ts-simple-nameof": "^1.3.1",
+        "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+        "@js-soft/docdb-access-loki": "1.0.6",
+        "@js-soft/docdb-access-mongo": "1.1.6",
+        "@js-soft/node-logger": "1.1.1",
+        "@js-soft/ts-serval": "2.0.10",
+        "@js-soft/web-logger": "^1.0.4",
+        "@nmshd/crypto": "2.0.5",
+        "@types/glob": "^8.1.0",
+        "@types/json-stringify-safe": "^5.0.3",
+        "@types/lodash": "^4.14.202",
+        "@types/luxon": "^3.4.2",
+        "@types/qs": "^6.9.11",
+        "@types/uuid": "^9.0.7",
+        "expect": "^29.7.0",
+        "ts-mockito": "^2.6.1"
+    },
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    }
+}

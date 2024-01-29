@@ -1,0 +1,344 @@
+import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { LokiJsConnection } from "@js-soft/docdb-access-loki";
+import { INativeTranslationProvider } from "@js-soft/native-abstractions";
+import { Result } from "@js-soft/ts-utils";
+import { ConsumptionController } from "@nmshd/consumption";
+import { ModuleConfiguration, Runtime, RuntimeHealth } from "@nmshd/runtime";
+import { AccountController, CoreId, ICoreAddress } from "@nmshd/transport";
+import { AppConfig, AppConfigOverwrite, createAppConfig } from "./AppConfig";
+import { AppRuntimeErrors } from "./AppRuntimeErrors";
+import { AppRuntimeServices } from "./AppRuntimeServices";
+import { AppStringProcessor } from "./AppStringProcessor";
+import { SessionStorage } from "./SessionStorage";
+import { UserfriendlyResult } from "./UserfriendlyResult";
+import { AccountSelectedEvent, RelationshipSelectedEvent } from "./events";
+import { AppServices, IUIBridge } from "./extensibility";
+import {
+    AppLaunchModule,
+    AppRuntimeModuleConfiguration,
+    AppSyncModule,
+    IAppRuntimeModuleConstructor,
+    MailReceivedModule,
+    MessageReceivedModule,
+    OnboardingChangeReceivedModule,
+    PushNotificationModule,
+    RelationshipChangedModule,
+    RelationshipTemplateProcessedModule
+} from "./modules";
+import { AccountServices, LocalAccountDTO, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
+import { RuntimeNativeBootstrapper, RuntimeNativeEnvironment } from "./runtimeNatives";
+
+export class AppRuntime extends Runtime<AppConfig> {
+    public constructor(
+        private readonly _nativeEnvironment: RuntimeNativeEnvironment,
+        appConfig: AppConfig
+    ) {
+        super(appConfig, _nativeEnvironment.loggerFactory);
+
+        this._stringProcessor = new AppStringProcessor(this, this.loggerFactory);
+    }
+
+    public get config(): AppConfig {
+        return this.runtimeConfig;
+    }
+
+    private _uiBridge: IUIBridge | undefined;
+    private _uiBridgeResolver?: { promise: Promise<IUIBridge>; resolve(uiBridge: IUIBridge): void };
+
+    public async uiBridge(): Promise<IUIBridge> {
+        if (this._uiBridge) return this._uiBridge;
+        if (this._uiBridgeResolver) return await this._uiBridgeResolver.promise;
+
+        let resolve: (uiBridge: IUIBridge) => void = () => "";
+        const promise = new Promise<IUIBridge>((r) => (resolve = r));
+        this._uiBridgeResolver = { promise, resolve };
+
+        try {
+            return await this._uiBridgeResolver.promise;
+        } finally {
+            this._uiBridgeResolver = undefined;
+        }
+    }
+
+    public registerUIBridge(uiBridge: IUIBridge): UserfriendlyResult<void> {
+        if (this._uiBridge) return UserfriendlyResult.fail(AppRuntimeErrors.startup.uiBridgeAlreadyRegistered());
+
+        this._uiBridge = uiBridge;
+        this._uiBridgeResolver?.resolve(uiBridge);
+
+        return UserfriendlyResult.ok(undefined);
+    }
+
+    private lokiConnection: LokiJsConnection;
+    private _multiAccountController: MultiAccountController;
+    public get multiAccountController(): MultiAccountController {
+        return this._multiAccountController;
+    }
+
+    private _accountServices: AccountServices;
+    public get accountServices(): AccountServices {
+        return this._accountServices;
+    }
+
+    public get nativeEnvironment(): RuntimeNativeEnvironment {
+        return this._nativeEnvironment;
+    }
+
+    private readonly sessionStorage = new SessionStorage();
+
+    public get currentAccount(): LocalAccountDTO {
+        return this.sessionStorage.currentSession.account;
+    }
+
+    public get currentSession(): LocalAccountSession {
+        return this.sessionStorage.currentSession;
+    }
+
+    public getSessions(): LocalAccountSession[] {
+        return this.sessionStorage.getSessions();
+    }
+
+    private readonly _stringProcessor: AppStringProcessor;
+    public get stringProcessor(): AppStringProcessor {
+        return this._stringProcessor;
+    }
+
+    protected override async login(accountController: AccountController, consumptionController: ConsumptionController): Promise<AppRuntimeServices> {
+        const services = await super.login(accountController, consumptionController);
+
+        const appServices = new AppServices(this, services.transportServices, services.consumptionServices, services.dataViewExpander);
+
+        return { ...services, appServices };
+    }
+
+    public async getServices(accountReference: string | ICoreAddress): Promise<AppRuntimeServices> {
+        const session = await this.getOrCreateSession(accountReference.toString());
+
+        return {
+            transportServices: session.transportServices,
+            consumptionServices: session.consumptionServices,
+            appServices: session.appServices,
+            dataViewExpander: session.expander
+        };
+    }
+
+    public async selectAccount(accountReference: string, _password: string): Promise<LocalAccountSession> {
+        const session = await this.getOrCreateSession(accountReference);
+        this.sessionStorage.currentSession = session;
+        this.eventBus.publish(new AccountSelectedEvent(session.address, session.account.id));
+
+        await this.multiAccountController.updateLastAccessedAt(session.account.id);
+
+        return session;
+    }
+
+    public async getOrCreateSession(accountReference: string): Promise<LocalAccountSession> {
+        const existingSession = this.sessionStorage.findSession(accountReference);
+        if (existingSession) {
+            return existingSession;
+        }
+
+        return await this.createSession(accountReference);
+    }
+
+    private currentSessionPromise: { promise: Promise<LocalAccountSession>; accountId: string } | undefined;
+    private async createSession(accountReference: string, masterPassword = ""): Promise<LocalAccountSession> {
+        const accountId = accountReference.length === 20 ? accountReference : (await this.multiAccountController.getAccountByAddress(accountReference)).id.toString();
+
+        if (this.currentSessionPromise?.accountId === accountId) {
+            return await this.currentSessionPromise.promise;
+        }
+
+        if (this.currentSessionPromise) {
+            await this.currentSessionPromise.promise.catch(() => {
+                // ignore
+            });
+
+            return await this.createSession(accountId, masterPassword);
+        }
+
+        this.currentSessionPromise = { promise: this._createSession(accountId, masterPassword), accountId };
+
+        try {
+            return await this.currentSessionPromise.promise;
+        } finally {
+            this.currentSessionPromise = undefined;
+        }
+    }
+
+    private async _createSession(accountId: string, masterPassword: string) {
+        const [localAccount, accountController] = await this._multiAccountController.selectAccount(CoreId.from(accountId), masterPassword);
+        if (!localAccount.address) {
+            throw AppRuntimeErrors.general.addressUnavailable().logWith(this.logger);
+        }
+        const consumptionController = await new ConsumptionController(this.transport, accountController).init();
+
+        const services = await this.login(accountController, consumptionController);
+
+        this.logger.debug(`Finished login to ${accountId}.`);
+        const session: LocalAccountSession = {
+            address: localAccount.address.toString(),
+            account: LocalAccountMapper.toLocalAccountDTO(localAccount),
+            consumptionServices: services.consumptionServices,
+            transportServices: services.transportServices,
+            expander: services.dataViewExpander,
+            appServices: services.appServices,
+            accountController,
+            consumptionController
+        };
+
+        this.sessionStorage.addSession(session);
+
+        return session;
+    }
+
+    public async requestAccountSelection(
+        title = "i18n://uibridge.accountSelection.title",
+        description = "i18n://uibridge.accountSelection.description"
+    ): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
+        const accounts = await this.accountServices.getAccounts();
+
+        const bridge = await this.uiBridge();
+        const accountSelectionResult = await bridge.requestAccountSelection(accounts, title, description);
+        if (accountSelectionResult.isError) {
+            return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailable(accountSelectionResult.error));
+        }
+
+        if (accountSelectionResult.value) await this.selectAccount(accountSelectionResult.value.id, "");
+        return UserfriendlyResult.ok(accountSelectionResult.value);
+    }
+
+    public async selectRelationship(id?: string): Promise<void> {
+        if (!id) {
+            this.currentSession.selectedRelationship = undefined;
+            return;
+        }
+
+        const result = await this.currentSession.appServices.relationships.renderRelationship(id);
+        if (result.isError) throw result.error;
+
+        const relationship = result.value;
+        this.currentSession.selectedRelationship = relationship;
+        this.eventBus.publish(new RelationshipSelectedEvent(this.currentSession.address, relationship));
+    }
+
+    public getHealth(): Promise<RuntimeHealth> {
+        const health = {
+            isHealthy: true,
+            services: {}
+        };
+        return Promise.resolve(health);
+    }
+
+    protected async initAccount(): Promise<void> {
+        this._multiAccountController = new MultiAccountController(this.transport, this.runtimeConfig);
+        await this._multiAccountController.init();
+        this._accountServices = new AccountServices(this._multiAccountController);
+    }
+
+    public static async create(nativeBootstrapper: RuntimeNativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
+        // TODO: JSSNMSHDD-2524 (validate app config)
+
+        if (!nativeBootstrapper.isInitialized) {
+            const result = await nativeBootstrapper.init();
+            if (!result.isSuccess) {
+                throw AppRuntimeErrors.startup.bootstrapError(result.error);
+            }
+        }
+
+        const applePushEnvironmentResult = nativeBootstrapper.nativeEnvironment.configAccess.get("applePushEnvironment");
+        const applePushEnvironment = applePushEnvironmentResult.isError ? undefined : applePushEnvironmentResult.value;
+
+        const applicationId = nativeBootstrapper.nativeEnvironment.configAccess.get("applicationId").value;
+        const transportConfig = nativeBootstrapper.nativeEnvironment.configAccess.get("transport").value;
+        const mergedConfig = appConfig
+            ? createAppConfig(
+                  {
+                      transportLibrary: transportConfig,
+                      applicationId: applicationId,
+                      applePushEnvironment: applePushEnvironment
+                  },
+                  appConfig
+              )
+            : createAppConfig({
+                  transportLibrary: transportConfig,
+                  applicationId: applicationId,
+                  applePushEnvironment: applePushEnvironment
+              });
+
+        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig);
+        await runtime.init();
+        runtime.logger.trace("Runtime initialized");
+
+        return runtime;
+    }
+
+    public static async createAndStart(nativeBootstrapper: RuntimeNativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
+        const runtime = await this.create(nativeBootstrapper, appConfig);
+        await runtime.start();
+        runtime.logger.trace("Runtime started");
+        return runtime;
+    }
+
+    protected createDatabaseConnection(): Promise<IDatabaseConnection> {
+        this.logger.trace("Creating DatabaseConnection to LokiJS");
+        this.lokiConnection = new LokiJsConnection("./data", this.nativeEnvironment.databaseFactory);
+        this.logger.trace("Finished initialization of LokiJS connection.");
+
+        return Promise.resolve(this.lokiConnection);
+    }
+
+    private static moduleRegistry: Record<string, IAppRuntimeModuleConstructor | undefined> = {
+        appLaunch: AppLaunchModule,
+        appSync: AppSyncModule,
+        pushNotification: PushNotificationModule,
+        mailReceived: MailReceivedModule,
+        onboardingChangeReceived: OnboardingChangeReceivedModule,
+        messageReceived: MessageReceivedModule,
+        relationshipChanged: RelationshipChangedModule,
+        relationshipTemplateProcessed: RelationshipTemplateProcessedModule
+    };
+
+    public static registerModule(moduleName: string, ctor: IAppRuntimeModuleConstructor): void {
+        this.moduleRegistry[moduleName] = ctor;
+    }
+
+    protected loadModule(moduleConfiguration: ModuleConfiguration): Promise<void> {
+        const moduleConstructor = AppRuntime.moduleRegistry[moduleConfiguration.location];
+        if (!moduleConstructor) {
+            const error = new Error(
+                `Module '${this.getModuleName(moduleConfiguration)}' could not be loaded, because it was not registered. Please register all modules before running init.`
+            );
+            this.logger.error(error);
+            return Promise.reject(error);
+        }
+
+        const connectorModuleConfiguration = moduleConfiguration as AppRuntimeModuleConfiguration;
+
+        const module = new moduleConstructor(this, connectorModuleConfiguration, this.loggerFactory.getLogger(moduleConstructor));
+
+        this.modules.add(module);
+
+        this.logger.info(`Module '${this.getModuleName(moduleConfiguration)}' was loaded successfully.`);
+        return Promise.resolve();
+    }
+
+    public override async stop(): Promise<void> {
+        const logError = (e: any) => this.logger.error(e);
+
+        await super.stop().catch(logError);
+        await this.lokiConnection.close().catch(logError);
+    }
+
+    private translationProvider: INativeTranslationProvider = {
+        translate: (key: string) => Promise.resolve(Result.ok(key))
+    };
+
+    public registerTranslationProvider(provider: INativeTranslationProvider): void {
+        this.translationProvider = provider;
+    }
+
+    public async translate(key: string, ...values: any[]): Promise<Result<string>> {
+        return await this.translationProvider.translate(key, ...values);
+    }
+}

@@ -1,0 +1,73 @@
+{
+    "name": "@nmshd/app-runtime",
+    "version": "3.0.3",
+    "description": "The App Runtime",
+    "homepage": "https://enmeshed.eu",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nmshd/runtime",
+        "directory": "packages/app-runtime"
+    },
+    "license": "MIT",
+    "author": "j&s-soft GmbH",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "lib-web/nmshd.app-runtime.js",
+        "lib-web/nmshd.app-runtime.min.js",
+        "ui5.yaml"
+    ],
+    "scripts": {
+        "build": "npm run build:node && npm run bundle",
+        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh && npm run bundle",
+        "build:node": "tsc -p tsconfig.json",
+        "build:notest": "npm run build:node && npm run bundle:notest",
+        "bundle": "npm run bundle:lib && npm run bundle:min",
+        "bundle:lib": "webpack --stats-all --config webpack.config.js",
+        "bundle:min": "webpack --stats-all --config webpack.min.config.js",
+        "bundle:notest": "npm run bundle:lib && npm run bundle:min",
+        "cdep": "tsc && madge --circular dist",
+        "lint": "npm run lint:prettier && npm run lint:eslint && npm run lint:tsc",
+        "lint:eslint": "eslint --ext .ts ./src ./test",
+        "lint:prettier": "prettier --check .",
+        "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
+        "test": "jest",
+        "test:ci": "jest -i"
+    },
+    "jest": {
+        "maxWorkers": 5,
+        "preset": "ts-jest",
+        "setupFilesAfterEnv": [
+            "jest-expect-message"
+        ],
+        "testEnvironment": "node",
+        "testTimeout": 60000,
+        "transform": {
+            "^.+\\.ts$": [
+                "ts-jest",
+                {
+                    "tsconfig": "test/tsconfig.json"
+                }
+            ]
+        }
+    },
+    "dependencies": {
+        "@js-soft/docdb-access-loki": "^1.0.6",
+        "@js-soft/native-abstractions": "^1.2.2",
+        "lodash": "^4.17.21"
+    },
+    "devDependencies": {
+        "@js-soft/web-logger": "^1.0.4",
+        "@types/lodash": "^4.14.202",
+        "@types/lokijs": "^1.5.14",
+        "@types/luxon": "^3.4.2"
+    },
+    "peerDependencies": {
+        "@nmshd/runtime": "^3.4.3"
+    },
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    }
+}

@@ -1,0 +1,70 @@
+{
+    "name": "@nmshd/content",
+    "version": "2.8.4",
+    "description": "The content library defines data structures that can be transmitted using the transport library.",
+    "homepage": "https://enmeshed.eu",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nmshd/runtime",
+        "directory": "packages/content"
+    },
+    "license": "MIT",
+    "author": "j&s-soft GmbH",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "lib-web/nmshd.content.js",
+        "lib-web/nmshd.content.min.js",
+        "ui5.yaml"
+    ],
+    "scripts": {
+        "bt": "npm run test:node && npm run build:node && npm run bundle",
+        "build": "npm run build:node && npm run bundle",
+        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh && npm run bundle",
+        "build:node": "tsc -p tsconfig.json && madge --circular dist",
+        "build:notest": "npm run build:node && npm run bundle:notest",
+        "bundle": "npm run bundle:lib && npm run bundle:min",
+        "bundle:lib": "webpack --stats-all --config webpack.config.js",
+        "bundle:min": "webpack --stats-all --config webpack.min.config.js",
+        "bundle:notest": "npm run bundle:lib && npm run bundle:min",
+        "cdep": "tsc && madge --circular dist",
+        "lint": "npm run lint:prettier && npm run lint:eslint && npm run lint:tsc",
+        "lint:eslint": "eslint --ext ts ./src ./test",
+        "lint:prettier": "prettier --check .",
+        "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
+        "test": "jest",
+        "test:ci": "jest -i"
+    },
+    "jest": {
+        "maxWorkers": 5,
+        "preset": "ts-jest",
+        "setupFilesAfterEnv": [
+            "jest-expect-message"
+        ],
+        "testEnvironment": "node",
+        "testTimeout": 60000,
+        "transform": {
+            "^.+\\.ts$": [
+                "ts-jest",
+                {
+                    "tsconfig": "test/tsconfig.json"
+                }
+            ]
+        }
+    },
+    "dependencies": {
+        "@js-soft/logging-abstractions": "^1.0.1",
+        "@nmshd/iql": "^1.0.0",
+        "easy-tsnameof": "^3.0.6"
+    },
+    "devDependencies": {
+        "@js-soft/ts-serval": "2.0.10",
+        "@nmshd/crypto": "2.0.5",
+        "@types/luxon": "^3.4.2"
+    },
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    }
+}

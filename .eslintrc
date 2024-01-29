@@ -1,0 +1,27 @@
+{
+    "extends": ["@js-soft/ts", "@js-soft/ts/jest"],
+    "parserOptions": {
+        "project": ["./packages/*/tsconfig.json", "./packages/*/test/tsconfig.json"]
+    },
+    "ignorePatterns": ["jest.config.js", "Schemas.ts", "dist", "node_modules", "lib-web"],
+    "rules": {
+        "jest/expect-expect": [
+            "error",
+            {
+                "assertFunctionNames": [
+                    "expect",
+                    "verify",
+                    "expectValid*",
+                    "*.expectThrows*",
+                    "expectValid*",
+                    "*.expectThrows*",
+                    "Then.*",
+                    "*.expectPublishedEvents",
+                    "*.executeTests",
+                    "expectThrows*"
+                ]
+            }
+        ],
+        "jest/max-nested-describe": ["error", { "max": 4 }]
+    }
+}

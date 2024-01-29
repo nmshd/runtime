@@ -1,0 +1,46 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { AcceptResponseItem, RejectResponseItem, Request, RequestItem, ResponseItem, ResponseItemResult } from "@nmshd/content";
+import { CoreAddress } from "@nmshd/transport";
+import { ValidationResult } from "../../common/ValidationResult";
+import { AcceptRequestItemParametersJSON } from "../incoming/decide/AcceptRequestItemParameters";
+import { RejectRequestItemParametersJSON } from "../incoming/decide/RejectRequestItemParameters";
+import { AbstractRequestItemProcessor } from "./AbstractRequestItemProcessor";
+import { LocalRequestInfo } from "./IRequestItemProcessor";
+
+export class GenericRequestItemProcessor<
+    TRequestItem extends RequestItem = RequestItem,
+    TAcceptParams extends AcceptRequestItemParametersJSON = AcceptRequestItemParametersJSON,
+    TRejectParams extends RejectRequestItemParametersJSON = RejectRequestItemParametersJSON
+> extends AbstractRequestItemProcessor<TRequestItem, TAcceptParams, TRejectParams> {
+    public checkPrerequisitesOfIncomingRequestItem(requestItem: TRequestItem, requestInfo: LocalRequestInfo): Promise<boolean> | boolean {
+        return true;
+    }
+
+    public canAccept(requestItem: TRequestItem, params: TAcceptParams, requestInfo: LocalRequestInfo): Promise<ValidationResult> | ValidationResult {
+        return ValidationResult.success();
+    }
+
+    public canReject(requestItem: TRequestItem, params: TRejectParams, requestInfo: LocalRequestInfo): Promise<ValidationResult> | ValidationResult {
+        return ValidationResult.success();
+    }
+
+    public accept(requestItem: TRequestItem, params: TAcceptParams, requestInfo: LocalRequestInfo): AcceptResponseItem | Promise<AcceptResponseItem> {
+        return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
+    }
+
+    public reject(requestItem: TRequestItem, params: TRejectParams, requestInfo: LocalRequestInfo): RejectResponseItem | Promise<RejectResponseItem> {
+        return RejectResponseItem.from({ result: ResponseItemResult.Rejected });
+    }
+
+    public canCreateOutgoingRequestItem(requestItem: TRequestItem, request: Request, recipient?: CoreAddress): Promise<ValidationResult> | ValidationResult {
+        return ValidationResult.success();
+    }
+
+    public canApplyIncomingResponseItem(responseItem: AcceptResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Promise<ValidationResult> | ValidationResult {
+        return ValidationResult.success();
+    }
+
+    public applyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Promise<void> | void {
+        // do nothing
+    }
+}
