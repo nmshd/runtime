@@ -3,7 +3,7 @@
     "parserOptions": {
         "project": ["./packages/*/tsconfig.json", "./packages/*/test/tsconfig.json"]
     },
-    "ignorePatterns": ["jest.config.js", "Schemas.ts", "dist", "node_modules", "lib-web"],
+    "ignorePatterns": ["jest.config.js", "Schemas.ts", "dist", "node_modules", "lib-web", "generated", "demo"],
     "rules": {
         "jest/expect-expect": [
             "error",
