@@ -6,6 +6,7 @@ This monorepo consolidates the following packages:
 
 | Package                              | Version                                                                                                           |
 | :----------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| [iql](packages/iql/)                 | [![version](https://badge.fury.io/js/@nmshd%2fiql.svg)](https://www.npmjs.com/package/@nmshd/iql)                 |
 | [transport](packages/transport/)     | [![version](https://badge.fury.io/js/@nmshd%2ftransport.svg)](https://www.npmjs.com/package/@nmshd/transport)     |
 | [content](packages/content/)         | [![version](https://badge.fury.io/js/@nmshd%2fcontent.svg)](https://www.npmjs.com/package/@nmshd/content)         |
 | [consumption](packages/consumption/) | [![version](https://badge.fury.io/js/@nmshd%2fconsumption.svg)](https://www.npmjs.com/package/@nmshd/consumption) |

@@ -1,0 +1,58 @@
+{
+    "name": "@nmshd/iql",
+    "version": "1.0.0",
+    "description": "Identity Query Language - A DSL to filter and query Enmeshed attributes",
+    "homepage": "https://enmeshed.eu",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nmshd/runtime",
+        "directory": "packages/iql"
+    },
+    "license": "MIT",
+    "author": "js-soft GmbH",
+    "main": "dist/src/index.js",
+    "types": "dist/src/index.d.ts",
+    "files": [
+        "dist/src",
+        "dist/generated"
+    ],
+    "scripts": {
+        "build": "npm run build:clean && npm run build:parser && npm run build:version.ts && npx tsc -p ./tsconfig.json",
+        "build:clean": "rm -rf ./dist ./generated",
+        "build:node": "npm run build",
+        "build:parser": "mkdir -p generated && npx peggy -o ./generated/iql.js ./src/grammar.peggy",
+        "build:version.ts": "mkdir -p generated && node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > generated/version.ts",
+        "demo": "npm run build && npx light-server -s ./demo -w 'src/grammar.peggy, demo/app.js, demo/attributes.js, demo/index.html # cd demo && npm run build && npx webpack --mode production'",
+        "lint": "npm run lint:prettier && npm run lint:eslint && npm run lint:tsc",
+        "lint:eslint": "eslint ./src ./tests",
+        "lint:prettier": "prettier --check ./src/**/*.ts ./tests/**/*.ts ./demo",
+        "lint:tsc": "tsc --noEmit",
+        "test": "npm run build && npx jest",
+        "test:ci": "npx jest -i"
+    },
+    "jest": {
+        "maxWorkers": 5,
+        "preset": "ts-jest",
+        "setupFilesAfterEnv": [
+            "jest-expect-message"
+        ],
+        "testEnvironment": "node",
+        "testTimeout": 60000,
+        "transform": {
+            "^.+\\.ts$": [
+                "ts-jest",
+                {
+                    "tsconfig": "tests/tsconfig.json"
+                }
+            ]
+        }
+    },
+    "devDependencies": {
+        "light-server": "^2.9.1",
+        "peggy": "^3.0.2"
+    },
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    }
+}
