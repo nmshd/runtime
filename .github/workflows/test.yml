@@ -38,12 +38,12 @@ jobs:
         uses: nmshd/start-backbone@latest
         with:
           consumerapi-version: v4.2.6
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: npm ci
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.6.0
+        uses: supercharge/mongodb-github-action@v1
       - run: npm run build:node --workspaces
       - run: npm run test:ci:mongodb --workspace=@nmshd/consumption
         env:
@@ -60,7 +60,7 @@ jobs:
         uses: nmshd/start-backbone@latest
         with:
           consumerapi-version: v4.2.6
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: npm ci
@@ -83,7 +83,7 @@ jobs:
         uses: nmshd/start-backbone@latest
         with:
           consumerapi-version: v4.2.6
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: npm ci
@@ -97,11 +97,10 @@ jobs:
   test-content:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: browser-actions/setup-chrome@latest
       - run: npm ci
         env:
           BUILD_NUMBER: ${{ github.run_number }}
@@ -117,10 +116,10 @@ jobs:
         uses: nmshd/start-backbone@latest
         with:
           consumerapi-version: v4.2.6
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: supercharge/mongodb-github-action@v1.9.0
+      - uses: supercharge/mongodb-github-action@v1
       - run: npm ci
       - run: npm run build:node --workspaces
       - run: npm run build:schemas --workspace=@nmshd/runtime
@@ -139,7 +138,7 @@ jobs:
         uses: nmshd/start-backbone@latest
         with:
           consumerapi-version: v4.2.6
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - uses: js-soft/ferretdb-github-action@1.1.0
@@ -164,7 +163,7 @@ jobs:
         uses: nmshd/start-backbone@latest
         with:
           consumerapi-version: v4.2.6
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: npm ci
@@ -190,7 +189,7 @@ jobs:
       - run: npm ci
       - run: npm run build:node --workspaces
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.6.0
+        uses: supercharge/mongodb-github-action@v1
       - run: npm run test:ci:mongodb --workspace=@nmshd/transport
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
@@ -211,7 +210,7 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm run build:node --workspaces
-      - uses: js-soft/ferretdb-github-action@1.0.2
+      - uses: js-soft/ferretdb-github-action@1.1.0
         with:
           ferretdb-telemetry: "enabled"
       - run: npm run test:ci:mongodb --workspace=@nmshd/transport
@@ -232,7 +231,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: browser-actions/setup-chrome@latest
       - run: npm ci
       - run: npm run build:node --workspaces
         env:
