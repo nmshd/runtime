@@ -10,5 +10,6 @@ export enum ConsumptionControllerName {
     RequestsController = "Requestsontroller",
     SettingsController = "SettingsController",
     SharedItemsController = "SharedItemsController",
-    NotificationsController = "NotificationsController"
+    NotificationsController = "NotificationsController",
+    IdentityMetadataController = "IdentityMetadataController"
 }
