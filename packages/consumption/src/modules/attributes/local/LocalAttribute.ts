@@ -99,8 +99,8 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return this.isRelationshipAttribute() && this.isPeerSharedAttribute(peerAddress);
     }
 
-    public isRepositoryAttribute(): this is RepositoryAttribute {
-        return this.isIdentityAttribute() && !this.isShared();
+    public isRepositoryAttribute(ownAddress: CoreAddress): this is RepositoryAttribute {
+        return this.isIdentityAttribute() && !this.isShared() && this.isOwnedBy(ownAddress);
     }
 
     public isOwnSharedAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute | OwnSharedRelationshipAttribute {
