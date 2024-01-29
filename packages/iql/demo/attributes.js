@@ -93,4 +93,4 @@ export const attributes = [
         validFrom: "2021-01-01T00:00:00",
         validTo: "2023-01-01T00:00:00"
     }
-]
+];

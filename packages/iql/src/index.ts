@@ -1,4 +1,4 @@
-import { parse, SyntaxError } from "../generated/iql.js"
+import { parse, SyntaxError } from "../generated/iql.js";
 
 /**
  * Simplified projection of an identity attribute, retaining only
@@ -8,11 +8,11 @@ import { parse, SyntaxError } from "../generated/iql.js"
  */
 export interface AttributeView {
     value: {
-        "@type": string
-        [_: string]: unknown
-    }
-    tags?: string[]
-    [_: string]: unknown
+        "@type": string;
+        [_: string]: unknown;
+    };
+    tags?: string[];
+    [_: string]: unknown;
 }
 
 /**
@@ -20,47 +20,47 @@ export interface AttributeView {
  * attribute array.
  */
 export function execute(iqlQuery: string, attributes: AttributeView[]): number[] {
-    return parse(iqlQuery, { attributes }) as number[]
+    return parse(iqlQuery, { attributes }) as number[];
 }
 
 export interface IValidateSuccess {
-    isValid: true
+    isValid: true;
 }
 
 export interface IValidateError {
-    isValid: false
+    isValid: false;
     error: {
-        message: string
+        message: string;
 
         /* Location of syntax error in the input string. */
         location: {
             start: {
-                column: number
-                line: number
-                offset: number
-            }
+                column: number;
+                line: number;
+                offset: number;
+            };
             end: {
-                column: number
-                line: number
-                offset: number
-            }
-        }
-    }
+                column: number;
+                line: number;
+                offset: number;
+            };
+        };
+    };
 }
 
-export type IValidateResult = IValidateSuccess | IValidateError
+export type IValidateResult = IValidateSuccess | IValidateError;
 
 export function validate(iqlQuery: string): IValidateResult {
     try {
-        parse(iqlQuery, { attributes: [] })
-        return { isValid: true }
+        parse(iqlQuery, { attributes: [] });
+        return { isValid: true };
     } catch (error: any) {
         // FIXME: Is there a cleaner way to catch IQL SyntaxErrors?
         //        For the sake of backwards compatibility peggy compiles to old
         //        js without the use of classes. Thus the static type inference
         //        for the SyntaxError type is severely crippled.
         if (error instanceof SyntaxError) {
-            const err = error as any // see FIXME above.
+            const err = error as any; // see FIXME above.
             return {
                 isValid: false,
                 error: {
@@ -70,7 +70,7 @@ export function validate(iqlQuery: string): IValidateResult {
                         end: err.location.end
                     }
                 }
-            }
+            };
         }
 
         return {
@@ -90,6 +90,6 @@ export function validate(iqlQuery: string): IValidateResult {
                     }
                 }
             }
-        }
+        };
     }
 }

@@ -1,4 +1,4 @@
-var path = require("path")
+var path = require("path");
 
 module.exports = {
     entry: "./app.js",
@@ -6,4 +6,4 @@ module.exports = {
         path: path.resolve(__dirname),
         filename: "_bundle.js"
     }
-}
+};
