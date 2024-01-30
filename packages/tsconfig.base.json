@@ -18,6 +18,7 @@
         "downlevelIteration": true,
         "noImplicitOverride": true,
         "useDefineForClassFields": false,
-        "lib": ["ES2022", "DOM"]
+        "lib": ["ES2022", "DOM"],
+        "composite": true
     }
 }

@@ -18,7 +18,8 @@
         "lint:eslint": "eslint --ext .ts ./packages/*/src ./packages/*/test",
         "lint:prettier": "prettier --check .",
         "lint:tsc": "npm run -ws lint:tsc",
-        "outdated": "ncu -i && ncu -i -ws"
+        "outdated": "ncu -i && ncu -i -ws",
+        "build:watch": "tsc -w"
     },
     "devDependencies": {
         "@js-soft/eslint-config-ts": "^1.6.6",
