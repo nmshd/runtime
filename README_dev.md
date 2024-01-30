@@ -17,6 +17,10 @@ This workspace provide two types of scripts:
 
     additionally you can run a script in all workspaces by `npm run -ws --if-present <scriptname>`
 
+## Check for outdated dependencies
+
+To check for outdated dependencies run `npm run outdated`. This will check the root folder and all packages using [npm-check-updates](https://www.npmjs.com/package/npm-check-updates).
+
 ## How to test
 
 ### Setup
