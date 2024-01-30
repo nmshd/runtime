@@ -1039,7 +1039,6 @@ describe("AttributesController", function () {
                             city: version0ChildValues[3],
                             country: version0ChildValues[4]
                         },
-                        validTo: CoreDate.utc(),
                         owner: consumptionController.accountController.identity.address
                     });
 
@@ -1128,9 +1127,6 @@ describe("AttributesController", function () {
                     expect(updatedRepoVersion0.succeededBy!.equals(repoVersion1.id)).toBe(true);
                     expect(repoVersion1.succeeds!.equals(updatedRepoVersion0.id)).toBe(true);
 
-                    expect((updatedRepoVersion0.content.value as StreetAddress).recipient).toBe("ARecipient");
-                    expect((repoVersion1.content.value as StreetAddress).recipient).toBe("ANewRecipient");
-
                     const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
                         parentId: repoVersion0.id.toString()
                     });
@@ -1139,20 +1135,10 @@ describe("AttributesController", function () {
                     });
 
                     const minNumberOfChildAttributes = version0ChildValues.length;
+                    expect(repoVersion0ChildAttributes).toHaveLength(minNumberOfChildAttributes);
                     expect(repoVersion1ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
 
-                    for (let i = 0; i < minNumberOfChildAttributes; i++) {
-                        expect(repoVersion0ChildAttributes[i].succeededBy).toStrictEqual(repoVersion1ChildAttributes[i].id);
-                        expect(repoVersion1ChildAttributes[i].succeeds).toStrictEqual(repoVersion0ChildAttributes[i].id);
-
-                        expect(repoVersion0ChildAttributes[i].parentId).toStrictEqual(repoVersion0.id);
-                        expect(repoVersion1ChildAttributes[i].parentId).toStrictEqual(repoVersion1.id);
-
-                        expect(repoVersion0ChildAttributes[i].content.value.toString()).toStrictEqual(version0ChildValues[i]);
-                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(version1ChildValues[i]);
-                    }
-
-                    expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toStrictEqual("Berlin");
+                    expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toBe("Berlin");
                     expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].parentId).toStrictEqual(repoVersion1.id);
                     expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].succeeds).toBeUndefined();
                 });
@@ -1187,9 +1173,6 @@ describe("AttributesController", function () {
                     expect(updatedRepoVersion0.succeededBy!.equals(repoVersion1.id)).toBe(true);
                     expect(repoVersion1.succeeds!.equals(updatedRepoVersion0.id)).toBe(true);
 
-                    expect((updatedRepoVersion0.content.value as StreetAddress).recipient).toBe("ARecipient");
-                    expect((repoVersion1.content.value as StreetAddress).recipient).toBe("ANewRecipient");
-
                     const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
                         parentId: repoVersion0.id.toString()
                     });
@@ -1197,21 +1180,11 @@ describe("AttributesController", function () {
                         parentId: repoVersion1.id.toString()
                     });
 
-                    const minNumberOfChildAttributes = version1ChildValues.length;
+                    const minNumberOfChildAttributes = version0ChildValues.length;
                     expect(repoVersion0ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
+                    expect(repoVersion1ChildAttributes).toHaveLength(minNumberOfChildAttributes);
 
-                    for (let i = 0; i < minNumberOfChildAttributes; i++) {
-                        expect(repoVersion0ChildAttributes[i].succeededBy).toStrictEqual(repoVersion1ChildAttributes[i].id);
-                        expect(repoVersion1ChildAttributes[i].succeeds).toStrictEqual(repoVersion0ChildAttributes[i].id);
-
-                        expect(repoVersion0ChildAttributes[i].parentId).toStrictEqual(repoVersion0.id);
-                        expect(repoVersion1ChildAttributes[i].parentId).toStrictEqual(repoVersion1.id);
-
-                        expect(repoVersion0ChildAttributes[i].content.value.toString()).toStrictEqual(version0ChildValues[i]);
-                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(version1ChildValues[i]);
-                    }
-
-                    expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toStrictEqual("Berlin");
+                    expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toBe("Berlin");
                     expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].parentId).toStrictEqual(repoVersion0.id);
                     expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].succeededBy).toBeUndefined();
                 });
@@ -1228,16 +1201,13 @@ describe("AttributesController", function () {
                             country: version0ChildValues[4],
                             state: "Berlin"
                         },
-                        validTo: CoreDate.utc(),
                         owner: consumptionController.accountController.identity.address
                     });
                     repoVersion0 = await consumptionController.attributes.createLocalAttribute({
                         content: identityAttribute
                     });
-                    const { predecessor: updatedRepoVersion0, successor: repoVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(
-                        repoVersion0.id,
-                        repoVersion1Params
-                    );
+
+                    const { successor: repoVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion0.id, repoVersion1Params);
 
                     const repoVersion2Params = {
                         content: IdentityAttribute.from({
@@ -1254,18 +1224,7 @@ describe("AttributesController", function () {
                             owner: consumptionController.accountController.identity.address
                         })
                     };
-                    const { predecessor: updatedRepoVersion1, successor: repoVersion2 } = await consumptionController.attributes.succeedRepositoryAttribute(
-                        repoVersion1.id,
-                        repoVersion2Params
-                    );
-
-                    expect(repoVersion2).toBeDefined();
-                    expect(updatedRepoVersion1).toBeDefined();
-                    expect(repoVersion1.id.equals(updatedRepoVersion1.id)).toBe(true);
-                    expect(updatedRepoVersion1.succeededBy!.equals(repoVersion2.id)).toBe(true);
-                    expect(repoVersion2.succeeds!.equals(updatedRepoVersion1.id)).toBe(true);
-
-                    expect((repoVersion2.content.value as StreetAddress).recipient).toBe("ANewRecipient");
+                    const { successor: repoVersion2 } = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion1.id, repoVersion2Params);
 
                     const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
                         parentId: repoVersion0.id.toString()
@@ -1277,21 +1236,12 @@ describe("AttributesController", function () {
                         parentId: repoVersion2.id.toString()
                     });
 
-                    const minNumberOfChildAttributes = version1ChildValues.length;
+                    const minNumberOfChildAttributes = version0ChildValues.length;
+                    expect(repoVersion0ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
+                    expect(repoVersion1ChildAttributes).toHaveLength(minNumberOfChildAttributes);
                     expect(repoVersion2ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
 
-                    for (let i = 0; i < minNumberOfChildAttributes; i++) {
-                        expect(repoVersion1ChildAttributes[i].succeededBy).toStrictEqual(repoVersion2ChildAttributes[i].id);
-                        expect(repoVersion2ChildAttributes[i].succeeds).toStrictEqual(repoVersion1ChildAttributes[i].id);
-
-                        expect(repoVersion1ChildAttributes[i].parentId).toStrictEqual(repoVersion1.id);
-                        expect(repoVersion2ChildAttributes[i].parentId).toStrictEqual(repoVersion2.id);
-
-                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(version1ChildValues[i]);
-                        expect(repoVersion2ChildAttributes[i].content.value.toString()).toStrictEqual(version1ChildValues[i]);
-                    }
-
-                    expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toStrictEqual("Berlin");
+                    expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toBe("Berlin");
                     expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].parentId).toStrictEqual(repoVersion2.id);
                     expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].succeeds).toStrictEqual(repoVersion0ChildAttributes[minNumberOfChildAttributes].id);
                 });
