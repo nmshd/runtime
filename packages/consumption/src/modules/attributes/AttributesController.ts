@@ -433,27 +433,6 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
-    private async validateComplexRepositoryAttributeSuccession(
-        predecessorId: CoreId,
-        successorParams: Parameters<typeof this.createAttributeUnsafe>[0]
-    ): Promise<ValidationResult> {
-        const childAttributes = await this.getLocalAttributes({
-            parentId: predecessorId.toString()
-        });
-
-        const childAttributeValues = Object.values(successorParams.content.value).filter((p) => p instanceof AbstractAttributeValue);
-
-        for (const childAttribute of childAttributes) {
-            // TODO: handle the case, that for a childAttribute, no new value is set => sometimes this is an error, sometimes this is okay because the child attribute is optional
-            const newContent = childAttributeValues.find((elem) => childAttribute.content.value.constructor.name === elem.constructor.name);
-
-            if (!newContent) {
-                return ValidationResult.error(CoreErrors.attributes.invalidSuccessor("All child attributes must be defined in the successor."));
-            }
-        }
-        return ValidationResult.success();
-    }
-
     private async _getChildOfAttributeValue(newChildAttributeValue: any, parentId: CoreId) {
         // TODO: type
         const children = await this.getLocalAttributes({
@@ -543,11 +522,6 @@ export class AttributesController extends ConsumptionBaseController {
         if (commonValidation.isError()) return commonValidation;
 
         const predecessor = (await this.getLocalAttribute(predecessorId))!;
-
-        if (predecessor instanceof AbstractComplexValue) {
-            const complexAttributeValidation = await this.validateComplexRepositoryAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (complexAttributeValidation.isError()) return complexAttributeValidation;
-        }
 
         const successor = LocalAttribute.from({
             id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
@@ -916,7 +890,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
-            throw CoreErrors.attributes.invalidPropertyValue("Attribute '${id}' isn't a RepositoryAttribute.");
+            throw CoreErrors.attributes.invalidPropertyValue("Attribute '${id}' isn't a repository attribute.");
         }
 
         let i = 0;
