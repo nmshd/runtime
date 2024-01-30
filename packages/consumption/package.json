@@ -78,7 +78,8 @@
         "@types/glob": "^8.1.0",
         "@types/lodash": "^4.14.202",
         "@types/luxon": "^3.4.2",
-        "leaked-handles": "^5.2.0"
+        "leaked-handles": "^5.2.0",
+        "madge": "6.1.0"
     },
     "publishConfig": {
         "access": "public",
