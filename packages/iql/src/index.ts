@@ -1,4 +1,4 @@
-import { parse, SyntaxError } from "../generated/iql.js";
+import { parse, SyntaxError } from "./iql.gen.js";
 
 /**
  * Simplified projection of an identity attribute, retaining only
