@@ -1,4 +1,4 @@
-name: runtime
+name: runtime-tests
 
 services:
   runtime-mongo:
