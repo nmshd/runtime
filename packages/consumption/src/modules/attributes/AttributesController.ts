@@ -444,6 +444,7 @@ export class AttributesController extends ConsumptionBaseController {
         const childAttributeValues = Object.values(successorParams.content.value).filter((p) => p instanceof AbstractAttributeValue);
 
         for (const childAttribute of childAttributes) {
+            // TODO: handle the case, that for a childAttribute, no new value is set => sometimes this is an error, sometimes this is okay because the child attribute is optional
             const newContent = childAttributeValues.find((elem) => childAttribute.content.value.constructor.name === elem.constructor.name);
 
             if (!newContent) {
@@ -454,18 +455,92 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async _succeedChildrenUnsafe(predecessorId: CoreId, successorParams: Parameters<typeof this.createAttributeUnsafe>[0], successorId: CoreId) {
+        const childAttributeValues = Object.values(successorParams.content.value).filter((p) => p instanceof AbstractAttributeValue);
+
+        const predecessor = await this.getLocalAttribute(predecessorId);
+
+        if (typeof predecessor === "undefined") {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessorId.toString());
+        }
+
+        // TODO: it can happen, that a new child attribute has to be created which is not part of "childAttributes"
+        // TODO: handle the case, that for a childAttribute, no new value is set => sometimes this is an error, sometimes this is okay because the child attribute is optional
+        // TODO: it can happen, that the childAttribute does not exist but get versionsOfAttribute
+        for (const newChildAttributeValue of childAttributeValues) {
+            // iterate through predecessors until the first time a matching childAttribute is found
+
+            let currentParent = predecessor;
+            let succeeds = undefined;
+            while (true) {
+                // get childs of predecessor
+                const predecessorChilds = await this.getLocalAttributes({
+                    parentId: currentParent.id.toString()
+                });
+
+                // find child which fits the type of the new attribute value
+                const child = predecessorChilds.find((elem) => elem.content.value.constructor.name === newChildAttributeValue.constructor.name);
+
+                if (typeof child !== "undefined") {
+                    // child found!
+                    succeeds = child.id;
+                    break;
+                }
+
+                // else: go to next predecessor
+
+                if (typeof currentParent.succeeds === "undefined") {
+                    break; // end of chain
+                }
+
+                const currentPredecessor = await this.getLocalAttribute(currentParent.succeeds);
+
+                if (typeof currentPredecessor === "undefined") {
+                    throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessorId.toString());
+                }
+
+                currentParent = currentPredecessor;
+            }
+
+            if (succeeds) {
+                // succeed predecessor if one exists
+                await this._succeedAttributeUnsafe(succeeds, {
+                    content: IdentityAttribute.from({
+                        value: newChildAttributeValue,
+                        owner: this.identity.address
+                    }),
+                    parentId: successorId,
+                    createdAt: successorParams.createdAt
+                });
+            } else {
+                // if no child is found in the predecessor, this is the first time the child is created => no succeeds is set and create new attribute
+                await this.createAttributeUnsafe({
+                    content: IdentityAttribute.from({
+                        value: newChildAttributeValue,
+                        owner: this.identity.address
+                    }),
+                    parentId: successorId,
+                    createdAt: successorParams.createdAt
+                });
+            }
+        }
+    }
+
+    private async __succeedChildrenUnsafe(predecessorId: CoreId, successorParams: Parameters<typeof this.createAttributeUnsafe>[0], successorId: CoreId) {
+        const childAttributeValues = Object.values(successorParams.content.value).filter((p) => p instanceof AbstractAttributeValue);
+
         const childAttributes = await this.getLocalAttributes({
             parentId: predecessorId.toString()
         });
 
-        const childAttributeValues = Object.values(successorParams.content.value).filter((p) => p instanceof AbstractAttributeValue);
+        // TODO: it can happen, that a new child attribute has to be created which is not part of "childAttributes"
 
         for (const childAttribute of childAttributes) {
+            // TODO: handle the case, that for a childAttribute, no new value is set => sometimes this is an error, sometimes this is okay because the child attribute is optional
             const newValues = childAttributeValues.find((elem) => childAttribute.content.value.constructor.name === elem.constructor.name);
             childAttribute.content.value = newValues;
             await this._succeedAttributeUnsafe(childAttribute.id, {
                 content: childAttribute.content,
-                succeeds: childAttribute.id,
+                succeeds: childAttribute.id, // TODO: it can happen, that the childAttribute does not exist but get versionsOfAttribute
                 parentId: successorId,
                 createdAt: successorParams.createdAt
             });
