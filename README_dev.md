@@ -68,3 +68,15 @@ Or deserialize-/fromUnknown won't find your class.
 
 -   Check if all (parent) classes up to Serializable(-Async) inclulde a @schema declaration with a type
 -   You might have several different Serializable(-Async) instances up- and running. This usually happens if ts-serval/crypto/transport are not correctly imported.
+
+### Upgrading package versions
+
+When bumping the packages pinned directly in the runtime (transport, content and consumption) you always have to update the packages in the runtime. If you don't do this, you will get errors like:
+
+```
+Error: src/AppRuntime.ts(106,30): error TS2416: Property 'login' in type 'AppRuntime' is not assignable to the same property in base type 'Runtime<AppConfig>'.
+  Type '(accountController: AccountController, consumptionController: ConsumptionController) => Promise<AppRuntimeServices>' is not assignable to type '(accountController: AccountController, consumptionController: ConsumptionController) => Promise<RuntimeServices>'.
+Error: src/AppRuntime.ts(107,63): error TS2345: Argument of type 'import("/home/runner/work/runtime/runtime/packages/consumption/dist/consumption/ConsumptionController").ConsumptionController' is not assignable to parameter of type 'import("/home/runner/work/runtime/runtime/packages/runtime/node_modules/@nmshd/consumption/dist/consumption/ConsumptionController").ConsumptionController'.
+```
+
+This is caused by the runtime using different (npm insalled) versions of the bumped packages.
