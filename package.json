@@ -14,12 +14,13 @@
         "packages/app-runtime"
     ],
     "scripts": {
+        "build:node": "tsc --build",
+        "build:watch": "npm run build:node && tsc --build -w",
         "lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:tsc",
         "lint:eslint": "eslint --ext .ts ./packages/*/src ./packages/*/test",
         "lint:prettier": "prettier --check .",
         "lint:tsc": "npm run -ws lint:tsc",
         "outdated": "ncu -i && ncu -i -ws",
-        "build:watch": "tsc -w",
         "test:teardown": "docker compose -f .dev/compose.yml down -fsv"
     },
     "devDependencies": {
