@@ -37,8 +37,14 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
 
     protected async executeInternal(request: ShareIdentityAttributeRequest): Promise<Result<LocalRequestDTO>> {
         const repositoryAttribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
-        if (typeof repositoryAttribute === "undefined") return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
-        if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) return Result.fail(RuntimeErrors.attributes.isNoIdentityAttribute(repositoryAttribute.id));
+
+        if (typeof repositoryAttribute === "undefined") {
+            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
+        }
+
+        if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
+            return Result.fail(RuntimeErrors.attributes.isNoIdentityAttribute(repositoryAttribute.id));
+        }
 
         const query = {
             "content.owner": this.accountController.identity.address.toString(),

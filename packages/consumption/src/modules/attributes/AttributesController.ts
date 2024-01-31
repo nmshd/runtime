@@ -540,11 +540,6 @@ export class AttributesController extends ConsumptionBaseController {
 
         const predecessor = (await this.getLocalAttribute(predecessorId))!;
 
-        if (predecessor instanceof AbstractComplexValue) {
-            const complexAttributeValidation = await this.validateComplexRepositoryAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (complexAttributeValidation.isError()) return complexAttributeValidation;
-        }
-
         const successor = LocalAttribute.from({
             id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
             content: parsedSuccessorParams.content,
@@ -913,7 +908,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
-            throw CoreErrors.attributes.invalidPropertyValue("Attribute '${id}' isn't a RepositoryAttribute.");
+            throw CoreErrors.attributes.invalidPropertyValue("Attribute '${id}' isn't a repository attribute.");
         }
 
         // TODO: ???: Woher kommt die 1000? Und warum nicht eine for-loop?
