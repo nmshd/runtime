@@ -1,5 +1,13 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { AbstractComplexValue, IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
+import {
+    AbstractComplexValue,
+    IdentityAttribute,
+    IdentityAttributeJSON,
+    IIdentityAttribute,
+    IRelationshipAttribute,
+    RelationshipAttribute,
+    RelationshipAttributeJSON
+} from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
@@ -146,7 +154,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     }
 
     public isComplexAttribute(): boolean {
-        return this.content.value instanceof AbstractComplexValue
+        return this.content.value instanceof AbstractComplexValue;
     }
 
     public isOwnedBy(identity: CoreAddress): boolean {
