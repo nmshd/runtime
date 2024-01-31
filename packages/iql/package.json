@@ -38,7 +38,7 @@
             "^.+\\.ts$": [
                 "ts-jest",
                 {
-                    "tsconfig": "tests/tsconfig.json"
+                    "tsconfig": "test/tsconfig.json"
                 }
             ]
         }
