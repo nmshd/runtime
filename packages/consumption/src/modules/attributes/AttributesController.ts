@@ -885,11 +885,12 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
-            throw CoreErrors.attributes.invalidPropertyValue("Attribute '${id}' isn't a repository attribute.");
+            throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
         }
 
-        // TODO: ???: Woher kommt die 1000? Und warum nicht eine for-loop?
         let i = 0;
+        // TODO: What's the use of this hardcoded termination condition?
+        //       Any why is it used only here, if we _really_ need it?
         while (repositoryAttribute.succeededBy && i < 1000) {
             const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
             if (!successor) {
