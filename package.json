@@ -15,7 +15,7 @@
     ],
     "scripts": {
         "build:node": "tsc --build",
-        "build:watch": "npm run build:node && tsc --build -w",
+        "build:watch": "tsc --build -w",
         "lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:tsc",
         "lint:eslint": "eslint --ext .ts ./packages/*/src ./packages/*/test",
         "lint:prettier": "prettier --check .",
