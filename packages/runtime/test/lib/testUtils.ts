@@ -16,8 +16,8 @@ import { DateTime } from "luxon";
 import {
     ConsumptionServices,
     CreateAndShareRelationshipAttributeRequest,
-    CreateIdentityAttributeRequest,
     CreateOutgoingRequestRequest,
+    CreateRepositoryAttributeRequest,
     CreateTokenForFileRequest,
     CreateTokenQRCodeForFileRequest,
     FileDTO,
@@ -26,16 +26,16 @@ import {
     LocalNotificationDTO,
     MessageDTO,
     MessageSentEvent,
-    NotifyPeerAboutIdentityAttributeSuccessionRequest,
+    NotifyPeerAboutRepositoryAttributeSuccessionRequest,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
     RelationshipDTO,
     RelationshipStatus,
     RelationshipTemplateDTO,
-    ShareIdentityAttributeRequest,
-    SucceedIdentityAttributeRequest,
-    SucceedIdentityAttributeResponse,
+    ShareRepositoryAttributeRequest,
+    SucceedRepositoryAttributeRequest,
+    SucceedRepositoryAttributeResponse,
     SyncEverythingResponse,
     TokenDTO,
     TransportServices,
@@ -399,19 +399,19 @@ export async function executeFullCreateAndShareRelationshipAttributeFlow(
  *
  * Returns the sender's own shared identity attribute.
  */
-export async function executeFullCreateAndShareIdentityAttributeFlow(
+export async function executeFullCreateAndShareRepositoryAttributeFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
-    request: CreateIdentityAttributeRequest
+    request: CreateRepositoryAttributeRequest
 ): Promise<LocalAttributeDTO> {
-    const createAttributeRequestResult = await sender.consumption.attributes.createIdentityAttribute(request);
+    const createAttributeRequestResult = await sender.consumption.attributes.createRepositoryAttribute(request);
     const attribute = createAttributeRequestResult.value;
 
-    const shareRequest: ShareIdentityAttributeRequest = {
+    const shareRequest: ShareRepositoryAttributeRequest = {
         attributeId: attribute.id,
         peer: recipient.address
     };
-    const shareRequestResult = await sender.consumption.attributes.shareIdentityAttribute(shareRequest);
+    const shareRequestResult = await sender.consumption.attributes.shareRepositoryAttribute(shareRequest);
     const shareRequestId = shareRequestResult.value.id;
 
     await syncUntilHasMessageWithRequest(recipient.transport, shareRequestId);
@@ -436,19 +436,19 @@ export async function executeFullCreateAndShareIdentityAttributeFlow(
  *
  * Returns the sender's own shared predecessor and successor identity attribute.
  */
-export async function executeFullSucceedIdentityAttributeAndNotifyPeerFlow(
+export async function executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
-    request: SucceedIdentityAttributeRequest
-): Promise<SucceedIdentityAttributeResponse> {
-    const succeedAttributeRequestResult = await sender.consumption.attributes.succeedIdentityAttribute(request);
+    request: SucceedRepositoryAttributeRequest
+): Promise<SucceedRepositoryAttributeResponse> {
+    const succeedAttributeRequestResult = await sender.consumption.attributes.succeedRepositoryAttribute(request);
     const repositorySuccessor = succeedAttributeRequestResult.value.successor;
 
-    const notifyRequest: NotifyPeerAboutIdentityAttributeSuccessionRequest = {
+    const notifyRequest: NotifyPeerAboutRepositoryAttributeSuccessionRequest = {
         attributeId: repositorySuccessor.id,
         peer: recipient.address
     };
-    const notifyRequestResult = await sender.consumption.attributes.notifyPeerAboutIdentityAttributeSuccession(notifyRequest);
+    const notifyRequestResult = await sender.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession(notifyRequest);
     const notificationId = notifyRequestResult.value.notificationId;
 
     await syncUntilHasMessageWithNotification(recipient.transport, notificationId);
@@ -461,7 +461,7 @@ export async function executeFullSucceedIdentityAttributeAndNotifyPeerFlow(
         return e.data.successor.id === notifyRequestResult.value.successor.id;
     });
 
-    const senderOwnSharedIdentityAttributes: SucceedIdentityAttributeResponse = {
+    const senderOwnSharedIdentityAttributes: SucceedRepositoryAttributeResponse = {
         predecessor: notifyRequestResult.value.predecessor,
         successor: notifyRequestResult.value.successor
     };

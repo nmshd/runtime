@@ -1,22 +1,22 @@
 import { AcceptReadAttributeRequestItemParametersWithNewAttributeJSON, LocalRequestStatus } from "@nmshd/consumption";
-import { IQLQuery, IdentityAttributeQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
+import { IdentityAttributeQuery, IQLQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
     DataViewExpander,
     DecidableReadAttributeRequestItemDVO,
-    IQLQueryDVO,
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
+    IQLQueryDVO,
     MessageDTO,
     OutgoingRequestStatusChangedEvent,
-    ProcessedIQLQueryDVO,
     ProcessedIdentityAttributeQueryDVO,
+    ProcessedIQLQueryDVO,
     ReadAttributeAcceptResponseItemDVO,
     ReadAttributeRequestItemDVO,
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { MockEventBus, RuntimeServiceProvider, establishRelationship, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -51,7 +51,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         await establishRelationship(transportServices1, transportServices2);
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
 
-        await consumptionServices2.attributes.createIdentityAttribute({
+        await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
                 value: PersonName.from({
                     honorificPrefix: "Dr.",
@@ -315,7 +315,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         await establishRelationship(transportServices1, transportServices2);
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
 
-        await consumptionServices2.attributes.createIdentityAttribute({
+        await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
                 value: PersonName.from({
                     honorificPrefix: "Dr.",

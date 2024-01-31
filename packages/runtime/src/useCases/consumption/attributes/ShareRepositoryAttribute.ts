@@ -7,7 +7,7 @@ import { LocalRequestDTO } from "../../../types";
 import { AddressString, AttributeIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RequestMapper } from "../requests";
 
-export interface ShareIdentityAttributeRequest {
+export interface ShareRepositoryAttributeRequest {
     attributeId: AttributeIdString;
     peer: AddressString;
     requestMetadata?: {
@@ -18,13 +18,13 @@ export interface ShareIdentityAttributeRequest {
     };
 }
 
-class Validator extends SchemaValidator<ShareIdentityAttributeRequest> {
+class Validator extends SchemaValidator<ShareRepositoryAttributeRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("ShareIdentityAttributeRequest"));
+        super(schemaRepository.getSchema("ShareRepositoryAttributeRequest"));
     }
 }
 
-export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttributeRequest, LocalRequestDTO> {
+export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttributeRequest, LocalRequestDTO> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -35,10 +35,10 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
         super(validator);
     }
 
-    protected async executeInternal(request: ShareIdentityAttributeRequest): Promise<Result<LocalRequestDTO>> {
+    protected async executeInternal(request: ShareRepositoryAttributeRequest): Promise<Result<LocalRequestDTO>> {
         const repositoryAttribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
         if (typeof repositoryAttribute === "undefined") return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
-        if (!repositoryAttribute.isRepositoryAttribute()) return Result.fail(RuntimeErrors.attributes.isNoIdentityAttribute(repositoryAttribute.id));
+        if (!repositoryAttribute.isRepositoryAttribute()) return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttribute.id));
 
         const query = {
             "content.owner": this.accountController.identity.address.toString(),
@@ -49,7 +49,7 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
         const ownSharedIdentityAttributesOfRepositoryAttribute = await this.attributeController.getLocalAttributes(query);
         if (ownSharedIdentityAttributesOfRepositoryAttribute.length > 0) {
             return Result.fail(
-                RuntimeErrors.attributes.identityAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, ownSharedIdentityAttributesOfRepositoryAttribute[0].id)
+                RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, ownSharedIdentityAttributesOfRepositoryAttribute[0].id)
             );
         }
 
@@ -65,7 +65,7 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
             const ownSharedIdentityAttributesOfRepositoryAttributeVersion = await this.attributeController.getLocalAttributes(query);
             if (ownSharedIdentityAttributesOfRepositoryAttributeVersion.length > 0) {
                 return Result.fail(
-                    RuntimeErrors.attributes.anotherVersionOfIdentityAttributeHasAlreadyBeenSharedWithPeer(
+                    RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
                         request.attributeId,
                         request.peer,
                         ownSharedIdentityAttributesOfRepositoryAttributeVersion[0].id
@@ -85,7 +85,7 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
             const ownSharedIdentityAttributesOfRepositoryAttributeVersion = await this.attributeController.getLocalAttributes(query);
             if (ownSharedIdentityAttributesOfRepositoryAttributeVersion.length > 0) {
                 return Result.fail(
-                    RuntimeErrors.attributes.anotherVersionOfIdentityAttributeHasAlreadyBeenSharedWithPeer(
+                    RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
                         request.attributeId,
                         request.peer,
                         ownSharedIdentityAttributesOfRepositoryAttributeVersion[0].id

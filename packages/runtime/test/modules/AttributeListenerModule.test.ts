@@ -1,6 +1,6 @@
 import { IdentityAttributeJSON, RelationshipAttributeConfidentiality, RelationshipAttributeJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
 import { AttributeListenerCreatedEvent, OutgoingRequestCreatedEvent } from "../../src";
-import { RuntimeServiceProvider, TestRuntimeServices, ensureActiveRelationship, exchangeAndAcceptRequestByMessage } from "../lib";
+import { ensureActiveRelationship, exchangeAndAcceptRequestByMessage, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let sender: TestRuntimeServices;
@@ -63,7 +63,7 @@ describe("AttributeListenerModule", () => {
             value: { "@type": "GivenName", value: "John" }
         };
 
-        await recipient.consumption.attributes.createIdentityAttribute({ content: { value: attributeContent.value } });
+        await recipient.consumption.attributes.createRepositoryAttribute({ content: { value: attributeContent.value } });
 
         await expect(recipient.eventBus).toHavePublished(OutgoingRequestCreatedEvent);
         expectShareAttributeRequestItemWith(attributeContent);

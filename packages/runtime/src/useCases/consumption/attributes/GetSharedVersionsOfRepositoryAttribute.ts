@@ -6,17 +6,17 @@ import { LocalAttributeDTO } from "../../../types";
 import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
-export interface GetSharedVersionsOfIdentityAttributeRequest {
+export interface GetSharedVersionsOfRepositoryAttributeRequest {
     attributeId: AttributeIdString;
 }
 
-class Validator extends SchemaValidator<GetSharedVersionsOfIdentityAttributeRequest> {
+class Validator extends SchemaValidator<GetSharedVersionsOfRepositoryAttributeRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("GetSharedVersionsOfIdentityAttributeRequest"));
+        super(schemaRepository.getSchema("GetSharedVersionsOfRepositoryAttributeRequest"));
     }
 }
 
-export class GetSharedVersionsOfIdentityAttributeUseCase extends UseCase<GetSharedVersionsOfIdentityAttributeRequest, LocalAttributeDTO[]> {
+export class GetSharedVersionsOfRepositoryAttributeUseCase extends UseCase<GetSharedVersionsOfRepositoryAttributeRequest, LocalAttributeDTO[]> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject validator: Validator
@@ -24,7 +24,7 @@ export class GetSharedVersionsOfIdentityAttributeUseCase extends UseCase<GetShar
         super(validator);
     }
 
-    protected async executeInternal(request: GetSharedVersionsOfIdentityAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
+    protected async executeInternal(request: GetSharedVersionsOfRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
         const attribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
 
         if (typeof attribute === "undefined") {

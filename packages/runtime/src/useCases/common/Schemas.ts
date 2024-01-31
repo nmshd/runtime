@@ -14543,11 +14543,11 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
     }
 }
 
-export const CreateIdentityAttributeRequest: any = {
+export const CreateRepositoryAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateIdentityAttributeRequest",
+    "$ref": "#/definitions/CreateRepositoryAttributeRequest",
     "definitions": {
-        "CreateIdentityAttributeRequest": {
+        "CreateRepositoryAttributeRequest": {
             "type": "object",
             "properties": {
                 "content": {
@@ -16536,22 +16536,6 @@ export const GetAttributesRequest: any = {
     }
 }
 
-export const GetOwnIdentityAttributesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetOwnIdentityAttributesRequest",
-    "definitions": {
-        "GetOwnIdentityAttributesRequest": {
-            "type": "object",
-            "properties": {
-                "onlyLatestVersions": {
-                    "type": "boolean"
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
 export const GetOwnSharedAttributesRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetOwnSharedAttributesRequest",
@@ -16939,11 +16923,27 @@ export const GetPeerSharedAttributesRequest: any = {
     }
 }
 
-export const GetSharedVersionsOfIdentityAttributeRequest: any = {
+export const GetRepositoryAttributesRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetSharedVersionsOfIdentityAttributeRequest",
+    "$ref": "#/definitions/GetRepositoryAttributesRequest",
     "definitions": {
-        "GetSharedVersionsOfIdentityAttributeRequest": {
+        "GetRepositoryAttributesRequest": {
+            "type": "object",
+            "properties": {
+                "onlyLatestVersions": {
+                    "type": "boolean"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetSharedVersionsOfRepositoryAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetSharedVersionsOfRepositoryAttributeRequest",
+    "definitions": {
+        "GetSharedVersionsOfRepositoryAttributeRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -16985,11 +16985,11 @@ export const GetVersionsOfAttributeRequest: any = {
     }
 }
 
-export const NotifyPeerAboutIdentityAttributeSuccessionRequest: any = {
+export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/NotifyPeerAboutIdentityAttributeSuccessionRequest",
+    "$ref": "#/definitions/NotifyPeerAboutRepositoryAttributeSuccessionRequest",
     "definitions": {
-        "NotifyPeerAboutIdentityAttributeSuccessionRequest": {
+        "NotifyPeerAboutRepositoryAttributeSuccessionRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -17016,11 +17016,11 @@ export const NotifyPeerAboutIdentityAttributeSuccessionRequest: any = {
     }
 }
 
-export const ShareIdentityAttributeRequest: any = {
+export const ShareRepositoryAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ShareIdentityAttributeRequest",
+    "$ref": "#/definitions/ShareRepositoryAttributeRequest",
     "definitions": {
-        "ShareIdentityAttributeRequest": {
+        "ShareRepositoryAttributeRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -17070,11 +17070,673 @@ export const ShareIdentityAttributeRequest: any = {
     }
 }
 
-export const SucceedIdentityAttributeRequest: any = {
+export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SucceedIdentityAttributeRequest",
+    "$ref": "#/definitions/SucceedRelationshipAttributeAndNotifyPeerRequest",
     "definitions": {
-        "SucceedIdentityAttributeRequest": {
+        "SucceedRelationshipAttributeAndNotifyPeerRequest": {
+            "type": "object",
+            "properties": {
+                "predecessorId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                },
+                "successorContent": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "#/definitions/AttributeValues.Relationship.Json"
+                        },
+                        "validFrom": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        },
+                        "validTo": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        }
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "predecessorId",
+                "successorContent"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        },
+        "AttributeValues.Relationship.Json": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/ProprietaryBooleanJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryCountryJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryEMailAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryFileReferenceJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryFloatJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryHEXColorJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryIntegerJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryLanguageJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryPhoneNumberJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryStringJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryURLJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryJSONJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryXMLJSON"
+                },
+                {
+                    "$ref": "#/definitions/ConsentJSON"
+                }
+            ]
+        },
+        "ProprietaryBooleanJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryBoolean"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ValueHintsOverrideJSON": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
+                    }
+                },
+                "defaultValue": {
+                    "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
+                    }
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ValueHintsValueJSON": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "displayName": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "key",
+                "displayName"
+            ],
+            "additionalProperties": false
+        },
+        "ValueHintsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
+                    }
+                },
+                "defaultValue": {
+                    "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
+                    }
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryCountryJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryCountry"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryEMailAddressJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryEMailAddress"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryFileReferenceJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFileReference"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryFloatJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFloat"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryHEXColorJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryHEXColor"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryIntegerJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryInteger"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryLanguageJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryLanguage"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryPhoneNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryPhoneNumber"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryStringJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryString"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryURLJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryURL"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryJSONJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryJSON"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryXMLJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryXML"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                },
+                "schemaURL": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ConsentJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "consent": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "consent"
+            ],
+            "additionalProperties": false
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+    }
+}
+
+export const SucceedRepositoryAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SucceedRepositoryAttributeRequest",
+    "definitions": {
+        "SucceedRepositoryAttributeRequest": {
             "type": "object",
             "properties": {
                 "predecessorId": {
@@ -18312,668 +18974,6 @@ export const SucceedIdentityAttributeRequest: any = {
             "required": [
                 "@type",
                 "value"
-            ],
-            "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        }
-    }
-}
-
-export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SucceedRelationshipAttributeAndNotifyPeerRequest",
-    "definitions": {
-        "SucceedRelationshipAttributeAndNotifyPeerRequest": {
-            "type": "object",
-            "properties": {
-                "predecessorId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                },
-                "successorContent": {
-                    "type": "object",
-                    "properties": {
-                        "value": {
-                            "$ref": "#/definitions/AttributeValues.Relationship.Json"
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        }
-                    },
-                    "required": [
-                        "value"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "predecessorId",
-                "successorContent"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        },
-        "AttributeValues.Relationship.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/ProprietaryBooleanJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryCountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryEMailAddressJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryFileReferenceJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryFloatJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryHEXColorJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryIntegerJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryLanguageJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryPhoneNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryStringJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryURLJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryJSONJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryXMLJSON"
-                },
-                {
-                    "$ref": "#/definitions/ConsentJSON"
-                }
-            ]
-        },
-        "ProprietaryBooleanJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryBoolean"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "boolean"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ValueHintsOverrideJSON": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
-                    }
-                },
-                "defaultValue": {
-                    "type": [
-                        "string",
-                        "number",
-                        "boolean"
-                    ]
-                },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
-                    }
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                }
-            }
-        },
-        "ValueHintsValueJSON": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": [
-                        "string",
-                        "number",
-                        "boolean"
-                    ]
-                },
-                "displayName": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "key",
-                "displayName"
-            ],
-            "additionalProperties": false
-        },
-        "ValueHintsJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
-                    }
-                },
-                "defaultValue": {
-                    "type": [
-                        "string",
-                        "number",
-                        "boolean"
-                    ]
-                },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
-                    }
-                }
-            },
-            "required": [
-                "@type"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryCountryJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryCountry"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryEMailAddressJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryEMailAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryFileReferenceJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFileReference"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryFloatJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFloat"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryHEXColorJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryHEXColor"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryIntegerJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryInteger"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryLanguageJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryLanguage"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryPhoneNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryPhoneNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryStringJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryString"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryURLJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryURL"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryJSONJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryJSON"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "value": {}
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryXMLJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                },
-                "schemaURL": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ConsentJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "consent": {
-                    "type": "string"
-                },
-                "link": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "consent"
             ],
             "additionalProperties": false
         },

@@ -4,7 +4,7 @@ import { IQLQueryJSON, ReadAttributeRequestItemJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
 import { ConsumptionServices, LocalAttributeDTO, LocalRequestDTO, MessageDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { RuntimeServiceProvider, establishRelationship, syncUntilHasMessages } from "../lib";
+import { establishRelationship, RuntimeServiceProvider, syncUntilHasMessages } from "../lib";
 
 /* Disable timeout errors if we're debugging */
 if (process.env.NODE_OPTIONS !== undefined && process.env.NODE_OPTIONS.search("inspect") !== -1) {
@@ -41,7 +41,7 @@ describe("IQL Query", () => {
 
         await establishRelationship(sTransportServices, rTransportServices);
 
-        const response = await rConsumptionServices.attributes.createIdentityAttribute({
+        const response = await rConsumptionServices.attributes.createRepositoryAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -53,7 +53,7 @@ describe("IQL Query", () => {
 
         rLocalAttribute = response.value;
 
-        await rConsumptionServices.attributes.createIdentityAttribute({
+        await rConsumptionServices.attributes.createRepositoryAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -63,7 +63,7 @@ describe("IQL Query", () => {
             }
         });
 
-        await rConsumptionServices.attributes.createIdentityAttribute({
+        await rConsumptionServices.attributes.createRepositoryAttribute({
             content: {
                 value: {
                     "@type": "GivenName",

@@ -20,7 +20,7 @@ describe("IdentityAttributeQueryExpanded", () => {
     beforeAll(async () => {
         attributes.push(
             (
-                await consumptionServices1.attributes.createIdentityAttribute({
+                await consumptionServices1.attributes.createRepositoryAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
@@ -32,7 +32,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         );
         attributes.push(
             (
-                await consumptionServices1.attributes.createIdentityAttribute({
+                await consumptionServices1.attributes.createRepositoryAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",

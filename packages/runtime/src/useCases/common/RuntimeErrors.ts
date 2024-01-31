@@ -140,29 +140,29 @@ class Notifications {
 }
 
 class Attributes {
-    public isNoIdentityAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNoIdentityAttribute", `Attribute '${attributeId.toString()}' is not an identity attribute.`);
+    public isNotRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotRepositoryAttribute", `Attribute '${attributeId.toString()}' is not a repository attribute.`);
     }
 
-    public identityAttributeHasAlreadyBeenSharedWithPeer(
+    public repositoryAttributeHasAlreadyBeenSharedWithPeer(
         repositoryAttributeId: CoreId | string,
         peer: CoreAddress | string,
         ownSharedIdentityAttributeId: CoreId | string
     ): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.identityAttributeHasAlreadyBeenSharedWithPeer",
-            `Identity attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. Id of shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
+            "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer",
+            `Repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
         );
     }
 
-    public anotherVersionOfIdentityAttributeHasAlreadyBeenSharedWithPeer(
+    public anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
         repositoryAttributeId: CoreId | string,
         peer: CoreAddress | string,
         ownSharedIdentityAttributeId: CoreId | string
     ): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.anotherVersionOfIdentityAttributeHasAlreadyBeenSharedWithPeer",
-            `Another version of identity attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. Id of previously shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
+            "error.runtime.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer",
+            `Another version of repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of previously shared repository attribute: ${ownSharedIdentityAttributeId.toString()}.`
         );
     }
 
