@@ -433,34 +433,13 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
-    private async validateComplexRepositoryAttributeSuccession(
-        predecessorId: CoreId,
-        successorParams: Parameters<typeof this.createAttributeUnsafe>[0]
-    ): Promise<ValidationResult> {
-        const childAttributes = await this.getLocalAttributes({
-            parentId: predecessorId.toString()
-        });
-
-        const childAttributeValues = Object.values(successorParams.content.value).filter((p) => p instanceof AbstractAttributeValue);
-
-        for (const childAttribute of childAttributes) {
-            // TODO: handle the case, that for a childAttribute, no new value is set => sometimes this is an error, sometimes this is okay because the child attribute is optional
-            const newContent = childAttributeValues.find((elem) => childAttribute.content.value.constructor.name === elem.constructor.name);
-
-            if (!newContent) {
-                return ValidationResult.error(CoreErrors.attributes.invalidSuccessor("All child attributes must be defined in the successor."));
-            }
-        }
-        return ValidationResult.success();
-    }
-
     private async getChildAttributesByValueType(parentId: CoreId, valueType: AbstractAttributeValue["constructor"]): Promise<LocalAttribute | undefined> {
         const children = await this.getLocalAttributes({
             parentId: parentId.toString()
         });
 
         /** We currently assume that all of the child attributes of a complex
-         * attribute have distinct types. Big if! */
+         * attribute have distinct types. */
         return children.find((elem) => elem.content.value instanceof valueType);
     }
 
@@ -527,7 +506,6 @@ export class AttributesController extends ConsumptionBaseController {
         predecessorId: CoreId,
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
     ): Promise<ValidationResult> {
-        // TODO: ???: Validieren wir auch die Succession komplexer Attribute?
         let parsedSuccessorParams;
         try {
             parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
@@ -555,8 +533,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isRepositoryAttribute(this.identity.address)) {
-            // TODO: fix wrong error
-            return ValidationResult.error(CoreErrors.attributes.invalidPredecessor("Successor is not a valid repository attribute."));
+            return ValidationResult.error(CoreErrors.attributes.invalidSuccessor("Successor is not a valid repository attribute."));
         }
 
         return ValidationResult.success();
