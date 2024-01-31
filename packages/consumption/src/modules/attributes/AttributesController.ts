@@ -58,7 +58,7 @@ export class AttributesController extends ConsumptionBaseController {
             return true;
         } else if (attribute.content.validFrom && !attribute.content.validTo && attribute.content.validFrom.isSameOrBefore(now)) {
             return true;
-        } else if (!attribute.content.validFrom && attribute.content.validTo && attribute.content.validTo.isSameOrAfter(now)) {
+        } else if (!attribute.content.validFrom && attribute.content.validTo?.isSameOrAfter(now)) {
             return true;
         } else if (attribute.content.validFrom && attribute.content.validTo && attribute.content.validFrom.isSameOrBefore(now) && attribute.content.validTo.isSameOrAfter(now)) {
             return true;
@@ -433,16 +433,6 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
-    private async getChildAttributesByValueType(parentId: CoreId, valueType: AbstractAttributeValue["constructor"]): Promise<LocalAttribute | undefined> {
-        const children = await this.getLocalAttributes({
-            parentId: parentId.toString()
-        });
-
-        /** We currently assume that all of the child attributes of a complex
-         * attribute have distinct types. */
-        return children.find((elem) => elem.content.value instanceof valueType);
-    }
-
     private async succeedChildrenOfComplexAttribute(parentSuccessorId: CoreId) {
         const parentSuccessor = (await this.getLocalAttribute(parentSuccessorId))!;
         const childAttributeValues: AbstractAttributeValue[] = Object.values(parentSuccessor.content.value).filter((elem) => elem instanceof AbstractAttributeValue);
@@ -478,6 +468,16 @@ export class AttributesController extends ConsumptionBaseController {
                 });
             }
         }
+    }
+
+    private async getChildAttributesByValueType(parentId: CoreId, valueType: AbstractAttributeValue["constructor"]): Promise<LocalAttribute | undefined> {
+        const children = await this.getLocalAttributes({
+            parentId: parentId.toString()
+        });
+
+        /** We currently assume that all of the child attributes of a complex
+         * attribute have distinct types. */
+        return children.find((elem) => elem.content.value instanceof valueType);
     }
 
     private async _succeedAttributeUnsafe(

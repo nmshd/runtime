@@ -1086,6 +1086,7 @@ describe("AttributesController", function () {
                     });
 
                     const numberOfChildAttributes = version0ChildValues.length;
+                    expect(repoVersion0ChildAttributes).toHaveLength(numberOfChildAttributes);
                     expect(repoVersion1ChildAttributes).toHaveLength(numberOfChildAttributes);
 
                     for (let i = 0; i < numberOfChildAttributes; i++) {
