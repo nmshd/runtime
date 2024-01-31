@@ -28,9 +28,6 @@
         "bundle:min": "webpack --stats-all --config webpack.min.config.js",
         "bundle:notest": "npm run bundle:lib && npm run bundle:min",
         "cdep": "tsc && madge --circular dist",
-        "lint": "npm run lint:prettier && npm run lint:eslint && npm run lint:tsc",
-        "lint:eslint": "eslint --ext .ts ./src ./test",
-        "lint:prettier": "prettier --check .",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest",
         "test:ci": "jest -i"

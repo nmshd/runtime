@@ -22,9 +22,6 @@
         "build:parser": "peggy -o ./src/iql.gen.js ./src/grammar.peggy",
         "build:watch:parser": "npx nodemon -w src/grammar.peggy --exec 'npm run build:parser'",
         "demo": "npm run build && light-server -s ./demo -w 'src/grammar.peggy, demo/app.js, demo/attributes.js, demo/index.html # cd demo && npm run build && webpack --mode production'",
-        "lint": "npm run lint:prettier && npm run lint:eslint && npm run lint:tsc",
-        "lint:eslint": "eslint ./src ./tests",
-        "lint:prettier": "prettier --check ./src/**/*.ts ./tests/**/*.ts ./demo",
         "lint:tsc": "tsc --noEmit",
         "test": "npm run build && jest",
         "test:ci": "jest -i"
