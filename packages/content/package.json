@@ -61,8 +61,7 @@
     "devDependencies": {
         "@js-soft/ts-serval": "2.0.10",
         "@nmshd/crypto": "2.0.5",
-        "@types/luxon": "^3.4.2",
-        "madge": "6.1.0"
+        "@types/luxon": "^3.4.2"
     },
     "publishConfig": {
         "access": "public",
