@@ -308,8 +308,8 @@ export class AttributesController extends ConsumptionBaseController {
             succeededBy: parsedSuccessorParams.succeededBy
         });
 
-        if (predecessor.content.value instanceof AbstractComplexValue) {
-            await this._succeedChildrenUnsafe(predecessorId, parsedSuccessorParams, successor.id);
+        if (predecessor.isComplexAttribute()) {
+            await this.succeedChildrenOfComplexAttribute(successor.id);
         }
 
         this.eventBus.publish(new RepositoryAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
@@ -454,53 +454,48 @@ export class AttributesController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
-    private async _getChildOfAttributeValue(newChildAttributeValue: any, parentId: CoreId) {
-        // TODO: type
+    private async getChildAttributesByValueType(parentId: CoreId, valueType: AbstractAttributeValue["constructor"]): Promise<LocalAttribute | undefined> {
         const children = await this.getLocalAttributes({
             parentId: parentId.toString()
         });
 
-        return children.find((elem) => elem.content.value.constructor.name === newChildAttributeValue.constructor.name);
+        /** We currently assume that all of the child attributes of a complex
+         * attribute have distinct types. Big if! */
+        return children.find((elem) => elem.content.value instanceof valueType);
     }
 
-    private async _succeedChildrenUnsafe(predecessorId: CoreId, successorParams: Parameters<typeof this.createAttributeUnsafe>[0], successorId: CoreId) {
-        const childAttributeValues = Object.values(successorParams.content.value).filter((p) => p instanceof AbstractAttributeValue);
+    private async succeedChildrenOfComplexAttribute(parentSuccessorId: CoreId) {
+        const parentSuccessor = (await this.getLocalAttribute(parentSuccessorId))!;
+        const childAttributeValues: AbstractAttributeValue[] = Object.values(parentSuccessor.content.value).filter((elem) => elem instanceof AbstractAttributeValue);
 
-        for (const newChildAttributeValue of childAttributeValues) {
-            let currentParent = await this.getLocalAttribute(successorId);
+        for (const childAttributeValue of childAttributeValues) {
+            let currentParent = await this.getLocalAttribute(parentSuccessorId);
 
             let child;
             while (typeof child === "undefined" && currentParent?.succeeds) {
-                const currentPredecessor = await this.getLocalAttribute(currentParent.succeeds);
-
-                if (typeof currentPredecessor === "undefined") {
-                    throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessorId.toString());
-                }
-
+                const currentPredecessor = (await this.getLocalAttribute(currentParent.succeeds))!;
                 currentParent = currentPredecessor;
-
-                child = await this._getChildOfAttributeValue(newChildAttributeValue, currentParent.id);
+                child = await this.getChildAttributesByValueType(currentParent.id, childAttributeValue.constructor);
             }
 
-            const succeeds = child?.id;
-
-            if (succeeds) {
-                await this._succeedAttributeUnsafe(succeeds, {
+            const childPredecessorId = child?.id;
+            if (typeof childPredecessorId !== "undefined") {
+                await this._succeedAttributeUnsafe(childPredecessorId, {
                     content: IdentityAttribute.from({
-                        value: newChildAttributeValue,
+                        value: childAttributeValue.toJSON() as AttributeValues.Identity.Json,
                         owner: this.identity.address
                     }),
-                    parentId: successorId,
-                    createdAt: successorParams.createdAt
+                    parentId: parentSuccessorId,
+                    createdAt: parentSuccessor.createdAt
                 });
             } else {
                 await this.createAttributeUnsafe({
                     content: IdentityAttribute.from({
-                        value: newChildAttributeValue,
+                        value: childAttributeValue.toJSON() as AttributeValues.Identity.Json,
                         owner: this.identity.address
                     }),
-                    parentId: successorId,
-                    createdAt: successorParams.createdAt
+                    parentId: parentSuccessorId,
+                    createdAt: parentSuccessor.createdAt
                 });
             }
         }
@@ -532,6 +527,7 @@ export class AttributesController extends ConsumptionBaseController {
         predecessorId: CoreId,
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
     ): Promise<ValidationResult> {
+        // TODO: ???: Validieren wir auch die Succession komplexer Attribute?
         let parsedSuccessorParams;
         try {
             parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
@@ -564,6 +560,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isRepositoryAttribute(this.identity.address)) {
+            // TODO: fix wrong error
             return ValidationResult.error(CoreErrors.attributes.invalidPredecessor("Successor is not a valid repository attribute."));
         }
 
@@ -919,6 +916,7 @@ export class AttributesController extends ConsumptionBaseController {
             throw CoreErrors.attributes.invalidPropertyValue("Attribute '${id}' isn't a RepositoryAttribute.");
         }
 
+        // TODO: ???: Woher kommt die 1000? Und warum nicht eine for-loop?
         let i = 0;
         while (repositoryAttribute.succeededBy && i < 1000) {
             const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
