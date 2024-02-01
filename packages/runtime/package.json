@@ -5,7 +5,7 @@
     "homepage": "https://enmeshed.eu",
     "repository": {
         "type": "git",
-        "url": "https://github.com/nmshd/runtime",
+        "url": "git+https://github.com/nmshd/runtime.git",
         "directory": "packages/runtime"
     },
     "license": "MIT",
