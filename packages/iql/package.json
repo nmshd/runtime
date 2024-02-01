@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/iql",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Identity Query Language - A DSL to filter and query Enmeshed attributes",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -10,26 +10,21 @@
     },
     "license": "MIT",
     "author": "js-soft GmbH",
-    "main": "dist/src/index.js",
-    "types": "dist/src/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "files": [
-        "dist/src",
-        "dist/generated"
+        "dist"
     ],
     "scripts": {
-        "build": "npm run build:clean && npm run build:parser && npm run build:version.ts && npx tsc -p ./tsconfig.json",
-        "build:clean": "rm -rf ./dist ./generated",
+        "build": "npm run build:parser && tsc -p ./tsconfig.json",
         "build:ci": "npm run build",
         "build:node": "npm run build",
-        "build:parser": "mkdir -p generated && npx peggy -o ./generated/iql.js ./src/grammar.peggy",
-        "build:version.ts": "mkdir -p generated && node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > generated/version.ts",
-        "demo": "npm run build && npx light-server -s ./demo -w 'src/grammar.peggy, demo/app.js, demo/attributes.js, demo/index.html # cd demo && npm run build && npx webpack --mode production'",
-        "lint": "npm run lint:prettier && npm run lint:eslint && npm run lint:tsc",
-        "lint:eslint": "eslint ./src ./tests",
-        "lint:prettier": "prettier --check ./src/**/*.ts ./tests/**/*.ts ./demo",
+        "build:parser": "peggy -o ./src/iql.gen.js ./src/grammar.peggy",
+        "build:watch:parser": "npx nodemon -w src/grammar.peggy --exec 'npm run build:parser'",
+        "demo": "npm run build && light-server -s ./demo -w 'src/grammar.peggy, demo/app.js, demo/attributes.js, demo/index.html # cd demo && npm run build && webpack --mode production'",
         "lint:tsc": "tsc --noEmit",
-        "test": "npm run build && npx jest",
-        "test:ci": "npx jest -i"
+        "test": "npm run build && jest",
+        "test:ci": "jest -i"
     },
     "jest": {
         "maxWorkers": 5,
@@ -43,7 +38,7 @@
             "^.+\\.ts$": [
                 "ts-jest",
                 {
-                    "tsconfig": "tests/tsconfig.json"
+                    "tsconfig": "test/tsconfig.json"
                 }
             ]
         }

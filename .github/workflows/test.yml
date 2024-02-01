@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 18
       - run: npm ci
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/app-runtime
         env:
           NMSHD_TEST_BASEURL: http://localhost:5000
@@ -44,7 +44,7 @@ jobs:
       - run: npm ci
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@v1
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - run: npm run test:ci:mongodb --workspace=@nmshd/consumption
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
@@ -67,7 +67,7 @@ jobs:
       - uses: js-soft/ferretdb-github-action@1.1.0
         with:
           ferretdb-telemetry: "enabled"
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - run: npm run test:ci:mongodb --workspace=@nmshd/consumption
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
@@ -87,7 +87,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - run: npm run test:ci:lokijs --workspace=@nmshd/consumption
         env:
           NMSHD_TEST_BASEURL: http://localhost:5000
@@ -105,7 +105,7 @@ jobs:
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           COMMIT_HASH: ${{ github.sha }}
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/content
 
   test-runtime-mongodb:
@@ -121,7 +121,7 @@ jobs:
           node-version: 20
       - uses: supercharge/mongodb-github-action@v1
       - run: npm ci
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
       - run: npm run test:ci:mongodb --workspace=@nmshd/runtime
         env:
@@ -146,7 +146,7 @@ jobs:
           ferretdb-telemetry: "enabled"
           ferretdb-version: latest
       - run: npm ci
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
       - run: npm run test:ci:mongodb --workspace=@nmshd/runtime
         env:
@@ -167,7 +167,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
       - run: npm run test:ci:lokijs --workspace=@nmshd/runtime
         env:
@@ -187,7 +187,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@v1
       - run: npm run test:ci:mongodb --workspace=@nmshd/transport
@@ -209,7 +209,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
       - uses: js-soft/ferretdb-github-action@1.1.0
         with:
           ferretdb-telemetry: "enabled"
@@ -232,7 +232,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           COMMIT_HASH: ${{ github.sha }}
@@ -250,7 +250,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm run build:node --workspaces
+      - run: npm run build:node
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           COMMIT_HASH: ${{ github.sha }}
