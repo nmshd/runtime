@@ -21,7 +21,7 @@ This workspace provide two types of scripts:
 ## Linting
 
 -   Typescript
-    -   each package provides its own typescript linting script. You can run it by `npm run lint:tsc` from the package directory or by `npm run -w packages/<package> lint` from the root of the project
+    -   each package provides its own typescript linting script. You can run it by `npm run lint:tsc` from the package directory or by `npm run -w packages/<package> lint:tsc` from the root of the project
     -   the root project also provides a script that lints all packages. You can run it by `npm run lint:tsc` from the root of the project
 -   Prettier: simply run `npm run lint:prettier` from the root of the project
 -   ESLint: simply run `npm run lint:eslint` from the root of the project
