@@ -2,6 +2,7 @@
 
 1. Download and install [Node JS](https://nodejs.org/en/download/)
 2. run `npm i`
+3. run `npm run build:watch` (this is also added as a VSCode task that is configured to [run on folder open](https://code.visualstudio.com/updates/v1_30#_run-on-folder-open))
 
 ## Running scripts
 
@@ -16,6 +17,18 @@ This workspace provide two types of scripts:
     these can be run by `npm run <scriptname>` from the package directory or by `npm run -w packages/<package> <scriptname>` from the root of the project
 
     additionally you can run a script in all workspaces by `npm run -ws --if-present <scriptname>`
+
+## Linting
+
+-   Typescript
+    -   each package provides its own typescript linting script. You can run it by `npm run lint:tsc` from the package directory or by `npm run -w packages/<package> lint:tsc` from the root of the project
+    -   the root project also provides a script that lints all packages. You can run it by `npm run lint:tsc` from the root of the project
+-   Prettier: simply run `npm run lint:prettier` from the root of the project
+-   ESLint: simply run `npm run lint:eslint` from the root of the project
+
+## Check for outdated dependencies
+
+To check for outdated dependencies run `npm run outdated`. This will check the root folder and all packages using [npm-check-updates](https://www.npmjs.com/package/npm-check-updates).
 
 ## How to test
 
@@ -64,3 +77,15 @@ Or deserialize-/fromUnknown won't find your class.
 
 -   Check if all (parent) classes up to Serializable(-Async) inclulde a @schema declaration with a type
 -   You might have several different Serializable(-Async) instances up- and running. This usually happens if ts-serval/crypto/transport are not correctly imported.
+
+### Upgrading package versions
+
+When bumping the packages pinned directly in the runtime (transport, content and consumption) you always have to update the packages in the runtime. If you don't do this, you will get errors like:
+
+```
+Error: src/AppRuntime.ts(106,30): error TS2416: Property 'login' in type 'AppRuntime' is not assignable to the same property in base type 'Runtime<AppConfig>'.
+  Type '(accountController: AccountController, consumptionController: ConsumptionController) => Promise<AppRuntimeServices>' is not assignable to type '(accountController: AccountController, consumptionController: ConsumptionController) => Promise<RuntimeServices>'.
+Error: src/AppRuntime.ts(107,63): error TS2345: Argument of type 'import("/home/runner/work/runtime/runtime/packages/consumption/dist/consumption/ConsumptionController").ConsumptionController' is not assignable to parameter of type 'import("/home/runner/work/runtime/runtime/packages/runtime/node_modules/@nmshd/consumption/dist/consumption/ConsumptionController").ConsumptionController'.
+```
+
+This is caused by the runtime using different (npm insalled) versions of the bumped packages.

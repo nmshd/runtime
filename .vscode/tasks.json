@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile",
+            "command": "npm run build:watch",
+            "type": "shell",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "never",
+                "focus": false
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        },
+        {
+            "label": "Clear",
+            "command": "npm run test:teardown",
+            "type": "shell",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always"
+            }
+        }
+    ]
+}
