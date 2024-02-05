@@ -7,6 +7,8 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateIdentityAttributeRequest,
     CreateIdentityAttributeUseCase,
+    GetSharedVersionsOfIdentityAttributeUseCase,
+    GetVersionsOfAttributeUseCase,
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     NotifyPeerAboutIdentityAttributeSuccessionUseCase,
@@ -21,14 +23,14 @@ import {
     SucceedRelationshipAttributeAndNotifyPeerUseCase
 } from "../../src";
 import {
-    RuntimeServiceProvider,
-    TestRuntimeServices,
     ensureActiveRelationship,
     executeFullCreateAndShareIdentityAttributeFlow,
     executeFullCreateAndShareRelationshipAttributeFlow,
+    RuntimeServiceProvider,
     syncUntilHasMessageWithNotification,
     syncUntilHasMessageWithRequest,
-    syncUntilHasMessageWithResponse
+    syncUntilHasMessageWithResponse,
+    TestRuntimeServices
 } from "../lib";
 
 /* Disable timeout errors if we're debugging */
@@ -371,7 +373,7 @@ describe(CreateIdentityAttributeUseCase.name, () => {
 });
 
 describe(ShareIdentityAttributeUseCase.name, () => {
-    test("should initialize the sharing of a identity attribute", async () => {
+    test("should initialize the sharing of an identity attribute", async () => {
         const createAttributeRequest: CreateIdentityAttributeRequest = {
             content: {
                 value: {
@@ -938,6 +940,22 @@ describe(NotifyPeerAboutIdentityAttributeSuccessionUseCase.name, () => {
         });
         expect(result2).toBeAnError(/.*/, "error.runtime.attributes.identityAttributeHasAlreadyBeenSharedWithPeer");
     });
+
+    test("should prevent notifying a peer about identity attribute succession if no other version has been shared before", async () => {
+        const repoAttribute = (
+            await services1.consumption.attributes.createIdentityAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "Petra Pan"
+                    }
+                }
+            })
+        ).value;
+
+        const result = await services1.consumption.attributes.notifyPeerAboutIdentityAttributeSuccession({ attributeId: repoAttribute.id, peer: services2.address });
+        expect(result).toBeAnError(/.*/, "error.runtime.attributes.noOtherVersionOfIdentityAttributeHasBeenSharedWithPeerBefore");
+    });
 });
 
 describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
@@ -1061,12 +1079,13 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
     });
 });
 
-describe("Get versions of attribute", () => {
+describe("Get (shared) versions of attribute", () => {
     let repositoryAttributeVersion1: LocalAttributeDTO;
     let repositoryAttributeVersion2: LocalAttributeDTO;
     let repositoryAttributeVersion3: LocalAttributeDTO;
     let ownSharedIdentityAttributeVersion1: LocalAttributeDTO;
     let ownSharedIdentityAttributeVersion3: LocalAttributeDTO;
+    let ownSharedIdentityAttributeVersion3Peer2: LocalAttributeDTO;
 
     let ownSharedRelationshipAttributeVersion1: LocalAttributeDTO;
     let ownSharedRelationshipAttributeVersion2: LocalAttributeDTO;
@@ -1126,6 +1145,26 @@ describe("Get versions of attribute", () => {
             return e.data.predecessor.id === ownSharedIdentityAttributeVersion1.id && e.data.successor.id === ownSharedIdentityAttributeVersion3.id;
         });
 
+        const shareRequestResultPeer2 = await services1.consumption.attributes.shareIdentityAttribute({
+            attributeId: repositoryAttributeVersion3.id,
+            peer: services3.address
+        });
+        const shareRequestId = shareRequestResultPeer2.value.id;
+
+        await syncUntilHasMessageWithRequest(services3.transport, shareRequestId);
+        await services3.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
+            return e.data.request.id === shareRequestId && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
+        });
+        await services3.consumption.incomingRequests.accept({ requestId: shareRequestId, items: [{ accept: true }] });
+
+        const responseMessage = await syncUntilHasMessageWithResponse(services1.transport, shareRequestId);
+        const sharedAttributeId = responseMessage.content.response.items[0].attributeId;
+        await services1.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
+            return e.data.request.id === shareRequestId && e.data.newStatus === LocalRequestStatus.Completed;
+        });
+
+        ownSharedIdentityAttributeVersion3Peer2 = (await services1.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+
         // setup RelationshipAttributes
         ownSharedRelationshipAttributeVersion1 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
@@ -1173,102 +1212,161 @@ describe("Get versions of attribute", () => {
         });
     });
 
-    test("should get all versions of a repository attribute", async () => {
-        const repositoryAttributeVersions = [repositoryAttributeVersion3, repositoryAttributeVersion2, repositoryAttributeVersion1];
-        for (const version of repositoryAttributeVersions) {
-            const result = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
+    describe(GetVersionsOfAttributeUseCase.name, () => {
+        test("should get all versions of a repository attribute", async () => {
+            const repositoryAttributeVersions = [repositoryAttributeVersion3, repositoryAttributeVersion2, repositoryAttributeVersion1];
+            for (const version of repositoryAttributeVersions) {
+                const result = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
+                expect(result.isSuccess).toBe(true);
+
+                const returnedVersions = result.value;
+                expect(returnedVersions).toStrictEqual(repositoryAttributeVersions);
+            }
+        });
+
+        test("should get all versions of an own shared identity attribute shared with the same peer", async () => {
+            const ownSharedIdentityAttributeVersions = [ownSharedIdentityAttributeVersion3, ownSharedIdentityAttributeVersion1];
+            for (const version of ownSharedIdentityAttributeVersions) {
+                const result1 = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
+                expect(result1.isSuccess).toBe(true);
+                const returnedVersions1 = result1.value;
+                expect(returnedVersions1).toStrictEqual(ownSharedIdentityAttributeVersions);
+            }
+        });
+
+        test("should get all versions of a peer shared identity attribute", async () => {
+            const peerSharedIdentityAttributeVersion3 = (await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion3.id })).value;
+            const peerSharedIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.id })).value;
+            const peerSharedIdentityAttributeVersions = [peerSharedIdentityAttributeVersion3, peerSharedIdentityAttributeVersion1];
+
+            for (const version of peerSharedIdentityAttributeVersions) {
+                const result1 = await services2.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
+                expect(result1.isSuccess).toBe(true);
+                const returnedVersions1 = result1.value;
+                expect(returnedVersions1).toStrictEqual(peerSharedIdentityAttributeVersions);
+
+                const result2 = await services2.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
+                expect(result2.isSuccess).toBe(true);
+                const returnedVersions2 = result2.value;
+                expect(returnedVersions2).toStrictEqual(peerSharedIdentityAttributeVersions);
+            }
+        });
+
+        test("should get all versions of an own shared relationship attribute", async () => {
+            const ownSharedRelationshipAttributeVersions = [ownSharedRelationshipAttributeVersion3, ownSharedRelationshipAttributeVersion2, ownSharedRelationshipAttributeVersion1];
+            for (const version of ownSharedRelationshipAttributeVersions) {
+                const result = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
+                expect(result.isSuccess).toBe(true);
+
+                const returnedVersions = result.value;
+                expect(returnedVersions).toStrictEqual(ownSharedRelationshipAttributeVersions);
+            }
+        });
+
+        test("should get all versions of a peer shared relationship attribute", async () => {
+            const peerSharedRelationshipAttributeVersion3 = (await services2.consumption.attributes.getAttribute({ id: ownSharedRelationshipAttributeVersion3.id })).value;
+            const peerSharedRelationshipAttributeVersion2 = (await services2.consumption.attributes.getAttribute({ id: ownSharedRelationshipAttributeVersion2.id })).value;
+            const peerSharedRelationshipAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownSharedRelationshipAttributeVersion1.id })).value;
+            const peerSharedRelationshipAttributeVersions = [
+                peerSharedRelationshipAttributeVersion3,
+                peerSharedRelationshipAttributeVersion2,
+                peerSharedRelationshipAttributeVersion1
+            ];
+
+            for (const version of peerSharedRelationshipAttributeVersions) {
+                const result = await services2.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
+                expect(result.isSuccess).toBe(true);
+
+                const returnedVersions = result.value;
+                expect(returnedVersions).toStrictEqual(peerSharedRelationshipAttributeVersions);
+            }
+        });
+
+        test("should throw trying to call getVersionsOfAttribute with a nonexistent attributeId", async () => {
+            const result1 = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: "ATTxxxxxxxxxxxxxxxxx" });
+            expect(result1).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+    });
+
+    describe(GetSharedVersionsOfIdentityAttributeUseCase.name, () => {
+        test("should get only latest shared version per peer of a repository attribute", async () => {
+            const repositoryAttributeVersions = [repositoryAttributeVersion3, repositoryAttributeVersion2, repositoryAttributeVersion1];
+            for (const version of repositoryAttributeVersions) {
+                const result = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: version.id });
+                expect(result.isSuccess).toBe(true);
+
+                const returnedVersions = result.value;
+                expect(returnedVersions).toStrictEqual([ownSharedIdentityAttributeVersion3, ownSharedIdentityAttributeVersion3Peer2]);
+            }
+        });
+
+        test("should get all shared versions of a repository attribute", async () => {
+            const repositoryAttributeVersions = [repositoryAttributeVersion3, repositoryAttributeVersion2, repositoryAttributeVersion1];
+            for (const version of repositoryAttributeVersions) {
+                const result = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: version.id, onlyLatestVersions: false });
+                expect(result.isSuccess).toBe(true);
+
+                const returnedVersions = result.value;
+                expect(returnedVersions).toStrictEqual([ownSharedIdentityAttributeVersion3, ownSharedIdentityAttributeVersion3Peer2, ownSharedIdentityAttributeVersion1]);
+            }
+        });
+
+        test("should get only latest shared version of a repository attribute for a specific peer", async () => {
+            const repositoryAttributeVersions = [repositoryAttributeVersion3, repositoryAttributeVersion2, repositoryAttributeVersion1];
+            for (const version of repositoryAttributeVersions) {
+                const result1 = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: version.id, peers: [services2.address] });
+                expect(result1.isSuccess).toBe(true);
+                const returnedVersions1 = result1.value;
+                expect(returnedVersions1).toStrictEqual([ownSharedIdentityAttributeVersion3]);
+
+                const result2 = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: version.id, peers: [services3.address] });
+                expect(result2.isSuccess).toBe(true);
+                const returnedVersions2 = result2.value;
+                expect(returnedVersions2).toStrictEqual([ownSharedIdentityAttributeVersion3Peer2]);
+            }
+        });
+
+        test("should get all shared versions of a repository attribute for a specific peer", async () => {
+            const repositoryAttributeVersions = [repositoryAttributeVersion3, repositoryAttributeVersion2, repositoryAttributeVersion1];
+            for (const version of repositoryAttributeVersions) {
+                const result1 = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({
+                    attributeId: version.id,
+                    peers: [services2.address],
+                    onlyLatestVersions: false
+                });
+                expect(result1.isSuccess).toBe(true);
+                const returnedVersions1 = result1.value;
+                expect(returnedVersions1).toStrictEqual([ownSharedIdentityAttributeVersion3, ownSharedIdentityAttributeVersion1]);
+
+                const result2 = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({
+                    attributeId: version.id,
+                    peers: [services3.address],
+                    onlyLatestVersions: false
+                });
+                expect(result2.isSuccess).toBe(true);
+                const returnedVersions2 = result2.value;
+                expect(returnedVersions2).toStrictEqual([ownSharedIdentityAttributeVersion3Peer2]);
+            }
+        });
+
+        test("should return an empty list calling getSharedVersionsOfIdentityAttribute with a nonexistent peer", async () => {
+            const result = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({
+                attributeId: repositoryAttributeVersion3.id,
+                peers: ["id1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"]
+            });
             expect(result.isSuccess).toBe(true);
-
             const returnedVersions = result.value;
-            expect(returnedVersions).toStrictEqual(repositoryAttributeVersions);
-        }
-    });
+            expect(returnedVersions).toStrictEqual([]);
+        });
 
-    test("should get all versions of an own shared identity attribute shared with the same peer", async () => {
-        const ownSharedIdentityAttributeVersions = [ownSharedIdentityAttributeVersion3, ownSharedIdentityAttributeVersion1];
-        for (const version of ownSharedIdentityAttributeVersions) {
-            const result1 = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
-            expect(result1.isSuccess).toBe(true);
-            const returnedVersions1 = result1.value;
-            expect(returnedVersions1).toStrictEqual(ownSharedIdentityAttributeVersions);
+        test("should throw trying to call getSharedVersionsOfIdentityAttribute with a nonexistent attributeId", async () => {
+            const result2 = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: "ATTxxxxxxxxxxxxxxxxx" });
+            expect(result2).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
 
-            const result2 = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: version.id });
-            expect(result2.isSuccess).toBe(true);
-            const returnedVersions2 = result2.value;
-            expect(returnedVersions2).toStrictEqual(ownSharedIdentityAttributeVersions);
-        }
-    });
-
-    test("should get all versions of a peer shared identity attribute", async () => {
-        const peerSharedIdentityAttributeVersion3 = (await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion3.id })).value;
-        const peerSharedIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.id })).value;
-        const peerSharedIdentityAttributeVersions = [peerSharedIdentityAttributeVersion3, peerSharedIdentityAttributeVersion1];
-
-        for (const version of peerSharedIdentityAttributeVersions) {
-            const result1 = await services2.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
-            expect(result1.isSuccess).toBe(true);
-            const returnedVersions1 = result1.value;
-            expect(returnedVersions1).toStrictEqual(peerSharedIdentityAttributeVersions);
-
-            const result2 = await services2.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
-            expect(result2.isSuccess).toBe(true);
-            const returnedVersions2 = result2.value;
-            expect(returnedVersions2).toStrictEqual(peerSharedIdentityAttributeVersions);
-        }
-    });
-
-    test("should get all shared versions of a repository attribute", async () => {
-        const repositoryAttributeVersions = [repositoryAttributeVersion3, repositoryAttributeVersion2, repositoryAttributeVersion1];
-        for (const version of repositoryAttributeVersions) {
-            const result = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: version.id });
-            expect(result.isSuccess).toBe(true);
-
-            const returnedVersions = result.value;
-            expect(returnedVersions).toStrictEqual([ownSharedIdentityAttributeVersion1, ownSharedIdentityAttributeVersion3]);
-        }
-    });
-
-    test("should throw if the attribute doesn't exist", async () => {
-        const result1 = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: "ATTxxxxxxxxxxxxxxxxx" });
-        expect(result1).toBeAnError(/.*/, "error.runtime.recordNotFound");
-
-        const result2 = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: "ATTxxxxxxxxxxxxxxxxx" });
-        expect(result2).toBeAnError(/.*/, "error.runtime.recordNotFound");
-    });
-
-    test("should throw if getSharedVersionsOfIdentityAttribute is called with a RelationshipAttribute", async () => {
-        const result = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: ownSharedRelationshipAttributeVersion1.id });
-        expect(result).toBeAnError(/.*/, "error.runtime.validation.invalidPropertyValue");
-    });
-
-    test("should get all versions of an own shared relationship attribute", async () => {
-        const ownSharedRelationshipAttributeVersions = [ownSharedRelationshipAttributeVersion3, ownSharedRelationshipAttributeVersion2, ownSharedRelationshipAttributeVersion1];
-        for (const version of ownSharedRelationshipAttributeVersions) {
-            const result = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
-            expect(result.isSuccess).toBe(true);
-
-            const returnedVersions = result.value;
-            expect(returnedVersions).toStrictEqual(ownSharedRelationshipAttributeVersions);
-        }
-    });
-
-    test("should get all versions of a peer shared relationship attribute", async () => {
-        const peerSharedRelationshipAttributeVersion3 = (await services2.consumption.attributes.getAttribute({ id: ownSharedRelationshipAttributeVersion3.id })).value;
-        const peerSharedRelationshipAttributeVersion2 = (await services2.consumption.attributes.getAttribute({ id: ownSharedRelationshipAttributeVersion2.id })).value;
-        const peerSharedRelationshipAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownSharedRelationshipAttributeVersion1.id })).value;
-        const peerSharedRelationshipAttributeVersions = [peerSharedRelationshipAttributeVersion3, peerSharedRelationshipAttributeVersion2, peerSharedRelationshipAttributeVersion1];
-
-        for (const version of peerSharedRelationshipAttributeVersions) {
-            const result = await services2.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
-            expect(result.isSuccess).toBe(true);
-
-            const returnedVersions = result.value;
-            expect(returnedVersions).toStrictEqual(peerSharedRelationshipAttributeVersions);
-        }
-    });
-
-    test("should throw trying to call getSharedVersionsOfIdentityAttribute with a relationship attribute", async () => {
-        const result = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: ownSharedRelationshipAttributeVersion3.id });
-        expect(result).toBeAnError(/.*/, "error.runtime.validation.invalidPropertyValue");
+        test("should throw trying to call getSharedVersionsOfIdentityAttribute with a relationship attribute", async () => {
+            const result = await services1.consumption.attributes.getSharedVersionsOfIdentityAttribute({ attributeId: ownSharedRelationshipAttributeVersion3.id });
+            expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNoIdentityAttribute");
+        });
     });
 });
