@@ -5,3 +5,4 @@ lib-web
 dist-test
 Schemas.ts
 generated
+*.gen.js

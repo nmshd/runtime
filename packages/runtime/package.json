@@ -5,7 +5,7 @@
     "homepage": "https://enmeshed.eu",
     "repository": {
         "type": "git",
-        "url": "https://github.com/nmshd/runtime",
+        "url": "git+https://github.com/nmshd/runtime.git",
         "directory": "packages/runtime"
     },
     "license": "MIT",
@@ -31,18 +31,14 @@
         "bundle:min": "webpack --stats-all --config webpack.min.config.js",
         "bundle:notest": "npm run bundle:lib && npm run bundle:min",
         "cdep": "tsc && madge --circular dist",
-        "lint": "npm run lint:prettier && npm run lint:eslint && npm run lint:tsc",
-        "lint:eslint": "eslint --ext .ts ./src ./test",
-        "lint:prettier": "prettier --check .",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci:lokijs": "USE_LOKIJS=true jest -i",
         "test:ci:mongodb": "jest -i",
-        "test:local": "npm run test:local:mongodb && npm run test:local:lokijs",
         "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://localhost:27022' jest",
         "test:local:lokijs": "USE_LOKIJS=true jest",
         "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
-        "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
+        "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv"
     },
     "jest": {
@@ -68,9 +64,13 @@
         "@js-soft/logging-abstractions": "^1.0.1",
         "@js-soft/ts-serval": "2.0.10",
         "@js-soft/ts-utils": "^2.3.3",
+<<<<<<< HEAD
         "@nmshd/crypto": "2.0.5",
+=======
+>>>>>>> main
         "@nmshd/consumption": "3.9.2",
         "@nmshd/content": "2.8.4",
+        "@nmshd/crypto": "2.0.5",
         "@nmshd/transport": "2.2.1",
         "ajv": "^8.12.0",
         "ajv-errors": "^3.0.0",
