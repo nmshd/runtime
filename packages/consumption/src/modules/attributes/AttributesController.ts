@@ -52,6 +52,7 @@ export class AttributesController extends ConsumptionBaseController {
         return this;
     }
 
+    // getLocalAttributes block
     public checkValid(attribute: LocalAttribute): boolean {
         const now = CoreDate.utc();
         if (!attribute.content.validFrom && !attribute.content.validTo) {
@@ -66,6 +67,7 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
+    // TODO: is not used
     public findCurrent(attributes: LocalAttribute[]): LocalAttribute | undefined {
         const sorted = attributes.sort((a, b) => {
             return a.createdAt.compare(b.createdAt);
@@ -93,6 +95,7 @@ export class AttributesController extends ConsumptionBaseController {
         return items;
     }
 
+    // TODO: not entagled with getLocalAttributes methods, but conceptionally close -> maybe better in CRUD/CGUD block
     public async getLocalAttribute(id: CoreId): Promise<LocalAttribute | undefined> {
         const result = await this.attributes.findOne({
             [nameof<LocalAttribute>((c) => c.id)]: id.toString()
@@ -111,6 +114,7 @@ export class AttributesController extends ConsumptionBaseController {
         return this.filterCurrent(parsed);
     }
 
+    // TODO: move inside getLocalAttributes
     private enrichQuery(query: any, hideTechnical: boolean) {
         if (!hideTechnical) return query;
 
@@ -137,10 +141,14 @@ export class AttributesController extends ConsumptionBaseController {
         return { $and: [query, hideTechnicalQuery] };
     }
 
+    // TODO: really needed? -> no
     public async getValidLocalAttributes(query?: any, hideTechnical = false): Promise<LocalAttribute[]> {
         return await this.getLocalAttributes(query, hideTechnical, true);
     }
 
+    // end block getLocalAttributes
+
+    // block executeQueries
     public async executeIQLQuery(query: IIQLQuery): Promise<LocalAttribute[]> {
         /* Fetch subset of attributes relevant for IQL queries. We filter for
          * identity attributes which are not shared. */
@@ -198,6 +206,10 @@ export class AttributesController extends ConsumptionBaseController {
         return this.parseArray(attributes, LocalAttribute);
     }
 
+    // end block execute Queries
+
+    // create block
+    // TODO: use createAttributeUnsafe? Why is succeededBy not set?
     public async createLocalAttribute(params: ICreateLocalAttributeParams): Promise<LocalAttribute> {
         const parsedParams = CreateLocalAttributeParams.from(params);
         const localAttribute = LocalAttribute.from({
@@ -223,6 +235,7 @@ export class AttributesController extends ConsumptionBaseController {
         return localAttribute;
     }
 
+    // TODO: move inside createLocalAttribute (if possible)
     private async createLocalAttributesForNestedAttributeValues(localAttribute: LocalAttribute): Promise<void> {
         if (!(localAttribute.content instanceof IdentityAttribute)) {
             throw new ConsumptionError("Only Identity Attributes are allowed here");
@@ -274,12 +287,15 @@ export class AttributesController extends ConsumptionBaseController {
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerLocalAttribute));
         return peerLocalAttribute;
     }
+    // end create block
 
+    // put in a basic block/delete block
     public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
         await this.deleteAttributeUnsafe(attribute.id);
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
     }
 
+    // succession block
     public async succeedRepositoryAttribute(
         predecessorId: CoreId,
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
@@ -425,6 +441,7 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
+    // TODO: dismiss "_" for private functions? -> talk to Julian
     private async _succeedAttributeUnsafe(
         predecessorId: CoreId,
         successorParams: Parameters<typeof this.createAttributeUnsafe>[0]
@@ -446,6 +463,8 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
+    // TODO: why do we call this from the runtime directly? succeedRepositoryAttribute calls this again
+    // TODO: if possible, make private and put in respective succeed<> function
     public async validateRepositoryAttributeSuccession(
         predecessorId: CoreId,
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
@@ -681,6 +700,7 @@ export class AttributesController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
+    // TODO: make private
     public async validateAttributeSuccessionCommon(predecessorId: CoreId, successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON): Promise<ValidationResult> {
         let parsedSuccessorParams;
         try {
@@ -747,7 +767,10 @@ export class AttributesController extends ConsumptionBaseController {
 
         return ValidationResult.success();
     }
+    // end succession block
 
+    // CRUD/CGUD block
+    // TODO: add getLocalAttribute to this block?
     public async createAttributeUnsafe(attributeData: Omit<ILocalAttribute, "id" | "createdAt"> & { id?: ICoreId; createdAt?: ICoreDate }): Promise<LocalAttribute> {
         const localAttribute = LocalAttribute.from({
             id: attributeData.id ?? (await ConsumptionIds.attribute.generate()),
@@ -787,7 +810,9 @@ export class AttributesController extends ConsumptionBaseController {
     public async deleteAttributeUnsafe(id: CoreId): Promise<void> {
         await this.attributes.delete({ id: id });
     }
+    // end CRUD/CGUD block
 
+    // put in succession block
     public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
         let attribute = await this.getLocalAttribute(id);
         if (typeof attribute === "undefined") {
