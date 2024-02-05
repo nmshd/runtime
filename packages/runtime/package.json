@@ -64,10 +64,6 @@
         "@js-soft/logging-abstractions": "^1.0.1",
         "@js-soft/ts-serval": "2.0.10",
         "@js-soft/ts-utils": "^2.3.3",
-<<<<<<< HEAD
-        "@nmshd/crypto": "2.0.5",
-=======
->>>>>>> main
         "@nmshd/consumption": "3.9.2",
         "@nmshd/content": "2.8.4",
         "@nmshd/crypto": "2.0.5",
