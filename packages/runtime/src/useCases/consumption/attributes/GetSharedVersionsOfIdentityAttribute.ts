@@ -31,11 +31,15 @@ export class GetSharedVersionsOfIdentityAttributeUseCase extends UseCase<GetShar
         const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
 
         if (typeof repositoryAttribute === "undefined") {
-            throw RuntimeErrors.general.recordNotFound(LocalAttribute);
+            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
         }
 
         if (!repositoryAttribute.isRepositoryAttribute()) {
             return Result.fail(RuntimeErrors.attributes.isNoIdentityAttribute(repositoryAttributeId));
+        }
+
+        if (request.peers?.length === 0) {
+            return Result.fail(RuntimeErrors.general.invalidPropertyValue("The `peers` property may not be an empty array."));
         }
 
         const peers = request.peers?.map((address) => CoreAddress.from(address));

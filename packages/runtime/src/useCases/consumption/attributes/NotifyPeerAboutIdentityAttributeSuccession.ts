@@ -55,7 +55,7 @@ export class NotifyPeerAboutIdentityAttributeSuccessionUseCase extends UseCase<
             return Result.fail(RuntimeErrors.attributes.noOtherVersionOfIdentityAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));
         }
 
-        if (candidatePredecessors[0].shareInfo!.sourceAttribute!.toString() === request.attributeId) {
+        if (candidatePredecessors[0].shareInfo?.sourceAttribute?.toString() === request.attributeId) {
             return Result.fail(RuntimeErrors.attributes.identityAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, candidatePredecessors[0].id));
         }
 
