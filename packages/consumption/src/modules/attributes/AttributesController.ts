@@ -889,8 +889,6 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         let i = 0;
-        // TODO: What's the use of this hardcoded termination condition?
-        //       Any why is it used only here, if we _really_ need it?
         while (repositoryAttribute.succeededBy && i < 1000) {
             const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
             if (!successor) {
