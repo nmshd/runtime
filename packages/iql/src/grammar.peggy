@@ -225,7 +225,7 @@ PredicateRHS
  * Path segments refer to the pieces of a path through a nested dict.
  */
 PathSegment
-  = $([a-z][A-za-z0-9]+)
+  = $([a-z][A-Za-z0-9]+)
 
 /**
  * The attribute type refers to the `value[@type]` field of an attribute. It

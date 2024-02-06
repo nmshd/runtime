@@ -1,5 +1,5 @@
 import _ from "lodash";
-import * as iql from "../dist/src/index.js";
+import * as iql from "../dist/index.js";
 
 /* Dummy data. */
 const attributes = [

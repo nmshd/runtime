@@ -1,7 +1,7 @@
 set -e
 
 npm ci
-npm run build --workspaces
+npm run build:node
 npm run lint:eslint
 npm run lint:prettier
 npx -ws license-check
