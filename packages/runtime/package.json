@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/runtime",
-    "version": "3.5.1",
+    "version": "3.5.2",
     "description": "The enmeshed client runtime.",
     "homepage": "https://enmeshed.eu",
     "repository": {
