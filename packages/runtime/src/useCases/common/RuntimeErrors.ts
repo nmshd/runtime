@@ -166,12 +166,11 @@ class Attributes {
         );
     }
 
-    public detectedErroneousAttribute(attributeId: CoreId | string, message?: string): ApplicationError {
-        let msg = `Detected an error regarding attribute '${attributeId.toString()}'.`;
-        if (typeof message !== "undefined") {
-            msg += ` ${message}`;
-        }
-        return new ApplicationError("error.runtime.attributes.detectedErroneousAttribute", msg);
+    public noOtherVersionOfIdentityAttributeHasBeenSharedWithPeerBefore(repositoryAttributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.noOtherVersionOfIdentityAttributeHasBeenSharedWithPeerBefore",
+            `No other version of identity attribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this attribute, use 'ShareIdentityAttribute'.`
+        );
     }
 }
 
