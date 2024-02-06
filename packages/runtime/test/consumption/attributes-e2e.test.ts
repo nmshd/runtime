@@ -373,7 +373,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
 });
 
 describe(ShareRepositoryAttributeUseCase.name, () => {
-    test("should initialize the sharing of a identity attribute", async () => {
+    test("should initialize the sharing of an identity attribute", async () => {
         const createAttributeRequest: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
@@ -954,7 +954,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
         ).value;
 
         const result = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({ attributeId: repoAttribute.id, peer: services2.address });
-        expect(result).toBeAnError(/.*/, "error.runtime.attributes.noOtherVersionOfIdentityAttributeHasBeenSharedWithPeerBefore");
+        expect(result).toBeAnError(/.*/, "error.runtime.attributes.noOtherVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore");
     });
 });
 
@@ -1362,6 +1362,11 @@ describe("Get (shared) versions of attribute", () => {
         test("should throw trying to call getSharedVersionsOfIdentityAttribute with a nonexistent attributeId", async () => {
             const result2 = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: "ATTxxxxxxxxxxxxxxxxx" });
             expect(result2).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("should throw trying to call getSharedVersionsOfIdentityAttribute with a relationship attribute", async () => {
+            const result = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: ownSharedRelationshipAttributeVersion3.id });
+            expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNoIdentityAttribute");
         });
     });
 });

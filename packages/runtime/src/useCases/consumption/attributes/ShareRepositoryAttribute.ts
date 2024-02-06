@@ -47,6 +47,19 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
         }
 
+        const query = {
+            "content.owner": this.accountController.identity.address.toString(),
+            "content.@type": "IdentityAttribute",
+            "shareInfo.sourceAttribute": request.attributeId,
+            "shareInfo.peer": request.peer
+        };
+        const ownSharedIdentityAttributesOfRepositoryAttribute = await this.attributeController.getLocalAttributes(query);
+        if (ownSharedIdentityAttributesOfRepositoryAttribute.length > 0) {
+            return Result.fail(
+                RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, ownSharedIdentityAttributesOfRepositoryAttribute[0].id)
+            );
+        }
+
         const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfRepositoryAttribute(
             repositoryAttributeId,
             [CoreAddress.from(request.peer)],
