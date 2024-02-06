@@ -36,62 +36,30 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
     }
 
     protected async executeInternal(request: ShareRepositoryAttributeRequest): Promise<Result<LocalRequestDTO>> {
-        const repositoryAttribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
-        if (typeof repositoryAttribute === "undefined") return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
-        if (!repositoryAttribute.isRepositoryAttribute()) return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttribute.id));
+        const repositoryAttributeId = CoreId.from(request.attributeId);
+        const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
 
-        const query = {
-            "content.owner": this.accountController.identity.address.toString(),
-            "content.@type": "IdentityAttribute",
-            "shareInfo.sourceAttribute": request.attributeId,
-            "shareInfo.peer": request.peer
-        };
-        const ownSharedIdentityAttributesOfRepositoryAttribute = await this.attributeController.getLocalAttributes(query);
-        if (ownSharedIdentityAttributesOfRepositoryAttribute.length > 0) {
+        if (typeof repositoryAttribute === "undefined") {
+            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
+        }
+
+        if (!repositoryAttribute.isRepositoryAttribute()) {
+            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
+        }
+
+        const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfRepositoryAttribute(
+            repositoryAttributeId,
+            [CoreAddress.from(request.peer)],
+            false
+        );
+        if (sharedVersionsOfRepositoryAttribute.length > 0) {
             return Result.fail(
-                RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, ownSharedIdentityAttributesOfRepositoryAttribute[0].id)
+                RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
+                    request.attributeId,
+                    request.peer,
+                    sharedVersionsOfRepositoryAttribute[0].id
+                )
             );
-        }
-
-        let repositoryAttributeVersion = repositoryAttribute as LocalAttribute;
-        while (typeof repositoryAttributeVersion.succeededBy !== "undefined") {
-            repositoryAttributeVersion = (await this.attributeController.getLocalAttribute(repositoryAttributeVersion.succeededBy))!;
-            const query = {
-                "content.owner": this.accountController.identity.address.toString(),
-                "content.@type": "IdentityAttribute",
-                "shareInfo.sourceAttribute": repositoryAttributeVersion.id.toString(),
-                "shareInfo.peer": request.peer
-            };
-            const ownSharedIdentityAttributesOfRepositoryAttributeVersion = await this.attributeController.getLocalAttributes(query);
-            if (ownSharedIdentityAttributesOfRepositoryAttributeVersion.length > 0) {
-                return Result.fail(
-                    RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
-                        request.attributeId,
-                        request.peer,
-                        ownSharedIdentityAttributesOfRepositoryAttributeVersion[0].id
-                    )
-                );
-            }
-        }
-        repositoryAttributeVersion = repositoryAttribute as LocalAttribute;
-        while (typeof repositoryAttributeVersion.succeeds !== "undefined") {
-            repositoryAttributeVersion = (await this.attributeController.getLocalAttribute(repositoryAttributeVersion.succeeds))!;
-            const query = {
-                "content.owner": this.accountController.identity.address.toString(),
-                "content.@type": "IdentityAttribute",
-                "shareInfo.sourceAttribute": repositoryAttributeVersion.id.toString(),
-                "shareInfo.peer": request.peer
-            };
-            const ownSharedIdentityAttributesOfRepositoryAttributeVersion = await this.attributeController.getLocalAttributes(query);
-            if (ownSharedIdentityAttributesOfRepositoryAttributeVersion.length > 0) {
-                return Result.fail(
-                    RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
-                        request.attributeId,
-                        request.peer,
-                        ownSharedIdentityAttributesOfRepositoryAttributeVersion[0].id
-                    )
-                );
-            }
         }
 
         const requestMetadata = request.requestMetadata ?? {};

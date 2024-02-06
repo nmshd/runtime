@@ -1,13 +1,15 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute } from "@nmshd/consumption";
-import { CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
-import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AddressString, AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface GetSharedVersionsOfRepositoryAttributeRequest {
     attributeId: AttributeIdString;
+    peers?: AddressString[];
+    onlyLatestVersions?: boolean;
 }
 
 class Validator extends SchemaValidator<GetSharedVersionsOfRepositoryAttributeRequest> {
@@ -25,29 +27,24 @@ export class GetSharedVersionsOfRepositoryAttributeUseCase extends UseCase<GetSh
     }
 
     protected async executeInternal(request: GetSharedVersionsOfRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
-        const attribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
+        const repositoryAttributeId = CoreId.from(request.attributeId);
+        const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
 
-        if (typeof attribute === "undefined") {
-            throw RuntimeErrors.general.recordNotFound(LocalAttribute);
+        if (typeof repositoryAttribute === "undefined") {
+            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
         }
 
-        if (attribute.isRelationshipAttribute()) {
-            throw RuntimeErrors.general.invalidPropertyValue("Attribute '${request.attributeId}' is a RelationshipAttribute.");
+        if (!repositoryAttribute.isRepositoryAttribute()) {
+            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
         }
 
-        const allVersions = await this.attributeController.getVersionsOfAttribute(CoreId.from(request.attributeId));
-
-        // queried ID doesn't belong to a repository attribute
-        if (attribute.shareInfo !== undefined) {
-            return Result.ok(AttributeMapper.toAttributeDTOList(allVersions));
+        if (request.peers?.length === 0) {
+            return Result.fail(RuntimeErrors.general.invalidPropertyValue("The `peers` property may not be an empty array."));
         }
 
-        const query = {
-            "shareInfo.sourceAttribute": { $in: allVersions.map((x) => x.id.toString()) }
-        };
+        const peers = request.peers?.map((address) => CoreAddress.from(address));
+        const sharedVersions = await this.attributeController.getSharedVersionsOfRepositoryAttribute(repositoryAttributeId, peers, request.onlyLatestVersions);
 
-        const sharedAttributes = await this.attributeController.getLocalAttributes(query);
-
-        return Result.ok(AttributeMapper.toAttributeDTOList(sharedAttributes));
+        return Result.ok(AttributeMapper.toAttributeDTOList(sharedVersions));
     }
 }

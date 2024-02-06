@@ -151,7 +151,7 @@ class Attributes {
     ): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `Repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
+            `Repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
         );
     }
 
@@ -166,12 +166,11 @@ class Attributes {
         );
     }
 
-    public detectedErroneousAttribute(attributeId: CoreId | string, message?: string): ApplicationError {
-        let msg = `Detected an error regarding attribute '${attributeId.toString()}'.`;
-        if (typeof message !== "undefined") {
-            msg += ` ${message}`;
-        }
-        return new ApplicationError("error.runtime.attributes.detectedErroneousAttribute", msg);
+    public noOtherVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.noOtherVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore",
+            `No other version of repository attribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this attribute, use 'ShareRepositoryAttribute'.`
+        );
     }
 }
 

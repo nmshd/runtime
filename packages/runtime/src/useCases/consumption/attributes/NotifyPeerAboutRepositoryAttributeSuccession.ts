@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, IAttributeSuccessorParams, LocalAttribute } from "@nmshd/consumption";
 import { Notification, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
-import { AccountController, CoreId, MessageController } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { AddressString, AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -40,48 +40,27 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
     protected async executeInternal(request: NotifyPeerAboutRepositoryAttributeSuccessionRequest): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
         const repositoryAttributeSuccessorId = CoreId.from(request.attributeId);
         const repositoryAttributeSuccessor = await this.attributeController.getLocalAttribute(repositoryAttributeSuccessorId);
-        if (typeof repositoryAttributeSuccessor === "undefined") return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
-        if (!repositoryAttributeSuccessor.isRepositoryAttribute()) return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeSuccessor.id));
 
-        const query = {
-            "content.owner": this.accountController.identity.address.toString(),
-            "content.@type": "IdentityAttribute",
-            "shareInfo.sourceAttribute": repositoryAttributeSuccessorId.toString(),
-            "shareInfo.peer": request.peer
-        };
-        const ownSharedIdentityAttributesOfRepositoryAttributeSuccessor = await this.attributeController.getLocalAttributes(query);
-        if (ownSharedIdentityAttributesOfRepositoryAttributeSuccessor.length > 0) {
-            return Result.fail(
-                RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(
-                    request.attributeId,
-                    request.peer,
-                    ownSharedIdentityAttributesOfRepositoryAttributeSuccessor[0].id
-                )
-            );
+        if (typeof repositoryAttributeSuccessor === "undefined") {
+            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
         }
 
-        const repositoryAttributeVersions = await this.attributeController.getVersionsOfAttribute(repositoryAttributeSuccessorId);
-        const repositoryAttributeVersionIds = repositoryAttributeVersions.map((x) => x.id.toString());
-        const candidatePredecessorsQuery: any = {
-            "shareInfo.sourceAttribute": { $in: repositoryAttributeVersionIds },
-            "shareInfo.peer": request.peer,
-            succeededBy: { $exists: false }
-        };
-        const candidatePredecessors = await this.attributeController.getLocalAttributes(candidatePredecessorsQuery);
+        if (!repositoryAttributeSuccessor.isRepositoryAttribute()) {
+            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeSuccessorId));
+        }
+
+        const candidatePredecessors = await this.attributeController.getSharedVersionsOfRepositoryAttribute(repositoryAttributeSuccessorId, [CoreAddress.from(request.peer)]);
 
         if (candidatePredecessors.length === 0) {
-            throw RuntimeErrors.general.recordNotFoundWithMessage(
-                "No shared predecessor found. If this is the fist version you want to share with this peer, use `ShareRepositoryAttribute`."
-            );
+            return Result.fail(RuntimeErrors.attributes.noOtherVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));
         }
-        if (candidatePredecessors.length > 1) {
-            throw RuntimeErrors.attributes.detectedErroneousAttribute(
-                request.attributeId,
-                "The attribute has shared copies of predecessing versions that are not in a succession chain."
-            );
+
+        if (candidatePredecessors[0].shareInfo?.sourceAttribute?.toString() === request.attributeId) {
+            return Result.fail(RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, candidatePredecessors[0].id));
         }
 
         const ownSharedIdentityAttributePredecessor = candidatePredecessors[0];
+
         const notificationId = await ConsumptionIds.notification.generate();
         const successorParams: IAttributeSuccessorParams = {
             content: repositoryAttributeSuccessor.content,

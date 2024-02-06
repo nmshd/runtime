@@ -16948,6 +16948,15 @@ export const GetSharedVersionsOfRepositoryAttributeRequest: any = {
             "properties": {
                 "attributeId": {
                     "$ref": "#/definitions/AttributeIdString"
+                },
+                "peers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AddressString"
+                    }
+                },
+                "onlyLatestVersions": {
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -16958,6 +16967,10 @@ export const GetSharedVersionsOfRepositoryAttributeRequest: any = {
         "AttributeIdString": {
             "type": "string",
             "pattern": "ATT[A-Za-z0-9]{17}"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "id1[A-Za-z0-9]{32,33}"
         }
     }
 }
