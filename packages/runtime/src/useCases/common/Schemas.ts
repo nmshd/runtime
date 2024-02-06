@@ -15916,37 +15916,33 @@ export const ExecuteIQLQueryRequest: any = {
             "type": "object",
             "properties": {
                 "query": {
-                    "$ref": "#/definitions/IQLQueryJSON"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "@type": {
+                            "type": "string",
+                            "const": "IQLQuery"
+                        },
+                        "queryString": {
+                            "type": "string"
+                        },
+                        "attributeCreationHints": {
+                            "$ref": "#/definitions/IQLQueryCreationHintsJSON"
+                        },
+                        "@context": {
+                            "type": "string"
+                        },
+                        "@version": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "queryString"
+                    ]
                 }
             },
             "required": [
                 "query"
-            ],
-            "additionalProperties": false
-        },
-        "IQLQueryJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IQLQuery"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "queryString": {
-                    "type": "string"
-                },
-                "attributeCreationHints": {
-                    "$ref": "#/definitions/IQLQueryCreationHintsJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "queryString"
             ],
             "additionalProperties": false
         },
