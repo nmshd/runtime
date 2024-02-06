@@ -99,14 +99,20 @@ export class RelationshipsController extends TransportController {
     }
 
     public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
-        const query: any = {
-            [`${nameof<Relationship>((r) => r.peer)}.${nameof<Identity>((r) => r.address)}`]: address.toString()
-        };
+        const simpleQuery: any = { peerAddress: address.toString() };
+        const dotNotationQuery: any = { [`${nameof<Relationship>((r) => r.peer)}.${nameof<Identity>((r) => r.address)}`]: address.toString() };
+
         if (status) {
-            query[`${nameof<Relationship>((r) => r.status)}`] = status;
+            simpleQuery[`${nameof<Relationship>((r) => r.status)}`] = status;
+            dotNotationQuery[`${nameof<Relationship>((r) => r.status)}`] = status;
         }
 
-        const relationshipDoc = await this.relationships.findOne(query);
+        let relationshipDoc = await this.relationships.findOne(simpleQuery);
+
+        if (!relationshipDoc) {
+            relationshipDoc = await this.relationships.findOne(dotNotationQuery);
+        }
+
         if (!relationshipDoc) {
             return;
         }

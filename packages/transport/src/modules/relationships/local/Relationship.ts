@@ -61,6 +61,15 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @serialize()
     public metadataModifiedAt?: CoreDate;
 
+    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): any {
+        const json = super.toJSON(verbose, serializeAsString) as any;
+
+        json.peerAddress = this.peer.address.toString();
+        json.templateId = this.cache?.template.id.toString();
+
+        return json;
+    }
+
     public static fromRequestSent(id: CoreId, template: IRelationshipTemplate, peer: IIdentity, creationChange: IRelationshipChange, relationshipSecretId: CoreId): Relationship {
         const cache = CachedRelationship.from({
             changes: [creationChange],
