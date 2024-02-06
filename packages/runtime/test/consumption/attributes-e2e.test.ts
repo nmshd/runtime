@@ -1366,7 +1366,7 @@ describe("Get (shared) versions of attribute", () => {
 
         test("should throw trying to call getSharedVersionsOfRepositoryAttribute with a relationship attribute", async () => {
             const result = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: ownSharedRelationshipAttributeVersion3.id });
-            expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNoIdentityAttribute");
+            expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
         });
     });
 });
