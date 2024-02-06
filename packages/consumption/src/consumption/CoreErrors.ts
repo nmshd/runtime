@@ -99,6 +99,10 @@ class Attributes {
         );
     }
 
+    public invalidParentSuccessor(parentSuccessorId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.invalidParentSuccessor", `The complex parent successor (id: ${parentSuccessorId}) does not exist.`);
+    }
+
     public invalidPropertyValue(message: string) {
         return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
     }

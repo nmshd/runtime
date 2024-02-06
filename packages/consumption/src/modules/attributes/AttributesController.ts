@@ -225,7 +225,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     private async createLocalAttributesForChildrenOfComplexAttribute(localAttribute: LocalAttribute): Promise<void> {
         if (!(localAttribute.content instanceof IdentityAttribute)) {
-            throw new ConsumptionError("Only Identity Attributes are allowed here");
+            throw new ConsumptionError("Only identity attributes are allowed here");
         }
 
         const childAttributeValues = Object.values(localAttribute.content.value).filter((p) => p instanceof AbstractAttributeValue) as AttributeValues.Identity.Class[];
@@ -434,7 +434,11 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async succeedChildrenOfComplexAttribute(parentSuccessorId: CoreId) {
-        const parentSuccessor = (await this.getLocalAttribute(parentSuccessorId))!;
+        const parentSuccessor = await this.getLocalAttribute(parentSuccessorId);
+        if (typeof parentSuccessor === "undefined") {
+            throw CoreErrors.attributes.invalidParentSuccessor;
+        }
+
         const childAttributeValues: AbstractAttributeValue[] = Object.values(parentSuccessor.content.value).filter((elem) => elem instanceof AbstractAttributeValue);
 
         for (const childAttributeValue of childAttributeValues) {
@@ -484,7 +488,10 @@ export class AttributesController extends ConsumptionBaseController {
         predecessorId: CoreId,
         successorParams: Parameters<typeof this.createAttributeUnsafe>[0]
     ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        const predecessor = (await this.getLocalAttribute(predecessorId))!;
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (typeof predecessor === "undefined") {
+            throw CoreErrors.attributes.predecessorDoesNotExist;
+        }
 
         const successor = await this.createAttributeUnsafe({
             id: successorParams.id,
