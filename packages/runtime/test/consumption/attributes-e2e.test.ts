@@ -26,6 +26,8 @@ import {
     ensureActiveRelationship,
     executeFullCreateAndShareIdentityAttributeFlow,
     executeFullCreateAndShareRelationshipAttributeFlow,
+    executeFullShareIdentityAttributeFlow,
+    executeFullSucceedIdentityAttributeAndNotifyPeerFlow,
     RuntimeServiceProvider,
     syncUntilHasMessageWithNotification,
     syncUntilHasMessageWithRequest,
@@ -45,7 +47,8 @@ let services2: TestRuntimeServices;
 let services3: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await runtimeServiceProvider.launch(3, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+    const numberOfServices = 3;
+    const runtimeServices = await runtimeServiceProvider.launch(numberOfServices, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
 
     services1 = runtimeServices[0];
     services2 = runtimeServices[1];
@@ -55,248 +58,84 @@ beforeAll(async () => {
     await ensureActiveRelationship(services1.transport, services3.transport);
     await ensureActiveRelationship(services2.transport, services3.transport);
 
-    // exchange IdentityAttibutes between all clients
-    await executeFullCreateAndShareIdentityAttributeFlow(services1, services2, {
-        content: {
-            value: {
-                "@type": "DisplayName",
-                value: "Client 1"
-            }
-        }
-    });
-    await executeFullCreateAndShareIdentityAttributeFlow(services1, services3, {
-        content: {
-            value: {
-                "@type": "DisplayName",
-                value: "Client 1"
-            }
-        }
-    });
-    await executeFullCreateAndShareIdentityAttributeFlow(services2, services1, {
-        content: {
-            value: {
-                "@type": "DisplayName",
-                value: "Client 2"
-            }
-        }
-    });
-    await executeFullCreateAndShareIdentityAttributeFlow(services2, services3, {
-        content: {
-            value: {
-                "@type": "DisplayName",
-                value: "Client 2"
-            }
-        }
-    });
-    await executeFullCreateAndShareIdentityAttributeFlow(services3, services1, {
-        content: {
-            value: {
-                "@type": "DisplayName",
-                value: "Client 3"
-            }
-        }
-    });
-    await executeFullCreateAndShareIdentityAttributeFlow(services3, services2, {
-        content: {
-            value: {
-                "@type": "DisplayName",
-                value: "Client 3"
-            }
-        }
-    });
+    await createAndShareIdentityAttributesBetweenAllServices();
+    await createAndShareAndSucceedIdentityAttributesBetweenSomeServices();
+    await createAndShareRelationshipAttributesBetweenAllServicesAndSucceedSome();
 
-    // exchange IdentityAttribute between some clients
-    const mailClient1 = await executeFullCreateAndShareIdentityAttributeFlow(services1, services2, {
-        content: {
-            value: {
-                "@type": "EMailAddress",
-                value: "Client1@mail.com"
-            }
-        }
-    });
-    const mailClient2 = await executeFullCreateAndShareIdentityAttributeFlow(services2, services3, {
-        content: {
-            value: {
-                "@type": "EMailAddress",
-                value: "Client2@mail.com"
-            }
-        }
-    });
-    const mailClient3 = await executeFullCreateAndShareIdentityAttributeFlow(services3, services1, {
-        content: {
-            value: {
-                "@type": "EMailAddress",
-                value: "Client3@mail.com"
-            }
-        }
-    });
+    async function createAndShareIdentityAttributesBetweenAllServices() {
+        for (let i = 0; i < numberOfServices; i++) {
+            const repositoryAttributeId = (
+                await executeFullCreateAndShareIdentityAttributeFlow(runtimeServices[i], runtimeServices[(i + 1) % numberOfServices], {
+                    content: {
+                        value: {
+                            "@type": "DisplayName",
+                            value: `Service ${i + 1}`
+                        }
+                    }
+                })
+            ).shareInfo!.sourceAttribute!;
 
-    // succeed some IdentityAttributes
-    const { successor: succeededMailClient1 } = (
-        await services1.consumption.attributes.succeedIdentityAttribute({
-            predecessorId: mailClient1.shareInfo!.sourceAttribute!,
-            successorContent: {
-                value: {
-                    "@type": "EMailAddress",
-                    value: "Client1New@mail.com"
+            await executeFullShareIdentityAttributeFlow(runtimeServices[i], runtimeServices[(i + 2) % numberOfServices], repositoryAttributeId);
+        }
+    }
+
+    async function createAndShareAndSucceedIdentityAttributesBetweenSomeServices() {
+        for (let i = 0; i < numberOfServices; i++) {
+            const repositoryPredecessor = (
+                await executeFullCreateAndShareIdentityAttributeFlow(runtimeServices[i], runtimeServices[(i + 1) % numberOfServices], {
+                    content: {
+                        value: {
+                            "@type": "EMailAddress",
+                            value: `Service${i + 1}@mail.com`
+                        }
+                    }
+                })
+            ).shareInfo!.sourceAttribute!;
+
+            await executeFullSucceedIdentityAttributeAndNotifyPeerFlow(runtimeServices[i], runtimeServices[(i + 1) % numberOfServices], {
+                predecessorId: repositoryPredecessor,
+                successorContent: {
+                    value: {
+                        "@type": "EMailAddress",
+                        value: `Service${i + 1}New@mail.com`
+                    }
+                }
+            });
+        }
+    }
+
+    async function createAndShareRelationshipAttributesBetweenAllServicesAndSucceedSome() {
+        for (let i = 0; i < numberOfServices; i++) {
+            for (let j = 1; j < numberOfServices; j++) {
+                const predecessorId = (
+                    await executeFullCreateAndShareRelationshipAttributeFlow(runtimeServices[i], runtimeServices[(i + j) % numberOfServices], {
+                        content: {
+                            key: "work phone",
+                            value: {
+                                "@type": "ProprietaryPhoneNumber",
+                                title: "Work phone",
+                                value: `0123${i}${j}`
+                            },
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                ).id;
+
+                if (j === 1) {
+                    await runtimeServices[i].consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
+                        predecessorId: predecessorId,
+                        successorContent: {
+                            value: {
+                                "@type": "ProprietaryPhoneNumber",
+                                title: "Work phone",
+                                value: `00123${i}${j}`
+                            }
+                        }
+                    });
                 }
             }
-        })
-    ).value;
-    await services1.consumption.attributes.notifyPeerAboutIdentityAttributeSuccession({
-        peer: services2.address,
-        attributeId: succeededMailClient1.id
-    });
-
-    await services2.consumption.attributes.succeedIdentityAttribute({
-        predecessorId: mailClient2.shareInfo!.sourceAttribute!,
-        successorContent: {
-            value: {
-                "@type": "EMailAddress",
-                value: "Client2New@mail.com"
-            }
         }
-    });
-
-    const { successor: succeededMailClient3 } = (
-        await services3.consumption.attributes.succeedIdentityAttribute({
-            predecessorId: mailClient3.shareInfo!.sourceAttribute!,
-            successorContent: {
-                value: {
-                    "@type": "EMailAddress",
-                    value: "Client3New@mail.com"
-                }
-            }
-        })
-    ).value;
-    const { successor: twiceSucceededMailClient3 } = (
-        await services3.consumption.attributes.succeedIdentityAttribute({
-            predecessorId: succeededMailClient3.id,
-            successorContent: {
-                value: {
-                    "@type": "EMailAddress",
-                    value: "Client3NewNew@mail.com"
-                }
-            }
-        })
-    ).value;
-    await services3.consumption.attributes.notifyPeerAboutIdentityAttributeSuccession({
-        peer: services1.address,
-        attributeId: twiceSucceededMailClient3.id
-    });
-
-    // create RelationshipAttributes for all client pairs
-    const relationshipAttributeClient12 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
-        content: {
-            key: "work phone",
-            value: {
-                "@type": "ProprietaryPhoneNumber",
-                title: "Work phone",
-                value: "012302"
-            },
-            confidentiality: RelationshipAttributeConfidentiality.Public
-        }
-    });
-    await executeFullCreateAndShareRelationshipAttributeFlow(services1, services3, {
-        content: {
-            key: "work phone",
-            value: {
-                "@type": "ProprietaryPhoneNumber",
-                title: "Work phone",
-                value: "012303"
-            },
-            confidentiality: RelationshipAttributeConfidentiality.Public
-        }
-    });
-
-    await executeFullCreateAndShareRelationshipAttributeFlow(services2, services1, {
-        content: {
-            key: "emergency phone",
-            value: {
-                "@type": "ProprietaryPhoneNumber",
-                title: "Emergency phone",
-                value: "011102"
-            },
-            confidentiality: RelationshipAttributeConfidentiality.Private
-        }
-    });
-    const relationshipAttributeClient23 = await executeFullCreateAndShareRelationshipAttributeFlow(services2, services3, {
-        content: {
-            key: "emergency phone",
-            value: {
-                "@type": "ProprietaryPhoneNumber",
-                title: "Emergency phone",
-                value: "011103"
-            },
-            confidentiality: RelationshipAttributeConfidentiality.Private
-        }
-    });
-    const relationshipAttributeClient31 = await executeFullCreateAndShareRelationshipAttributeFlow(services3, services1, {
-        content: {
-            key: "client number",
-            value: {
-                "@type": "ProprietaryInteger",
-                title: "Client Number",
-                value: 31
-            },
-            confidentiality: RelationshipAttributeConfidentiality.Private
-        }
-    });
-    await executeFullCreateAndShareRelationshipAttributeFlow(services3, services2, {
-        content: {
-            key: "client number",
-            value: {
-                "@type": "ProprietaryInteger",
-                title: "Client Number",
-                value: 32
-            },
-            confidentiality: RelationshipAttributeConfidentiality.Private
-        }
-    });
-
-    // succeed some RelationshipAttributes
-    await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-        predecessorId: relationshipAttributeClient12.id,
-        successorContent: {
-            value: {
-                "@type": "ProprietaryPhoneNumber",
-                title: "Work phone",
-                value: "0123020"
-            }
-        }
-    });
-    await services2.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-        predecessorId: relationshipAttributeClient23.id,
-        successorContent: {
-            value: {
-                "@type": "ProprietaryPhoneNumber",
-                title: "Emergency phone new",
-                value: "0111010"
-            }
-        }
-    });
-    const { successor: succeededRelationshipAttributeClient31 } = (
-        await services3.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-            predecessorId: relationshipAttributeClient31.id,
-            successorContent: {
-                value: {
-                    "@type": "ProprietaryInteger",
-                    title: "Updated client number",
-                    value: 10001
-                }
-            }
-        })
-    ).value;
-    await services3.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-        predecessorId: succeededRelationshipAttributeClient31.id,
-        successorContent: {
-            value: {
-                "@type": "ProprietaryInteger",
-                title: "Updated client number",
-                value: 10002
-            }
-        }
-    });
+    }
 }, 120000);
 afterAll(async () => await runtimeServiceProvider.stop());
 
