@@ -162,7 +162,7 @@ class Attributes {
     ): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `Another version of repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of previously shared repository attribute: ${ownSharedIdentityAttributeId.toString()}.`
+            `Another version of repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of previous own shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
         );
     }
 
