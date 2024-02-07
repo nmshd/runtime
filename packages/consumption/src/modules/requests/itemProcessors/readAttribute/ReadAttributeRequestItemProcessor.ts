@@ -42,7 +42,15 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const ownerIsCurrentIdentity = this.accountController.identity.isMe(foundAttribute.content.owner);
             if (!ownerIsCurrentIdentity && foundAttribute.content instanceof IdentityAttribute) {
-                return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The given Attribute belongs to someone else. You can only share own Attributes."));
+                return ValidationResult.error(CoreErrors.requests.invalidAttributeOwner("The given Attribute belongs to someone else. You can only share own Attributes."));
+            }
+        }
+
+        if (parsedParams.isWithNewAttribute()) {
+            const newAttribute = parsedParams.newAttribute;
+            const ownerIsCurrentIdentity = this.accountController.identity.isMe(newAttribute!.owner);
+            if (!ownerIsCurrentIdentity && newAttribute instanceof IdentityAttribute) {
+                return ValidationResult.error(CoreErrors.requests.invalidAttributeOwner("You can only create and share an own new IdentityAttribute."));
             }
         }
 

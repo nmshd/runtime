@@ -137,6 +137,10 @@ class Requests {
         return new CoreError("error.consumption.requests.invalidRequestItem", message);
     }
 
+    public invalidAttributeOwner(message: string) {
+        return new CoreError("error.consumption.requests.invalidAttributeOwner", message);
+    }
+
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);

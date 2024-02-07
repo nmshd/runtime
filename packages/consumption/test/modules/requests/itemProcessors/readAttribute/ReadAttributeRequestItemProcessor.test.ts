@@ -388,8 +388,50 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem",
+                code: "error.consumption.requests.invalidAttributeOwner",
                 message: /The given Attribute belongs to someone else. You can only share own Attributes./
+            });
+        });
+
+        test("returns an error when the new IdentityAttribute to be created and shared belongs to a third party", async function () {
+            const sender = CoreAddress.from("id0");
+            const thirdParty = CoreAddress.from("id1");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: thirdParty.toString(),
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidAttributeOwner",
+                message: /You can only create and share an own new IdentityAttribute./
             });
         });
     });
