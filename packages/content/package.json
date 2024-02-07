@@ -57,7 +57,7 @@
     },
     "devDependencies": {
         "@js-soft/ts-serval": "2.0.10",
-        "@nmshd/crypto": "2.0.5",
+        "@nmshd/crypto": "2.0.6",
         "@types/luxon": "^3.4.2"
     },
     "publishConfig": {
