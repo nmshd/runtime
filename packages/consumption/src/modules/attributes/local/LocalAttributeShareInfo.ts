@@ -1,4 +1,4 @@
-import { Serializable, ValidationError, serialize, validate } from "@js-soft/ts-serval";
+import { Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
 import { CoreAddress, CoreId, CoreSerializable, ICoreAddress, ICoreId } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";

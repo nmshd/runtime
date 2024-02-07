@@ -212,10 +212,10 @@ export class AttributesController extends ConsumptionBaseController {
         await this.attributes.create(localAttribute);
 
         if (
-            localAttribute.content instanceof IdentityAttribute && // nested Local Attributes should only be created for Identity Attributes
+            localAttribute.content instanceof IdentityAttribute && // Local Attributes for children should only be created for Identity Attributes
             localAttribute.content.value instanceof AbstractComplexValue
         ) {
-            await this.createLocalAttributesForNestedAttributeValues(localAttribute);
+            await this.createLocalAttributesForChildrenOfComplexAttribute(localAttribute);
         }
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), localAttribute));
@@ -223,20 +223,23 @@ export class AttributesController extends ConsumptionBaseController {
         return localAttribute;
     }
 
-    private async createLocalAttributesForNestedAttributeValues(localAttribute: LocalAttribute): Promise<void> {
+    private async createLocalAttributesForChildrenOfComplexAttribute(localAttribute: LocalAttribute): Promise<void> {
         if (!(localAttribute.content instanceof IdentityAttribute)) {
-            throw new ConsumptionError("Only Identity Attributes are allowed here");
+            throw new ConsumptionError("Only identity attributes are allowed here");
         }
 
-        const nestedAttributeValues = Object.values(localAttribute.content.value).filter((p) => p instanceof AbstractAttributeValue) as AttributeValues.Identity.Class[];
+        const childAttributeValues = Object.values(localAttribute.content.value).filter((p) => p instanceof AbstractAttributeValue) as AttributeValues.Identity.Class[];
 
-        for (const propertyValue of nestedAttributeValues) {
-            const nestedAttribute = IdentityAttribute.from({
+        for (const propertyValue of childAttributeValues) {
+            const childAttribute = IdentityAttribute.from({
                 ...localAttribute.content.toJSON(),
                 value: propertyValue.toJSON() as AttributeValues.Identity.Json
             });
 
-            await this.createLocalAttribute({ content: nestedAttribute, parentId: localAttribute.id });
+            await this.createLocalAttribute({
+                content: childAttribute,
+                parentId: localAttribute.id
+            });
         }
     }
 
@@ -255,6 +258,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const sharedLocalAttributeCopy = await LocalAttribute.fromAttribute(sourceAttribute.content, undefined, shareInfo, parsedParams.attributeId);
         await this.attributes.create(sharedLocalAttributeCopy);
+
         this.eventBus.publish(new SharedAttributeCopyCreatedEvent(this.identity.address.toString(), sharedLocalAttributeCopy));
         return sharedLocalAttributeCopy;
     }
@@ -303,6 +307,10 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: parsedSuccessorParams.createdAt,
             succeededBy: parsedSuccessorParams.succeededBy
         });
+
+        if (predecessor.isComplexAttribute()) {
+            await this.succeedChildrenOfComplexAttribute(successor.id);
+        }
 
         this.eventBus.publish(new RepositoryAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
@@ -425,10 +433,66 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
+    private async succeedChildrenOfComplexAttribute(parentSuccessorId: CoreId) {
+        const parentSuccessor = await this.getLocalAttribute(parentSuccessorId);
+        if (typeof parentSuccessor === "undefined") {
+            throw CoreErrors.attributes.invalidParentSuccessor;
+        }
+
+        const childAttributeValues: AbstractAttributeValue[] = Object.values(parentSuccessor.content.value).filter((elem) => elem instanceof AbstractAttributeValue);
+
+        for (const childAttributeValue of childAttributeValues) {
+            let currentParent = await this.getLocalAttribute(parentSuccessorId);
+
+            let child;
+            while (typeof child === "undefined" && currentParent?.succeeds) {
+                const currentPredecessor = (await this.getLocalAttribute(currentParent.succeeds))!;
+                currentParent = currentPredecessor;
+                child = await this.getChildAttributesByValueType(currentParent.id, childAttributeValue.constructor);
+            }
+
+            const childPredecessorId = child?.id;
+            if (typeof childPredecessorId !== "undefined") {
+                await this._succeedAttributeUnsafe(childPredecessorId, {
+                    content: IdentityAttribute.from({
+                        value: childAttributeValue.toJSON() as AttributeValues.Identity.Json,
+                        owner: this.identity.address
+                    }),
+                    parentId: parentSuccessorId,
+                    createdAt: parentSuccessor.createdAt
+                });
+            } else {
+                await this.createAttributeUnsafe({
+                    content: IdentityAttribute.from({
+                        value: childAttributeValue.toJSON() as AttributeValues.Identity.Json,
+                        owner: this.identity.address
+                    }),
+                    parentId: parentSuccessorId,
+                    createdAt: parentSuccessor.createdAt
+                });
+            }
+        }
+    }
+
+    private async getChildAttributesByValueType(parentId: CoreId, valueType: AbstractAttributeValue["constructor"]): Promise<LocalAttribute | undefined> {
+        const children = await this.getLocalAttributes({
+            parentId: parentId.toString()
+        });
+
+        /** We currently assume that all of the child attributes of a complex
+         * attribute have distinct types. */
+        return children.find((elem) => elem.content.value instanceof valueType);
+    }
+
     private async _succeedAttributeUnsafe(
         predecessorId: CoreId,
         successorParams: Parameters<typeof this.createAttributeUnsafe>[0]
     ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (typeof predecessor === "undefined") {
+            throw CoreErrors.attributes.predecessorDoesNotExist;
+        }
+
         const successor = await this.createAttributeUnsafe({
             id: successorParams.id,
             content: successorParams.content,
@@ -439,7 +503,6 @@ export class AttributesController extends ConsumptionBaseController {
             succeededBy: successorParams.succeededBy
         });
 
-        const predecessor = (await this.getLocalAttribute(predecessorId))!;
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
 
@@ -461,6 +524,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (commonValidation.isError()) return commonValidation;
 
         const predecessor = (await this.getLocalAttribute(predecessorId))!;
+
         const successor = LocalAttribute.from({
             id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
             content: parsedSuccessorParams.content,
@@ -471,12 +535,12 @@ export class AttributesController extends ConsumptionBaseController {
             parentId: parsedSuccessorParams.parentId
         });
 
-        if (!predecessor.isIdentityAttribute() || predecessor.isShared()) {
+        if (!predecessor.isRepositoryAttribute(this.identity.address)) {
             return ValidationResult.error(CoreErrors.attributes.invalidPredecessor("Predecessor is not a valid repository attribute."));
         }
 
-        if (!successor.isIdentityAttribute() || successor.isShared()) {
-            return ValidationResult.error(CoreErrors.attributes.invalidPredecessor("Successor is not a valid repository attribute."));
+        if (!successor.isRepositoryAttribute(this.identity.address)) {
+            return ValidationResult.error(CoreErrors.attributes.invalidSuccessor("Successor is not a valid repository attribute."));
         }
 
         return ValidationResult.success();
@@ -525,10 +589,10 @@ export class AttributesController extends ConsumptionBaseController {
         const successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
         const predecessorSourceVersionIds = (await this.getVersionsOfAttribute(predecessor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
         const successorSourceVersionIds = (await this.getVersionsOfAttribute(successor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
-        if (typeof predecessorSource === "undefined" || !predecessorSource.isRepositoryAttribute()) {
+        if (typeof predecessorSource === "undefined" || !predecessorSource.isRepositoryAttribute(this.identity.address)) {
             return ValidationResult.error(CoreErrors.attributes.invalidSuccessionOfOwnSharedIdentityAttribute());
         }
-        if (typeof successorSource === "undefined" || !successorSource.isRepositoryAttribute()) {
+        if (typeof successorSource === "undefined" || !successorSource.isRepositoryAttribute(this.identity.address)) {
             return ValidationResult.error(CoreErrors.attributes.invalidSuccessionOfOwnSharedIdentityAttribute("Source attribute is not a valid repository attribute."));
         }
         if (
@@ -827,8 +891,8 @@ export class AttributesController extends ConsumptionBaseController {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
-        if (!repositoryAttribute.isRepositoryAttribute()) {
-            throw CoreErrors.attributes.invalidPropertyValue("Attribute '${id}' isn't a RepositoryAttribute.");
+        if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
+            throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
         }
 
         let i = 0;

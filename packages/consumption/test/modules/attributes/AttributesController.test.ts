@@ -4,15 +4,16 @@ import {
     Country,
     EMailAddress,
     HouseNumber,
-    IIQLQuery,
-    IIdentityAttributeQuery,
-    IRelationshipAttributeQuery,
     IdentityAttribute,
+    IIdentityAttributeQuery,
+    IIQLQuery,
+    IRelationshipAttributeQuery,
     Nationality,
     PhoneNumber,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     Street,
+    StreetAddress,
     ZipCode
 } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
@@ -544,7 +545,7 @@ describe("AttributesController", function () {
 
     describe("Attribute successions", function () {
         describe("Common validator", function () {
-            beforeEach(async function () {
+            afterEach(async function () {
                 const attributes = await consumptionController.attributes.getLocalAttributes();
                 for (const attribute of attributes) {
                     await consumptionController.attributes.deleteAttributeUnsafe(attribute.id);
@@ -814,7 +815,7 @@ describe("AttributesController", function () {
         });
 
         describe("Validator for own shared identity attribute successions", function () {
-            beforeEach(async function () {
+            afterEach(async function () {
                 const attributes = await consumptionController.attributes.getLocalAttributes();
                 for (const attribute of attributes) {
                     await consumptionController.attributes.deleteAttributeUnsafe(attribute.id);
@@ -871,7 +872,7 @@ describe("AttributesController", function () {
         });
 
         describe("Happy paths for attribute successions", function () {
-            beforeEach(async function () {
+            afterEach(async function () {
                 const attributes = await consumptionController.attributes.getLocalAttributes();
                 for (const attribute of attributes) {
                     await consumptionController.attributes.deleteAttributeUnsafe(attribute.id);
@@ -885,7 +886,7 @@ describe("AttributesController", function () {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
                 const successorParams: IAttributeSuccessorParams = {
@@ -894,7 +895,7 @@ describe("AttributesController", function () {
                             "@type": "Nationality",
                             value: "US"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 };
 
@@ -908,7 +909,7 @@ describe("AttributesController", function () {
                 expect((successor.content.value.toJSON() as any).value).toBe("US");
             });
 
-            test("it should succeed an own shared identity attribute", async function () {
+            test("should succeed an own shared identity attribute", async function () {
                 const predecessorRepo = await consumptionController.attributes.createLocalAttribute({
                     content: IdentityAttribute.from({
                         value: {
@@ -959,7 +960,7 @@ describe("AttributesController", function () {
                 expect((successor.content.value.toJSON() as any).value).toBe("US");
             });
 
-            test("should succeed a selected own shared identity attribute", async function () {
+            test("should succeed an own shared identity attribute skipping one version", async function () {
                 const predecessorRepo = await consumptionController.attributes.createLocalAttribute({
                     content: IdentityAttribute.from({
                         value: {
@@ -1020,7 +1021,392 @@ describe("AttributesController", function () {
                 expect((successor.content.value.toJSON() as any).value).toBe("CZ");
             });
 
-            test("it should succeed a peer shared identity attribute", async function () {
+            describe("Complex attribute successions", function () {
+                let version0ChildValues: string[];
+                let version1ChildValues: string[];
+                let repoVersion0: LocalAttribute;
+                let repoVersion1Params: IAttributeSuccessorParams;
+                beforeEach(async function () {
+                    version0ChildValues = ["AStreet", "AHouseNo", "AZipCode", "ACity", "DE"];
+
+                    const identityAttribute = IdentityAttribute.from({
+                        value: {
+                            "@type": "StreetAddress",
+                            recipient: "ARecipient",
+                            street: version0ChildValues[0],
+                            houseNo: version0ChildValues[1],
+                            zipCode: version0ChildValues[2],
+                            city: version0ChildValues[3],
+                            country: version0ChildValues[4]
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    });
+
+                    repoVersion0 = await consumptionController.attributes.createLocalAttribute({
+                        content: identityAttribute
+                    });
+
+                    version1ChildValues = ["ANewStreet", "ANewHouseNo", "ANewZipCode", "ANewCity", "DE"];
+
+                    repoVersion1Params = {
+                        content: IdentityAttribute.from({
+                            value: {
+                                "@type": "StreetAddress",
+                                recipient: "ANewRecipient",
+                                street: version1ChildValues[0],
+                                houseNo: version1ChildValues[1],
+                                zipCode: version1ChildValues[2],
+                                city: version1ChildValues[3],
+                                country: version1ChildValues[4]
+                            },
+                            owner: consumptionController.accountController.identity.address
+                        })
+                    };
+                });
+
+                test("should succeed a complex repository attribute", async function () {
+                    const { predecessor: updatedRepoVersion0, successor: repoVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(
+                        repoVersion0.id,
+                        repoVersion1Params
+                    );
+                    expect(repoVersion1).toBeDefined();
+                    expect(updatedRepoVersion0).toBeDefined();
+                    expect(repoVersion0.id.equals(updatedRepoVersion0.id)).toBe(true);
+                    expect(updatedRepoVersion0.succeededBy!.equals(repoVersion1.id)).toBe(true);
+                    expect(repoVersion1.succeeds!.equals(updatedRepoVersion0.id)).toBe(true);
+
+                    expect((updatedRepoVersion0.content.value as StreetAddress).recipient).toBe("ARecipient");
+                    expect((repoVersion1.content.value as StreetAddress).recipient).toBe("ANewRecipient");
+
+                    const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion0.id.toString()
+                    });
+                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion1.id.toString()
+                    });
+
+                    const numberOfChildAttributes = version0ChildValues.length;
+                    expect(repoVersion0ChildAttributes).toHaveLength(numberOfChildAttributes);
+                    expect(repoVersion1ChildAttributes).toHaveLength(numberOfChildAttributes);
+
+                    for (let i = 0; i < numberOfChildAttributes; i++) {
+                        expect(repoVersion0ChildAttributes[i].succeededBy).toStrictEqual(repoVersion1ChildAttributes[i].id);
+                        expect(repoVersion1ChildAttributes[i].succeeds).toStrictEqual(repoVersion0ChildAttributes[i].id);
+
+                        expect(repoVersion0ChildAttributes[i].parentId).toStrictEqual(repoVersion0.id);
+                        expect(repoVersion1ChildAttributes[i].parentId).toStrictEqual(repoVersion1.id);
+
+                        expect(repoVersion0ChildAttributes[i].content.value.toString()).toStrictEqual(version0ChildValues[i]);
+                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(version1ChildValues[i]);
+                    }
+                });
+
+                test("should succeed a complex repository attribute adding an optional child", async function () {
+                    repoVersion1Params = {
+                        content: IdentityAttribute.from({
+                            value: {
+                                "@type": "StreetAddress",
+                                recipient: "ANewRecipient",
+                                street: version1ChildValues[0],
+                                houseNo: version1ChildValues[1],
+                                zipCode: version1ChildValues[2],
+                                city: version1ChildValues[3],
+                                country: version1ChildValues[4],
+                                state: "Berlin"
+                            },
+                            owner: consumptionController.accountController.identity.address
+                        })
+                    };
+
+                    const { predecessor: updatedRepoVersion0, successor: repoVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(
+                        repoVersion0.id,
+                        repoVersion1Params
+                    );
+                    expect(repoVersion1).toBeDefined();
+                    expect(updatedRepoVersion0).toBeDefined();
+                    expect(repoVersion0.id.equals(updatedRepoVersion0.id)).toBe(true);
+                    expect(updatedRepoVersion0.succeededBy!.equals(repoVersion1.id)).toBe(true);
+                    expect(repoVersion1.succeeds!.equals(updatedRepoVersion0.id)).toBe(true);
+
+                    const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion0.id.toString()
+                    });
+                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion1.id.toString()
+                    });
+
+                    const minNumberOfChildAttributes = version0ChildValues.length;
+                    expect(repoVersion0ChildAttributes).toHaveLength(minNumberOfChildAttributes);
+                    expect(repoVersion1ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
+
+                    expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toBe("Berlin");
+                    expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].parentId).toStrictEqual(repoVersion1.id);
+                    expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].succeeds).toBeUndefined();
+                });
+
+                test("should succeed a complex repository attribute omitting an optional child", async function () {
+                    const identityAttribute = IdentityAttribute.from({
+                        value: {
+                            "@type": "StreetAddress",
+                            recipient: "ARecipient",
+                            street: version0ChildValues[0],
+                            houseNo: version0ChildValues[1],
+                            zipCode: version0ChildValues[2],
+                            city: version0ChildValues[3],
+                            country: version0ChildValues[4],
+                            state: "Berlin"
+                        },
+                        validTo: CoreDate.utc(),
+                        owner: consumptionController.accountController.identity.address
+                    });
+
+                    repoVersion0 = await consumptionController.attributes.createLocalAttribute({
+                        content: identityAttribute
+                    });
+
+                    const { predecessor: updatedRepoVersion0, successor: repoVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(
+                        repoVersion0.id,
+                        repoVersion1Params
+                    );
+                    expect(repoVersion1).toBeDefined();
+                    expect(updatedRepoVersion0).toBeDefined();
+                    expect(repoVersion0.id.equals(updatedRepoVersion0.id)).toBe(true);
+                    expect(updatedRepoVersion0.succeededBy!.equals(repoVersion1.id)).toBe(true);
+                    expect(repoVersion1.succeeds!.equals(updatedRepoVersion0.id)).toBe(true);
+
+                    const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion0.id.toString()
+                    });
+                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion1.id.toString()
+                    });
+
+                    const minNumberOfChildAttributes = version0ChildValues.length;
+                    expect(repoVersion0ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
+                    expect(repoVersion1ChildAttributes).toHaveLength(minNumberOfChildAttributes);
+
+                    expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toBe("Berlin");
+                    expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].parentId).toStrictEqual(repoVersion0.id);
+                    expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].succeededBy).toBeUndefined();
+                });
+
+                test("should succeed a complex repository attribute re-adding an optional child", async function () {
+                    const identityAttribute = IdentityAttribute.from({
+                        value: {
+                            "@type": "StreetAddress",
+                            recipient: "ARecipient",
+                            street: version0ChildValues[0],
+                            houseNo: version0ChildValues[1],
+                            zipCode: version0ChildValues[2],
+                            city: version0ChildValues[3],
+                            country: version0ChildValues[4],
+                            state: "Berlin"
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    });
+                    repoVersion0 = await consumptionController.attributes.createLocalAttribute({
+                        content: identityAttribute
+                    });
+
+                    const { successor: repoVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion0.id, repoVersion1Params);
+
+                    const repoVersion2Params = {
+                        content: IdentityAttribute.from({
+                            value: {
+                                "@type": "StreetAddress",
+                                recipient: "ANewRecipient",
+                                street: version1ChildValues[0],
+                                houseNo: version1ChildValues[1],
+                                zipCode: version1ChildValues[2],
+                                city: version1ChildValues[3],
+                                country: version1ChildValues[4],
+                                state: "Berlin"
+                            },
+                            owner: consumptionController.accountController.identity.address
+                        })
+                    };
+                    const { successor: repoVersion2 } = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion1.id, repoVersion2Params);
+
+                    const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion0.id.toString()
+                    });
+                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion1.id.toString()
+                    });
+                    const repoVersion2ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion2.id.toString()
+                    });
+
+                    const minNumberOfChildAttributes = version0ChildValues.length;
+                    expect(repoVersion0ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
+                    expect(repoVersion1ChildAttributes).toHaveLength(minNumberOfChildAttributes);
+                    expect(repoVersion2ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
+
+                    expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toBe("Berlin");
+                    expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].parentId).toStrictEqual(repoVersion2.id);
+                    expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].succeeds).toStrictEqual(repoVersion0ChildAttributes[minNumberOfChildAttributes].id);
+                });
+
+                test("should succeed a complex own shared identity attribute", async function () {
+                    const successionResultRepo = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion0.id, repoVersion1Params);
+                    repoVersion0 = successionResultRepo.predecessor;
+                    const repoVersion1 = successionResultRepo.successor;
+
+                    const ownSharedVersion0 = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                        sourceAttributeId: repoVersion0.id,
+                        peer: CoreAddress.from("peer"),
+                        requestReference: CoreId.from("reqRef")
+                    });
+
+                    const ownSharedVersion1Params: IAttributeSuccessorParams = {
+                        ...repoVersion1Params,
+                        shareInfo: {
+                            peer: CoreAddress.from("peer"),
+                            requestReference: CoreId.from("reqRef2"),
+                            sourceAttribute: repoVersion1.id
+                        }
+                    };
+                    const { predecessor: updatedOwnSharedVersion0, successor: ownSharedVersion1 } = await consumptionController.attributes.succeedOwnSharedIdentityAttribute(
+                        ownSharedVersion0.id,
+                        ownSharedVersion1Params
+                    );
+
+                    expect(ownSharedVersion1).toBeDefined();
+                    expect(updatedOwnSharedVersion0).toBeDefined();
+                    expect(ownSharedVersion0.id.equals(updatedOwnSharedVersion0.id)).toBe(true);
+                    expect(updatedOwnSharedVersion0.succeededBy!.equals(ownSharedVersion1.id)).toBe(true);
+                    expect(ownSharedVersion1.succeeds!.equals(updatedOwnSharedVersion0.id)).toBe(true);
+
+                    expect((ownSharedVersion1.content.value as StreetAddress).recipient).toBe("ANewRecipient");
+                    expect((ownSharedVersion1.content.value as StreetAddress).street.toString()).toBe(version1ChildValues[0]);
+                    expect((ownSharedVersion1.content.value as StreetAddress).houseNo.toString()).toBe(version1ChildValues[1]);
+                    expect((ownSharedVersion1.content.value as StreetAddress).zipCode.toString()).toBe(version1ChildValues[2]);
+                    expect((ownSharedVersion1.content.value as StreetAddress).city.toString()).toBe(version1ChildValues[3]);
+                    expect((ownSharedVersion1.content.value as StreetAddress).country.toString()).toBe(version1ChildValues[4]);
+                });
+
+                test("should succeed a complex own shared identity attribute skipping one version", async function () {
+                    const interimSuccessionResult = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion0.id, repoVersion1Params);
+                    repoVersion0 = interimSuccessionResult.predecessor;
+                    let repoVersion1 = interimSuccessionResult.successor;
+
+                    const version2ChildValues = ["ANewNewStreet", "ANewNewHouseNo", "ANewNewZipCode", "ANewNewCity", "DE"];
+
+                    const repoVersion2Params: IAttributeSuccessorParams = {
+                        content: IdentityAttribute.from({
+                            value: {
+                                "@type": "StreetAddress",
+                                recipient: "ANewNewRecipient",
+                                street: version2ChildValues[0],
+                                houseNo: version2ChildValues[1],
+                                zipCode: version2ChildValues[2],
+                                city: version2ChildValues[3],
+                                country: version2ChildValues[4]
+                            },
+                            owner: consumptionController.accountController.identity.address
+                        })
+                    };
+
+                    const successionResultRepo = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion1.id, repoVersion2Params);
+                    repoVersion1 = successionResultRepo.predecessor;
+                    const repoVersion2 = successionResultRepo.successor;
+
+                    const ownSharedVersion0 = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                        sourceAttributeId: repoVersion0.id,
+                        peer: CoreAddress.from("peer"),
+                        requestReference: CoreId.from("reqRef")
+                    });
+
+                    const ownSharedVersion2Params: IAttributeSuccessorParams = {
+                        ...repoVersion2Params,
+                        shareInfo: {
+                            peer: CoreAddress.from("peer"),
+                            requestReference: CoreId.from("reqRef2"),
+                            sourceAttribute: repoVersion2.id
+                        }
+                    };
+                    const { predecessor: updatedOwnSharedVersion0, successor: ownSharedVersion2 } = await consumptionController.attributes.succeedOwnSharedIdentityAttribute(
+                        ownSharedVersion0.id,
+                        ownSharedVersion2Params
+                    );
+
+                    expect(ownSharedVersion2).toBeDefined();
+                    expect(updatedOwnSharedVersion0).toBeDefined();
+                    expect(ownSharedVersion0.id.equals(updatedOwnSharedVersion0.id)).toBe(true);
+                    expect(updatedOwnSharedVersion0.succeededBy!.equals(ownSharedVersion2.id)).toBe(true);
+                    expect(ownSharedVersion2.succeeds!.equals(updatedOwnSharedVersion0.id)).toBe(true);
+
+                    expect((ownSharedVersion2.content.value as StreetAddress).recipient).toBe("ANewNewRecipient");
+                    expect((ownSharedVersion2.content.value as StreetAddress).street.toString()).toBe(version2ChildValues[0]);
+                    expect((ownSharedVersion2.content.value as StreetAddress).houseNo.toString()).toBe(version2ChildValues[1]);
+                    expect((ownSharedVersion2.content.value as StreetAddress).zipCode.toString()).toBe(version2ChildValues[2]);
+                    expect((ownSharedVersion2.content.value as StreetAddress).city.toString()).toBe(version2ChildValues[3]);
+                    expect((ownSharedVersion2.content.value as StreetAddress).country.toString()).toBe(version2ChildValues[4]);
+                });
+
+                test("should succeed a complex peer shared identity attribute", async function () {
+                    const identityAttribute = IdentityAttribute.from({
+                        value: {
+                            "@type": "StreetAddress",
+                            recipient: "ARecipient",
+                            street: version0ChildValues[0],
+                            houseNo: version0ChildValues[1],
+                            zipCode: version0ChildValues[2],
+                            city: version0ChildValues[3],
+                            country: version0ChildValues[4]
+                        },
+                        validTo: CoreDate.utc(),
+                        owner: CoreAddress.from("peer")
+                    });
+
+                    const peerSharedVersion0 = await consumptionController.attributes.createLocalAttribute({
+                        content: identityAttribute,
+                        shareInfo: {
+                            peer: CoreAddress.from("peer"),
+                            requestReference: CoreId.from("reqRef2")
+                        }
+                    });
+
+                    const peerSharedVersion1Params: IAttributeSuccessorParams = {
+                        content: IdentityAttribute.from({
+                            value: {
+                                "@type": "StreetAddress",
+                                recipient: "ANewRecipient",
+                                street: version1ChildValues[0],
+                                houseNo: version1ChildValues[1],
+                                zipCode: version1ChildValues[2],
+                                city: version1ChildValues[3],
+                                country: version1ChildValues[4]
+                            },
+                            owner: CoreAddress.from("peer")
+                        }),
+                        shareInfo: {
+                            peer: CoreAddress.from("peer"),
+                            requestReference: CoreId.from("reqRef2")
+                        }
+                    };
+
+                    const { predecessor: updatedPeerSharedVersion0, successor: peerSharedVersion1 } = await consumptionController.attributes.succeedPeerSharedIdentityAttribute(
+                        peerSharedVersion0.id,
+                        peerSharedVersion1Params
+                    );
+
+                    expect(peerSharedVersion1).toBeDefined();
+                    expect(updatedPeerSharedVersion0).toBeDefined();
+                    expect(peerSharedVersion0.id.equals(updatedPeerSharedVersion0.id)).toBe(true);
+                    expect(updatedPeerSharedVersion0.succeededBy!.equals(peerSharedVersion1.id)).toBe(true);
+                    expect(peerSharedVersion1.succeeds!.equals(updatedPeerSharedVersion0.id)).toBe(true);
+
+                    expect((peerSharedVersion1.content.value as StreetAddress).recipient).toBe("ANewRecipient");
+                    expect((peerSharedVersion1.content.value as StreetAddress).street.toString()).toBe(version1ChildValues[0]);
+                    expect((peerSharedVersion1.content.value as StreetAddress).houseNo.toString()).toBe(version1ChildValues[1]);
+                    expect((peerSharedVersion1.content.value as StreetAddress).zipCode.toString()).toBe(version1ChildValues[2]);
+                    expect((peerSharedVersion1.content.value as StreetAddress).city.toString()).toBe(version1ChildValues[3]);
+                    expect((peerSharedVersion1.content.value as StreetAddress).country.toString()).toBe(version1ChildValues[4]);
+                });
+            });
+
+            test("should succeed a peer shared identity attribute", async function () {
                 const predecessor = await consumptionController.attributes.createLocalAttribute({
                     content: IdentityAttribute.from({
                         value: {
@@ -1058,7 +1444,7 @@ describe("AttributesController", function () {
                 expect((successor.content.value.toJSON() as any).value).toBe("US");
             });
 
-            test("it should succeed an own shared relationship attribute", async function () {
+            test("should succeed an own shared relationship attribute", async function () {
                 const predecessor = await consumptionController.attributes.createLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "customerId",
@@ -1105,7 +1491,7 @@ describe("AttributesController", function () {
                 expect((successor.content.value.toJSON() as any).value).toBe("1337");
             });
 
-            test("it should succeed a peer shared relationship attribute", async function () {
+            test("should succeed a peer shared relationship attribute", async function () {
                 const predecessor = await consumptionController.attributes.createLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "customerId",
@@ -1217,7 +1603,7 @@ describe("AttributesController", function () {
                         "@type": "Nationality",
                         value: "DE"
                     },
-                    owner: CoreAddress.from("address")
+                    owner: consumptionController.accountController.identity.address
                 })
             });
             const successorParams1: IAttributeSuccessorParams = {
@@ -1226,7 +1612,7 @@ describe("AttributesController", function () {
                         "@type": "Nationality",
                         value: "US"
                     },
-                    owner: CoreAddress.from("address")
+                    owner: consumptionController.accountController.identity.address
                 })
             };
             const successorParams2: IAttributeSuccessorParams = {
@@ -1235,7 +1621,7 @@ describe("AttributesController", function () {
                         "@type": "Nationality",
                         value: "CZ"
                     },
-                    owner: CoreAddress.from("address")
+                    owner: consumptionController.accountController.identity.address
                 })
             };
 

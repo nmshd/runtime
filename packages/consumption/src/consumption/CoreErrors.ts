@@ -95,8 +95,12 @@ class Attributes {
     public cannotSucceedAttributesWithASuccessor(successorId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.cannotSucceedAttributesWithASuccessor",
-            `The Attribute you want to succeed has a successor (id: ${successorId}). You cannot succeed Attributes with a successor. Instead, succeed the successor.`
+            `The attribute you want to succeed has a successor (id: ${successorId}). You cannot succeed attributes with a successor. Instead, succeed the successor.`
         );
+    }
+
+    public invalidParentSuccessor(parentSuccessorId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.invalidParentSuccessor", `The complex parent successor (id: ${parentSuccessorId}) does not exist.`);
     }
 
     public invalidPropertyValue(message: string) {
