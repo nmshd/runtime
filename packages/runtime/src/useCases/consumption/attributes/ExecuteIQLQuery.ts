@@ -7,7 +7,7 @@ import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface ExecuteIQLQueryRequest {
-    query: IQLQueryJSON;
+    query: Omit<IQLQueryJSON, "@type"> & { "@type"?: "IQLQuery" };
 }
 
 class Validator extends SchemaValidator<ExecuteIQLQueryRequest> {
