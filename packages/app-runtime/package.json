@@ -61,7 +61,7 @@
         "@types/luxon": "^3.4.2"
     },
     "peerDependencies": {
-        "@nmshd/runtime": "^3.5.1"
+        "@nmshd/runtime": "^3.5.0"
     },
     "publishConfig": {
         "access": "public",
