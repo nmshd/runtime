@@ -43,8 +43,8 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
         }
 
-        if (!repositoryAttribute.isRepositoryAttribute()) {
-            return Result.fail(RuntimeErrors.attributes.isNoIdentityAttribute(repositoryAttribute.id));
+        if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
+            return Result.fail(RuntimeErrors.attributes.isNoIdentityAttribute(repositoryAttributeId));
         }
 
         const query = {
