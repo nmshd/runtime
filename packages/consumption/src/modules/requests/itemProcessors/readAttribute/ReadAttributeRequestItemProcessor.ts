@@ -32,26 +32,32 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
+        let attribute;
+        let existingOrNew;
 
         if (parsedParams.isWithExistingAttribute()) {
-            const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
+            const foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
 
-            if (!foundAttribute) {
+            if (!foundLocalAttribute) {
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
             }
 
-            const ownerIsCurrentIdentity = this.accountController.identity.isMe(foundAttribute.content.owner);
-            if (!ownerIsCurrentIdentity && foundAttribute.content instanceof IdentityAttribute) {
-                return ValidationResult.error(CoreErrors.requests.invalidAttributeOwner("The given Attribute belongs to someone else. You can only share own Attributes."));
-            }
+            attribute = foundLocalAttribute.content;
+            existingOrNew = "existing";
         }
 
         if (parsedParams.isWithNewAttribute()) {
-            const newAttribute = parsedParams.newAttribute;
-            const ownerIsCurrentIdentity = this.accountController.identity.isMe(newAttribute!.owner);
-            if (!ownerIsCurrentIdentity && newAttribute instanceof IdentityAttribute) {
-                return ValidationResult.error(CoreErrors.requests.invalidAttributeOwner("You can only create and share an own new IdentityAttribute."));
-            }
+            attribute = parsedParams.newAttribute;
+            existingOrNew = "new";
+        }
+
+        if (!attribute || !existingOrNew) {
+            return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing("An unknown error occurred during the RequestItem processing."));
+        }
+
+        const ownerIsCurrentIdentity = this.accountController.identity.isMe(attribute.owner);
+        if (!ownerIsCurrentIdentity && attribute instanceof IdentityAttribute) {
+            return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute belongs to someone else. You can only share own Attributes.`));
         }
 
         return ValidationResult.success();

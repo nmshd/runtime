@@ -388,8 +388,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidAttributeOwner",
-                message: /The given Attribute belongs to someone else. You can only share own Attributes./
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The existing Attribute belongs to someone else. You can only share own Attributes./
             });
         });
 
@@ -430,8 +430,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidAttributeOwner",
-                message: /You can only create and share an own new IdentityAttribute./
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The new Attribute belongs to someone else. You can only share own Attributes./
             });
         });
     });

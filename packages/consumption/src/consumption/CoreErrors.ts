@@ -137,8 +137,8 @@ class Requests {
         return new CoreError("error.consumption.requests.invalidRequestItem", message);
     }
 
-    public invalidAttributeOwner(message: string) {
-        return new CoreError("error.consumption.requests.invalidAttributeOwner", message);
+    public invalidlyAnsweredQuery(message: string) {
+        return new CoreError("error.consumption.requests.invalidlyAnsweredQuery", message);
     }
 
     private static readonly _decideValidation = class {
