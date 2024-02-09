@@ -13900,6 +13900,18 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                         }
                     },
                     "additionalProperties": false
+                },
+                "requestItemMetadata": {
+                    "type": "object",
+                    "properties": {
+                        "title": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -17052,6 +17064,18 @@ export const ShareIdentityAttributeRequest: any = {
                         },
                         "expiresAt": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "requestItemMetadata": {
+                    "type": "object",
+                    "properties": {
+                        "title": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
                         }
                     },
                     "additionalProperties": false

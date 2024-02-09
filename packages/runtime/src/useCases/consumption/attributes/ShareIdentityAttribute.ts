@@ -16,6 +16,10 @@ export interface ShareIdentityAttributeRequest {
         metadata?: Record<string, any>;
         expiresAt?: ISO8601DateTimeString;
     };
+    requestItemMetadata?: {
+        title?: string;
+        description?: string;
+    };
 }
 
 class Validator extends SchemaValidator<ShareIdentityAttributeRequest> {
@@ -75,13 +79,13 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
             );
         }
 
-        const requestMetadata = request.requestMetadata ?? {};
         const requestParams = CreateOutgoingRequestParameters.from({
             peer: request.peer,
             content: Request.from({
-                ...requestMetadata,
+                ...(request.requestMetadata ?? {}),
                 items: [
                     ShareAttributeRequestItem.from({
+                        ...(request.requestItemMetadata ?? {}),
                         attribute: repositoryAttribute.content,
                         sourceAttributeId: repositoryAttribute.id,
                         mustBeAccepted: true
