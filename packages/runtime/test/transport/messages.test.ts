@@ -192,11 +192,15 @@ describe("Message query", () => {
     });
 
     test("query Messages withAttachments", async () => {
-        await exchangeMessageWithAttachment(transportServices1, transportServices2);
-        await exchangeMessage(transportServices1, transportServices2);
+        const messageWithAttachment = await exchangeMessageWithAttachment(transportServices1, transportServices2);
+        const messageWithoutAttachment = await exchangeMessage(transportServices1, transportServices2);
 
         const messages = await transportServices2.messages.getMessages({ query: { attachments: "+" } });
 
         expect(messages.value.every((m) => m.attachments.length > 0)).toBe(true);
+
+        const messageIds = messages.value.map((m) => m.id);
+        expect(messageIds).toContain(messageWithAttachment.id);
+        expect(messageIds).not.toContain(messageWithoutAttachment.id);
     });
 });
