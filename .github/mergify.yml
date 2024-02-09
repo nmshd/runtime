@@ -1,6 +1,6 @@
 pull_request_rules:
-  - name: continuously rebase pull requests when it's not labeled with `norebase`
+  - name: update pull request
     conditions:
-      - label!=norebase
+      - label!=wip
     actions:
       update:
