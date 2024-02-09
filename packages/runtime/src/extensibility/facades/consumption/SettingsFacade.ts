@@ -9,9 +9,9 @@ import {
     GetSettingByKeyRequest,
     GetSettingByKeyUseCase,
     GetSettingRequest,
+    GetSettingUseCase,
     GetSettingsRequest,
     GetSettingsUseCase,
-    GetSettingUseCase,
     UpdateSettingRequest,
     UpdateSettingUseCase
 } from "../../../useCases";

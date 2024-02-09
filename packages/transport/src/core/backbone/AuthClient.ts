@@ -3,8 +3,8 @@ import qs from "qs";
 import { CoreDate } from "../types";
 import { ClientResult } from "./ClientResult";
 import { PlatformParameters } from "./PlatformParameters";
-import { RequestError } from "./RequestError";
 import { RESTClient } from "./RESTClient";
+import { RequestError } from "./RequestError";
 
 export interface IAuthenticationRequest {
     grantType: string;

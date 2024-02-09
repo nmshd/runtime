@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO } from "@nmshd/runtime";
-import { LocalAccountDTO } from "../../multiAccount";
 import { UserfriendlyApplicationError } from "../../UserfriendlyApplicationError";
+import { LocalAccountDTO } from "../../multiAccount";
 
 export interface IUIBridge {
     showMessage(account: LocalAccountDTO, relationship: IdentityDVO, message: MessageDVO | MailDVO | RequestMessageDVO): Promise<Result<void>>;

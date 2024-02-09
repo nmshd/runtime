@@ -1,12 +1,12 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
 import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
-import { Identity, IIdentity } from "../../accounts/data/Identity";
+import { IIdentity, Identity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
+import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { IRelationshipChange } from "../transmission/changes/RelationshipChange";
 import { RelationshipChangeResponse } from "../transmission/changes/RelationshipChangeResponse";
-import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 
 export interface IRelationship extends ICoreSynchronizable {
