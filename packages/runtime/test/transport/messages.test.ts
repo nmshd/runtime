@@ -1,6 +1,7 @@
 import { GetMessagesQuery, MessageSentEvent, TransportServices } from "../../src";
 import {
     establishRelationship,
+    exchangeMessage,
     exchangeMessageWithAttachment,
     getRelationship,
     MockEventBus,
@@ -188,5 +189,18 @@ describe("Message query", () => {
         expect(messagesToRecipient1.value).toHaveLength(1);
         expect(messagesToRecipient2.value).toHaveLength(1);
         expect(messagesToRecipient1Or2.value).toHaveLength(2);
+    });
+
+    test("query Messages withAttachments", async () => {
+        const messageWithAttachment = await exchangeMessageWithAttachment(transportServices1, transportServices2);
+        const messageWithoutAttachment = await exchangeMessage(transportServices1, transportServices2);
+
+        const messages = await transportServices2.messages.getMessages({ query: { attachments: "+" } });
+
+        expect(messages.value.every((m) => m.attachments.length > 0)).toBe(true);
+
+        const messageIds = messages.value.map((m) => m.id);
+        expect(messageIds).toContain(messageWithAttachment.id);
+        expect(messageIds).not.toContain(messageWithoutAttachment.id);
     });
 });
