@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { IdentityAttributeQuery, IIdentityAttributeQuery, IThirdPartyRelationshipAttributeQuery, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
+import { IIdentityAttributeQuery, IThirdPartyRelationshipAttributeQuery, IdentityAttributeQuery, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
 import { CoreAddress, ICoreAddress } from "@nmshd/transport";
 
 export interface ICreateLocalAttributeListenerParams extends ISerializable {

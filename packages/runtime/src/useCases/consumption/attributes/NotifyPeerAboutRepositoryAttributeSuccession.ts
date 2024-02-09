@@ -45,7 +45,7 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
         }
 
-        if (!repositoryAttributeSuccessor.isRepositoryAttribute()) {
+        if (!repositoryAttributeSuccessor.isRepositoryAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeSuccessorId));
         }
 

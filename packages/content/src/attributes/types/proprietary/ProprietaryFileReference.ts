@@ -4,9 +4,9 @@ import { AbstractStringJSON, IAbstractString } from "../AbstractString";
 import { AbstractFileReference } from "../strings";
 import {
     IProprietaryAttributeValue,
-    ProprietaryAttributeValueJSON,
     PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH,
-    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH
+    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH,
+    ProprietaryAttributeValueJSON
 } from "./ProprietaryAttributeValue";
 
 export interface ProprietaryFileReferenceJSON extends ProprietaryAttributeValueJSON, AbstractStringJSON {

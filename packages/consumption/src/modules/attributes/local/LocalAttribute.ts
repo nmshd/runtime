@@ -1,5 +1,13 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
+import {
+    AbstractComplexValue,
+    IIdentityAttribute,
+    IRelationshipAttribute,
+    IdentityAttribute,
+    IdentityAttributeJSON,
+    RelationshipAttribute,
+    RelationshipAttributeJSON
+} from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
@@ -99,8 +107,8 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return this.isRelationshipAttribute() && this.isPeerSharedAttribute(peerAddress);
     }
 
-    public isRepositoryAttribute(): this is RepositoryAttribute {
-        return this.isIdentityAttribute() && !this.isShared();
+    public isRepositoryAttribute(ownAddress: CoreAddress): this is RepositoryAttribute {
+        return this.isIdentityAttribute() && !this.isShared() && this.isOwnedBy(ownAddress);
     }
 
     public isOwnSharedAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute | OwnSharedRelationshipAttribute {
@@ -143,6 +151,10 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
     } {
         return this.content instanceof RelationshipAttribute && this.isShared() && typeof this.shareInfo.sourceAttribute === "undefined";
+    }
+
+    public isComplexAttribute(): boolean {
+        return this.content.value instanceof AbstractComplexValue;
     }
 
     public isOwnedBy(identity: CoreAddress): boolean {

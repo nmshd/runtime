@@ -3,9 +3,9 @@ import { ValueHints, ValueHintsOverride } from "../../hints";
 import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
 import {
     IProprietaryAttributeValue,
-    ProprietaryAttributeValueJSON,
     PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH,
-    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH
+    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH,
+    ProprietaryAttributeValueJSON
 } from "./ProprietaryAttributeValue";
 
 export interface ProprietaryStringJSON extends ProprietaryAttributeValueJSON, AbstractStringJSON {

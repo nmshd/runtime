@@ -4,10 +4,10 @@ import { CoreId, TransportError, TransportLoggerFactory } from "../../core";
 import { MessageDeliveredEvent, MessageReceivedEvent, RelationshipChangedEvent } from "../../events";
 import { MessageController } from "../messages/MessageController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
-import { BackboneExternalEvent } from "./backbone/BackboneExternalEvent";
-import { FinalizeSyncRunRequestExternalEventResult } from "./backbone/FinalizeSyncRun";
 import { ChangedItems } from "./ChangedItems";
 import { SyncProgressReporter, SyncProgressReporterStep, SyncStep } from "./SyncCallback";
+import { BackboneExternalEvent } from "./backbone/BackboneExternalEvent";
+import { FinalizeSyncRunRequestExternalEventResult } from "./backbone/FinalizeSyncRun";
 
 export class ExternalEventsProcessor {
     private readonly log: ILogger;

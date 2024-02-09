@@ -16,6 +16,12 @@ export interface ShareRepositoryAttributeRequest {
         metadata?: Record<string, any>;
         expiresAt?: ISO8601DateTimeString;
     };
+    requestItemMetadata?: {
+        title?: string;
+        description?: string;
+        metadata?: Record<string, any>;
+        requireManualDecision?: boolean;
+    };
 }
 
 class Validator extends SchemaValidator<ShareRepositoryAttributeRequest> {
@@ -43,7 +49,7 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
         }
 
-        if (!repositoryAttribute.isRepositoryAttribute()) {
+        if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
         }
 
@@ -75,13 +81,13 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             );
         }
 
-        const requestMetadata = request.requestMetadata ?? {};
         const requestParams = CreateOutgoingRequestParameters.from({
             peer: request.peer,
             content: Request.from({
-                ...requestMetadata,
+                ...(request.requestMetadata ?? {}),
                 items: [
                     ShareAttributeRequestItem.from({
+                        ...(request.requestItemMetadata ?? {}),
                         attribute: repositoryAttribute.content,
                         sourceAttributeId: repositoryAttribute.id,
                         mustBeAccepted: true

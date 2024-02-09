@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute } from "@nmshd/consumption";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreId } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { AddressString, AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -20,6 +20,7 @@ class Validator extends SchemaValidator<GetSharedVersionsOfRepositoryAttributeRe
 
 export class GetSharedVersionsOfRepositoryAttributeUseCase extends UseCase<GetSharedVersionsOfRepositoryAttributeRequest, LocalAttributeDTO[]> {
     public constructor(
+        @Inject private readonly accountController: AccountController,
         @Inject private readonly attributeController: AttributesController,
         @Inject validator: Validator
     ) {
@@ -34,7 +35,7 @@ export class GetSharedVersionsOfRepositoryAttributeUseCase extends UseCase<GetSh
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
         }
 
-        if (!repositoryAttribute.isRepositoryAttribute()) {
+        if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
         }
 

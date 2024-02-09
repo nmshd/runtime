@@ -221,9 +221,9 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
-export async function exchangeMessage(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<MessageDTO> {
-    const recipientAddress = (await getRelationship(transportServicesCreator)).peer;
-    const messageId = (await sendMessage(transportServicesCreator, recipientAddress)).id;
+export async function exchangeMessage(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices, attachments?: string[]): Promise<MessageDTO> {
+    const recipientAddress = (await transportServicesRecipient.account.getIdentityInfo()).value.address;
+    const messageId = (await sendMessage(transportServicesCreator, recipientAddress, undefined, attachments)).id;
     const messages = await syncUntilHasMessages(transportServicesRecipient);
     expect(messages).toHaveLength(1);
 
@@ -235,15 +235,8 @@ export async function exchangeMessage(transportServicesCreator: TransportService
 
 export async function exchangeMessageWithAttachment(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<MessageDTO> {
     const file = await uploadFile(transportServicesCreator);
-    const recipientAddress = (await getRelationship(transportServicesCreator)).peer;
-    const messageId = (await sendMessage(transportServicesCreator, recipientAddress, undefined, [file.id])).id;
-    const messages = await syncUntilHasMessages(transportServicesRecipient);
-    expect(messages).toHaveLength(1);
 
-    const message = messages[0];
-    expect(message.id).toStrictEqual(messageId);
-
-    return message;
+    return await exchangeMessage(transportServicesCreator, transportServicesRecipient, [file.id]);
 }
 
 export async function getRelationship(transportServices: TransportServices): Promise<RelationshipDTO> {
