@@ -12,6 +12,7 @@ export interface IMessage extends ICoreSynchronizable {
     metadata?: any;
     metadataModifiedAt?: ICoreDate;
     relationshipIds: ICoreId[];
+    readAt?: ICoreDate;
 }
 
 @type("Message")
@@ -54,6 +55,10 @@ export class Message extends CoreSynchronizable implements IMessage {
     @serialize({ type: CoreId })
     public relationshipIds: CoreId[];
 
+    @validate({ nullable: true })
+    @serialize()
+    public readAt?: CoreDate;
+
     public static from(value: IMessage): Message {
         return this.fromAny(value);
     }
@@ -67,6 +72,11 @@ export class Message extends CoreSynchronizable implements IMessage {
     public setMetadata(metadata: any): this {
         this.metadata = metadata;
         this.metadataModifiedAt = CoreDate.utc();
+        return this;
+    }
+
+    public setReadAt(readAt: any): this {
+        this.readAt = readAt;
         return this;
     }
 }
