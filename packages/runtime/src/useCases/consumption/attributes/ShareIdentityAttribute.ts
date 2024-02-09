@@ -19,6 +19,8 @@ export interface ShareIdentityAttributeRequest {
     requestItemMetadata?: {
         title?: string;
         description?: string;
+        metadata?: Record<string, any>;
+        requireManualDecision?: boolean;
     };
 }
 

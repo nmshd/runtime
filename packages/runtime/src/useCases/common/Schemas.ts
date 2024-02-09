@@ -13909,6 +13909,12 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                         },
                         "description": {
                             "type": "string"
+                        },
+                        "metadata": {
+                            "type": "object"
+                        },
+                        "requireManualDecision": {
+                            "type": "boolean"
                         }
                     },
                     "additionalProperties": false
@@ -17076,6 +17082,12 @@ export const ShareIdentityAttributeRequest: any = {
                         },
                         "description": {
                             "type": "string"
+                        },
+                        "metadata": {
+                            "type": "object"
+                        },
+                        "requireManualDecision": {
+                            "type": "boolean"
                         }
                     },
                     "additionalProperties": false
