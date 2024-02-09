@@ -1,0 +1,6 @@
+pull_request_rules:
+  - name: continuously rebase pull requests when it's not labeled with `norebase`
+    conditions:
+      - label!=norebase
+    actions:
+      rebase:
