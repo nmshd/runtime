@@ -64,6 +64,11 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
                 };
             },
             [nameof<MessageDTO>((m) => m.attachments)]: (query: any, input: any) => {
+                if (input === "+") {
+                    query[`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.attachments)}`] = { $not: { $size: 0 } };
+                    return;
+                }
+
                 query[`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.attachments)}`] = {
                     $containsAny: Array.isArray(input) ? input : [input]
                 };
