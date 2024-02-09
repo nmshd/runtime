@@ -3,4 +3,4 @@ pull_request_rules:
     conditions:
       - label!=norebase
     actions:
-      rebase:
+      update:
