@@ -2,7 +2,7 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { ICryptoExchangePublicKey } from "@nmshd/crypto";
 import { CoreAddress, CoreDate, CoreSerializable, ICoreAddress, ICoreDate, ICoreSerializable } from "../../../core";
 import { CoreId, ICoreId } from "../../../core/types/CoreId";
-import { Identity, IIdentity } from "../../accounts/data/Identity";
+import { IIdentity, Identity } from "../../accounts/data/Identity";
 import { RelationshipTemplatePublicKey } from "../transmission/RelationshipTemplatePublicKey";
 
 export interface ICachedRelationshipTemplate extends ICoreSerializable {

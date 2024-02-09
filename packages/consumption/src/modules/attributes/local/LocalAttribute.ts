@@ -1,10 +1,10 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import {
     AbstractComplexValue,
-    IdentityAttribute,
-    IdentityAttributeJSON,
     IIdentityAttribute,
     IRelationshipAttribute,
+    IdentityAttribute,
+    IdentityAttributeJSON,
     RelationshipAttribute,
     RelationshipAttributeJSON
 } from "@nmshd/content";

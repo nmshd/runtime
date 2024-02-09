@@ -4,9 +4,9 @@ import { AbstractStringJSON, IAbstractString } from "../AbstractString";
 import { AbstractEMailAddress } from "../strings/AbstractEMailAddress";
 import {
     IProprietaryAttributeValue,
-    ProprietaryAttributeValueJSON,
     PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH,
-    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH
+    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH,
+    ProprietaryAttributeValueJSON
 } from "./ProprietaryAttributeValue";
 
 export interface ProprietaryEMailAddressJSON extends ProprietaryAttributeValueJSON, AbstractStringJSON {

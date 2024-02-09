@@ -20,8 +20,8 @@ import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
 import { RelationshipTemplatePublicKey } from "../relationshipTemplates/transmission/RelationshipTemplatePublicKey";
-import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
 import { SecretController } from "../secrets/SecretController";
+import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
 
 export class RelationshipSecretController extends SecretController {
     private readonly cache: Map<CoreId, CryptoRelationshipRequestSecrets | CryptoRelationshipSecrets> = new Map<
