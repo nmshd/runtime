@@ -434,6 +434,91 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 message: /The new Attribute belongs to someone else. You can only share own Attributes./
             });
         });
+
+        test("returns an error when an IdentityAttribute was queried and the peer tries to respond with a RelationshipAttribute", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "RelationshipAttribute",
+                    key: "AKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: accountController.identity.address.toString(),
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "aTitle",
+                        value: "AStringValue"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The new Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
+            });
+        });
+
+        test("returns an error when an IdentityAttribute of a specific type was queried and the peer tries to respond with an IdentityAttribute of another type", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: accountController.identity.address.toString(),
+                    value: {
+                        "@type": "DisplayName",
+                        value: "ADisplayName"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The new IdentityAttribute is not of the queried IdentityAttribute Value Type./
+            });
+        });
     });
 
     describe("accept", function () {

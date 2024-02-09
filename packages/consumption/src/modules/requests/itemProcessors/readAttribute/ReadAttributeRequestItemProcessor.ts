@@ -1,5 +1,6 @@
 import {
     IdentityAttribute,
+    IdentityAttributeQuery,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
     RejectResponseItem,
@@ -58,6 +59,20 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         const ownerIsCurrentIdentity = this.accountController.identity.isMe(attribute.owner);
         if (!ownerIsCurrentIdentity && attribute instanceof IdentityAttribute) {
             return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute belongs to someone else. You can only share own Attributes.`));
+        }
+
+        if (_requestItem.query instanceof IdentityAttributeQuery) {
+            if (!(attribute instanceof IdentityAttribute)) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute is not an IdentityAttribute, but an IdentityAttribute was queried.`)
+                );
+            }
+
+            if (_requestItem.query.valueType !== attribute.value.constructor.name) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} IdentityAttribute is not of the queried IdentityAttribute Value Type.`)
+                );
+            }
         }
 
         return ValidationResult.success();
