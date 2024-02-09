@@ -384,18 +384,18 @@ describe("get repository, own shared and peer shared attributes", () => {
     });
 
     describe(GetRepositoryAttributesUseCase.name, () => {
-        test("get only latest version of own identity attributes", async () => {
+        test("get only latest version of repository attributes", async () => {
             const result = await services1.consumption.attributes.getRepositoryAttributes({});
             expect(result).toBeSuccessful();
-            const ownIdentityAttributes = result.value;
-            expect(ownIdentityAttributes).toStrictEqual([services1RepoSurnameV1, services1RepoGivenNameV1]);
+            const repositoryAttributes = result.value;
+            expect(repositoryAttributes).toStrictEqual([services1RepoSurnameV1, services1RepoGivenNameV1]);
         });
 
-        test("get all versions of own identity attributes", async () => {
+        test("get all versions of repository attributes", async () => {
             const result = await services1.consumption.attributes.getRepositoryAttributes({ onlyLatestVersions: false });
             expect(result).toBeSuccessful();
-            const ownIdentityAttributes = result.value;
-            expect(ownIdentityAttributes).toStrictEqual([services1RepoSurnameV0, services1RepoSurnameV1, services1RepoGivenNameV0, services1RepoGivenNameV1]);
+            const repositoryAttributes = result.value;
+            expect(repositoryAttributes).toStrictEqual([services1RepoSurnameV0, services1RepoSurnameV1, services1RepoGivenNameV0, services1RepoGivenNameV1]);
         });
     });
 
