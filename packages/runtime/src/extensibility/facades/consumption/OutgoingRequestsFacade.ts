@@ -13,9 +13,9 @@ import {
     DiscardOutgoingRequestRequest,
     DiscardOutgoingRequestUseCase,
     GetOutgoingRequestRequest,
+    GetOutgoingRequestUseCase,
     GetOutgoingRequestsRequest,
     GetOutgoingRequestsUseCase,
-    GetOutgoingRequestUseCase,
     SentOutgoingRequestRequest,
     SentOutgoingRequestUseCase
 } from "../../../useCases";

@@ -4,9 +4,9 @@ import { AbstractStringJSON, IAbstractString } from "../AbstractString";
 import { AbstractHEXColor } from "../strings/AbstractHEXColor";
 import {
     IProprietaryAttributeValue,
-    ProprietaryAttributeValueJSON,
     PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH,
-    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH
+    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH,
+    ProprietaryAttributeValueJSON
 } from "./ProprietaryAttributeValue";
 
 export interface ProprietaryHEXColorJSON extends ProprietaryAttributeValueJSON, AbstractStringJSON {

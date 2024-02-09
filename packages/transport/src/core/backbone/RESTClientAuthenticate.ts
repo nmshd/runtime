@@ -4,8 +4,8 @@ import { IConfig } from "../Transport";
 import { Authenticator } from "./Authenticator";
 import { ClientResult } from "./ClientResult";
 import { Paginator, PaginatorPercentageCallback } from "./Paginator";
-import { RequestError } from "./RequestError";
 import { RESTClient } from "./RESTClient";
+import { RequestError } from "./RequestError";
 
 export interface CredentialsBasic {
     username: string;

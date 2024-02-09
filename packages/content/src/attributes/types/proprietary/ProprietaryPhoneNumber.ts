@@ -4,9 +4,9 @@ import { AbstractStringJSON, IAbstractString } from "../AbstractString";
 import { AbstractPhoneNumber } from "../strings/AbstractPhoneNumber";
 import {
     IProprietaryAttributeValue,
-    ProprietaryAttributeValueJSON,
     PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH,
-    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH
+    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH,
+    ProprietaryAttributeValueJSON
 } from "./ProprietaryAttributeValue";
 
 export interface ProprietaryPhoneNumberJSON extends ProprietaryAttributeValueJSON, AbstractStringJSON {

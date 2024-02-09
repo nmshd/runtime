@@ -1,9 +1,9 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import {
-    IdentityAttributeQuery,
-    IdentityAttributeQueryJSON,
     IIdentityAttributeQuery,
     IThirdPartyRelationshipAttributeQuery,
+    IdentityAttributeQuery,
+    IdentityAttributeQueryJSON,
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryJSON
 } from "../../../attributes";

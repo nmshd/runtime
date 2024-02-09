@@ -23,6 +23,12 @@ export interface CreateAndShareRelationshipAttributeRequest {
         metadata?: Record<string, any>;
         expiresAt?: ISO8601DateTimeString;
     };
+    requestItemMetadata?: {
+        title?: string;
+        description?: string;
+        metadata?: Record<string, any>;
+        requireManualDecision?: boolean;
+    };
 }
 
 class Validator extends SchemaValidator<CreateAndShareRelationshipAttributeRequest> {
@@ -43,13 +49,13 @@ export class CreateAndShareRelationshipAttributeUseCase extends UseCase<CreateAn
     }
 
     protected async executeInternal(request: CreateAndShareRelationshipAttributeRequest): Promise<Result<LocalRequestDTO>> {
-        const requestMetadata = request.requestMetadata ?? {};
         const requestParams = CreateOutgoingRequestParameters.from({
             peer: request.peer,
             content: Request.from({
-                ...requestMetadata,
+                ...(request.requestMetadata ?? {}),
                 items: [
                     CreateAttributeRequestItem.from({
+                        ...(request.requestItemMetadata ?? {}),
                         attribute: RelationshipAttribute.from({
                             "@type": "RelationshipAttribute",
                             owner: this.accountController.identity.address.toString(),
