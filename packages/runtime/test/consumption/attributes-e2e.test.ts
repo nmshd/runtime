@@ -1,6 +1,6 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, StreetJSON, ZipCodeJSON } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
+import { CoreDate, CoreId } from "@nmshd/transport";
 import {
     AttributeCreatedEvent,
     CreateAndShareRelationshipAttributeRequest,
@@ -414,6 +414,51 @@ describe(ShareIdentityAttributeUseCase.name, () => {
         const senderOwnSharedIdentityAttribute = senderOwnSharedIdentityAttributeResult.value;
         expect(senderOwnSharedIdentityAttribute.content).toStrictEqual(recipientPeerSharedIdentityAttribute.content);
         expect(senderOwnSharedIdentityAttribute.shareInfo?.sourceAttribute?.toString()).toBe(attribute.id);
+    });
+
+    test("should initialize the sharing of an identity attribute with metadata", async () => {
+        const createAttributeRequest: CreateIdentityAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Petra Pan"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const createAttributeRequestResult = await services1.consumption.attributes.createIdentityAttribute(createAttributeRequest);
+        const attribute = createAttributeRequestResult.value;
+
+        const expiresAt = CoreDate.utc().add({ days: 1 }).toString();
+        const shareRequest: ShareIdentityAttributeRequest = {
+            attributeId: attribute.id,
+            peer: services2.address,
+            requestMetadata: {
+                title: "A request Title",
+                description: "A request Description",
+                metadata: { aKey: "aValue" },
+                expiresAt
+            },
+            requestItemMetadata: {
+                title: "An item Title",
+                description: "An item Description",
+                metadata: { aKey: "aValue" },
+                requireManualDecision: true
+            }
+        };
+        const shareRequestResult = await services1.consumption.attributes.shareIdentityAttribute(shareRequest);
+        expect(shareRequestResult.isSuccess).toBe(true);
+        const request = shareRequestResult.value;
+
+        expect(request.content.title).toBe("A request Title");
+        expect(request.content.description).toBe("A request Description");
+        expect(request.content.metadata).toStrictEqual({ aKey: "aValue" });
+        expect(request.content.expiresAt).toBe(expiresAt);
+
+        expect(request.content.items[0].title).toBe("An item Title");
+        expect(request.content.items[0].description).toBe("An item Description");
+        expect(request.content.items[0].metadata).toStrictEqual({ aKey: "aValue" });
+        expect((request.content.items[0] as RequestItemJSONDerivations).requireManualDecision).toBe(true);
     });
 
     test("should reject sharing an attribute, of which a previous version has been shared", async () => {
@@ -995,6 +1040,48 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
         const senderOwnSharedRelationshipAttribute = senderOwnSharedRelationshipAttributeResult.value;
         const recipientPeerSharedRelationshipAttribute = recipientPeerSharedRelationshipAttributeResult.value;
         expect(senderOwnSharedRelationshipAttribute.content).toStrictEqual(recipientPeerSharedRelationshipAttribute.content);
+    });
+
+    test("should create and share a relationship attribute with metadata", async () => {
+        const expiresAt = CoreDate.utc().add({ days: 1 }).toString();
+        const createAndShareRelationshipAttributeRequest: CreateAndShareRelationshipAttributeRequest = {
+            content: {
+                key: "test",
+                value: {
+                    "@type": "ProprietaryString",
+                    value: "a String",
+                    title: "a title"
+                },
+                confidentiality: RelationshipAttributeConfidentiality.Public
+            },
+            peer: services2.address,
+            requestMetadata: {
+                title: "A request Title",
+                description: "A request Description",
+                metadata: { aKey: "aValue" },
+                expiresAt
+            },
+            requestItemMetadata: {
+                title: "An item Title",
+                description: "An item Description",
+                metadata: { aKey: "aValue" },
+                requireManualDecision: true
+            }
+        };
+        const requestResult = await services1.consumption.attributes.createAndShareRelationshipAttribute(createAndShareRelationshipAttributeRequest);
+        expect(requestResult.isSuccess).toBe(true);
+
+        const request = requestResult.value;
+
+        expect(request.content.title).toBe("A request Title");
+        expect(request.content.description).toBe("A request Description");
+        expect(request.content.metadata).toStrictEqual({ aKey: "aValue" });
+        expect(request.content.expiresAt).toBe(expiresAt);
+
+        expect(request.content.items[0].title).toBe("An item Title");
+        expect(request.content.items[0].description).toBe("An item Description");
+        expect(request.content.items[0].metadata).toStrictEqual({ aKey: "aValue" });
+        expect((request.content.items[0] as RequestItemJSONDerivations).requireManualDecision).toBe(true);
     });
 });
 

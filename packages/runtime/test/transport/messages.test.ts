@@ -1,12 +1,12 @@
 import { GetMessagesQuery, MessageSentEvent, TransportServices } from "../../src";
 import {
+    MockEventBus,
+    QueryParamConditions,
+    RuntimeServiceProvider,
     establishRelationship,
     exchangeMessage,
     exchangeMessageWithAttachment,
     getRelationship,
-    MockEventBus,
-    QueryParamConditions,
-    RuntimeServiceProvider,
     syncUntilHasMessages,
     uploadFile
 } from "../lib";
