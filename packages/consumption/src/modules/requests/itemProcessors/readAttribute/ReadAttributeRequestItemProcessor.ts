@@ -57,6 +57,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing("An unknown error occurred during the RequestItem processing."));
         }
 
+        const ownerIsCurrentIdentity = this.accountController.identity.isMe(attribute.owner);
+
         if (_requestItem.query instanceof IdentityAttributeQuery) {
             if (!(attribute instanceof IdentityAttribute)) {
                 return ValidationResult.error(
@@ -64,7 +66,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 );
             }
 
-            const ownerIsCurrentIdentity = this.accountController.identity.isMe(attribute.owner);
             if (!ownerIsCurrentIdentity && attribute instanceof IdentityAttribute) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.`)
@@ -82,6 +83,20 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (!(attribute instanceof RelationshipAttribute)) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried.`)
+                );
+            }
+
+            const queriedOwnerIsEmpty = _requestItem.query.owner.equals("");
+
+            if (!queriedOwnerIsEmpty && !_requestItem.query.owner.equals(attribute.owner)) {
+                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} RelationshipAttribute does not belong to the queried owner.`));
+            }
+
+            if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery(
+                        `The owner of the ${existingOrNew} RelationshipAttribute is not the Recipient, but an empty string was specified for the owner of the query.`
+                    )
                 );
             }
 
