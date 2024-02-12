@@ -22,7 +22,8 @@ export class Message extends CoreSynchronizable implements IMessage {
         "@context",
         nameof<Message>((r) => r.secretKey),
         nameof<Message>((r) => r.isOwn),
-        nameof<Message>((r) => r.relationshipIds)
+        nameof<Message>((r) => r.relationshipIds),
+        nameof<Message>((r) => r.readAt)
     ];
 
     public override readonly metadataProperties = [nameof<Message>((r) => r.metadata), nameof<Message>((r) => r.metadataModifiedAt)];
