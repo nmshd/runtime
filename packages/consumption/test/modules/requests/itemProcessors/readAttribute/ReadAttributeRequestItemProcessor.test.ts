@@ -167,13 +167,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 if (typeof testParams.input.thirdParty !== "undefined") {
                     query = ThirdPartyRelationshipAttributeQuery.from({
                         owner: translateTestIdentityToAddress(testParams.input.owner)!,
-                        key: "aKey",
+                        key: "AKey",
                         thirdParty: [translateTestIdentityToAddress(testParams.input.thirdParty)!]
                     });
                 } else {
                     query = RelationshipAttributeQuery.from({
                         owner: translateTestIdentityToAddress(testParams.input.owner)!,
-                        key: "aKey",
+                        key: "AKey",
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
                             title: "ATitle",
@@ -288,7 +288,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "aKey",
+                    key: "AKey",
                     owner: "id1",
                     thirdParty: ["id1"]
                 })
@@ -389,7 +389,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The existing Attribute belongs to someone else. You can only share own Attributes./
+                message: /The existing IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
             });
         });
 
@@ -431,7 +431,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new Attribute belongs to someone else. You can only share own Attributes./
+                message: /The new IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
             });
         });
 
@@ -465,7 +465,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: accountController.identity.address.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "aTitle",
+                        title: "ATitle",
                         value: "AStringValue"
                     }
                 }
@@ -517,6 +517,109 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
                 message: /The new IdentityAttribute is not of the queried IdentityAttribute Value Type./
+            });
+        });
+
+        test("returns an error when a RelationshipAttribute was queried and the Recipient tries to respond with an IdentityAttribute", async function () {
+            const sender = CoreAddress.from("id0");
+            const recipient = CoreAddress.from("id1");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: RelationshipAttributeQuery.from({
+                    owner: recipient.toString(),
+                    key: "AKey",
+                    attributeCreationHints: {
+                        valueType: "ProprietaryString",
+                        title: "ATitle",
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: recipient
+                })
+            });
+            const repositoryAttributeId = repositoryAttribute.id.toString();
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: repositoryAttributeId
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The existing Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried./
+            });
+        });
+
+        test("returns an error when a RelationshipAttribute of a specific type was queried and the Recipient tries to respond with a RelationshipAttribute of another type", async function () {
+            const sender = CoreAddress.from("id0");
+            const recipient = CoreAddress.from("id1");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: RelationshipAttributeQuery.from({
+                    owner: recipient.toString(),
+                    key: "AKey",
+                    attributeCreationHints: {
+                        valueType: "ProprietaryString",
+                        title: "ATitle",
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "RelationshipAttribute",
+                    key: "AKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: recipient.toString(),
+                    value: {
+                        "@type": "ProprietaryInteger",
+                        title: "ATitle",
+                        value: 1
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The new RelationshipAttribute is not of the queried RelationshipAttribute Value Type./
             });
         });
     });
@@ -608,7 +711,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    key: "aKey",
+                    key: "AKey",
                     owner: senderAddress,
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
@@ -640,7 +743,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: senderAddress.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "aTitle",
+                        title: "ATitle",
                         value: "AStringValue"
                     }
                 }

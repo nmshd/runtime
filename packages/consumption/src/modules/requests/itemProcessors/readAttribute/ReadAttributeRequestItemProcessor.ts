@@ -5,6 +5,7 @@ import {
     ReadAttributeRequestItem,
     RejectResponseItem,
     RelationshipAttribute,
+    RelationshipAttributeQuery,
     Request,
     ResponseItemResult
 } from "@nmshd/content";
@@ -56,11 +57,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing("An unknown error occurred during the RequestItem processing."));
         }
 
-        const ownerIsCurrentIdentity = this.accountController.identity.isMe(attribute.owner);
-        if (!ownerIsCurrentIdentity && attribute instanceof IdentityAttribute) {
-            return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute belongs to someone else. You can only share own Attributes.`));
-        }
-
         if (_requestItem.query instanceof IdentityAttributeQuery) {
             if (!(attribute instanceof IdentityAttribute)) {
                 return ValidationResult.error(
@@ -68,9 +64,30 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 );
             }
 
+            const ownerIsCurrentIdentity = this.accountController.identity.isMe(attribute.owner);
+            if (!ownerIsCurrentIdentity && attribute instanceof IdentityAttribute) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.`)
+                );
+            }
+
             if (_requestItem.query.valueType !== attribute.value.constructor.name) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} IdentityAttribute is not of the queried IdentityAttribute Value Type.`)
+                );
+            }
+        }
+
+        if (_requestItem.query instanceof RelationshipAttributeQuery) {
+            if (!(attribute instanceof RelationshipAttribute)) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried.`)
+                );
+            }
+
+            if (_requestItem.query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} RelationshipAttribute is not of the queried RelationshipAttribute Value Type.`)
                 );
             }
         }
