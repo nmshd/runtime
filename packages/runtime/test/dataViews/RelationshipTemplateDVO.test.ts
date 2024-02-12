@@ -9,7 +9,7 @@ import {
     RelationshipTemplateDTO,
     RequestItemGroupDVO
 } from "../../src";
-import { RuntimeServiceProvider, TestRuntimeServices, createTemplate, syncUntilHasRelationships } from "../lib";
+import { createTemplate, RuntimeServiceProvider, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
@@ -32,7 +32,7 @@ beforeEach(function () {
 
 describe("RelationshipTemplateDVO", () => {
     beforeAll(async () => {
-        await templator.consumption.attributes.createIdentityAttribute({
+        await templator.consumption.attributes.createRepositoryAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -40,7 +40,7 @@ describe("RelationshipTemplateDVO", () => {
                 }
             }
         });
-        await templator.consumption.attributes.createIdentityAttribute({
+        await templator.consumption.attributes.createRepositoryAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -48,7 +48,7 @@ describe("RelationshipTemplateDVO", () => {
                 }
             }
         });
-        await templator.consumption.attributes.createIdentityAttribute({
+        await templator.consumption.attributes.createRepositoryAttribute({
             content: {
                 value: {
                     "@type": "Surname",

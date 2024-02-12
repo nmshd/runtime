@@ -1,17 +1,17 @@
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { GetRelationshipsQuery, LocalAttributeDTO, OwnSharedAttributeSucceededEvent, PeerSharedAttributeSucceededEvent } from "../../src";
 import {
-    QueryParamConditions,
-    RuntimeServiceProvider,
-    TestRuntimeServices,
     createTemplate,
     ensureActiveRelationship,
-    executeFullCreateAndShareIdentityAttributeFlow,
     executeFullCreateAndShareRelationshipAttributeFlow,
-    executeFullSucceedIdentityAttributeAndNotifyPeerFlow,
+    executeFullCreateAndShareRepositoryAttributeFlow,
+    executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     getRelationship,
+    QueryParamConditions,
+    RuntimeServiceProvider,
     syncUntilHasMessageWithNotification,
-    syncUntilHasRelationships
+    syncUntilHasRelationships,
+    TestRuntimeServices
 } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -138,7 +138,7 @@ describe("Attributes for the relationship", () => {
         relationshipId = relationship.id;
 
         // create own shared attributes
-        ownSharedIdentityAttributeV0 = await executeFullCreateAndShareIdentityAttributeFlow(services1, services2, {
+        ownSharedIdentityAttributeV0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -148,15 +148,19 @@ describe("Attributes for the relationship", () => {
         });
 
         const repositoryAttributeIdV0 = ownSharedIdentityAttributeV0.shareInfo!.sourceAttribute!;
-        ({ predecessor: ownSharedIdentityAttributeV0, successor: ownSharedIdentityAttributeV1 } = await executeFullSucceedIdentityAttributeAndNotifyPeerFlow(services1, services2, {
-            predecessorId: repositoryAttributeIdV0,
-            successorContent: {
-                value: {
-                    "@type": "GivenName",
-                    value: "New own name"
+        ({ predecessor: ownSharedIdentityAttributeV0, successor: ownSharedIdentityAttributeV1 } = await executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
+            services1,
+            services2,
+            {
+                predecessorId: repositoryAttributeIdV0,
+                successorContent: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "New own name"
+                    }
                 }
             }
-        }));
+        ));
 
         ownSharedRelationshipAttributeV0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
@@ -195,7 +199,7 @@ describe("Attributes for the relationship", () => {
         });
 
         // create peer shared attributes
-        peerSharedIdentityAttributeV0 = await executeFullCreateAndShareIdentityAttributeFlow(services2, services1, {
+        peerSharedIdentityAttributeV0 = await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -205,7 +209,7 @@ describe("Attributes for the relationship", () => {
         });
 
         const peerRepositoryAttributeIdV0 = peerSharedIdentityAttributeV0.shareInfo!.sourceAttribute!;
-        ({ predecessor: peerSharedIdentityAttributeV0, successor: peerSharedIdentityAttributeV1 } = await executeFullSucceedIdentityAttributeAndNotifyPeerFlow(
+        ({ predecessor: peerSharedIdentityAttributeV0, successor: peerSharedIdentityAttributeV1 } = await executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
             services2,
             services1,
             {

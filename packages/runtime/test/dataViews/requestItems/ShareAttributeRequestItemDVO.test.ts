@@ -12,7 +12,7 @@ import {
     ShareAttributeRequestItemDVO,
     TransportServices
 } from "../../../src";
-import { MockEventBus, RuntimeServiceProvider, establishRelationship, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -39,7 +39,7 @@ beforeAll(async () => {
     await establishRelationship(sTransportServices, rTransportServices);
     const rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
-    const senderAttribute = await sConsumptionServices.attributes.createIdentityAttribute({
+    const senderAttribute = await sConsumptionServices.attributes.createRepositoryAttribute({
         content: {
             value: {
                 "@type": "DisplayName",

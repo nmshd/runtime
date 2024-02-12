@@ -14,7 +14,7 @@ import {
     TransportServices
 } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { RuntimeServiceProvider, establishRelationship, syncUntilHasMessages, syncUntilHasRelationships } from "../lib";
+import { establishRelationship, RuntimeServiceProvider, syncUntilHasMessages, syncUntilHasRelationships } from "../lib";
 
 describe("Requests", () => {
     describe.each([

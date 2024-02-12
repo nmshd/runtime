@@ -9,7 +9,6 @@ import {
     ResponseWrapper,
     ResponseWrapperJSON
 } from "@nmshd/content";
-import { RuntimeServices } from "../Runtime";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -21,6 +20,7 @@ import {
 } from "../events";
 import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
+import { RuntimeServices } from "../Runtime";
 import { LocalRequestDTO, RelationshipStatus } from "../types";
 
 export class RequestModule extends RuntimeModule {

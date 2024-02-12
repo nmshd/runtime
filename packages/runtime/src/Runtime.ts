@@ -22,21 +22,21 @@ import {
     ICoreAddress,
     IdentityController,
     MessageController,
-    RelationshipTemplateController,
     RelationshipsController,
+    RelationshipTemplateController,
     TokenController,
     Transport
 } from "@nmshd/transport";
 import { Container, Scope } from "typescript-ioc";
-import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
-import { RuntimeConfig } from "./RuntimeConfig";
-import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
 import { buildInformation } from "./buildInformation";
+import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
 import { DataViewExpander } from "./dataViews";
 import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events";
 import { EventProxy } from "./events/EventProxy";
 import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeModule, RuntimeModuleRegistry, TransportServices } from "./extensibility";
 import { AttributeListenerModule, DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules";
+import { RuntimeConfig } from "./RuntimeConfig";
+import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
 import { RuntimeHealth } from "./types";
 import { RuntimeErrors } from "./useCases";
 import { SchemaRepository } from "./useCases/common/SchemaRepository";

@@ -657,7 +657,7 @@ describe("AttributesController", function () {
 
                 const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
                 expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.cannotSucceedPartOfComplexAttribute"
+                    code: "error.consumption.attributes.cannotSucceedChildOfComplexAttribute"
                 });
             });
 
@@ -728,7 +728,7 @@ describe("AttributesController", function () {
 
                 const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
                 expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.cannotSucceedPartOfComplexAttribute"
+                    code: "error.consumption.attributes.cannotSucceedChildOfComplexAttribute"
                 });
             });
 
