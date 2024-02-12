@@ -1,6 +1,6 @@
 import { RelationshipChangeStatus, RelationshipChangeType } from "@nmshd/transport";
-import { DataViewObject } from "../DataViewObject";
 import { LocalAttributeDVO } from "../consumption";
+import { DataViewObject } from "../DataViewObject";
 
 export enum RelationshipDirection {
     Outgoing = "Outgoing",

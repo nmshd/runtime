@@ -23,7 +23,7 @@ import {
     RelationshipTemplateProcessedResult,
     TransportServices
 } from "../../src";
-import { MockEventBus, RuntimeServiceProvider, ensureActiveRelationship, exchangeTemplate, sendMessage, syncUntilHasMessages, syncUntilHasRelationships } from "../lib";
+import { ensureActiveRelationship, exchangeTemplate, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages, syncUntilHasRelationships } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;

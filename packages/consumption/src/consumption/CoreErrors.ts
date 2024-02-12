@@ -29,10 +29,10 @@ class Attributes {
         return new CoreError("error.consumption.attributes.invalidSuccessionOfOwnSharedIdentityAttribute", errorMessage);
     }
 
-    public cannotSucceedPartOfComplexAttribute(parentId: string | CoreId) {
+    public cannotSucceedChildOfComplexAttribute(parentId: string | CoreId) {
         return new CoreError(
-            "error.consumption.attributes.cannotSucceedPartOfComplexAttribute",
-            `The attribute you want to succeed is part of a complex attribute (id: ${parentId}), and cannot be succeeded on its own. Instead, succeed the parent which will implicitly succeed all its children.`
+            "error.consumption.attributes.cannotSucceedChildOfComplexAttribute",
+            `The attribute you want to succeed is child attribute of a complex attribute (id: ${parentId}), and cannot be succeeded on its own. Instead, succeed the parent which will implicitly succeed all its children.`
         );
     }
 

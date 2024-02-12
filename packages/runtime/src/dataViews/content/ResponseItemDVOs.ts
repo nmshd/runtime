@@ -1,6 +1,6 @@
 import { ResponseItemResult } from "@nmshd/content";
-import { DataViewObject } from "../DataViewObject";
 import { LocalAttributeDVO, LocalAttributeListenerDVO } from "../consumption";
+import { DataViewObject } from "../DataViewObject";
 
 export interface ResponseItemGroupDVO {
     type: "ResponseItemGroupDVO";
