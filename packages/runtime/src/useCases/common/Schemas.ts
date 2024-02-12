@@ -20885,6 +20885,52 @@ export const GetMessagesRequest: any = {
     }
 }
 
+export const MarkMessageAsReadRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkMessageAsReadRequest",
+    "definitions": {
+        "MarkMessageAsReadRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "MessageIdString": {
+            "type": "string",
+            "pattern": "MSG[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const MarkMessageAsUnreadRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkMessageAsUnreadRequest",
+    "definitions": {
+        "MarkMessageAsUnreadRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "MessageIdString": {
+            "type": "string",
+            "pattern": "MSG[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const SendMessageRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/SendMessageRequest",
