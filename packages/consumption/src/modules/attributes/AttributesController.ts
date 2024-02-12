@@ -781,7 +781,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (typeof successor.parentId !== "undefined") {
-            return ValidationResult.error(CoreErrors.attributes.cannotSucceedPartOfComplexAttribute(predecessorId.toString()));
+            return ValidationResult.error(CoreErrors.attributes.cannotSucceedChildOfComplexAttribute(predecessorId.toString()));
         }
 
         const predecessor = await this.getLocalAttribute(predecessorId);
@@ -794,7 +794,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (typeof predecessor.parentId !== "undefined") {
-            return ValidationResult.error(CoreErrors.attributes.cannotSucceedPartOfComplexAttribute(predecessorId.toString()));
+            return ValidationResult.error(CoreErrors.attributes.cannotSucceedChildOfComplexAttribute(predecessorId.toString()));
         }
 
         if (!predecessor.content.owner.equals(CoreAddress.from(successor.content.owner))) {
