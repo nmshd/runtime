@@ -149,21 +149,21 @@ describe("MessageController", function () {
         const timeAfterRead = CoreDate.utc();
 
         const updatedMessage = await recipient.messages.getMessage(tempId1);
-        expect(updatedMessage?.readAt).toBeDefined();
-        expect(updatedMessage!.readAt!.isBetween(timeBeforeRead, timeAfterRead)).toBe(true);
+        expect(updatedMessage?.wasReadAt).toBeDefined();
+        expect(updatedMessage!.wasReadAt!.isBetween(timeBeforeRead, timeAfterRead)).toBe(true);
     });
 
-    test("should not change readAt of a read message", async function () {
+    test("should not change wasReadAt of a read message", async function () {
         const receivedMessage = await recipient.messages.getMessage(tempId1);
         await recipient.messages.markMessageAsRead(receivedMessage!.id);
 
         const readMessage = await recipient.messages.getMessage(tempId1);
-        const firstReadAt = readMessage!.readAt!;
+        const firstReadAt = readMessage!.wasReadAt!;
         await recipient.messages.markMessageAsRead(readMessage!.id);
 
         const updatedMessage = await recipient.messages.getMessage(tempId1);
-        expect(updatedMessage?.readAt).toBeDefined();
-        expect(updatedMessage!.readAt!.equals(firstReadAt)).toBe(true);
+        expect(updatedMessage?.wasReadAt).toBeDefined();
+        expect(updatedMessage!.wasReadAt!.equals(firstReadAt)).toBe(true);
     });
 
     test("should mark a read message as unread", async function () {
@@ -174,6 +174,6 @@ describe("MessageController", function () {
         await recipient.messages.markMessageAsUnread(readMessage!.id);
 
         const updatedMessage = await recipient.messages.getMessage(tempId1);
-        expect(updatedMessage?.readAt).toBeUndefined();
+        expect(updatedMessage?.wasReadAt).toBeUndefined();
     });
 });
