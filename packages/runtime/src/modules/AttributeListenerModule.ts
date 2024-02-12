@@ -1,7 +1,7 @@
 import { RelationshipAttributeConfidentiality, ShareAttributeRequestItemJSON } from "@nmshd/content";
-import { RuntimeServices } from "../Runtime";
 import { AttributeCreatedEvent, AttributeListenerTriggeredEvent } from "../events";
 import { RuntimeModule } from "../extensibility";
+import { RuntimeServices } from "../Runtime";
 import { LocalAttributeDTO, LocalAttributeListenerDTO } from "../types";
 
 export class AttributeListenerModule extends RuntimeModule {

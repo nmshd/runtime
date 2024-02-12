@@ -1,6 +1,6 @@
 import { CoreDate } from "@nmshd/transport";
 import { GetTokensQuery, OwnerRestriction, TransportServices } from "../../src";
-import { QueryParamConditions, RuntimeServiceProvider, exchangeToken, uploadOwnToken } from "../lib";
+import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;

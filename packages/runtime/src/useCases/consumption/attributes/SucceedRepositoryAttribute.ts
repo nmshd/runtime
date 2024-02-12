@@ -7,12 +7,12 @@ import { LocalAttributeDTO } from "../../../types";
 import { ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
-export interface SucceedIdentityAttributeResponse {
+export interface SucceedRepositoryAttributeResponse {
     predecessor: LocalAttributeDTO;
     successor: LocalAttributeDTO;
 }
 
-export interface SucceedIdentityAttributeRequest {
+export interface SucceedRepositoryAttributeRequest {
     predecessorId: string;
     successorContent: {
         value: AttributeValues.Identity.Json;
@@ -22,13 +22,13 @@ export interface SucceedIdentityAttributeRequest {
     };
 }
 
-class Validator extends SchemaValidator<SucceedIdentityAttributeRequest> {
+class Validator extends SchemaValidator<SucceedRepositoryAttributeRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("SucceedIdentityAttributeRequest"));
+        super(schemaRepository.getSchema("SucceedRepositoryAttributeRequest"));
     }
 }
 
-export class SucceedIdentityAttributeUseCase extends UseCase<SucceedIdentityAttributeRequest, SucceedIdentityAttributeResponse> {
+export class SucceedRepositoryAttributeUseCase extends UseCase<SucceedRepositoryAttributeRequest, SucceedRepositoryAttributeResponse> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -37,7 +37,7 @@ export class SucceedIdentityAttributeUseCase extends UseCase<SucceedIdentityAttr
         super(validator);
     }
 
-    protected async executeInternal(request: SucceedIdentityAttributeRequest): Promise<Result<SucceedIdentityAttributeResponse>> {
+    protected async executeInternal(request: SucceedRepositoryAttributeRequest): Promise<Result<SucceedRepositoryAttributeResponse>> {
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
         if (typeof predecessor === "undefined") {
             return Result.fail(CoreErrors.attributes.predecessorDoesNotExist());
@@ -60,7 +60,7 @@ export class SucceedIdentityAttributeUseCase extends UseCase<SucceedIdentityAttr
         const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedRepositoryAttribute(predecessorId, successorParams, false);
         await this.accountController.syncDatawallet();
 
-        const response: SucceedIdentityAttributeResponse = {
+        const response: SucceedRepositoryAttributeResponse = {
             predecessor: AttributeMapper.toAttributeDTO(updatedPredecessor),
             successor: AttributeMapper.toAttributeDTO(successor)
         };

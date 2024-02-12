@@ -15,7 +15,7 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { MockEventBus, RuntimeServiceProvider, establishRelationship, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -42,7 +42,7 @@ beforeAll(async () => {
     await establishRelationship(transportServices1, transportServices2);
     const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
 
-    await consumptionServices2.attributes.createIdentityAttribute({
+    await consumptionServices2.attributes.createRepositoryAttribute({
         content: {
             value: {
                 "@type": "GivenName",
@@ -51,7 +51,7 @@ beforeAll(async () => {
         }
     });
 
-    await consumptionServices2.attributes.createIdentityAttribute({
+    await consumptionServices2.attributes.createRepositoryAttribute({
         content: {
             value: {
                 "@type": "Surname",
