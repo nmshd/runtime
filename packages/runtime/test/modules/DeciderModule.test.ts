@@ -10,7 +10,7 @@ import {
     RelationshipTemplateProcessedResult,
     TransportServices
 } from "../../src";
-import { MockEventBus, RuntimeServiceProvider, TestRequestItem, establishRelationship, exchangeMessage } from "../lib";
+import { establishRelationship, exchangeMessage, MockEventBus, RuntimeServiceProvider, TestRequestItem } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;

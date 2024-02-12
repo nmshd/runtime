@@ -1,5 +1,5 @@
 import { AbstractIntegerJSON, AbstractStringJSON, BiologicalSex, BirthMonth } from "@nmshd/content";
-import { ConsumptionServices, CreateIdentityAttributeRequest, DataViewExpander, LocalAttributeDTO, RepositoryAttributeDVO } from "../../src";
+import { ConsumptionServices, CreateRepositoryAttributeRequest, DataViewExpander, LocalAttributeDTO, RepositoryAttributeDVO } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -18,7 +18,7 @@ describe("RepositoryAttributeDVO", () => {
     const attributes: LocalAttributeDTO[] = [];
 
     beforeAll(async () => {
-        const requests: CreateIdentityAttributeRequest[] = [
+        const requests: CreateRepositoryAttributeRequest[] = [
             {
                 content: {
                     value: {
@@ -84,7 +84,7 @@ describe("RepositoryAttributeDVO", () => {
             }
         ];
         for (const request of requests) {
-            const attribute = (await consumptionServices1.attributes.createIdentityAttribute(request)).value;
+            const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(request)).value;
             attributes.push(attribute);
         }
     });

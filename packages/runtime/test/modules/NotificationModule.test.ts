@@ -2,7 +2,7 @@ import { ConsumptionIds, LocalNotificationStatus } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
 import { ConsumptionServices, TransportServices } from "../../src";
-import { MockEventBus, RuntimeServiceProvider, TestNotificationItem, TestNotificationItemProcessor, establishRelationship, syncUntilHasMessages } from "../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, syncUntilHasMessages, TestNotificationItem, TestNotificationItemProcessor } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;

@@ -1,6 +1,6 @@
 import { AbstractIntegerJSON, AbstractStringJSON } from "@nmshd/content";
 import { LocalAttributeDTO, RepositoryAttributeDVO } from "../../src";
-import { RuntimeServiceProvider, TestRuntimeServices, ensureActiveRelationship, executeFullCreateAndShareIdentityAttributeFlow } from "../lib";
+import { ensureActiveRelationship, executeFullCreateAndShareRepositoryAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;
@@ -25,7 +25,7 @@ const ownSharedIdentityAttributes: LocalAttributeDTO[] = [];
 describe("SharedToPeerAttributeDVO", () => {
     beforeAll(async () => {
         ownSharedIdentityAttributes.push(
-            await executeFullCreateAndShareIdentityAttributeFlow(services1, services2, {
+            await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
                 content: {
                     value: {
                         "@type": "BirthYear",
@@ -35,7 +35,7 @@ describe("SharedToPeerAttributeDVO", () => {
             })
         );
         ownSharedIdentityAttributes.push(
-            await executeFullCreateAndShareIdentityAttributeFlow(services1, services2, {
+            await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
                 content: {
                     value: {
                         "@type": "Sex",
@@ -45,7 +45,7 @@ describe("SharedToPeerAttributeDVO", () => {
             })
         );
         ownSharedIdentityAttributes.push(
-            await executeFullCreateAndShareIdentityAttributeFlow(services1, services2, {
+            await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
                 content: {
                     value: {
                         "@type": "Nationality",
@@ -55,7 +55,7 @@ describe("SharedToPeerAttributeDVO", () => {
             })
         );
         ownSharedIdentityAttributes.push(
-            await executeFullCreateAndShareIdentityAttributeFlow(services1, services2, {
+            await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
                 content: {
                     value: {
                         "@type": "CommunicationLanguage",

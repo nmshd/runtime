@@ -12,7 +12,7 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { MockEventBus, RuntimeServiceProvider, establishRelationship, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
