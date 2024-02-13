@@ -1,13 +1,16 @@
+import { CoreDate } from "@nmshd/transport";
 import { GetMessagesQuery, MessageSentEvent, TransportServices } from "../../src";
 import {
-    MockEventBus,
-    QueryParamConditions,
-    RuntimeServiceProvider,
+    ensureActiveRelationship,
     establishRelationship,
     exchangeMessage,
     exchangeMessageWithAttachment,
     getRelationship,
+    MockEventBus,
+    QueryParamConditions,
+    RuntimeServiceProvider,
     syncUntilHasMessages,
+    TestRuntimeServices,
     uploadFile
 } from "../lib";
 
@@ -15,13 +18,18 @@ const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
 let eventBus1: MockEventBus;
 let transportServices2: TransportServices;
+let client1: TestRuntimeServices;
+let client2: TestRuntimeServices;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
+    client1 = runtimeServices[0];
+    client2 = runtimeServices[1];
+    await ensureActiveRelationship(client1.transport, client2.transport);
+
     transportServices1 = runtimeServices[0].transport;
     eventBus1 = runtimeServices[0].eventBus;
     transportServices2 = runtimeServices[1].transport;
-    await establishRelationship(transportServices1, transportServices2);
 }, 30000);
 
 beforeEach(() => {
@@ -135,13 +143,61 @@ describe("Message errors", () => {
     });
 });
 
+describe("Mark Message as un-/read", () => {
+    let messageId: string;
+    beforeEach(async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                body: "A body",
+                cc: [],
+                subject: "A subject",
+                to: [client2.address]
+            }
+        });
+        await syncUntilHasMessages(client2.transport, 1);
+        messageId = result.value.id;
+    });
+
+    test("Mark Message as read", async () => {
+        const messageResult = await client2.transport.messages.getMessage({ id: messageId });
+        expect(messageResult).toBeSuccessful();
+        const message = messageResult.value;
+        expect(message.wasReadAt).toBeUndefined();
+
+        const expectedReadTime = CoreDate.utc();
+        const updatedMessageResult = await client2.transport.messages.markMessageAsRead({ id: messageId });
+
+        const updatedMessage = updatedMessageResult.value;
+        expect(updatedMessage.wasReadAt).toBeDefined();
+        const actualReadTime = CoreDate.from(updatedMessage.wasReadAt!);
+        expect(actualReadTime.isSameOrAfter(expectedReadTime)).toBe(true);
+    });
+
+    test("Mark Message as unread", async () => {
+        const messageResult = await client2.transport.messages.getMessage({ id: messageId });
+        expect(messageResult).toBeSuccessful();
+        const message = messageResult.value;
+        expect(message.wasReadAt).toBeUndefined();
+
+        await client2.transport.messages.markMessageAsRead({ id: messageId });
+        const updatedMessageResult = await client2.transport.messages.markMessageAsUnread({ id: messageId });
+
+        const updatedMessage = updatedMessageResult.value;
+        expect(updatedMessage.wasReadAt).toBeUndefined();
+    });
+});
+
 describe("Message query", () => {
     test("query messages", async () => {
         const message = await exchangeMessageWithAttachment(transportServices1, transportServices2);
-        const conditions = new QueryParamConditions<GetMessagesQuery>(message, transportServices2)
+        const updatedMessage = (await client2.transport.messages.markMessageAsRead({ id: message.id })).value;
+        const conditions = new QueryParamConditions<GetMessagesQuery>(updatedMessage, transportServices2)
             .addDateSet("createdAt")
             .addStringSet("createdBy")
-            .addStringSet("recipients.address", message.recipients[0].address)
+            .addDateSet("wasReadAt")
+            .addStringSet("recipients.address", updatedMessage.recipients[0].address)
             .addStringSet("content.@type")
             .addStringSet("content.subject")
             .addStringSet("content.body")
@@ -150,7 +206,7 @@ describe("Message query", () => {
             .addStringSet("recipients.relationshipId")
             .addSingleCondition({
                 key: "participant",
-                value: [message.createdBy, "id111111111111111111111111111111111"],
+                value: [updatedMessage.createdBy, "id111111111111111111111111111111111"],
                 expectedResult: true
             });
 
