@@ -87,7 +87,7 @@ export interface MessageDVO extends DataViewObject {
     /**
      * The read indicator of the message
      */
-    wasReadAt: unknown;
+    wasReadAt?: string;
 }
 
 export interface RecipientDVO extends Omit<IdentityDVO, "type"> {
