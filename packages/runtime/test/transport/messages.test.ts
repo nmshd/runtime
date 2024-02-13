@@ -1,12 +1,10 @@
 import { CoreDate } from "@nmshd/transport";
-import { GetMessagesQuery, MessageSentEvent, TransportServices } from "../../src";
+import { GetMessagesQuery, MessageSentEvent } from "../../src";
 import {
     ensureActiveRelationship,
     establishRelationship,
     exchangeMessage,
     exchangeMessageWithAttachment,
-    getRelationship,
-    MockEventBus,
     QueryParamConditions,
     RuntimeServiceProvider,
     syncUntilHasMessages,
@@ -15,9 +13,6 @@ import {
 } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
-let transportServices1: TransportServices;
-let eventBus1: MockEventBus;
-let transportServices2: TransportServices;
 let client1: TestRuntimeServices;
 let client2: TestRuntimeServices;
 
@@ -26,48 +21,39 @@ beforeAll(async () => {
     client1 = runtimeServices[0];
     client2 = runtimeServices[1];
     await ensureActiveRelationship(client1.transport, client2.transport);
-
-    transportServices1 = runtimeServices[0].transport;
-    eventBus1 = runtimeServices[0].eventBus;
-    transportServices2 = runtimeServices[1].transport;
 }, 30000);
 
 beforeEach(() => {
-    eventBus1.reset();
+    client1.eventBus.reset();
 });
 
 afterAll(() => serviceProvider.stop());
 
 describe("Messaging", () => {
-    let transportService2Address: string;
     let fileId: string;
     let messageId: string;
 
     beforeAll(async () => {
-        const file = await uploadFile(transportServices1);
+        const file = await uploadFile(client1.transport);
         fileId = file.id;
-
-        const relationship = await getRelationship(transportServices1);
-        transportService2Address = relationship.peer;
     });
 
-    test("send a Message from TransportServices1 to TransportServices2", async () => {
-        expect(transportService2Address).toBeDefined();
+    test("send a Message from client1.transport to client2.transport", async () => {
         expect(fileId).toBeDefined();
 
-        const result = await transportServices1.messages.sendMessage({
-            recipients: [transportService2Address],
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
             content: {
                 "@type": "Mail",
                 body: "b",
                 cc: [],
                 subject: "a",
-                to: [transportService2Address]
+                to: [client2.address]
             },
             attachments: [fileId]
         });
         expect(result).toBeSuccessful();
-        await expect(eventBus1).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
+        await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
 
         messageId = result.value.id;
     });
@@ -75,7 +61,7 @@ describe("Messaging", () => {
     test("receive the message in a sync run", async () => {
         expect(messageId).toBeDefined();
 
-        const messages = await syncUntilHasMessages(transportServices2);
+        const messages = await syncUntilHasMessages(client2.transport);
         expect(messages).toHaveLength(1);
 
         const message = messages[0];
@@ -85,14 +71,14 @@ describe("Messaging", () => {
             body: "b",
             cc: [],
             subject: "a",
-            to: [transportService2Address]
+            to: [client2.address]
         });
     });
 
     test("receive the message on TransportService2 in /Messages", async () => {
         expect(messageId).toBeDefined();
 
-        const response = await transportServices2.messages.getMessages({});
+        const response = await client2.transport.messages.getMessages({});
         expect(response).toBeSuccessful();
         expect(response.value).toHaveLength(1);
 
@@ -103,14 +89,14 @@ describe("Messaging", () => {
             body: "b",
             cc: [],
             subject: "a",
-            to: [transportService2Address]
+            to: [client2.address]
         });
     });
 
     test("receive the message on TransportService2 in /Messages/{id}", async () => {
         expect(messageId).toBeDefined();
 
-        const response = await transportServices2.messages.getMessage({ id: messageId });
+        const response = await client2.transport.messages.getMessage({ id: messageId });
         expect(response).toBeSuccessful();
     });
 });
@@ -118,7 +104,7 @@ describe("Messaging", () => {
 describe("Message errors", () => {
     const fakeAddress = "id1PNvUP4jHD74qo6usnWNoaFGFf33MXZi6c";
     test("should throw correct error for empty 'to' in the Message", async () => {
-        const result = await transportServices1.messages.sendMessage({
+        const result = await client1.transport.messages.sendMessage({
             recipients: [fakeAddress],
             content: {
                 "@type": "Mail",
@@ -131,7 +117,7 @@ describe("Message errors", () => {
     });
 
     test("should throw correct error for missing 'to' in the Message", async () => {
-        const result = await transportServices1.messages.sendMessage({
+        const result = await client1.transport.messages.sendMessage({
             recipients: [fakeAddress],
             content: {
                 "@type": "Mail",
@@ -191,9 +177,9 @@ describe("Mark Message as un-/read", () => {
 
 describe("Message query", () => {
     test("query messages", async () => {
-        const message = await exchangeMessageWithAttachment(transportServices1, transportServices2);
+        const message = await exchangeMessageWithAttachment(client1.transport, client2.transport);
         const updatedMessage = (await client2.transport.messages.markMessageAsRead({ id: message.id })).value;
-        const conditions = new QueryParamConditions<GetMessagesQuery>(updatedMessage, transportServices2)
+        const conditions = new QueryParamConditions<GetMessagesQuery>(updatedMessage, client2.transport)
             .addDateSet("createdAt")
             .addStringSet("createdBy")
             .addDateSet("wasReadAt")
@@ -218,27 +204,27 @@ describe("Message query", () => {
         const recipient1 = additionalRuntimeServices[0].transport;
         const recipient2 = additionalRuntimeServices[1].transport;
 
-        await establishRelationship(transportServices1, recipient1);
-        await establishRelationship(transportServices1, recipient2);
+        await establishRelationship(client1.transport, recipient1);
+        await establishRelationship(client1.transport, recipient2);
 
         const addressRecipient1 = (await recipient1.account.getIdentityInfo()).value.address;
         const addressRecipient2 = (await recipient2.account.getIdentityInfo()).value.address;
 
-        const relationshipToRecipient1 = await transportServices1.relationships.getRelationshipByAddress({ address: addressRecipient1 });
-        const relationshipToRecipient2 = await transportServices1.relationships.getRelationshipByAddress({ address: addressRecipient2 });
+        const relationshipToRecipient1 = await client1.transport.relationships.getRelationshipByAddress({ address: addressRecipient1 });
+        const relationshipToRecipient2 = await client1.transport.relationships.getRelationshipByAddress({ address: addressRecipient2 });
 
-        await transportServices1.messages.sendMessage({
+        await client1.transport.messages.sendMessage({
             content: {},
             recipients: [addressRecipient1]
         });
-        await transportServices1.messages.sendMessage({
+        await client1.transport.messages.sendMessage({
             content: {},
             recipients: [addressRecipient2]
         });
 
-        const messagesToRecipient1 = await transportServices1.messages.getMessages({ query: { "recipients.relationshipId": relationshipToRecipient1.value.id } });
-        const messagesToRecipient2 = await transportServices1.messages.getMessages({ query: { "recipients.relationshipId": relationshipToRecipient2.value.id } });
-        const messagesToRecipient1Or2 = await transportServices1.messages.getMessages({
+        const messagesToRecipient1 = await client1.transport.messages.getMessages({ query: { "recipients.relationshipId": relationshipToRecipient1.value.id } });
+        const messagesToRecipient2 = await client1.transport.messages.getMessages({ query: { "recipients.relationshipId": relationshipToRecipient2.value.id } });
+        const messagesToRecipient1Or2 = await client1.transport.messages.getMessages({
             query: { "recipients.relationshipId": [relationshipToRecipient1.value.id, relationshipToRecipient2.value.id] }
         });
 
@@ -248,10 +234,10 @@ describe("Message query", () => {
     });
 
     test("query Messages withAttachments", async () => {
-        const messageWithAttachment = await exchangeMessageWithAttachment(transportServices1, transportServices2);
-        const messageWithoutAttachment = await exchangeMessage(transportServices1, transportServices2);
+        const messageWithAttachment = await exchangeMessageWithAttachment(client1.transport, client2.transport);
+        const messageWithoutAttachment = await exchangeMessage(client1.transport, client2.transport);
 
-        const messages = await transportServices2.messages.getMessages({ query: { attachments: "+" } });
+        const messages = await client2.transport.messages.getMessages({ query: { attachments: "+" } });
 
         expect(messages.value.every((m) => m.attachments.length > 0)).toBe(true);
 
