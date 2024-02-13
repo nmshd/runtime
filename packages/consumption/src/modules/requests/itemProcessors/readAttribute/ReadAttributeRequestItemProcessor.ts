@@ -34,11 +34,12 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
+        let foundLocalAttribute;
         let attribute;
         let existingOrNew;
 
         if (parsedParams.isWithExistingAttribute()) {
-            const foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
+            foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
 
             if (!foundLocalAttribute) {
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
@@ -46,6 +47,17 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             attribute = foundLocalAttribute.content;
             existingOrNew = "existing";
+
+            if (
+                _requestItem.query instanceof IdentityAttributeQuery &&
+                attribute instanceof IdentityAttribute &&
+                this.accountController.identity.isMe(attribute.owner) &&
+                foundLocalAttribute.isShared()
+            ) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery("The existing IdentityAttribute is already shared. You can only share unshared IdentityAttributes.")
+                );
+            }
         }
 
         if (parsedParams.isWithNewAttribute()) {
@@ -66,7 +78,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 );
             }
 
-            if (!ownerIsCurrentIdentity && attribute instanceof IdentityAttribute) {
+            if (!ownerIsCurrentIdentity) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.`)
                 );

@@ -9,7 +9,7 @@ import {
     ResponseItemResult,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreDate, Transport } from "@nmshd/transport";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
@@ -206,12 +206,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
     describe("canAccept", function () {
         test("can be called with the id of an existing own LocalAttribute", async function () {
-            const attribute = await consumptionController.attributes.createPeerLocalAttribute({
+            const attribute = await consumptionController.attributes.createLocalAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
-                }),
-                peer: CoreAddress.from(accountController.identity.address),
-                requestReference: CoreId.from("someRequestReference")
+                })
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -476,6 +474,48 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
                 message: /The new Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
+            });
+        });
+
+        test("returns an error when the existing IdentityAttribute is already shared", async function () {
+            const peer = CoreAddress.from("id1");
+
+            const attribute = await consumptionController.attributes.createPeerLocalAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                }),
+                peer: peer,
+                requestReference: await ConsumptionIds.request.generate()
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: peer,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: attribute.id.toString()
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The existing IdentityAttribute is already shared. You can only share unshared IdentityAttributes./
             });
         });
 
