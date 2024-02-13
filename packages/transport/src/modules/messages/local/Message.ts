@@ -22,11 +22,12 @@ export class Message extends CoreSynchronizable implements IMessage {
         "@context",
         nameof<Message>((r) => r.secretKey),
         nameof<Message>((r) => r.isOwn),
-        nameof<Message>((r) => r.relationshipIds),
-        nameof<Message>((r) => r.wasReadAt)
+        nameof<Message>((r) => r.relationshipIds)
     ];
 
     public override readonly metadataProperties = [nameof<Message>((r) => r.metadata), nameof<Message>((r) => r.metadataModifiedAt)];
+
+    public override readonly userdataProperties = [nameof<Message>((r) => r.wasReadAt)];
 
     @validate()
     @serialize()
@@ -73,11 +74,6 @@ export class Message extends CoreSynchronizable implements IMessage {
     public setMetadata(metadata: any): this {
         this.metadata = metadata;
         this.metadataModifiedAt = CoreDate.utc();
-        return this;
-    }
-
-    public setWasReadAt(readAt: any): this {
-        this.wasReadAt = readAt;
         return this;
     }
 }

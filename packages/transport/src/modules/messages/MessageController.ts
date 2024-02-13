@@ -212,7 +212,7 @@ export class MessageController extends TransportController {
 
         const message = Message.from(messageDoc);
         if (typeof message.wasReadAt === "undefined") {
-            message.setWasReadAt(CoreDate.utc());
+            message.wasReadAt = CoreDate.utc();
             await this.messages.update(messageDoc, message);
         }
 
@@ -226,7 +226,7 @@ export class MessageController extends TransportController {
         }
 
         const message = Message.from(messageDoc);
-        message.setWasReadAt(undefined);
+        message.wasReadAt = undefined;
         await this.messages.update(messageDoc, message);
 
         return message;
