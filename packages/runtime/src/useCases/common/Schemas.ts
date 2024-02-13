@@ -20866,6 +20866,19 @@ export const GetMessagesRequest: any = {
                         }
                     ]
                 },
+                "wasReadAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "participant": {
                     "anyOf": [
                         {

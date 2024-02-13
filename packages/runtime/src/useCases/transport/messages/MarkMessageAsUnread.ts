@@ -1,7 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
 import { AccountController, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
+import { MessageDTO } from "../../../types";
 import { MessageIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { MessageMapper } from "./MessageMapper";
 
 export interface MarkMessageAsUnreadRequest {
     id: MessageIdString;
@@ -13,7 +15,7 @@ class Validator extends SchemaValidator<MarkMessageAsUnreadRequest> {
     }
 }
 
-export class MarkMessageAsUnreadUseCase extends UseCase<MarkMessageAsUnreadRequest, void> {
+export class MarkMessageAsUnreadUseCase extends UseCase<MarkMessageAsUnreadRequest, MessageDTO> {
     public constructor(
         @Inject private readonly messageController: MessageController,
         @Inject private readonly accountController: AccountController,
@@ -22,11 +24,11 @@ export class MarkMessageAsUnreadUseCase extends UseCase<MarkMessageAsUnreadReque
         super(validator);
     }
 
-    protected async executeInternal(request: MarkMessageAsUnreadRequest): Promise<Result<void>> {
-        await this.messageController.markMessageAsUnread(CoreId.from(request.id));
+    protected async executeInternal(request: MarkMessageAsUnreadRequest): Promise<Result<MessageDTO>> {
+        const updatedMessage = await this.messageController.markMessageAsUnread(CoreId.from(request.id));
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(undefined);
+        return Result.ok(MessageMapper.toMessageDTO(updatedMessage));
     }
 }

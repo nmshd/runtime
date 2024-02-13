@@ -17,6 +17,7 @@ export interface GetMessagesQuery {
     attachments?: string | string[];
     "recipients.address"?: string | string[];
     "recipients.relationshipId"?: string | string[];
+    wasReadAt?: string | string[];
     participant?: string | string[];
 }
 

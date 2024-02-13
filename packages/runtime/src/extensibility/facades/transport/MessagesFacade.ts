@@ -50,11 +50,11 @@ export class MessagesFacade {
         return await this.getAttachmentMetadataUseCase.execute(request);
     }
 
-    public async markMessageAsRead(request: MarkMessageAsReadRequest): Promise<void> {
-        await this.markMessageAsReadUseCase.execute(request);
+    public async markMessageAsRead(request: MarkMessageAsReadRequest): Promise<Result<MessageDTO>> {
+        return await this.markMessageAsReadUseCase.execute(request);
     }
 
-    public async markMessageAsUnread(request: MarkMessageAsUnreadRequest): Promise<void> {
-        await this.markMessageAsUnreadUseCase.execute(request);
+    public async markMessageAsUnread(request: MarkMessageAsUnreadRequest): Promise<Result<MessageDTO>> {
+        return await this.markMessageAsUnreadUseCase.execute(request);
     }
 }

@@ -204,7 +204,7 @@ export class MessageController extends TransportController {
         return message;
     }
 
-    public async markMessageAsRead(id: CoreId): Promise<void> {
+    public async markMessageAsRead(id: CoreId): Promise<Message> {
         const messageDoc = await this.messages.read(id.toString());
         if (!messageDoc) {
             throw CoreErrors.general.recordNotFound(Message, id.toString());
@@ -215,9 +215,11 @@ export class MessageController extends TransportController {
             message.setWasReadAt(CoreDate.utc());
             await this.messages.update(messageDoc, message);
         }
+
+        return message;
     }
 
-    public async markMessageAsUnread(id: CoreId): Promise<void> {
+    public async markMessageAsUnread(id: CoreId): Promise<Message> {
         const messageDoc = await this.messages.read(id.toString());
         if (!messageDoc) {
             throw CoreErrors.general.recordNotFound(Message, id.toString());
@@ -226,6 +228,8 @@ export class MessageController extends TransportController {
         const message = Message.from(messageDoc);
         message.setWasReadAt(undefined);
         await this.messages.update(messageDoc, message);
+
+        return message;
     }
 
     @log()
