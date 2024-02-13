@@ -150,7 +150,7 @@ describe("MessageController", function () {
 
         const updatedMessage = await recipient.messages.getMessage(tempId1);
         expect(updatedMessage?.wasReadAt).toBeDefined();
-        expect(updatedMessage!.wasReadAt!.isBetween(timeBeforeRead, timeAfterRead)).toBe(true);
+        expect(updatedMessage!.wasReadAt!.isBetween(timeBeforeRead, timeAfterRead, "millisecond")).toBe(true);
     });
 
     test("should not change wasReadAt of a read message", async function () {
