@@ -11,17 +11,23 @@ import {
     GetMessagesRequest,
     GetMessagesUseCase,
     GetMessageUseCase,
+    MarkMessageAsReadRequest,
+    MarkMessageAsReadUseCase,
+    MarkMessageAsUnreadRequest,
+    MarkMessageAsUnreadUseCase,
     SendMessageRequest,
     SendMessageUseCase
 } from "../../../useCases";
 
 export class MessagesFacade {
     public constructor(
-        @Inject private readonly getMessagesUseCase: GetMessagesUseCase,
-        @Inject private readonly getMessageUseCase: GetMessageUseCase,
-        @Inject private readonly sendMessageUseCase: SendMessageUseCase,
         @Inject private readonly downloadAttachmentUseCase: DownloadAttachmentUseCase,
-        @Inject private readonly getAttachmentMetadataUseCase: GetAttachmentMetadataUseCase
+        @Inject private readonly getAttachmentMetadataUseCase: GetAttachmentMetadataUseCase,
+        @Inject private readonly getMessageUseCase: GetMessageUseCase,
+        @Inject private readonly getMessagesUseCase: GetMessagesUseCase,
+        @Inject private readonly markMessageAsReadUseCase: MarkMessageAsReadUseCase,
+        @Inject private readonly markMessageAsUnreadUseCase: MarkMessageAsUnreadUseCase,
+        @Inject private readonly sendMessageUseCase: SendMessageUseCase
     ) {}
 
     public async sendMessage(request: SendMessageRequest): Promise<Result<MessageDTO>> {
@@ -42,5 +48,13 @@ export class MessagesFacade {
 
     public async getAttachmentMetadata(request: GetAttachmentMetadataRequest): Promise<Result<FileDTO>> {
         return await this.getAttachmentMetadataUseCase.execute(request);
+    }
+
+    public async markMessageAsRead(request: MarkMessageAsReadRequest): Promise<Result<MessageDTO>> {
+        return await this.markMessageAsReadUseCase.execute(request);
+    }
+
+    public async markMessageAsUnread(request: MarkMessageAsUnreadRequest): Promise<Result<MessageDTO>> {
+        return await this.markMessageAsUnreadUseCase.execute(request);
     }
 }
