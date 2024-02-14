@@ -387,7 +387,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The existing IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
+                message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
             });
         });
 
@@ -429,7 +429,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
+                message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
             });
         });
 
@@ -473,7 +473,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
+                message: /The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
             });
         });
 
@@ -515,7 +515,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The existing IdentityAttribute is already shared. You can only share unshared IdentityAttributes./
+                message: /The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes./
             });
         });
 
@@ -556,7 +556,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new IdentityAttribute is not of the queried IdentityAttribute Value Type./
+                message: /The provided IdentityAttribute is not of the queried IdentityAttribute Value Type./
             });
         });
 
@@ -637,7 +637,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The number of tags of the new IdentityAttribute do not match the number of queried tags./
+                message: /The number of tags of the provided IdentityAttribute do not match the number of queried tags./
             });
         });
 
@@ -679,7 +679,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The tags of the new IdentityAttribute do not match the queried tags./
+                message: /The tags of the provided IdentityAttribute do not match the queried tags./
             });
         });
 
@@ -729,7 +729,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The existing Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried./
+                message: /The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried./
             });
         });
 
@@ -782,7 +782,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new RelationshipAttribute is not of the queried RelationshipAttribute Value Type./
+                message: /The provided RelationshipAttribute is not of the queried RelationshipAttribute Value Type./
             });
         });
 
@@ -835,7 +835,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new RelationshipAttribute does not belong to the queried owner./
+                message: /The provided RelationshipAttribute does not belong to the queried owner./
             });
         });
 
@@ -887,7 +887,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The owner of the new RelationshipAttribute is not the Recipient, but an empty string was specified for the owner of the query./
+                message: /The owner of the provided RelationshipAttribute is not the Recipient, but an empty string was specified for the owner of the query./
             });
         });
 
@@ -939,7 +939,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new RelationshipAttribute has not the queried key./
+                message: /The provided RelationshipAttribute has not the queried key./
             });
         });
 
@@ -991,7 +991,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new RelationshipAttribute has not the queried confidentiality./
+                message: /The provided RelationshipAttribute has not the queried confidentiality./
             });
         });
 
@@ -1087,7 +1087,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new Attribute is not valid in the queried time frame./
+                message: /The provided Attribute is not valid in the queried time frame./
             });
         });
 
@@ -1143,7 +1143,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The new Attribute is not valid in the queried time frame./
+                message: /The provided Attribute is not valid in the queried time frame./
             });
         });
     });

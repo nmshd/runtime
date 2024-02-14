@@ -5,7 +5,6 @@ import {
     ReadAttributeRequestItem,
     RejectResponseItem,
     RelationshipAttribute,
-    RelationshipAttributeQuery,
     Request,
     ResponseItemResult
 } from "@nmshd/content";
@@ -15,6 +14,7 @@ import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
+import validateAnswerToQuery from "../utility/validateAnswerToQuery";
 import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
 
@@ -34,9 +34,9 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
+        const recipient = this.accountController.identity.address;
         let foundLocalAttribute;
         let attribute;
-        let existingOrNew;
 
         if (parsedParams.isWithExistingAttribute()) {
             foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
@@ -46,7 +46,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
 
             attribute = foundLocalAttribute.content;
-            existingOrNew = "existing";
 
             if (
                 _requestItem.query instanceof IdentityAttributeQuery &&
@@ -55,107 +54,19 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 foundLocalAttribute.isShared()
             ) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery("The existing IdentityAttribute is already shared. You can only share unshared IdentityAttributes.")
+                    CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes.")
                 );
             }
-        }
-
-        if (parsedParams.isWithNewAttribute()) {
+        } else if (parsedParams.isWithNewAttribute()) {
             attribute = parsedParams.newAttribute;
-            existingOrNew = "new";
         }
 
-        if (!attribute || !existingOrNew) {
+        if (!attribute) {
             return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing("An unknown error occurred during the RequestItem processing."));
         }
 
-        const ownerIsCurrentIdentity = this.accountController.identity.isMe(attribute.owner);
-
-        if (_requestItem.query instanceof IdentityAttributeQuery) {
-            if (!(attribute instanceof IdentityAttribute)) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute is not an IdentityAttribute, but an IdentityAttribute was queried.`)
-                );
-            }
-
-            if (!ownerIsCurrentIdentity) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.`)
-                );
-            }
-
-            if (_requestItem.query.valueType !== attribute.value.constructor.name) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} IdentityAttribute is not of the queried IdentityAttribute Value Type.`)
-                );
-            }
-
-            if (_requestItem.query.tags?.length !== attribute.tags?.length) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery(`The number of tags of the ${existingOrNew} IdentityAttribute do not match the number of queried tags.`)
-                );
-            }
-
-            if (_requestItem.query.tags !== undefined && attribute.tags !== undefined) {
-                const sortedQueriedTags = _requestItem.query.tags.sort();
-                const sortedAttributeTags = attribute.tags.sort();
-                if (!sortedQueriedTags.every((tag, index) => tag === sortedAttributeTags[index])) {
-                    return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The tags of the ${existingOrNew} IdentityAttribute do not match the queried tags.`));
-                }
-            }
-        }
-
-        if (_requestItem.query instanceof RelationshipAttributeQuery) {
-            if (!(attribute instanceof RelationshipAttribute)) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried.`)
-                );
-            }
-
-            const queriedOwnerIsEmpty = _requestItem.query.owner.equals("");
-
-            if (!queriedOwnerIsEmpty && !_requestItem.query.owner.equals(attribute.owner)) {
-                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} RelationshipAttribute does not belong to the queried owner.`));
-            }
-
-            if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery(
-                        `The owner of the ${existingOrNew} RelationshipAttribute is not the Recipient, but an empty string was specified for the owner of the query.`
-                    )
-                );
-            }
-
-            if (_requestItem.query.key !== attribute.key) {
-                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} RelationshipAttribute has not the queried key.`));
-            }
-
-            if (_requestItem.query.attributeCreationHints.confidentiality !== attribute.confidentiality) {
-                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} RelationshipAttribute has not the queried confidentiality.`));
-            }
-
-            if (_requestItem.query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} RelationshipAttribute is not of the queried RelationshipAttribute Value Type.`)
-                );
-            }
-        }
-
-        if (_requestItem.query instanceof IdentityAttributeQuery || _requestItem.query instanceof RelationshipAttributeQuery) {
-            if (
-                (!_requestItem.query.validFrom && attribute.validFrom !== undefined) ||
-                (_requestItem.query.validFrom && attribute.validFrom && _requestItem.query.validFrom.isBefore(attribute.validFrom))
-            ) {
-                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute is not valid in the queried time frame.`));
-            }
-
-            if (
-                (!_requestItem.query.validTo && attribute.validTo !== undefined) ||
-                (_requestItem.query.validTo && attribute.validTo && _requestItem.query.validTo.isAfter(attribute.validTo))
-            ) {
-                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute is not valid in the queried time frame.`));
-            }
-        }
+        const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, recipient);
+        if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
 
         return ValidationResult.success();
     }

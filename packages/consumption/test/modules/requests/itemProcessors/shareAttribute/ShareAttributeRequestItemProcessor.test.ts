@@ -1,9 +1,9 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
     GivenName,
+    IdentityAttribute,
     IIdentityAttribute,
     IRelationshipAttribute,
-    IdentityAttribute,
     ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
@@ -83,7 +83,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
                     owner: CoreAddress.from("{{sender}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "aKey"
+                    key: "AKey"
                 })
             },
             {
@@ -93,7 +93,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
                     owner: CoreAddress.from("{{sender}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "aKey"
+                    key: "AKey"
                 })
             },
             {
@@ -103,7 +103,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
                     owner: CoreAddress.from("{{sender}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "aKey"
+                    key: "AKey"
                 })
             },
             {
@@ -113,7 +113,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
                     owner: CoreAddress.from("{{sender}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Private,
-                    key: "aKey"
+                    key: "AKey"
                 }),
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
@@ -127,7 +127,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
                     owner: CoreAddress.from("{{recipient}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "aKey"
+                    key: "AKey"
                 }),
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",

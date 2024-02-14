@@ -78,7 +78,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: CoreAddress.from("")
                 }),
                 query: RelationshipAttributeQuery.from({
-                    key: "aKey",
+                    key: "AKey",
                     owner: CoreAddress.from(""),
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
@@ -103,7 +103,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: recipientAddress
                 }),
                 query: RelationshipAttributeQuery.from({
-                    key: "aKey",
+                    key: "AKey",
                     owner: CoreAddress.from(""),
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
@@ -130,7 +130,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: CoreAddress.from("")
                 }),
                 query: RelationshipAttributeQuery.from({
-                    key: "aKey",
+                    key: "AKey",
                     owner: recipientAddress,
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
@@ -170,7 +170,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 test("simple query", function () {
                     const query = RelationshipAttributeQuery.from({
                         owner: "",
-                        key: "aKey",
+                        key: "AKey",
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
                             title: "ATitle",
@@ -550,7 +550,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    key: "aKey",
+                    key: "AKey",
                     owner: senderAddress,
                     attributeCreationHints: {
                         valueType: "ProprietaryString",

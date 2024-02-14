@@ -91,7 +91,7 @@ export class TestObjectFactory {
         return RelationshipAttribute.from({
             value: properties?.value ?? ProprietaryString.from({ title: "A Title", value: "AGivenName" }),
             confidentiality: RelationshipAttributeConfidentiality.Public,
-            key: "aKey",
+            key: "AKey",
             isTechnical: false,
             owner: properties?.owner ?? CoreAddress.from("id1")
         });

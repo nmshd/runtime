@@ -36,7 +36,7 @@ beforeAll(async () => {
                         "@type": "RegisterAttributeListenerRequestItem",
                         query: {
                             "@type": "ThirdPartyRelationshipAttributeQuery",
-                            key: "aKey",
+                            key: "AKey",
                             owner: thirdParty.address,
                             thirdParty: [thirdParty.address]
                         },
@@ -73,7 +73,7 @@ describe("AttributeListenerModule", () => {
         const attributeContent: RelationshipAttributeJSON = {
             "@type": "RelationshipAttribute",
             owner: thirdParty.address,
-            key: "aKey",
+            key: "AKey",
             confidentiality: RelationshipAttributeConfidentiality.Public,
             isTechnical: false,
             value: {
