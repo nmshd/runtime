@@ -12,7 +12,7 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages, syncUntilHasMessageWithRequest } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -25,6 +25,7 @@ let sEventBus: MockEventBus;
 let rEventBus: MockEventBus;
 let senderMessage: MessageDTO;
 let recipientMessage: MessageDTO;
+let requestId: string;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
@@ -199,7 +200,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessages(sTransportServices, 1);
+        await syncUntilHasMessageWithResponse(sTransportServices, requestId);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
 
         const dto = senderMessage;

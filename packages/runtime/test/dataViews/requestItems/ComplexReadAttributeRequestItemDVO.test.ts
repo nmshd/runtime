@@ -16,7 +16,7 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages, syncUntilHasMessageWithRequest } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -29,6 +29,7 @@ let eventBus1: MockEventBus;
 let eventBus2: MockEventBus;
 let senderMessage: MessageDTO;
 let recipientMessage: MessageDTO;
+let requestId: string;
 
 afterAll(() => serviceProvider.stop());
 
@@ -232,7 +233,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessages(transportServices1, 1);
+        await syncUntilHasMessageWithResponse(transportServices1, requestId);
 
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
 
@@ -336,6 +337,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
             },
             peer: recipientAddress
         });
+        requestId = localRequest.value.id;
 
         senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
         recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
@@ -476,7 +478,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessages(transportServices1, 1);
+        await syncUntilHasMessageWithResponse(transportServices1, requestId);
 
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
 

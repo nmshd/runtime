@@ -322,17 +322,19 @@ export async function exchangeAndAcceptRequestByMessage(
     const createRequestResult = await sender.consumption.outgoingRequests.create(request);
     expect(createRequestResult).toBeSuccessful();
 
+    const requestId = createRequestResult.value.id;
+
     await sender.transport.messages.sendMessage({
         recipients: [recipient.address],
         content: createRequestResult.value.content
     });
 
-    await syncUntilHasMessages(recipient.transport);
+    await syncUntilHasMessageWithRequest(recipient.transport, requestId);
     await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
     const acceptIncomingRequestResult = await recipient.consumption.incomingRequests.accept({ requestId: createRequestResult.value.id, items: responseItems });
     expect(acceptIncomingRequestResult).toBeSuccessful();
     await recipient.eventBus.waitForEvent(MessageSentEvent);
-    await syncUntilHasMessages(sender.transport);
+    await syncUntilHasMessageWithResponse(sender.transport, requestId);
     await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 }
 
@@ -343,12 +345,12 @@ export async function sendAndReceiveNotification(
     notificationItems: INotificationItem[] = [TestNotificationItem.from({})]
 ): Promise<LocalNotificationDTO> {
     const rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+    const notificationId = await ConsumptionIds.notification.generate();
 
-    const notificationToSend = Notification.from({ id: await ConsumptionIds.notification.generate(), items: notificationItems });
+    const notificationToSend = Notification.from({ id: notificationId, items: notificationItems });
     await sTransportServices.messages.sendMessage({ recipients: [rAddress], content: notificationToSend.toJSON() });
 
-    const messages = await syncUntilHasMessages(rTransportServices, 1);
-    const message = messages[0];
+    const message = await syncUntilHasMessageWithNotification(rTransportServices, notificationId);
 
     const notification = await rConsumptionServices.notifications.receivedNotification({ messageId: message.id });
     expect(notification).toBeSuccessful();
