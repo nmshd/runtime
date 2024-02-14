@@ -20866,6 +20866,19 @@ export const GetMessagesRequest: any = {
                         }
                     ]
                 },
+                "wasReadAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "participant": {
                     "anyOf": [
                         {
@@ -20881,6 +20894,52 @@ export const GetMessagesRequest: any = {
                 }
             },
             "additionalProperties": false
+        }
+    }
+}
+
+export const MarkMessageAsReadRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkMessageAsReadRequest",
+    "definitions": {
+        "MarkMessageAsReadRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "MessageIdString": {
+            "type": "string",
+            "pattern": "MSG[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const MarkMessageAsUnreadRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkMessageAsUnreadRequest",
+    "definitions": {
+        "MarkMessageAsUnreadRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "MessageIdString": {
+            "type": "string",
+            "pattern": "MSG[A-Za-z0-9]{17}"
         }
     }
 }

@@ -141,4 +141,42 @@ describe("MessageController", function () {
         const messages = await recipient.messages.getMessagesByRelationshipId(relationshipId);
         expect(messages).toHaveLength(3);
     });
+
+    test("should mark an unread message as read", async function () {
+        await TestUtil.sendMessage(sender, recipient);
+        const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
+        const message = messages[0];
+
+        const timeBeforeRead = CoreDate.utc();
+        const updatedMessage = await recipient.messages.markMessageAsRead(message.id);
+        const timeAfterRead = CoreDate.utc();
+
+        expect(updatedMessage.wasReadAt).toBeDefined();
+        expect(updatedMessage.wasReadAt!.isSameOrAfter(timeBeforeRead)).toBe(true);
+        expect(updatedMessage.wasReadAt!.isSameOrBefore(timeAfterRead)).toBe(true);
+    });
+
+    test("should not change wasReadAt of a read message", async function () {
+        await TestUtil.sendMessage(sender, recipient);
+        const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
+        const message = messages[0];
+
+        const updatedMessage = await recipient.messages.markMessageAsRead(message.id);
+        const firstReadAt = updatedMessage.wasReadAt;
+
+        const unchangedMessage = await recipient.messages.markMessageAsRead(updatedMessage.id);
+        expect(unchangedMessage.wasReadAt).toBeDefined();
+        expect(unchangedMessage.wasReadAt!.equals(firstReadAt!)).toBe(true);
+    });
+
+    test("should mark a read message as unread", async function () {
+        await TestUtil.sendMessage(sender, recipient);
+        const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
+        const message = messages[0];
+
+        const readMessage = await recipient.messages.markMessageAsRead(message.id);
+
+        const unreadMessage = await recipient.messages.markMessageAsUnread(readMessage.id);
+        expect(unreadMessage.wasReadAt).toBeUndefined();
+    });
 });
