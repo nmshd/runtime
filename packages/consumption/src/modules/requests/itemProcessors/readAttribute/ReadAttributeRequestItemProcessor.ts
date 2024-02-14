@@ -89,6 +89,20 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} IdentityAttribute is not of the queried IdentityAttribute Value Type.`)
                 );
             }
+
+            if (_requestItem.query.tags?.length !== attribute.tags?.length) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery(`The number of tags of the ${existingOrNew} IdentityAttribute do not match the number of queried tags.`)
+                );
+            }
+
+            if (_requestItem.query.tags !== undefined && attribute.tags !== undefined) {
+                const sortedQueriedTags = _requestItem.query.tags.sort();
+                const sortedAttributeTags = attribute.tags.sort();
+                if (!sortedQueriedTags.every((tag, index) => tag === sortedAttributeTags[index])) {
+                    return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The tags of the ${existingOrNew} IdentityAttribute do not match the queried tags.`));
+                }
+            }
         }
 
         if (_requestItem.query instanceof RelationshipAttributeQuery) {
