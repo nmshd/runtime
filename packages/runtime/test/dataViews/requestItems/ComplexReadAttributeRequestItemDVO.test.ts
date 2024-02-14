@@ -78,6 +78,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             },
             peer: recipientAddress
         });
+        requestId = localRequest.value.id;
 
         senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
         recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);

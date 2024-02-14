@@ -63,9 +63,10 @@ beforeAll(async () => {
         },
         peer: rAddress
     });
+    requestId = localRequest.value.id;
 
     senderMessage = await sendMessage(sTransportServices, rAddress, localRequest.value.content);
-    recipientMessage = await syncUntilHasMessageWithRequest(sTransportServices, localRequest.value.id);
+    recipientMessage = await syncUntilHasMessageWithRequest(rTransportServices, localRequest.value.id);
 
     await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 }, 30000);

@@ -191,7 +191,6 @@ describe("RequestModule", () => {
             expect(requests).toHaveLength(1);
 
             const request = requests[0];
-            requestId = request.id;
 
             expect(request.content.items[0]["@type"]).toBe("CreateAttributeRequestItem");
         });
@@ -211,6 +210,7 @@ describe("RequestModule", () => {
 
             const requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
             const request = requests[0];
+            requestId = request.id;
 
             const requestAfterReject = (await rConsumptionServices.incomingRequests.reject({ requestId: request.id, items: [{ accept: false }] })).value;
 
@@ -238,6 +238,7 @@ describe("RequestModule", () => {
 
             const requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
             const request = requests[0];
+            requestId = request.id;
 
             const requestAfterReject = (await rConsumptionServices.incomingRequests.accept({ requestId: request.id, items: [{ accept: false }] })).value;
 
@@ -247,7 +248,7 @@ describe("RequestModule", () => {
         });
 
         test("receives the accepted Request by Message", async () => {
-            await syncUntilHasMessageWithRequest(rTransportServices, requestId);
+            await syncUntilHasMessageWithResponse(sTransportServices, requestId);
 
             await sEventBus.waitForRunningEventHandlers();
 
