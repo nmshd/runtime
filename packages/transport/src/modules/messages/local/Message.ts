@@ -12,6 +12,7 @@ export interface IMessage extends ICoreSynchronizable {
     metadata?: any;
     metadataModifiedAt?: ICoreDate;
     relationshipIds: ICoreId[];
+    wasReadAt?: ICoreDate;
 }
 
 @type("Message")
@@ -25,6 +26,8 @@ export class Message extends CoreSynchronizable implements IMessage {
     ];
 
     public override readonly metadataProperties = [nameof<Message>((r) => r.metadata), nameof<Message>((r) => r.metadataModifiedAt)];
+
+    public override readonly userdataProperties = [nameof<Message>((r) => r.wasReadAt)];
 
     @validate()
     @serialize()
@@ -53,6 +56,10 @@ export class Message extends CoreSynchronizable implements IMessage {
     @validate()
     @serialize({ type: CoreId })
     public relationshipIds: CoreId[];
+
+    @validate({ nullable: true })
+    @serialize()
+    public wasReadAt?: CoreDate;
 
     public static from(value: IMessage): Message {
         return this.fromAny(value);
