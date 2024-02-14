@@ -112,6 +112,14 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 );
             }
 
+            if (_requestItem.query.key !== attribute.key) {
+                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} RelationshipAttribute has not the queried key.`));
+            }
+
+            if (_requestItem.query.attributeCreationHints.confidentiality !== attribute.confidentiality) {
+                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} RelationshipAttribute has not the queried confidentiality.`));
+            }
+
             if (_requestItem.query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} RelationshipAttribute is not of the queried RelationshipAttribute Value Type.`)
