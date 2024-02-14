@@ -4,7 +4,7 @@ import { IQLQueryJSON, ReadAttributeRequestItemJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
 import { ConsumptionServices, LocalAttributeDTO, LocalRequestDTO, MessageDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { establishRelationship, RuntimeServiceProvider, syncUntilHasMessages } from "../lib";
+import { establishRelationship, RuntimeServiceProvider, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../lib";
 
 /* Disable timeout errors if we're debugging */
 if (process.env.NODE_OPTIONS !== undefined && process.env.NODE_OPTIONS.search("inspect") !== -1) {
@@ -143,20 +143,13 @@ describe("IQL Query", () => {
         expect(triggeredEvent!.data.request.id).toBe(result.value.id);
     });
 
-    test("recipient: sync the Message with the IQL Request", async () => {
-        const result = await syncUntilHasMessages(rTransportServices);
-
-        expect(result).toHaveLength(1);
-
-        rRequestMessage = result[0];
-    });
-
-    test("recipient: create an incoming Request from the IQL Message content", async () => {
+    test("recipient: sync the Message with the IQL Request and create an incoming Request from the IQL Message content", async () => {
         let triggeredEvent: IncomingRequestReceivedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestReceivedEvent, (event) => {
             triggeredEvent = event;
         });
 
+        rRequestMessage = await syncUntilHasMessageWithRequest(rTransportServices, sLocalRequest.id);
         const result = await rConsumptionServices.incomingRequests.received({
             receivedRequest: rRequestMessage.content,
             requestSourceId: rRequestMessage.id
@@ -320,20 +313,13 @@ describe("IQL Query", () => {
         expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Completed);
     });
 
-    test("sender: sync Message with Response", async () => {
-        const result = await syncUntilHasMessages(sTransportServices);
-
-        expect(result).toHaveLength(1);
-
-        sResponseMessage = result[0];
-    });
-
-    test("sender: complete the outgoing Request with Response from Message", async () => {
+    test("sender: sync Message with Response and complete the outgoing Request with Response from Message", async () => {
         let triggeredEvent: OutgoingRequestStatusChangedEvent | undefined;
         sEventBus.subscribeOnce(OutgoingRequestStatusChangedEvent, (event) => {
             triggeredEvent = event;
         });
 
+        sResponseMessage = await syncUntilHasMessageWithResponse(sTransportServices, sLocalRequest.id);
         const result = await sConsumptionServices.outgoingRequests.complete({
             messageId: sResponseMessage.id,
             receivedResponse: sResponseMessage.content

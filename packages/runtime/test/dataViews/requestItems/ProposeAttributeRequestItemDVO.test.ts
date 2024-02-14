@@ -15,7 +15,7 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages, syncUntilHasMessageWithRequest } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -91,10 +91,7 @@ beforeAll(async () => {
     });
 
     senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-
-    const messages = await syncUntilHasMessages(transportServices2, 1);
-
-    recipientMessage = messages[0];
+    recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
 
     await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 }, 30000);

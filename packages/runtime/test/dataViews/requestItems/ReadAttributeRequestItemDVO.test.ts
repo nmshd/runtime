@@ -16,7 +16,7 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages, syncUntilHasMessageWithRequest } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -76,12 +76,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         });
 
         senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-
-        const messages = await syncUntilHasMessages(transportServices2, 1);
-        if (messages.length < 1) {
-            throw new Error("Not enough messages synced");
-        }
-        recipientMessage = messages[0];
+        recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
 
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
     }, 30000);
@@ -308,12 +303,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         });
 
         senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-
-        const messages = await syncUntilHasMessages(transportServices2, 1);
-        if (messages.length < 1) {
-            throw new Error("Not enough messages synced");
-        }
-        recipientMessage = messages[0];
+        recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
 
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
     }, 30000);
@@ -530,12 +520,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         });
 
         senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-
-        const messages = await syncUntilHasMessages(transportServices2, 1);
-        if (messages.length < 1) {
-            throw new Error("Not enough messages synced");
-        }
-        recipientMessage = messages[0];
+        recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
 
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
     }, 30000);

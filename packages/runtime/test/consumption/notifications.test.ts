@@ -2,7 +2,14 @@ import { ConsumptionIds, LocalNotificationStatus } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
 import { CoreIdHelper } from "@nmshd/transport";
 import { ConsumptionServices, TransportServices } from "../../src";
-import { establishRelationship, RuntimeServiceProvider, sendAndReceiveNotification, syncUntilHasMessages, TestNotificationItem, TestNotificationItemProcessor } from "../lib";
+import {
+    establishRelationship,
+    RuntimeServiceProvider,
+    sendAndReceiveNotification,
+    syncUntilHasMessageWithNotification,
+    TestNotificationItem,
+    TestNotificationItemProcessor
+} from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -47,11 +54,11 @@ describe("Notifications", () => {
     });
 
     test("receivedNotification", async () => {
-        const notificationToSend = Notification.from({ id: await ConsumptionIds.notification.generate(), items: [TestNotificationItem.from({})] });
+        const id = await ConsumptionIds.notification.generate();
+        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
         await sTransportServices.messages.sendMessage({ recipients: [rAddress], content: notificationToSend.toJSON() });
 
-        const messages = await syncUntilHasMessages(rTransportServices, 1);
-        const message = messages[0];
+        const message = await syncUntilHasMessageWithNotification(rTransportServices, id);
 
         const notification = await rConsumptionServices.notifications.receivedNotification({ messageId: message.id });
         expect(notification).toBeSuccessful();

@@ -12,7 +12,7 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages, syncUntilHasMessageWithRequest } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -60,12 +60,7 @@ beforeAll(async () => {
     });
 
     senderMessage = await sendMessage(sTransportServices, rAddress, localRequest.value.content);
-
-    const messages = await syncUntilHasMessages(rTransportServices, 1);
-    if (messages.length < 1) {
-        throw new Error("Not enough messages synced");
-    }
-    recipientMessage = messages[0];
+    recipientMessage = await syncUntilHasMessageWithRequest(rTransportServices, localRequest.value.id);
 
     await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 }, 30000);
