@@ -127,6 +127,22 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
         }
 
+        if (_requestItem.query instanceof IdentityAttributeQuery || _requestItem.query instanceof RelationshipAttributeQuery) {
+            if (
+                (!_requestItem.query.validFrom && attribute.validFrom !== undefined) ||
+                (_requestItem.query.validFrom && attribute.validFrom && _requestItem.query.validFrom.isBefore(attribute.validFrom))
+            ) {
+                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute is not valid in the queried time frame.`));
+            }
+
+            if (
+                (!_requestItem.query.validTo && attribute.validTo !== undefined) ||
+                (_requestItem.query.validTo && attribute.validTo && _requestItem.query.validTo.isAfter(attribute.validTo))
+            ) {
+                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery(`The ${existingOrNew} Attribute is not valid in the queried time frame.`));
+            }
+        }
+
         return ValidationResult.success();
     }
 

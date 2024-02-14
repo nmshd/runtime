@@ -871,6 +871,158 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 message: /The new RelationshipAttribute has not the queried confidentiality./
             });
         });
+
+        test("returns an error when an IdentityAttribute is not valid in the queried time frame", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ validTo: "2024-02-14T09:35:12.824Z", valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: accountController.identity.address.toString(),
+                    validFrom: "2024-02-14T08:47:35.077Z",
+                    validTo: "2024-02-14T09:35:12.824Z",
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The new Attribute is not valid in the queried time frame./
+            });
+        });
+
+        test("returns an error when a RelationshipAttribute is not valid in the queried time frame", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: RelationshipAttributeQuery.from({
+                    owner: sender.toString(),
+                    key: "AKey",
+                    validFrom: "2024-02-14T08:47:35.077Z",
+                    validTo: "2024-02-14T09:35:12.824Z",
+                    attributeCreationHints: {
+                        valueType: "ProprietaryString",
+                        title: "ATitle",
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "RelationshipAttribute",
+                    key: "AKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: sender.toString(),
+                    validFrom: "2024-02-14T08:47:35.077Z",
+                    validTo: "2024-02-14T09:30:00.000Z",
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "ATitle",
+                        value: "AStringValue"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The new Attribute is not valid in the queried time frame./
+            });
+        });
+
+        test("can be called with properties validFrom and validTo used in the query", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: RelationshipAttributeQuery.from({
+                    owner: sender.toString(),
+                    key: "AKey",
+                    validFrom: "2024-02-14T08:47:35.077Z",
+                    validTo: "2024-02-14T09:35:12.824Z",
+                    attributeCreationHints: {
+                        valueType: "ProprietaryString",
+                        title: "ATitle",
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "RelationshipAttribute",
+                    key: "AKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: sender.toString(),
+                    validFrom: "2024-02-14T08:40:35.077Z",
+                    validTo: "2024-02-14T09:35:12.824Z",
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "ATitle",
+                        value: "AStringValue"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).successfulValidationResult();
+        });
     });
 
     describe("accept", function () {
