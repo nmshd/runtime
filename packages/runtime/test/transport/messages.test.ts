@@ -1,5 +1,5 @@
 import { CoreDate } from "@nmshd/transport";
-import { GetMessagesQuery, MessageSentEvent } from "../../src";
+import { GetMessagesQuery, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
 import {
     ensureActiveRelationship,
     establishRelationship,
@@ -159,6 +159,8 @@ describe("Mark Message as un-/read", () => {
         expect(updatedMessage.wasReadAt).toBeDefined();
         const actualReadTime = CoreDate.from(updatedMessage.wasReadAt!);
         expect(actualReadTime.isSameOrAfter(expectedReadTime)).toBe(true);
+
+        await expect(client2.eventBus).toHavePublished(MessageWasReadAtChangedEvent, (m) => m.data.id === messageId);
     });
 
     test("Mark Message as unread", async () => {
@@ -168,10 +170,15 @@ describe("Mark Message as un-/read", () => {
         expect(message.wasReadAt).toBeUndefined();
 
         await client2.transport.messages.markMessageAsRead({ id: messageId });
+        // reset event bus to not have the event from the previous call
+        client2.eventBus.reset();
+
         const updatedMessageResult = await client2.transport.messages.markMessageAsUnread({ id: messageId });
 
         const updatedMessage = updatedMessageResult.value;
         expect(updatedMessage.wasReadAt).toBeUndefined();
+
+        await expect(client2.eventBus).toHavePublished(MessageWasReadAtChangedEvent, (m) => m.data.id === messageId);
     });
 });
 
