@@ -278,7 +278,13 @@ describe("IQL Query", () => {
 
     test("recipient: send Response via Message", async () => {
         const result = await rTransportServices.messages.sendMessage({
-            content: rLocalRequest.response!.content,
+            content: {
+                "@type": "ResponseWrapper",
+                requestId: sLocalRequest.id,
+                requestSourceReference: sRequestMessage.id,
+                requestSourceType: "Message",
+                response: rLocalRequest.response!.content
+            },
             recipients: [(await sTransportServices.account.getIdentityInfo()).value.address]
         });
 
@@ -286,7 +292,7 @@ describe("IQL Query", () => {
 
         rResponseMessage = result.value;
 
-        expect(rResponseMessage.content["@type"]).toBe("Response");
+        expect(rResponseMessage.content["@type"]).toBe("ResponseWrapper");
     });
 
     test("recipient: complete incoming Request", async () => {
@@ -322,7 +328,7 @@ describe("IQL Query", () => {
         sResponseMessage = await syncUntilHasMessageWithResponse(sTransportServices, sLocalRequest.id);
         const result = await sConsumptionServices.outgoingRequests.complete({
             messageId: sResponseMessage.id,
-            receivedResponse: sResponseMessage.content
+            receivedResponse: sResponseMessage.content.response
         });
 
         expect(result).toBeSuccessful();
