@@ -87,7 +87,7 @@ export async function syncUntilHasMessageWithRequest(transportServices: Transpor
 
 export async function syncUntilHasMessageWithResponse(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
     const filterResponseMessagesByRequestId = (syncResult: SyncEverythingResponse) => {
-        return syncResult.messages.filter((m) => (m.content["@type"] === "Response" || m.content["@type"] === "ResponseWrapper") && m.content.requestId === requestId.toString());
+        return syncResult.messages.filter((m) => m.content["@type"] === "ResponseWrapper" && m.content.requestId === requestId.toString());
     };
     const syncResult = await syncUntil(transportServices, (syncResult) => filterResponseMessagesByRequestId(syncResult).length !== 0);
     return filterResponseMessagesByRequestId(syncResult)[0];
