@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreErrors } from "@nmshd/consumption/src/consumption/CoreErrors";
 import { ValidationResult } from "@nmshd/consumption/src/modules/common/ValidationResult";
+import { RuntimeErrors } from "@nmshd/runtime/src/useCases/common";
 import nameOf from "easy-tsnameof";
 import { DateTime } from "luxon";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
@@ -49,11 +49,11 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
 
     private validateDate(): ValidationResult {
         if (this.month.value === 2 && (this.day.value === 31 || this.day.value === 30 || (!this.withinLeapYear() && this.day.value === 29))) {
-            return ValidationResult.error(CoreErrors.attributes.invalidPropertyValue("The BirthDate is not a valid date."));
+            ValidationResult.error(RuntimeErrors.serval.requestDeserialization("The BirthDate is not a valid date."));
         }
 
         if ((this.month.value === 4 || this.month.value === 6 || this.month.value === 9 || this.month.value === 11) && this.day.value === 31) {
-            return ValidationResult.error(CoreErrors.attributes.invalidPropertyValue("The BirthDate is not a valid date."));
+            return ValidationResult.error(RuntimeErrors.serval.requestDeserialization("The BirthDate is not a valid date."));
         }
 
         return ValidationResult.success();
