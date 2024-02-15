@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
     IdentityAttributeQuery,
+    IQLQuery,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
     RelationshipAttributeConfidentiality,
@@ -433,7 +434,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when an IdentityAttribute was queried and the peer tries to respond with a RelationshipAttribute", async function () {
+        test("returns an error when an IdentityAttribute was queried by an IdentityAttributeQuery and the peer tries to respond with a RelationshipAttribute", async function () {
             const sender = CoreAddress.from("id0");
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -519,7 +520,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when an IdentityAttribute of a specific type was queried and the peer tries to respond with an IdentityAttribute of another type", async function () {
+        test("returns an error when an IdentityAttribute of a specific type was queried by an IdentityAttributeQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
             const sender = CoreAddress.from("id0");
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -599,7 +600,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns an error when the number of tags of the IdentityAttribute do not match the number of queried tags", async function () {
+        test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IdentityAttributeQuery", async function () {
             const sender = CoreAddress.from("id0");
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -641,12 +642,220 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when the tags of the IdentityAttribute do not match the queried tags", async function () {
+        test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IdentityAttributeQuery", async function () {
             const sender = CoreAddress.from("id0");
 
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ tags: ["tagA", "tagB", "tagC"], valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: accountController.identity.address.toString(),
+                    tags: ["tagD", "tagE", "tagF"],
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The tags of the provided IdentityAttribute do not match the queried tags./
+            });
+        });
+
+        test("returns an error when an IdentityAttribute was queried by an IQLQuery and the peer tries to respond with a RelationshipAttribute", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "RelationshipAttribute",
+                    key: "AKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: accountController.identity.address.toString(),
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "ATitle",
+                        value: "AStringValue"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
+            });
+        });
+
+        test("returns an error when an IdentityAttribute of a specific type was queried by an IQLQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: accountController.identity.address.toString(),
+                    value: {
+                        "@type": "DisplayName",
+                        value: "ADisplayName"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The provided IdentityAttribute is not of the queried IdentityAttribute Value Type./
+            });
+        });
+
+        test("can be called with property tags used in the IQLQuery", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["tagA", "tagB", "tagC"] } })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: accountController.identity.address.toString(),
+                    tags: ["tagA", "tagB", "tagC"],
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).successfulValidationResult();
+        });
+
+        test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IQLQuery", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: accountController.identity.address.toString(),
+                    tags: ["Atag"],
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: /The number of tags of the provided IdentityAttribute do not match the number of queried tags./
+            });
+        });
+
+        test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IQLQuery", async function () {
+            const sender = CoreAddress.from("id0");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["tagA", "tagB", "tagC"] } })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
