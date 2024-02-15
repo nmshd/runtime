@@ -78,19 +78,23 @@ function validateAnswerToIQLQuery(query: IQLQuery, attribute: IdentityAttribute 
         );
     }
 
-    if (query.attributeCreationHints !== undefined && query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
-        return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
-    }
+    if (query.attributeCreationHints !== undefined) {
+        if (query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
+            return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
+        }
 
-    if (query.attributeCreationHints?.tags?.length !== attribute.tags?.length) {
-        return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The number of tags of the provided IdentityAttribute do not match the number of queried tags."));
-    }
+        if (query.attributeCreationHints.tags?.length !== attribute.tags?.length) {
+            return ValidationResult.error(
+                CoreErrors.requests.invalidlyAnsweredQuery("The number of tags of the provided IdentityAttribute do not match the number of queried tags.")
+            );
+        }
 
-    if (query.attributeCreationHints?.tags !== undefined && attribute.tags !== undefined) {
-        const sortedQueriedTags = query.attributeCreationHints.tags.sort();
-        const sortedAttributeTags = attribute.tags.sort();
-        if (!sortedQueriedTags.every((tag, index) => tag === sortedAttributeTags[index])) {
-            return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The tags of the provided IdentityAttribute do not match the queried tags."));
+        if (query.attributeCreationHints.tags !== undefined && attribute.tags !== undefined) {
+            const sortedQueriedTags = query.attributeCreationHints.tags.sort();
+            const sortedAttributeTags = attribute.tags.sort();
+            if (!sortedQueriedTags.every((tag, index) => tag === sortedAttributeTags[index])) {
+                return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The tags of the provided IdentityAttribute do not match the queried tags."));
+            }
         }
     }
 
