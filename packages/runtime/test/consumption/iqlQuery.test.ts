@@ -91,7 +91,11 @@ describe("IQL Query", () => {
                         mustBeAccepted: false,
                         query: {
                             "@type": "IQLQuery",
-                            queryString: "#language:de"
+                            queryString: "#language:de",
+                            attributeCreationHints: {
+                                valueType: "GivenName",
+                                tags: ["language:de"]
+                            }
                         }
                     }
                 ],
