@@ -5,7 +5,7 @@ import { nameof } from "ts-simple-nameof";
 import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId, ICoreAddress, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
-import { MessageSentEvent } from "../../events";
+import { MessageSentEvent, MessageWasReadAtChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { File } from "../files/local/File";
 import { FileReference } from "../files/transmission/FileReference";
@@ -215,6 +215,9 @@ export class MessageController extends TransportController {
 
         message.wasReadAt = CoreDate.utc();
         await this.messages.update(messageDoc, message);
+
+        this.eventBus.publish(new MessageWasReadAtChangedEvent(this.parent.identity.address.toString(), message));
+
         return message;
     }
 
@@ -229,6 +232,8 @@ export class MessageController extends TransportController {
 
         message.wasReadAt = undefined;
         await this.messages.update(messageDoc, message);
+
+        this.eventBus.publish(new MessageWasReadAtChangedEvent(this.parent.identity.address.toString(), message));
 
         return message;
     }
