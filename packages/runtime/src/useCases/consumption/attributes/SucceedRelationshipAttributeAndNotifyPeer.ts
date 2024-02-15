@@ -44,7 +44,7 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
             return Result.fail(CoreErrors.attributes.predecessorDoesNotExist());
         }
         if (!predecessor.isOwnSharedRelationshipAttribute(this.accountController.identity.address, predecessor.shareInfo?.peer)) {
-            return Result.fail(CoreErrors.attributes.invalidPredecessor());
+            return Result.fail(CoreErrors.attributes.predecessorNotValidOwnSharedRelationshipAttribute());
         }
 
         const notificationId = await ConsumptionIds.notification.generate();

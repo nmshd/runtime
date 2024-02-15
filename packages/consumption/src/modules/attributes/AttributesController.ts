@@ -536,11 +536,11 @@ export class AttributesController extends ConsumptionBaseController {
         });
 
         if (!predecessor.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.invalidPredecessor("Predecessor is not a valid repository attribute."));
+            return ValidationResult.error(CoreErrors.attributes.predecessorNotValidRepositoryAttribute());
         }
 
         if (!successor.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.invalidSuccessor("Successor is not a valid repository attribute."));
+            return ValidationResult.error(CoreErrors.attributes.successorNotValidRepositoryAttribute());
         }
 
         return ValidationResult.success();
@@ -572,11 +572,11 @@ export class AttributesController extends ConsumptionBaseController {
         });
 
         if (!predecessor.isOwnSharedIdentityAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.invalidPredecessor("Predecessor is not a valid own shared identity attribute."));
+            return ValidationResult.error(CoreErrors.attributes.predecessorNotValidOwnSharedIdentityAttribute());
         }
 
         if (!successor.isOwnSharedIdentityAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.invalidSuccessor("Successor is not a valid peer shared identity attribute."));
+            return ValidationResult.error(CoreErrors.attributes.successorNotValidOwnSharedIdentityAttribute());
         }
 
         if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
@@ -590,10 +590,10 @@ export class AttributesController extends ConsumptionBaseController {
         const predecessorSourceVersionIds = (await this.getVersionsOfAttribute(predecessor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
         const successorSourceVersionIds = (await this.getVersionsOfAttribute(successor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
         if (typeof predecessorSource === "undefined" || !predecessorSource.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.invalidSuccessionOfOwnSharedIdentityAttribute());
+            return ValidationResult.error(CoreErrors.attributes.predecessorSourceAttributeInvalid());
         }
         if (typeof successorSource === "undefined" || !successorSource.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.invalidSuccessionOfOwnSharedIdentityAttribute("Source attribute is not a valid repository attribute."));
+            return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeInvalid());
         }
         if (
             typeof successorSource.succeeds === "undefined" ||
@@ -601,17 +601,13 @@ export class AttributesController extends ConsumptionBaseController {
             typeof predecessorSource.succeededBy === "undefined" ||
             !successorSourceVersionIds.some((id) => id === predecessorSource.succeededBy?.toString())
         ) {
-            return ValidationResult.error(
-                CoreErrors.attributes.invalidSuccessionOfOwnSharedIdentityAttribute("Predecessor source attribute is not succeeded by successor source attribute.")
-            );
+            return ValidationResult.error(CoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
         }
 
         const repositoryAttributeContentMatchesItsSharedAttribute =
             _.isEqual(predecessorSource.content, predecessor.content) && _.isEqual(successorSource.content, successor.content);
         if (!repositoryAttributeContentMatchesItsSharedAttribute) {
-            return ValidationResult.error(
-                CoreErrors.attributes.invalidSuccessionOfOwnSharedIdentityAttribute("Successor source attribute contents don't match successor shared attribute copy.")
-            );
+            return ValidationResult.error(CoreErrors.attributes.sourceContentNotEqualToCopyContent());
         }
 
         return ValidationResult.success();
@@ -643,11 +639,11 @@ export class AttributesController extends ConsumptionBaseController {
         });
 
         if (!predecessor.isOwnSharedRelationshipAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.invalidPredecessor("Predecessor is not a valid own shared relationship attribute."));
+            return ValidationResult.error(CoreErrors.attributes.predecessorNotValidOwnSharedIdentityAttribute());
         }
 
         if (!successor.isOwnSharedRelationshipAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.invalidSuccessor("Successor is not a valid own shared relationship attribute."));
+            return ValidationResult.error(CoreErrors.attributes.successorNotValidOwnSharedIdentityAttribute());
         }
 
         if (successor.content.key !== predecessor.content.key) {
@@ -687,11 +683,11 @@ export class AttributesController extends ConsumptionBaseController {
         });
 
         if (!predecessor.isPeerSharedIdentityAttribute()) {
-            return ValidationResult.error(CoreErrors.attributes.invalidPredecessor("Predecessor is not a valid peer shared identity attribute."));
+            return ValidationResult.error(CoreErrors.attributes.predecessorNotValidPeerSharedIdentityAttribute());
         }
 
         if (!successor.isPeerSharedIdentityAttribute()) {
-            return ValidationResult.error(CoreErrors.attributes.invalidSuccessor("Successor is not a valid peer shared identity attribute."));
+            return ValidationResult.error(CoreErrors.attributes.successorNotValidPeerSharedIdentityAttribute());
         }
 
         if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
@@ -727,11 +723,11 @@ export class AttributesController extends ConsumptionBaseController {
         });
 
         if (!predecessor.isPeerSharedRelationshipAttribute()) {
-            return ValidationResult.error(CoreErrors.attributes.invalidPredecessor("Predecessor is not a valid peer shared relationship attribute."));
+            return ValidationResult.error(CoreErrors.attributes.predecessorNotValidPeerSharedRelationshipAttribute());
         }
 
         if (!successor.isPeerSharedRelationshipAttribute()) {
-            return ValidationResult.error(CoreErrors.attributes.invalidSuccessor("Successor is not a valid peer shared relationship attribute."));
+            return ValidationResult.error(CoreErrors.attributes.successorNotValidPeerSharedRelationshipAttribute());
         }
 
         if (successor.content.key !== predecessor.content.key) {
@@ -771,9 +767,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (typeof successor.succeeds !== "undefined" && !predecessorId.equals(successor.succeeds.toString())) {
-            return ValidationResult.error(
-                CoreErrors.attributes.invalidPredecessor("The predecessor's id and the explicitly set value for the successor's succeeds field don't match.")
-            );
+            return ValidationResult.error(CoreErrors.attributes.differentPredecessorNamedInSuccessor());
         }
 
         if (typeof successor.succeededBy !== "undefined") {

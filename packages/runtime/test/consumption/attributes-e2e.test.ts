@@ -927,7 +927,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             attributeId: sRASuccessor1.id,
             peer: services2.address
         });
-        expect(result2).toBeAnError(/.*/, "error.consumption.attributes.invalidSuccessionOfOwnSharedIdentityAttribute");
+        expect(result2).toBeAnError(/.*/, "error.consumption.attributes.successorSourceDoesNotSucceedPredecessorSource");
     });
 
     test("should prevent attempts of notifying the same peer about the same attribute succession more than once", async () => {
