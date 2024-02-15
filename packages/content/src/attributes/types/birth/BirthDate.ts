@@ -1,8 +1,8 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { ValidationResult } from "@nmshd/consumption/src/modules/common/ValidationResult";
-import { RuntimeErrors } from "@nmshd/runtime/src/useCases/common";
+import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
+import { ConsumptionError } from "@nmshd/consumption/src/consumption/ConsumptionError";
 import nameOf from "easy-tsnameof";
 import { DateTime } from "luxon";
+import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, ValueHints } from "../../hints";
@@ -39,24 +39,28 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
     @validate()
     public year: BirthYear;
 
-    public constructor(day: BirthDay, month: BirthMonth, year: BirthYear) {
-        super();
-        this.day = day;
-        this.month = month;
-        this.year = year;
-        this.validateDate();
-    }
-
-    private validateDate(): ValidationResult {
-        if (this.month.value === 2 && (this.day.value === 31 || this.day.value === 30 || (!this.withinLeapYear() && this.day.value === 29))) {
-            ValidationResult.error(RuntimeErrors.serval.requestDeserialization("The BirthDate is not a valid date."));
+    protected static override postFrom<T extends Serializable>(value: T): T {
+        if (!(value instanceof BirthDate)) {
+            throw new ConsumptionError("An unexpected error with a BirthDate occured.");
         }
 
-        if ((this.month.value === 4 || this.month.value === 6 || this.month.value === 9 || this.month.value === 11) && this.day.value === 31) {
-            return ValidationResult.error(RuntimeErrors.serval.requestDeserialization("The BirthDate is not a valid date."));
+        if (value.month.value === 2 && (value.day.value === 31 || value.day.value === 30 || (!value.withinLeapYear() && value.day.value === 29))) {
+            throw new ValidationError(
+                BirthDate.name,
+                nameof<BirthDate>((x) => x.day),
+                "The BirthDate is not a valid date. The chosen day does not exist in the chosen month."
+            );
         }
 
-        return ValidationResult.success();
+        if ((value.month.value === 4 || value.month.value === 6 || value.month.value === 9 || value.month.value === 11) && value.day.value === 31) {
+            throw new ValidationError(
+                BirthDate.name,
+                nameof<BirthDate>((x) => x.day),
+                "The BirthDate is not a valid date. The chosen day does not exist in the chosen month."
+            );
+        }
+
+        return value;
     }
 
     private withinLeapYear(): boolean {
