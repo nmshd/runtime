@@ -31,7 +31,8 @@ export class MessageMapper {
             recipients: message.cache.recipients.map((r, i) => this.toRecipient(r, message.relationshipIds[i])),
             createdAt: message.cache.createdAt.toString(),
             attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
-            isOwn: message.isOwn
+            isOwn: message.isOwn,
+            wasReadAt: message.wasReadAt?.toString()
         };
     }
 
@@ -48,7 +49,8 @@ export class MessageMapper {
             recipients: message.cache.recipients.map((r, i) => this.toRecipient(r, message.relationshipIds[i])),
             createdAt: message.cache.createdAt.toString(),
             attachments: message.cache.attachments.map((a) => a.toString()),
-            isOwn: message.isOwn
+            isOwn: message.isOwn,
+            wasReadAt: message.wasReadAt?.toString()
         };
     }
 

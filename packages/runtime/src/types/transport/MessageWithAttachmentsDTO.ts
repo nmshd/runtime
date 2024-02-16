@@ -10,4 +10,5 @@ export interface MessageWithAttachmentsDTO {
     createdAt: string;
     attachments: FileDTO[];
     isOwn: boolean;
+    wasReadAt?: string;
 }

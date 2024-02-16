@@ -270,7 +270,8 @@ export class DataViewExpander {
             statusText: `i18n://dvo.message.${status}`,
             image: "",
             peer: peer,
-            content: message.content
+            content: message.content,
+            wasReadAt: message.wasReadAt
         };
 
         if (message.content["@type"] === "Mail" || message.content["@type"] === "RequestMail") {

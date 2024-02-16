@@ -16,7 +16,14 @@ import {
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent
 } from "./consumption";
-import { MessageDeliveredEvent, MessageReceivedEvent, MessageSentEvent, PeerRelationshipTemplateLoadedEvent, RelationshipChangedEvent } from "./transport";
+import {
+    MessageDeliveredEvent,
+    MessageReceivedEvent,
+    MessageSentEvent,
+    MessageWasReadAtChangedEvent,
+    PeerRelationshipTemplateLoadedEvent,
+    RelationshipChangedEvent
+} from "./transport";
 
 export class EventProxy {
     private readonly subscriptionIds: number[] = [];
@@ -45,6 +52,10 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(transport.MessageSentEvent, (event) => {
             this.targetEventBus.publish(new MessageSentEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.MessageWasReadAtChangedEvent, (event) => {
+            this.targetEventBus.publish(new MessageWasReadAtChangedEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.PeerRelationshipTemplateLoadedEvent, (event) => {
