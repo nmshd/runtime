@@ -23,7 +23,17 @@ import {
     RelationshipTemplateProcessedResult,
     TransportServices
 } from "../../src";
-import { ensureActiveRelationship, exchangeTemplate, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessages, syncUntilHasRelationships } from "../lib";
+import {
+    ensureActiveRelationship,
+    exchangeTemplate,
+    MockEventBus,
+    RuntimeServiceProvider,
+    sendMessage,
+    syncUntilHasMessages,
+    syncUntilHasMessageWithRequest,
+    syncUntilHasMessageWithResponse,
+    syncUntilHasRelationships
+} from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -166,6 +176,8 @@ describe("RequestModule", () => {
     });
 
     describe("Relationships / RelationshipTemplates (onExistingRelationship)", () => {
+        let requestId: string;
+
         beforeAll(async () => await ensureActiveRelationship(sTransportServices, rTransportServices));
 
         test("creates a request from onExistingRelationship if a relationship already exists", async () => {
@@ -198,6 +210,7 @@ describe("RequestModule", () => {
 
             const requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
             const request = requests[0];
+            requestId = request.id;
 
             const requestAfterReject = (await rConsumptionServices.incomingRequests.reject({ requestId: request.id, items: [{ accept: false }] })).value;
 
@@ -207,11 +220,9 @@ describe("RequestModule", () => {
         });
 
         test("receives the rejected Request by Message", async () => {
-            const message = (await syncUntilHasMessages(sTransportServices, 1))[0];
+            await syncUntilHasMessageWithResponse(sTransportServices, requestId);
 
             await sEventBus.waitForRunningEventHandlers();
-
-            const requestId = message.content.requestId;
 
             await expect(sEventBus).toHavePublished(OutgoingRequestCreatedAndCompletedEvent, (e) => e.data.id === requestId);
 
@@ -227,6 +238,7 @@ describe("RequestModule", () => {
 
             const requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
             const request = requests[0];
+            requestId = request.id;
 
             const requestAfterReject = (await rConsumptionServices.incomingRequests.accept({ requestId: request.id, items: [{ accept: false }] })).value;
 
@@ -236,11 +248,9 @@ describe("RequestModule", () => {
         });
 
         test("receives the accepted Request by Message", async () => {
-            const message = (await syncUntilHasMessages(sTransportServices, 1))[0];
+            await syncUntilHasMessageWithResponse(sTransportServices, requestId);
 
             await sEventBus.waitForRunningEventHandlers();
-
-            const requestId = message.content.requestId;
 
             await expect(sEventBus).toHavePublished(OutgoingRequestCreatedAndCompletedEvent, (e) => e.data.id === requestId);
 
@@ -303,8 +313,7 @@ describe("RequestModule", () => {
         });
 
         test("the incoming request is created and moved to status DecisionRequired", async () => {
-            const messages = await syncUntilHasMessages(rTransportServices, 1);
-            expect(messages).toHaveLength(1);
+            await syncUntilHasMessageWithRequest(rTransportServices, requestId);
 
             const incomingRequestReceivedEvent = await rEventBus.waitForEvent(IncomingRequestReceivedEvent);
             const request = incomingRequestReceivedEvent.data;
@@ -341,8 +350,7 @@ describe("RequestModule", () => {
         });
 
         test("processes the response", async () => {
-            const messages = await syncUntilHasMessages(sTransportServices, 1);
-            expect(messages).toHaveLength(1);
+            await syncUntilHasMessageWithResponse(sTransportServices, requestId);
 
             const outgoingRequestStatusChangedEvent = await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
             expect(outgoingRequestStatusChangedEvent.data.newStatus).toBe(LocalRequestStatus.Completed);
