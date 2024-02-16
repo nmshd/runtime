@@ -64,7 +64,7 @@ export class DeliveryBoxAddress extends AbstractAddress implements IDeliveryBoxA
     public state?: State;
 
     public static override get valueHints(): ValueHints {
-        return ValueHints.from({
+        return super.valueHints.copyWith({
             propertyHints: {
                 [this.propertyNames.userId.$path]: ValueHints.from({}),
                 [this.propertyNames.deliveryBoxId.$path]: ValueHints.from({}),
