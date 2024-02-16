@@ -51,7 +51,14 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
                 "The BirthDate is not a valid date. The chosen day does not exist in the chosen month."
             );
         }
-        if (value.month.value === 2 && !value.isInLeapYear() && value.day.value === 29) {
+
+        const valueIsInLeapYear = DateTime.fromObject({
+            day: value.day.value,
+            month: value.month.value,
+            year: value.year.value
+        }).isInLeapYear;
+
+        if (value.month.value === 2 && !valueIsInLeapYear && value.day.value === 29) {
             throw new ValidationError(
                 BirthDate.name,
                 nameof<BirthDate>((x) => x.year),
@@ -60,10 +67,6 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
         }
 
         return value;
-    }
-
-    private isInLeapYear(): boolean {
-        return (this.year.value % 4 === 0 && this.year.value % 100 !== 0) || this.year.value % 400 === 0;
     }
 
     public static get valueHints(): ValueHints {
