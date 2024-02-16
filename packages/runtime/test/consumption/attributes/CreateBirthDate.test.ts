@@ -1,6 +1,7 @@
 import { UserfriendlyApplicationError } from "@nmshd/app-runtime/src/UserfriendlyApplicationError";
 import { AttributesController } from "@nmshd/consumption";
-import { CreateRepositoryAttributeRequest, CreateRepositoryAttributeUseCase } from "@nmshd/runtime/src/useCases/consumption/attributes/CreateRepositoryAttribute";
+import { BirthDate } from "@nmshd/content";
+import { CreateRepositoryAttributeRequest } from "@nmshd/runtime/src/useCases/consumption/attributes/CreateRepositoryAttribute";
 import { RuntimeServiceProvider, TestRuntimeServices } from "@nmshd/runtime/test/lib";
 import { CoreId } from "@nmshd/transport";
 
@@ -33,7 +34,7 @@ describe("creation of RepositoryAttributes of type BirthDate", () => {
         await cleanupAttributes();
     });
 
-    describe(CreateRepositoryAttributeUseCase.name, () => {
+    describe(BirthDate.name, () => {
         test("can create a RepositoryAttribute of type BirthDate", async function () {
             const request: CreateRepositoryAttributeRequest = {
                 content: {
@@ -66,16 +67,17 @@ describe("creation of RepositoryAttributes of type BirthDate", () => {
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
 
             expect(result.isError).toBe(true);
+            expect(UserfriendlyApplicationError.fromError(result.error).code).toBe("error.runtime.requestDeserialization");
             expect(UserfriendlyApplicationError.fromError(result.error).message).toBe("BirthMonth.value:Number :: must be an integer value between 1 and 12");
         });
 
-        test("returns an error when trying to create an invalid BirthDate with cross-component violated validation criteria", async function () {
+        test("returns an error when trying to create an invalid BirthDate with cross-component violated validation criteria for June", async function () {
             const request: CreateRepositoryAttributeRequest = {
                 content: {
                     value: {
                         "@type": "BirthDate",
                         day: 31,
-                        month: 2,
+                        month: 6,
                         year: 1990
                     }
                 }
@@ -84,8 +86,30 @@ describe("creation of RepositoryAttributes of type BirthDate", () => {
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
 
             expect(result.isError).toBe(true);
+            expect(UserfriendlyApplicationError.fromError(result.error).code).toBe("error.runtime.requestDeserialization");
             expect(UserfriendlyApplicationError.fromError(result.error).message).toBe(
                 "BirthDate.day :: The BirthDate is not a valid date. The chosen day does not exist in the chosen month."
+            );
+        });
+
+        test("returns an error when trying to create an invalid BirthDate with cross-component violated validation criteria for February", async function () {
+            const request: CreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "BirthDate",
+                        day: 29,
+                        month: 2,
+                        year: 2010
+                    }
+                }
+            };
+
+            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+
+            expect(result.isError).toBe(true);
+            expect(UserfriendlyApplicationError.fromError(result.error).code).toBe("error.runtime.requestDeserialization");
+            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe(
+                "BirthDate.year :: The BirthDate is not a valid date. The 29 February only exists in leap years."
             );
         });
     });
