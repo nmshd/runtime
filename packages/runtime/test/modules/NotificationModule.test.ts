@@ -2,7 +2,7 @@ import { ConsumptionIds, LocalNotificationStatus } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
 import { ConsumptionServices, TransportServices } from "../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, syncUntilHasMessages, TestNotificationItem, TestNotificationItemProcessor } from "../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, syncUntilHasMessageWithNotification, TestNotificationItem, TestNotificationItemProcessor } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -53,7 +53,7 @@ describe("NotificationModule", () => {
     });
 
     test("runs received and process when receiving a Message containing a Notification", async () => {
-        await syncUntilHasMessages(rTransportServices);
+        await syncUntilHasMessageWithNotification(rTransportServices, notificationId);
         await rEventBus.waitForRunningEventHandlers();
 
         const getNotificationResult = await rConsumptionServices.notifications.getNotification({ id: notificationId.toString() });
