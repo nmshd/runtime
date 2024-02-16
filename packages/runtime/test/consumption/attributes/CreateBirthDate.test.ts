@@ -1,7 +1,7 @@
 import { AttributesController } from "@nmshd/consumption";
+import { BirthDate } from "@nmshd/content/src";
 import { RuntimeServiceProvider, TestRuntimeServices } from "@nmshd/runtime/test/lib";
 import { CoreId } from "@nmshd/transport";
-import { BirthDate } from "../../src";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 
