@@ -4,6 +4,7 @@ import { BirthDate } from "@nmshd/content";
 import { CreateRepositoryAttributeRequest } from "@nmshd/runtime/src/useCases/consumption/attributes/CreateRepositoryAttribute";
 import { RuntimeServiceProvider, TestRuntimeServices } from "@nmshd/runtime/test/lib";
 import { CoreId } from "@nmshd/transport";
+import { DateTime } from "luxon";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 
@@ -87,7 +88,7 @@ describe("creation of RepositoryAttributes of type BirthDate", () => {
 
             expect(result.isError).toBe(true);
             expect(UserfriendlyApplicationError.fromError(result.error).code).toBe("error.runtime.requestDeserialization");
-            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe("BirthDate.day, BirthDate.month or BirthDate.year :: The BirthDate is not a valid date.");
+            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe("BirthDate :: The BirthDate is not a valid date.");
         });
 
         test("returns an error when trying to create an invalid BirthDate with cross-component violated validation criteria for February", async function () {
@@ -106,7 +107,28 @@ describe("creation of RepositoryAttributes of type BirthDate", () => {
 
             expect(result.isError).toBe(true);
             expect(UserfriendlyApplicationError.fromError(result.error).code).toBe("error.runtime.requestDeserialization");
-            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe("BirthDate.day, BirthDate.month or BirthDate.year :: The BirthDate is not a valid date.");
+            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe("BirthDate :: The BirthDate is not a valid date.");
+        });
+
+        test("returns an error when trying to create an BirthDate that is in the future", async function () {
+            const currentDateTime = DateTime.utc();
+            const yearInFuture = currentDateTime.year + 1;
+            const request: CreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "BirthDate",
+                        day: 10,
+                        month: 6,
+                        year: yearInFuture
+                    }
+                }
+            };
+
+            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+
+            expect(result.isError).toBe(true);
+            expect(UserfriendlyApplicationError.fromError(result.error).code).toBe("error.runtime.requestDeserialization");
+            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe("BirthDate :: You cannot enter a BirthDate that is in the future.");
         });
     });
 });

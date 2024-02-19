@@ -1,7 +1,7 @@
-import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
+import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import nameOf from "easy-tsnameof";
 import { DateTime } from "luxon";
-import { nameof } from "ts-simple-nameof";
+import { ValidationErrorWithoutProperty } from "../../../ValidationErrorWithoutProperty";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, ValueHints } from "../../hints";
@@ -45,11 +45,11 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
         const isValid = dateTime.isValid;
 
         if (!isValid) {
-            throw new ValidationError(
-                BirthDate.name,
-                `${nameof<BirthDate>((x) => x.day)}, ${BirthDate.name}.${nameof<BirthDate>((x) => x.month)} or ${BirthDate.name}.${nameof<BirthDate>((x) => x.year)}`,
-                "The BirthDate is not a valid date."
-            );
+            throw new ValidationErrorWithoutProperty(BirthDate.name, "The BirthDate is not a valid date.");
+        }
+
+        if (DateTime.utc() < dateTime) {
+            throw new ValidationErrorWithoutProperty(BirthDate.name, "You cannot enter a BirthDate that is in the future.");
         }
 
         return value;
