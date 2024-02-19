@@ -87,9 +87,7 @@ describe("creation of RepositoryAttributes of type BirthDate", () => {
 
             expect(result.isError).toBe(true);
             expect(UserfriendlyApplicationError.fromError(result.error).code).toBe("error.runtime.requestDeserialization");
-            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe(
-                "BirthDate.day :: The BirthDate is not a valid date. The chosen day does not exist in the chosen month."
-            );
+            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe("BirthDate.day, BirthDate.month or BirthDate.year :: The BirthDate is not a valid date.");
         });
 
         test("returns an error when trying to create an invalid BirthDate with cross-component violated validation criteria for February", async function () {
@@ -108,9 +106,7 @@ describe("creation of RepositoryAttributes of type BirthDate", () => {
 
             expect(result.isError).toBe(true);
             expect(UserfriendlyApplicationError.fromError(result.error).code).toBe("error.runtime.requestDeserialization");
-            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe(
-                "BirthDate.year :: The BirthDate is not a valid date. The 29 February only exists in leap years."
-            );
+            expect(UserfriendlyApplicationError.fromError(result.error).message).toBe("BirthDate.day, BirthDate.month or BirthDate.year :: The BirthDate is not a valid date.");
         });
     });
 });

@@ -1,5 +1,4 @@
 import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
-import { ConsumptionError } from "@nmshd/consumption/src/consumption/ConsumptionError";
 import nameOf from "easy-tsnameof";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -41,28 +40,21 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
 
     protected static override postFrom<T extends Serializable>(value: T): T {
         if (!(value instanceof BirthDate)) {
-            throw new ConsumptionError("An unexpected error has occured with a BirthDate.");
-        }
-
-        if ((value.month.value === 2 && value.day.value === 30) || ([2, 4, 6, 9, 11].includes(value.month.value) && value.day.value === 31)) {
             throw new ValidationError(
                 BirthDate.name,
-                nameof<BirthDate>((x) => x.day),
-                "The BirthDate is not a valid date. The chosen day does not exist in the chosen month."
+                `${nameof<BirthDate>((x) => x.day)}, ${BirthDate.name}.${nameof<BirthDate>((x) => x.month)} or ${BirthDate.name}.${nameof<BirthDate>((x) => x.year)}`,
+                "An unexpected error has occured with a BirthDate."
             );
         }
 
-        const valueIsInLeapYear = DateTime.fromObject({
-            day: value.day.value,
-            month: value.month.value,
-            year: value.year.value
-        }).isInLeapYear;
+        const dateTime = DateTime.fromObject({ day: value.day.value, month: value.month.value, year: value.year.value });
+        const isValid = dateTime.isValid;
 
-        if (value.month.value === 2 && !valueIsInLeapYear && value.day.value === 29) {
+        if (!isValid) {
             throw new ValidationError(
                 BirthDate.name,
-                nameof<BirthDate>((x) => x.year),
-                "The BirthDate is not a valid date. The 29 February only exists in leap years."
+                `${nameof<BirthDate>((x) => x.day)}, ${BirthDate.name}.${nameof<BirthDate>((x) => x.month)} or ${BirthDate.name}.${nameof<BirthDate>((x) => x.year)}`,
+                "The BirthDate is not a valid date."
             );
         }
 
