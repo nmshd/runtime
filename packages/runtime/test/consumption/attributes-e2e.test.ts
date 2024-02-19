@@ -207,11 +207,11 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
 });
 
 describe(ShareRepositoryAttributeUseCase.name, () => {
-    let senderRepositoryAttribute: LocalAttributeDTO;
-    let senderOwnSharedIdentityAttribute: LocalAttributeDTO;
-    let recipientPeerSharedIdentityAttribute: LocalAttributeDTO;
+    let sRA: LocalAttributeDTO;
+    let sOSIA: LocalAttributeDTO;
+    let rPSIA: LocalAttributeDTO;
     beforeAll(async () => {
-        senderRepositoryAttribute = (
+        sRA = (
             await services1.consumption.attributes.createRepositoryAttribute({
                 content: {
                     value: {
@@ -226,28 +226,28 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
 
     test("should initialize the sharing of an identity attribute", async () => {
         const shareRequest: ShareRepositoryAttributeRequest = {
-            attributeId: senderRepositoryAttribute.id,
+            attributeId: sRA.id,
             peer: services2.address
         };
         const shareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute(shareRequest);
         expect(shareRequestResult.isSuccess).toBe(true);
 
         const shareRequestId = shareRequestResult.value.id;
-        senderOwnSharedIdentityAttribute = await acceptIncomingShareAttributeRequest(services1, services2, shareRequestId);
+        sOSIA = await acceptIncomingShareAttributeRequest(services1, services2, shareRequestId);
 
-        const recipientPeerSharedIdentityAttributeResult = await services2.consumption.attributes.getAttribute({ id: senderOwnSharedIdentityAttribute.id });
-        expect(recipientPeerSharedIdentityAttributeResult.isSuccess).toBe(true);
-        recipientPeerSharedIdentityAttribute = recipientPeerSharedIdentityAttributeResult.value;
+        const rPSIAResult = await services2.consumption.attributes.getAttribute({ id: sOSIA.id });
+        expect(rPSIAResult.isSuccess).toBe(true);
+        rPSIA = rPSIAResult.value;
 
-        expect(senderOwnSharedIdentityAttribute.content).toStrictEqual(recipientPeerSharedIdentityAttribute.content);
-        expect(senderOwnSharedIdentityAttribute.shareInfo?.sourceAttribute?.toString()).toBe(senderRepositoryAttribute.id);
+        expect(sOSIA.content).toStrictEqual(rPSIA.content);
+        expect(sOSIA.shareInfo?.sourceAttribute?.toString()).toBe(sRA.id);
     });
 
     test("should reject attempts to share the same attribute more than once", async () => {
-        await executeFullShareRepositoryAttributeFlow(services1, services3, senderRepositoryAttribute.id);
+        await executeFullShareRepositoryAttributeFlow(services1, services3, sRA.id);
 
         const repeatedShareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute({
-            attributeId: senderRepositoryAttribute.id,
+            attributeId: sRA.id,
             peer: services3.address
         });
 
@@ -255,7 +255,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
     });
 
     test("should reject sharing an attribute, of which a previous version has been shared", async () => {
-        const predecesssorOwnSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+        const predecesssorOSIA = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "Surname",
@@ -264,9 +264,9 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
             }
         });
 
-        const { successor: successorRepositoryAttribute } = (
+        const { successor: successorRA } = (
             await services1.consumption.attributes.succeedRepositoryAttribute({
-                predecessorId: predecesssorOwnSharedIdentityAttribute.shareInfo!.sourceAttribute!,
+                predecessorId: predecesssorOSIA.shareInfo!.sourceAttribute!,
                 successorContent: {
                     value: {
                         "@type": "Surname",
@@ -277,7 +277,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
         ).value;
 
         const response = await services1.consumption.attributes.shareRepositoryAttribute({
-            attributeId: successorRepositoryAttribute.id,
+            attributeId: successorRA.id,
             peer: services2.address
         });
         expect(response).toBeAnError(/.*/, "error.runtime.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer");
@@ -285,7 +285,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
 
     test("should reject sharing an own shared attribute", async () => {
         const shareRequest: ShareRepositoryAttributeRequest = {
-            attributeId: senderOwnSharedIdentityAttribute.id,
+            attributeId: sOSIA.id,
             peer: services2.address
         };
         const shareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute(shareRequest);
@@ -294,7 +294,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
 
     test("should reject sharing peer shared attribute", async () => {
         const shareRequest: ShareRepositoryAttributeRequest = {
-            attributeId: recipientPeerSharedIdentityAttribute.id,
+            attributeId: rPSIA.id,
             peer: services1.address
         };
         const shareRequestResult = await services2.consumption.attributes.shareRepositoryAttribute(shareRequest);
@@ -314,10 +314,10 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
             },
             peer: services2.address
         };
-        const senderOwnSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, createAndShareRelationshipAttributeRequest);
+        const sOSRA = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, createAndShareRelationshipAttributeRequest);
 
         const shareRequest: ShareRepositoryAttributeRequest = {
-            attributeId: senderOwnSharedRelationshipAttribute.id,
+            attributeId: sOSRA.id,
             peer: services2.address
         };
         const shareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute(shareRequest);
@@ -564,11 +564,11 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
         expect(requestResult.isSuccess).toBe(true);
 
         const requestId = requestResult.value.id;
-        const senderOwnSharedRelationshipAttribute = await acceptIncomingShareAttributeRequest(services1, services2, requestId);
-        const recipientPeerSharedRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: senderOwnSharedRelationshipAttribute.id })).value;
+        const sOSRA = await acceptIncomingShareAttributeRequest(services1, services2, requestId);
+        const rPSRA = (await services2.consumption.attributes.getAttribute({ id: sOSRA.id })).value;
 
-        expect(senderOwnSharedRelationshipAttribute.content.value).toStrictEqual(createAndShareRelationshipAttributeRequest.content.value);
-        expect(senderOwnSharedRelationshipAttribute.content).toStrictEqual(recipientPeerSharedRelationshipAttribute.content);
+        expect(sOSRA.content.value).toStrictEqual(createAndShareRelationshipAttributeRequest.content.value);
+        expect(sOSRA.content).toStrictEqual(rPSRA.content);
     });
 
     test("should create and share a relationship attribute with metadata", async () => {
