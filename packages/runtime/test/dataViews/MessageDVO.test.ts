@@ -1,7 +1,7 @@
 import { GivenName, IdentityAttribute, MailJSON, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, MailDVO, TransportServices } from "../../src";
-import { RuntimeServiceProvider, establishRelationshipWithContents, getRelationship, syncUntilHasMessages, uploadFile } from "../lib";
+import { establishRelationshipWithContents, getRelationship, RuntimeServiceProvider, syncUntilHasMessages, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;

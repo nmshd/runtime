@@ -83,6 +83,11 @@ export interface MessageDVO extends DataViewObject {
      * The content of the message.
      */
     content: unknown;
+
+    /**
+     * The read indicator of the message
+     */
+    wasReadAt?: string;
 }
 
 export interface RecipientDVO extends Omit<IdentityDVO, "type"> {

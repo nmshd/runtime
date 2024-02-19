@@ -1,6 +1,6 @@
 import { IdentityAttributeJSON, RelationshipAttributeCreationHintsJSON, RelationshipAttributeJSON, RenderHintsJSON, ValueHintsJSON } from "@nmshd/content";
-import { DataViewObject } from "../DataViewObject";
 import { AttributeQueryDVO } from "../content/AttributeDVOs";
+import { DataViewObject } from "../DataViewObject";
 import { IdentityDVO } from "../transport";
 
 /**

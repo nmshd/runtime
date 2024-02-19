@@ -1,22 +1,22 @@
 import { AcceptReadAttributeRequestItemParametersWithNewAttributeJSON, LocalRequestStatus } from "@nmshd/consumption";
-import { IQLQuery, IdentityAttributeQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
+import { IdentityAttributeQuery, IQLQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
     DataViewExpander,
     DecidableReadAttributeRequestItemDVO,
-    IQLQueryDVO,
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
+    IQLQueryDVO,
     MessageDTO,
     OutgoingRequestStatusChangedEvent,
-    ProcessedIQLQueryDVO,
     ProcessedIdentityAttributeQueryDVO,
+    ProcessedIQLQueryDVO,
     ReadAttributeAcceptResponseItemDVO,
     ReadAttributeRequestItemDVO,
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { MockEventBus, RuntimeServiceProvider, establishRelationship, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -29,6 +29,7 @@ let eventBus1: MockEventBus;
 let eventBus2: MockEventBus;
 let senderMessage: MessageDTO;
 let recipientMessage: MessageDTO;
+let requestId: string;
 
 afterAll(() => serviceProvider.stop());
 
@@ -51,7 +52,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         await establishRelationship(transportServices1, transportServices2);
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
 
-        await consumptionServices2.attributes.createIdentityAttribute({
+        await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
                 value: PersonName.from({
                     honorificPrefix: "Dr.",
@@ -77,14 +78,10 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             },
             peer: recipientAddress
         });
+        requestId = localRequest.value.id;
 
         senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-
-        const messages = await syncUntilHasMessages(transportServices2, 1);
-        if (messages.length < 1) {
-            throw new Error("Not enough messages synced");
-        }
-        recipientMessage = messages[0];
+        recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
 
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
     }, 30000);
@@ -237,7 +234,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessages(transportServices1, 1);
+        await syncUntilHasMessageWithResponse(transportServices1, requestId);
 
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
 
@@ -315,7 +312,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         await establishRelationship(transportServices1, transportServices2);
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
 
-        await consumptionServices2.attributes.createIdentityAttribute({
+        await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
                 value: PersonName.from({
                     honorificPrefix: "Dr.",
@@ -341,14 +338,10 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
             },
             peer: recipientAddress
         });
+        requestId = localRequest.value.id;
 
         senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-
-        const messages = await syncUntilHasMessages(transportServices2, 1);
-        if (messages.length < 1) {
-            throw new Error("Not enough messages synced");
-        }
-        recipientMessage = messages[0];
+        recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
 
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
     }, 30000);
@@ -486,7 +479,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessages(transportServices1, 1);
+        await syncUntilHasMessageWithResponse(transportServices1, requestId);
 
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
 

@@ -12,7 +12,7 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { MockEventBus, RuntimeServiceProvider, establishRelationship, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -25,6 +25,7 @@ let sEventBus: MockEventBus;
 let rEventBus: MockEventBus;
 let senderMessage: MessageDTO;
 let recipientMessage: MessageDTO;
+let requestId: string;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
@@ -58,14 +59,10 @@ beforeAll(async () => {
         },
         peer: rAddress
     });
+    requestId = localRequest.value.id;
 
     senderMessage = await sendMessage(sTransportServices, rAddress, localRequest.value.content);
-
-    const messages = await syncUntilHasMessages(rTransportServices, 1);
-    if (messages.length < 1) {
-        throw new Error("Not enough messages synced");
-    }
-    recipientMessage = messages[0];
+    recipientMessage = await syncUntilHasMessageWithRequest(rTransportServices, localRequest.value.id);
 
     await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 }, 30000);
@@ -204,7 +201,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessages(sTransportServices, 1);
+        await syncUntilHasMessageWithResponse(sTransportServices, requestId);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
 
         const dto = senderMessage;

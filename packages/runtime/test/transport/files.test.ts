@@ -1,7 +1,7 @@
 import fs from "fs";
 import { DateTime } from "luxon";
 import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { createToken, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, uploadFile } from "../lib";
+import { QueryParamConditions, RuntimeServiceProvider, createToken, exchangeFile, makeUploadRequest, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;

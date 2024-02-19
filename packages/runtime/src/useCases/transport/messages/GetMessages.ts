@@ -17,6 +17,7 @@ export interface GetMessagesQuery {
     attachments?: string | string[];
     "recipients.address"?: string | string[];
     "recipients.relationshipId"?: string | string[];
+    wasReadAt?: string | string[];
     participant?: string | string[];
 }
 
@@ -42,6 +43,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
             [nameof<MessageDTO>((m) => m.attachments)]: true,
             [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.address)}`]: true,
             [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.relationshipId)}`]: true,
+            [nameof<MessageDTO>((m) => m.wasReadAt)]: true,
             participant: true
         },
 
@@ -54,7 +56,8 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
             )}.${nameof<MessageEnvelopeRecipient>((r) => r.address)}`,
             [`${nameof<MessageDTO>((m) => m.content)}.@type`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.@type`,
             [`${nameof<MessageDTO>((m) => m.content)}.body`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.body`,
-            [`${nameof<MessageDTO>((m) => m.content)}.subject`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.subject`
+            [`${nameof<MessageDTO>((m) => m.content)}.subject`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.subject`,
+            [nameof<MessageDTO>((m) => m.wasReadAt)]: [nameof<Message>((m) => m.wasReadAt)]
         },
 
         custom: {
@@ -64,6 +67,11 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
                 };
             },
             [nameof<MessageDTO>((m) => m.attachments)]: (query: any, input: any) => {
+                if (input === "+") {
+                    query[`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.attachments)}`] = { $not: { $size: 0 } };
+                    return;
+                }
+
                 query[`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.attachments)}`] = {
                     $containsAny: Array.isArray(input) ? input : [input]
                 };

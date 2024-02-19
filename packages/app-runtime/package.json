@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/app-runtime",
-    "version": "3.0.3",
+    "version": "3.0.4",
     "description": "The App Runtime",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -61,7 +61,7 @@
         "@types/luxon": "^3.4.2"
     },
     "peerDependencies": {
-        "@nmshd/runtime": "^3.5.0"
+        "@nmshd/runtime": "^4.0.0"
     },
     "publishConfig": {
         "access": "public",

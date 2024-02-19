@@ -11,8 +11,8 @@ import {
     GetDeviceOnboardingInfoRequest,
     GetDeviceOnboardingInfoUseCase,
     GetDeviceRequest,
-    GetDevicesUseCase,
     GetDeviceUseCase,
+    GetDevicesUseCase,
     UpdateDeviceRequest,
     UpdateDeviceUseCase
 } from "../../../useCases";

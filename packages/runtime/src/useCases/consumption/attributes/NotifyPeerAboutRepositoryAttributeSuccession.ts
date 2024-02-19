@@ -7,26 +7,26 @@ import { LocalAttributeDTO } from "../../../types";
 import { AddressString, AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
-export interface NotifyPeerAboutIdentityAttributeSuccessionResponse {
+export interface NotifyPeerAboutRepositoryAttributeSuccessionResponse {
     predecessor: LocalAttributeDTO;
     successor: LocalAttributeDTO;
     notificationId: CoreId;
 }
 
-export interface NotifyPeerAboutIdentityAttributeSuccessionRequest {
+export interface NotifyPeerAboutRepositoryAttributeSuccessionRequest {
     attributeId: AttributeIdString;
     peer: AddressString;
 }
 
-class Validator extends SchemaValidator<NotifyPeerAboutIdentityAttributeSuccessionRequest> {
+class Validator extends SchemaValidator<NotifyPeerAboutRepositoryAttributeSuccessionRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("NotifyPeerAboutIdentityAttributeSuccessionRequest"));
+        super(schemaRepository.getSchema("NotifyPeerAboutRepositoryAttributeSuccessionRequest"));
     }
 }
 
-export class NotifyPeerAboutIdentityAttributeSuccessionUseCase extends UseCase<
-    NotifyPeerAboutIdentityAttributeSuccessionRequest,
-    NotifyPeerAboutIdentityAttributeSuccessionResponse
+export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase<
+    NotifyPeerAboutRepositoryAttributeSuccessionRequest,
+    NotifyPeerAboutRepositoryAttributeSuccessionResponse
 > {
     public constructor(
         @Inject private readonly accountController: AccountController,
@@ -37,7 +37,7 @@ export class NotifyPeerAboutIdentityAttributeSuccessionUseCase extends UseCase<
         super(validator);
     }
 
-    protected async executeInternal(request: NotifyPeerAboutIdentityAttributeSuccessionRequest): Promise<Result<NotifyPeerAboutIdentityAttributeSuccessionResponse>> {
+    protected async executeInternal(request: NotifyPeerAboutRepositoryAttributeSuccessionRequest): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
         const repositoryAttributeSuccessorId = CoreId.from(request.attributeId);
         const repositoryAttributeSuccessor = await this.attributeController.getLocalAttribute(repositoryAttributeSuccessorId);
 
@@ -46,17 +46,17 @@ export class NotifyPeerAboutIdentityAttributeSuccessionUseCase extends UseCase<
         }
 
         if (!repositoryAttributeSuccessor.isRepositoryAttribute(this.accountController.identity.address)) {
-            return Result.fail(RuntimeErrors.attributes.isNoIdentityAttribute(repositoryAttributeSuccessorId));
+            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeSuccessorId));
         }
 
         const candidatePredecessors = await this.attributeController.getSharedVersionsOfRepositoryAttribute(repositoryAttributeSuccessorId, [CoreAddress.from(request.peer)]);
 
         if (candidatePredecessors.length === 0) {
-            return Result.fail(RuntimeErrors.attributes.noOtherVersionOfIdentityAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));
+            return Result.fail(RuntimeErrors.attributes.noOtherVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));
         }
 
         if (candidatePredecessors[0].shareInfo?.sourceAttribute?.toString() === request.attributeId) {
-            return Result.fail(RuntimeErrors.attributes.identityAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, candidatePredecessors[0].id));
+            return Result.fail(RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, candidatePredecessors[0].id));
         }
 
         const ownSharedIdentityAttributePredecessor = candidatePredecessors[0];

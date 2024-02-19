@@ -9,10 +9,10 @@ import {
     ErrorResponseItemJSON,
     FreeTextRequestItemJSON,
     GivenNameJSON,
-    IQLQueryJSON,
     IdentityAttribute,
     IdentityAttributeJSON,
     IdentityAttributeQueryJSON,
+    IQLQueryJSON,
     MailJSON,
     MiddleNameJSON,
     ProposeAttributeAcceptResponseItemJSON,
@@ -81,8 +81,6 @@ import {
     RelationshipTemplateDTO
 } from "../types";
 import { RuntimeErrors } from "../useCases";
-import { DataViewObject } from "./DataViewObject";
-import { DataViewTranslateable } from "./DataViewTranslateable";
 import {
     LocalAttributeDVO,
     LocalAttributeListenerDVO,
@@ -92,8 +90,8 @@ import {
     PeerAttributeDVO,
     PeerRelationshipAttributeDVO,
     ProcessedAttributeQueryDVO,
-    ProcessedIQLQueryDVO,
     ProcessedIdentityAttributeQueryDVO,
+    ProcessedIQLQueryDVO,
     ProcessedRelationshipAttributeQueryDVO,
     ProcessedThirdPartyRelationshipAttributeQueryDVO,
     RelationshipSettingDVO,
@@ -115,8 +113,8 @@ import {
     AttributeQueryDVO,
     DraftIdentityAttributeDVO,
     DraftRelationshipAttributeDVO,
-    IQLQueryDVO,
     IdentityAttributeQueryDVO,
+    IQLQueryDVO,
     RelationshipAttributeQueryDVO,
     ThirdPartyRelationshipAttributeQueryDVO
 } from "./content/AttributeDVOs";
@@ -133,8 +131,10 @@ import {
     ResponseItemGroupDVO,
     ShareAttributeAcceptResponseItemDVO
 } from "./content/ResponseItemDVOs";
+import { DataViewObject } from "./DataViewObject";
+import { DataViewTranslateable } from "./DataViewTranslateable";
 import { MessageDVO, MessageStatus, RecipientDVO } from "./transport/MessageDVO";
-import { RelationshipChangeDVO, RelationshipChangeResponseDVO, RelationshipDVO, RelationshipDirection } from "./transport/RelationshipDVO";
+import { RelationshipChangeDVO, RelationshipChangeResponseDVO, RelationshipDirection, RelationshipDVO } from "./transport/RelationshipDVO";
 
 export class DataViewExpander {
     public constructor(
@@ -270,7 +270,8 @@ export class DataViewExpander {
             statusText: `i18n://dvo.message.${status}`,
             image: "",
             peer: peer,
-            content: message.content
+            content: message.content,
+            wasReadAt: message.wasReadAt
         };
 
         if (message.content["@type"] === "Mail" || message.content["@type"] === "RequestMail") {

@@ -5,7 +5,7 @@ import { nameof } from "ts-simple-nameof";
 import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId, ICoreAddress, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
-import { MessageSentEvent } from "../../events";
+import { MessageSentEvent, MessageWasReadAtChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { File } from "../files/local/File";
 import { FileReference } from "../files/transmission/FileReference";
@@ -200,6 +200,40 @@ export class MessageController extends TransportController {
         const message = Message.from(messageDoc);
         message.setMetadata(metadata);
         await this.messages.update(messageDoc, message);
+
+        return message;
+    }
+
+    public async markMessageAsRead(id: CoreId): Promise<Message> {
+        const messageDoc = await this.messages.read(id.toString());
+        if (!messageDoc) {
+            throw CoreErrors.general.recordNotFound(Message, id.toString());
+        }
+
+        const message = Message.from(messageDoc);
+        if (typeof message.wasReadAt !== "undefined") return message;
+
+        message.wasReadAt = CoreDate.utc();
+        await this.messages.update(messageDoc, message);
+
+        this.eventBus.publish(new MessageWasReadAtChangedEvent(this.parent.identity.address.toString(), message));
+
+        return message;
+    }
+
+    public async markMessageAsUnread(id: CoreId): Promise<Message> {
+        const messageDoc = await this.messages.read(id.toString());
+        if (!messageDoc) {
+            throw CoreErrors.general.recordNotFound(Message, id.toString());
+        }
+
+        const message = Message.from(messageDoc);
+        if (typeof message.wasReadAt === "undefined") return message;
+
+        message.wasReadAt = undefined;
+        await this.messages.update(messageDoc, message);
+
+        this.eventBus.publish(new MessageWasReadAtChangedEvent(this.parent.identity.address.toString(), message));
 
         return message;
     }

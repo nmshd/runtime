@@ -1,6 +1,6 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { DataViewObject } from "../DataViewObject";
 import { RequestDVO, RequestItemDVO, RequestItemGroupDVO, ResponseDVO } from "../content";
+import { DataViewObject } from "../DataViewObject";
 import { IdentityDVO } from "../transport";
 
 export interface LocalRequestDVO extends DataViewObject {

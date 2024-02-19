@@ -15,7 +15,7 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { MockEventBus, RuntimeServiceProvider, establishRelationship, sendMessage, syncUntilHasMessages } from "../../lib";
+import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -28,6 +28,7 @@ let eventBus1: MockEventBus;
 let eventBus2: MockEventBus;
 let senderMessage: MessageDTO;
 let recipientMessage: MessageDTO;
+let requestId: string;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
@@ -42,7 +43,7 @@ beforeAll(async () => {
     await establishRelationship(transportServices1, transportServices2);
     const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
 
-    await consumptionServices2.attributes.createIdentityAttribute({
+    await consumptionServices2.attributes.createRepositoryAttribute({
         content: {
             value: {
                 "@type": "GivenName",
@@ -51,7 +52,7 @@ beforeAll(async () => {
         }
     });
 
-    await consumptionServices2.attributes.createIdentityAttribute({
+    await consumptionServices2.attributes.createRepositoryAttribute({
         content: {
             value: {
                 "@type": "Surname",
@@ -89,12 +90,10 @@ beforeAll(async () => {
         },
         peer: recipientAddress
     });
+    requestId = localRequest.value.id;
 
     senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-
-    const messages = await syncUntilHasMessages(transportServices2, 1);
-
-    recipientMessage = messages[0];
+    recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
 
     await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 }, 30000);
@@ -342,7 +341,7 @@ describe("ProposeAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessages(transportServices1, 1);
+        await syncUntilHasMessageWithResponse(transportServices1, requestId);
 
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
 

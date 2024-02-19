@@ -1,6 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RequestItemJSON } from "@nmshd/content";
-import { RuntimeServices } from "../Runtime";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -9,6 +8,7 @@ import {
     RelationshipTemplateProcessedResult
 } from "../events";
 import { RuntimeModule } from "../extensibility";
+import { RuntimeServices } from "../Runtime";
 
 export class DeciderModule extends RuntimeModule {
     public init(): void {

@@ -3,9 +3,9 @@ import { ValueHints, ValueHintsOverride } from "../../hints";
 import { AbstractFloat, AbstractFloatJSON, IAbstractFloat } from "../AbstractFloat";
 import {
     IProprietaryAttributeValue,
-    ProprietaryAttributeValueJSON,
     PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH,
-    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH
+    PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH,
+    ProprietaryAttributeValueJSON
 } from "./ProprietaryAttributeValue";
 
 export interface ProprietaryFloatJSON extends ProprietaryAttributeValueJSON, AbstractFloatJSON {

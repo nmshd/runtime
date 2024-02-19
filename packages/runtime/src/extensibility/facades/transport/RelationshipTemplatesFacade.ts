@@ -13,9 +13,9 @@ import {
     CreateTokenQRCodeForOwnTemplateResponse,
     CreateTokenQRCodeForOwnTemplateUseCase,
     GetRelationshipTemplateRequest,
+    GetRelationshipTemplateUseCase,
     GetRelationshipTemplatesRequest,
     GetRelationshipTemplatesUseCase,
-    GetRelationshipTemplateUseCase,
     LoadPeerRelationshipTemplateRequest,
     LoadPeerRelationshipTemplateUseCase
 } from "../../../useCases";

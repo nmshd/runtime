@@ -7,7 +7,7 @@ import { LocalRequestDTO } from "../../../types";
 import { AddressString, AttributeIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RequestMapper } from "../requests";
 
-export interface ShareIdentityAttributeRequest {
+export interface ShareRepositoryAttributeRequest {
     attributeId: AttributeIdString;
     peer: AddressString;
     requestMetadata?: {
@@ -16,15 +16,21 @@ export interface ShareIdentityAttributeRequest {
         metadata?: Record<string, any>;
         expiresAt?: ISO8601DateTimeString;
     };
+    requestItemMetadata?: {
+        title?: string;
+        description?: string;
+        metadata?: Record<string, any>;
+        requireManualDecision?: boolean;
+    };
 }
 
-class Validator extends SchemaValidator<ShareIdentityAttributeRequest> {
+class Validator extends SchemaValidator<ShareRepositoryAttributeRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("ShareIdentityAttributeRequest"));
+        super(schemaRepository.getSchema("ShareRepositoryAttributeRequest"));
     }
 }
 
-export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttributeRequest, LocalRequestDTO> {
+export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttributeRequest, LocalRequestDTO> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -35,7 +41,7 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
         super(validator);
     }
 
-    protected async executeInternal(request: ShareIdentityAttributeRequest): Promise<Result<LocalRequestDTO>> {
+    protected async executeInternal(request: ShareRepositoryAttributeRequest): Promise<Result<LocalRequestDTO>> {
         const repositoryAttributeId = CoreId.from(request.attributeId);
         const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
 
@@ -44,7 +50,7 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
         }
 
         if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
-            return Result.fail(RuntimeErrors.attributes.isNoIdentityAttribute(repositoryAttributeId));
+            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
         }
 
         const query = {
@@ -56,32 +62,32 @@ export class ShareIdentityAttributeUseCase extends UseCase<ShareIdentityAttribut
         const ownSharedIdentityAttributesOfRepositoryAttribute = await this.attributeController.getLocalAttributes(query);
         if (ownSharedIdentityAttributesOfRepositoryAttribute.length > 0) {
             return Result.fail(
-                RuntimeErrors.attributes.identityAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, ownSharedIdentityAttributesOfRepositoryAttribute[0].id)
+                RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, ownSharedIdentityAttributesOfRepositoryAttribute[0].id)
             );
         }
 
-        const ownSharedIdentityAttributesOfRepositoryAttributeVersion = await this.attributeController.getSharedVersionsOfRepositoryAttribute(
+        const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfRepositoryAttribute(
             repositoryAttributeId,
             [CoreAddress.from(request.peer)],
             false
         );
-        if (ownSharedIdentityAttributesOfRepositoryAttributeVersion.length > 0) {
+        if (sharedVersionsOfRepositoryAttribute.length > 0) {
             return Result.fail(
-                RuntimeErrors.attributes.anotherVersionOfIdentityAttributeHasAlreadyBeenSharedWithPeer(
+                RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
                     request.attributeId,
                     request.peer,
-                    ownSharedIdentityAttributesOfRepositoryAttributeVersion[0].id
+                    sharedVersionsOfRepositoryAttribute[0].id
                 )
             );
         }
 
-        const requestMetadata = request.requestMetadata ?? {};
         const requestParams = CreateOutgoingRequestParameters.from({
             peer: request.peer,
             content: Request.from({
-                ...requestMetadata,
+                ...(request.requestMetadata ?? {}),
                 items: [
                     ShareAttributeRequestItem.from({
+                        ...(request.requestItemMetadata ?? {}),
                         attribute: repositoryAttribute.content,
                         sourceAttributeId: repositoryAttribute.id,
                         mustBeAccepted: true

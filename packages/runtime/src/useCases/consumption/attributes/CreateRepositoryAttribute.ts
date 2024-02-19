@@ -7,7 +7,7 @@ import { LocalAttributeDTO } from "../../../types";
 import { ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
-export interface CreateIdentityAttributeRequest {
+export interface CreateRepositoryAttributeRequest {
     content: {
         value: AttributeValues.Identity.Json;
         tags?: string[];
@@ -16,13 +16,13 @@ export interface CreateIdentityAttributeRequest {
     };
 }
 
-class Validator extends SchemaValidator<CreateIdentityAttributeRequest> {
+class Validator extends SchemaValidator<CreateRepositoryAttributeRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("CreateIdentityAttributeRequest"));
+        super(schemaRepository.getSchema("CreateRepositoryAttributeRequest"));
     }
 }
 
-export class CreateIdentityAttributeUseCase extends UseCase<CreateIdentityAttributeRequest, LocalAttributeDTO> {
+export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAttributeRequest, LocalAttributeDTO> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -31,7 +31,7 @@ export class CreateIdentityAttributeUseCase extends UseCase<CreateIdentityAttrib
         super(validator);
     }
 
-    protected async executeInternal(request: CreateIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+    protected async executeInternal(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
         const params = CreateLocalAttributeParams.from({
             content: {
                 "@type": "IdentityAttribute",

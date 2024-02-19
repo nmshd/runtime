@@ -14,7 +14,7 @@ import {
     TransportServices
 } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { RuntimeServiceProvider, establishRelationship, syncUntilHasMessages, syncUntilHasRelationships } from "../lib";
+import { establishRelationship, RuntimeServiceProvider, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse, syncUntilHasRelationships } from "../lib";
 
 describe("Requests", () => {
     describe.each([
@@ -117,20 +117,13 @@ describe("Requests", () => {
             expect(triggeredEvent!.data.request.id).toBe(result.value.id);
         });
 
-        test("recipient: sync the Message with the Request", async () => {
-            const result = await syncUntilHasMessages(rTransportServices);
-
-            expect(result).toHaveLength(1);
-
-            rRequestMessage = result[0];
-        });
-
-        test("recipient: create an incoming Request from the Message content", async () => {
+        test("recipient: sync the Message with the Request and create an incoming Request from the Message content", async () => {
             let triggeredEvent: IncomingRequestReceivedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestReceivedEvent, (event) => {
                 triggeredEvent = event;
             });
 
+            rRequestMessage = await syncUntilHasMessageWithRequest(rTransportServices, sLocalRequest.id);
             const result = await rConsumptionServices.incomingRequests.received({
                 receivedRequest: rRequestMessage.content,
                 requestSourceId: rRequestMessage.id
@@ -246,7 +239,13 @@ describe("Requests", () => {
 
         test("recipient: send Response via Message", async () => {
             const result = await rTransportServices.messages.sendMessage({
-                content: rLocalRequest.response!.content,
+                content: {
+                    "@type": "ResponseWrapper",
+                    requestId: sLocalRequest.id,
+                    requestSourceReference: sRequestMessage.id,
+                    requestSourceType: "Message",
+                    response: rLocalRequest.response!.content
+                },
                 recipients: [(await sTransportServices.account.getIdentityInfo()).value.address]
             });
 
@@ -254,7 +253,7 @@ describe("Requests", () => {
 
             rResponseMessage = result.value;
 
-            expect(rResponseMessage.content["@type"]).toBe("Response");
+            expect(rResponseMessage.content["@type"]).toBe("ResponseWrapper");
         });
 
         test("recipient: complete incoming Request", async () => {
@@ -281,23 +280,16 @@ describe("Requests", () => {
             expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Completed);
         });
 
-        test("sender: sync Message with Response", async () => {
-            const result = await syncUntilHasMessages(sTransportServices);
-
-            expect(result).toHaveLength(1);
-
-            sResponseMessage = result[0];
-        });
-
-        test("sender: complete the outgoing Request with Response from Message", async () => {
+        test("sender: sync Message with Response and complete the outgoing Request with Response from Message", async () => {
             let triggeredEvent: OutgoingRequestStatusChangedEvent | undefined;
             sEventBus.subscribeOnce(OutgoingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
             });
 
+            sResponseMessage = await syncUntilHasMessageWithResponse(sTransportServices, sLocalRequest.id);
             const result = await sConsumptionServices.outgoingRequests.complete({
                 messageId: sResponseMessage.id,
-                receivedResponse: sResponseMessage.content
+                receivedResponse: sResponseMessage.content.response
             });
 
             expect(result).toBeSuccessful();

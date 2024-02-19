@@ -4,8 +4,8 @@ import { LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
-    CreateIdentityAttributeRequest,
-    CreateIdentityAttributeUseCase,
+    CreateRepositoryAttributeRequest,
+    CreateRepositoryAttributeUseCase,
     ExecuteIdentityAttributeQueryRequest,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteIQLQueryRequest,
@@ -18,27 +18,27 @@ import {
     GetAttributesRequest,
     GetAttributesUseCase,
     GetAttributeUseCase,
-    GetOwnIdentityAttributesRequest,
-    GetOwnIdentityAttributesUseCase,
     GetOwnSharedAttributesRequest,
     GetOwnSharedAttributesUseCase,
     GetPeerSharedAttributesRequest,
     GetPeerSharedAttributesUseCase,
-    GetSharedVersionsOfIdentityAttributeRequest,
-    GetSharedVersionsOfIdentityAttributeUseCase,
+    GetRepositoryAttributesRequest,
+    GetRepositoryAttributesUseCase,
+    GetSharedVersionsOfRepositoryAttributeRequest,
+    GetSharedVersionsOfRepositoryAttributeUseCase,
     GetVersionsOfAttributeRequest,
     GetVersionsOfAttributeUseCase,
-    NotifyPeerAboutIdentityAttributeSuccessionRequest,
-    NotifyPeerAboutIdentityAttributeSuccessionResponse,
-    NotifyPeerAboutIdentityAttributeSuccessionUseCase,
-    ShareIdentityAttributeRequest,
-    ShareIdentityAttributeUseCase,
-    SucceedIdentityAttributeRequest,
-    SucceedIdentityAttributeResponse,
-    SucceedIdentityAttributeUseCase,
+    NotifyPeerAboutRepositoryAttributeSuccessionRequest,
+    NotifyPeerAboutRepositoryAttributeSuccessionResponse,
+    NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+    ShareRepositoryAttributeRequest,
+    ShareRepositoryAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerRequest,
     SucceedRelationshipAttributeAndNotifyPeerResponse,
     SucceedRelationshipAttributeAndNotifyPeerUseCase,
+    SucceedRepositoryAttributeRequest,
+    SucceedRepositoryAttributeResponse,
+    SucceedRepositoryAttributeUseCase,
     ValidateIQLQueryRequest,
     ValidateIQLQueryResponse,
     ValidateIQLQueryUseCase
@@ -46,16 +46,16 @@ import {
 
 export class AttributesFacade {
     public constructor(
-        @Inject private readonly createIdentityAttributeUseCase: CreateIdentityAttributeUseCase,
-        @Inject private readonly shareIdentityAttributeUseCase: ShareIdentityAttributeUseCase,
+        @Inject private readonly createRepositoryAttributeUseCase: CreateRepositoryAttributeUseCase,
+        @Inject private readonly shareRepositoryAttributeUseCase: ShareRepositoryAttributeUseCase,
         @Inject private readonly getPeerSharedAttributesUseCase: GetPeerSharedAttributesUseCase,
         @Inject private readonly getOwnSharedAttributesUseCase: GetOwnSharedAttributesUseCase,
-        @Inject private readonly getOwnIdentityAttributesUseCase: GetOwnIdentityAttributesUseCase,
+        @Inject private readonly getRepositoryAttributesUseCase: GetRepositoryAttributesUseCase,
         @Inject private readonly getAttributeUseCase: GetAttributeUseCase,
         @Inject private readonly getAttributesUseCase: GetAttributesUseCase,
         @Inject private readonly getVersionsOfAttributeUseCase: GetVersionsOfAttributeUseCase,
-        @Inject private readonly getSharedVersionsOfIdentityAttributeUseCase: GetSharedVersionsOfIdentityAttributeUseCase,
-        @Inject private readonly succeedIdentityAttributeUseCase: SucceedIdentityAttributeUseCase,
+        @Inject private readonly getSharedVersionsOfRepositoryAttributeUseCase: GetSharedVersionsOfRepositoryAttributeUseCase,
+        @Inject private readonly succeedRepositoryAttributeUseCase: SucceedRepositoryAttributeUseCase,
         @Inject private readonly executeIdentityAttributeQueryUseCase: ExecuteIdentityAttributeQueryUseCase,
         @Inject private readonly executeRelationshipAttributeQueryUseCase: ExecuteRelationshipAttributeQueryUseCase,
         @Inject private readonly succeedRelationshipAttributeAndNotifyPeerUseCase: SucceedRelationshipAttributeAndNotifyPeerUseCase,
@@ -63,11 +63,11 @@ export class AttributesFacade {
         @Inject private readonly executeIQLQueryUseCase: ExecuteIQLQueryUseCase,
         @Inject private readonly validateIQLQueryUseCase: ValidateIQLQueryUseCase,
         @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
-        @Inject private readonly notifyPeerAboutIdentityAttributeSuccessionUseCase: NotifyPeerAboutIdentityAttributeSuccessionUseCase
+        @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase
     ) {}
 
-    public async createIdentityAttribute(request: CreateIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        return await this.createIdentityAttributeUseCase.execute(request);
+    public async createRepositoryAttribute(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.createRepositoryAttributeUseCase.execute(request);
     }
 
     public async getPeerSharedAttributes(request: GetPeerSharedAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
@@ -78,8 +78,8 @@ export class AttributesFacade {
         return await this.getOwnSharedAttributesUseCase.execute(request);
     }
 
-    public async getOwnIdentityAttributes(request: GetOwnIdentityAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
-        return await this.getOwnIdentityAttributesUseCase.execute(request);
+    public async getRepositoryAttributes(request: GetRepositoryAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
+        return await this.getRepositoryAttributesUseCase.execute(request);
     }
 
     public async getAttribute(request: GetAttributeRequest): Promise<Result<LocalAttributeDTO>> {
@@ -94,8 +94,8 @@ export class AttributesFacade {
         return await this.getVersionsOfAttributeUseCase.execute(request);
     }
 
-    public async getSharedVersionsOfIdentityAttribute(request: GetSharedVersionsOfIdentityAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
-        return await this.getSharedVersionsOfIdentityAttributeUseCase.execute(request);
+    public async getSharedVersionsOfRepositoryAttribute(request: GetSharedVersionsOfRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
+        return await this.getSharedVersionsOfRepositoryAttributeUseCase.execute(request);
     }
 
     public async executeIdentityAttributeQuery(request: ExecuteIdentityAttributeQueryRequest): Promise<Result<LocalAttributeDTO[]>> {
@@ -124,21 +124,21 @@ export class AttributesFacade {
         return await this.validateIQLQueryUseCase.execute(request);
     }
 
-    public async succeedIdentityAttribute(request: SucceedIdentityAttributeRequest): Promise<Result<SucceedIdentityAttributeResponse>> {
-        return await this.succeedIdentityAttributeUseCase.execute(request);
+    public async succeedRepositoryAttribute(request: SucceedRepositoryAttributeRequest): Promise<Result<SucceedRepositoryAttributeResponse>> {
+        return await this.succeedRepositoryAttributeUseCase.execute(request);
     }
 
-    public async shareIdentityAttribute(request: ShareIdentityAttributeRequest): Promise<Result<LocalRequestDTO>> {
-        return await this.shareIdentityAttributeUseCase.execute(request);
+    public async shareRepositoryAttribute(request: ShareRepositoryAttributeRequest): Promise<Result<LocalRequestDTO>> {
+        return await this.shareRepositoryAttributeUseCase.execute(request);
     }
 
     public async createAndShareRelationshipAttribute(request: CreateAndShareRelationshipAttributeRequest): Promise<Result<LocalRequestDTO>> {
         return await this.createAndShareRelationshipAttributeUseCase.execute(request);
     }
 
-    public async notifyPeerAboutIdentityAttributeSuccession(
-        request: NotifyPeerAboutIdentityAttributeSuccessionRequest
-    ): Promise<Result<NotifyPeerAboutIdentityAttributeSuccessionResponse>> {
-        return await this.notifyPeerAboutIdentityAttributeSuccessionUseCase.execute(request);
+    public async notifyPeerAboutRepositoryAttributeSuccession(
+        request: NotifyPeerAboutRepositoryAttributeSuccessionRequest
+    ): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
+        return await this.notifyPeerAboutRepositoryAttributeSuccessionUseCase.execute(request);
     }
 }
