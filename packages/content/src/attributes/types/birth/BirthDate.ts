@@ -1,6 +1,7 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import nameOf from "easy-tsnameof";
 import { DateTime } from "luxon";
+import { ValidationErrorWithoutProperty } from "../../../ValidationErrorWithoutProperty";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, ValueHints } from "../../hints";
@@ -36,6 +37,23 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
     @validate()
     public year: BirthYear;
+
+    protected static override postFrom<T extends Serializable>(value: T): T {
+        if (!(value instanceof BirthDate)) throw new Error("this should never happen");
+
+        const dateTime = DateTime.fromObject({ day: value.day.value, month: value.month.value, year: value.year.value });
+        const isValid = dateTime.isValid;
+
+        if (!isValid) {
+            throw new ValidationErrorWithoutProperty(BirthDate.name, "The BirthDate is not a valid date.");
+        }
+
+        if (DateTime.utc() < dateTime) {
+            throw new ValidationErrorWithoutProperty(BirthDate.name, "You cannot enter a BirthDate that is in the future.");
+        }
+
+        return value;
+    }
 
     public static get valueHints(): ValueHints {
         return ValueHints.from({
