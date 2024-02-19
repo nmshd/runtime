@@ -1,0 +1,47 @@
+import { UserfriendlyApplicationError } from "@nmshd/app-runtime/src/UserfriendlyApplicationError";
+import { BirthDate } from "@nmshd/content";
+import { ValidationErrorWithoutProperty } from "@nmshd/content/src/ValidationErrorWithoutProperty";
+import { DateTime } from "luxon";
+
+describe("creation of RepositoryAttributes of Attribute Value Type BirthDate", () => {
+    test("can create a RepositoryAttribute of Attribute Value Type BirthDate", function () {
+        const validBirthDate = BirthDate.from({ day: 1, month: 12, year: 1990 });
+        expect(validBirthDate.constructor.name).toBe("BirthDate");
+        expect(validBirthDate.day.value).toBe(1);
+        expect(validBirthDate.month.value).toBe(12);
+        expect(validBirthDate.year.value).toBe(1990);
+    });
+
+    test("returns an error when trying to create an invalid BirthDate with violated validation criteria of a single property", function () {
+        const invalidBirthDateCall = () => {
+            BirthDate.from({ day: 1, month: 13, year: 1990 });
+        };
+        expect(invalidBirthDateCall).toThrow(
+            new UserfriendlyApplicationError("error.runtime.requestDeserialization", "BirthMonth.value:Number :: must be an integer value between 1 and 12")
+        );
+    });
+
+    test("returns an error when trying to create an invalid BirthDate with cross-component violated validation criteria for June", function () {
+        const invalidBirthDateCall = () => {
+            BirthDate.from({ day: 31, month: 6, year: 1990 });
+        };
+        expect(invalidBirthDateCall).toThrow(new ValidationErrorWithoutProperty(BirthDate.name, "The BirthDate is not a valid date."));
+    });
+
+    test("returns an error when trying to create an invalid BirthDate with cross-component violated validation criteria for February", function () {
+        const invalidBirthDateCall = () => {
+            BirthDate.from({ day: 29, month: 2, year: 2010 });
+        };
+        expect(invalidBirthDateCall).toThrow(new ValidationErrorWithoutProperty(BirthDate.name, "The BirthDate is not a valid date."));
+    });
+
+    test("returns an error when trying to create an BirthDate that is in the future", function () {
+        const currentDateTime = DateTime.utc();
+        const yearInFuture = currentDateTime.year + 1;
+
+        const invalidBirthDateCall = () => {
+            BirthDate.from({ day: 10, month: 6, year: yearInFuture });
+        };
+        expect(invalidBirthDateCall).toThrow(new ValidationErrorWithoutProperty(BirthDate.name, "You cannot enter a BirthDate that is in the future."));
+    });
+});
