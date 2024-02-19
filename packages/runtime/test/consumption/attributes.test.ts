@@ -11,7 +11,7 @@ import {
     GetPeerSharedAttributesUseCase,
     GetRepositoryAttributesUseCase,
     LocalAttributeDTO
-} from "../../../src";
+} from "../../src";
 import {
     ensureActiveRelationship,
     executeFullCreateAndShareRelationshipAttributeFlow,
@@ -19,7 +19,7 @@ import {
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     RuntimeServiceProvider,
     TestRuntimeServices
-} from "../../lib";
+} from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 

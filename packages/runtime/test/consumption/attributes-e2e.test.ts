@@ -21,7 +21,7 @@ import {
     SucceedRelationshipAttributeAndNotifyPeerUseCase,
     SucceedRepositoryAttributeRequest,
     SucceedRepositoryAttributeUseCase
-} from "../../../src";
+} from "../../src";
 import {
     ensureActiveRelationship,
     executeFullCreateAndShareRelationshipAttributeFlow,
@@ -31,7 +31,7 @@ import {
     syncUntilHasMessageWithRequest,
     syncUntilHasMessageWithResponse,
     TestRuntimeServices
-} from "../../lib";
+} from "../lib";
 
 /* Disable timeout errors if we're debugging */
 if (process.env.NODE_OPTIONS !== undefined && process.env.NODE_OPTIONS.search("inspect") !== -1) {
