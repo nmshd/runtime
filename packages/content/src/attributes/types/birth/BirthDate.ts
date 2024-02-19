@@ -39,13 +39,7 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
     public year: BirthYear;
 
     protected static override postFrom<T extends Serializable>(value: T): T {
-        if (!(value instanceof BirthDate)) {
-            throw new ValidationError(
-                BirthDate.name,
-                `${nameof<BirthDate>((x) => x.day)}, ${BirthDate.name}.${nameof<BirthDate>((x) => x.month)} or ${BirthDate.name}.${nameof<BirthDate>((x) => x.year)}`,
-                "An unexpected error has occured with a BirthDate."
-            );
-        }
+        if (!(value instanceof BirthDate)) throw new Error("this should never happen");
 
         const dateTime = DateTime.fromObject({ day: value.day.value, month: value.month.value, year: value.year.value });
         const isValid = dateTime.isValid;
