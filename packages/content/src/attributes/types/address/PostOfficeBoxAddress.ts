@@ -51,7 +51,7 @@ export class PostOfficeBoxAddress extends AbstractAddress implements IPostOffice
     public state?: State;
 
     public static override get valueHints(): ValueHints {
-        return ValueHints.from({
+        return super.valueHints.copyWith({
             propertyHints: {
                 [this.propertyNames.boxId.$path]: ValueHints.from({}),
                 [this.propertyNames.zipCode.$path]: ZipCode.valueHints,
