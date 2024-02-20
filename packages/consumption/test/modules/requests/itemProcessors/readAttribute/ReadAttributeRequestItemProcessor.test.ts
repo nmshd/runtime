@@ -1451,6 +1451,123 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 });
             });
 
+            test("returns an error when a RelationshipAttribute queried by a ThirdPartyRelationshipAttributeQuery does not belong to the queried owner", async function () {
+                const sender = CoreAddress.from("id0");
+                const recipient = CoreAddress.from("id1");
+                const thirdParty = CoreAddress.from("id2");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: ThirdPartyRelationshipAttributeQuery.from({
+                        owner: recipient.toString(),
+                        key: "AKey",
+                        thirdParty: [thirdParty.toString()]
+                    })
+                });
+
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const requestId2 = await ConsumptionIds.request.generate();
+                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: thirdParty,
+                        value: ProprietaryString.from({
+                            title: "ATitle",
+                            value: "AStringValue"
+                        })
+                    }),
+                    shareInfo: {
+                        peer: thirdParty,
+                        requestReference: requestId2
+                    }
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: localAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided RelationshipAttribute does not belong to the queried owner./
+                });
+            });
+
+            test("returns an error when a RelationshipAttribute that was queried by a ThirdPartyRelationshipAttributeQuery does not belong to the Recipient or one of the involved third parties, but an empty string was specified for the owner of the query", async function () {
+                const sender = CoreAddress.from("id0");
+                const thirdParty = CoreAddress.from("id2");
+                const notInvolvedThirdParty = CoreAddress.from("id3");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: ThirdPartyRelationshipAttributeQuery.from({
+                        owner: "",
+                        key: "AKey",
+                        thirdParty: [thirdParty.toString()]
+                    })
+                });
+
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const requestId2 = await ConsumptionIds.request.generate();
+                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: notInvolvedThirdParty,
+                        value: ProprietaryString.from({
+                            title: "ATitle",
+                            value: "AStringValue"
+                        })
+                    }),
+                    shareInfo: {
+                        peer: notInvolvedThirdParty,
+                        requestReference: requestId2
+                    }
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: localAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message:
+                        /The owner of the provided RelationshipAttribute is not the Recipient or one of the involved third parties, but an empty string was specified for the owner of the query./
+                });
+            });
+
             test("returns an error when a RelationshipAttribute that was queried with a ThirdPartyRelationshipAttributeQuery does not have the queried key", async function () {
                 const sender = CoreAddress.from("id0");
                 const recipient = CoreAddress.from("id1");
@@ -1465,7 +1582,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 });
                 const requestId1 = await ConsumptionIds.request.generate();
-                const requestId2 = await ConsumptionIds.request.generate();
                 const request = LocalRequest.from({
                     id: requestId1,
                     createdAt: CoreDate.utc(),
@@ -1479,6 +1595,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
+                const requestId2 = await ConsumptionIds.request.generate();
                 const localAttribute = await consumptionController.attributes.createLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AnotherKey",

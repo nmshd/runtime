@@ -18,7 +18,7 @@ export default function validateAnswerToQuery(
         const result = validateAnswerToRelationshipAttributeQuery(query, attribute, recipient);
         if (result.isError()) return result;
     } else if (query instanceof ThirdPartyRelationshipAttributeQuery) {
-        const result = validateAnswerToThirdPartyRelationshipAttributeQuery(query, attribute);
+        const result = validateAnswerToThirdPartyRelationshipAttributeQuery(query, attribute, recipient);
         if (result.isError()) return result;
     } else {
         return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing("An unknown error occurred during the RequestItem processing."));
@@ -148,10 +148,29 @@ function validateAnswerToRelationshipAttributeQuery(
     return ValidationResult.success();
 }
 
-function validateAnswerToThirdPartyRelationshipAttributeQuery(query: ThirdPartyRelationshipAttributeQuery, attribute: IdentityAttribute | RelationshipAttribute): ValidationResult {
+function validateAnswerToThirdPartyRelationshipAttributeQuery(
+    query: ThirdPartyRelationshipAttributeQuery,
+    attribute: IdentityAttribute | RelationshipAttribute,
+    recipient: CoreAddress
+): ValidationResult {
     if (!(attribute instanceof RelationshipAttribute)) {
         return ValidationResult.error(
             CoreErrors.requests.invalidlyAnsweredQuery("The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried.")
+        );
+    }
+
+    const ownerIsCurrentIdentity = recipient.equals(attribute.owner);
+    const queriedOwnerIsEmpty = query.owner.equals("");
+
+    if (!queriedOwnerIsEmpty && !query.owner.equals(attribute.owner)) {
+        return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided RelationshipAttribute does not belong to the queried owner."));
+    }
+
+    if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity && !query.thirdParty.includes(attribute.owner)) {
+        return ValidationResult.error(
+            CoreErrors.requests.invalidlyAnsweredQuery(
+                "The owner of the provided RelationshipAttribute is not the Recipient or one of the involved third parties, but an empty string was specified for the owner of the query."
+            )
         );
     }
 
