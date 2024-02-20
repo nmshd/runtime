@@ -1624,6 +1624,68 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     message: /The provided RelationshipAttribute has not the queried key./
                 });
             });
+
+            test("returns an error when a RelationshipAttribute that was queried with a ThirdPartyRelationshipAttributeQuery is not valid in the queried time frame", async function () {
+                const sender = CoreAddress.from("id0");
+                const recipient = CoreAddress.from("id1");
+                const thirdParty = CoreAddress.from("id2");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: ThirdPartyRelationshipAttributeQuery.from({
+                        owner: recipient.toString(),
+                        validFrom: "2024-02-14T08:47:35.077Z",
+                        validTo: "2024-02-14T09:35:12.824Z",
+                        key: "AKey",
+                        thirdParty: [thirdParty.toString()]
+                    })
+                });
+
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const requestId2 = await ConsumptionIds.request.generate();
+                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: recipient,
+                        validFrom: CoreDate.from("2024-02-14T08:47:35.077Z"),
+                        validTo: CoreDate.from("2024-02-14T09:30:00.000Z"),
+                        value: ProprietaryString.from({
+                            title: "ATitle",
+                            value: "AStringValue"
+                        })
+                    }),
+                    shareInfo: {
+                        peer: thirdParty,
+                        requestReference: requestId2
+                    }
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: localAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided Attribute is not valid in the queried time frame./
+                });
+            });
         });
     });
 

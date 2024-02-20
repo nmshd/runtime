@@ -24,7 +24,7 @@ export default function validateAnswerToQuery(
         return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing("An unknown error occurred during the RequestItem processing."));
     }
 
-    if (query instanceof IdentityAttributeQuery || query instanceof RelationshipAttributeQuery) {
+    if (query instanceof IdentityAttributeQuery || query instanceof RelationshipAttributeQuery || query instanceof ThirdPartyRelationshipAttributeQuery) {
         if ((!query.validFrom && attribute.validFrom !== undefined) || (query.validFrom && attribute.validFrom && query.validFrom.isBefore(attribute.validFrom))) {
             return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided Attribute is not valid in the queried time frame."));
         }
