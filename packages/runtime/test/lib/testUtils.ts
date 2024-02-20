@@ -14,8 +14,6 @@ import { CoreId } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
 import {
-    AttributeSuccessionResponse,
-    AttributeSuccessionWithNotificationResponse,
     ConsumptionServices,
     CreateAndShareRelationshipAttributeRequest,
     CreateOutgoingRequestRequest,
@@ -29,6 +27,7 @@ import {
     MessageDTO,
     MessageSentEvent,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
+    NotifyPeerAboutRepositoryAttributeSuccessionResponse,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
@@ -37,6 +36,7 @@ import {
     RelationshipTemplateDTO,
     ShareRepositoryAttributeRequest,
     SucceedRepositoryAttributeRequest,
+    SucceedRepositoryAttributeResponse,
     SyncEverythingResponse,
     TokenDTO,
     TransportServices,
@@ -434,7 +434,7 @@ export async function executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
     request: SucceedRepositoryAttributeRequest
-): Promise<AttributeSuccessionResponse> {
+): Promise<SucceedRepositoryAttributeResponse> {
     const succeedAttributeRequestResult = await sender.consumption.attributes.succeedRepositoryAttribute(request);
     const repositorySuccessorId = succeedAttributeRequestResult.value.successor.id;
 
@@ -446,7 +446,7 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
     attributeId: string
-): Promise<AttributeSuccessionResponse> {
+): Promise<SucceedRepositoryAttributeResponse> {
     const notifyRequest: NotifyPeerAboutRepositoryAttributeSuccessionRequest = {
         attributeId: attributeId,
         peer: recipient.address
@@ -455,7 +455,7 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
 
     await waitForRecipientToReceiveNotification(sender, recipient, notifyRequestResult.value);
 
-    const senderOwnSharedIdentityAttributes: AttributeSuccessionResponse = {
+    const senderOwnSharedIdentityAttributes: SucceedRepositoryAttributeResponse = {
         predecessor: notifyRequestResult.value.predecessor,
         successor: notifyRequestResult.value.successor
     };
@@ -466,7 +466,7 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
 export async function waitForRecipientToReceiveNotification(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
-    notifyRequestResult: AttributeSuccessionWithNotificationResponse
+    notifyRequestResult: NotifyPeerAboutRepositoryAttributeSuccessionResponse
 ): Promise<void> {
     await syncUntilHasMessageWithNotification(recipient.transport, notifyRequestResult.notificationId);
 

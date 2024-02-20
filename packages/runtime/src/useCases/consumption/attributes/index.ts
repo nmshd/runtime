@@ -1,5 +1,4 @@
 export * from "./AttributeMapper";
-export * from "./AttributeSuccessionResponse";
 export * from "./CreateAndShareRelationshipAttribute";
 export * from "./CreateRepositoryAttribute";
 export * from "./ExecuteIdentityAttributeQuery";
