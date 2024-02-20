@@ -2,8 +2,10 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
     IdentityAttributeQuery,
     IQLQuery,
+    ProprietaryString,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
+    RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     RelationshipAttributeQuery,
     Request,
@@ -347,1012 +349,1122 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const peer = CoreAddress.from("id1");
+        describe("canAccept ReadAttributeRequestitem with IdentityAttributeQuery", function () {
+            test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
+                const peer = CoreAddress.from("id1");
 
-            const peerAttributeId = await ConsumptionIds.attribute.generate();
+                const peerAttributeId = await ConsumptionIds.attribute.generate();
 
-            await consumptionController.attributes.createPeerLocalAttribute({
-                id: peerAttributeId,
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: peer
-                }),
-                peer: peer,
-                requestReference: await ConsumptionIds.request.generate()
-            });
+                await consumptionController.attributes.createPeerLocalAttribute({
+                    id: peerAttributeId,
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: peer
+                    }),
+                    peer: peer,
+                    requestReference: await ConsumptionIds.request.generate()
+                });
 
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: peer,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: peer,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: peerAttributeId.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
+                });
             });
 
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                existingAttributeId: peerAttributeId.toString()
-            };
+            test("returns an error when the new IdentityAttribute to be created and shared belongs to a third party", async function () {
+                const sender = CoreAddress.from("id0");
+                const thirdParty = CoreAddress.from("id1");
 
-            const result = await processor.canAccept(requestItem, acceptParams, request);
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
 
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: thirdParty.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
+                });
+            });
+
+            test("returns an error when an IdentityAttribute was queried by an IdentityAttributeQuery and the peer tries to respond with a RelationshipAttribute", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: accountController.identity.address.toString(),
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
+                });
+            });
+
+            test("returns an error when the existing IdentityAttribute is already shared", async function () {
+                const peer = CoreAddress.from("id1");
+
+                const attribute = await consumptionController.attributes.createPeerLocalAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: CoreAddress.from(accountController.identity.address)
+                    }),
+                    peer: peer,
+                    requestReference: await ConsumptionIds.request.generate()
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: peer,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: attribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes./
+                });
+            });
+
+            test("returns an error when an IdentityAttribute of a specific type was queried by an IdentityAttributeQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: accountController.identity.address.toString(),
+                        value: {
+                            "@type": "DisplayName",
+                            value: "ADisplayName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided IdentityAttribute is not of the queried IdentityAttribute Value Type./
+                });
+            });
+
+            test("can be called with property tags used in the IdentityAttributeQuery", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ tags: ["tagA", "tagB", "tagC"], valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: accountController.identity.address.toString(),
+                        tags: ["tagA", "tagB", "tagC"],
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).successfulValidationResult();
+            });
+
+            test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IdentityAttributeQuery", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: accountController.identity.address.toString(),
+                        tags: ["Atag"],
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The number of tags of the provided IdentityAttribute do not match the number of queried tags./
+                });
+            });
+
+            test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IdentityAttributeQuery", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ tags: ["tagA", "tagB", "tagC"], valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: accountController.identity.address.toString(),
+                        tags: ["tagD", "tagE", "tagF"],
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The tags of the provided IdentityAttribute do not match the queried tags./
+                });
+            });
+
+            test("returns an error when an IdentityAttribute is not valid in the queried time frame", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ validTo: "2024-02-14T09:35:12.824Z", valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: accountController.identity.address.toString(),
+                        validFrom: "2024-02-14T08:47:35.077Z",
+                        validTo: "2024-02-14T09:35:12.824Z",
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided Attribute is not valid in the queried time frame./
+                });
             });
         });
 
-        test("returns an error when the new IdentityAttribute to be created and shared belongs to a third party", async function () {
-            const sender = CoreAddress.from("id0");
-            const thirdParty = CoreAddress.from("id1");
+        describe("canAccept ReadAttributeRequestitem with IQLQuery", function () {
+            test("returns an error when an IdentityAttribute was queried by an IQLQuery and the peer tries to respond with a RelationshipAttribute", async function () {
+                const sender = CoreAddress.from("id0");
 
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: accountController.identity.address.toString(),
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
+                });
             });
 
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: thirdParty.toString(),
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
+            test("returns an error when an IdentityAttribute of a specific type was queried by an IQLQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: accountController.identity.address.toString(),
+                        value: {
+                            "@type": "DisplayName",
+                            value: "ADisplayName"
+                        }
                     }
-                }
-            };
+                };
 
-            const result = await processor.canAccept(requestItem, acceptParams, request);
+                const result = await processor.canAccept(requestItem, acceptParams, request);
 
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided IdentityAttribute is not of the queried IdentityAttribute Value Type./
+                });
+            });
+
+            test("can be called with property tags used in the IQLQuery", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["tagA", "tagB", "tagC"] } })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: accountController.identity.address.toString(),
+                        tags: ["tagA", "tagB", "tagC"],
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).successfulValidationResult();
+            });
+
+            test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IQLQuery", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: accountController.identity.address.toString(),
+                        tags: ["Atag"],
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The number of tags of the provided IdentityAttribute do not match the number of queried tags./
+                });
+            });
+
+            test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IQLQuery", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["tagA", "tagB", "tagC"] } })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: accountController.identity.address.toString(),
+                        tags: ["tagD", "tagE", "tagF"],
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The tags of the provided IdentityAttribute do not match the queried tags./
+                });
             });
         });
 
-        test("returns an error when an IdentityAttribute was queried by an IdentityAttributeQuery and the peer tries to respond with a RelationshipAttribute", async function () {
-            const sender = CoreAddress.from("id0");
+        describe("canAccept ReadAttributeRequestitem with RelationshipAttributeQuery", function () {
+            test("returns an error when a RelationshipAttribute was queried and the Recipient tries to respond with an IdentityAttribute", async function () {
+                const sender = CoreAddress.from("id0");
+                const recipient = CoreAddress.from("id1");
 
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: recipient.toString(),
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: recipient
+                    })
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: repositoryAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried./
+                });
             });
 
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "AKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: accountController.identity.address.toString(),
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+            test("returns an error when a RelationshipAttribute of a specific type was queried and the Recipient tries to respond with a RelationshipAttribute of another type", async function () {
+                const sender = CoreAddress.from("id0");
+                const recipient = CoreAddress.from("id1");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: recipient.toString(),
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "ProprietaryInteger",
+                            title: "ATitle",
+                            value: 1
+                        }
                     }
-                }
-            };
+                };
 
-            const result = await processor.canAccept(requestItem, acceptParams, request);
+                const result = await processor.canAccept(requestItem, acceptParams, request);
 
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided RelationshipAttribute is not of the queried RelationshipAttribute Value Type./
+                });
+            });
+
+            test("returns an error when a RelationshipAttribute does not belong to the queried owner", async function () {
+                const sender = CoreAddress.from("id0");
+                const recipient = CoreAddress.from("id1");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: sender.toString(),
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided RelationshipAttribute does not belong to the queried owner./
+                });
+            });
+
+            test("returns an error when a RelationshipAttribute does not belong to the Recipient, but an empty string was specified for the owner of the query", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: "",
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: sender.toString(),
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The owner of the provided RelationshipAttribute is not the Recipient, but an empty string was specified for the owner of the query./
+                });
+            });
+
+            test("returns an error when a RelationshipAttribute does not have the queried key", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: sender.toString(),
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AnotherKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: sender.toString(),
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided RelationshipAttribute has not the queried key./
+                });
+            });
+
+            test("returns an error when a RelationshipAttribute does not have the queried confidentiality", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: sender.toString(),
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Protected
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Private,
+                        owner: sender.toString(),
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided RelationshipAttribute has not the queried confidentiality./
+                });
+            });
+
+            test("can be called with properties validFrom and validTo used in the query", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: sender.toString(),
+                        key: "AKey",
+                        validFrom: "2024-02-14T08:47:35.077Z",
+                        validTo: "2024-02-14T09:35:12.824Z",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: sender.toString(),
+                        validFrom: "2024-02-14T08:40:35.077Z",
+                        validTo: "2024-02-14T09:35:12.824Z",
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).successfulValidationResult();
+            });
+
+            test("returns an error when a RelationshipAttribute is not valid in the queried time frame", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: sender.toString(),
+                        key: "AKey",
+                        validFrom: "2024-02-14T08:47:35.077Z",
+                        validTo: "2024-02-14T09:35:12.824Z",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: sender.toString(),
+                        validFrom: "2024-02-14T08:47:35.077Z",
+                        validTo: "2024-02-14T09:30:00.000Z",
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided Attribute is not valid in the queried time frame./
+                });
             });
         });
 
-        test("returns an error when the existing IdentityAttribute is already shared", async function () {
-            const peer = CoreAddress.from("id1");
+        describe("canAccept ReadAttributeRequestitem with ThirdPartyRelationshipAttributeQuery", function () {
+            test("returns an error when a RelationshipAttribute was queried with a ThirdPartyRelationshipAttributeQuery and the Recipient tries to respond with an IdentityAttribute", async function () {
+                const sender = CoreAddress.from("id0");
+                const recipient = CoreAddress.from("id1");
+                const thirdParty = CoreAddress.from("id2");
 
-            const attribute = await consumptionController.attributes.createPeerLocalAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
-                }),
-                peer: peer,
-                requestReference: await ConsumptionIds.request.generate()
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: ThirdPartyRelationshipAttributeQuery.from({
+                        owner: recipient.toString(),
+                        key: "AKey",
+                        thirdParty: [thirdParty.toString()]
+                    })
+                });
+                const requestId1 = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId1,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId1,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: recipient
+                    })
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: localAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried./
+                });
             });
 
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: peer,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
+            test("returns an error when a RelationshipAttribute that was queried with a ThirdPartyRelationshipAttributeQuery does not have the queried key", async function () {
+                const sender = CoreAddress.from("id0");
+                const recipient = CoreAddress.from("id1");
+                const thirdParty = CoreAddress.from("id2");
 
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                existingAttributeId: attribute.id.toString()
-            };
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: ThirdPartyRelationshipAttributeQuery.from({
+                        owner: recipient.toString(),
+                        key: "AKey",
+                        thirdParty: [thirdParty.toString()]
+                    })
+                });
+                const requestId1 = await ConsumptionIds.request.generate();
+                const requestId2 = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId1,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId1,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
 
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes./
-            });
-        });
-
-        test("returns an error when an IdentityAttribute of a specific type was queried by an IdentityAttributeQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: accountController.identity.address.toString(),
-                    value: {
-                        "@type": "DisplayName",
-                        value: "ADisplayName"
+                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "AnotherKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: recipient,
+                        value: ProprietaryString.from({
+                            title: "ATitle",
+                            value: "AStringValue"
+                        })
+                    }),
+                    shareInfo: {
+                        peer: thirdParty,
+                        requestReference: requestId2
                     }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided IdentityAttribute is not of the queried IdentityAttribute Value Type./
-            });
-        });
-
-        test("can be called with property tags used in the IdentityAttributeQuery", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ tags: ["tagA", "tagB", "tagC"], valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: accountController.identity.address.toString(),
-                    tags: ["tagA", "tagB", "tagC"],
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).successfulValidationResult();
-        });
-
-        test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IdentityAttributeQuery", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: accountController.identity.address.toString(),
-                    tags: ["Atag"],
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The number of tags of the provided IdentityAttribute do not match the number of queried tags./
-            });
-        });
-
-        test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IdentityAttributeQuery", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ tags: ["tagA", "tagB", "tagC"], valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: accountController.identity.address.toString(),
-                    tags: ["tagD", "tagE", "tagF"],
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The tags of the provided IdentityAttribute do not match the queried tags./
-            });
-        });
-
-        test("returns an error when an IdentityAttribute was queried by an IQLQuery and the peer tries to respond with a RelationshipAttribute", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "AKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: accountController.identity.address.toString(),
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
-            });
-        });
-
-        test("returns an error when an IdentityAttribute of a specific type was queried by an IQLQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: accountController.identity.address.toString(),
-                    value: {
-                        "@type": "DisplayName",
-                        value: "ADisplayName"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided IdentityAttribute is not of the queried IdentityAttribute Value Type./
-            });
-        });
-
-        test("can be called with property tags used in the IQLQuery", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["tagA", "tagB", "tagC"] } })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: accountController.identity.address.toString(),
-                    tags: ["tagA", "tagB", "tagC"],
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).successfulValidationResult();
-        });
-
-        test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IQLQuery", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: accountController.identity.address.toString(),
-                    tags: ["Atag"],
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The number of tags of the provided IdentityAttribute do not match the number of queried tags./
-            });
-        });
-
-        test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IQLQuery", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["tagA", "tagB", "tagC"] } })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: accountController.identity.address.toString(),
-                    tags: ["tagD", "tagE", "tagF"],
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The tags of the provided IdentityAttribute do not match the queried tags./
-            });
-        });
-
-        test("returns an error when a RelationshipAttribute was queried and the Recipient tries to respond with an IdentityAttribute", async function () {
-            const sender = CoreAddress.from("id0");
-            const recipient = CoreAddress.from("id1");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    owner: recipient.toString(),
-                    key: "AKey",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "ATitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: recipient
-                })
-            });
-            const repositoryAttributeId = repositoryAttribute.id.toString();
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                existingAttributeId: repositoryAttributeId
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried./
-            });
-        });
-
-        test("returns an error when a RelationshipAttribute of a specific type was queried and the Recipient tries to respond with a RelationshipAttribute of another type", async function () {
-            const sender = CoreAddress.from("id0");
-            const recipient = CoreAddress.from("id1");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    owner: recipient.toString(),
-                    key: "AKey",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "ATitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "AKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: recipient.toString(),
-                    value: {
-                        "@type": "ProprietaryInteger",
-                        title: "ATitle",
-                        value: 1
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided RelationshipAttribute is not of the queried RelationshipAttribute Value Type./
-            });
-        });
-
-        test("returns an error when a RelationshipAttribute does not belong to the queried owner", async function () {
-            const sender = CoreAddress.from("id0");
-            const recipient = CoreAddress.from("id1");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    owner: sender.toString(),
-                    key: "AKey",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "ATitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "AKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: recipient.toString(),
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided RelationshipAttribute does not belong to the queried owner./
-            });
-        });
-
-        test("returns an error when a RelationshipAttribute does not belong to the Recipient, but an empty string was specified for the owner of the query", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    owner: "",
-                    key: "AKey",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "ATitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "AKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: sender.toString(),
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The owner of the provided RelationshipAttribute is not the Recipient, but an empty string was specified for the owner of the query./
-            });
-        });
-
-        test("returns an error when a RelationshipAttribute does not have the queried key", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    owner: sender.toString(),
-                    key: "AKey",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "ATitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "AnotherKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: sender.toString(),
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided RelationshipAttribute has not the queried key./
-            });
-        });
-
-        test("returns an error when a RelationshipAttribute does not have the queried confidentiality", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    owner: sender.toString(),
-                    key: "AKey",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "ATitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Protected
-                    }
-                })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "AKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Private,
-                    owner: sender.toString(),
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided RelationshipAttribute has not the queried confidentiality./
-            });
-        });
-
-        test("can be called with properties validFrom and validTo used in the query", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    owner: sender.toString(),
-                    key: "AKey",
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "ATitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "AKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: sender.toString(),
-                    validFrom: "2024-02-14T08:40:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).successfulValidationResult();
-        });
-
-        test("returns an error when an IdentityAttribute is not valid in the queried time frame", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ validTo: "2024-02-14T09:35:12.824Z", valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: accountController.identity.address.toString(),
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided Attribute is not valid in the queried time frame./
-            });
-        });
-
-        test("returns an error when a RelationshipAttribute is not valid in the queried time frame", async function () {
-            const sender = CoreAddress.from("id0");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    owner: sender.toString(),
-                    key: "AKey",
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "ATitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "AKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: sender.toString(),
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:30:00.000Z",
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
-                    }
-                }
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: /The provided Attribute is not valid in the queried time frame./
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: localAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided RelationshipAttribute has not the queried key./
+                });
             });
         });
     });
