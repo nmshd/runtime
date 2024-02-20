@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
+import { AttributeDeletedNotificationItem, Notification } from "@nmshd/content";
 import { AccountController, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -43,8 +44,7 @@ export class DeletePeerSharedAttributeUseCase extends UseCase<DeletePeerSharedAt
         await this.attributeController.deleteAttribute(peerSharedAttribute);
 
         const notificationId = await ConsumptionIds.notification.generate();
-        // TODO: implement AttributeDeletedNotificationItem
-        const notificationItem = AttributeDeletedNotificationItem.from();
+        const notificationItem = AttributeDeletedNotificationItem.from({ attributeId: peerSharedAttributeId });
         const notification = Notification.from({
             id: notificationId,
             items: [notificationItem]
