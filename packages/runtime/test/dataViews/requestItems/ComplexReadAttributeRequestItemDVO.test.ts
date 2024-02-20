@@ -1,13 +1,13 @@
-import { AcceptReadAttributeRequestItemParametersWithNewAttributeJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { sleep } from "@js-soft/ts-utils";
+import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { IdentityAttributeQuery, IQLQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
+    CreateOutgoingRequestRequest,
     DataViewExpander,
     DecidableReadAttributeRequestItemDVO,
     IdentityAttributeQueryDVO,
-    IncomingRequestStatusChangedEvent,
     IQLQueryDVO,
-    MessageDTO,
     OutgoingRequestStatusChangedEvent,
     ProcessedIdentityAttributeQueryDVO,
     ProcessedIQLQueryDVO,
@@ -16,9 +16,20 @@ import {
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../../lib";
+import {
+    establishRelationship,
+    exchangeAndAcceptRequestByMessage,
+    exchangeMessageWithRequest,
+    MockEventBus,
+    RuntimeServiceProvider,
+    sendMessageWithRequest,
+    syncUntilHasMessageWithRequest,
+    TestRuntimeServices
+} from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
+let runtimeServices1: TestRuntimeServices;
+let runtimeServices2: TestRuntimeServices;
 let transportServices1: TransportServices;
 let transportServices2: TransportServices;
 let expander1: DataViewExpander;
@@ -27,44 +38,40 @@ let consumptionServices1: ConsumptionServices;
 let consumptionServices2: ConsumptionServices;
 let eventBus1: MockEventBus;
 let eventBus2: MockEventBus;
-let senderMessage: MessageDTO;
-let recipientMessage: MessageDTO;
-let requestId: string;
-
-afterAll(() => serviceProvider.stop());
-
-beforeEach(function () {
-    eventBus1.reset();
-    eventBus2.reset();
-});
+let requestContent: CreateOutgoingRequestRequest;
+let responseItems: DecideRequestItemParametersJSON[];
+let attributeValue: PersonNameJSON;
 
 describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
         const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
-        transportServices1 = runtimeServices[0].transport;
-        transportServices2 = runtimeServices[1].transport;
-        expander1 = runtimeServices[0].expander;
-        expander2 = runtimeServices[1].expander;
-        consumptionServices1 = runtimeServices[0].consumption;
-        consumptionServices2 = runtimeServices[1].consumption;
-        eventBus1 = runtimeServices[0].eventBus;
-        eventBus2 = runtimeServices[1].eventBus;
+        runtimeServices1 = runtimeServices[0];
+        runtimeServices2 = runtimeServices[1];
+
+        transportServices1 = runtimeServices1.transport;
+        transportServices2 = runtimeServices2.transport;
+        expander1 = runtimeServices1.expander;
+        expander2 = runtimeServices2.expander;
+        consumptionServices1 = runtimeServices1.consumption;
+        consumptionServices2 = runtimeServices2.consumption;
+        eventBus1 = runtimeServices1.eventBus;
+        eventBus2 = runtimeServices2.eventBus;
         await establishRelationship(transportServices1, transportServices2);
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-
+        attributeValue = PersonName.from({
+            honorificPrefix: "Dr.",
+            givenName: "Heinz",
+            middleName: "Gerhard",
+            surname: "Ranzig",
+            honorificSuffix: "von Warnermünde"
+        }).toJSON();
         await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
-                value: PersonName.from({
-                    honorificPrefix: "Dr.",
-                    givenName: "Heinz",
-                    middleName: "Gerhard",
-                    surname: "Ranzig",
-                    honorificSuffix: "von Warnermünde"
-                }).toJSON()
+                value: attributeValue
             }
         });
 
-        const localRequest = await consumptionServices1.outgoingRequests.create({
+        requestContent = {
             content: {
                 items: [
                     ReadAttributeRequestItem.from({
@@ -77,16 +84,15 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
                 ]
             },
             peer: recipientAddress
-        });
-        requestId = localRequest.value.id;
+        };
 
-        senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-        recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
+        responseItems = [Object.assign({ accept: true }, { newAttribute: { "@type": "IdentityAttribute", owner: recipientAddress, value: attributeValue } })];
 
-        await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+        // await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
     }, 30000);
-
     test("check the MessageDVO for the sender", async () => {
+        const senderMessage = await sendMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -116,7 +122,8 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
-    test("check the MessageDVO for the recipient and accept it", async () => {
+    test("check the MessageDVO for the recipient", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         const dto = recipientMessage;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -154,15 +161,17 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect((resultItem.content.value as PersonNameJSON).middleName).toBe("Gerhard");
         expect((resultItem.content.value as PersonNameJSON).honorificPrefix).toBe("Dr.");
         expect((resultItem.content.value as PersonNameJSON).honorificSuffix).toBe("von Warnermünde");
-
-        const acceptResult = await consumptionServices2.incomingRequests.accept({
-            requestId: dvo.request.id,
-            items: [{ accept: true, newAttribute: resultItem.content } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON]
-        });
-        expect(acceptResult).toBeSuccessful();
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+
+        const acceptResult = await consumptionServices2.incomingRequests.accept({
+            requestId: recipientMessage.content.id,
+            items: responseItems
+        });
+        expect(acceptResult).toBeSuccessful();
+
         const dto = recipientMessage;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -234,9 +243,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessageWithResponse(transportServices1, requestId);
-
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
@@ -299,32 +306,33 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
 });
 
 describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
         const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
-        transportServices1 = runtimeServices[0].transport;
-        transportServices2 = runtimeServices[1].transport;
-        expander1 = runtimeServices[0].expander;
-        expander2 = runtimeServices[1].expander;
-        consumptionServices1 = runtimeServices[0].consumption;
-        consumptionServices2 = runtimeServices[1].consumption;
-        eventBus1 = runtimeServices[0].eventBus;
-        eventBus2 = runtimeServices[1].eventBus;
+        runtimeServices1 = runtimeServices[0];
+        runtimeServices2 = runtimeServices[1];
+        transportServices1 = runtimeServices1.transport;
+        transportServices2 = runtimeServices2.transport;
+        expander1 = runtimeServices1.expander;
+        expander2 = runtimeServices2.expander;
+        consumptionServices1 = runtimeServices1.consumption;
+        consumptionServices2 = runtimeServices2.consumption;
+        eventBus1 = runtimeServices1.eventBus;
+        eventBus2 = runtimeServices2.eventBus;
         await establishRelationship(transportServices1, transportServices2);
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-
+        attributeValue = PersonName.from({
+            honorificPrefix: "Dr.",
+            givenName: "Heinz",
+            middleName: "Gerhard",
+            surname: "Ranzig",
+            honorificSuffix: "von Warnermünde"
+        }).toJSON();
         await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
-                value: PersonName.from({
-                    honorificPrefix: "Dr.",
-                    givenName: "Heinz",
-                    middleName: "Gerhard",
-                    surname: "Ranzig",
-                    honorificSuffix: "von Warnermünde"
-                }).toJSON()
+                value: attributeValue
             }
         });
-
-        const localRequest = await consumptionServices1.outgoingRequests.create({
+        requestContent = {
             content: {
                 items: [
                     ReadAttributeRequestItem.from({
@@ -337,16 +345,16 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
                 ]
             },
             peer: recipientAddress
-        });
-        requestId = localRequest.value.id;
+        };
 
-        senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-        recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
-
-        await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+        responseItems = [Object.assign({ accept: true }, { newAttribute: { "@type": "IdentityAttribute", owner: recipientAddress, value: attributeValue } })];
+        await sleep(1000);
     }, 30000);
 
+    afterEach(() => serviceProvider.stop());
     test("check the MessageDVO for the sender", async () => {
+        const senderMessage = await sendMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -372,7 +380,8 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(iqlQueryDVO.queryString).toBe("PersonName");
     });
 
-    test("check the MessageDVO for the recipient and accept it", async () => {
+    test("check the MessageDVO for the recipient", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         const dto = recipientMessage;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -405,15 +414,17 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect((resultItem.content.value as PersonNameJSON).middleName).toBe("Gerhard");
         expect((resultItem.content.value as PersonNameJSON).honorificPrefix).toBe("Dr.");
         expect((resultItem.content.value as PersonNameJSON).honorificSuffix).toBe("von Warnermünde");
-
-        const acceptResult = await consumptionServices2.incomingRequests.accept({
-            requestId: dvo.request.id,
-            items: [{ accept: true, newAttribute: resultItem.content } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON]
-        });
-        expect(acceptResult).toBeSuccessful();
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+
+        const acceptResult = await consumptionServices2.incomingRequests.accept({
+            requestId: recipientMessage.content.id,
+            items: responseItems
+        });
+        expect(acceptResult).toBeSuccessful();
+
         const dto = recipientMessage;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -479,7 +490,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessageWithResponse(transportServices1, requestId);
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
 
