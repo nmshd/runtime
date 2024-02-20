@@ -12,7 +12,7 @@ export default function validateAnswerToQuery(
         const result = validateAnswerToIdentityAttributeQuery(query, attribute, recipient);
         if (result.isError()) return result;
     } else if (query instanceof IQLQuery) {
-        const result = validateAnswerToIQLQuery(query, attribute);
+        const result = validateAnswerToIQLQuery(query, attribute, recipient);
         if (result.isError()) return result;
     } else if (query instanceof RelationshipAttributeQuery) {
         const result = validateAnswerToRelationshipAttributeQuery(query, attribute, recipient);
@@ -69,12 +69,18 @@ function validateAnswerToIdentityAttributeQuery(query: IdentityAttributeQuery, a
     return ValidationResult.success();
 }
 
-function validateAnswerToIQLQuery(query: IQLQuery, attribute: IdentityAttribute | RelationshipAttribute): ValidationResult {
+function validateAnswerToIQLQuery(query: IQLQuery, attribute: IdentityAttribute | RelationshipAttribute, recipient: CoreAddress): ValidationResult {
     if (!(attribute instanceof IdentityAttribute)) {
         return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery(
-                "The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried. Currently, only IdentityAttributes can be queried by an IQLQuery."
-            )
+            CoreErrors.requests.invalidlyAnsweredQuery("The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes should be queried by an IQLQuery.")
+        );
+    }
+
+    const ownerIsCurrentIdentity = recipient.equals(attribute.owner);
+
+    if (!ownerIsCurrentIdentity) {
+        return ValidationResult.error(
+            CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
         );
     }
 

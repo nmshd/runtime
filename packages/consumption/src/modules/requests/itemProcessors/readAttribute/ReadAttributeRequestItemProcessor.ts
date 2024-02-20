@@ -62,7 +62,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         }
 
         if (!attribute) {
-            return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing("An unknown error occurred during the RequestItem processing."));
+            throw new Error("this should never happen");
         }
 
         const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, recipient);

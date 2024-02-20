@@ -772,7 +772,48 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
+                    message: /The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes should be queried by an IQLQuery./
+                });
+            });
+
+            test("returns an error when the IdentityAttribute queried by an IQLQuery is not owned by the Recipient", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: sender.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
                 });
             });
 
