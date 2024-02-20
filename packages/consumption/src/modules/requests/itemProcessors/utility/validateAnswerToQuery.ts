@@ -166,7 +166,12 @@ function validateAnswerToThirdPartyRelationshipAttributeQuery(
         return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided RelationshipAttribute does not belong to the queried owner."));
     }
 
-    if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity && !query.thirdParty.includes(attribute.owner)) {
+    function convertCoreAddressToString(value: CoreAddress): string {
+        return value.toString();
+    }
+    const queriedThirdParties = query.thirdParty.map(convertCoreAddressToString);
+
+    if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity && !queriedThirdParties.includes(attribute.owner.toString())) {
         return ValidationResult.error(
             CoreErrors.requests.invalidlyAnsweredQuery(
                 "The owner of the provided RelationshipAttribute is not the Recipient or one of the involved third parties, but an empty string was specified for the owner of the query."

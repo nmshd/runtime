@@ -6,7 +6,8 @@ import {
     RejectResponseItem,
     RelationshipAttribute,
     Request,
-    ResponseItemResult
+    ResponseItemResult,
+    ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
 import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
@@ -57,7 +58,35 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes.")
                 );
             }
+            if (_requestItem.query instanceof ThirdPartyRelationshipAttributeQuery && attribute instanceof RelationshipAttribute) {
+                if (!foundLocalAttribute.isShared()) {
+                    throw new Error("this should never happen");
+                }
+
+                function convertCoreAddressToString(value: CoreAddress): string {
+                    return value.toString();
+                }
+                const queriedThirdParties = _requestItem.query.thirdParty.map(convertCoreAddressToString);
+
+                if (
+                    (this.accountController.identity.isMe(attribute.owner) || queriedThirdParties.includes(attribute.owner.toString())) &&
+                    !queriedThirdParties.includes(foundLocalAttribute.shareInfo.peer.toString())
+                ) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidlyAnsweredQuery(
+                            "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
+                        )
+                    );
+                }
+            }
         } else if (parsedParams.isWithNewAttribute()) {
+            if (_requestItem.query instanceof ThirdPartyRelationshipAttributeQuery) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery(
+                        "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that already exist may be provided."
+                    )
+                );
+            }
             attribute = parsedParams.newAttribute;
         }
 
