@@ -1,16 +1,14 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
+import { AttributesController, ConsumptionIds, LocalAttribute, NotificationsController } from "@nmshd/consumption";
 import { AttributeDeletedNotificationItem, Notification } from "@nmshd/content";
 import { AccountController, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { LocalNotificationDTO } from "../../../types";
+import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { NotificationMapper } from "../notifications/NotificationMapper";
 
 export interface DeletePeerSharedAttributeRequest {
     attributeId: AttributeIdString;
-}
-
-export interface DeletePeerSharedAttributeResponse {
-    notificationId: NotificationIdString;
 }
 
 class Validator extends SchemaValidator<DeletePeerSharedAttributeRequest> {
@@ -19,17 +17,18 @@ class Validator extends SchemaValidator<DeletePeerSharedAttributeRequest> {
     }
 }
 
-export class DeletePeerSharedAttributeUseCase extends UseCase<DeletePeerSharedAttributeRequest, DeletePeerSharedAttributeResponse> {
+export class DeletePeerSharedAttributeUseCase extends UseCase<DeletePeerSharedAttributeRequest, LocalNotificationDTO> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly messageController: MessageController,
+        @Inject private readonly notificationsController: NotificationsController,
         @Inject validator: Validator
     ) {
         super(validator);
     }
 
-    protected async executeInternal(request: DeletePeerSharedAttributeRequest): Promise<Result<DeletePeerSharedAttributeResponse>> {
+    protected async executeInternal(request: DeletePeerSharedAttributeRequest): Promise<Result<LocalNotificationDTO>> {
         const peerSharedAttributeId = CoreId.from(request.attributeId);
         const peerSharedAttribute = await this.attributeController.getLocalAttribute(peerSharedAttributeId);
 
@@ -56,7 +55,7 @@ export class DeletePeerSharedAttributeUseCase extends UseCase<DeletePeerSharedAt
 
         await this.accountController.syncDatawallet();
 
-        const result = { notificationId: notificationId.toString() };
-        return Result.ok(result);
+        const localNotification = await this.notificationsController.getNotification(notificationId);
+        return Result.ok(NotificationMapper.toNotificationDTO(localNotification));
     }
 }

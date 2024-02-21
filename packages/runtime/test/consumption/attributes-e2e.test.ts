@@ -1,3 +1,4 @@
+import { AttributeDeletedByPeerEvent } from "@nmshd/consumption";
 import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/transport";
 import {
@@ -6,6 +7,7 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
+    DeletePeerSharedAttributeUseCase,
     GetSharedVersionsOfRepositoryAttributeUseCase,
     GetVersionsOfAttributeUseCase,
     LocalAttributeDTO,
@@ -26,6 +28,7 @@ import {
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     RuntimeServiceProvider,
+    syncUntilHasMessageWithNotification,
     TestRuntimeServices,
     waitForRecipientToReceiveNotification
 } from "../lib";
@@ -1005,4 +1008,54 @@ describe("Get (shared) versions of attribute", () => {
             expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
         });
     });
+});
+
+describe(DeletePeerSharedAttributeUseCase.name, () => {
+    test("should delete a peer shared identity attribute", async () => {
+        const sOSIA = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Petra Pan"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        });
+
+        const rPSIA = (await services2.consumption.attributes.getAttribute({ id: sOSIA.id })).value;
+        expect(rPSIA).toBeDefined();
+
+        const deletionResult = await services2.consumption.attributes.deletePeerSharedAttribute({ attributeId: sOSIA.id });
+        expect(deletionResult.isSuccess).toBe(true);
+
+        const getDeletedAttributeResult = await services2.consumption.attributes.getAttribute({ id: sOSIA.id });
+        expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should notify about identity attribute deletion by peer", async () => {
+        const sOSIA = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Petra Pan"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        });
+
+        const deletionTime = CoreDate.utc();
+        const notification = (await services2.consumption.attributes.deletePeerSharedAttribute({ attributeId: sOSIA.id })).value;
+        await syncUntilHasMessageWithNotification(services1.transport, notification.id);
+        await services1.eventBus.waitForEvent(AttributeDeletedByPeerEvent, (e) => {
+            return e.data.id.toString() === sOSIA.id;
+        });
+
+        const result = await services1.consumption.attributes.getAttribute({ id: sOSIA.id });
+        expect(result.isSuccess).toBe(true);
+        const updatedAttribute = result.value;
+        expect(updatedAttribute.deletionStatus?.deletedByPeer).toBeDefined();
+        expect(CoreDate.from(updatedAttribute.deletionStatus!.deletedByPeer!).isSame(deletionTime, "second")).toBe(true);
+    });
+
+    // TODO: test deletion of predecessors
 });

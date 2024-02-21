@@ -1,13 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
 import { Inject } from "typescript-ioc";
-import { LocalAttributeDTO, LocalRequestDTO } from "../../../types";
+import { LocalAttributeDTO, LocalNotificationDTO, LocalRequestDTO } from "../../../types";
 import {
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
     DeletePeerSharedAttributeRequest,
-    DeletePeerSharedAttributeResponse,
     DeletePeerSharedAttributeUseCase,
     ExecuteIdentityAttributeQueryRequest,
     ExecuteIdentityAttributeQueryUseCase,
@@ -146,7 +145,7 @@ export class AttributesFacade {
         return await this.notifyPeerAboutRepositoryAttributeSuccessionUseCase.execute(request);
     }
 
-    public async deletePeerSharedAttribute(request: DeletePeerSharedAttributeRequest): Promise<Result<DeletePeerSharedAttributeResponse>> {
+    public async deletePeerSharedAttribute(request: DeletePeerSharedAttributeRequest): Promise<Result<LocalNotificationDTO>> {
         return await this.deletePeerSharedAttributeUseCase.execute(request);
     }
 }

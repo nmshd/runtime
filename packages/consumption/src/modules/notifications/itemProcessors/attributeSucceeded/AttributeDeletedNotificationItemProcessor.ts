@@ -37,6 +37,7 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
         return ValidationResult.success();
     }
 
+    // TODO: add deletion of predecessors
     public override async process(notificationItem: AttributeDeletedNotificationItem, notification: LocalNotification): Promise<AttributeDeletedByPeerEvent> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") {
