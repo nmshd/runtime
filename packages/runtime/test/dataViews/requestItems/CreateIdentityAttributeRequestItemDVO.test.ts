@@ -1,20 +1,29 @@
-import { LocalRequestStatus } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { AbstractStringJSON, DisplayNameJSON } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateAttributeAcceptResponseItemDVO,
     CreateAttributeRequestItemDVO,
+    CreateOutgoingRequestRequest,
     DataViewExpander,
     DecidableCreateAttributeRequestItemDVO,
-    IncomingRequestStatusChangedEvent,
-    MessageDTO,
-    OutgoingRequestStatusChangedEvent,
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../../lib";
+import {
+    establishRelationship,
+    exchangeAndAcceptRequestByMessage,
+    exchangeMessageWithRequest,
+    MockEventBus,
+    RuntimeServiceProvider,
+    sendMessageWithRequest,
+    syncUntilHasMessageWithRequest,
+    TestRuntimeServices
+} from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
+let sRuntimeServices: TestRuntimeServices;
+let rRuntimeServices: TestRuntimeServices;
 let sTransportServices: TransportServices;
 let rTransportServices: TransportServices;
 let sExpander: DataViewExpander;
@@ -23,24 +32,25 @@ let sConsumptionServices: ConsumptionServices;
 let rConsumptionServices: ConsumptionServices;
 let sEventBus: MockEventBus;
 let rEventBus: MockEventBus;
-let senderMessage: MessageDTO;
-let recipientMessage: MessageDTO;
-let requestId: string;
+let requestContent: CreateOutgoingRequestRequest;
+let responseItems: DecideRequestItemParametersJSON[];
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
-    sTransportServices = runtimeServices[0].transport;
-    rTransportServices = runtimeServices[1].transport;
-    sExpander = runtimeServices[0].expander;
-    rExpander = runtimeServices[1].expander;
-    sConsumptionServices = runtimeServices[0].consumption;
-    rConsumptionServices = runtimeServices[1].consumption;
-    sEventBus = runtimeServices[0].eventBus;
-    rEventBus = runtimeServices[1].eventBus;
+    sRuntimeServices = runtimeServices[0];
+    rRuntimeServices = runtimeServices[1];
+    sTransportServices = sRuntimeServices.transport;
+    rTransportServices = rRuntimeServices.transport;
+    sExpander = sRuntimeServices.expander;
+    rExpander = rRuntimeServices.expander;
+    sConsumptionServices = sRuntimeServices.consumption;
+    rConsumptionServices = rRuntimeServices.consumption;
+    sEventBus = sRuntimeServices.eventBus;
+    rEventBus = rRuntimeServices.eventBus;
     await establishRelationship(sTransportServices, rTransportServices);
     const rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
-    const localRequest = await sConsumptionServices.outgoingRequests.create({
+    requestContent = {
         content: {
             items: [
                 {
@@ -58,24 +68,17 @@ beforeAll(async () => {
             ]
         },
         peer: rAddress
-    });
-    requestId = localRequest.value.id;
+    };
 
-    senderMessage = await sendMessage(sTransportServices, rAddress, localRequest.value.content);
-    recipientMessage = await syncUntilHasMessageWithRequest(rTransportServices, localRequest.value.id);
-
-    await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+    responseItems = [{ accept: true }];
 }, 30000);
 
 afterAll(() => serviceProvider.stop());
 
-beforeEach(function () {
-    rEventBus.reset();
-    sEventBus.reset();
-});
-
 describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
+        const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -105,7 +108,8 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
-    test("check the MessageDVO for the recipient and accept it", async () => {
+    test("check the MessageDVO for the recipient", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         const dto = recipientMessage;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -134,15 +138,15 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.isDraft).toBe(true);
         expect(requestItemDVO.attribute.isOwn).toBe(true);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
-
-        const acceptResult = await rConsumptionServices.incomingRequests.accept({
-            requestId: dvo.request.id,
-            items: [{ accept: true }]
-        });
-        expect(acceptResult).toBeSuccessful();
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        const acceptResult = await rConsumptionServices.incomingRequests.accept({
+            requestId: recipientMessage.content.id,
+            items: responseItems
+        });
+        expect(acceptResult).toBeSuccessful();
         const dto = recipientMessage;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -195,14 +199,14 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     });
 
     test("check the sender's dvo for the recipient", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
         expect(dvo.name).toStrictEqual(senderMessage.createdBy.substring(3, 9));
         expect(dvo.items).toHaveLength(0);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessageWithResponse(sTransportServices, requestId);
-        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
 
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
@@ -250,16 +254,18 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
-        expect(attributeResult.value[0].id).toBeDefined();
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
+        const attributeNumber = attributeResult.value.length - 1; // there may be other attributes produced by request responses from previous tests
+        expect(attributeResult.value[attributeNumber].id).toBeDefined();
+        expect((attributeResult.value[attributeNumber].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[attributeNumber].id);
         expect(responseItem.attribute).toBeDefined();
         expect(responseItem.attribute.valueType).toBe("DisplayName");
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
+        expect((attributeResult.value[attributeNumber].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
     });
 
     test("check the attributes for the sender", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         const attributeResult = await sConsumptionServices.attributes.getOwnSharedAttributes({
             peer: dvo.request.peer.id
@@ -270,9 +276,10 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     });
 
     test("check the recipient's dvo for the sender", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await sExpander.expandAddress(senderMessage.recipients[0].address);
 
         expect(dvo.name).toBe("Richard Receiver");
-        expect(dvo.items).toHaveLength(1);
+        expect(dvo.items).not.toHaveLength(0);
     });
 });
