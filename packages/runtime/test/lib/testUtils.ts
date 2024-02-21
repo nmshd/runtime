@@ -1,4 +1,4 @@
-import { EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import { ConsumptionIds, DecideRequestItemGroupParametersJSON, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import {
     INotificationItem,
@@ -222,6 +222,18 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
+export async function sendMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
+    const createRequestResult = await sender.consumption.outgoingRequests.create(request);
+    expect(createRequestResult).toBeSuccessful();
+    const sendMessageResult = await sender.transport.messages.sendMessage({
+        recipients: [recipient.address],
+        content: createRequestResult.value.content
+    });
+    expect(sendMessageResult).toBeSuccessful();
+
+    return sendMessageResult.value;
+}
+
 export async function exchangeMessage(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices, attachments?: string[]): Promise<MessageDTO> {
     const recipientAddress = (await transportServicesRecipient.account.getIdentityInfo()).value.address;
     const messageId = (await sendMessage(transportServicesCreator, recipientAddress, undefined, attachments)).id;
@@ -232,6 +244,11 @@ export async function exchangeMessage(transportServicesCreator: TransportService
     expect(message.id).toStrictEqual(messageId);
 
     return message;
+}
+
+export async function exchangeMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
+    const sentMessage = await sendMessageWithRequest(sender, recipient, request);
+    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id);
 }
 
 export async function exchangeMessageWithAttachment(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<MessageDTO> {
@@ -324,139 +341,18 @@ export interface LocalRequestDTOWithRequestSource extends LocalRequestDTO {
     requestSourceReference: string;
 }
 
-export async function createRequest(sender: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<Result<LocalRequestDTO>> {
-    return await sender.consumption.outgoingRequests.create(request);
-}
-
-export async function createAndSendRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<Result<MessageDTO>> {
-    const localRequest = await createRequest(sender, request);
-    return await sender.transport.messages.sendMessage({
-        content: localRequest.value.content,
-        recipients: [(await recipient.transport.account.getIdentityInfo()).value.address]
-    });
-}
-
-export async function createSendAndMarkAsSentRequest(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    request: CreateOutgoingRequestRequest
-): Promise<Result<LocalRequestDTO>> {
-    const message = await createAndSendRequest(sender, recipient, request);
-    return await sender.consumption.outgoingRequests.sent({ requestId: message.value.content.id, messageId: message.value.id });
-}
-
-export async function createSendAndSyncRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
-    const localRequest = await createSendAndMarkAsSentRequest(sender, recipient, request);
-    return await syncUntilHasMessageWithRequest(recipient.transport, localRequest.value.id);
-}
-
-export async function createSendAndReceiveRequest(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    request: CreateOutgoingRequestRequest
-): Promise<Result<LocalRequestDTO> & RequestSourceReference> {
-    const sentMessage = await createSendAndSyncRequest(sender, recipient, request);
-    return Object.assign(await recipient.consumption.incomingRequests.received({ receivedRequest: sentMessage.content, requestSourceId: sentMessage.id }), {
-        requestSourceReference: sentMessage.id
-    });
-}
-
-export async function createSendSyncAndCheckRequest(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    request: CreateOutgoingRequestRequest
-): Promise<Result<LocalRequestDTO> & RequestSourceReference> {
-    const localRequest = await createSendAndReceiveRequest(sender, recipient, request);
-    return Object.assign(
-        await recipient.consumption.incomingRequests.checkPrerequisites({
-            requestId: localRequest.value.id
-        }),
-        {
-            requestSourceReference: localRequest.requestSourceReference
-        }
-    );
-}
-
-export async function createSendSyncRequestAndRequireManualDecision(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    request: CreateOutgoingRequestRequest
-): Promise<Result<LocalRequestDTO>> {
-    const localRequest = await createSendSyncAndCheckRequest(sender, recipient, request);
-    return await recipient.consumption.incomingRequests.requireManualDecision({
-        requestId: localRequest.value.id
-    });
-}
-
-export async function createSendAndAcceptRequest(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    request: CreateOutgoingRequestRequest,
-    responseItems: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
-): Promise<Result<LocalRequestDTO> & RequestSourceReference> {
-    const localRequest = await createSendSyncAndCheckRequest(sender, recipient, request);
-    return Object.assign(
-        await recipient.consumption.incomingRequests.accept({
-            requestId: localRequest.value.id,
-            items: responseItems
-        }),
-        { requestSourceReference: localRequest.requestSourceReference }
-    );
-}
-
-export async function createSendAndAcceptRequestAndSendResponse(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    request: CreateOutgoingRequestRequest,
-    responseItems: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
-): Promise<Result<MessageDTO>> {
-    const localRequest = await createSendAndAcceptRequest(sender, recipient, request, responseItems);
-    return await recipient.transport.messages.sendMessage({
-        content: {
-            "@type": "ResponseWrapper",
-            requestId: localRequest.value.id,
-            requestSourceReference: localRequest.requestSourceReference,
-            requestSourceType: "Message",
-            response: localRequest.value.response!.content
-        },
-        recipients: [(await sender.transport.account.getIdentityInfo()).value.address]
-    });
-}
-
-export async function createAndSendRequestSendResponseAndSync(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    request: CreateOutgoingRequestRequest,
-    responseItems: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
-): Promise<MessageDTO> {
-    const responseMessage = await createSendAndAcceptRequestAndSendResponse(sender, recipient, request, responseItems);
-    return await syncUntilHasMessageWithResponse(sender.transport, responseMessage.value.content.requestId);
-}
-
-export async function sendRequestByMessage(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<void> {
-    const createRequestResult = await sender.consumption.outgoingRequests.create(request);
-    expect(createRequestResult).toBeSuccessful();
-
-    await sender.transport.messages.sendMessage({
-        recipients: [recipient.address],
-        content: createRequestResult.value.content
-    });
-
-    await syncUntilHasMessages(recipient.transport);
-}
-
 export async function exchangeAndAcceptRequestByMessage(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
     request: CreateOutgoingRequestRequest,
     responseItems: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
-): Promise<void> {
+): Promise<MessageDTO> {
     const createRequestResult = await sender.consumption.outgoingRequests.create(request);
     expect(createRequestResult).toBeSuccessful();
 
     const requestId = createRequestResult.value.id;
 
-    await sender.transport.messages.sendMessage({
+    const senderMessage = await sender.transport.messages.sendMessage({
         recipients: [recipient.address],
         content: createRequestResult.value.content
     });
@@ -468,6 +364,7 @@ export async function exchangeAndAcceptRequestByMessage(
     await recipient.eventBus.waitForEvent(MessageSentEvent);
     await syncUntilHasMessageWithResponse(sender.transport, requestId);
     await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+    return senderMessage.value;
 }
 
 export async function sendAndReceiveNotification(
