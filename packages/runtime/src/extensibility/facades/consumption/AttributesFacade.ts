@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
+import { Notification } from "@nmshd/content";
 import { Inject } from "typescript-ioc";
-import { LocalAttributeDTO, LocalNotificationDTO, LocalRequestDTO } from "../../../types";
+import { LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
@@ -145,7 +146,7 @@ export class AttributesFacade {
         return await this.notifyPeerAboutRepositoryAttributeSuccessionUseCase.execute(request);
     }
 
-    public async deletePeerSharedAttribute(request: DeletePeerSharedAttributeRequest): Promise<Result<LocalNotificationDTO>> {
+    public async deletePeerSharedAttribute(request: DeletePeerSharedAttributeRequest): Promise<Result<Notification>> {
         return await this.deletePeerSharedAttributeUseCase.execute(request);
     }
 }

@@ -1,4 +1,5 @@
 export * from "./AttributeCreatedEvent";
+export * from "./AttributeDeletedByPeerEvent";
 export * from "./AttributeDeletedEvent";
 export * from "./AttributeListenerCreatedEvent";
 export * from "./AttributeListenerTriggeredEvent";

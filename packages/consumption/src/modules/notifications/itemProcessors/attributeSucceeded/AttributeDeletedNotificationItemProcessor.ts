@@ -44,10 +44,20 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
         }
 
+        // TODO: improve
         const params: ILocalAttribute = {
-            ...attribute,
+            // ...attribute,
+            id: attribute.id,
+            content: attribute.content,
+            createdAt: attribute.createdAt,
+            parentId: attribute.parentId,
+            shareInfo: attribute.shareInfo,
+            succeededBy: attribute.succeededBy,
+            succeeds: attribute.succeeds,
             deletionStatus: {
-                ...attribute.deletionStatus,
+                // ...attribute.deletionStatus,
+                toBeDeletedAt: attribute.deletionStatus?.toBeDeletedAt,
+                toBeDeletedByPeerAt: attribute.deletionStatus?.toBeDeletedByPeerAt,
                 deletedByPeer: CoreDate.utc()
             }
         };
@@ -62,6 +72,7 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
         }
 
+        // TODO: adjust like above
         const params: ILocalAttribute = {
             ...attribute,
             deletionStatus: {

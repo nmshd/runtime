@@ -15810,6 +15810,29 @@ export const CreateRepositoryAttributeRequest: any = {
     }
 }
 
+export const DeletePeerSharedAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeletePeerSharedAttributeRequest",
+    "definitions": {
+        "DeletePeerSharedAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const ExecuteIdentityAttributeQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",

@@ -1,4 +1,5 @@
 import {
+    AttributeDeletedNotificationItem,
     AuthenticationRequestItem,
     ConsentRequestItem,
     CreateAttributeRequestItem,
@@ -33,6 +34,7 @@ import {
     SettingsController,
     ShareAttributeRequestItemProcessor
 } from "../modules";
+import { AttributeDeletedNotificationItemProcessor } from "../modules/notifications/itemProcessors/attributeSucceeded/AttributeDeletedNotificationItemProcessor";
 
 export class ConsumptionController {
     public constructor(
@@ -138,7 +140,8 @@ export class ConsumptionController {
 
     private getDefaultNotificationItemProcessors() {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
-            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor]
+            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
+            [AttributeDeletedNotificationItem, AttributeDeletedNotificationItemProcessor]
         ]);
     }
 }

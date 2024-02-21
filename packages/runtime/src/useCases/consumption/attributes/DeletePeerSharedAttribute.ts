@@ -3,9 +3,7 @@ import { AttributesController, ConsumptionIds, LocalAttribute, NotificationsCont
 import { AttributeDeletedNotificationItem, Notification } from "@nmshd/content";
 import { AccountController, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { LocalNotificationDTO } from "../../../types";
 import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { NotificationMapper } from "../notifications/NotificationMapper";
 
 export interface DeletePeerSharedAttributeRequest {
     attributeId: AttributeIdString;
@@ -17,7 +15,7 @@ class Validator extends SchemaValidator<DeletePeerSharedAttributeRequest> {
     }
 }
 
-export class DeletePeerSharedAttributeUseCase extends UseCase<DeletePeerSharedAttributeRequest, LocalNotificationDTO> {
+export class DeletePeerSharedAttributeUseCase extends UseCase<DeletePeerSharedAttributeRequest, Notification> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -28,7 +26,7 @@ export class DeletePeerSharedAttributeUseCase extends UseCase<DeletePeerSharedAt
         super(validator);
     }
 
-    protected async executeInternal(request: DeletePeerSharedAttributeRequest): Promise<Result<LocalNotificationDTO>> {
+    protected async executeInternal(request: DeletePeerSharedAttributeRequest): Promise<Result<Notification>> {
         const peerSharedAttributeId = CoreId.from(request.attributeId);
         const peerSharedAttribute = await this.attributeController.getLocalAttribute(peerSharedAttributeId);
 
@@ -36,7 +34,7 @@ export class DeletePeerSharedAttributeUseCase extends UseCase<DeletePeerSharedAt
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
         }
 
-        if (!peerSharedAttribute.isPeerSharedAttribute(this.accountController.identity.address)) {
+        if (!peerSharedAttribute.isPeerSharedAttribute(peerSharedAttribute.shareInfo?.peer)) {
             return Result.fail(RuntimeErrors.attributes.isNotPeerSharedAttribute(peerSharedAttributeId));
         }
 
@@ -55,7 +53,6 @@ export class DeletePeerSharedAttributeUseCase extends UseCase<DeletePeerSharedAt
 
         await this.accountController.syncDatawallet();
 
-        const localNotification = await this.notificationsController.getNotification(notificationId);
-        return Result.ok(NotificationMapper.toNotificationDTO(localNotification));
+        return Result.ok(notification);
     }
 }
