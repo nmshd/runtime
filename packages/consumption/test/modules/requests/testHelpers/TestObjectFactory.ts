@@ -89,7 +89,7 @@ export class TestObjectFactory {
 
     public static createRelationshipAttribute(properties?: Partial<IRelationshipAttribute>): RelationshipAttribute {
         return RelationshipAttribute.from({
-            value: properties?.value ?? ProprietaryString.from({ title: "A Title", value: "AGivenName" }),
+            value: properties?.value ?? ProprietaryString.from({ title: "ATitle", value: "AGivenName" }),
             confidentiality: RelationshipAttributeConfidentiality.Public,
             key: "AKey",
             isTechnical: false,

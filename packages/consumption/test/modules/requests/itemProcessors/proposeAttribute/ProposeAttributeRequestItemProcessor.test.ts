@@ -74,7 +74,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    value: ProprietaryString.from({ title: "A Title", value: "AGivenName" }),
+                    value: ProprietaryString.from({ title: "ATitle", value: "AGivenName" }),
                     owner: CoreAddress.from("")
                 }),
                 query: RelationshipAttributeQuery.from({
@@ -99,7 +99,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    value: ProprietaryString.from({ title: "A Title", value: "AGivenName" }),
+                    value: ProprietaryString.from({ title: "ATitle", value: "AGivenName" }),
                     owner: recipientAddress
                 }),
                 query: RelationshipAttributeQuery.from({
@@ -126,7 +126,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    value: ProprietaryString.from({ title: "A Title", value: "AGivenName" }),
+                    value: ProprietaryString.from({ title: "ATitle", value: "AGivenName" }),
                     owner: CoreAddress.from("")
                 }),
                 query: RelationshipAttributeQuery.from({

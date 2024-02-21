@@ -469,7 +469,7 @@ describe("AttributesController", function () {
                 key: "displayName",
                 value: {
                     "@type": "ProprietaryString",
-                    title: "A Title",
+                    title: "ATitle",
                     value: "DE"
                 },
                 owner: testAccount.identity.address,

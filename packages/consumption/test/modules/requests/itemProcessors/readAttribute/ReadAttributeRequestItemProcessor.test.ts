@@ -279,12 +279,21 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        /*
         test("can be called with an existing RelationshipAttribute by a third party", async function () {
             const attribute = await consumptionController.attributes.createLocalAttribute({
-                content: TestObjectFactory.createRelationshipAttribute({
-                    owner: CoreAddress.from("id1")
-                })
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: CoreAddress.from("id1"),
+                    value: ProprietaryString.from({
+                        title: "ATitle",
+                        value: "AStringValue"
+                    })
+                }),
+                shareInfo: {
+                    peer: CoreAddress.from("id1"),
+                    requestReference: await ConsumptionIds.request.generate()
+                }
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -318,7 +327,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).successfulValidationResult();
         });
-        */
 
         test("returns an error when the given Attribute id does not exist", async function () {
             const requestItem = ReadAttributeRequestItem.from({
@@ -1481,7 +1489,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const requestId2 = await ConsumptionIds.request.generate();
                 const localAttribute = await consumptionController.attributes.createLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AKey",
@@ -1494,7 +1501,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }),
                     shareInfo: {
                         peer: thirdParty,
-                        requestReference: requestId2
+                        requestReference: await ConsumptionIds.request.generate()
                     }
                 });
 
@@ -1539,7 +1546,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const requestId2 = await ConsumptionIds.request.generate();
                 const localAttribute = await consumptionController.attributes.createLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AKey",
@@ -1552,7 +1558,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }),
                     shareInfo: {
                         peer: notInvolvedThirdParty,
-                        requestReference: requestId2
+                        requestReference: await ConsumptionIds.request.generate()
                     }
                 });
 
@@ -1597,7 +1603,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const requestId2 = await ConsumptionIds.request.generate();
                 const localAttribute = await consumptionController.attributes.createLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AnotherKey",
@@ -1610,7 +1615,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }),
                     shareInfo: {
                         peer: thirdParty,
-                        requestReference: requestId2
+                        requestReference: await ConsumptionIds.request.generate()
                     }
                 });
 
@@ -1655,7 +1660,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const requestId2 = await ConsumptionIds.request.generate();
                 const localAttribute = await consumptionController.attributes.createLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AKey",
@@ -1668,7 +1672,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }),
                     shareInfo: {
                         peer: notInvolvedThirdParty,
-                        requestReference: requestId2
+                        requestReference: await ConsumptionIds.request.generate()
                     }
                 });
 
@@ -1715,7 +1719,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const requestId2 = await ConsumptionIds.request.generate();
                 const localAttribute = await consumptionController.attributes.createLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AKey",
@@ -1730,7 +1733,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }),
                     shareInfo: {
                         peer: thirdParty,
-                        requestReference: requestId2
+                        requestReference: await ConsumptionIds.request.generate()
                     }
                 });
 
