@@ -1,5 +1,5 @@
 import { ApplicationError } from "@js-soft/ts-utils";
-import { CoreError, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreError, CoreId } from "@nmshd/transport";
 
 class Attributes {
     public genericValidationError(error: any) {
@@ -105,6 +105,17 @@ class Attributes {
 
     public invalidPropertyValue(message: string) {
         return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
+    }
+
+    public isNotOwnSharedAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotOwnSharedAttribute", `The attribute (id: ${attributeId}) is not an own shared attribute.`);
+    }
+
+    public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {
+        return new CoreError(
+            "error.consumption.attributes.senderIsNotPeerOfSharedAttribute",
+            `The sender (id: ${senderId}) is not the peer you shared the attribute (id: ${attributeId}) with.`
+        );
     }
 }
 
