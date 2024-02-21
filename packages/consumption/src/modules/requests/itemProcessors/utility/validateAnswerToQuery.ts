@@ -1,4 +1,12 @@
-import { IdentityAttribute, IdentityAttributeQuery, IQLQuery, RelationshipAttribute, RelationshipAttributeQuery, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
+import {
+    Consent,
+    IdentityAttribute,
+    IdentityAttributeQuery,
+    IQLQuery,
+    RelationshipAttribute,
+    RelationshipAttributeQuery,
+    ThirdPartyRelationshipAttributeQuery
+} from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
@@ -143,6 +151,16 @@ function validateAnswerToRelationshipAttributeQuery(
 
     if (query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
         return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided RelationshipAttribute is not of the queried RelationshipAttribute Value Type."));
+    }
+
+    if (!(attribute.value instanceof Consent)) {
+        if (query.attributeCreationHints.title !== attribute.value.title) {
+            return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided RelationshipAttribute has not the queried title."));
+        }
+
+        if (query.attributeCreationHints.description !== attribute.value.description) {
+            return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided RelationshipAttribute has not the queried description."));
+        }
     }
 
     return ValidationResult.success();

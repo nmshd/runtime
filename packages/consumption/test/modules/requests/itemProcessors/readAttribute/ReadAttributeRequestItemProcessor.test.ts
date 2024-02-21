@@ -1304,6 +1304,162 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 });
             });
 
+            test("returns an error when a RelationshipAttribute does not have the queried title", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: sender.toString(),
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            description: "ADescription",
+                            confidentiality: RelationshipAttributeConfidentiality.Private
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Private,
+                        owner: sender.toString(),
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "AnotherTitle",
+                            description: "ADescription",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided RelationshipAttribute has not the queried title./
+                });
+            });
+
+            test("returns an error when a RelationshipAttribute does not have the queried description", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: sender.toString(),
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            description: "ADescription",
+                            confidentiality: RelationshipAttributeConfidentiality.Private
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Private,
+                        owner: sender.toString(),
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /The provided RelationshipAttribute has not the queried description./
+                });
+            });
+
+            test("can be called when a RelationshipAttribute of Value Type Consent is queried even though title and description is specified", async function () {
+                const sender = CoreAddress.from("id0");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: sender.toString(),
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "Consent",
+                            title: "ATitle",
+                            description: "ADescription",
+                            confidentiality: RelationshipAttributeConfidentiality.Private
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Private,
+                        owner: sender.toString(),
+                        value: {
+                            "@type": "Consent",
+                            consent: "AConsent"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).successfulValidationResult();
+            });
+
             test("can be called with properties validFrom and validTo used in the query", async function () {
                 const sender = CoreAddress.from("id0");
 
