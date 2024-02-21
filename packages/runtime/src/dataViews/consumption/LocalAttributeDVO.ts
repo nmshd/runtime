@@ -3,6 +3,8 @@ import { AttributeQueryDVO } from "../content/AttributeDVOs";
 import { DataViewObject } from "../DataViewObject";
 import { IdentityDVO } from "../transport";
 
+// TODO: add deletionStatus appropriately
+
 /**
  * The DataViewObject representation of a LocalAttribute
  * @abstract

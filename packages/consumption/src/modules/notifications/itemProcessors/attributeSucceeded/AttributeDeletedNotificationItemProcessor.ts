@@ -1,9 +1,9 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { AttributeDeletedNotificationItem } from "@nmshd/content";
-import { CoreErrors as TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate, CoreErrors as TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { AttributeDeletedByPeerEvent, LocalAttribute } from "../../../attributes";
+import { AttributeDeletedByPeerEvent, ILocalAttribute, LocalAttribute } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
@@ -39,12 +39,35 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
 
     public override async process(notificationItem: AttributeDeletedNotificationItem, notification: LocalNotification): Promise<AttributeDeletedByPeerEvent> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        // TODO: update deletion status deletedByPeer of LocalAttribute
+        if (typeof attribute === "undefined") {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
+        }
 
-        return new AttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
+        const params: ILocalAttribute = {
+            ...attribute,
+            deletionStatus: {
+                ...attribute.deletionStatus,
+                deletedByPeer: CoreDate.utc()
+            }
+        };
+        const updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(params);
+
+        return new AttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), updatedAttribute);
     }
 
     public override async rollback(notificationItem: AttributeDeletedNotificationItem, notification: LocalNotification): Promise<void> {
-        // TODO: set deletion status deletedByPeer undefined again
+        const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
+        if (typeof attribute === "undefined") {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
+        }
+
+        const params: ILocalAttribute = {
+            ...attribute,
+            deletionStatus: {
+                ...attribute.deletionStatus,
+                deletedByPeer: undefined
+            }
+        };
+        await this.consumptionController.attributes.updateAttributeUnsafe(params);
     }
 }
