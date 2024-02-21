@@ -135,9 +135,7 @@ function validateAnswerToRelationshipAttributeQuery(
 
     if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity) {
         return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery(
-                "The owner of the provided RelationshipAttribute is not the Recipient, but an empty string was specified for the owner of the query."
-            )
+            CoreErrors.requests.invalidlyAnsweredQuery("You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query.")
         );
     }
 
@@ -192,7 +190,7 @@ function validateAnswerToThirdPartyRelationshipAttributeQuery(
     if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity && !queriedThirdParties.includes(attribute.owner.toString())) {
         return ValidationResult.error(
             CoreErrors.requests.invalidlyAnsweredQuery(
-                "The owner of the provided RelationshipAttribute is not the Recipient or one of the involved third parties, but an empty string was specified for the owner of the query."
+                "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
             )
         );
     }

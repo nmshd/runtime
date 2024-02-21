@@ -74,6 +74,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             enum TestIdentity {
                 Self,
                 Recipient,
+                Empty,
                 OtherWithRelationship,
                 OtherWithoutRelationship,
                 ThirdParty
@@ -100,6 +101,37 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     },
                     expectedOutput: {
                         success: true
+                    }
+                },
+                {
+                    description: "query with owner=empty string, owner will become the Recipient later on",
+                    input: {
+                        owner: TestIdentity.Empty
+                    },
+                    expectedOutput: {
+                        success: true
+                    }
+                },
+                {
+                    description: "cannot query with owner=Recipient",
+                    input: {
+                        owner: TestIdentity.Recipient
+                    },
+                    expectedOutput: {
+                        errorCode: "error.consumption.requests.invalidRequestItem",
+                        errorMessage:
+                            "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically becomes the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
+                    }
+                },
+                {
+                    description: "cannot query with owner=thirdParty",
+                    input: {
+                        owner: TestIdentity.ThirdParty
+                    },
+                    expectedOutput: {
+                        errorCode: "error.consumption.requests.invalidRequestItem",
+                        errorMessage:
+                            "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically becomes the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
                     }
                 },
                 {
@@ -155,6 +187,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             return accountController.identity.address.toString();
                         case TestIdentity.Recipient:
                             return CoreAddress.from("recipientAddress").toString();
+                        case TestIdentity.Empty:
+                            return CoreAddress.from("").toString();
                         case TestIdentity.OtherWithRelationship:
                             return CoreAddress.from("recipientAddress").toString();
                         case TestIdentity.OtherWithoutRelationship:
@@ -1256,7 +1290,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The owner of the provided RelationshipAttribute is not the Recipient, but an empty string was specified for the owner of the query./
+                    message: /You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query./
                 });
             });
 
@@ -1788,7 +1822,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
                     message:
-                        /The owner of the provided RelationshipAttribute is not the Recipient or one of the involved third parties, but an empty string was specified for the owner of the query./
+                        /Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query./
                 });
             });
 

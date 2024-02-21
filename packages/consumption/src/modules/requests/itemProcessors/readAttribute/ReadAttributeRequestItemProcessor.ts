@@ -22,9 +22,26 @@ import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestIte
 
 export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcessor<ReadAttributeRequestItem, AcceptReadAttributeRequestItemParametersJSON> {
     public override canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient?: CoreAddress): ValidationResult {
-        const queryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
+        const queryValidationResult = this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
+        }
+
+        return ValidationResult.success();
+    }
+
+    private validateQuery(requestItem: ReadAttributeRequestItem, recipient?: CoreAddress) {
+        const commonQueryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
+        if (commonQueryValidationResult.isError()) {
+            return commonQueryValidationResult;
+        }
+
+        if (requestItem.query instanceof RelationshipAttributeQuery && !["", this.currentIdentityAddress.toString()].includes(requestItem.query.owner.toString())) {
+            return ValidationResult.error(
+                CoreErrors.requests.invalidRequestItem(
+                    "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically becomes the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
+                )
+            );
         }
 
         return ValidationResult.success();
@@ -36,7 +53,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
-        const recipient = this.accountController.identity.address;
         let foundLocalAttribute;
         let attribute;
 
@@ -101,7 +117,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             throw new Error("this should never happen");
         }
 
-        const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, recipient);
+        const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, this.currentIdentityAddress);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
 
         return ValidationResult.success();
