@@ -1,16 +1,17 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import {
     AbstractComplexValue,
-    IIdentityAttribute,
-    IRelationshipAttribute,
     IdentityAttribute,
     IdentityAttributeJSON,
+    IIdentityAttribute,
+    IRelationshipAttribute,
     RelationshipAttribute,
     RelationshipAttributeJSON
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
+import { ILocalAttributeDeletionStatus, LocalAttributeDeletionStatus, LocalAttributeDeletionStatusJSON } from "./LocalAttributeDeletionStatus";
 import { ILocalAttributeShareInfo, LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "./LocalAttributeShareInfo";
 
 export interface LocalAttributeJSON {
@@ -20,6 +21,7 @@ export interface LocalAttributeJSON {
     succeededBy?: string;
     shareInfo?: LocalAttributeShareInfoJSON;
     parentId?: string;
+    deletionStatus?: LocalAttributeDeletionStatusJSON;
 }
 
 export interface ILocalAttribute extends ICoreSynchronizable {
@@ -29,6 +31,7 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     succeededBy?: ICoreId;
     shareInfo?: ILocalAttributeShareInfo;
     parentId?: ICoreId;
+    deletionStatus?: ILocalAttributeDeletionStatus;
 }
 
 export type OwnSharedIdentityAttribute = LocalAttribute & { content: IdentityAttribute } & {
@@ -90,6 +93,10 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     @validate({ nullable: true })
     @serialize()
     public parentId?: CoreId;
+
+    @validate({ nullable: true })
+    @serialize()
+    public deletionStatus?: LocalAttributeDeletionStatus;
 
     public isOwnSharedIdentityAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute {
         return this.isIdentityAttribute() && this.isOwnSharedAttribute(ownAddress, peerAddress);
