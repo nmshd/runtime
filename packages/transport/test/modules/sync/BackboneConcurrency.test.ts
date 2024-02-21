@@ -40,7 +40,7 @@ describe("BackboneConcurrency", function () {
     });
 
     // eslint-disable-next-line jest/no-disabled-tests
-    test.skip("should only start one sync run on multiple calls", async function () {
+    test("should only start one sync run on multiple calls", async function () {
         const a1 = await TestUtil.createIdentityWithOneDevice(connection, { datawalletEnabled: true });
 
         const numberOfDevices = 10;
