@@ -5,6 +5,7 @@ import {
     ReadAttributeRequestItem,
     RejectResponseItem,
     RelationshipAttribute,
+    RelationshipAttributeQuery,
     Request,
     ResponseItemResult,
     ThirdPartyRelationshipAttributeQuery
@@ -40,6 +41,12 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         let attribute;
 
         if (parsedParams.isWithExistingAttribute()) {
+            if (_requestItem.query instanceof RelationshipAttributeQuery) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
+                );
+            }
+
             foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
 
             if (!foundLocalAttribute) {

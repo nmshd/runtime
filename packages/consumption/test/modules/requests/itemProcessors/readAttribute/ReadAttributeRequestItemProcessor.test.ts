@@ -993,6 +993,65 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
 
         describe("canAccept ReadAttributeRequestitem with RelationshipAttributeQuery", function () {
+            test("returns an error when a RelationshipAttribute was queried using a RelationshipAttributeQuery and the Recipient tries to respond with an existing RelationshipAttribute", async function () {
+                const sender = CoreAddress.from("id0");
+                const recipient = CoreAddress.from(accountController.identity.address);
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: recipient.toString(),
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: recipient,
+                        value: ProprietaryString.from({
+                            title: "ATitle",
+                            value: "AStringValue"
+                        })
+                    }),
+                    shareInfo: {
+                        peer: sender,
+                        requestReference: await ConsumptionIds.request.generate()
+                    }
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: localAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: /When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided./
+                });
+            });
+
             test("returns an error when a RelationshipAttribute was queried and the Recipient tries to respond with an IdentityAttribute", async function () {
                 const sender = CoreAddress.from("id0");
                 const recipient = CoreAddress.from(accountController.identity.address);
@@ -1023,15 +1082,16 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: recipient
-                    })
-                });
-
-                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
                     accept: true,
-                    existingAttributeId: repositoryAttribute.id.toString()
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
                 };
 
                 const result = await processor.canAccept(requestItem, acceptParams, request);
