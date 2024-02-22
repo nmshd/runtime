@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/content",
-    "version": "2.8.6",
+    "version": "2.9.0",
     "description": "The content library defines data structures that can be transmitted using the transport library.",
     "homepage": "https://enmeshed.eu",
     "repository": {
