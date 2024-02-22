@@ -46,6 +46,7 @@
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
+            "./test/disableTimeoutForDebugging.ts",
             "jest-expect-message"
         ],
         "testEnvironment": "node",
