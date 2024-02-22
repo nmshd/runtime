@@ -28,6 +28,7 @@ import {
     MessageDTO,
     MessageSentEvent,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
+    NotifyPeerAboutRepositoryAttributeSuccessionResponse,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
@@ -396,6 +397,53 @@ export async function sendAndReceiveNotification(
 }
 
 /**
+ * Creates a repository attribute on sender's side and shares it with
+ * recipient, waiting for all communication and event processing to finish.
+ *
+ * Returns the sender's own shared identity attribute.
+ */
+export async function executeFullCreateAndShareRepositoryAttributeFlow(
+    sender: TestRuntimeServices,
+    recipient: TestRuntimeServices,
+    request: CreateRepositoryAttributeRequest
+): Promise<LocalAttributeDTO> {
+    const createAttributeRequestResult = await sender.consumption.attributes.createRepositoryAttribute(request);
+    const repositoryAttribute = createAttributeRequestResult.value;
+
+    const senderOwnSharedIdentityAttribute = await executeFullShareRepositoryAttributeFlow(sender, recipient, repositoryAttribute.id);
+    return senderOwnSharedIdentityAttribute;
+}
+
+export async function executeFullShareRepositoryAttributeFlow(sender: TestRuntimeServices, recipient: TestRuntimeServices, attributeId: string): Promise<LocalAttributeDTO> {
+    const shareRequest: ShareRepositoryAttributeRequest = {
+        attributeId: attributeId.toString(),
+        peer: recipient.address
+    };
+    const shareRequestResult = await sender.consumption.attributes.shareRepositoryAttribute(shareRequest);
+    const shareRequestId = shareRequestResult.value.id;
+
+    const senderOwnSharedIdentityAttribute = await acceptIncomingShareAttributeRequest(sender, recipient, shareRequestId);
+    return senderOwnSharedIdentityAttribute;
+}
+
+export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, requestId: string): Promise<LocalAttributeDTO> {
+    await syncUntilHasMessageWithRequest(recipient.transport, requestId);
+    await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
+        return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
+    });
+    await recipient.consumption.incomingRequests.accept({ requestId: requestId, items: [{ accept: true }] });
+
+    const responseMessage = await syncUntilHasMessageWithResponse(sender.transport, requestId);
+    const sharedAttributeId = responseMessage.content.response.items[0].attributeId;
+    await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
+        return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.Completed;
+    });
+
+    const senderOwnSharedAttribute = (await sender.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    return senderOwnSharedAttribute;
+}
+
+/**
  * Creates and shares a relationship attribute, waiting for all communication
  * and event processing to finish.
  *
@@ -409,57 +457,8 @@ export async function executeFullCreateAndShareRelationshipAttributeFlow(
     const requestResult = await sender.consumption.attributes.createAndShareRelationshipAttribute({ ...request, peer: recipient.address });
     const requestId = requestResult.value.id;
 
-    await syncUntilHasMessageWithRequest(recipient.transport, requestId);
-    await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
-        return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
-    });
-    await recipient.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-
-    const responseMessage = await syncUntilHasMessageWithResponse(sender.transport, requestId);
-    const sharedAttributeId = responseMessage.content.response.items[0].attributeId;
-    await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
-        return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.Completed;
-    });
-
-    const senderOwnSharedRelationshipAttribute = (await sender.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    const senderOwnSharedRelationshipAttribute = await acceptIncomingShareAttributeRequest(sender, recipient, requestId);
     return senderOwnSharedRelationshipAttribute;
-}
-
-/**
- * Creates a repository attribute on sender's side and shares it with
- * recipient, waiting for all communication and event processing to finish.
- *
- * Returns the sender's own shared identity attribute.
- */
-export async function executeFullCreateAndShareRepositoryAttributeFlow(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    request: CreateRepositoryAttributeRequest
-): Promise<LocalAttributeDTO> {
-    const createAttributeRequestResult = await sender.consumption.attributes.createRepositoryAttribute(request);
-    const attribute = createAttributeRequestResult.value;
-
-    const shareRequest: ShareRepositoryAttributeRequest = {
-        attributeId: attribute.id,
-        peer: recipient.address
-    };
-    const shareRequestResult = await sender.consumption.attributes.shareRepositoryAttribute(shareRequest);
-    const shareRequestId = shareRequestResult.value.id;
-
-    await syncUntilHasMessageWithRequest(recipient.transport, shareRequestId);
-    await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
-        return e.data.request.id === shareRequestId && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
-    });
-    await recipient.consumption.incomingRequests.accept({ requestId: shareRequestId, items: [{ accept: true }] });
-
-    const responseMessage = await syncUntilHasMessageWithResponse(sender.transport, shareRequestId);
-    const sharedAttributeId = responseMessage.content.response.items[0].attributeId;
-    await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
-        return e.data.request.id === shareRequestId && e.data.newStatus === LocalRequestStatus.Completed;
-    });
-
-    const senderOwnSharedIdentityAttribute = (await sender.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-    return senderOwnSharedIdentityAttribute;
 }
 
 /**
@@ -474,24 +473,24 @@ export async function executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
     request: SucceedRepositoryAttributeRequest
 ): Promise<SucceedRepositoryAttributeResponse> {
     const succeedAttributeRequestResult = await sender.consumption.attributes.succeedRepositoryAttribute(request);
-    const repositorySuccessor = succeedAttributeRequestResult.value.successor;
+    const repositorySuccessorId = succeedAttributeRequestResult.value.successor.id;
 
+    const senderOwnSharedIdentityAttributes = await executeFullNotifyPeerAboutAttributeSuccessionFlow(sender, recipient, repositorySuccessorId);
+    return senderOwnSharedIdentityAttributes;
+}
+
+export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
+    sender: TestRuntimeServices,
+    recipient: TestRuntimeServices,
+    attributeId: string
+): Promise<SucceedRepositoryAttributeResponse> {
     const notifyRequest: NotifyPeerAboutRepositoryAttributeSuccessionRequest = {
-        attributeId: repositorySuccessor.id,
+        attributeId: attributeId,
         peer: recipient.address
     };
     const notifyRequestResult = await sender.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession(notifyRequest);
-    const notificationId = notifyRequestResult.value.notificationId;
 
-    await syncUntilHasMessageWithNotification(recipient.transport, notificationId);
-
-    await sender.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
-        return e.data.successor.id === notifyRequestResult.value.successor.id;
-    });
-
-    await recipient.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
-        return e.data.successor.id === notifyRequestResult.value.successor.id;
-    });
+    await waitForRecipientToReceiveNotification(sender, recipient, notifyRequestResult.value);
 
     const senderOwnSharedIdentityAttributes: SucceedRepositoryAttributeResponse = {
         predecessor: notifyRequestResult.value.predecessor,
@@ -499,6 +498,22 @@ export async function executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
     };
 
     return senderOwnSharedIdentityAttributes;
+}
+
+export async function waitForRecipientToReceiveNotification(
+    sender: TestRuntimeServices,
+    recipient: TestRuntimeServices,
+    notifyRequestResult: NotifyPeerAboutRepositoryAttributeSuccessionResponse
+): Promise<void> {
+    await syncUntilHasMessageWithNotification(recipient.transport, notifyRequestResult.notificationId);
+
+    await sender.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
+        return e.data.successor.id === notifyRequestResult.successor.id;
+    });
+
+    await recipient.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
+        return e.data.successor.id === notifyRequestResult.successor.id;
+    });
 }
 
 /**

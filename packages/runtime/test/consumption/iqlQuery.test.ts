@@ -6,11 +6,6 @@ import { ConsumptionServices, CreateOutgoingRequestRequest, LocalAttributeDTO, O
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import { establishRelationship, exchangeMessageWithRequest, RuntimeServiceProvider, sendMessageWithRequest, syncUntilHasMessageWithResponse, TestRuntimeServices } from "../lib";
 
-/* Disable timeout errors if we're debugging */
-if (process.env.NODE_OPTIONS !== undefined && process.env.NODE_OPTIONS.search("inspect") !== -1) {
-    jest.setTimeout(1e9);
-}
-
 describe("IQL Query", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider();
 
