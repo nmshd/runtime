@@ -7,6 +7,7 @@ import {
     exchangeMessageWithAttachment,
     QueryParamConditions,
     RuntimeServiceProvider,
+    sendMessage,
     syncUntilHasMessages,
     TestRuntimeServices,
     uploadFile
@@ -31,7 +32,6 @@ afterAll(() => serviceProvider.stop());
 
 describe("Messaging", () => {
     let fileId: string;
-    let messageId: string;
 
     beforeAll(async () => {
         const file = await uploadFile(client1.transport);
@@ -54,12 +54,10 @@ describe("Messaging", () => {
         });
         expect(result).toBeSuccessful();
         await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
-
-        messageId = result.value.id;
     });
 
     test("receive the message in a sync run", async () => {
-        expect(messageId).toBeDefined();
+        const messageId = (await sendMessage(client1.transport, client2.address, undefined, [fileId])).id;
 
         const messages = await syncUntilHasMessages(client2.transport);
         expect(messages).toHaveLength(1);
@@ -68,15 +66,15 @@ describe("Messaging", () => {
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            body: "b",
+            subject: "This is the mail subject",
+            body: "This is the mail body",
             cc: [],
-            subject: "a",
             to: [client2.address]
         });
     });
 
     test("receive the message on TransportService2 in /Messages", async () => {
-        expect(messageId).toBeDefined();
+        const messageId = (await exchangeMessage(client1.transport, client2.transport, [fileId])).id;
 
         const response = await client2.transport.messages.getMessages({});
         expect(response).toBeSuccessful();
@@ -86,15 +84,15 @@ describe("Messaging", () => {
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            body: "b",
+            subject: "This is the mail subject",
+            body: "This is the mail body",
             cc: [],
-            subject: "a",
             to: [client2.address]
         });
     });
 
     test("receive the message on TransportService2 in /Messages/{id}", async () => {
-        expect(messageId).toBeDefined();
+        const messageId = (await exchangeMessage(client1.transport, client2.transport, [fileId])).id;
 
         const response = await client2.transport.messages.getMessage({ id: messageId });
         expect(response).toBeSuccessful();
