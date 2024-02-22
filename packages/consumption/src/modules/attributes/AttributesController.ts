@@ -517,7 +517,7 @@ export class AttributesController extends ConsumptionBaseController {
         try {
             parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
         } catch (e: unknown) {
-            return ValidationResult.error(CoreErrors.attributes.genericValidationError(e));
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
         const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
@@ -540,7 +540,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidRepositoryAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotRepositoryAttribute());
         }
 
         return ValidationResult.success();
@@ -554,7 +554,7 @@ export class AttributesController extends ConsumptionBaseController {
         try {
             parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
         } catch (e: unknown) {
-            return ValidationResult.error(CoreErrors.attributes.genericValidationError(e));
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
         const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
@@ -576,7 +576,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isOwnSharedIdentityAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidOwnSharedIdentityAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotOwnSharedIdentityAttribute());
         }
 
         if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
@@ -621,7 +621,7 @@ export class AttributesController extends ConsumptionBaseController {
         try {
             parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
         } catch (e: unknown) {
-            return ValidationResult.error(CoreErrors.attributes.genericValidationError(e));
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
         const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
@@ -643,7 +643,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isOwnSharedRelationshipAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidOwnSharedRelationshipAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotOwnSharedRelationshipAttribute());
         }
 
         if (successor.content.key !== predecessor.content.key) {
@@ -665,7 +665,7 @@ export class AttributesController extends ConsumptionBaseController {
         try {
             parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
         } catch (e: unknown) {
-            return ValidationResult.error(CoreErrors.attributes.genericValidationError(e));
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
         const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
@@ -687,7 +687,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isPeerSharedIdentityAttribute()) {
-            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidPeerSharedIdentityAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotPeerSharedIdentityAttribute());
         }
 
         if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
@@ -705,7 +705,7 @@ export class AttributesController extends ConsumptionBaseController {
         try {
             parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
         } catch (e: unknown) {
-            return ValidationResult.error(CoreErrors.attributes.genericValidationError(e));
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
         const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
@@ -727,7 +727,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isPeerSharedRelationshipAttribute()) {
-            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidPeerSharedRelationshipAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotPeerSharedRelationshipAttribute());
         }
 
         if (successor.content.key !== predecessor.content.key) {
@@ -746,7 +746,7 @@ export class AttributesController extends ConsumptionBaseController {
         try {
             parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
         } catch (e: unknown) {
-            return ValidationResult.error(CoreErrors.attributes.genericValidationError(e));
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
         const successor = LocalAttribute.from({

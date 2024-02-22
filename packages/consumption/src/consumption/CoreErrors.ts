@@ -2,10 +2,10 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { CoreError, CoreId } from "@nmshd/transport";
 
 class Attributes {
-    public genericValidationError(error: any) {
+    public successorIsNotAValidAttribute(error: any) {
         return new CoreError(
-            "error.consumption.attributes.genericValidationError",
-            "Validation failed during creation of object.",
+            "error.consumption.attributes.successorIsNotAValidAttribute",
+            "Validation failed during creation of successor.",
             error,
             undefined,
             error instanceof Error ? error : undefined
@@ -85,24 +85,24 @@ class Attributes {
         return new CoreError("error.consumption.attributes.predecessorIsNotPeerSharedRelationshipAttribute", "Predecessor is not a peer shared relationship attribute.");
     }
 
-    public successorIsNotValidRepositoryAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotValidRepositoryAttribute", "Successor is not a valid repository attribute.");
+    public successorIsNotRepositoryAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotRepositoryAttribute", "Successor is not a repository attribute.");
     }
 
-    public successorIsNotValidOwnSharedIdentityAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotValidOwnSharedIdentityAttribute", "Successor is not a valid own shared identity attribute.");
+    public successorIsNotOwnSharedIdentityAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotOwnSharedIdentityAttribute", "Successor is not an own shared identity attribute.");
     }
 
-    public successorIsNotValidPeerSharedIdentityAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotValidPeerSharedIdentityAttribute", "Successor is not a valid peer shared identity attribute.");
+    public successorIsNotPeerSharedIdentityAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotPeerSharedIdentityAttribute", "Successor is not a peer shared identity attribute.");
     }
 
-    public successorIsNotValidOwnSharedRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotValidOwnSharedRelationshipAttribute", "Successor is not a valid own shared relationship attribute.");
+    public successorIsNotOwnSharedRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotOwnSharedRelationshipAttribute", "Successor is not an own shared relationship attribute.");
     }
 
-    public successorIsNotValidPeerSharedRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotValidOwnSharedRelationshipAttribute", "Successor is not a valid peer shared relationship attribute.");
+    public successorIsNotPeerSharedRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotOwnSharedRelationshipAttribute", "Successor is not a peer shared relationship attribute.");
     }
 
     public setPredecessorIdDoesNotMatchActualPredecessorId() {
