@@ -53,9 +53,6 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
 
         const updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
 
-        // TODO: delete
-        const getAttribute = await this.consumptionController.attributes.getLocalAttribute(attribute.id);
-
         return new AttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), updatedAttribute);
     }
 
@@ -65,7 +62,6 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
         }
 
-        // TODO: adjust like above
         const deletionStatus = LocalAttributeDeletionStatus.from({
             ...attribute.deletionStatus,
             deletedByPeer: undefined
