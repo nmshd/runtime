@@ -540,7 +540,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.successorNotValidRepositoryAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidRepositoryAttribute());
         }
 
         return ValidationResult.success();
@@ -576,7 +576,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isOwnSharedIdentityAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.successorNotValidOwnSharedIdentityAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidOwnSharedIdentityAttribute());
         }
 
         if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
@@ -607,7 +607,7 @@ export class AttributesController extends ConsumptionBaseController {
         const repositoryAttributeContentMatchesItsSharedAttribute =
             _.isEqual(predecessorSource.content, predecessor.content) && _.isEqual(successorSource.content, successor.content);
         if (!repositoryAttributeContentMatchesItsSharedAttribute) {
-            return ValidationResult.error(CoreErrors.attributes.sourceContentNotEqualToCopyContent());
+            return ValidationResult.error(CoreErrors.attributes.sourceContentIsNotEqualToCopyContent());
         }
 
         return ValidationResult.success();
@@ -639,11 +639,11 @@ export class AttributesController extends ConsumptionBaseController {
         });
 
         if (!predecessor.isOwnSharedRelationshipAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.predecessorIsNotOwnSharedIdentityAttribute());
+            return ValidationResult.error(CoreErrors.attributes.predecessorIsNotOwnSharedRelationshipAttribute());
         }
 
         if (!successor.isOwnSharedRelationshipAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.successorNotValidOwnSharedIdentityAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidOwnSharedRelationshipAttribute());
         }
 
         if (successor.content.key !== predecessor.content.key) {
@@ -687,7 +687,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isPeerSharedIdentityAttribute()) {
-            return ValidationResult.error(CoreErrors.attributes.successorNotValidPeerSharedIdentityAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidPeerSharedIdentityAttribute());
         }
 
         if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
@@ -727,7 +727,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (!successor.isPeerSharedRelationshipAttribute()) {
-            return ValidationResult.error(CoreErrors.attributes.successorNotValidPeerSharedRelationshipAttribute());
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotValidPeerSharedRelationshipAttribute());
         }
 
         if (successor.content.key !== predecessor.content.key) {
@@ -767,7 +767,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (typeof successor.succeeds !== "undefined" && !predecessorId.equals(successor.succeeds.toString())) {
-            return ValidationResult.error(CoreErrors.attributes.differentPredecessorNamedInSuccessor());
+            return ValidationResult.error(CoreErrors.attributes.setPredecessorIdDoesNotMatchActualPredecessorId());
         }
 
         if (typeof successor.succeededBy !== "undefined") {

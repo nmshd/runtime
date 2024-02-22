@@ -40,7 +40,7 @@ export class SucceedRepositoryAttributeUseCase extends UseCase<SucceedRepository
     protected async executeInternal(request: SucceedRepositoryAttributeRequest): Promise<Result<SucceedRepositoryAttributeResponse>> {
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
         if (typeof predecessor === "undefined") {
-            return Result.fail(CoreErrors.attributes.predecessorDoesNotExist());
+            return Result.fail(CoreErrors.attributes.setPredecessorIdDoesNotMatchActualPredecessorId());
         }
 
         const successorParams: AttributeSuccessorParamsJSON = {

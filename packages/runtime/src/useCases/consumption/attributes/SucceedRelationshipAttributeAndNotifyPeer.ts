@@ -41,7 +41,7 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
     protected async executeInternal(request: SucceedRelationshipAttributeAndNotifyPeerRequest): Promise<Result<SucceedRelationshipAttributeAndNotifyPeerResponse>> {
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
         if (typeof predecessor === "undefined") {
-            return Result.fail(CoreErrors.attributes.predecessorDoesNotExist());
+            return Result.fail(CoreErrors.attributes.setPredecessorIdDoesNotMatchActualPredecessorId());
         }
         if (!predecessor.isOwnSharedRelationshipAttribute(this.accountController.identity.address, predecessor.shareInfo?.peer)) {
             return Result.fail(CoreErrors.attributes.predecessorIsNotOwnSharedRelationshipAttribute());
