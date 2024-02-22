@@ -34,6 +34,8 @@ let sEventBus: MockEventBus;
 let rEventBus: MockEventBus;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
+let sAddress: string;
+let rAddress: string;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
@@ -48,8 +50,8 @@ beforeAll(async () => {
     sEventBus = sRuntimeServices.eventBus;
     rEventBus = rRuntimeServices.eventBus;
     await establishRelationship(sTransportServices, rTransportServices);
-    const sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
-    const rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+    sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
+    rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
     requestContent = {
         content: {
@@ -211,9 +213,11 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     });
 
     test("check the sender's dvo for the recipient", async () => {
+        const baselineNumberOfItems = (await rExpander.expandAddress(sAddress)).items!.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
-        expect(dvo.items).not.toHaveLength(0);
+        const numberOfItems = dvo.items!.length;
+        expect(numberOfItems - baselineNumberOfItems).toBe(1);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
@@ -278,6 +282,16 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     });
 
     test("check the attributes for the sender", async () => {
+        const baselineNumberOfAttributes = (
+            await sConsumptionServices.attributes.getOwnSharedAttributes({
+                peer: rAddress
+            })
+        ).value.length;
+        const baselineNumberOfRelationshipAttributes = (
+            await sConsumptionServices.attributes.getAttributes({
+                query: { "shareInfo.peer": rAddress, "content.@type": "RelationshipAttribute" }
+            })
+        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         const attributeResult = await sConsumptionServices.attributes.getOwnSharedAttributes({
@@ -285,16 +299,17 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         });
 
         expect(attributeResult).toBeSuccessful();
-        expect(attributeResult.value).not.toHaveLength(0);
-        const attributeNumber = attributeResult.value.length - 1; // there may be other attributes produced by request responses from previous tests
-        expect(attributeResult.value[attributeNumber].id).toBeDefined();
-        expect((attributeResult.value[attributeNumber].content.value as ProprietaryStringJSON).value).toBe("0815");
+        const numberOfAttributes = attributeResult.value.length;
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as ProprietaryStringJSON).value).toBe("0815");
 
         const relationshipAttributeResult = await sConsumptionServices.attributes.getAttributes({
             query: { "shareInfo.peer": dvo.request.peer.id, "content.@type": "RelationshipAttribute" }
         });
         expect(relationshipAttributeResult).toBeSuccessful();
-        expect(relationshipAttributeResult.value).not.toHaveLength(0);
+        const numberOfRelationshipAttributes = relationshipAttributeResult.value.length;
+        expect(numberOfRelationshipAttributes - baselineNumberOfRelationshipAttributes).toBe(1);
     });
 
     test("check the recipient's dvo for the sender", async () => {

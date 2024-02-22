@@ -3,7 +3,6 @@ import { GetRelationshipsQuery, LocalAttributeDTO, OwnSharedAttributeSucceededEv
 import {
     createTemplate,
     ensureActiveRelationship,
-    establishRelationship,
     exchangeTemplate,
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
@@ -35,83 +34,55 @@ describe("Create Relationship", () => {
         expect(response).toBeSuccessful();
     });
 
-    test("create relationship", async () => {
+    test("execute relationship creation flow", async () => {
         const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
 
-        const response = await services2.transport.relationships.createRelationship({
+        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
             content: { a: "b" }
         });
-        expect(response).toBeSuccessful();
-    });
+        expect(createRelationshipResponse).toBeSuccessful();
 
-    test("sync relationships", async () => {
-        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
         await services2.transport.relationships.createRelationship({
             templateId: templateId,
             content: { a: "b" }
         });
-        const relationships = await syncUntilHasRelationships(services1.transport);
-        expect(relationships).toHaveLength(1);
-    });
+        const relationships1 = await syncUntilHasRelationships(services1.transport);
+        expect(relationships1).toHaveLength(1);
+        const relationshipId = relationships1[0].id;
+        const relationshipChangeId = relationships1[0].changes[0].id;
 
-    test("accept relationship", async () => {
-        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
-        await services2.transport.relationships.createRelationship({
-            templateId: templateId,
-            content: { a: "b" }
-        });
-        const relationships = await syncUntilHasRelationships(services1.transport);
-        const relationshipId = relationships[0].id;
-        const relationshipChangeId = relationships[0].changes[0].id;
-
-        const response = await services1.transport.relationships.acceptRelationshipChange({
+        const acceptRelationshipResponse = await services1.transport.relationships.acceptRelationshipChange({
             relationshipId: relationshipId,
             changeId: relationshipChangeId,
             content: { a: "b" }
         });
-        expect(response).toBeSuccessful();
-    });
+        expect(acceptRelationshipResponse).toBeSuccessful();
 
-    test("should exist a relationship on TransportService1", async () => {
-        await establishRelationship(services1.transport, services2.transport);
+        const relationships1Response = await services1.transport.relationships.getRelationships({});
+        expect(relationships1Response).toBeSuccessful();
+        expect(relationships1Response.value).toHaveLength(1);
 
-        const response = await services1.transport.relationships.getRelationships({});
-        expect(response).toBeSuccessful();
-        expect(response.value).toHaveLength(1);
-    });
+        const relationships2 = await syncUntilHasRelationships(services2.transport);
+        expect(relationships2).toHaveLength(1);
 
-    test("check Open Outgoing Relationships on TransportService2", async () => {
-        await establishRelationship(services1.transport, services2.transport);
-        const relationships = await syncUntilHasRelationships(services2.transport);
-        expect(relationships).toHaveLength(1);
-    });
+        const relationships2Response = await services2.transport.relationships.getRelationships({});
+        expect(relationships2Response).toBeSuccessful();
+        expect(relationships2Response.value).toHaveLength(1);
 
-    test("should exist a relationship on TransportService2", async () => {
-        await establishRelationship(services1.transport, services2.transport);
-        const response = await services2.transport.relationships.getRelationships({});
-        expect(response).toBeSuccessful();
-        expect(response.value).toHaveLength(1);
-    });
+        const relationship1Response = await services1.transport.relationships.getRelationship({ id: relationshipId });
+        expect(relationship1Response).toBeSuccessful();
+        expect(relationship1Response.value.status).toBe("Active");
 
-    test("should get created Relationship on TransportService1", async () => {
-        const relationshipId = (await establishRelationship(services1.transport, services2.transport)).id;
-        const response = await services1.transport.relationships.getRelationship({ id: relationshipId });
-        expect(response).toBeSuccessful();
-        expect(response.value.status).toBe("Active");
-    });
-
-    test("should get created Relationship on TransportService2", async () => {
-        const relationshipId = (await establishRelationship(services1.transport, services2.transport)).id;
-        const response = await services2.transport.relationships.getRelationship({ id: relationshipId });
-        expect(response).toBeSuccessful();
-        expect(response.value.status).toBe("Active");
+        const relationship2Response = await services2.transport.relationships.getRelationship({ id: relationshipId });
+        expect(relationship2Response).toBeSuccessful();
+        expect(relationship2Response.value.status).toBe("Active");
     });
 });
 
 describe("Relationships query", () => {
     test("query own relationship", async () => {
-        await establishRelationship(services1.transport, services2.transport);
+        await ensureActiveRelationship(services1.transport, services2.transport);
         const relationship = await getRelationship(services1.transport);
         const conditions = new QueryParamConditions<GetRelationshipsQuery>(relationship, services1.transport)
             .addStringSet("peer")

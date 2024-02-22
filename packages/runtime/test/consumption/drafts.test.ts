@@ -34,6 +34,8 @@ describe("Drafts", () => {
     });
 
     test("should have query the draft", async () => {
+        const baselineNumberOfDrafts = (await consumptionServices.drafts.getDrafts({})).value.length;
+
         const creationResult = await consumptionServices.drafts.createDraft({ content: content, type: "test" });
 
         expect(creationResult).toBeSuccessful();
@@ -44,9 +46,10 @@ describe("Drafts", () => {
         expect(getResult).toBeSuccessful();
 
         const drafts = getResult.value;
-        expect(drafts).toHaveLength(1);
+        const numberOfDrafts = drafts.length;
+        expect(numberOfDrafts - baselineNumberOfDrafts).toBe(1);
 
-        expect(drafts[0].id).toStrictEqual(draftId);
+        expect(drafts[numberOfDrafts - 1].id).toStrictEqual(draftId);
     });
 
     test("should edit the draft", async () => {
@@ -74,6 +77,7 @@ describe("Drafts", () => {
 
         const draftId = creationResult.value.id;
 
+        const baselineNumberOfDrafts = (await consumptionServices.drafts.getDrafts({})).value.length;
         const deleteResult = await consumptionServices.drafts.deleteDraft({ id: draftId });
         expect(deleteResult).toBeSuccessful();
 
@@ -81,7 +85,8 @@ describe("Drafts", () => {
         expect(getResult).toBeSuccessful();
 
         const drafts = getResult.value;
-        expect(drafts).toHaveLength(0);
+        const numberOfDrafts = drafts.length;
+        expect(baselineNumberOfDrafts - numberOfDrafts).toBe(1);
     });
 });
 

@@ -34,6 +34,7 @@ let sEventBus: MockEventBus;
 let rEventBus: MockEventBus;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
+let rAddress: string;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
@@ -48,7 +49,7 @@ beforeAll(async () => {
     sEventBus = sRuntimeServices.eventBus;
     rEventBus = rRuntimeServices.eventBus;
     await establishRelationship(sTransportServices, rTransportServices);
-    const rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+    rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
     requestContent = {
         content: {
@@ -276,10 +277,11 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     });
 
     test("check the recipient's dvo for the sender", async () => {
+        const baselineNumberOfItems = (await sExpander.expandAddress(rAddress)).items!.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await sExpander.expandAddress(senderMessage.recipients[0].address);
-
+        const numberOfItems = dvo.items!.length;
         expect(dvo.name).toBe("Richard Receiver");
-        expect(dvo.items).not.toHaveLength(0);
+        expect(numberOfItems - baselineNumberOfItems).toBe(1);
     });
 });
