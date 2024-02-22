@@ -383,7 +383,7 @@ describe("get repository, own shared and peer shared attributes", () => {
         await cleanupAttributes();
     });
 
-    describe(GetRepositoryAttributesUseCase.name, () => {
+    describe.only(GetRepositoryAttributesUseCase.name, () => {
         test("get only latest version of repository attributes", async () => {
             const result = await services1.consumption.attributes.getRepositoryAttributes({});
             expect(result).toBeSuccessful();

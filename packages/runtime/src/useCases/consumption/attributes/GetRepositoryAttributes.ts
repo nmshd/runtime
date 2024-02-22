@@ -48,7 +48,7 @@ export class GetRepositoryAttributesUseCase extends UseCase<GetRepositoryAttribu
             dbQuery["succeededBy"] = { $exists: false };
         }
 
-        const attributes = await this.attributesController.getLocalAttributes(query);
+        const attributes = await this.attributesController.getLocalAttributes(dbQuery);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }
