@@ -12,6 +12,7 @@ import {
 } from "@nmshd/content";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
+    AttributeDeletedNotificationItemProcessor,
     AttributeListenersController,
     AttributesController,
     CreateAttributeRequestItemProcessor,
@@ -34,7 +35,6 @@ import {
     SettingsController,
     ShareAttributeRequestItemProcessor
 } from "../modules";
-import { AttributeDeletedNotificationItemProcessor } from "../modules/notifications/itemProcessors/AttributeDeletedNotificationItemProcessor";
 
 export class ConsumptionController {
     public constructor(
