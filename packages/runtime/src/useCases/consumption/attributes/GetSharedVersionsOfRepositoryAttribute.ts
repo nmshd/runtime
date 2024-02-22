@@ -9,7 +9,10 @@ import { AttributeMapper } from "./AttributeMapper";
 export interface GetSharedVersionsOfRepositoryAttributeRequest {
     attributeId: AttributeIdString;
     peers?: AddressString[];
-    onlyLatestVersions?: boolean; // default: true
+    /**
+     * default: true
+     */
+    onlyLatestVersions?: boolean;
 }
 
 class Validator extends SchemaValidator<GetSharedVersionsOfRepositoryAttributeRequest> {

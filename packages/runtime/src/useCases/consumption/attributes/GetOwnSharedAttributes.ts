@@ -13,7 +13,10 @@ export interface GetOwnSharedAttributesRequest {
     onlyValid?: boolean;
     query?: GetOwnSharedAttributeRequestQuery;
     hideTechnical?: boolean;
-    onlyLatestVersions?: boolean; // default: true
+    /**
+     * default: true
+     */
+    onlyLatestVersions?: boolean;
 }
 
 export interface GetOwnSharedAttributeRequestQuery {

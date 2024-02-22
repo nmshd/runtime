@@ -6,19 +6,18 @@ import { LocalAttributeDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase, flattenObject } from "../../common";
 
 export interface GetRepositoryAttributesRequest {
-    onlyLatestVersions?: boolean; // default: true
+    /**
+     * default: true
+     */
+    onlyLatestVersions?: boolean;
     query?: GetRepositoryAttributesRequestQuery;
 }
 
 export interface GetRepositoryAttributesRequestQuery {
     createdAt?: string;
-    "content.@type"?: string | string[];
     "content.tags"?: string | string[];
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];
-    "content.key"?: string | string[];
-    "content.isTechnical"?: string | string[];
-    "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
 }
 

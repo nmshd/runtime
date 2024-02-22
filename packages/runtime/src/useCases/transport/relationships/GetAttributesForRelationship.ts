@@ -9,7 +9,10 @@ import { AttributeMapper } from "../../consumption";
 export interface GetAttributesForRelationshipRequest {
     id: RelationshipIdString;
     hideTechnical?: boolean;
-    onlyLatestVersions?: boolean; // default: true
+    /**
+     * default: true
+     */
+    onlyLatestVersions?: boolean;
 }
 
 export interface GetAttributesForRelationshipResponse extends Array<LocalAttributeDTO> {}
