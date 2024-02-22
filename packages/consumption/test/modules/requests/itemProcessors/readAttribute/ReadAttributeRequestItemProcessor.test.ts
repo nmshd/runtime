@@ -156,6 +156,17 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }
                 },
                 {
+                    description: "cannot query with thirdParty = empty string",
+                    input: {
+                        owner: TestIdentity.Self,
+                        thirdParty: TestIdentity.Empty
+                    },
+                    expectedOutput: {
+                        errorCode: "error.consumption.requests.invalidRequestItem",
+                        errorMessage: "Cannot query an Attribute with an empty string as third party."
+                    }
+                },
+                {
                     description: "cannot query with thirdParty = self",
                     input: {
                         owner: TestIdentity.Self,
