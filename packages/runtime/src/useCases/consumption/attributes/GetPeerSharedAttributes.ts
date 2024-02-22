@@ -12,7 +12,7 @@ export interface GetPeerSharedAttributesRequest {
     onlyValid?: boolean;
     query?: GetPeerSharedAttributesRequestQuery;
     hideTechnical?: boolean;
-    onlyLatestVersions?: boolean;
+    onlyLatestVersions?: boolean; // default: true
 }
 
 export interface GetPeerSharedAttributesRequestQuery {
