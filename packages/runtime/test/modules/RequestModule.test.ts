@@ -64,6 +64,11 @@ beforeAll(async () => {
     rEventBus = rRuntimeServices.eventBus;
 }, 30000);
 
+beforeEach(() => {
+    sEventBus.reset();
+    rEventBus.reset();
+});
+
 afterAll(async () => await runtimeServiceProvider.stop());
 
 // afterEach(async () => {
@@ -177,7 +182,6 @@ describe("RequestModule", () => {
 
         test("does not create a second Request from the same Template if an active Relationship exists", async () => {
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-            rEventBus.reset();
             await syncUntilHasRelationships(rTransportServices);
             await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
@@ -223,8 +227,6 @@ describe("RequestModule", () => {
         });
 
         test("sends the Reject-Response by Message", async () => {
-            rEventBus.reset();
-
             const template = await exchangeRelationshipTemplate();
 
             await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
@@ -244,7 +246,6 @@ describe("RequestModule", () => {
         });
 
         test("receives the rejected Request by Message", async () => {
-            rEventBus.reset();
             const template = await exchangeRelationshipTemplate();
             await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
@@ -261,7 +262,6 @@ describe("RequestModule", () => {
         });
 
         test("sends the Accept-Response by Message", async () => {
-            rEventBus.reset();
             const template = await exchangeRelationshipTemplate();
 
             await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
@@ -276,7 +276,6 @@ describe("RequestModule", () => {
         });
 
         test("receives the accepted Request by Message", async () => {
-            rEventBus.reset();
             const template = await exchangeRelationshipTemplate();
             await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;

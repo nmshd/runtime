@@ -44,6 +44,11 @@ let attributeValue: PersonNameJSON;
 
 afterAll(() => serviceProvider.stop());
 
+beforeEach(function () {
+    eventBus1.reset();
+    eventBus2.reset();
+});
+
 describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
     beforeAll(async () => {
         const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
