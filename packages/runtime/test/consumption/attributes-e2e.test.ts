@@ -1038,18 +1038,19 @@ describe(DeletePeerSharedAttributeUseCase.name, () => {
             }
         });
 
-        const deletionTime = CoreDate.utc();
         const notification = (await services2.consumption.attributes.deletePeerSharedAttribute({ attributeId: sOSIA.id })).value;
+        const timeBeforeUpdate = CoreDate.utc();
         await syncUntilHasMessageWithNotification(services1.transport, notification.id);
         await services1.eventBus.waitForEvent(AttributeDeletedByPeerEvent, (e) => {
             return e.data.id.toString() === sOSIA.id;
         });
+        const timeAfterUpdate = CoreDate.utc();
 
         const result = await services1.consumption.attributes.getAttribute({ id: sOSIA.id });
         expect(result.isSuccess).toBe(true);
         const updatedAttribute = result.value;
         expect(updatedAttribute.deletionStatus?.deletedByPeer).toBeDefined();
-        expect(CoreDate.from(updatedAttribute.deletionStatus!.deletedByPeer!).isSame(deletionTime, "second")).toBe(true);
+        expect(CoreDate.from(updatedAttribute.deletionStatus!.deletedByPeer!).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
     });
 
     // TODO: test deletion of predecessors
