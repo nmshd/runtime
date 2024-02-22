@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/consumption",
-    "version": "3.9.3",
+    "version": "3.9.4",
     "description": "The consumption library extends the transport library.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -61,7 +61,7 @@
     },
     "dependencies": {
         "@js-soft/docdb-querytranslator": "^1.1.2",
-        "@nmshd/iql": "^1.0.1",
+        "@nmshd/iql": "^1.0.2",
         "ts-simple-nameof": "^1.3.1"
     },
     "devDependencies": {
