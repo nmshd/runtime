@@ -3,8 +3,6 @@ import { AttributeQueryDVO } from "../content/AttributeDVOs";
 import { DataViewObject } from "../DataViewObject";
 import { IdentityDVO } from "../transport";
 
-// TODO: add deletionStatus appropriately
-
 /**
  * The DataViewObject representation of a LocalAttribute
  * @abstract
@@ -26,6 +24,7 @@ export interface LocalAttributeDVO extends DataViewObject {
     createdAt: string;
     succeeds?: string;
     succeededBy?: string;
+    toBeDeletedAt?: string;
 }
 
 /**
@@ -49,6 +48,8 @@ export interface SharedToPeerAttributeDVO extends LocalAttributeDVO {
     sourceAttribute: string;
     isOwn: true;
     tags: string[];
+    toBeDeletedByPeerAt?: string;
+    deletedByPeerAt?: string;
 }
 
 /**
@@ -75,6 +76,8 @@ export interface OwnRelationshipAttributeDVO extends LocalAttributeDVO {
     isOwn: true;
     confidentiality: string;
     isTechnical: boolean;
+    toBeDeletedByPeerAt?: string;
+    deletedByPeerAt?: string;
 }
 
 /**

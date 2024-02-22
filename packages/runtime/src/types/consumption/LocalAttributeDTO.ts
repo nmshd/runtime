@@ -1,5 +1,4 @@
-import { LocalAttributeShareInfoJSON } from "@nmshd/consumption";
-import { LocalAttributeDeletionStatusJSON } from "@nmshd/consumption/src/modules/attributes/local/LocalAttributeDeletionStatus";
+import { LocalAttributeDeletionStatusJSON, LocalAttributeShareInfoJSON } from "@nmshd/consumption";
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 
 export interface LocalAttributeDTO {
