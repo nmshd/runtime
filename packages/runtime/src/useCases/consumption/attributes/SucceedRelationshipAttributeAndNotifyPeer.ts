@@ -4,13 +4,13 @@ import { AttributeValues, Notification, PeerSharedAttributeSucceededNotification
 import { AccountController, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
-import { AttributeIdString, ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeIdString, ISO8601DateTimeString, NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface SucceedRelationshipAttributeAndNotifyPeerResponse {
     predecessor: LocalAttributeDTO;
     successor: LocalAttributeDTO;
-    notificationId: CoreId;
+    notificationId: NotificationIdString;
 }
 
 export interface SucceedRelationshipAttributeAndNotifyPeerRequest {
@@ -85,7 +85,7 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
         const response: SucceedRelationshipAttributeAndNotifyPeerResponse = {
             predecessor: AttributeMapper.toAttributeDTO(updatedPredecessor),
             successor: AttributeMapper.toAttributeDTO(successor),
-            notificationId: notificationId
+            notificationId: notificationId.toString()
         };
 
         return Result.ok(response);
