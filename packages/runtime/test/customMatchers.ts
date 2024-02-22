@@ -1,11 +1,6 @@
 import { ApplicationError, EventConstructor, Result } from "@js-soft/ts-utils";
 import { MockEventBus } from "./lib";
 
-/* Disable timeout errors if we're debugging */
-if (process.env.NODE_OPTIONS !== undefined && process.env.NODE_OPTIONS.search("inspect") !== -1) {
-    jest.setTimeout(1e9);
-}
-
 expect.extend({
     toBeSuccessful(actual: Result<unknown, ApplicationError>) {
         if (!(actual instanceof Result)) {
