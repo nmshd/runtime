@@ -34,7 +34,7 @@ import {
     SettingsController,
     ShareAttributeRequestItemProcessor
 } from "../modules";
-import { AttributeDeletedNotificationItemProcessor } from "../modules/notifications/itemProcessors/attributeSucceeded/AttributeDeletedNotificationItemProcessor";
+import { AttributeDeletedNotificationItemProcessor } from "../modules/notifications/itemProcessors/AttributeDeletedNotificationItemProcessor";
 
 export class ConsumptionController {
     public constructor(

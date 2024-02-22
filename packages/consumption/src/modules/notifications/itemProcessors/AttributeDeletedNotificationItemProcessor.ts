@@ -1,12 +1,13 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { AttributeDeletedNotificationItem } from "@nmshd/content";
 import { CoreDate, CoreErrors as TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
-import { ConsumptionController } from "../../../../consumption/ConsumptionController";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { AttributeDeletedByPeerEvent, ILocalAttribute, LocalAttribute } from "../../../attributes";
-import { ValidationResult } from "../../../common";
-import { LocalNotification } from "../../local/LocalNotification";
-import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
+import { ConsumptionController } from "../../../consumption/ConsumptionController";
+import { CoreErrors } from "../../../consumption/CoreErrors";
+import { AttributeDeletedByPeerEvent, LocalAttribute } from "../../attributes";
+import { LocalAttributeDeletionStatus } from "../../attributes/local/LocalAttributeDeletionStatus";
+import { ValidationResult } from "../../common";
+import { LocalNotification } from "../local/LocalNotification";
+import { AbstractNotificationItemProcessor } from "./AbstractNotificationItemProcessor";
 
 export class AttributeDeletedNotificationItemProcessor extends AbstractNotificationItemProcessor<AttributeDeletedNotificationItem> {
     private readonly _logger: ILogger;
@@ -44,24 +45,16 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
         }
 
-        // TODO: improve
-        const params: ILocalAttribute = {
-            // ...attribute,
-            id: attribute.id,
-            content: attribute.content,
-            createdAt: attribute.createdAt,
-            parentId: attribute.parentId,
-            shareInfo: attribute.shareInfo,
-            succeededBy: attribute.succeededBy,
-            succeeds: attribute.succeeds,
-            deletionStatus: {
-                // ...attribute.deletionStatus,
-                toBeDeletedAt: attribute.deletionStatus?.toBeDeletedAt,
-                toBeDeletedByPeerAt: attribute.deletionStatus?.toBeDeletedByPeerAt,
-                deletedByPeer: CoreDate.utc()
-            }
-        };
-        const updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(params);
+        const deletionStatus = LocalAttributeDeletionStatus.from({
+            ...attribute.deletionStatus,
+            deletedByPeer: CoreDate.utc()
+        });
+        attribute.deletionStatus = deletionStatus;
+
+        const updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
+
+        // TODO: delete
+        const getAttribute = await this.consumptionController.attributes.getLocalAttribute(attribute.id);
 
         return new AttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), updatedAttribute);
     }
@@ -73,13 +66,12 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
         }
 
         // TODO: adjust like above
-        const params: ILocalAttribute = {
-            ...attribute,
-            deletionStatus: {
-                ...attribute.deletionStatus,
-                deletedByPeer: undefined
-            }
-        };
-        await this.consumptionController.attributes.updateAttributeUnsafe(params);
+        const deletionStatus = LocalAttributeDeletionStatus.from({
+            ...attribute.deletionStatus,
+            deletedByPeer: undefined
+        });
+        attribute.deletionStatus = deletionStatus;
+
+        await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
     }
 }

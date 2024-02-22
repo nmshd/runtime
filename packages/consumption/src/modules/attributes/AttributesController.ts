@@ -820,7 +820,8 @@ export class AttributesController extends ConsumptionBaseController {
             shareInfo: attributeData.shareInfo,
             parentId: attributeData.parentId,
             succeededBy: attributeData.succeededBy,
-            succeeds: attributeData.succeeds
+            succeeds: attributeData.succeeds,
+            deletionStatus: attributeData.deletionStatus
         });
         await this.attributes.create(localAttribute);
         return localAttribute;
