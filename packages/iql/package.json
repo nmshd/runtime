@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/iql",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Identity Query Language - A DSL to filter and query Enmeshed attributes",
     "homepage": "https://enmeshed.eu",
     "repository": {
