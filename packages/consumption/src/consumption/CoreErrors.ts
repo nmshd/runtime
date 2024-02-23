@@ -102,7 +102,7 @@ class Attributes {
     }
 
     public successorIsNotPeerSharedRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotOwnSharedRelationshipAttribute", "Successor is not a peer shared relationship attribute.");
+        return new CoreError("error.consumption.attributes.successorIsNotPeerSharedRelationshipAttribute", "Successor is not a peer shared relationship attribute.");
     }
 
     public setPredecessorIdDoesNotMatchActualPredecessorId() {
