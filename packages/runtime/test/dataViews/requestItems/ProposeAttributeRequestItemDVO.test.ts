@@ -1,23 +1,42 @@
-import { AcceptProposeAttributeRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
-import { AbstractStringJSON, GivenName, GivenNameJSON, IdentityAttribute, IdentityAttributeQuery, ProposeAttributeRequestItem, Surname, SurnameJSON } from "@nmshd/content";
+import { AcceptProposeAttributeRequestItemParametersJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
+import {
+    AbstractStringJSON,
+    GivenName,
+    GivenNameJSON,
+    IdentityAttribute,
+    IdentityAttributeQuery,
+    ProposeAttributeRequestItem,
+    ProposeAttributeRequestItemJSON,
+    Surname,
+    SurnameJSON
+} from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import {
     ConsumptionServices,
+    CreateOutgoingRequestRequest,
     DataViewExpander,
     DecidableProposeAttributeRequestItemDVO,
     IdentityAttributeQueryDVO,
-    IncomingRequestStatusChangedEvent,
-    MessageDTO,
-    OutgoingRequestStatusChangedEvent,
     ProcessedIdentityAttributeQueryDVO,
     ProposeAttributeAcceptResponseItemDVO,
     ProposeAttributeRequestItemDVO,
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../../lib";
+import {
+    establishRelationship,
+    exchangeAndAcceptRequestByMessage,
+    exchangeMessageWithRequest,
+    MockEventBus,
+    RuntimeServiceProvider,
+    sendMessageWithRequest,
+    syncUntilHasMessageWithRequest,
+    TestRuntimeServices
+} from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
+let runtimeServices1: TestRuntimeServices;
+let runtimeServices2: TestRuntimeServices;
 let transportServices1: TransportServices;
 let transportServices2: TransportServices;
 let expander1: DataViewExpander;
@@ -26,24 +45,27 @@ let consumptionServices1: ConsumptionServices;
 let consumptionServices2: ConsumptionServices;
 let eventBus1: MockEventBus;
 let eventBus2: MockEventBus;
-let senderMessage: MessageDTO;
-let recipientMessage: MessageDTO;
-let requestId: string;
+
+let requestContent: CreateOutgoingRequestRequest;
+let responseItems: DecideRequestItemParametersJSON[];
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
-    transportServices1 = runtimeServices[0].transport;
-    transportServices2 = runtimeServices[1].transport;
-    expander1 = runtimeServices[0].expander;
-    expander2 = runtimeServices[1].expander;
-    consumptionServices1 = runtimeServices[0].consumption;
-    consumptionServices2 = runtimeServices[1].consumption;
-    eventBus1 = runtimeServices[0].eventBus;
-    eventBus2 = runtimeServices[1].eventBus;
+    runtimeServices1 = runtimeServices[0];
+    runtimeServices2 = runtimeServices[1];
+    transportServices1 = runtimeServices1.transport;
+    transportServices2 = runtimeServices2.transport;
+    expander1 = runtimeServices1.expander;
+    expander2 = runtimeServices2.expander;
+    consumptionServices1 = runtimeServices1.consumption;
+    consumptionServices2 = runtimeServices2.consumption;
+    eventBus1 = runtimeServices1.eventBus;
+    eventBus2 = runtimeServices2.eventBus;
+
     await establishRelationship(transportServices1, transportServices2);
     const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
 
-    await consumptionServices2.attributes.createRepositoryAttribute({
+    const attribute1 = await consumptionServices2.attributes.createRepositoryAttribute({
         content: {
             value: {
                 "@type": "GivenName",
@@ -52,7 +74,7 @@ beforeAll(async () => {
         }
     });
 
-    await consumptionServices2.attributes.createRepositoryAttribute({
+    const attribute2 = await consumptionServices2.attributes.createRepositoryAttribute({
         content: {
             value: {
                 "@type": "Surname",
@@ -61,7 +83,7 @@ beforeAll(async () => {
         }
     });
 
-    const localRequest = await consumptionServices1.outgoingRequests.create({
+    requestContent = {
         content: {
             items: [
                 ProposeAttributeRequestItem.from({
@@ -89,13 +111,15 @@ beforeAll(async () => {
             ]
         },
         peer: recipientAddress
-    });
-    requestId = localRequest.value.id;
+    };
 
-    senderMessage = await sendMessage(transportServices1, recipientAddress, localRequest.value.content);
-    recipientMessage = await syncUntilHasMessageWithRequest(transportServices2, localRequest.value.id);
-
-    await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+    responseItems = [
+        { accept: true, attributeId: attribute1.value.id } as AcceptProposeAttributeRequestItemParametersJSON,
+        {
+            accept: true,
+            attribute: Object.assign({}, (requestContent.content.items[1] as ProposeAttributeRequestItemJSON).attribute, { owner: recipientAddress })
+        } as AcceptProposeAttributeRequestItemParametersJSON
+    ];
 }, 30000);
 
 afterAll(() => serviceProvider.stop());
@@ -107,6 +131,8 @@ beforeEach(function () {
 
 describe("ProposeAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
+        const senderMessage = await sendMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -143,7 +169,8 @@ describe("ProposeAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.isOwn).toBe(false);
     });
 
-    test("check the MessageDVO for the recipient and accept it", async () => {
+    test("check the MessageDVO for the recipient", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         const dto = recipientMessage;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -222,13 +249,13 @@ describe("ProposeAttributeRequestItemDVO", () => {
             query: { shareInfo: "!", "content.value.@type": "GivenName" }
         });
         expect(givenNameRepositoryResult.value).toHaveLength(1);
+    });
 
+    test("check the MessageDVO for the recipient after acceptance", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
-            requestId: dvo.request.id,
-            items: [
-                { accept: true, attributeId: resultItem.id } as AcceptProposeAttributeRequestItemParametersJSON,
-                { accept: true, attribute: requestItemDVO.attribute.content } as AcceptProposeAttributeRequestItemParametersJSON
-            ]
+            requestId: recipientMessage.content.id,
+            items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
 
@@ -236,9 +263,6 @@ describe("ProposeAttributeRequestItemDVO", () => {
             query: { shareInfo: "!", "content.value.@type": "GivenName" }
         });
         expect(givenNameRepositoryResult2.value).toHaveLength(1);
-    });
-
-    test("check the MessageDVO for the recipient after acceptance", async () => {
         const dto = recipientMessage;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -341,9 +365,7 @@ describe("ProposeAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessageWithResponse(transportServices1, requestId);
-
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
@@ -405,23 +427,25 @@ describe("ProposeAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(givenNameResult).toBeSuccessful();
-        expect(givenNameResult.value[0].id).toBeDefined();
-        const givenName = givenNameResult.value[0].content.value as GivenNameJSON;
+        const numberOfGivenNames = givenNameResult.value.length;
+        expect(givenNameResult.value[numberOfGivenNames - 1].id).toBeDefined();
+        const givenName = givenNameResult.value[numberOfGivenNames - 1].content.value as GivenNameJSON;
         expect(givenName.value).toBe("Marlene");
 
-        expect(responseItem.attributeId).toStrictEqual(givenNameResult.value[0].id);
+        expect(responseItem.attributeId).toStrictEqual(givenNameResult.value[numberOfGivenNames - 1].id);
         expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
 
         const surnameResult = await consumptionServices1.attributes.getAttributes({
             query: { "content.value.@type": "Surname", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(surnameResult).toBeSuccessful();
-        expect(surnameResult.value[0].id).toBeDefined();
+        const numberOfSurnames = surnameResult.value.length;
+        expect(surnameResult.value[numberOfSurnames - 1].id).toBeDefined();
 
-        const surname = surnameResult.value[0].content.value as SurnameJSON;
+        const surname = surnameResult.value[numberOfSurnames - 1].content.value as SurnameJSON;
         expect(surname.value).toBe("Weigl-Rostock");
 
-        expect(responseItem2.attributeId).toStrictEqual(surnameResult.value[0].id);
+        expect(responseItem2.attributeId).toStrictEqual(surnameResult.value[numberOfSurnames - 1].id);
         expect(surname.value).toStrictEqual((responseItem2.attribute.content.value as SurnameJSON).value);
     });
 });

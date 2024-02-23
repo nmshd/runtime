@@ -65,16 +65,15 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         eventBus2 = runtimeServices2.eventBus;
         await establishRelationship(transportServices1, transportServices2);
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        attributeValue = PersonName.from({
-            honorificPrefix: "Dr.",
-            givenName: "Heinz",
-            middleName: "Gerhard",
-            surname: "Ranzig",
-            honorificSuffix: "von Warnermünde"
-        }).toJSON();
-        await consumptionServices2.attributes.createRepositoryAttribute({
+        const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
-                value: attributeValue
+                value: PersonName.from({
+                    honorificPrefix: "Dr.",
+                    givenName: "Heinz",
+                    middleName: "Gerhard",
+                    surname: "Ranzig",
+                    honorificSuffix: "von Warnermünde"
+                }).toJSON()
             }
         });
 
@@ -93,7 +92,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             peer: recipientAddress
         };
 
-        responseItems = [Object.assign({ accept: true }, { newAttribute: { "@type": "IdentityAttribute", owner: recipientAddress, value: attributeValue } })];
+        responseItems = [Object.assign({ accept: true }, { newAttribute: attribute.value.content })];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
