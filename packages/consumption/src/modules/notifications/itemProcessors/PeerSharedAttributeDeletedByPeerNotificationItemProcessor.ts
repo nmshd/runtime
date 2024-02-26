@@ -1,9 +1,9 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
-import { CoreDate, CoreErrors as TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { CoreErrors } from "../../../consumption/CoreErrors";
-import { LocalAttribute, PeerSharedAttributeDeletedByPeerEvent } from "../../attributes";
+import { PeerSharedAttributeDeletedByPeerEvent } from "../../attributes";
 import { DeletionStatus, LocalAttributeDeletionStatus } from "../../attributes/local/LocalAttributeDeletionStatus";
 import { ValidationResult } from "../../common";
 import { LocalNotification } from "../local/LocalNotification";
@@ -24,7 +24,7 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
 
         if (typeof attribute === "undefined") {
-            return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString()));
+            return ValidationResult.success();
         }
 
         if (!attribute.isOwnSharedAttribute(this.currentIdentityAddress)) {
@@ -42,11 +42,9 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
     public override async process(
         notificationItem: PeerSharedAttributeDeletedByPeerNotificationItem,
         _notification: LocalNotification
-    ): Promise<PeerSharedAttributeDeletedByPeerEvent> {
+    ): Promise<PeerSharedAttributeDeletedByPeerEvent | void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
-        }
+        if (typeof attribute === "undefined") return;
 
         const deletionStatus = LocalAttributeDeletionStatus.from({
             status: DeletionStatus.DeletedByPeer,
@@ -61,9 +59,7 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
 
     public override async rollback(notificationItem: PeerSharedAttributeDeletedByPeerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
-        }
+        if (typeof attribute === "undefined") return;
 
         // TODO: the status before might have been 'toBeDeletedByPeer', but I don't think we can save it between process and rollback
         attribute.deletionStatus = undefined;

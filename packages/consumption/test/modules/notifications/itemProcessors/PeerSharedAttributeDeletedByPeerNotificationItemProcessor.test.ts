@@ -97,9 +97,9 @@ describe("PeerSharedAttributeDeletedByPeerNotificationItemProcessor", function (
         /* Run process() and validate its results. */
         const event = await processor.process(notificationItem, notification);
         expect(event).toBeInstanceOf(PeerSharedAttributeDeletedByPeerEvent);
-        const updatedAttribute = event.data;
-        expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
+        const updatedAttribute = event?.data;
+        expect(notificationItem.attributeId.equals(updatedAttribute!.id)).toBe(true);
+        expect(updatedAttribute!.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
@@ -107,7 +107,7 @@ describe("PeerSharedAttributeDeletedByPeerNotificationItemProcessor", function (
         expect(attributeAfterRollback?.deletionStatus).toBeUndefined();
     });
 
-    test("runs all processor methods for a peer shared relationship attribute", async function () {
+    test("runs all processor methods for an own shared relationship attribute", async function () {
         const ownSharedRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
             content: RelationshipAttribute.from({
                 key: "customerId",
@@ -153,14 +153,51 @@ describe("PeerSharedAttributeDeletedByPeerNotificationItemProcessor", function (
         /* Run process() and validate its results. */
         const event = await processor.process(notificationItem, notification);
         expect(event).toBeInstanceOf(PeerSharedAttributeDeletedByPeerEvent);
-        const updatedAttribute = event.data;
-        expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
+        const updatedAttribute = event?.data;
+        expect(notificationItem.attributeId.equals(updatedAttribute!.id)).toBe(true);
+        expect(updatedAttribute!.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         expect(attributeAfterRollback?.deletionStatus).toBeUndefined();
+    });
+
+    test("runs all processor methods for an unknown attribute", async function () {
+        const unknownAttributeId = CoreId.from("id1xxxxxxxxxxxxxxxxx");
+
+        const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({
+            attributeId: unknownAttributeId
+        });
+        const notification = LocalNotification.from({
+            id: CoreId.from("notificationRef"),
+            source: LocalNotificationSource.from({
+                type: "Message",
+                reference: CoreId.from("messageRef")
+            }),
+            status: LocalNotificationStatus.Open,
+            isOwn: false,
+            peer: CoreAddress.from("peer"),
+            createdAt: CoreDate.utc(),
+            content: Notification.from({
+                id: CoreId.from("notificationRef"),
+                items: [notificationItem]
+            }),
+            receivedByDevice: CoreId.from("deviceId")
+        });
+        const processor = new PeerSharedAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
+
+        /* Run and check validation. */
+        const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
+        expect(checkResult.isError()).toBe(false);
+
+        /* Run process() and validate its results. */
+        const processResult = await processor.process(notificationItem, notification);
+        expect(processResult).toBeUndefined();
+
+        /* Manually trigger and verify rollback. */
+        const rollbackResult = await processor.rollback(notificationItem, notification);
+        expect(rollbackResult).toBeUndefined();
     });
 
     test("detects spoofing attempts", async function () {
