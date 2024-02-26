@@ -43,10 +43,6 @@ describe("Create Relationship", () => {
         });
         expect(createRelationshipResponse).toBeSuccessful();
 
-        await services2.transport.relationships.createRelationship({
-            templateId: templateId,
-            content: { a: "b" }
-        });
         const relationships1 = await syncUntilHasRelationships(services1.transport);
         expect(relationships1).toHaveLength(1);
         const relationshipId = relationships1[0].id;
