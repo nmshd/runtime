@@ -39,7 +39,7 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
     }
 
     // TODO: add deletion of predecessors
-    public override async process(notificationItem: AttributeDeletedNotificationItem, notification: LocalNotification): Promise<AttributeDeletedByPeerEvent> {
+    public override async process(notificationItem: AttributeDeletedNotificationItem, _notification: LocalNotification): Promise<AttributeDeletedByPeerEvent> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
@@ -56,7 +56,7 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
         return new AttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), updatedAttribute);
     }
 
-    public override async rollback(notificationItem: AttributeDeletedNotificationItem, notification: LocalNotification): Promise<void> {
+    public override async rollback(notificationItem: AttributeDeletedNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
