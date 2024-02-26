@@ -3,6 +3,7 @@ import { IdentityAttribute, Notification, PeerSharedAttributeDeletedByPeerNotifi
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
+    DeletionStatus,
     LocalNotification,
     LocalNotificationSource,
     LocalNotificationStatus,
@@ -98,12 +99,12 @@ describe("PeerSharedAttributeDeletedByPeerNotificationItemProcessor", function (
         expect(event).toBeInstanceOf(PeerSharedAttributeDeletedByPeerEvent);
         const updatedAttribute = event.data;
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.deletionStatus?.deletedByPeer).toBeDefined();
+        expect(updatedAttribute.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        expect(attributeAfterRollback?.deletionStatus?.deletedByPeer).toBeUndefined();
+        expect(attributeAfterRollback?.deletionStatus).toBeUndefined();
     });
 
     test("runs all processor methods for a peer shared relationship attribute", async function () {
@@ -154,12 +155,12 @@ describe("PeerSharedAttributeDeletedByPeerNotificationItemProcessor", function (
         expect(event).toBeInstanceOf(PeerSharedAttributeDeletedByPeerEvent);
         const updatedAttribute = event.data;
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.deletionStatus?.deletedByPeer).toBeDefined();
+        expect(updatedAttribute.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        expect(attributeAfterRollback?.deletionStatus?.deletedByPeer).toBeUndefined();
+        expect(attributeAfterRollback?.deletionStatus).toBeUndefined();
     });
 
     test("detects spoofing attempts", async function () {

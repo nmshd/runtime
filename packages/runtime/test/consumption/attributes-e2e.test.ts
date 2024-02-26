@@ -1,4 +1,4 @@
-import { PeerSharedAttributeDeletedByPeerEvent } from "@nmshd/consumption";
+import { DeletionStatus, PeerSharedAttributeDeletedByPeerEvent } from "@nmshd/consumption";
 import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/transport";
 import {
@@ -1050,8 +1050,8 @@ describe(DeletePeerSharedAttributeAndNotifyOwnerUseCase.name, () => {
         const result = await services1.consumption.attributes.getAttribute({ id: sOSIA.id });
         expect(result.isSuccess).toBe(true);
         const updatedAttribute = result.value;
-        expect(updatedAttribute.deletionStatus?.deletedByPeer).toBeDefined();
-        expect(CoreDate.from(updatedAttribute.deletionStatus!.deletedByPeer!).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+        expect(updatedAttribute.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
+        expect(CoreDate.from(updatedAttribute.deletionStatus!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
     });
 
     // TODO: test deletion of predecessors

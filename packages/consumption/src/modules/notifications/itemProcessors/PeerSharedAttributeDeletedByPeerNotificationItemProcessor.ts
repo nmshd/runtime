@@ -4,7 +4,7 @@ import { CoreDate, CoreErrors as TransportCoreErrors, TransportLoggerFactory } f
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { CoreErrors } from "../../../consumption/CoreErrors";
 import { LocalAttribute, PeerSharedAttributeDeletedByPeerEvent } from "../../attributes";
-import { LocalAttributeDeletionStatus } from "../../attributes/local/LocalAttributeDeletionStatus";
+import { DeletionStatus, LocalAttributeDeletionStatus } from "../../attributes/local/LocalAttributeDeletionStatus";
 import { ValidationResult } from "../../common";
 import { LocalNotification } from "../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "./AbstractNotificationItemProcessor";
@@ -49,8 +49,8 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         }
 
         const deletionStatus = LocalAttributeDeletionStatus.from({
-            ...attribute.deletionStatus,
-            deletedByPeer: CoreDate.utc()
+            status: DeletionStatus.DeletedByPeer,
+            deletionDate: CoreDate.utc()
         });
         attribute.deletionStatus = deletionStatus;
 
@@ -65,11 +65,8 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
         }
 
-        const deletionStatus = LocalAttributeDeletionStatus.from({
-            ...attribute.deletionStatus,
-            deletedByPeer: undefined
-        });
-        attribute.deletionStatus = deletionStatus;
+        // TODO: the status before might have been 'toBeDeletedByPeer', but I don't think we can save it between process and rollback
+        attribute.deletionStatus = undefined;
 
         await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
     }
