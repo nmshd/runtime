@@ -4,7 +4,6 @@ import * as transport from "@nmshd/transport";
 import { AttributeListenerMapper, AttributeMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
 import {
     AttributeCreatedEvent,
-    AttributeDeletedByPeerEvent,
     AttributeDeletedEvent,
     AttributeListenerCreatedEvent,
     IncomingRequestReceivedEvent,
@@ -14,6 +13,7 @@ import {
     OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
+    AttributeDeletedByPeerEvent as PeerSharedAttributeDeletedByPeerEvent,
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent
 } from "./consumption";
@@ -77,8 +77,8 @@ export class EventProxy {
             this.targetEventBus.publish(new AttributeDeletedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.AttributeDeletedByPeerEvent, (event) => {
-            this.targetEventBus.publish(new AttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        this.subscribeToSourceEvent(consumption.PeerSharedAttributeDeletedByPeerEvent, (event) => {
+            this.targetEventBus.publish(new PeerSharedAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.OwnSharedAttributeSucceededEvent, (event) => {

@@ -1,24 +1,24 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { AttributeDeletedNotificationItem } from "@nmshd/content";
+import { PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreDate, CoreErrors as TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { CoreErrors } from "../../../consumption/CoreErrors";
-import { AttributeDeletedByPeerEvent, LocalAttribute } from "../../attributes";
+import { LocalAttribute, PeerSharedAttributeDeletedByPeerEvent } from "../../attributes";
 import { LocalAttributeDeletionStatus } from "../../attributes/local/LocalAttributeDeletionStatus";
 import { ValidationResult } from "../../common";
 import { LocalNotification } from "../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "./AbstractNotificationItemProcessor";
 
-export class AttributeDeletedNotificationItemProcessor extends AbstractNotificationItemProcessor<AttributeDeletedNotificationItem> {
+export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends AbstractNotificationItemProcessor<PeerSharedAttributeDeletedByPeerNotificationItem> {
     private readonly _logger: ILogger;
 
     public constructor(consumptionController: ConsumptionController) {
         super(consumptionController);
-        this._logger = TransportLoggerFactory.getLogger(AttributeDeletedNotificationItemProcessor);
+        this._logger = TransportLoggerFactory.getLogger(PeerSharedAttributeDeletedByPeerNotificationItemProcessor);
     }
 
     public override async checkPrerequisitesOfIncomingNotificationItem(
-        notificationItem: AttributeDeletedNotificationItem,
+        notificationItem: PeerSharedAttributeDeletedByPeerNotificationItem,
         notification: LocalNotification
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
@@ -39,7 +39,10 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
     }
 
     // TODO: add deletion of predecessors
-    public override async process(notificationItem: AttributeDeletedNotificationItem, _notification: LocalNotification): Promise<AttributeDeletedByPeerEvent> {
+    public override async process(
+        notificationItem: PeerSharedAttributeDeletedByPeerNotificationItem,
+        _notification: LocalNotification
+    ): Promise<PeerSharedAttributeDeletedByPeerEvent> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());
@@ -53,10 +56,10 @@ export class AttributeDeletedNotificationItemProcessor extends AbstractNotificat
 
         const updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
 
-        return new AttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), updatedAttribute);
+        return new PeerSharedAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), updatedAttribute);
     }
 
-    public override async rollback(notificationItem: AttributeDeletedNotificationItem, _notification: LocalNotification): Promise<void> {
+    public override async rollback(notificationItem: PeerSharedAttributeDeletedByPeerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, notificationItem.attributeId.toString());

@@ -1,4 +1,4 @@
-import { AttributeDeletedByPeerEvent } from "@nmshd/consumption";
+import { PeerSharedAttributeDeletedByPeerEvent } from "@nmshd/consumption";
 import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/transport";
 import {
@@ -7,7 +7,7 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
-    DeletePeerSharedAttributeUseCase,
+    DeletePeerSharedAttributeAndNotifyOwnerUseCase,
     GetSharedVersionsOfRepositoryAttributeUseCase,
     GetVersionsOfAttributeUseCase,
     LocalAttributeDTO,
@@ -1005,7 +1005,7 @@ describe("Get (shared) versions of attribute", () => {
     });
 });
 
-describe(DeletePeerSharedAttributeUseCase.name, () => {
+describe(DeletePeerSharedAttributeAndNotifyOwnerUseCase.name, () => {
     test("should delete a peer shared identity attribute", async () => {
         const sOSIA = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
@@ -1020,7 +1020,7 @@ describe(DeletePeerSharedAttributeUseCase.name, () => {
         const rPSIA = (await services2.consumption.attributes.getAttribute({ id: sOSIA.id })).value;
         expect(rPSIA).toBeDefined();
 
-        const deletionResult = await services2.consumption.attributes.deletePeerSharedAttribute({ attributeId: sOSIA.id });
+        const deletionResult = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sOSIA.id });
         expect(deletionResult.isSuccess).toBe(true);
 
         const getDeletedAttributeResult = await services2.consumption.attributes.getAttribute({ id: sOSIA.id });
@@ -1038,12 +1038,13 @@ describe(DeletePeerSharedAttributeUseCase.name, () => {
             }
         });
 
-        const notification = (await services2.consumption.attributes.deletePeerSharedAttribute({ attributeId: sOSIA.id })).value;
+        const notification = (await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sOSIA.id })).value;
         const timeBeforeUpdate = CoreDate.utc();
         await syncUntilHasMessageWithNotification(services1.transport, notification.id);
-        await services1.eventBus.waitForEvent(AttributeDeletedByPeerEvent, (e) => {
+        await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
             return e.data.id.toString() === sOSIA.id;
         });
+
         const timeAfterUpdate = CoreDate.utc();
 
         const result = await services1.consumption.attributes.getAttribute({ id: sOSIA.id });

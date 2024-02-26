@@ -1,9 +1,9 @@
 import {
-    AttributeDeletedNotificationItem,
     AuthenticationRequestItem,
     ConsentRequestItem,
     CreateAttributeRequestItem,
     FreeTextRequestItem,
+    PeerSharedAttributeDeletedByPeerNotificationItem,
     PeerSharedAttributeSucceededNotificationItem,
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
@@ -12,7 +12,6 @@ import {
 } from "@nmshd/content";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
-    AttributeDeletedNotificationItemProcessor,
     AttributeListenersController,
     AttributesController,
     CreateAttributeRequestItemProcessor,
@@ -25,6 +24,7 @@ import {
     NotificationItemProcessorRegistry,
     NotificationsController,
     OutgoingRequestsController,
+    PeerSharedAttributeDeletedByPeerNotificationItemProcessor,
     PeerSharedAttributeSucceededNotificationItemProcessor,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
@@ -141,7 +141,7 @@ export class ConsumptionController {
     private getDefaultNotificationItemProcessors() {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
             [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
-            [AttributeDeletedNotificationItem, AttributeDeletedNotificationItemProcessor]
+            [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor]
         ]);
     }
 }

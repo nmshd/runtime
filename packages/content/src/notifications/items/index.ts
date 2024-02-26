@@ -1,2 +1,2 @@
-export * from "./AttributeDeletedNotificationItem";
+export * from "./PeerSharedAttributeDeletedByPeerNotificationItem";
 export * from "./PeerSharedAttributeSucceededNotificationItem";

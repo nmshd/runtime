@@ -1,20 +1,20 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AttributeDeletedNotificationItem, IdentityAttribute, Notification, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
+import { IdentityAttribute, Notification, PeerSharedAttributeDeletedByPeerNotificationItem, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
 import {
-    AttributeDeletedByPeerEvent,
-    AttributeDeletedNotificationItemProcessor,
     ConsumptionController,
     LocalNotification,
     LocalNotificationSource,
-    LocalNotificationStatus
+    LocalNotificationStatus,
+    PeerSharedAttributeDeletedByPeerEvent,
+    PeerSharedAttributeDeletedByPeerNotificationItemProcessor
 } from "../../../../src";
 import { TestUtil } from "../../../core/TestUtil";
 import { MockEventBus } from "../../MockEventBus";
 
 const mockEventBus = new MockEventBus();
 
-describe("AttributeDeletedNotificationItemProcessor", function () {
+describe("PeerSharedAttributeDeletedByPeerNotificationItemProcessor", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -68,7 +68,7 @@ describe("AttributeDeletedNotificationItemProcessor", function () {
             }
         });
 
-        const notificationItem = AttributeDeletedNotificationItem.from({
+        const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({
             attributeId: ownSharedIdentityAttribute.id
         });
         const notification = LocalNotification.from({
@@ -87,7 +87,7 @@ describe("AttributeDeletedNotificationItemProcessor", function () {
             }),
             receivedByDevice: CoreId.from("deviceId")
         });
-        const processor = new AttributeDeletedNotificationItemProcessor(consumptionController);
+        const processor = new PeerSharedAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
 
         /* Run and check validation. */
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
@@ -95,7 +95,7 @@ describe("AttributeDeletedNotificationItemProcessor", function () {
 
         /* Run process() and validate its results. */
         const event = await processor.process(notificationItem, notification);
-        expect(event).toBeInstanceOf(AttributeDeletedByPeerEvent);
+        expect(event).toBeInstanceOf(PeerSharedAttributeDeletedByPeerEvent);
         const updatedAttribute = event.data;
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
         expect(updatedAttribute.deletionStatus?.deletedByPeer).toBeDefined();
@@ -124,7 +124,7 @@ describe("AttributeDeletedNotificationItemProcessor", function () {
             }
         });
 
-        const notificationItem = AttributeDeletedNotificationItem.from({
+        const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({
             attributeId: ownSharedRelationshipAttribute.id
         });
         const notification = LocalNotification.from({
@@ -143,7 +143,7 @@ describe("AttributeDeletedNotificationItemProcessor", function () {
             }),
             receivedByDevice: CoreId.from("deviceId")
         });
-        const processor = new AttributeDeletedNotificationItemProcessor(consumptionController);
+        const processor = new PeerSharedAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
 
         /* Run and check validation. */
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
@@ -151,7 +151,7 @@ describe("AttributeDeletedNotificationItemProcessor", function () {
 
         /* Run process() and validate its results. */
         const event = await processor.process(notificationItem, notification);
-        expect(event).toBeInstanceOf(AttributeDeletedByPeerEvent);
+        expect(event).toBeInstanceOf(PeerSharedAttributeDeletedByPeerEvent);
         const updatedAttribute = event.data;
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
         expect(updatedAttribute.deletionStatus?.deletedByPeer).toBeDefined();
@@ -181,7 +181,7 @@ describe("AttributeDeletedNotificationItemProcessor", function () {
             }
         });
 
-        const notificationItem = AttributeDeletedNotificationItem.from({
+        const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({
             attributeId: ownSharedIdentityAttribute.id
         });
 
@@ -201,7 +201,7 @@ describe("AttributeDeletedNotificationItemProcessor", function () {
             }),
             receivedByDevice: CoreId.from("deviceId")
         });
-        const processor = new AttributeDeletedNotificationItemProcessor(consumptionController);
+        const processor = new PeerSharedAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
 
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
         expect(checkResult).errorValidationResult({

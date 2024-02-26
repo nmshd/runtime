@@ -15810,11 +15810,11 @@ export const CreateRepositoryAttributeRequest: any = {
     }
 }
 
-export const DeletePeerSharedAttributeRequest: any = {
+export const DeletePeerSharedAttributeAndNotifyOwnerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeletePeerSharedAttributeRequest",
+    "$ref": "#/definitions/DeletePeerSharedAttributeAndNotifyOwnerRequest",
     "definitions": {
-        "DeletePeerSharedAttributeRequest": {
+        "DeletePeerSharedAttributeAndNotifyOwnerRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
