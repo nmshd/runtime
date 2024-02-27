@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+import { DeletionStatus } from "@nmshd/consumption";
+>>>>>>> 42f37dc (test: DeleteOwnSharedAttributeAndNotifyPeer)
 import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/transport";
 import {
@@ -6,10 +10,16 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
+
+
+
+
+
     GetSharedVersionsOfRepositoryAttributeUseCase,
     GetVersionsOfAttributeUseCase,
     LocalAttributeDTO,
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+    OwnSharedAttributeDeletedByOwnerEvent,
     RepositoryAttributeSucceededEvent,
     ShareRepositoryAttributeRequest,
     ShareRepositoryAttributeUseCase,
@@ -1001,3 +1011,80 @@ describe("Get (shared) versions of attribute", () => {
         });
     });
 });
+
+
+describe(DeleteOwnSharedAttributeAndNotifyPeerUseCase.name, () => {
+    let sOSIAVersion0: LocalAttributeDTO;
+    let sOSIAVersion1: LocalAttributeDTO;
+    beforeEach(async () => {
+        sOSIAVersion0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Petra Pan"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        });
+
+        ({ predecessor: sOSIAVersion0, successor: sOSIAVersion1 } = await executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(services1, services2, {
+            predecessorId: sOSIAVersion0.shareInfo!.sourceAttribute!,
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Tina Turner"
+                }
+            }
+        }));
+    });
+    test("should delete an own shared identity attribute", async () => {
+        expect(sOSIAVersion0).toBeDefined();
+
+        const deletionResult = await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sOSIAVersion0.id });
+        expect(deletionResult.isSuccess).toBe(true);
+
+        const getDeletedAttributeResult = await services1.consumption.attributes.getAttribute({ id: sOSIAVersion0.id });
+        expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should delete a succeeded own shared identity attribute and its predecessors", async () => {
+        expect(sOSIAVersion1).toBeDefined();
+
+        const deletionResult = await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sOSIAVersion1.id });
+        expect(deletionResult.isSuccess).toBe(true);
+
+        const getDeletedPredecessorResult = await services1.consumption.attributes.getAttribute({ id: sOSIAVersion0.id });
+        expect(getDeletedPredecessorResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should notify about identity attribute deletion by owner", async () => {
+        const notification = (await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sOSIAVersion0.id })).value;
+        const timeBeforeUpdate = CoreDate.utc();
+        await syncUntilHasMessageWithNotification(services2.transport, notification.id);
+        await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+            return e.data.id.toString() === sOSIAVersion0.id;
+        });
+        const timeAfterUpdate = CoreDate.utc();
+
+        const result = await services2.consumption.attributes.getAttribute({ id: sOSIAVersion0.id });
+        expect(result.isSuccess).toBe(true);
+        const updatedAttribute = result.value;
+        expect(updatedAttribute.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByOwner);
+        expect(CoreDate.from(updatedAttribute.deletionStatus!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+    });
+
+    test("should notify about identity attribute deletion of succeeded attribute by owner", async () => {
+        const notification = (await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sOSIAVersion1.id })).value;
+        const timeBeforeUpdate = CoreDate.utc();
+        await syncUntilHasMessageWithNotification(services2.transport, notification.id);
+        await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+            return e.data.id.toString() === sOSIAVersion1.id;
+        });
+        const timeAfterUpdate = CoreDate.utc();
+
+        const updatedPredecessor = (await services2.consumption.attributes.getAttribute({ id: sOSIAVersion0.id })).value;
+        expect(updatedPredecessor.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByOwner);
+        expect(CoreDate.from(updatedPredecessor.deletionStatus!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+    });
+});
+
