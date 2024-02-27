@@ -1638,8 +1638,11 @@ describe("AttributesController", function () {
     });
 
     describe("get versions of attribute", function () {
-        test("should return all versions of a possibly succeeded repository attribute", async function () {
-            const version0 = await consumptionController.attributes.createLocalAttribute({
+        let rAVersion0: LocalAttribute;
+        let rAVersion1: LocalAttribute;
+        let rAVersion2: LocalAttribute;
+        beforeEach(async function () {
+            rAVersion0 = await consumptionController.attributes.createLocalAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "Nationality",
@@ -1667,22 +1670,41 @@ describe("AttributesController", function () {
                 })
             };
 
-            const onlyVersion0 = await consumptionController.attributes.getVersionsOfAttribute(version0.id);
-            expect(onlyVersion0).toStrictEqual([version0]);
+            ({ predecessor: rAVersion0, successor: rAVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(rAVersion0.id, successorParams1));
+            ({ predecessor: rAVersion1, successor: rAVersion2 } = await consumptionController.attributes.succeedRepositoryAttribute(rAVersion1.id, successorParams2));
+        });
+        test("should return all predecessors of a succeeded repository attribute", async function () {
+            const result0 = await consumptionController.attributes.getPredecessorsOfAttribute(rAVersion0.id);
+            expect(result0).toStrictEqual([]);
 
-            const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedRepositoryAttribute(version0.id, successorParams1);
-            const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedRepositoryAttribute(version1.id, successorParams2);
+            const result1 = await consumptionController.attributes.getPredecessorsOfAttribute(rAVersion1.id);
+            expect(result1).toStrictEqual([rAVersion0]);
 
-            const allVersions = [version2, updatedVersion1, updatedVersion0];
+            const result2 = await consumptionController.attributes.getPredecessorsOfAttribute(rAVersion2.id);
+            expect(result2).toStrictEqual([rAVersion1, rAVersion0]);
+        });
 
+        test("should return all successors of a succeeded repository attribute", async function () {
+            const result0 = await consumptionController.attributes.getSuccessorsOfAttribute(rAVersion0.id);
+            expect(result0).toStrictEqual([rAVersion1, rAVersion2]);
+
+            const result1 = await consumptionController.attributes.getSuccessorsOfAttribute(rAVersion1.id);
+            expect(result1).toStrictEqual([rAVersion2]);
+
+            const result2 = await consumptionController.attributes.getSuccessorsOfAttribute(rAVersion2.id);
+            expect(result2).toStrictEqual([]);
+        });
+
+        test("should return all versions of a succeeded repository attribute", async function () {
+            const allVersions = [rAVersion2, rAVersion1, rAVersion0];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual([version2, updatedVersion1, updatedVersion0]);
+                expect(result).toStrictEqual([rAVersion2, rAVersion1, rAVersion0]);
             }
         });
 
-        test("should return all versions of a possibly succeeded own shared identity attribute", async function () {
-            const version0Repo = await consumptionController.attributes.createLocalAttribute({
+        test("should return only input attribute if no successions were performed", async function () {
+            const version0 = await consumptionController.attributes.createLocalAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "Nationality",
@@ -1691,50 +1713,28 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address
                 })
             });
-            const successorParams1Repo: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "Nationality",
-                        value: "US"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const successorParams2Repo: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "Nationality",
-                        value: "CZ"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
 
-            const { predecessor: updatedVersion0Repo, successor: version1Repo } = await consumptionController.attributes.succeedRepositoryAttribute(
-                version0Repo.id,
-                successorParams1Repo
-            );
-            const { predecessor: updatedVersion1Repo, successor: version2Repo } = await consumptionController.attributes.succeedRepositoryAttribute(
-                version1Repo.id,
-                successorParams2Repo
-            );
+            const onlyVersion0 = await consumptionController.attributes.getVersionsOfAttribute(version0.id);
+            expect(onlyVersion0).toStrictEqual([version0]);
+        });
 
-            const version0A = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: updatedVersion0Repo.id,
+        test("should return all versions of a possibly succeeded own shared identity attribute", async function () {
+            const oSIAVersion0 = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: rAVersion0.id,
                 peer: CoreAddress.from("peerA"),
                 requestReference: CoreId.from("reqRef")
             });
 
-            const versionsA = await consumptionController.attributes.getVersionsOfAttribute(version0A.id);
-            expect(versionsA).toStrictEqual([version0A]);
+            const oSIAVersionsBeforeSuccession = await consumptionController.attributes.getVersionsOfAttribute(oSIAVersion0.id);
+            expect(oSIAVersionsBeforeSuccession).toStrictEqual([oSIAVersion0]);
 
-            const version1B = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: updatedVersion1Repo.id,
+            const oSIAVersion1 = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: rAVersion1.id,
                 peer: CoreAddress.from("peerB"),
                 requestReference: CoreId.from("reqRef1")
             });
 
-            const successorParams2B: IAttributeSuccessorParams = {
+            const successorParams: IAttributeSuccessorParams = {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "Nationality",
@@ -1745,16 +1745,16 @@ describe("AttributesController", function () {
                 shareInfo: {
                     peer: CoreAddress.from("peerB"),
                     requestReference: CoreId.from("reqRef2"),
-                    sourceAttribute: version2Repo.id
+                    sourceAttribute: rAVersion2.id
                 }
             };
 
-            const { predecessor: updatedVersion1B, successor: version2B } = await consumptionController.attributes.succeedOwnSharedIdentityAttribute(
-                version1B.id,
-                successorParams2B
+            const { predecessor: updatedOSIAVersion1, successor: oSIAVersion2 } = await consumptionController.attributes.succeedOwnSharedIdentityAttribute(
+                oSIAVersion1.id,
+                successorParams
             );
 
-            const allVersions = [version2B, updatedVersion1B];
+            const allVersions = [oSIAVersion2, updatedOSIAVersion1];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
                 expect(result).toStrictEqual(allVersions);
