@@ -13,7 +13,7 @@ import {
     OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
-    AttributeDeletedByPeerEvent as PeerSharedAttributeDeletedByPeerEvent,
+    PeerSharedAttributeDeletedByPeerEvent,
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent
 } from "./consumption";

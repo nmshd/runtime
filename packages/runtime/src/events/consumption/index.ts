@@ -1,5 +1,4 @@
 export * from "./AttributeCreatedEvent";
-export * from "./AttributeDeletedByPeerEvent";
 export * from "./AttributeDeletedEvent";
 export * from "./AttributeListenerCreatedEvent";
 export * from "./AttributeListenerTriggeredEvent";
@@ -12,6 +11,7 @@ export * from "./OutgoingRequestCreatedEvent";
 export * from "./OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent";
 export * from "./OutgoingRequestStatusChangedEvent";
 export * from "./OwnSharedAttributeSucceededEvent";
+export * from "./PeerSharedAttributeDeletedByPeerEvent";
 export * from "./PeerSharedAttributeSucceededEvent";
 export * from "./RelationshipEvent";
 export * from "./RelationshipTemplateProcessedEvent";
