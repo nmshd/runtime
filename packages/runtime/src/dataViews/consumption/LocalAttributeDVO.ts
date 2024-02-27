@@ -24,7 +24,6 @@ export interface LocalAttributeDVO extends DataViewObject {
     createdAt: string;
     succeeds?: string;
     succeededBy?: string;
-    toBeDeletedAt?: string;
 }
 
 /**
@@ -48,8 +47,8 @@ export interface SharedToPeerAttributeDVO extends LocalAttributeDVO {
     sourceAttribute: string;
     isOwn: true;
     tags: string[];
-    toBeDeletedByPeerAt?: string;
-    deletedByPeerAt?: string;
+    deletionDate?: string;
+    status?: string;
 }
 
 /**
@@ -62,6 +61,8 @@ export interface PeerAttributeDVO extends LocalAttributeDVO {
     notificationReference?: string;
     isOwn: false;
     tags: string[];
+    deletionDate?: string;
+    status?: string;
 }
 
 /**
@@ -76,8 +77,8 @@ export interface OwnRelationshipAttributeDVO extends LocalAttributeDVO {
     isOwn: true;
     confidentiality: string;
     isTechnical: boolean;
-    toBeDeletedByPeerAt?: string;
-    deletedByPeerAt?: string;
+    deletionDate?: string;
+    status?: string;
 }
 
 /**
@@ -92,6 +93,8 @@ export interface PeerRelationshipAttributeDVO extends LocalAttributeDVO {
     isOwn: false;
     confidentiality: string;
     isTechnical: boolean;
+    deletionDate?: string;
+    status?: string;
 }
 
 /**
