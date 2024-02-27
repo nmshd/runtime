@@ -3,6 +3,7 @@ import {
     ConsentRequestItem,
     CreateAttributeRequestItem,
     FreeTextRequestItem,
+    OwnSharedAttributeDeletedByOwnerNotificationItem,
     PeerSharedAttributeSucceededNotificationItem,
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
@@ -33,6 +34,7 @@ import {
     SettingsController,
     ShareAttributeRequestItemProcessor
 } from "../modules";
+import { OwnSharedAttributeDeletedByOwnerNotificationItemProcessor } from "../modules/notifications/itemProcessors/OwnSharedAttributeDeletedByOwnerNotificationItemProcessor";
 
 export class ConsumptionController {
     public constructor(
@@ -138,7 +140,8 @@ export class ConsumptionController {
 
     private getDefaultNotificationItemProcessors() {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
-            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor]
+            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
+            [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor]
         ]);
     }
 }

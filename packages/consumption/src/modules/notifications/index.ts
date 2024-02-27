@@ -3,6 +3,7 @@ export * from "./itemProcessors/attributeSucceeded/PeerSharedAttributeSucceededN
 export * from "./itemProcessors/NotificationItemConstructor";
 export * from "./itemProcessors/NotificationItemProcessorConstructor";
 export * from "./itemProcessors/NotificationItemProcessorRegistry";
+export * from "./itemProcessors/OwnSharedAttributeDeletedByOwnerNotificationItemProcessor";
 export * from "./local/LocalNotification";
 export * from "./local/LocalNotificationSource";
 export * from "./NotificationsController";
