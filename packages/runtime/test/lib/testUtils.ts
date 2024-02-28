@@ -24,7 +24,6 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
-    LocalRequestDTO,
     MessageDTO,
     MessageSentEvent,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
@@ -304,7 +303,7 @@ export async function establishRelationshipWithContents(
     transportServices2: TransportServices,
     templateContent: RelationshipTemplateContentJSON | RelationshipTemplateContent | IRelationshipTemplateContent,
     requestContent: RelationshipCreationChangeRequestContentJSON | RelationshipCreationChangeRequestContent | IRelationshipCreationChangeRequestContent
-): Promise<RelationshipDTO> {
+): Promise<void> {
     const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
@@ -325,7 +324,6 @@ export async function establishRelationshipWithContents(
 
     const relationships2 = await syncUntilHasRelationships(transportServices2);
     expect(relationships2).toHaveLength(1);
-    return relationships2[0];
 }
 
 export async function ensureActiveRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<RelationshipDTO> {
@@ -340,14 +338,6 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
     }
 
     return (await sTransportServices.relationships.getRelationships({})).value[0];
-}
-
-export interface RequestSourceReference {
-    requestSourceReference: string;
-}
-
-export interface LocalRequestDTOWithRequestSource extends LocalRequestDTO {
-    requestSourceReference: string;
 }
 
 export async function exchangeAndAcceptRequestByMessage(
