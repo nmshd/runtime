@@ -1,0 +1,136 @@
+import { IResponse, RelationshipCreationChangeRequestContent } from "@nmshd/content";
+import { CreateOutgoingRequestRequest, LocalRequestDTO, MessageDTO, RelationshipDTO } from "src";
+import { TestRuntimeServices } from "./RuntimeServiceProvider";
+import { exchangeMessageWithRequest, exchangeTemplate, syncUntilHasMessageWithResponse } from "./testUtils";
+
+export interface LocalRequestWithSource {
+    request: LocalRequestDTO;
+    source: string;
+}
+
+export interface ResponseMessagesForSenderAndRecipient {
+    rResponseMessage: MessageDTO;
+    sResponseMessage: MessageDTO;
+}
+
+export interface RelationshipRequestWithRelationshipIfAccepted {
+    request: LocalRequestDTO;
+    relationship: RelationshipDTO | undefined;
+}
+
+export async function exchangeMessageAndReceiverRequiresManualDecision(
+    sRuntimeServices: TestRuntimeServices,
+    rRuntimeServices: TestRuntimeServices,
+    requestForCreate: CreateOutgoingRequestRequest
+): Promise<LocalRequestWithSource> {
+    const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestForCreate);
+    await sRuntimeServices.consumption.outgoingRequests.sent({ requestId: message.content.id, messageId: message.id });
+
+    await rRuntimeServices.consumption.incomingRequests.received({
+        receivedRequest: message.content,
+        requestSourceId: message.id
+    });
+    await rRuntimeServices.consumption.incomingRequests.checkPrerequisites({
+        requestId: message.content.id
+    });
+    return {
+        request: (
+            await rRuntimeServices.consumption.incomingRequests.requireManualDecision({
+                requestId: message.content.id
+            })
+        ).value,
+        source: message.id
+    };
+}
+
+export async function exchangeMessageAndReceiverSendsResponse(
+    sRuntimeServices: TestRuntimeServices,
+    rRuntimeServices: TestRuntimeServices,
+    requestForCreate: CreateOutgoingRequestRequest,
+    action: string
+): Promise<ResponseMessagesForSenderAndRecipient> {
+    const { request, source } = await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestForCreate);
+    const acceptedRequest = await rRuntimeServices.consumption.incomingRequests.accept({
+        requestId: request.id,
+        items: [
+            {
+                accept: action === "Accept"
+            }
+        ] as any // bug in runtime
+    });
+
+    const rResponseMessage = (
+        await rRuntimeServices.transport.messages.sendMessage({
+            content: {
+                "@type": "ResponseWrapper",
+                requestId: request.id,
+                requestSourceReference: source,
+                requestSourceType: "Message",
+                response: acceptedRequest.value.response!.content
+            },
+            recipients: [(await sRuntimeServices.transport.account.getIdentityInfo()).value.address]
+        })
+    ).value;
+    const sResponseMessage = await syncUntilHasMessageWithResponse(sRuntimeServices.transport, request.id);
+    return { rResponseMessage, sResponseMessage };
+}
+
+export async function exchangeTemplateAndReceiverRequiresManualDecision(
+    sRuntimeServices: TestRuntimeServices,
+    rRuntimeServices: TestRuntimeServices,
+    templateContent: any
+): Promise<LocalRequestWithSource> {
+    const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
+
+    const request = (
+        await rRuntimeServices.consumption.incomingRequests.received({
+            receivedRequest: template.content.onNewRelationship,
+            requestSourceId: template.id
+        })
+    ).value;
+    await rRuntimeServices.consumption.incomingRequests.checkPrerequisites({
+        requestId: request.id
+    });
+    return {
+        request: (
+            await rRuntimeServices.consumption.incomingRequests.requireManualDecision({
+                requestId: request.id
+            })
+        ).value,
+        source: template.id
+    };
+}
+
+export async function exchangeTemplateAndReceiverSendsResponse(
+    sRuntimeServices: TestRuntimeServices,
+    rRuntimeServices: TestRuntimeServices,
+    templateContent: any,
+    actionLowerCase: string
+): Promise<RelationshipRequestWithRelationshipIfAccepted> {
+    const { request, source: templateId } = await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent);
+    const decidedRequest = (
+        await rRuntimeServices.consumption.incomingRequests[actionLowerCase]({
+            requestId: request.id,
+            items: [
+                {
+                    accept: actionLowerCase === "accept"
+                }
+            ]
+        })
+    ).value;
+
+    let relationship;
+    if (actionLowerCase === "accept") {
+        const content = RelationshipCreationChangeRequestContent.from({ response: decidedRequest.response!.content as unknown as IResponse });
+        const result = await rRuntimeServices.transport.relationships.createRelationship({ content, templateId });
+
+        expect(result).toBeSuccessful();
+
+        relationship = result.value;
+
+        const rRelationshipChange = result.value.changes[0];
+
+        expect(rRelationshipChange.request.content["@type"]).toBe("RelationshipCreationChangeRequestContent");
+    }
+    return { request, relationship };
+}

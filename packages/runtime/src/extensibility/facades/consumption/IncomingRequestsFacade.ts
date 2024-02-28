@@ -11,9 +11,9 @@ import {
     CompleteIncomingRequestRequest,
     CompleteIncomingRequestUseCase,
     GetIncomingRequestRequest,
-    GetIncomingRequestUseCase,
     GetIncomingRequestsRequest,
     GetIncomingRequestsUseCase,
+    GetIncomingRequestUseCase,
     ReceivedIncomingRequestRequest,
     ReceivedIncomingRequestUseCase,
     RejectIncomingRequestRequest,
@@ -23,6 +23,7 @@ import {
 } from "../../../useCases";
 
 export class IncomingRequestsFacade {
+    [key: string]: any;
     public constructor(
         @Inject private readonly receivedUseCase: ReceivedIncomingRequestUseCase,
         @Inject private readonly checkPrerequisitesUseCase: CheckPrerequisitesOfIncomingRequestUseCase,

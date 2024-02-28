@@ -1,6 +1,6 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { IResponse, RelationshipCreationChangeRequestContent, RelationshipCreationChangeRequestContentJSON } from "@nmshd/content";
+import { RelationshipCreationChangeRequestContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
@@ -17,10 +17,15 @@ import {
     exchangeTemplate,
     RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncUntilHasMessageWithResponse,
     syncUntilHasRelationships,
     TestRuntimeServices
 } from "../lib";
+import {
+    exchangeMessageAndReceiverRequiresManualDecision,
+    exchangeMessageAndReceiverSendsResponse,
+    exchangeTemplateAndReceiverRequiresManualDecision,
+    exchangeTemplateAndReceiverSendsResponse
+} from "../lib/testUtilsWithInactiveModules";
 
 describe("Requests", () => {
     describe.each([
@@ -200,7 +205,7 @@ describe("Requests", () => {
         });
 
         test(`recipient: call can${action} for incoming Request`, async () => {
-            const rLocalRequest = (await exchangeMessageRequireManualDecision()).request;
+            const rLocalRequest = (await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestForCreate)).request;
             const result = await rConsumptionServices.incomingRequests[`can${action}`]({
                 requestId: rLocalRequest.id,
                 items: [
@@ -221,7 +226,7 @@ describe("Requests", () => {
         });
 
         test(`recipient: ${actionLowerCase} incoming Request`, async () => {
-            const request = (await exchangeMessageRequireManualDecision()).request;
+            const request = (await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestForCreate)).request;
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
@@ -251,7 +256,7 @@ describe("Requests", () => {
         });
 
         test("recipient: send Response via Message", async () => {
-            const { request, source } = await exchangeMessageRequireManualDecision();
+            const { request, source } = await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestForCreate);
             const acceptedRequest = await rConsumptionServices.incomingRequests[actionLowerCase]({
                 requestId: request.id,
                 items: [
@@ -279,7 +284,7 @@ describe("Requests", () => {
         });
 
         test("recipient: complete incoming Request", async () => {
-            const rResponseMessage = (await exchangeMessageSendResponse()).rResponseMessage;
+            const rResponseMessage = (await exchangeMessageAndReceiverSendsResponse(sRuntimeServices, rRuntimeServices, requestForCreate, action)).rResponseMessage;
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
@@ -304,7 +309,7 @@ describe("Requests", () => {
         });
 
         test("sender: sync Message with Response and complete the outgoing Request with Response from Message", async () => {
-            const sResponseMessage = (await exchangeMessageSendResponse()).sResponseMessage;
+            const sResponseMessage = (await exchangeMessageAndReceiverSendsResponse(sRuntimeServices, rRuntimeServices, requestForCreate, action)).sResponseMessage;
 
             let triggeredEvent: OutgoingRequestStatusChangedEvent | undefined;
             sEventBus.subscribeOnce(OutgoingRequestStatusChangedEvent, (event) => {
@@ -330,54 +335,6 @@ describe("Requests", () => {
             expect(triggeredEvent!.data.oldStatus).toBe(LocalRequestStatus.Open);
             expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Completed);
         });
-
-        async function exchangeMessageRequireManualDecision() {
-            const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestForCreate);
-            await sConsumptionServices.outgoingRequests.sent({ requestId: message.content.id, messageId: message.id });
-
-            await rConsumptionServices.incomingRequests.received({
-                receivedRequest: message.content,
-                requestSourceId: message.id
-            });
-            await rConsumptionServices.incomingRequests.checkPrerequisites({
-                requestId: message.content.id
-            });
-            return {
-                request: (
-                    await rConsumptionServices.incomingRequests.requireManualDecision({
-                        requestId: message.content.id
-                    })
-                ).value,
-                source: message.id
-            };
-        }
-
-        async function exchangeMessageSendResponse() {
-            const { request, source } = await exchangeMessageRequireManualDecision();
-            const acceptedRequest = await rConsumptionServices.incomingRequests.accept({
-                requestId: request.id,
-                items: [
-                    {
-                        accept: action === "Accept"
-                    }
-                ] as any // bug in runtime
-            });
-
-            const rResponseMessage = (
-                await rTransportServices.messages.sendMessage({
-                    content: {
-                        "@type": "ResponseWrapper",
-                        requestId: request.id,
-                        requestSourceReference: source,
-                        requestSourceType: "Message",
-                        response: acceptedRequest.value.response!.content
-                    },
-                    recipients: [(await sTransportServices.account.getIdentityInfo()).value.address]
-                })
-            ).value;
-            const sResponseMessage = await syncUntilHasMessageWithResponse(sTransportServices, request.id);
-            return { rResponseMessage, sResponseMessage };
-        }
     });
 
     describe.each([
@@ -391,6 +348,8 @@ describe("Requests", () => {
         const actionLowerCase = action.toLowerCase() as "accept" | "reject";
 
         const runtimeServiceProvider = new RuntimeServiceProvider();
+        let sRuntimeServices: TestRuntimeServices;
+        let rRuntimeServices: TestRuntimeServices;
         let sConsumptionServices: ConsumptionServices;
         let rConsumptionServices: ConsumptionServices;
         let sTransportServices: TransportServices;
@@ -414,12 +373,14 @@ describe("Requests", () => {
 
         beforeAll(async () => {
             const runtimeServices = await runtimeServiceProvider.launch(2);
-            sConsumptionServices = runtimeServices[0].consumption;
-            sTransportServices = runtimeServices[0].transport;
-            sEventBus = runtimeServices[0].eventBus;
-            rConsumptionServices = runtimeServices[1].consumption;
-            rTransportServices = runtimeServices[1].transport;
-            rEventBus = runtimeServices[1].eventBus;
+            sRuntimeServices = runtimeServices[0];
+            rRuntimeServices = runtimeServices[1];
+            sTransportServices = sRuntimeServices.transport;
+            rTransportServices = rRuntimeServices.transport;
+            sConsumptionServices = sRuntimeServices.consumption;
+            rConsumptionServices = rRuntimeServices.consumption;
+            sEventBus = sRuntimeServices.eventBus;
+            rEventBus = rRuntimeServices.eventBus;
         }, 30000);
         afterAll(async () => await runtimeServiceProvider.stop());
 
@@ -527,7 +488,7 @@ describe("Requests", () => {
         });
 
         test(`recipient: call can${action} for incoming Request`, async () => {
-            const request = (await exchangeTemplateRequireManualDecision()).request;
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
             const result = await rConsumptionServices.incomingRequests[`can${action}`]({
                 requestId: request.id,
                 items: [
@@ -548,7 +509,7 @@ describe("Requests", () => {
         });
 
         test(`recipient: ${actionLowerCase} incoming Request`, async () => {
-            const request = (await exchangeTemplateRequireManualDecision()).request;
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
@@ -579,7 +540,7 @@ describe("Requests", () => {
         });
 
         test("recipient: complete incoming Request", async () => {
-            const { request, relationship } = await exchangeTemplateSendResponse();
+            const { request, relationship } = await exchangeTemplateAndReceiverSendsResponse(sRuntimeServices, rRuntimeServices, templateContent, actionLowerCase);
             await rConsumptionServices.incomingRequests[actionLowerCase]({
                 requestId: request.id,
                 items: [
@@ -644,64 +605,65 @@ describe("Requests", () => {
             expect(triggeredEvent).toBeDefined();
             expect(triggeredEvent!.data).toBeDefined();
         });
-
-        async function exchangeTemplateRequireManualDecision() {
-            const template = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
-
-            const request = (
-                await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: template.content.onNewRelationship,
-                    requestSourceId: template.id
-                })
-            ).value;
-            await rConsumptionServices.incomingRequests.checkPrerequisites({
-                requestId: request.id
-            });
-            return {
-                request: (
-                    await rConsumptionServices.incomingRequests.requireManualDecision({
-                        requestId: request.id
-                    })
-                ).value,
-                templateId: template.id
-            };
-        }
-
-        async function exchangeTemplateSendResponse() {
-            const { request, templateId } = await exchangeTemplateRequireManualDecision();
-            const decidedRequest = (
-                await rConsumptionServices.incomingRequests[actionLowerCase]({
-                    requestId: request.id,
-                    items: [
-                        {
-                            accept: action === "Accept"
-                        }
-                    ]
-                })
-            ).value;
-
-            let relationship;
-            if (action === "Accept") {
-                const content = RelationshipCreationChangeRequestContent.from({ response: decidedRequest.response!.content as unknown as IResponse });
-                const result = await rTransportServices.relationships.createRelationship({ content, templateId });
-
-                expect(result).toBeSuccessful();
-
-                relationship = result.value;
-
-                const rRelationshipChange = result.value.changes[0];
-
-                expect(rRelationshipChange.request.content["@type"]).toBe("RelationshipCreationChangeRequestContent");
-            }
-            return { request, relationship };
-            // return (await rConsumptionServices.incomingRequests.complete({
-            //     requestId: rLocalRequest.id,
-            //     responseSourceId: action === "Accept" ? relationship?.changes[0].id : undefined
-            // })).value;
-        }
     });
 });
 
 interface TestCase {
     action: "Accept" | "Reject";
 }
+
+// async function exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices: TestRuntimeServices, rRuntimeServices: TestRuntimeServices, templateContent: any) {
+//     const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
+
+//     const request = (
+//         await rRuntimeServices.consumption.incomingRequests.received({
+//             receivedRequest: template.content.onNewRelationship,
+//             requestSourceId: template.id
+//         })
+//     ).value;
+//     await rRuntimeServices.consumption.incomingRequests.checkPrerequisites({
+//         requestId: request.id
+//     });
+//     return {
+//         request: (
+//             await rRuntimeServices.consumption.incomingRequests.requireManualDecision({
+//                 requestId: request.id
+//             })
+//         ).value,
+//         templateId: template.id
+//     };
+// }
+
+// async function exchangeTemplateAndReceiverSendsResponse(
+//     sRuntimeServices: TestRuntimeServices,
+//     rRuntimeServices: TestRuntimeServices,
+//     templateContent: any,
+//     actionLowerCase: string
+// ) {
+//     const { request, templateId } = await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent);
+//     const decidedRequest = (
+//         await rRuntimeServices.consumption.incomingRequests[actionLowerCase]({
+//             requestId: request.id,
+//             items: [
+//                 {
+//                     accept: actionLowerCase === "accept"
+//                 }
+//             ]
+//         })
+//     ).value;
+
+//     let relationship;
+//     if (actionLowerCase === "accept") {
+//         const content = RelationshipCreationChangeRequestContent.from({ response: decidedRequest.response!.content as unknown as IResponse });
+//         const result = await rRuntimeServices.transport.relationships.createRelationship({ content, templateId });
+
+//         expect(result).toBeSuccessful();
+
+//         relationship = result.value;
+
+//         const rRelationshipChange = result.value.changes[0];
+
+//         expect(rRelationshipChange.request.content["@type"]).toBe("RelationshipCreationChangeRequestContent");
+//     }
+//     return { request, relationship };
+// }
