@@ -1069,8 +1069,8 @@ describe(DeleteOwnSharedAttributeAndNotifyPeerUseCase.name, () => {
         const result = await services2.consumption.attributes.getAttribute({ id: sOSIAVersion0.id });
         expect(result.isSuccess).toBe(true);
         const updatedAttribute = result.value;
-        expect(updatedAttribute.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByOwner);
-        expect(CoreDate.from(updatedAttribute.deletionStatus!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+        expect(updatedAttribute.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByOwner);
+        expect(CoreDate.from(updatedAttribute.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
     });
 
     test("should notify about identity attribute deletion of succeeded attribute by owner", async () => {
@@ -1083,8 +1083,8 @@ describe(DeleteOwnSharedAttributeAndNotifyPeerUseCase.name, () => {
         const timeAfterUpdate = CoreDate.utc();
 
         const updatedPredecessor = (await services2.consumption.attributes.getAttribute({ id: sOSIAVersion0.id })).value;
-        expect(updatedPredecessor.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByOwner);
-        expect(CoreDate.from(updatedPredecessor.deletionStatus!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+        expect(updatedPredecessor.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByOwner);
+        expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
     });
 });
 

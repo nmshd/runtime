@@ -3,8 +3,7 @@ import { OwnSharedAttributeDeletedByOwnerNotificationItem } from "@nmshd/content
 import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { CoreErrors } from "../../../consumption/CoreErrors";
-import { OwnSharedAttributeDeletedByOwnerEvent } from "../../attributes";
-import { DeletionStatus, LocalAttributeDeletionStatus } from "../../attributes/local/LocalAttributeDeletionStatus";
+import { DeletionStatus, LocalAttributeDeletionInfo, OwnSharedAttributeDeletedByOwnerEvent } from "../../attributes";
 import { ValidationResult } from "../../common";
 import { LocalNotification } from "../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "./AbstractNotificationItemProcessor";
@@ -45,21 +44,21 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") return;
 
-        const deletionStatus = LocalAttributeDeletionStatus.from({
-            status: DeletionStatus.DeletedByOwner,
+        const deletionInfo = LocalAttributeDeletionInfo.from({
+            deletionStatus: DeletionStatus.DeletedByOwner,
             deletionDate: CoreDate.utc()
         });
 
         let updatedAttribute = attribute;
-        if (typeof attribute.deletionStatus === "undefined") {
-            attribute.deletionStatus = deletionStatus;
+        if (typeof attribute.deletionInfo === "undefined") {
+            attribute.deletionInfo = deletionInfo;
             updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
         }
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
         for (const predecessor of predecessors) {
-            if (typeof predecessor.deletionStatus === "undefined") {
-                predecessor.deletionStatus = deletionStatus;
+            if (typeof predecessor.deletionInfo === "undefined") {
+                predecessor.deletionInfo = deletionInfo;
                 await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
             }
         }
@@ -71,12 +70,12 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") return;
 
-        attribute.deletionStatus = undefined;
+        attribute.deletionInfo = undefined;
         await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
         for (const predecessor of predecessors) {
-            predecessor.deletionStatus = undefined;
+            predecessor.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
         }
     }

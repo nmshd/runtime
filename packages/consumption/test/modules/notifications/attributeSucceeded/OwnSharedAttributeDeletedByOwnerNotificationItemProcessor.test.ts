@@ -98,12 +98,12 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(event).toBeInstanceOf(OwnSharedAttributeDeletedByOwnerEvent);
         const updatedAttribute = event?.data;
         expect(notificationItem.attributeId.equals(updatedAttribute!.id)).toBe(true);
-        expect(updatedAttribute!.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByOwner);
+        expect(updatedAttribute!.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByOwner);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        expect(attributeAfterRollback?.deletionStatus).toBeUndefined();
+        expect(attributeAfterRollback?.deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for a peer shared relationship attribute", async function () {
@@ -154,12 +154,12 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(event).toBeInstanceOf(OwnSharedAttributeDeletedByOwnerEvent);
         const updatedAttribute = event?.data;
         expect(notificationItem.attributeId.equals(updatedAttribute!.id)).toBe(true);
-        expect(updatedAttribute!.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByOwner);
+        expect(updatedAttribute!.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByOwner);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        expect(attributeAfterRollback?.deletionStatus).toBeUndefined();
+        expect(attributeAfterRollback?.deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for an attribute that is waiting to be deleted", async function () {
@@ -175,8 +175,8 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
                 peer: CoreAddress.from("peer"),
                 requestReference: CoreId.from("reqRef")
             },
-            deletionStatus: {
-                status: DeletionStatus.ToBeDeleted,
+            deletionInfo: {
+                deletionStatus: DeletionStatus.ToBeDeleted,
                 deletionDate: CoreDate.utc()
             }
         });
@@ -211,12 +211,12 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(event).toBeInstanceOf(OwnSharedAttributeDeletedByOwnerEvent);
         const updatedAttribute = event?.data;
         expect(notificationItem.attributeId.equals(updatedAttribute!.id)).toBe(true);
-        expect(updatedAttribute!.deletionStatus?.status).toStrictEqual(DeletionStatus.ToBeDeleted);
+        expect(updatedAttribute!.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.ToBeDeleted);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        expect(attributeAfterRollback?.deletionStatus).toBeUndefined();
+        expect(attributeAfterRollback?.deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for a succeeded attribute", async function () {
@@ -278,12 +278,12 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(event).toBeInstanceOf(OwnSharedAttributeDeletedByOwnerEvent);
 
         const updatedPredecessor = await consumptionController.attributes.getLocalAttribute(predecessorPSIA.id);
-        expect(updatedPredecessor!.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByOwner);
+        expect(updatedPredecessor!.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByOwner);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const predecessorAfterRollback = await consumptionController.attributes.getLocalAttribute(predecessorPSIA.id);
-        expect(predecessorAfterRollback?.deletionStatus).toBeUndefined();
+        expect(predecessorAfterRollback?.deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for an unknown attribute", async function () {
