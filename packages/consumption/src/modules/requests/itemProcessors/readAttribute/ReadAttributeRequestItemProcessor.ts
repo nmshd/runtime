@@ -93,6 +93,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
                 if (
                     (this.accountController.identity.isMe(attribute.owner) || queriedThirdParties.includes(attribute.owner.toString())) &&
+                    !queriedThirdParties.includes("") &&
                     !queriedThirdParties.includes(foundLocalAttribute.shareInfo.peer.toString())
                 ) {
                     return ValidationResult.error(

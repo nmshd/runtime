@@ -187,7 +187,7 @@ function validateAnswerToThirdPartyRelationshipAttributeQuery(
     }
     const queriedThirdParties = query.thirdParty.map(convertCoreAddressToString);
 
-    if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity && !queriedThirdParties.includes(attribute.owner.toString())) {
+    if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity && !queriedThirdParties.includes("") && !queriedThirdParties.includes(attribute.owner.toString())) {
         return ValidationResult.error(
             CoreErrors.requests.invalidlyAnsweredQuery(
                 "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."

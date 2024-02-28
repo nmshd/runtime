@@ -29,10 +29,6 @@ export default function validateQuery(
 }
 
 function validateThirdParty(thirdParty: CoreAddress, sender: CoreAddress, recipient?: CoreAddress): ValidationResult {
-    if (thirdParty.equals(CoreAddress.from(""))) {
-        return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Cannot query an Attribute with an empty string as third party."));
-    }
-
     if (thirdParty.equals(sender)) {
         return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Cannot query an Attribute with the own address as third party."));
     }

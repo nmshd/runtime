@@ -156,20 +156,19 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }
                 },
                 {
-                    description: "cannot query with thirdParty = empty string",
+                    description: "can query with thirdParty = empty string",
                     input: {
-                        owner: TestIdentity.Self,
+                        owner: TestIdentity.ThirdParty,
                         thirdParty: TestIdentity.Empty
                     },
                     expectedOutput: {
-                        errorCode: "error.consumption.requests.invalidRequestItem",
-                        errorMessage: "Cannot query an Attribute with an empty string as third party."
+                        success: true
                     }
                 },
                 {
                     description: "cannot query with thirdParty = self",
                     input: {
-                        owner: TestIdentity.Self,
+                        owner: TestIdentity.Recipient,
                         thirdParty: TestIdentity.Self
                     },
                     expectedOutput: {
@@ -1835,6 +1834,60 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     message:
                         /Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query./
                 });
+            });
+
+            test("can be called with an arbitrary third party if the thirdParty string array of the ThirdPartyRelationshipAttributeQuery contains an empty string", async function () {
+                const sender = CoreAddress.from("id0");
+                const thirdParty = CoreAddress.from("id2");
+                const notInvolvedThirdParty = CoreAddress.from("id3");
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: ThirdPartyRelationshipAttributeQuery.from({
+                        owner: "",
+                        key: "AKey",
+                        thirdParty: ["", thirdParty.toString()]
+                    })
+                });
+
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: notInvolvedThirdParty,
+                        value: ProprietaryString.from({
+                            title: "ATitle",
+                            value: "AStringValue"
+                        })
+                    }),
+                    shareInfo: {
+                        peer: notInvolvedThirdParty,
+                        requestReference: await ConsumptionIds.request.generate()
+                    }
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: localAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).successfulValidationResult();
             });
 
             test("returns an error when a RelationshipAttribute does not have the key that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
