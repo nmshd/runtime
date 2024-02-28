@@ -1,8 +1,8 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { AccountController } from "../../modules";
-import { IConfig } from "../Transport";
 import { CoreDate } from "../types/CoreDate";
 import { AuthClient } from "./AuthClient";
+import { IRESTClientConfig } from "./RESTClient";
 import { CredentialsBasic } from "./RESTClientAuthenticate";
 
 export abstract class AbstractAuthenticator {
@@ -11,7 +11,7 @@ export abstract class AbstractAuthenticator {
     private token?: string;
 
     private readonly authClient: AuthClient;
-    public constructor(private readonly config: IConfig) {
+    public constructor(private readonly config: IRESTClientConfig) {
         this.authClient = new AuthClient(config);
     }
 

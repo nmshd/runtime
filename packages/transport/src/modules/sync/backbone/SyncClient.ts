@@ -1,4 +1,4 @@
-import { IConfig, Paginator, PaginatorPercentageCallback, RESTClientAuthenticate } from "../../../core";
+import { IRESTClientConfig, Paginator, PaginatorPercentageCallback, RESTClientAuthenticate } from "../../../core";
 import { Authenticator } from "../../../core/backbone/Authenticator";
 import { ClientResult } from "../../../core/backbone/ClientResult";
 import { BackboneDatawalletModification } from "./BackboneDatawalletModification";
@@ -36,7 +36,7 @@ export interface ISyncClient {
 }
 
 export class SyncClient extends RESTClientAuthenticate implements ISyncClient {
-    public constructor(config: IConfig, authenticator: Authenticator) {
+    public constructor(config: IRESTClientConfig & { supportedDatawalletVersion: number }, authenticator: Authenticator) {
         super(config, authenticator, {
             headers: {
                 "x-supported-datawallet-version": config.supportedDatawalletVersion.toString() // eslint-disable-line @typescript-eslint/naming-convention
