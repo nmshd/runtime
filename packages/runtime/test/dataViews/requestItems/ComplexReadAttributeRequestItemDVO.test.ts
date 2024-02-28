@@ -1,5 +1,4 @@
-import { sleep } from "@js-soft/ts-utils";
-import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
+import { AcceptReadAttributeRequestItemParametersWithNewAttributeJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { IdentityAttributeQuery, IQLQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
@@ -40,7 +39,6 @@ let eventBus1: MockEventBus;
 let eventBus2: MockEventBus;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
-let attributeValue: PersonNameJSON;
 
 afterAll(() => serviceProvider.stop());
 
@@ -92,7 +90,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             peer: recipientAddress
         };
 
-        responseItems = [Object.assign({ accept: true }, { newAttribute: attribute.value.content })];
+        responseItems = [{ accept: true, newAttribute: attribute.value.content }] as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON[];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
@@ -327,16 +325,15 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         eventBus2 = runtimeServices2.eventBus;
         await establishRelationship(transportServices1, transportServices2);
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        attributeValue = PersonName.from({
-            honorificPrefix: "Dr.",
-            givenName: "Heinz",
-            middleName: "Gerhard",
-            surname: "Ranzig",
-            honorificSuffix: "von Warnermünde"
-        }).toJSON();
-        await consumptionServices2.attributes.createRepositoryAttribute({
+        const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
-                value: attributeValue
+                value: PersonName.from({
+                    honorificPrefix: "Dr.",
+                    givenName: "Heinz",
+                    middleName: "Gerhard",
+                    surname: "Ranzig",
+                    honorificSuffix: "von Warnermünde"
+                }).toJSON()
             }
         });
         requestContent = {
@@ -354,8 +351,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
             peer: recipientAddress
         };
 
-        responseItems = [Object.assign({ accept: true }, { newAttribute: { "@type": "IdentityAttribute", owner: recipientAddress, value: attributeValue } })];
-        await sleep(1000);
+        responseItems = [{ accept: true, newAttribute: attribute.value.content }] as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON[];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
