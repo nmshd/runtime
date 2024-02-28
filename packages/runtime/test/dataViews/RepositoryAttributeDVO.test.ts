@@ -163,7 +163,7 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the BirthMonth", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[4])).value;
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[3])).value;
         const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
@@ -190,7 +190,7 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the BirthYear", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[5])).value;
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[4])).value;
         const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
@@ -217,7 +217,7 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the Sex", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[6])).value;
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[5])).value;
         const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
@@ -247,7 +247,7 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the Nationality", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[7])).value;
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[6])).value;
         const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
@@ -276,7 +276,7 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the CommunicationLanguage", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[8])).value;
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[7])).value;
         const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
