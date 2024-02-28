@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from "axios";
 import _ from "lodash";
-import { Authenticator } from "./Authenticator";
+import { AbstractAuthenticator } from "./Authenticator";
 import { ClientResult } from "./ClientResult";
 import { Paginator, PaginatorPercentageCallback } from "./Paginator";
 import { RequestError } from "./RequestError";
@@ -14,7 +14,7 @@ export interface CredentialsBasic {
 export class RESTClientAuthenticate extends RESTClient {
     public constructor(
         config: IRESTClientConfig,
-        private readonly authenticator: Authenticator,
+        private readonly authenticator: AbstractAuthenticator,
         requestConfig: AxiosRequestConfig = {}
     ) {
         super(config, requestConfig);
