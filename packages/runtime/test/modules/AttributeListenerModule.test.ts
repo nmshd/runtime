@@ -37,7 +37,7 @@ beforeAll(async () => {
                         query: {
                             "@type": "ThirdPartyRelationshipAttributeQuery",
                             key: "AKey",
-                            owner: thirdParty.address,
+                            owner: "thirdParty",
                             thirdParty: [thirdParty.address]
                         },
                         mustBeAccepted: true

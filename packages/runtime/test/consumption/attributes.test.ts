@@ -224,7 +224,7 @@ describe("attribute queries", () => {
                 query: {
                     "@type": "ThirdPartyRelationshipAttributeQuery",
                     key: "website",
-                    owner: services1.address,
+                    owner: "thirdParty",
                     thirdParty: [services1.address]
                 }
             });
