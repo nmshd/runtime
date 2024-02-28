@@ -37,6 +37,7 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
         super(validator);
     }
 
+    // TODO: check for deleted Attributes
     protected async executeInternal(request: NotifyPeerAboutRepositoryAttributeSuccessionRequest): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
         const repositoryAttributeSuccessorId = CoreId.from(request.attributeId);
         const repositoryAttributeSuccessor = await this.attributeController.getLocalAttribute(repositoryAttributeSuccessorId);

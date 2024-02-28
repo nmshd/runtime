@@ -333,6 +333,8 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
+    // TODO: Probably it shouldn't be allowed to succeed an own shared Attribute if deletedByPeer is set. Add validation.
+    // TODO: Is it allowed to succeed an own shared Attribute if toBeDeletedByPeer is set? No -> add validation.
     public async succeedOwnSharedIdentityAttribute(
         predecessorId: CoreId,
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
@@ -391,6 +393,10 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
+    // TODO: Can it somehow happen, that a peer shared Attribute ought to be succeeded that has deletedByOwner set? -> no
+    //       - Cannot be triggered by owner, since they already deleted it.
+    //       - NotificationItemProcessor checks that no wrong peer may trigger a peer shared Attribute succession.
+    // TODO: Is it allowed to succeed a peer shared Attribute that has toBeDeleted set? Otherwise add validation.
     public async succeedPeerSharedIdentityAttribute(
         predecessorId: CoreId,
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
