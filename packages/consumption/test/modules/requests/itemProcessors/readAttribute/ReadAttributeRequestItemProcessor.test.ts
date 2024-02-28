@@ -249,23 +249,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     });
                 }
             });
-
-            test("returns an error when a RelationshipAttribute was queried using a ThirdPartyRelationshipAttributeQuery and a third party was specified multiple times", function () {
-                const requestItem = ReadAttributeRequestItem.from({
-                    mustBeAccepted: false,
-                    query: ThirdPartyRelationshipAttributeQuery.from({
-                        key: "AKey",
-                        owner: "ownerAddress",
-                        thirdParty: ["someThirdPartyAddress", "someThirdPartyAddress"]
-                    })
-                });
-
-                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipientAddress"));
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidRequestItem",
-                    message: "Cannot specify a third party multiple times."
-                });
-            });
         });
     });
 

@@ -10,15 +10,6 @@ export default function validateQuery(
     recipient?: CoreAddress
 ): ValidationResult {
     if (query instanceof ThirdPartyRelationshipAttributeQuery) {
-        function convertCoreAddressToString(value: CoreAddress): string {
-            return value.toString();
-        }
-        const queriedThirdParties = query.thirdParty.map(convertCoreAddressToString);
-
-        if (new Set(queriedThirdParties).size !== queriedThirdParties.length) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Cannot specify a third party multiple times."));
-        }
-
         for (const thirdParty of query.thirdParty) {
             const result = validateThirdParty(thirdParty, sender, recipient);
             if (result.isError()) return result;
