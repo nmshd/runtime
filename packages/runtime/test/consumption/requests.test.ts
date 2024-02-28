@@ -380,7 +380,7 @@ describe("Requests", () => {
         }
     });
 
-    describe.only.each([
+    describe.each([
         {
             action: "Accept"
         },
@@ -399,21 +399,19 @@ describe("Requests", () => {
         let sEventBus: EventBus;
 
         const templateContent = {
-            content: {
-                "@type": "RelationshipTemplateContent",
-                onNewRelationship: {
-                    "@type": "Request",
-                    items: [
-                        {
-                            "@type": "TestRequestItem",
-                            mustBeAccepted: false
-                        }
-                    ],
-                    expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
-                }
-            },
-            expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+            "@type": "RelationshipTemplateContent",
+            onNewRelationship: {
+                "@type": "Request",
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ],
+                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+            }
         };
+
         beforeAll(async () => {
             const runtimeServices = await runtimeServiceProvider.launch(2);
             sConsumptionServices = runtimeServices[0].consumption;
@@ -426,7 +424,10 @@ describe("Requests", () => {
         afterAll(async () => await runtimeServiceProvider.stop());
 
         test("sender: create a Relationship Template with the Request", async () => {
-            const result = await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate(templateContent);
+            const result = await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                content: templateContent,
+                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+            });
 
             expect(result).toBeSuccessful();
         });
@@ -444,7 +445,7 @@ describe("Requests", () => {
             });
 
             const result = await rConsumptionServices.incomingRequests.received({
-                receivedRequest: rRelationshipTemplate.content.content.onNewRelationship,
+                receivedRequest: rRelationshipTemplate.content.onNewRelationship,
                 requestSourceId: rRelationshipTemplate.id
             });
 
@@ -465,7 +466,7 @@ describe("Requests", () => {
             const rRelationshipTemplate = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
             const incomingRequest = (
                 await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: rRelationshipTemplate.content.content.onNewRelationship,
+                    receivedRequest: rRelationshipTemplate.content.onNewRelationship,
                     requestSourceId: rRelationshipTemplate.id
                 })
             ).value;
@@ -495,7 +496,7 @@ describe("Requests", () => {
             const rRelationshipTemplate = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
             const incomingRequest = (
                 await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: rRelationshipTemplate.content.content.onNewRelationship,
+                    receivedRequest: rRelationshipTemplate.content.onNewRelationship,
                     requestSourceId: rRelationshipTemplate.id
                 })
             ).value;
@@ -577,7 +578,7 @@ describe("Requests", () => {
             expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Decided);
         });
 
-        test.only("recipient: complete incoming Request", async () => {
+        test("recipient: complete incoming Request", async () => {
             const { request, relationship } = await exchangeTemplateSendResponse();
             await rConsumptionServices.incomingRequests[actionLowerCase]({
                 requestId: request.id,
@@ -649,7 +650,7 @@ describe("Requests", () => {
 
             const request = (
                 await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: template.content.content.onNewRelationship,
+                    receivedRequest: template.content.onNewRelationship,
                     requestSourceId: template.id
                 })
             ).value;
