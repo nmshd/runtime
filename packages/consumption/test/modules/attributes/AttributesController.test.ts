@@ -337,7 +337,7 @@ describe("AttributesController", function () {
 
         const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
             key: "customerId",
-            owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
+            owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
             thirdParty: [CoreAddress.from("peerAddress")]
         });
         expect(attributes).toHaveLength(1);

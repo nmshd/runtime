@@ -11,7 +11,8 @@ import {
     IThirdPartyRelationshipAttributeQuery,
     RelationshipAttributeJSON,
     RelationshipAttributeQuery,
-    ThirdPartyRelationshipAttributeQuery
+    ThirdPartyRelationshipAttributeQuery,
+    ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
 import * as iql from "@nmshd/iql";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
@@ -181,6 +182,17 @@ export class AttributesController extends ConsumptionBaseController {
 
         const dbQuery = ThirdPartyRelationshipAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.confidentiality"] = { $ne: "private" };
+
+        if (dbQuery["content.owner"] === ThirdPartyRelationshipAttributeQueryOwner.Recipient) {
+            dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
+        }
+
+        if (dbQuery["content.owner"] === ThirdPartyRelationshipAttributeQueryOwner.ThirdParty) {
+            function convertCoreAddressToString(value: CoreAddress): string {
+                return value.toString();
+            }
+            dbQuery["content.owner"] = { $in: parsedQuery.thirdParty.map(convertCoreAddressToString) };
+        }
 
         const attributes = await this.attributes.find(dbQuery);
 
