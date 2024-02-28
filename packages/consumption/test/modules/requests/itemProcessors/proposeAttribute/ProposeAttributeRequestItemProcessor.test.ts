@@ -48,6 +48,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         processor = new ProposeAttributeRequestItemProcessor(consumptionController);
     });
 
+    // TODO: check all request tests
     describe("canCreateOutgoingRequestItem", function () {
         test("returns success when proposing an Identity Attribute", function () {
             const recipientAddress = CoreAddress.from("recipientAddress");

@@ -209,7 +209,7 @@ class Requests {
     }
 
     public invalidAcceptParameters(message: string): ApplicationError {
-        return new ApplicationError("error.consumption.requests.canAccept.invalidAcceptParameters", message);
+        return new ApplicationError("error.consumption.requests.invalidAcceptParameters", message);
     }
 
     public invalidRequestItem(message: string) {

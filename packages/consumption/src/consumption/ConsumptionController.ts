@@ -2,6 +2,7 @@ import {
     AuthenticationRequestItem,
     ConsentRequestItem,
     CreateAttributeRequestItem,
+    DeleteAttributeRequestItem,
     FreeTextRequestItem,
     PeerSharedAttributeSucceededNotificationItem,
     ProposeAttributeRequestItem,
@@ -14,6 +15,7 @@ import {
     AttributeListenersController,
     AttributesController,
     CreateAttributeRequestItemProcessor,
+    DeleteAttributeRequestItemProcessor,
     DraftsController,
     FreeTextRequestItemProcessor,
     GenericRequestItemProcessor,
@@ -127,6 +129,7 @@ export class ConsumptionController {
         return new Map<RequestItemConstructor, RequestItemProcessorConstructor>([
             [ShareAttributeRequestItem, ShareAttributeRequestItemProcessor],
             [CreateAttributeRequestItem, CreateAttributeRequestItemProcessor],
+            [DeleteAttributeRequestItem, DeleteAttributeRequestItemProcessor],
             [ReadAttributeRequestItem, ReadAttributeRequestItemProcessor],
             [ProposeAttributeRequestItem, ProposeAttributeRequestItemProcessor],
             [ConsentRequestItem, GenericRequestItemProcessor],
