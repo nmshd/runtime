@@ -1,16 +1,18 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { AccountController } from "../../modules";
+import { IConfig } from "../Transport";
 import { CoreDate } from "../types/CoreDate";
 import { AuthClient } from "./AuthClient";
+import { CredentialsBasic } from "./RESTClientAuthenticate";
 
-export class Authenticator {
+export abstract class AbstractAuthenticator {
     private request?: Promise<void>;
     private expiry?: CoreDate;
     private token?: string;
 
     private readonly authClient: AuthClient;
-    public constructor(private readonly accountController: AccountController) {
-        this.authClient = new AuthClient(accountController.config);
+    public constructor(private readonly config: IConfig) {
+        this.authClient = new AuthClient(config);
     }
 
     public async getToken(): Promise<string> {
@@ -58,11 +60,11 @@ export class Authenticator {
     }
 
     private async authenticateInternal() {
-        const deviceCredentials = await this.accountController.activeDevice.getCredentials();
+        const deviceCredentials = await this.getCredentials();
         const params = {
             grantType: "password",
-            clientId: this.accountController.config.platformClientId,
-            clientSecret: this.accountController.config.platformClientSecret,
+            clientId: this.config.platformClientId,
+            clientSecret: this.config.platformClientSecret,
             username: deviceCredentials.username,
             password: deviceCredentials.password
         };
@@ -70,5 +72,21 @@ export class Authenticator {
         const result = await this.authClient.authenticate(params);
         this.token = result.value.token;
         this.expiry = result.value.expiry;
+    }
+
+    abstract getCredentials(): Promise<CredentialsBasic>;
+}
+
+export class Authenticator extends AbstractAuthenticator {
+    public constructor(private readonly accountController: AccountController) {
+        super(accountController.config);
+    }
+
+    public async getCredentials(): Promise<CredentialsBasic> {
+        const activeDevice = await this.accountController.activeDevice.getCredentials();
+        return {
+            username: activeDevice.username,
+            password: activeDevice.password
+        };
     }
 }
