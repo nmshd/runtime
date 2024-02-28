@@ -2,6 +2,7 @@ import { AcceptProposeAttributeRequestItemParametersJSON, DecideRequestItemGroup
 import {
     GivenName,
     IdentityAttribute,
+    IdentityAttributeJSON,
     IdentityAttributeQuery,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
@@ -10,7 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import { OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, PeerRelationshipTemplateDVO, RelationshipTemplateDTO, RequestItemGroupDVO } from "../../src";
-import { RuntimeServiceProvider, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
+import { createTemplate, RuntimeServiceProvider, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
@@ -32,82 +33,15 @@ beforeEach(function () {
 });
 
 describe("RelationshipTemplateDVO", () => {
-    const relationshipAttributeContent1 = {
-        "@type": "RelationshipAttribute",
-        owner: templator.address,
-        value: {
-            "@type": "ProprietaryString",
-            title: "aTitle",
-            value: "aProprietaryStringValue"
-        },
-        key: "givenName",
-        confidentiality: "protected" as RelationshipAttributeConfidentiality
-    };
-
-    const relationshipAttributeContent2 = {
-        "@type": "RelationshipAttribute",
-        owner: templator.address,
-        value: {
-            "@type": "ProprietaryString",
-            title: "aTitle",
-            value: "aProprietaryStringValue"
-        },
-        key: "surname",
-        confidentiality: "protected" as RelationshipAttributeConfidentiality
-    };
-    const templateContent = {
-        "@type": "RelationshipTemplateContent",
-        onNewRelationship: {
-            "@type": "Request",
-            items: [
-                {
-                    "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
-                    title: "Templator Attributes",
-                    items: [
-                        {
-                            "@type": "CreateAttributeRequestItem",
-                            mustBeAccepted: true,
-                            attribute: relationshipAttributeContent1
-                        },
-                        {
-                            "@type": "CreateAttributeRequestItem",
-                            mustBeAccepted: true,
-                            attribute: relationshipAttributeContent2
-                        }
-                    ]
-                },
-                {
-                    "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
-                    title: "Proposed Attributes",
-                    items: [
-                        ProposeAttributeRequestItem.from({
-                            mustBeAccepted: true,
-                            query: IdentityAttributeQuery.from({
-                                valueType: "GivenName"
-                            }),
-                            attribute: IdentityAttribute.from({
-                                owner: CoreAddress.from(""),
-                                value: GivenName.from("Theo")
-                            })
-                        }),
-                        ProposeAttributeRequestItem.from({
-                            mustBeAccepted: true,
-                            query: IdentityAttributeQuery.from({
-                                valueType: "Surname"
-                            }),
-                            attribute: IdentityAttribute.from({
-                                owner: CoreAddress.from(""),
-                                value: Surname.from("Templator")
-                            })
-                        })
-                    ]
-                }
-            ]
-        }
-    };
     beforeAll(async () => {
+        await templator.consumption.attributes.createRepositoryAttribute({
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Hugo"
+                }
+            }
+        });
         await templator.consumption.attributes.createRepositoryAttribute({
             content: {
                 value: {
@@ -125,26 +59,108 @@ describe("RelationshipTemplateDVO", () => {
             }
         });
 
+        const relationshipAttributeContent1 = {
+            "@type": "RelationshipAttribute",
+            owner: templator.address,
+            value: {
+                "@type": "ProprietaryString",
+                title: "aTitle",
+                value: "aProprietaryStringValue"
+            },
+            key: "givenName",
+            confidentiality: "protected" as RelationshipAttributeConfidentiality
+        };
+
+        const relationshipAttributeContent2 = {
+            "@type": "RelationshipAttribute",
+            owner: templator.address,
+            value: {
+                "@type": "ProprietaryString",
+                title: "aTitle",
+                value: "aProprietaryStringValue"
+            },
+            key: "surname",
+            confidentiality: "protected" as RelationshipAttributeConfidentiality
+        };
+
+        const templateContent = {
+            "@type": "RelationshipTemplateContent",
+            onNewRelationship: {
+                "@type": "Request",
+                items: [
+                    {
+                        "@type": "RequestItemGroup",
+                        mustBeAccepted: true,
+                        title: "Templator Attributes",
+                        items: [
+                            {
+                                "@type": "CreateAttributeRequestItem",
+                                mustBeAccepted: true,
+                                attribute: relationshipAttributeContent1
+                            },
+                            {
+                                "@type": "CreateAttributeRequestItem",
+                                mustBeAccepted: true,
+                                attribute: relationshipAttributeContent2
+                            }
+                        ]
+                    },
+                    {
+                        "@type": "RequestItemGroup",
+                        mustBeAccepted: true,
+                        title: "Proposed Attributes",
+                        items: [
+                            ProposeAttributeRequestItem.from({
+                                mustBeAccepted: true,
+                                query: IdentityAttributeQuery.from({
+                                    valueType: "GivenName"
+                                }),
+                                attribute: IdentityAttribute.from({
+                                    owner: CoreAddress.from(""),
+                                    value: GivenName.from("Theo")
+                                })
+                            }),
+                            ProposeAttributeRequestItem.from({
+                                mustBeAccepted: true,
+                                query: IdentityAttributeQuery.from({
+                                    valueType: "Surname"
+                                }),
+                                attribute: IdentityAttribute.from({
+                                    owner: CoreAddress.from(""),
+                                    value: Surname.from("Templator")
+                                })
+                            })
+                        ]
+                    }
+                ]
+            }
+        };
+        const newIdentityAttribute1 = IdentityAttribute.from(
+            (templateContent.onNewRelationship.items[1].items[0] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
+        ).toJSON();
+        const newIdentityAttribute2 = IdentityAttribute.from(
+            (templateContent.onNewRelationship.items[1].items[1] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
+        ).toJSON();
         responseItems = [
             { items: [{ accept: true }, { accept: true }] },
             {
                 items: [
                     {
                         accept: true,
-                        attribute: Object.assign({}, (templateContent.onNewRelationship.items[1].items[0] as ProposeAttributeRequestItemJSON).attribute, {
-                            owner: requestor.address
+                        attribute: Object.assign(newIdentityAttribute1, {
+                            owner: CoreAddress.from(requestor.address)
                         })
                     } as AcceptProposeAttributeRequestItemParametersJSON,
                     {
                         accept: true,
-                        attribute: Object.assign({}, (templateContent.onNewRelationship.items[1].items[1] as ProposeAttributeRequestItemJSON).attribute, {
-                            owner: requestor.address
+                        attribute: Object.assign(newIdentityAttribute2, {
+                            owner: CoreAddress.from(requestor.address)
                         })
                     } as AcceptProposeAttributeRequestItemParametersJSON
                 ]
             }
         ];
-        // templatorTemplate = await createTemplate(templator.transport, templateContent);
+        templatorTemplate = await createTemplate(templator.transport, templateContent);
     });
 
     test("TemplateDVO for templator", async () => {
@@ -179,6 +195,7 @@ describe("RelationshipTemplateDVO", () => {
 
     test("TemplateDVO for requestor", async () => {
         const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        // await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const dto = requestorTemplate;
         const dvo = (await requestor.expander.expandRelationshipTemplateDTO(dto)) as PeerRelationshipTemplateDVO;
         expect(dvo).toBeDefined();
@@ -244,11 +261,16 @@ describe("RelationshipTemplateDVO", () => {
             items: responseItems
         });
 
+        const requestResultAfterAcceptance = await requestor.consumption.incomingRequests.getRequests({
+            query: {
+                "source.reference": requestorTemplate.id
+            }
+        });
         expect(acceptResult).toBeSuccessful();
-        expect(requestResult).toBeSuccessful();
-        expect(requestResult.value).toHaveLength(1);
+        expect(requestResultAfterAcceptance).toBeSuccessful();
+        expect(requestResultAfterAcceptance.value).toHaveLength(1);
 
-        dto = requestResult.value[0];
+        dto = requestResultAfterAcceptance.value[0];
         dvo = await requestor.expander.expandLocalRequestDTO(dto);
         expect(dvo).toBeDefined();
         expect(dvo.isOwn).toBe(false);
