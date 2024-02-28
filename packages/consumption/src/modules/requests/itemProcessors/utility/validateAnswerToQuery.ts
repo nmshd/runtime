@@ -14,7 +14,8 @@ import { ValidationResult } from "../../../common/ValidationResult";
 export default function validateAnswerToQuery(
     query: IdentityAttributeQuery | IQLQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery,
     attribute: IdentityAttribute | RelationshipAttribute,
-    recipient: CoreAddress
+    recipient: CoreAddress,
+    sender: CoreAddress
 ): ValidationResult {
     if (query instanceof IdentityAttributeQuery) {
         const result = validateAnswerToIdentityAttributeQuery(query, attribute, recipient);
@@ -26,7 +27,7 @@ export default function validateAnswerToQuery(
         const result = validateAnswerToRelationshipAttributeQuery(query, attribute, recipient);
         if (result.isError()) return result;
     } else if (query instanceof ThirdPartyRelationshipAttributeQuery) {
-        const result = validateAnswerToThirdPartyRelationshipAttributeQuery(query, attribute, recipient);
+        const result = validateAnswerToThirdPartyRelationshipAttributeQuery(query, attribute, recipient, sender);
         if (result.isError()) return result;
     } else {
         return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing("An unknown error occurred during the RequestItem processing."));
@@ -167,7 +168,8 @@ function validateAnswerToRelationshipAttributeQuery(
 function validateAnswerToThirdPartyRelationshipAttributeQuery(
     query: ThirdPartyRelationshipAttributeQuery,
     attribute: IdentityAttribute | RelationshipAttribute,
-    recipient: CoreAddress
+    recipient: CoreAddress,
+    sender: CoreAddress
 ): ValidationResult {
     if (!(attribute instanceof RelationshipAttribute)) {
         return ValidationResult.error(
@@ -175,19 +177,25 @@ function validateAnswerToThirdPartyRelationshipAttributeQuery(
         );
     }
 
-    const ownerIsCurrentIdentity = recipient.equals(attribute.owner);
-    const queriedOwnerIsEmpty = query.owner.equals("");
-
-    if (!queriedOwnerIsEmpty && !query.owner.equals(attribute.owner)) {
-        return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided RelationshipAttribute does not belong to the queried owner."));
-    }
+    const recipientIsAttributeOwner = recipient.equals(attribute.owner);
+    const senderIsAttributeOwner = sender.equals(attribute.owner);
 
     function convertCoreAddressToString(value: CoreAddress): string {
         return value.toString();
     }
     const queriedThirdParties = query.thirdParty.map(convertCoreAddressToString);
 
-    if (queriedOwnerIsEmpty && !ownerIsCurrentIdentity && !queriedThirdParties.includes("") && !queriedThirdParties.includes(attribute.owner.toString())) {
+    if (
+        senderIsAttributeOwner ||
+        (query.owner === "recipient" && !recipientIsAttributeOwner) ||
+        (query.owner === "thirdParty" &&
+            !queriedThirdParties.includes(attribute.owner.toString()) &&
+            (!queriedThirdParties.includes("") || (recipientIsAttributeOwner && !queriedThirdParties.includes(recipient.toString()))))
+    ) {
+        return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The provided RelationshipAttribute does not belong to a queried owner."));
+    }
+
+    if (query.owner === "" && !recipientIsAttributeOwner && !queriedThirdParties.includes("") && !queriedThirdParties.includes(attribute.owner.toString())) {
         return ValidationResult.error(
             CoreErrors.requests.invalidlyAnsweredQuery(
                 "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."

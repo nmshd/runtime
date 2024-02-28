@@ -41,7 +41,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             const requestItem = RegisterAttributeListenerRequestItem.from({
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     key: "AKey",
-                    owner: "anOwner",
+                    owner: "",
                     thirdParty: ["aThirdParty"]
                 }),
                 mustBeAccepted: true

@@ -13,7 +13,7 @@ describe("AttributeListenersController", function () {
 
     const dummyQuery = ThirdPartyRelationshipAttributeQuery.from({
         key: "AKey",
-        owner: "anOwner",
+        owner: "",
         thirdParty: ["aThirdParty"]
     });
     const dummyPeer = CoreAddress.from("aPeer");

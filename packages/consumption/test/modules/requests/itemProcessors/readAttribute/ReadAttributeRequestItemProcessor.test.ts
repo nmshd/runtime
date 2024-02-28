@@ -64,7 +64,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     query: query
                 });
 
-                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipientAddress"));
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
 
                 expect(result).successfulValidationResult();
             });
@@ -145,17 +145,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }
                 },
                 {
-                    description: "cannot query own attributes from third party",
-                    input: {
-                        owner: TestIdentity.Self,
-                        thirdParty: TestIdentity.ThirdParty
-                    },
-                    expectedOutput: {
-                        errorCode: "error.consumption.requests.invalidRequestItem",
-                        errorMessage: "Cannot query own Attributes from a third party."
-                    }
-                },
-                {
                     description: "can query with thirdParty = empty string",
                     input: {
                         owner: TestIdentity.ThirdParty,
@@ -196,15 +185,15 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         case TestIdentity.Self:
                             return accountController.identity.address.toString();
                         case TestIdentity.Recipient:
-                            return CoreAddress.from("recipientAddress").toString();
+                            return CoreAddress.from("recipient").toString();
                         case TestIdentity.Empty:
                             return CoreAddress.from("").toString();
                         case TestIdentity.OtherWithRelationship:
-                            return CoreAddress.from("recipientAddress").toString();
+                            return CoreAddress.from("recipient").toString();
                         case TestIdentity.OtherWithoutRelationship:
                             return "someAddressWithoutRelationship";
                         case TestIdentity.ThirdParty:
-                            return "someThirdPartyAddress";
+                            return "thirdParty";
                         default:
                             throw new Error("Given TestIdentity does not exist");
                     }
@@ -234,7 +223,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     query: query
                 });
 
-                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipientAddress"));
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
 
                 if (testParams.expectedOutput.hasOwnProperty("success")) {
                     // eslint-disable-next-line jest/no-conditional-expect
@@ -344,7 +333,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     key: "AKey",
-                    owner: "id1",
+                    owner: "thirdParty",
                     thirdParty: ["id1"]
                 })
             });
@@ -353,7 +342,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("sender"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -1683,7 +1672,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
-                        owner: recipient.toString(),
+                        owner: "recipient",
                         key: "AKey",
                         thirdParty: [thirdParty.toString()]
                     })
@@ -1723,13 +1712,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             test("returns an error when a RelationshipAttribute does not belong to the owner that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
                 const sender = CoreAddress.from("id0");
-                const recipient = CoreAddress.from(accountController.identity.address);
                 const thirdParty = CoreAddress.from("id2");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
-                        owner: recipient.toString(),
+                        owner: "recipient",
                         key: "AKey",
                         thirdParty: [thirdParty.toString()]
                     })
@@ -1774,7 +1762,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute does not belong to the queried owner./
+                    message: /The provided RelationshipAttribute does not belong to a queried owner./
                 });
             });
 
@@ -1898,7 +1886,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
-                        owner: recipient.toString(),
+                        owner: "recipient",
                         key: "AKey",
                         thirdParty: [thirdParty.toString()]
                     })
@@ -1955,7 +1943,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
-                        owner: recipient.toString(),
+                        owner: "recipient",
                         key: "AKey",
                         thirdParty: [thirdParty.toString()]
                     })
@@ -2011,7 +1999,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
-                        owner: recipient.toString(),
+                        owner: "recipient",
                         validFrom: "2024-02-14T08:47:35.077Z",
                         validTo: "2024-02-14T09:35:12.824Z",
                         key: "AKey",

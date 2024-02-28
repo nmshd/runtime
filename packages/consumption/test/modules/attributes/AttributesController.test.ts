@@ -14,6 +14,7 @@ import {
     RelationshipAttributeConfidentiality,
     Street,
     StreetAddress,
+    ThirdPartyRelationshipAttributeQueryOwner,
     ZipCode
 } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
@@ -327,7 +328,7 @@ describe("AttributesController", function () {
                     value: "0815",
                     title: "Customer ID"
                 },
-                owner: testAccount.identity.address,
+                owner: CoreAddress.from("peerAddress"),
                 confidentiality: RelationshipAttributeConfidentiality.Protected
             }),
             peer: CoreAddress.from("peerAddress"),
@@ -336,7 +337,7 @@ describe("AttributesController", function () {
 
         const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
             key: "customerId",
-            owner: testAccount.identity.address,
+            owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
             thirdParty: [CoreAddress.from("peerAddress")]
         });
         expect(attributes).toHaveLength(1);
@@ -352,7 +353,7 @@ describe("AttributesController", function () {
                     value: "0815",
                     title: "Customer ID"
                 },
-                owner: testAccount.identity.address,
+                owner: CoreAddress.from("peerAddress"),
                 confidentiality: RelationshipAttributeConfidentiality.Private
             }),
             peer: CoreAddress.from("peerAddress"),
@@ -361,7 +362,7 @@ describe("AttributesController", function () {
 
         const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
             key: "customerId",
-            owner: testAccount.identity.address,
+            owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
             thirdParty: [CoreAddress.from("peerAddress")]
         });
         expect(attributes).toHaveLength(0);
@@ -376,7 +377,7 @@ describe("AttributesController", function () {
                     value: "0815",
                     title: "Customer ID"
                 },
-                owner: testAccount.identity.address,
+                owner: CoreAddress.from("peerAddress"),
                 confidentiality: RelationshipAttributeConfidentiality.Private
             }),
             peer: CoreAddress.from("peerAddress"),
@@ -385,7 +386,7 @@ describe("AttributesController", function () {
 
         const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
             key: "notMatchingKey",
-            owner: testAccount.identity.address,
+            owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
             thirdParty: [CoreAddress.from("peerAddress")]
         });
         expect(attributes).toHaveLength(0);

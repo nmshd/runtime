@@ -118,7 +118,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             throw new Error("this should never happen");
         }
 
-        const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, this.currentIdentityAddress);
+        const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
 
         return ValidationResult.success();
