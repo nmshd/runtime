@@ -74,15 +74,6 @@ beforeAll(async () => {
         }
     });
 
-    const attribute2 = await consumptionServices2.attributes.createRepositoryAttribute({
-        content: {
-            value: {
-                "@type": "Surname",
-                value: "Weigl"
-            }
-        }
-    });
-
     requestContent = {
         content: {
             items: [

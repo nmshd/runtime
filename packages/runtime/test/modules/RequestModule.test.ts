@@ -64,23 +64,13 @@ beforeAll(async () => {
     rEventBus = rRuntimeServices.eventBus;
 }, 30000);
 
-beforeEach(() => {
+afterEach(() => {
     sEventBus.reset();
     rEventBus.reset();
 });
 
 afterAll(async () => await runtimeServiceProvider.stop());
 
-// afterEach(async () => {
-//     const requests = (await rConsumptionServices.incomingRequests.getRequests({})).value;
-//     await Promise.all(
-//         requests.map(async (request) => {
-//             const result = await rConsumptionServices.incomingRequests.reject({ requestId: request.id, items: [{ accept: false }] });
-//             expect(result).toBeSuccessful();
-//             await syncUntilHasMessageWithResponse(sTransportServices, request.id);
-//         })
-//     );
-// });
 describe("RequestModule", () => {
     describe("Relationships / RelationshipTemplates (onNewRelationship)", () => {
         let template: RelationshipTemplateDTO;
@@ -95,14 +85,12 @@ describe("RequestModule", () => {
 
         beforeAll(async () => {
             template = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
-
-            await expect(rEventBus).toHavePublished(IncomingRequestReceivedEvent);
-            await expect(rEventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-
-            requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
         });
 
         test("creates a request for a loaded peer Relationship Template and checks its prerequisites", async () => {
+            await expect(rEventBus).toHavePublished(IncomingRequestReceivedEvent);
+            await expect(rEventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+
             const requestsResult = await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } });
             expect(requestsResult.value).toHaveLength(1);
         });
@@ -118,6 +106,7 @@ describe("RequestModule", () => {
         });
 
         test("completes the Request when the Request is accepted by creating a Relationship", async () => {
+            requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
 
             await expect(rEventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -154,6 +143,7 @@ describe("RequestModule", () => {
         });
 
         test("templator: creates a Relationship with the correct data on an incoming Relationship Change with a Response", async () => {
+            requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
 
             const relationships = await syncUntilHasRelationships(sTransportServices, 1);
@@ -181,6 +171,7 @@ describe("RequestModule", () => {
         });
 
         test("does not create a second Request from the same Template if an active Relationship exists", async () => {
+            requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
             await syncUntilHasRelationships(rTransportServices);
             await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
@@ -193,6 +184,7 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent if an active Relationship exists", async () => {
+            requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
             await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
@@ -389,6 +381,7 @@ describe("RequestModule", () => {
             expect(messageSentEvent.data.content["@type"]).toBe("ResponseWrapper");
         });
 
+        // eslint-disable-next-line jest/expect-expect
         test("processes the response", async () => {
             await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         });

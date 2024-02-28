@@ -14,7 +14,6 @@ import {
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
-    MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
     syncUntilHasMessageWithRequest,
@@ -30,8 +29,6 @@ let sExpander: DataViewExpander;
 let rExpander: DataViewExpander;
 let sConsumptionServices: ConsumptionServices;
 let rConsumptionServices: ConsumptionServices;
-let sEventBus: MockEventBus;
-let rEventBus: MockEventBus;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
 let rAddress: string;
@@ -46,8 +43,6 @@ beforeAll(async () => {
     rExpander = rRuntimeServices.expander;
     sConsumptionServices = sRuntimeServices.consumption;
     rConsumptionServices = rRuntimeServices.consumption;
-    sEventBus = sRuntimeServices.eventBus;
-    rEventBus = rRuntimeServices.eventBus;
     await establishRelationship(sTransportServices, rTransportServices);
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
