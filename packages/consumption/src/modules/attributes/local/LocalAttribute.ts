@@ -11,7 +11,7 @@ import {
 import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { ILocalAttributeDeletionStatus, LocalAttributeDeletionStatus, LocalAttributeDeletionStatusJSON } from "./LocalAttributeDeletionStatus";
+import { ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttributeDeletionInfoJSON } from "./LocalAttributeDeletionInfo";
 import { ILocalAttributeShareInfo, LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "./LocalAttributeShareInfo";
 
 export interface LocalAttributeJSON {
@@ -21,7 +21,7 @@ export interface LocalAttributeJSON {
     succeededBy?: string;
     shareInfo?: LocalAttributeShareInfoJSON;
     parentId?: string;
-    deletionStatus?: LocalAttributeDeletionStatusJSON;
+    deletionInfo?: LocalAttributeDeletionInfoJSON;
 }
 
 export interface ILocalAttribute extends ICoreSynchronizable {
@@ -31,7 +31,7 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     succeededBy?: ICoreId;
     shareInfo?: ILocalAttributeShareInfo;
     parentId?: ICoreId;
-    deletionStatus?: ILocalAttributeDeletionStatus;
+    deletionInfo?: ILocalAttributeDeletionInfo;
 }
 
 export type OwnSharedIdentityAttribute = LocalAttribute & { content: IdentityAttribute } & {
@@ -96,7 +96,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
     @validate({ nullable: true })
     @serialize()
-    public deletionStatus?: LocalAttributeDeletionStatus;
+    public deletionInfo?: LocalAttributeDeletionInfo;
 
     public isOwnSharedIdentityAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute {
         return this.isIdentityAttribute() && this.isOwnSharedAttribute(ownAddress, peerAddress);

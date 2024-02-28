@@ -1050,8 +1050,8 @@ describe(DeletePeerSharedAttributeAndNotifyOwnerUseCase.name, () => {
         const result = await services1.consumption.attributes.getAttribute({ id: sOSIA.id });
         expect(result.isSuccess).toBe(true);
         const updatedAttribute = result.value;
-        expect(updatedAttribute.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
-        expect(CoreDate.from(updatedAttribute.deletionStatus!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+        expect(updatedAttribute.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
+        expect(CoreDate.from(updatedAttribute.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
     });
 
     // TODO: test deletion of predecessors

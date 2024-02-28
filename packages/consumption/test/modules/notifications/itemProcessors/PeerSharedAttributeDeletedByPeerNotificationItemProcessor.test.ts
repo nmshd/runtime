@@ -99,12 +99,12 @@ describe("PeerSharedAttributeDeletedByPeerNotificationItemProcessor", function (
         expect(event).toBeInstanceOf(PeerSharedAttributeDeletedByPeerEvent);
         const updatedAttribute = event?.data;
         expect(notificationItem.attributeId.equals(updatedAttribute!.id)).toBe(true);
-        expect(updatedAttribute!.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
+        expect(updatedAttribute!.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        expect(attributeAfterRollback?.deletionStatus).toBeUndefined();
+        expect(attributeAfterRollback?.deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for an own shared relationship attribute", async function () {
@@ -155,12 +155,12 @@ describe("PeerSharedAttributeDeletedByPeerNotificationItemProcessor", function (
         expect(event).toBeInstanceOf(PeerSharedAttributeDeletedByPeerEvent);
         const updatedAttribute = event?.data;
         expect(notificationItem.attributeId.equals(updatedAttribute!.id)).toBe(true);
-        expect(updatedAttribute!.deletionStatus?.status).toStrictEqual(DeletionStatus.DeletedByPeer);
+        expect(updatedAttribute!.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        expect(attributeAfterRollback?.deletionStatus).toBeUndefined();
+        expect(attributeAfterRollback?.deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for an unknown attribute", async function () {

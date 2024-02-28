@@ -4,7 +4,7 @@ import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { CoreErrors } from "../../../consumption/CoreErrors";
 import { PeerSharedAttributeDeletedByPeerEvent } from "../../attributes";
-import { DeletionStatus, LocalAttributeDeletionStatus } from "../../attributes/local/LocalAttributeDeletionStatus";
+import { DeletionStatus, LocalAttributeDeletionInfo } from "../../attributes/local/LocalAttributeDeletionInfo";
 import { ValidationResult } from "../../common";
 import { LocalNotification } from "../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "./AbstractNotificationItemProcessor";
@@ -46,11 +46,11 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") return;
 
-        const deletionStatus = LocalAttributeDeletionStatus.from({
-            status: DeletionStatus.DeletedByPeer,
+        const deletionStatus = LocalAttributeDeletionInfo.from({
+            deletionStatus: DeletionStatus.DeletedByPeer,
             deletionDate: CoreDate.utc()
         });
-        attribute.deletionStatus = deletionStatus;
+        attribute.deletionInfo = deletionStatus;
 
         const updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
 
@@ -62,7 +62,7 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         if (typeof attribute === "undefined") return;
 
         // TODO: the status before might have been 'toBeDeletedByPeer', but I don't think we can save it between process and rollback
-        attribute.deletionStatus = undefined;
+        attribute.deletionInfo = undefined;
 
         await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
     }

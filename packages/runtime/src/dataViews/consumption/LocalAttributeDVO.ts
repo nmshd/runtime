@@ -48,7 +48,7 @@ export interface SharedToPeerAttributeDVO extends LocalAttributeDVO {
     isOwn: true;
     tags: string[];
     deletionDate?: string;
-    status?: string;
+    deletionStatus?: string;
 }
 
 /**
@@ -62,7 +62,7 @@ export interface PeerAttributeDVO extends LocalAttributeDVO {
     isOwn: false;
     tags: string[];
     deletionDate?: string;
-    status?: string;
+    deletionStatus?: string;
 }
 
 /**
@@ -78,7 +78,7 @@ export interface OwnRelationshipAttributeDVO extends LocalAttributeDVO {
     confidentiality: string;
     isTechnical: boolean;
     deletionDate?: string;
-    status?: string;
+    deletionStatus?: string;
 }
 
 /**
@@ -94,7 +94,7 @@ export interface PeerRelationshipAttributeDVO extends LocalAttributeDVO {
     confidentiality: string;
     isTechnical: boolean;
     deletionDate?: string;
-    status?: string;
+    deletionStatus?: string;
 }
 
 /**

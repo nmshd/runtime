@@ -11,26 +11,26 @@ export enum DeletionStatus {
     DeletedByOwner = "DeletedByOwner"
 }
 
-export interface LocalAttributeDeletionStatusJSON {
-    status: string;
+export interface LocalAttributeDeletionInfoJSON {
+    deletionStatus: string;
     deletionDate: string;
 }
 
-export interface ILocalAttributeDeletionStatus {
-    status: DeletionStatus;
+export interface ILocalAttributeDeletionInfo {
+    deletionStatus: DeletionStatus;
     deletionDate: ICoreDate;
 }
 
-export class LocalAttributeDeletionStatus extends CoreSerializable implements ILocalAttributeDeletionStatus {
+export class LocalAttributeDeletionInfo extends CoreSerializable implements ILocalAttributeDeletionInfo {
     @serialize()
     @validate()
-    public status: DeletionStatus;
+    public deletionStatus: DeletionStatus;
 
     @serialize()
     @validate()
     public deletionDate: CoreDate;
 
-    public static from(value: ILocalAttributeDeletionStatus | LocalAttributeDeletionStatusJSON): LocalAttributeDeletionStatus {
+    public static from(value: ILocalAttributeDeletionInfo | LocalAttributeDeletionInfoJSON): LocalAttributeDeletionInfo {
         return this.fromAny(value);
     }
 }
