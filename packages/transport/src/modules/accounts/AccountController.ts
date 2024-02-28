@@ -3,7 +3,7 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { log } from "@js-soft/ts-utils";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
-import { Authenticator } from "../../core/backbone/Authenticator";
+import { AbstractAuthenticator, Authenticator } from "../../core/backbone/Authenticator";
 import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
@@ -38,10 +38,10 @@ import { IdentityController } from "./IdentityController";
 import { IdentityUtil } from "./IdentityUtil";
 
 export class AccountController {
-    private readonly _authenticator: Authenticator;
+    private readonly _authenticator: AbstractAuthenticator;
     private unpushedDatawalletModifications: IDatabaseCollection;
 
-    public get authenticator(): Authenticator {
+    public get authenticator(): AbstractAuthenticator {
         return this._authenticator;
     }
 
