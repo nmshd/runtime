@@ -2,8 +2,9 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
+import { AgentOptions } from "http";
+import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { IConfig } from "../../core";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
 import { CoreId } from "../types";
 import { ClientResult } from "./ClientResult";
@@ -32,6 +33,18 @@ export enum RESTClientLogDirective {
     LogAll
 }
 
+export interface IRESTClientConfig {
+    platformClientId: string;
+    platformClientSecret: string;
+    platformTimeout: number;
+    platformMaxRedirects: number;
+    platformAdditionalHeaders?: Record<string, string>;
+    httpAgent: AgentOptions;
+    httpsAgent: HTTPSAgentOptions;
+    debug: boolean;
+    baseUrl: string;
+}
+
 export class RESTClient {
     protected _logger: ILogger;
     protected _logDirective = RESTClientLogDirective.LogAll;
@@ -50,7 +63,7 @@ export class RESTClient {
     }
 
     public constructor(
-        protected readonly config: IConfig,
+        protected readonly config: IRESTClientConfig,
         protected requestConfig: AxiosRequestConfig = {}
     ) {
         const defaults: AxiosRequestConfig = {
