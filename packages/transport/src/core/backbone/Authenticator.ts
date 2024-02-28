@@ -74,7 +74,7 @@ export abstract class AbstractAuthenticator {
         this.expiry = result.value.expiry;
     }
 
-    abstract getCredentials(): Promise<CredentialsBasic>;
+    protected abstract getCredentials(): Promise<CredentialsBasic>;
 }
 
 export class Authenticator extends AbstractAuthenticator {
