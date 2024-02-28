@@ -17,7 +17,9 @@ export class PeerSharedAttributeDeletedByPeerNotificationItem extends Notificati
     @serialize()
     public attributeId: CoreId;
 
-    public static from(value: IPeerSharedAttributeDeletedByPeerNotificationItem): PeerSharedAttributeDeletedByPeerNotificationItem {
+    public static from(
+        value: IPeerSharedAttributeDeletedByPeerNotificationItem | Omit<PeerSharedAttributeDeletedByPeerNotificationItemJSON, "@type">
+    ): PeerSharedAttributeDeletedByPeerNotificationItem {
         return this.fromAny(value);
     }
 }

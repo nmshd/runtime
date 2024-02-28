@@ -12,7 +12,7 @@ export enum DeletionStatus {
 }
 
 export interface LocalAttributeDeletionStatusJSON {
-    status: object;
+    status: string;
     deletionDate: string;
 }
 
