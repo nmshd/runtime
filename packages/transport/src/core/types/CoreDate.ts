@@ -15,8 +15,7 @@ export class CoreDate extends CoreSerializable {
     }
 
     public get date(): string {
-        if (!this.dateTime.isValid) throw new TransportError("The date is invalid.");
-        return this.dateTime.toISODate()!;
+        return this.asValidDateTime.toISODate();
     }
 
     public constructor(dateTime: DateTime = DateTime.utc()) {
@@ -134,13 +133,11 @@ export class CoreDate extends CoreSerializable {
      * Creates an ISO String.
      */
     public override toString(): string {
-        if (!this.dateTime.isValid) throw new TransportError("The date is invalid.");
-        return this.dateTime.toISO()!;
+        return this.asValidDateTime.toISO();
     }
 
     public toISOString(): string {
-        if (!this.dateTime.isValid) throw new TransportError("The date is invalid.");
-        return this.dateTime.toISO()!;
+        return this.asValidDateTime.toISO();
     }
 
     public override toLocaleString(): string {
@@ -148,13 +145,16 @@ export class CoreDate extends CoreSerializable {
     }
 
     public override toJSON(): string {
-        if (!this.dateTime.isValid) throw new TransportError("The date is invalid.");
-        return this.dateTime.toISO()!;
+        return this.asValidDateTime.toISO();
     }
 
     public override serialize(): string {
+        return this.asValidDateTime.toISO();
+    }
+
+    private get asValidDateTime(): DateTime<true> {
         if (!this.dateTime.isValid) throw new TransportError("The date is invalid.");
-        return this.dateTime.toISO()!;
+        return this.dateTime as DateTime<true>;
     }
 
     protected static override preFrom(value: any): any {
@@ -183,7 +183,7 @@ export class CoreDate extends CoreSerializable {
             return DateTime.fromISO(value, { zone: "utc" }).toUTC();
         }
 
-        throw new TransportError("The provided object is invalid cannot be deserialized.");
+        throw new TransportError("The provided object is invalid and cannot be deserialized.");
     }
 
     public static from(value: ICoreDate | string | number): CoreDate {
