@@ -9,6 +9,9 @@ import { AttributeMapper } from "./AttributeMapper";
 export interface GetSharedVersionsOfRepositoryAttributeRequest {
     attributeId: AttributeIdString;
     peers?: AddressString[];
+    /**
+     * default: true
+     */
     onlyLatestVersions?: boolean;
 }
 
