@@ -57,8 +57,8 @@ afterAll(() => serviceProvider.stop());
 describe("MessageDVO", () => {
     let transportService2Address: string;
     let fileId: string;
-    let createMessage: SendMessageRequest;
-    let createMail: SendMessageRequest;
+    let messageRequest: SendMessageRequest;
+    let mailRequest: SendMessageRequest;
     // let changeAttributeMailId: string;
 
     beforeAll(async () => {
@@ -68,14 +68,14 @@ describe("MessageDVO", () => {
         const relationship = await getRelationship(transportServices1);
         transportService2Address = relationship.peer;
 
-        createMessage = {
+        messageRequest = {
             recipients: [transportService2Address],
             content: {
                 arbitraryValue: true
             },
             attachments: [fileId]
         };
-        createMail = {
+        mailRequest = {
             recipients: [transportService2Address],
             content: {
                 "@type": "Mail",
@@ -89,7 +89,7 @@ describe("MessageDVO", () => {
     });
 
     test("check the message dvo for the sender", async () => {
-        const dto = (await transportServices1.messages.sendMessage(createMessage)).value;
+        const dto = (await transportServices1.messages.sendMessage(messageRequest)).value;
         const dvo = await expander1.expandMessageDTO(dto);
         expect(dvo).toBeDefined();
         expect(dvo.name).toBe("i18n://dvo.message.name");
@@ -113,7 +113,7 @@ describe("MessageDVO", () => {
     });
 
     test("check the message dvo for the recipient", async () => {
-        const senderMessage = (await transportServices1.messages.sendMessage(createMessage)).value;
+        const senderMessage = (await transportServices1.messages.sendMessage(messageRequest)).value;
         const messageId = senderMessage.id;
         const dto = await syncUntilHasMessage(transportServices2, messageId);
         const dvo = await expander2.expandMessageDTO(dto);
@@ -140,7 +140,7 @@ describe("MessageDVO", () => {
     });
 
     test("check the mail dvo for the sender", async () => {
-        const dto = (await transportServices1.messages.sendMessage(createMail)).value;
+        const dto = (await transportServices1.messages.sendMessage(mailRequest)).value;
         const dvo = (await expander1.expandMessageDTO(dto)) as MailDVO;
         expect(dto.content["@type"]).toBe("Mail");
         const mail = dto.content as MailJSON;
@@ -180,7 +180,7 @@ describe("MessageDVO", () => {
     });
 
     test("check the mail dvo for the recipient", async () => {
-        const senderMail = (await transportServices1.messages.sendMessage(createMail)).value;
+        const senderMail = (await transportServices1.messages.sendMessage(mailRequest)).value;
         const mailId = senderMail.id;
         const dto = await syncUntilHasMessage(transportServices2, mailId);
         const dvo = (await expander2.expandMessageDTO(dto)) as MailDVO;
