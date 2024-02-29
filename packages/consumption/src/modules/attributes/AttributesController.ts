@@ -814,7 +814,8 @@ export class AttributesController extends ConsumptionBaseController {
             shareInfo: attributeData.shareInfo,
             parentId: attributeData.parentId,
             succeededBy: attributeData.succeededBy,
-            succeeds: attributeData.succeeds
+            succeeds: attributeData.succeeds,
+            deletionInfo: attributeData.deletionInfo
         });
         await this.attributes.create(localAttribute);
         return localAttribute;
@@ -835,7 +836,8 @@ export class AttributesController extends ConsumptionBaseController {
             parentId: attributeParams.parentId,
             shareInfo: attributeParams.shareInfo,
             succeededBy: attributeParams.succeededBy,
-            succeeds: attributeParams.succeeds
+            succeeds: attributeParams.succeeds,
+            deletionInfo: attributeParams.deletionInfo
         };
         const newAttribute = LocalAttribute.from(params);
         await this.attributes.update(doc, newAttribute);

@@ -1,16 +1,17 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import {
     AbstractComplexValue,
-    IIdentityAttribute,
-    IRelationshipAttribute,
     IdentityAttribute,
     IdentityAttributeJSON,
+    IIdentityAttribute,
+    IRelationshipAttribute,
     RelationshipAttribute,
     RelationshipAttributeJSON
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
+import { ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttributeDeletionInfoJSON } from "./LocalAttributeDeletionInfo";
 import { ILocalAttributeShareInfo, LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "./LocalAttributeShareInfo";
 
 export interface LocalAttributeJSON {
@@ -19,6 +20,7 @@ export interface LocalAttributeJSON {
     succeeds?: string;
     succeededBy?: string;
     shareInfo?: LocalAttributeShareInfoJSON;
+    deletionInfo?: LocalAttributeDeletionInfoJSON;
     parentId?: string;
 }
 
@@ -28,6 +30,7 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     succeeds?: ICoreId;
     succeededBy?: ICoreId;
     shareInfo?: ILocalAttributeShareInfo;
+    deletionInfo?: ILocalAttributeDeletionInfo;
     parentId?: ICoreId;
 }
 
@@ -86,6 +89,10 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     @validate({ nullable: true })
     @serialize()
     public shareInfo?: LocalAttributeShareInfo;
+
+    @validate({ nullable: true })
+    @serialize()
+    public deletionInfo?: LocalAttributeDeletionInfo;
 
     @validate({ nullable: true })
     @serialize()
