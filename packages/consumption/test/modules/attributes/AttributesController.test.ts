@@ -645,7 +645,7 @@ describe("AttributesController", function () {
 
                 const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
                 expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.invalidPredecessor"
+                    code: "error.consumption.attributes.setPredecessorIdDoesNotMatchActualPredecessorId"
                 });
             });
 
@@ -908,7 +908,7 @@ describe("AttributesController", function () {
 
                 const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessor.id, successorParams);
                 expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.invalidSuccessionOfOwnSharedIdentityAttribute"
+                    code: "error.consumption.attributes.successorSourceDoesNotSucceedPredecessorSource"
                 });
             });
         });

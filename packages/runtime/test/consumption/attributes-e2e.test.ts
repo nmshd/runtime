@@ -557,7 +557,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             attributeId: sRAVersion1.id,
             peer: services2.address
         });
-        expect(notificationResult).toBeAnError(/.*/, "error.consumption.attributes.invalidSuccessionOfOwnSharedIdentityAttribute");
+        expect(notificationResult).toBeAnError(/.*/, "error.consumption.attributes.successorSourceDoesNotSucceedPredecessorSource");
     });
 
     test("should throw if no other version of the attribute has been shared before", async () => {

@@ -2,10 +2,10 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { CoreAddress, CoreError, CoreId } from "@nmshd/transport";
 
 class Attributes {
-    public genericValidationError(error: any) {
+    public successorIsNotAValidAttribute(error: any) {
         return new CoreError(
-            "error.consumption.attributes.genericValidationError",
-            "Validation failed during creation of object.",
+            "error.consumption.attributes.successorIsNotAValidAttribute",
+            "Validation failed during creation of successor.",
             error,
             undefined,
             error instanceof Error ? error : undefined
@@ -23,10 +23,26 @@ class Attributes {
         return new CoreError("error.consumption.attributes.successionPeerIsNotOwner", "The peer of the succeeded attribute is not its owner. This may be an attempt of spoofing.");
     }
 
-    public invalidSuccessionOfOwnSharedIdentityAttribute(comment?: string) {
-        let errorMessage = "Invalid succession of own shared identity attribute.";
-        if (comment) errorMessage += ` ${comment}`;
-        return new CoreError("error.consumption.attributes.invalidSuccessionOfOwnSharedIdentityAttribute", errorMessage);
+    public predecessorSourceAttributeIsNotRepositoryAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorSourceAttributeIsNotRepositoryAttribute", "Predecessor source attribute is not a repository attribute.");
+    }
+
+    public successorSourceAttributeIsNotRepositoryAttribute() {
+        return new CoreError("error.consumption.attributes.successorSourceAttributeIsNotRepositoryAttribute", "Successor source attribute is not a repository attribute.");
+    }
+
+    public successorSourceDoesNotSucceedPredecessorSource() {
+        return new CoreError(
+            "error.consumption.attributes.successorSourceDoesNotSucceedPredecessorSource",
+            "Predecessor source attribute is not succeeded by successor source attribute."
+        );
+    }
+
+    public sourceContentIsNotEqualToCopyContent() {
+        return new CoreError(
+            "error.consumption.attributes.sourceContentIsNotEqualToCopyContent",
+            "Successor source attribute contents don't match successor shared attribute copy."
+        );
     }
 
     public cannotSucceedChildOfComplexAttribute(parentId: string | CoreId) {
@@ -49,16 +65,51 @@ class Attributes {
         return new CoreError("error.consumption.attributes.successorMustNotHaveASuccessor", errorMessage);
     }
 
-    public invalidPredecessor(comment?: string) {
-        let errorMessage = "Invalid predecessor.";
-        if (comment) errorMessage += ` ${comment}`;
-        return new CoreError("error.consumption.attributes.invalidPredecessor", errorMessage);
+    public predecessorIsNotRepositoryAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotRepositoryAttribute", "Predecessor is not a repository attribute.");
     }
 
-    public invalidSuccessor(comment?: string) {
-        let errorMessage = "Invalid successor.";
-        if (comment) errorMessage += ` ${comment}`;
-        return new CoreError("error.consumption.attributes.invalidSuccessor", errorMessage);
+    public predecessorIsNotOwnSharedIdentityAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotOwnSharedIdentityAttribute", "Predecessor is not an own shared identity attribute.");
+    }
+
+    public predecessorIsNotPeerSharedIdentityAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotPeerSharedIdentityAttribute", "Predecessor is not a peer shared identity attribute.");
+    }
+
+    public predecessorIsNotOwnSharedRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotOwnSharedRelationshipAttribute", "Predecessor is not an own shared relationship attribute.");
+    }
+
+    public predecessorIsNotPeerSharedRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotPeerSharedRelationshipAttribute", "Predecessor is not a peer shared relationship attribute.");
+    }
+
+    public successorIsNotRepositoryAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotRepositoryAttribute", "Successor is not a repository attribute.");
+    }
+
+    public successorIsNotOwnSharedIdentityAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotOwnSharedIdentityAttribute", "Successor is not an own shared identity attribute.");
+    }
+
+    public successorIsNotPeerSharedIdentityAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotPeerSharedIdentityAttribute", "Successor is not a peer shared identity attribute.");
+    }
+
+    public successorIsNotOwnSharedRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotOwnSharedRelationshipAttribute", "Successor is not an own shared relationship attribute.");
+    }
+
+    public successorIsNotPeerSharedRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotPeerSharedRelationshipAttribute", "Successor is not a peer shared relationship attribute.");
+    }
+
+    public setPredecessorIdDoesNotMatchActualPredecessorId() {
+        return new CoreError(
+            "error.consumption.attributes.setPredecessorIdDoesNotMatchActualPredecessorId",
+            "The predecessor's id and the explicitly set value for the successor's succeeds field don't match."
+        );
     }
 
     public predecessorDoesNotExist() {
