@@ -22,6 +22,7 @@ import {
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
+    syncAndGetBaselineNumberOfAttributes,
     syncUntilHasMessageWithRequest,
     TestRuntimeServices
 } from "../../lib";
@@ -37,6 +38,8 @@ let consumptionServices1: ConsumptionServices;
 let consumptionServices2: ConsumptionServices;
 let eventBus1: MockEventBus;
 let eventBus2: MockEventBus;
+let address1: string;
+let address2: string;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
 
@@ -62,7 +65,8 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         eventBus1 = runtimeServices1.eventBus;
         eventBus2 = runtimeServices2.eventBus;
         await establishRelationship(transportServices1, transportServices2);
-        const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
+        address1 = (await transportServices1.account.getIdentityInfo()).value.address;
+        address2 = (await transportServices2.account.getIdentityInfo()).value.address;
         const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
                 value: PersonName.from({
@@ -87,7 +91,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
                     }).toJSON()
                 ]
             },
-            peer: recipientAddress
+            peer: address2
         };
 
         responseItems = [{ accept: true, newAttribute: attribute.value.content }] as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON[];
@@ -167,6 +171,11 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
+        const baselineNumberOfAttributes = (
+            await consumptionServices1.attributes.getAttributes({
+                query: { "content.value.@type": "PersonName", "shareInfo.peer": address1 }
+            })
+        ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
 
         const acceptResult = await consumptionServices2.incomingRequests.accept({
@@ -231,10 +240,11 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
-        const attributeNumber = attributeResult.value.length - 1; // there may be other attributes produced by request responses from previous tests
-        expect(attributeResult.value[attributeNumber].id).toBeDefined();
+        const numberOfAttributes = attributeResult.value.length;
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
 
-        const returnedValue = attributeResult.value[attributeNumber].content.value as PersonNameJSON;
+        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
         expect(returnedValue.givenName).toBe("Heinz");
         expect(returnedValue.surname).toBe("Ranzig");
@@ -242,11 +252,14 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(returnedValue.honorificPrefix).toBe("Dr.");
         expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[attributeNumber].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(attributeValue);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
+        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+            query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
+        });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         const dto = senderMessage;
@@ -294,10 +307,11 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
-        const attributeNumber = attributeResult.value.length - 1; // there may be other attributes produced by request responses from previous tests
-        expect(attributeResult.value[attributeNumber].id).toBeDefined();
+        const numberOfAttributes = attributeResult.value.length;
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
 
-        const returnedValue = attributeResult.value[attributeNumber].content.value as PersonNameJSON;
+        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
         expect(returnedValue.givenName).toBe("Heinz");
         expect(returnedValue.surname).toBe("Ranzig");
@@ -305,7 +319,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(returnedValue.honorificPrefix).toBe("Dr.");
         expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[attributeNumber].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);
     });
 });
@@ -324,6 +338,8 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         eventBus1 = runtimeServices1.eventBus;
         eventBus2 = runtimeServices2.eventBus;
         await establishRelationship(transportServices1, transportServices2);
+        address1 = (await transportServices1.account.getIdentityInfo()).value.address;
+        address2 = (await transportServices2.account.getIdentityInfo()).value.address;
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
@@ -419,6 +435,11 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
+        const baselineNumberOfAttributes = (
+            await consumptionServices1.attributes.getAttributes({
+                query: { "content.value.@type": "PersonName", "shareInfo.peer": address1 }
+            })
+        ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
 
         const acceptResult = await consumptionServices2.incomingRequests.accept({
@@ -477,10 +498,11 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
             query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
-        const attributeNumber = attributeResult.value.length - 1; // there may be other attributes produced by request responses from previous tests
-        expect(attributeResult.value[attributeNumber].id).toBeDefined();
+        const numberOfAttributes = attributeResult.value.length;
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
 
-        const returnedValue = attributeResult.value[attributeNumber].content.value as PersonNameJSON;
+        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
         expect(returnedValue.givenName).toBe("Heinz");
         expect(returnedValue.surname).toBe("Ranzig");
@@ -488,11 +510,14 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(returnedValue.honorificPrefix).toBe("Dr.");
         expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[attributeNumber].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(attributeValue);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
+        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+            query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
+        });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
@@ -535,10 +560,11 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
             query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
-        const attributeNumber = attributeResult.value.length - 1; // there may be other attributes produced by request responses from previous tests
-        expect(attributeResult.value[attributeNumber].id).toBeDefined();
+        const numberOfAttributes = attributeResult.value.length;
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
 
-        const returnedValue = attributeResult.value[attributeNumber].content.value as PersonNameJSON;
+        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
         expect(returnedValue.givenName).toBe("Heinz");
         expect(returnedValue.surname).toBe("Ranzig");
@@ -546,7 +572,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(returnedValue.honorificPrefix).toBe("Dr.");
         expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[attributeNumber].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);
     });
 });

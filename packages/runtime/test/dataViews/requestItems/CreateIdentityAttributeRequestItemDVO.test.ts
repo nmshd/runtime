@@ -14,6 +14,7 @@ import {
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
+    MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
     syncUntilHasMessageWithRequest,
@@ -29,9 +30,12 @@ let sExpander: DataViewExpander;
 let rExpander: DataViewExpander;
 let sConsumptionServices: ConsumptionServices;
 let rConsumptionServices: ConsumptionServices;
+let sEventBus: MockEventBus;
+let rEventBus: MockEventBus;
+let sAddress: string;
+let rAddress: string;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
-let rAddress: string;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
@@ -43,7 +47,10 @@ beforeAll(async () => {
     rExpander = rRuntimeServices.expander;
     sConsumptionServices = sRuntimeServices.consumption;
     rConsumptionServices = rRuntimeServices.consumption;
+    sEventBus = runtimeServices[0].eventBus;
+    rEventBus = runtimeServices[1].eventBus;
     await establishRelationship(sTransportServices, rTransportServices);
+    sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
     requestContent = {
@@ -70,6 +77,11 @@ beforeAll(async () => {
 }, 30000);
 
 afterAll(() => serviceProvider.stop());
+
+beforeEach(function () {
+    rEventBus.reset();
+    sEventBus.reset();
+});
 
 describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
@@ -137,6 +149,11 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
+        const baselineNumberOfAttributes = (
+            await rConsumptionServices.attributes.getAttributes({
+                query: { "content.value.@type": "DisplayName", "shareInfo.peer": sAddress }
+            })
+        ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
             requestId: recipientMessage.content.id,
@@ -185,13 +202,17 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
-        expect(attributeResult.value[0].id).toBeDefined();
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
+        const numberOfAttributes = attributeResult.value.length;
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(responseItem.attribute).toBeDefined();
         expect(responseItem.attribute.valueType).toBe("DisplayName");
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toStrictEqual(
+            (responseItem.attribute.content.value as DisplayNameJSON).value
+        );
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
     });
 
     test("check the sender's dvo for the recipient", async () => {
@@ -202,6 +223,11 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
+        const baselineNumberOfAttributes = (
+            await sConsumptionServices.attributes.getAttributes({
+                query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
+            })
+        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
 
         const dto = senderMessage;
@@ -250,14 +276,17 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
-        const attributeNumber = attributeResult.value.length - 1; // there may be other attributes produced by request responses from previous tests
-        expect(attributeResult.value[attributeNumber].id).toBeDefined();
-        expect((attributeResult.value[attributeNumber].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
+        const numberOfAttributes = attributeResult.value.length;
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[attributeNumber].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(responseItem.attribute).toBeDefined();
         expect(responseItem.attribute.valueType).toBe("DisplayName");
-        expect((attributeResult.value[attributeNumber].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toStrictEqual(
+            (responseItem.attribute.content.value as DisplayNameJSON).value
+        );
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
     });
 
     test("check the attributes for the sender", async () => {
