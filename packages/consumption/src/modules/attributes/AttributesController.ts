@@ -281,7 +281,23 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
         await this.deleteAttributeUnsafe(attribute.id);
+
+        if (attribute.content instanceof IdentityAttribute && attribute.content.value instanceof AbstractComplexValue) {
+            await this.deleteChildAttributesOfComplexAttribute(attribute);
+        }
+
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
+    }
+
+    public async deleteChildAttributesOfComplexAttribute(complexAttribute: LocalAttribute): Promise<void> {
+        if (!(complexAttribute.content instanceof IdentityAttribute)) {
+            throw new ConsumptionError("Only identity attributes are allowed here");
+        }
+
+        const childAttributes = await this.getLocalAttributes({ parentId: complexAttribute.id.toString() });
+        for (const childAttribute of childAttributes) {
+            await this.deleteAttribute(childAttribute);
+        }
     }
 
     public async succeedRepositoryAttribute(
