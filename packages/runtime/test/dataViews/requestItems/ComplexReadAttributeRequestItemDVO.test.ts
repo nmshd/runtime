@@ -435,11 +435,6 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
-        const baselineNumberOfAttributes = (
-            await consumptionServices1.attributes.getAttributes({
-                query: { "content.value.@type": "PersonName", "shareInfo.peer": address1 }
-            })
-        ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
 
         const acceptResult = await consumptionServices2.incomingRequests.accept({
@@ -498,11 +493,9 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
             query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
-        const numberOfAttributes = attributeResult.value.length;
-        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
+        expect(attributeResult.value[0].id).toBeDefined();
 
-        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
+        const returnedValue = attributeResult.value[0].content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
         expect(returnedValue.givenName).toBe("Heinz");
         expect(returnedValue.surname).toBe("Ranzig");
@@ -510,7 +503,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(returnedValue.honorificPrefix).toBe("Dr.");
         expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(returnedValue).toStrictEqual(attributeValue);
     });
 

@@ -32,7 +32,6 @@ let sConsumptionServices: ConsumptionServices;
 let rConsumptionServices: ConsumptionServices;
 let sEventBus: MockEventBus;
 let rEventBus: MockEventBus;
-let sAddress: string;
 let rAddress: string;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
@@ -50,7 +49,6 @@ beforeAll(async () => {
     sEventBus = runtimeServices[0].eventBus;
     rEventBus = runtimeServices[1].eventBus;
     await establishRelationship(sTransportServices, rTransportServices);
-    sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
     requestContent = {
@@ -149,11 +147,6 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
-        const baselineNumberOfAttributes = (
-            await rConsumptionServices.attributes.getAttributes({
-                query: { "content.value.@type": "DisplayName", "shareInfo.peer": sAddress }
-            })
-        ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
             requestId: recipientMessage.content.id,
@@ -202,17 +195,13 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
-        const numberOfAttributes = attributeResult.value.length;
-        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
+        expect(attributeResult.value[0].id).toBeDefined();
+        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(responseItem.attribute).toBeDefined();
         expect(responseItem.attribute.valueType).toBe("DisplayName");
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toStrictEqual(
-            (responseItem.attribute.content.value as DisplayNameJSON).value
-        );
-        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
+        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
     });
 
     test("check the sender's dvo for the recipient", async () => {

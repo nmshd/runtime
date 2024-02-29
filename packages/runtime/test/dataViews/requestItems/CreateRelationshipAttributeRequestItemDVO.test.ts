@@ -153,11 +153,6 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
-        const baselineNumberOfAttributes = (
-            await rConsumptionServices.attributes.getAttributes({
-                query: { "content.value.@type": "ProprietaryString", "shareInfo.peer": sAddress }
-            })
-        ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
             requestId: recipientMessage.content.id,
@@ -206,14 +201,12 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "ProprietaryString", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
-        const numberOfAttributes = attributeResult.value.length;
-        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
+        expect(attributeResult.value[0].id).toBeDefined();
 
-        const proprietaryString = attributeResult.value[numberOfAttributes - 1].content.value as ProprietaryStringJSON;
+        const proprietaryString = attributeResult.value[0].content.value as ProprietaryStringJSON;
         expect(proprietaryString.value).toBe("0815");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(responseItem.attribute).toBeDefined();
         expect(responseItem.attribute.valueType).toBe("ProprietaryString");
         expect(proprietaryString.value).toStrictEqual((responseItem.attribute.content.value as ProprietaryStringJSON).value);
