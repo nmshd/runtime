@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    BirthDate,
     City,
     Country,
     EMailAddress,
@@ -184,21 +185,6 @@ describe("AttributesController", function () {
             AttributeCreatedEvent,
             AttributeCreatedEvent
         );
-    });
-
-    test("should delete an attribute", async function () {
-        const attributes = await consumptionController.attributes.getLocalAttributes();
-        const nrAttributesBeforeDelete = attributes.length;
-        await consumptionController.attributes.deleteAttribute(attributes[0]);
-
-        const attributesAfterDelete = await consumptionController.attributes.getLocalAttributes();
-        const nrAttributesAfterDelete = attributesAfterDelete.length;
-        expect(nrAttributesAfterDelete).toStrictEqual(nrAttributesBeforeDelete - 1);
-
-        const attributesJSON = attributesAfterDelete.map((v) => v.id.toString());
-        expect(attributesJSON).not.toContain(attributes[0]?.id.toString());
-
-        mockEventBus.expectLastPublishedEvent(AttributeDeletedEvent);
     });
 
     test("should allow to create a share attribute copy", async function () {
@@ -541,6 +527,62 @@ describe("AttributesController", function () {
         expect(createPeerAttributeParams.requestReference.toString()).toStrictEqual(CoreId.from("requestId").toString());
 
         mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
+    });
+
+    describe("Attribute deletion", function () {
+        test("should delete a simple attribute", async function () {
+            const attributeParams: ICreateLocalAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: EMailAddress.from({
+                        value: "my@email.address"
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const simpleAttribute = await consumptionController.attributes.createLocalAttribute(attributeParams);
+
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute(simpleAttribute.id);
+            expect(createdAttribute).toBeDefined();
+            expect(createdAttribute).toStrictEqual(simpleAttribute);
+
+            await consumptionController.attributes.deleteAttribute(simpleAttribute);
+
+            const deletedAttribute = await consumptionController.attributes.getLocalAttribute(simpleAttribute.id);
+            expect(deletedAttribute).toBeUndefined();
+
+            mockEventBus.expectLastPublishedEvent(AttributeDeletedEvent);
+        });
+
+        test("should delete a complex attribute", async function () {
+            const attributeParams: ICreateLocalAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: BirthDate.from({
+                        day: 24,
+                        month: 12,
+                        year: 2000
+                    }),
+                    owner: CoreAddress.from("address")
+                })
+            };
+            const complexAttribute = await consumptionController.attributes.createLocalAttribute(attributeParams);
+
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute(complexAttribute.id);
+            expect(createdAttribute).toBeDefined();
+            expect(createdAttribute).toStrictEqual(complexAttribute);
+
+            const childAttributes = await consumptionController.attributes.getLocalAttributes({ parentId: complexAttribute.id.toString() });
+            expect(childAttributes).toHaveLength(3);
+
+            await consumptionController.attributes.deleteAttribute(complexAttribute);
+
+            const deletedAttribute = await consumptionController.attributes.getLocalAttribute(complexAttribute.id);
+            expect(deletedAttribute).toBeUndefined();
+
+            for (const childAttribute of childAttributes) {
+                const deletedChildAttribute = await consumptionController.attributes.getLocalAttribute(childAttribute.id);
+                expect(deletedChildAttribute).toBeUndefined();
+            }
+        });
     });
 
     describe("Attribute successions", function () {
