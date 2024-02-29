@@ -11,7 +11,7 @@ import {
 import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttributeDeletionInfoJSON } from "./LocalAttributeDeletionInfo";
+import { DeletionStatus, ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttributeDeletionInfoJSON } from "./LocalAttributeDeletionInfo";
 import { ILocalAttributeShareInfo, LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "./LocalAttributeShareInfo";
 
 export interface LocalAttributeJSON {
@@ -115,7 +115,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     }
 
     public isRepositoryAttribute(ownAddress: CoreAddress): this is RepositoryAttribute {
-        return this.isIdentityAttribute() && !this.isShared() && this.isOwnedBy(ownAddress);
+        return this.isIdentityAttribute() && !this.isShared() && this.isOwnedBy(ownAddress) && !this.hasDeletionInfo();
     }
 
     public isOwnSharedAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute | OwnSharedRelationshipAttribute {
@@ -131,6 +131,9 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         if (typeof peerAddress !== "undefined") {
             isOwnSharedAttribute &&= this.shareInfo!.peer.equals(peerAddress);
         }
+
+        isOwnSharedAttribute &&= !this.hasPeerSharedAttributeDeletionInfo();
+
         return isOwnSharedAttribute;
     }
 
@@ -147,6 +150,9 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         if (typeof peerAddress !== "undefined") {
             isPeerSharedAttribute &&= this.isOwnedBy(peerAddress);
         }
+
+        isPeerSharedAttribute &&= !this.hasOwnSharedAttributeDeletionInfo();
+
         return isPeerSharedAttribute;
     }
 
@@ -170,6 +176,18 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
     public isShared(): this is LocalAttribute & { shareInfo: LocalAttributeShareInfo } {
         return typeof this.shareInfo !== "undefined";
+    }
+
+    public hasDeletionInfo(): boolean {
+        return typeof this.deletionInfo !== "undefined";
+    }
+
+    public hasOwnSharedAttributeDeletionInfo(): boolean {
+        return this.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer || this.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeletedByPeer;
+    }
+
+    public hasPeerSharedAttributeDeletionInfo(): boolean {
+        return this.deletionInfo?.deletionStatus === DeletionStatus.DeletedByOwner || this.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeleted;
     }
 
     public static from(value: ILocalAttribute | LocalAttributeJSON): LocalAttribute {
