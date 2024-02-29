@@ -24,7 +24,6 @@ import {
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullNotifyPeerAboutAttributeSuccessionFlow,
     executeFullShareRepositoryAttributeFlow,
-    executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     RuntimeServiceProvider,
     TestRuntimeServices,
     waitForRecipientToReceiveNotification
@@ -47,86 +46,7 @@ beforeAll(async () => {
     await ensureActiveRelationship(services1.transport, services2.transport);
     await ensureActiveRelationship(services1.transport, services3.transport);
     await ensureActiveRelationship(services2.transport, services3.transport);
-
-    await createAndShareRepositoryAttributesBetweenAllServices();
-    await createAndShareAndSucceedRepositoryAttributesBetweenSomeServices();
-    await createAndShareRelationshipAttributesBetweenAllServicesAndSucceedSome();
-
-    async function createAndShareRepositoryAttributesBetweenAllServices() {
-        for (let i = 0; i < numberOfServices; i++) {
-            const repositoryAttributeId = (
-                await executeFullCreateAndShareRepositoryAttributeFlow(runtimeServices[i], runtimeServices[(i + 1) % numberOfServices], {
-                    content: {
-                        value: {
-                            "@type": "DisplayName",
-                            value: `Service ${i + 1}`
-                        }
-                    }
-                })
-            ).shareInfo!.sourceAttribute!;
-
-            await executeFullShareRepositoryAttributeFlow(runtimeServices[i], runtimeServices[(i + 2) % numberOfServices], repositoryAttributeId);
-        }
-    }
-
-    async function createAndShareAndSucceedRepositoryAttributesBetweenSomeServices() {
-        for (let i = 0; i < numberOfServices; i++) {
-            const repositoryPredecessor = (
-                await executeFullCreateAndShareRepositoryAttributeFlow(runtimeServices[i], runtimeServices[(i + 1) % numberOfServices], {
-                    content: {
-                        value: {
-                            "@type": "EMailAddress",
-                            value: `Service${i + 1}@mail.com`
-                        }
-                    }
-                })
-            ).shareInfo!.sourceAttribute!;
-
-            await executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(runtimeServices[i], runtimeServices[(i + 1) % numberOfServices], {
-                predecessorId: repositoryPredecessor,
-                successorContent: {
-                    value: {
-                        "@type": "EMailAddress",
-                        value: `Service${i + 1}New@mail.com`
-                    }
-                }
-            });
-        }
-    }
-
-    async function createAndShareRelationshipAttributesBetweenAllServicesAndSucceedSome() {
-        for (let i = 0; i < numberOfServices; i++) {
-            for (let j = 1; j < numberOfServices; j++) {
-                const predecessorId = (
-                    await executeFullCreateAndShareRelationshipAttributeFlow(runtimeServices[i], runtimeServices[(i + j) % numberOfServices], {
-                        content: {
-                            key: "work phone",
-                            value: {
-                                "@type": "ProprietaryPhoneNumber",
-                                title: "Work phone",
-                                value: `0123${i}${j}`
-                            },
-                            confidentiality: RelationshipAttributeConfidentiality.Public
-                        }
-                    })
-                ).id;
-
-                if (j === 1) {
-                    await runtimeServices[i].consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-                        predecessorId: predecessorId,
-                        successorContent: {
-                            value: {
-                                "@type": "ProprietaryPhoneNumber",
-                                title: "Work phone",
-                                value: `00123${i}${j}`
-                            }
-                        }
-                    });
-                }
-            }
-        }
-    }
-}, 120000);
+}, 30000);
 afterAll(async () => await runtimeServiceProvider.stop());
 
 describe(CreateRepositoryAttributeUseCase.name, () => {
