@@ -79,7 +79,7 @@ describe("IQL Query", () => {
                         }
                     }
                 ],
-                expiresAt: DateTime.now().plus({ hour: 1 }).toISO() as any
+                expiresAt: DateTime.now().plus({ hour: 1 }).toISO()
             },
             peer: (await rTransportServices.account.getIdentityInfo()).value.address
         };
