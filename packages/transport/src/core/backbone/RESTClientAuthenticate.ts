@@ -1,11 +1,10 @@
 import { AxiosRequestConfig } from "axios";
 import _ from "lodash";
-import { IConfig } from "../Transport";
-import { Authenticator } from "./Authenticator";
+import { AbstractAuthenticator } from "./Authenticator";
 import { ClientResult } from "./ClientResult";
 import { Paginator, PaginatorPercentageCallback } from "./Paginator";
-import { RESTClient } from "./RESTClient";
 import { RequestError } from "./RequestError";
+import { IRESTClientConfig, RESTClient } from "./RESTClient";
 
 export interface CredentialsBasic {
     username: string;
@@ -14,8 +13,8 @@ export interface CredentialsBasic {
 
 export class RESTClientAuthenticate extends RESTClient {
     public constructor(
-        config: IConfig,
-        private readonly authenticator: Authenticator,
+        config: IRESTClientConfig,
+        private readonly authenticator: AbstractAuthenticator,
         requestConfig: AxiosRequestConfig = {}
     ) {
         super(config, requestConfig);
