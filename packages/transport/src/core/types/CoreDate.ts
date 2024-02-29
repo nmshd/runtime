@@ -15,8 +15,7 @@ export class CoreDate extends CoreSerializable {
     }
 
     public get date(): string {
-        if (!this.dateTime.isValid) throw new TransportError("The date is invalid.");
-        return this.dateTime.toISODate()!;
+        return this.asValidDateTime.toISODate();
     }
 
     public constructor(dateTime: DateTime = DateTime.utc()) {
