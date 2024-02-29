@@ -289,7 +289,7 @@ export class AttributesController extends ConsumptionBaseController {
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
     }
 
-    public async deleteChildAttributesOfComplexAttribute(complexAttribute: LocalAttribute): Promise<void> {
+    private async deleteChildAttributesOfComplexAttribute(complexAttribute: LocalAttribute): Promise<void> {
         if (!(complexAttribute.content instanceof IdentityAttribute)) {
             throw new ConsumptionError("Only identity attributes are allowed here");
         }
