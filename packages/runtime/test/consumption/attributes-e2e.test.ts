@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 import { DeletionStatus } from "@nmshd/consumption";
->>>>>>> 42f37dc (test: DeleteOwnSharedAttributeAndNotifyPeer)
 import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/transport";
 import {
@@ -10,11 +7,7 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
-
-
-
-
-
+    DeleteOwnSharedAttributeAndNotifyPeerUseCase,
     GetSharedVersionsOfRepositoryAttributeUseCase,
     GetVersionsOfAttributeUseCase,
     LocalAttributeDTO,
@@ -36,6 +29,7 @@ import {
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     RuntimeServiceProvider,
+    syncUntilHasMessageWithNotification,
     TestRuntimeServices,
     waitForRecipientToReceiveNotification
 } from "../lib";
@@ -1012,7 +1006,6 @@ describe("Get (shared) versions of attribute", () => {
     });
 });
 
-
 describe(DeleteOwnSharedAttributeAndNotifyPeerUseCase.name, () => {
     let sOSIAVersion0: LocalAttributeDTO;
     let sOSIAVersion1: LocalAttributeDTO;
@@ -1087,4 +1080,3 @@ describe(DeleteOwnSharedAttributeAndNotifyPeerUseCase.name, () => {
         expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
     });
 });
-
