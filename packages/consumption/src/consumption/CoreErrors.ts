@@ -150,6 +150,10 @@ class Attributes {
         );
     }
 
+    public cannotSucceedAttributesWithDeletionInfo() {
+        return new CoreError("error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo", "You cannot succeed attributes with a deletionInfo.");
+    }
+
     public invalidParentSuccessor(parentSuccessorId: string | CoreId) {
         return new CoreError("error.consumption.attributes.invalidParentSuccessor", `The complex parent successor (id: ${parentSuccessorId}) does not exist.`);
     }

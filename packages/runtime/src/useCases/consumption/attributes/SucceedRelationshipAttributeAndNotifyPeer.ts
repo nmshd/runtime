@@ -38,7 +38,6 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
         super(validator);
     }
 
-    // TODO: check for deleted Attributes
     protected async executeInternal(request: SucceedRelationshipAttributeAndNotifyPeerRequest): Promise<Result<SucceedRelationshipAttributeAndNotifyPeerResponse>> {
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
         if (typeof predecessor === "undefined") {

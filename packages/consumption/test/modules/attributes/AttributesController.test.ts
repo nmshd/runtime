@@ -22,11 +22,13 @@ import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
     ConsumptionController,
+    DeletionStatus,
     IAttributeSuccessorParams,
     ICreateLocalAttributeParams,
     ICreatePeerLocalAttributeParams,
     ICreateSharedLocalAttributeCopyParams,
     LocalAttribute,
+    LocalAttributeDeletionInfo,
     SharedAttributeCopyCreatedEvent
 } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
@@ -852,6 +854,36 @@ describe("AttributesController", function () {
                 const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
                 expect(validationResult).errorValidationResult({
                     code: "error.consumption.attributes.successionMustNotChangeValueType"
+                });
+            });
+
+            test("should catch if the predecessor has a deletionInfo", async function () {
+                const predecessor = await consumptionController.attributes.createAttributeUnsafe({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: CoreAddress.from("address")
+                    }),
+                    deletionInfo: LocalAttributeDeletionInfo.from({
+                        deletionStatus: DeletionStatus.ToBeDeleted,
+                        deletionDate: CoreDate.utc().add({ days: 1 })
+                    })
+                });
+                const successorData: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: CoreAddress.from("address")
+                    })
+                };
+
+                const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo"
                 });
             });
         });
