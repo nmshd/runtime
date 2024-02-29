@@ -865,36 +865,57 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
+        const attribute = await this.getLocalAttribute(id);
+        if (typeof attribute === "undefined") {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
+        }
+
+        const predecessors = await this.getPredecessorsOfAttribute(id);
+        const successors = await this.getSuccessorsOfAttribute(id);
+
+        const allAttributeVersions = [...successors.reverse(), attribute, ...predecessors];
+
+        return allAttributeVersions;
+    }
+
+    public async getPredecessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
         let attribute = await this.getLocalAttribute(id);
         if (typeof attribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
-        let i = 0;
-        while (attribute.succeededBy && i < 1000) {
-            const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (!successor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
-            }
-
-            attribute = successor;
-            i++;
-        }
-
-        let j = 0;
-        const attributeVersions: LocalAttribute[] = [attribute];
-        while (attribute.succeeds && j < 1000) {
+        const predecessors: LocalAttribute[] = [];
+        while (attribute.succeeds) {
             const predecessor = await this.getLocalAttribute(attribute.succeeds);
             if (!predecessor) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
             }
 
             attribute = predecessor;
-            attributeVersions.push(attribute);
-            j++;
+            predecessors.push(attribute);
         }
 
-        return attributeVersions;
+        return predecessors;
+    }
+
+    public async getSuccessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
+        let attribute = await this.getLocalAttribute(id);
+        if (typeof attribute === "undefined") {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
+        }
+
+        const successors: LocalAttribute[] = [];
+        while (attribute.succeededBy) {
+            const successor = await this.getLocalAttribute(attribute.succeededBy);
+            if (!successor) {
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
+            }
+
+            attribute = successor;
+            successors.push(successor);
+        }
+
+        return successors;
     }
 
     public async getSharedVersionsOfRepositoryAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
@@ -907,15 +928,13 @@ export class AttributesController extends ConsumptionBaseController {
             throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
         }
 
-        let i = 0;
-        while (repositoryAttribute.succeededBy && i < 1000) {
+        while (repositoryAttribute.succeededBy) {
             const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
             if (!successor) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
             }
 
             repositoryAttribute = successor;
-            i++;
         }
 
         const query: any = { "shareInfo.sourceAttribute": repositoryAttribute.id.toString() };
@@ -930,8 +949,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const ownSharedIdentityAttributeVersions: LocalAttribute[] = await this.getLocalAttributes(query);
 
-        let j = 0;
-        while (repositoryAttribute.succeeds && j < 1000) {
+        while (repositoryAttribute.succeeds) {
             const predecessor = await this.getLocalAttribute(repositoryAttribute.succeeds);
             if (!predecessor) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeeds.toString());
@@ -943,7 +961,6 @@ export class AttributesController extends ConsumptionBaseController {
             const sharedCopies = await this.getLocalAttributes(query);
 
             ownSharedIdentityAttributeVersions.push(...sharedCopies);
-            j++;
         }
 
         return ownSharedIdentityAttributeVersions;
