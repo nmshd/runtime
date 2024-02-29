@@ -1,5 +1,5 @@
 import { AbstractIntegerJSON, AbstractStringJSON } from "@nmshd/content";
-import { LocalAttributeDTO, RepositoryAttributeDVO } from "../../src";
+import { RepositoryAttributeDVO } from "../../src";
 import { ensureActiveRelationship, executeFullCreateAndShareRepositoryAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -20,26 +20,7 @@ beforeAll(async () => {
 
 afterAll(() => serviceProvider.stop());
 
-const repositoryAttributes: LocalAttributeDTO[] = [];
-const ownSharedIdentityAttributes: LocalAttributeDTO[] = [];
 describe("SharedToPeerAttributeDVO", () => {
-    beforeAll(async () => {
-        ownSharedIdentityAttributes.push(
-            await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
-                content: {
-                    value: {
-                        "@type": "CommunicationLanguage",
-                        value: "de"
-                    }
-                }
-            })
-        );
-
-        for (const attr of ownSharedIdentityAttributes) {
-            repositoryAttributes.push((await services1.consumption.attributes.getAttribute({ id: attr.shareInfo!.sourceAttribute! })).value);
-        }
-    });
-
     test("check the BirthYear", async () => {
         const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {

@@ -362,9 +362,7 @@ export async function exchangeAndAcceptRequestByMessage(
     const acceptIncomingRequestResult = await recipient.consumption.incomingRequests.accept({ requestId: createRequestResult.value.id, items: responseItems });
     expect(acceptIncomingRequestResult).toBeSuccessful();
     await recipient.eventBus.waitForEvent(MessageSentEvent);
-    const attributeResult2 = await sender.consumption.attributes.getAttributes({});
     await syncUntilHasMessageWithResponse(sender.transport, requestId);
-    const attributeResult3 = await sender.consumption.attributes.getAttributes({});
     await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     return senderMessage.value;
 }
@@ -514,7 +512,7 @@ export async function waitForRecipientToReceiveNotification(
  * Assumes that
  */
 export async function syncAndGetBaselineNumberOfAttributes(sender: TestRuntimeServices, filter: GetAttributesRequest): Promise<number> {
-    await sleep(500);
+    await sleep(1000);
     await sender.transport.account.syncEverything();
     return (await sender.consumption.attributes.getAttributes(filter)).value.length;
 }

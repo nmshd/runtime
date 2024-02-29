@@ -74,7 +74,6 @@ afterAll(async () => await runtimeServiceProvider.stop());
 describe("RequestModule", () => {
     describe("Relationships / RelationshipTemplates (onNewRelationship)", () => {
         let template: RelationshipTemplateDTO;
-        let requestId: string;
 
         const metadata = { aMetadataKey: "aMetadataValue" };
         const templateContent: RelationshipTemplateContentJSON = {
@@ -106,7 +105,7 @@ describe("RequestModule", () => {
         });
 
         test("completes the Request when the Request is accepted by creating a Relationship", async () => {
-            requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
 
             await expect(rEventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -143,7 +142,7 @@ describe("RequestModule", () => {
         });
 
         test("templator: creates a Relationship with the correct data on an incoming Relationship Change with a Response", async () => {
-            requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
 
             const relationships = await syncUntilHasRelationships(sTransportServices, 1);
@@ -171,7 +170,7 @@ describe("RequestModule", () => {
         });
 
         test("does not create a second Request from the same Template if an active Relationship exists", async () => {
-            requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
             await syncUntilHasRelationships(rTransportServices);
             await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
@@ -184,7 +183,7 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent if an active Relationship exists", async () => {
-            requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
             await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 

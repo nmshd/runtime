@@ -34,31 +34,6 @@ beforeEach(function () {
 
 describe("RelationshipTemplateDVO", () => {
     beforeAll(async () => {
-        await templator.consumption.attributes.createRepositoryAttribute({
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "Hugo"
-                }
-            }
-        });
-        await templator.consumption.attributes.createRepositoryAttribute({
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "Egon"
-                }
-            }
-        });
-        await templator.consumption.attributes.createRepositoryAttribute({
-            content: {
-                value: {
-                    "@type": "Surname",
-                    value: "Becker"
-                }
-            }
-        });
-
         const relationshipAttributeContent1 = {
             "@type": "RelationshipAttribute",
             owner: templator.address,
@@ -195,7 +170,7 @@ describe("RelationshipTemplateDVO", () => {
 
     test("TemplateDVO for requestor", async () => {
         const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
-        // await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+
         const dto = requestorTemplate;
         const dvo = (await requestor.expander.expandRelationshipTemplateDTO(dto)) as PeerRelationshipTemplateDVO;
         expect(dvo).toBeDefined();
