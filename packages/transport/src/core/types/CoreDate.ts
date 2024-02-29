@@ -183,7 +183,7 @@ export class CoreDate extends CoreSerializable {
             return DateTime.fromISO(value, { zone: "utc" }).toUTC();
         }
 
-        throw new TransportError("The provided object is invalid cannot be deserialized.");
+        throw new TransportError("The provided object is invalid and cannot be deserialized.");
     }
 
     public static from(value: ICoreDate | string | number): CoreDate {
