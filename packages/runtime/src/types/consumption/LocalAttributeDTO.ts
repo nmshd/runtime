@@ -1,4 +1,4 @@
-import { LocalAttributeShareInfoJSON } from "@nmshd/consumption";
+import { LocalAttributeDeletionInfoJSON, LocalAttributeShareInfoJSON } from "@nmshd/consumption";
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 
 export interface LocalAttributeDTO {
@@ -9,4 +9,5 @@ export interface LocalAttributeDTO {
     succeeds?: string;
     succeededBy?: string;
     shareInfo?: LocalAttributeShareInfoJSON;
+    deletionInfo?: LocalAttributeDeletionInfoJSON;
 }
