@@ -17,6 +17,7 @@ import {
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
+    syncAndGetBaselineNumberOfAttributes,
     syncUntilHasMessageWithRequest,
     TestRuntimeServices
 } from "../../lib";
@@ -201,6 +202,7 @@ describe("ShareAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
+        expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
         expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
     });
@@ -215,6 +217,9 @@ describe("ShareAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
+        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(sRuntimeServices, {
+            query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
+        });
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
 
         const dto = senderMessage;
@@ -263,8 +268,10 @@ describe("ShareAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
-        expect(attributeResult.value[0].id).toBeDefined();
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        const numberOfAttributes = attributeResult.value.length;
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
     });
 
     test("check the attributes for the sender", async () => {

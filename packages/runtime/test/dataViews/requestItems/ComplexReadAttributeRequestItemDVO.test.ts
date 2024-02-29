@@ -493,6 +493,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
             query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
+        expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
 
         const returnedValue = attributeResult.value[0].content.value as PersonNameJSON;

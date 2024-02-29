@@ -201,6 +201,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "ProprietaryString", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
+        expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
 
         const proprietaryString = attributeResult.value[0].content.value as ProprietaryStringJSON;

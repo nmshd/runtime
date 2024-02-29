@@ -195,6 +195,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
+        expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
         expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
 

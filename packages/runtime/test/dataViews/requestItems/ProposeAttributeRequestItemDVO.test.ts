@@ -30,6 +30,7 @@ import {
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
+    syncAndGetBaselineNumberOfAttributes,
     syncUntilHasMessageWithRequest,
     TestRuntimeServices
 } from "../../lib";
@@ -45,6 +46,7 @@ let consumptionServices1: ConsumptionServices;
 let consumptionServices2: ConsumptionServices;
 let eventBus1: MockEventBus;
 let eventBus2: MockEventBus;
+let address2: string;
 
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
@@ -63,7 +65,7 @@ beforeAll(async () => {
     eventBus2 = runtimeServices2.eventBus;
 
     await establishRelationship(transportServices1, transportServices2);
-    const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
+    address2 = (await transportServices2.account.getIdentityInfo()).value.address;
 
     const attribute1 = await consumptionServices2.attributes.createRepositoryAttribute({
         content: {
@@ -74,6 +76,14 @@ beforeAll(async () => {
         }
     });
 
+    await consumptionServices2.attributes.createRepositoryAttribute({
+        content: {
+            value: {
+                "@type": "Surname",
+                value: "Weigl"
+            }
+        }
+    });
     requestContent = {
         content: {
             items: [
@@ -101,14 +111,14 @@ beforeAll(async () => {
                 }).toJSON()
             ]
         },
-        peer: recipientAddress
+        peer: address2
     };
 
     responseItems = [
         { accept: true, attributeId: attribute1.value.id } as AcceptProposeAttributeRequestItemParametersJSON,
         {
             accept: true,
-            attribute: Object.assign({}, (requestContent.content.items[1] as ProposeAttributeRequestItemJSON).attribute, { owner: recipientAddress })
+            attribute: Object.assign({}, (requestContent.content.items[1] as ProposeAttributeRequestItemJSON).attribute, { owner: address2 })
         } as AcceptProposeAttributeRequestItemParametersJSON
     ];
 }, 30000);
@@ -250,10 +260,6 @@ describe("ProposeAttributeRequestItemDVO", () => {
         });
         expect(acceptResult).toBeSuccessful();
 
-        const givenNameRepositoryResult2 = await consumptionServices2.attributes.getAttributes({
-            query: { shareInfo: "!", "content.value.@type": "GivenName" }
-        });
-        expect(givenNameRepositoryResult2.value).toHaveLength(1);
         const dto = recipientMessage;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -356,6 +362,12 @@ describe("ProposeAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
+        const baselineNumberOfGivenNames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+            query: { "content.value.@type": "GivenName", "shareInfo.peer": address2 }
+        });
+        const baselineNumberOfSurnames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+            query: { "content.value.@type": "Surname", "shareInfo.peer": address2 }
+        });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         const dto = senderMessage;
@@ -419,6 +431,7 @@ describe("ProposeAttributeRequestItemDVO", () => {
         });
         expect(givenNameResult).toBeSuccessful();
         const numberOfGivenNames = givenNameResult.value.length;
+        expect(numberOfGivenNames - baselineNumberOfGivenNames).toBe(1);
         expect(givenNameResult.value[numberOfGivenNames - 1].id).toBeDefined();
         const givenName = givenNameResult.value[numberOfGivenNames - 1].content.value as GivenNameJSON;
         expect(givenName.value).toBe("Marlene");
@@ -431,6 +444,7 @@ describe("ProposeAttributeRequestItemDVO", () => {
         });
         expect(surnameResult).toBeSuccessful();
         const numberOfSurnames = surnameResult.value.length;
+        expect(numberOfSurnames - baselineNumberOfSurnames).toBe(1);
         expect(surnameResult.value[numberOfSurnames - 1].id).toBeDefined();
 
         const surname = surnameResult.value[numberOfSurnames - 1].content.value as SurnameJSON;
