@@ -9,6 +9,9 @@ import { AttributeMapper } from "../../consumption";
 export interface GetAttributesForRelationshipRequest {
     id: RelationshipIdString;
     hideTechnical?: boolean;
+    /**
+     * default: true
+     */
     onlyLatestVersions?: boolean;
 }
 
