@@ -186,10 +186,6 @@ class Attributes {
         return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
     }
 
-    public isNotOwnSharedAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotOwnSharedAttribute", `The attribute (id: ${attributeId}) is not an own shared attribute.`);
-    }
-
     public isNotPeerSharedAttribute(attributeId: string | CoreId) {
         return new CoreError("error.consumption.attributes.isNotPeerSharedAttribute", `The attribute (id: ${attributeId}) is not a peer shared attribute.`);
     }

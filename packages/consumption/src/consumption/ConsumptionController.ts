@@ -24,6 +24,7 @@ import {
     NotificationItemProcessorRegistry,
     NotificationsController,
     OutgoingRequestsController,
+    OwnSharedAttributeDeletedByOwnerNotificationItemProcessor,
     PeerSharedAttributeSucceededNotificationItemProcessor,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
@@ -34,7 +35,6 @@ import {
     SettingsController,
     ShareAttributeRequestItemProcessor
 } from "../modules";
-import { OwnSharedAttributeDeletedByOwnerNotificationItemProcessor } from "../modules/notifications/itemProcessors/OwnSharedAttributeDeletedByOwnerNotificationItemProcessor";
 
 export class ConsumptionController {
     public constructor(
