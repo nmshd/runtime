@@ -192,15 +192,23 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return this;
     }
 
-    public hasPeerSharedAttributeDeletionInfo(): boolean {
-        return this.deletionInfo?.deletionStatus === DeletionStatus.DeletedByOwner || this.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeleted;
+    public hasPeerSharedAttributeDeletionInfo(): this is LocalAttribute & {
+        deletionInfo: LocalAttributeDeletionInfo & { deletionStatus: DeletionStatus.DeletedByOwner | DeletionStatus.ToBeDeleted };
+    } {
+        if (!this.hasDeletionInfo()) return false;
+
+        return this.deletionInfo.deletionStatus === DeletionStatus.DeletedByOwner || this.deletionInfo.deletionStatus === DeletionStatus.ToBeDeleted;
     }
 
-    public hasOwnSharedAttributeDeletionInfo(): boolean {
-        return this.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer || this.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeletedByPeer;
+    public hasOwnSharedAttributeDeletionInfo(): this is LocalAttribute & {
+        deletionInfo: LocalAttributeDeletionInfo & { deletionStatus: DeletionStatus.DeletedByPeer | DeletionStatus.ToBeDeletedByPeer };
+    } {
+        if (!this.hasDeletionInfo()) return false;
+
+        return this.deletionInfo.deletionStatus === DeletionStatus.DeletedByPeer || this.deletionInfo.deletionStatus === DeletionStatus.ToBeDeletedByPeer;
     }
 
-    public hasDeletionInfo(): boolean {
+    public hasDeletionInfo(): this is LocalAttribute & { deletionInfo: LocalAttributeDeletionInfo } {
         return typeof this.deletionInfo !== "undefined";
     }
 
