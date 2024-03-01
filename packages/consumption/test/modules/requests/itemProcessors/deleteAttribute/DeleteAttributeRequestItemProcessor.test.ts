@@ -346,7 +346,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 deletionDate: dateInFuture.toString()
             };
 
-            const result = await processor.canAccept(requestItem, acceptParams, request);
+            const result = processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).successfulValidationResult();
         });
@@ -377,7 +377,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 deletionDate: dateInPast.toString()
             };
 
-            const result = await processor.canAccept(requestItem, acceptParams, request);
+            const result = processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters"
@@ -410,7 +410,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 deletionDate: invalidDate
             };
 
-            const result = await processor.canAccept(requestItem, acceptParams, request);
+            const result = processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters"
