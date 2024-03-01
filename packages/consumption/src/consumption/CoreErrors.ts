@@ -155,7 +155,10 @@ class Attributes {
     }
 
     public cannotSucceedAttributesWithDeletionInfo() {
-        return new CoreError("error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo", "You cannot succeed attributes with a deletionInfo.");
+        return new CoreError(
+            "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo",
+            "You cannot succeed attributes with a deletionInfo, since the peer may have already deleted it or marked it for deletion."
+        );
     }
 
     public cannotSetDeletionInfoOfRepositoryAttributes() {
