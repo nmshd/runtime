@@ -819,6 +819,10 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(CoreErrors.attributes.successionMustNotChangeValueType());
         }
 
+        if (predecessor.hasDeletionInfo()) {
+            return ValidationResult.error(CoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        }
+
         return ValidationResult.success();
     }
 

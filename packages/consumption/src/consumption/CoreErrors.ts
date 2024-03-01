@@ -154,6 +154,34 @@ class Attributes {
         return new CoreError("error.consumption.attributes.invalidParentSuccessor", `The complex parent successor (id: ${parentSuccessorId}) does not exist.`);
     }
 
+    public cannotSucceedAttributesWithDeletionInfo() {
+        return new CoreError(
+            "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo",
+            "You cannot succeed attributes with a deletionInfo, since the peer may have already deleted it or marked it for deletion."
+        );
+    }
+
+    public cannotSetDeletionInfoOfRepositoryAttributes() {
+        return new CoreError(
+            "error.consumption.attributes.cannotSetDeletionInfoOfRepositoryAttributes",
+            "RepositoryAttributes may not have a deletionInfo, since they don't have a peer and you can delete them directly."
+        );
+    }
+
+    public invalidDeletionInfoOfOwnSharedAttribute() {
+        return new CoreError(
+            "error.consumption.attributes.invalidDeletionInfoOfOwnSharedAttribute",
+            "The deletionStatus 'DeletedByOwner' and 'ToBeDeleted' can only be set for peer shared Attributes."
+        );
+    }
+
+    public invalidDeletionInfoOfPeerSharedAttribute() {
+        return new CoreError(
+            "error.consumption.attributes.invalidDeletionInfoOfPeerSharedAttribute",
+            "The deletionStatus 'DeletedByPeer' and 'ToBeDeletedByPeer' can only be set for own shared Attributes."
+        );
+    }
+
     public invalidPropertyValue(message: string) {
         return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
     }
