@@ -12,6 +12,9 @@ export interface GetPeerSharedAttributesRequest {
     onlyValid?: boolean;
     query?: GetPeerSharedAttributesRequestQuery;
     hideTechnical?: boolean;
+    /**
+     * default: true
+     */
     onlyLatestVersions?: boolean;
 }
 
@@ -28,6 +31,9 @@ export interface GetPeerSharedAttributesRequestQuery {
     shareInfo?: string | string[];
     "shareInfo.requestReference"?: string | string[];
     "shareInfo.notificationReference"?: string | string[];
+    deletionInfo?: string | string[];
+    "deletionInfo.deletionStatus"?: string | string[];
+    "deletionInfo.deletionDate"?: string | string[];
 }
 
 class Validator extends SchemaValidator<GetPeerSharedAttributesRequest> {

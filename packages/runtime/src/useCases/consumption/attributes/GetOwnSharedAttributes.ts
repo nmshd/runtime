@@ -13,6 +13,9 @@ export interface GetOwnSharedAttributesRequest {
     onlyValid?: boolean;
     query?: GetOwnSharedAttributeRequestQuery;
     hideTechnical?: boolean;
+    /**
+     * default: true
+     */
     onlyLatestVersions?: boolean;
 }
 
@@ -30,6 +33,9 @@ export interface GetOwnSharedAttributeRequestQuery {
     "shareInfo.requestReference"?: string | string[];
     "shareInfo.notificationReference"?: string | string[];
     "shareInfo.sourceAttribute"?: string | string[];
+    deletionInfo?: string | string[];
+    "deletionInfo.deletionStatus"?: string | string[];
+    "deletionInfo.deletionDate"?: string | string[];
 }
 
 class Validator extends SchemaValidator<GetOwnSharedAttributesRequest> {

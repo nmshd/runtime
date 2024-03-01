@@ -1,9 +1,6 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreSerializable, ICoreDate } from "@nmshd/transport";
 
-// TODO: check all places that need to be adjusted adding deletionStatus to LocalAttribute
-// TODO: check all use cases that need to be adjusted if an attribute is marked for deletion
-
 export enum DeletionStatus {
     ToBeDeleted = "ToBeDeleted",
     ToBeDeletedByPeer = "ToBeDeletedByPeer",
