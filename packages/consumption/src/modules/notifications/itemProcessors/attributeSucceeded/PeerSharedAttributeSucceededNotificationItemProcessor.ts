@@ -1,12 +1,12 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { IdentityAttribute, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
 import { TransportLoggerFactory } from "@nmshd/transport";
-import { ConsumptionController } from "../../../consumption/ConsumptionController";
-import { CoreErrors } from "../../../consumption/CoreErrors";
-import { LocalAttribute, PeerSharedAttributeSucceededEvent } from "../../attributes";
-import { ValidationResult } from "../../common";
-import { LocalNotification } from "../local/LocalNotification";
-import { AbstractNotificationItemProcessor } from "./AbstractNotificationItemProcessor";
+import { ConsumptionController } from "../../../../consumption/ConsumptionController";
+import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { LocalAttribute, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { ValidationResult } from "../../../common";
+import { LocalNotification } from "../../local/LocalNotification";
+import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
 
 export class PeerSharedAttributeSucceededNotificationItemProcessor extends AbstractNotificationItemProcessor<PeerSharedAttributeSucceededNotificationItem> {
     private readonly _logger: ILogger;

@@ -1,13 +1,13 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
-import { ConsumptionController } from "../../../consumption/ConsumptionController";
-import { CoreErrors } from "../../../consumption/CoreErrors";
-import { PeerSharedAttributeDeletedByPeerEvent } from "../../attributes";
-import { DeletionStatus, LocalAttributeDeletionInfo } from "../../attributes/local/LocalAttributeDeletionInfo";
-import { ValidationResult } from "../../common";
-import { LocalNotification } from "../local/LocalNotification";
-import { AbstractNotificationItemProcessor } from "./AbstractNotificationItemProcessor";
+import { ConsumptionController } from "../../../../consumption/ConsumptionController";
+import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { PeerSharedAttributeDeletedByPeerEvent } from "../../../attributes";
+import { DeletionStatus, LocalAttributeDeletionInfo } from "../../../attributes/local/LocalAttributeDeletionInfo";
+import { ValidationResult } from "../../../common";
+import { LocalNotification } from "../../local/LocalNotification";
+import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
 
 export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends AbstractNotificationItemProcessor<PeerSharedAttributeDeletedByPeerNotificationItem> {
     private readonly _logger: ILogger;
