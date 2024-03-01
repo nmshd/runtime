@@ -51,14 +51,14 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
 
         let updatedAttribute = attribute;
         if (typeof attribute.deletionInfo === "undefined") {
-            attribute.deletionInfo = deletionInfo;
+            attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
             updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
         }
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
         for (const predecessor of predecessors) {
             if (typeof predecessor.deletionInfo === "undefined") {
-                predecessor.deletionInfo = deletionInfo;
+                predecessor.setDeletionInfo(deletionInfo, this.accountController.identity.address);
                 await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
             }
         }
