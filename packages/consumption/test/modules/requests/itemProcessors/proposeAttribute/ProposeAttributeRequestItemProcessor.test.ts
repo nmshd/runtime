@@ -48,7 +48,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         processor = new ProposeAttributeRequestItemProcessor(consumptionController);
     });
 
-    // TODO: check all request tests
     describe("canCreateOutgoingRequestItem", function () {
         test("returns success when proposing an Identity Attribute", function () {
             const recipientAddress = CoreAddress.from("recipientAddress");
@@ -384,7 +383,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem",
+                code: "error.consumption.requests.invalidAcceptParameters",
                 message: /The given Attribute belongs to someone else. You can only share own Attributes./
             });
         });
@@ -419,7 +418,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem",
+                code: "error.consumption.requests.invalidAcceptParameters",
                 message: /The given Attribute belongs to someone else. You can only share own Attributes./
             });
         });
