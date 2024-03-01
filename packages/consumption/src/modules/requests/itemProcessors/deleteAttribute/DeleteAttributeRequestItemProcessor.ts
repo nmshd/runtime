@@ -74,7 +74,11 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, requestItem.attributeId.toString());
         }
 
-        attribute.deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeleted, deletionDate: deletionDate });
+        const deletionInfo = LocalAttributeDeletionInfo.from({
+            deletionStatus: DeletionStatus.ToBeDeleted,
+            deletionDate: deletionDate
+        });
+        attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
         await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
 
         return DeleteAttributeAcceptResponseItem.from({
@@ -97,7 +101,8 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (attribute.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer) return;
 
-        attribute.deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: responseItem.deletionDate });
+        const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: responseItem.deletionDate });
+        attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
         await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
     }
 }
