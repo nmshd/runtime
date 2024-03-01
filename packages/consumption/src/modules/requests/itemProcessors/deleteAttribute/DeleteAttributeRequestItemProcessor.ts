@@ -27,7 +27,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The Attribute was already deleted by the peer."));
         }
 
-        if (attribute.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeletedByPeer && attribute.deletionInfo.deletionDate.isAfter(CoreDate.utc())) {
+        if (attribute.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeletedByPeer) {
             return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The peer already accepted the deletion of the Attribute."));
         }
 
@@ -44,11 +44,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         return ValidationResult.success();
     }
 
-    public override async canAccept(
-        _requestItem: DeleteAttributeRequestItem,
-        params: AcceptDeleteAttributeRequestItemParametersJSON,
-        _requestInfo: LocalRequestInfo
-    ): Promise<ValidationResult> {
+    public override canAccept(_requestItem: DeleteAttributeRequestItem, params: AcceptDeleteAttributeRequestItemParametersJSON, _requestInfo: LocalRequestInfo): ValidationResult {
         const deletionDate = CoreDate.from(params.deletionDate);
 
         if (!deletionDate.dateTime.isValid) {
@@ -67,19 +63,25 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         params: AcceptDeleteAttributeRequestItemParametersJSON,
         _requestInfo: LocalRequestInfo
     ): Promise<DeleteAttributeAcceptResponseItem> {
-        const deletionDate = CoreDate.from(params.deletionDate);
-
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
         if (typeof attribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, requestItem.attributeId.toString());
         }
 
+        const deletionDate = CoreDate.from(params.deletionDate);
         const deletionInfo = LocalAttributeDeletionInfo.from({
             deletionStatus: DeletionStatus.ToBeDeleted,
             deletionDate: deletionDate
         });
+
         attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
         await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
+
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+        for (const predecessor of predecessors) {
+            predecessor.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+            await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+        }
 
         return DeleteAttributeAcceptResponseItem.from({
             deletionDate: deletionDate,
@@ -101,8 +103,19 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (attribute.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer) return;
 
-        const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: responseItem.deletionDate });
+        const deletionInfo = LocalAttributeDeletionInfo.from({
+            deletionStatus: DeletionStatus.ToBeDeletedByPeer,
+            deletionDate: responseItem.deletionDate
+        });
         attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
         await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
+
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+        for (const predecessor of predecessors) {
+            if (predecessor.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                predecessor.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+                await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+            }
+        }
     }
 }
