@@ -38,7 +38,6 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         return ValidationResult.success();
     }
 
-    // TODO: add deletion of predecessors
     public override async process(
         notificationItem: PeerSharedAttributeDeletedByPeerNotificationItem,
         _notification: LocalNotification
@@ -46,13 +45,20 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") return;
 
-        const deletionStatus = LocalAttributeDeletionInfo.from({
+        const deletionDate = CoreDate.utc();
+        const deletionInfo = LocalAttributeDeletionInfo.from({
             deletionStatus: DeletionStatus.DeletedByPeer,
-            deletionDate: CoreDate.utc()
+            deletionDate: deletionDate
         });
-        attribute.deletionInfo = deletionStatus;
 
+        attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
         const updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
+
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+        for (const predecessor of predecessors) {
+            predecessor.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+            await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+        }
 
         return new PeerSharedAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), updatedAttribute);
     }
@@ -63,7 +69,12 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
 
         // TODO: the status before might have been 'toBeDeletedByPeer', but I don't think we can save it between process and rollback
         attribute.deletionInfo = undefined;
-
         await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
+
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+        for (const predecessor of predecessors) {
+            predecessor.deletionInfo = undefined;
+            await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+        }
     }
 }

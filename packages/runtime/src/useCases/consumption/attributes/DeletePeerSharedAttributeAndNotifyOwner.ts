@@ -38,6 +38,11 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
             return Result.fail(RuntimeErrors.attributes.isNotPeerSharedAttribute(peerSharedAttributeId));
         }
 
+        const predecessors = await this.attributeController.getPredecessorsOfAttribute(peerSharedAttributeId);
+        for (const predecessor of predecessors) {
+            await this.attributeController.deleteAttribute(predecessor);
+        }
+
         await this.attributeController.deleteAttribute(peerSharedAttribute);
 
         const notificationId = await ConsumptionIds.notification.generate();
