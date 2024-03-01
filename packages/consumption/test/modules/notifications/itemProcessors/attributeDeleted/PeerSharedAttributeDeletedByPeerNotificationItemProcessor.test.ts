@@ -199,10 +199,7 @@ describe("PeerSharedAttributeDeletedByPeerNotificationItemProcessor", function (
             }
         };
 
-        const { predecessor: updatedPredecessorOSRA, successor: successorOSRA } = await consumptionController.attributes.succeedOwnSharedRelationshipAttribute(
-            predecessorOSRA.id,
-            successorParams
-        );
+        const { successor: successorOSRA } = await consumptionController.attributes.succeedOwnSharedRelationshipAttribute(predecessorOSRA.id, successorParams);
 
         const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({
             attributeId: successorOSRA.id
