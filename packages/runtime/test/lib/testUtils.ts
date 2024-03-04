@@ -527,7 +527,9 @@ export async function waitForEvent<TEvent>(
     let eventFired = false;
 
     const eventPromise = new Promise<TEvent>((resolve) => {
+        console.log("subscribing to", subscriptionTarget);
         subscriptionId = eventBus.subscribe(subscriptionTarget, (event: TEvent) => {
+            console.log("fired");
             eventFired = true;
             if (assertionFunction && !assertionFunction(event)) return;
 
