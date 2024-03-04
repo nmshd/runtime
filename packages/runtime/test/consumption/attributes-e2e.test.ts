@@ -1,6 +1,6 @@
-import { DeletionStatus, PeerSharedAttributeDeletedByPeerEvent } from "@nmshd/consumption";
-import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
-import { CoreDate, CoreId } from "@nmshd/transport";
+import { DeletionStatus, PeerSharedAttributeDeletedByPeerEvent } from "@nmshd/consumption"
+import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content"
+import { CoreDate, CoreId } from "@nmshd/transport"
 import {
     AttributeCreatedEvent,
     CreateAndShareRelationshipAttributeRequest,
@@ -18,7 +18,7 @@ import {
     SucceedRelationshipAttributeAndNotifyPeerUseCase,
     SucceedRepositoryAttributeRequest,
     SucceedRepositoryAttributeUseCase
-} from "../../src";
+} from "../../src"
 import {
     acceptIncomingShareAttributeRequest,
     ensureActiveRelationship,
@@ -31,7 +31,7 @@ import {
     syncUntilHasMessageWithNotification,
     TestRuntimeServices,
     waitForRecipientToReceiveNotification
-} from "../lib";
+} from "../lib"
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 
@@ -1078,7 +1078,6 @@ describe(DeletePeerSharedAttributeAndNotifyOwnerUseCase.name, () => {
         await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
             return e.data.id.toString() === sOSIAVersion1.id;
         });
-        console.log(services1.eventBus.publishedEvents.map((a) => a.namespace));
 
         const timeAfterUpdate = CoreDate.utc();
 
