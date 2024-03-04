@@ -524,13 +524,9 @@ export async function waitForEvent<TEvent>(
     timeout = 50000
 ): Promise<TEvent> {
     let subscriptionId: number;
-    let eventFired = false;
 
     const eventPromise = new Promise<TEvent>((resolve) => {
-        console.log("subscribing to", subscriptionTarget);
         subscriptionId = eventBus.subscribe(subscriptionTarget, (event: TEvent) => {
-            console.log("fired");
-            eventFired = true;
             if (assertionFunction && !assertionFunction(event)) return;
 
             resolve(event);
@@ -541,13 +537,7 @@ export async function waitForEvent<TEvent>(
     let timeoutId: NodeJS.Timeout;
     const timeoutPromise = new Promise<TEvent>((_resolve, reject) => {
         timeoutId = setTimeout(
-            () =>
-                reject(
-                    new Error(
-                        // @ts-expect-error
-                        `timeout exceeded for waiting for event ${typeof subscriptionTarget === "string" ? subscriptionTarget : subscriptionTarget.name} ${eventFired ? "event got fired but assertion function did not match" : ""} ${eventBus.publishedEvents.map((a) => a.namespace)}`
-                    )
-                ),
+            () => reject(new Error(`timeout exceeded for waiting for event ${typeof subscriptionTarget === "string" ? subscriptionTarget : subscriptionTarget.name}`)),
             timeout
         );
     });

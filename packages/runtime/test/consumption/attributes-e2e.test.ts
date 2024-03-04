@@ -1070,15 +1070,12 @@ describe(DeletePeerSharedAttributeAndNotifyOwnerUseCase.name, () => {
         expect(CoreDate.from(updatedAttribute.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
     });
 
-    test.only("should notify about identity attribute deletion of succeeded attribute by peer", async () => {
+    test("should notify about identity attribute deletion of succeeded attribute by peer", async () => {
         const notification = (await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sOSIAVersion1.id })).value;
         const timeBeforeUpdate = CoreDate.utc();
         services1.eventBus.reset();
         await syncUntilHasMessageWithNotification(services1.transport, notification.id);
-        console.log(services1.eventBus.publishedEvents.map((a) => a.namespace));
         await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
-            console.log("%c 🇹🇫: e.data.id.toString() ", "font-size:16px;background-color:#e4cfe4;color:black;", e.data.id.toString());
-            console.log("%c 🇻🇬: sOSIAVersion1.id ", "font-size:16px;background-color:#dedb06;color:black;", sOSIAVersion1.id);
             return e.data.id.toString() === sOSIAVersion1.id;
         });
 
