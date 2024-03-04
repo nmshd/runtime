@@ -1,4 +1,4 @@
-import { DeletionStatus, PeerSharedAttributeDeletedByPeerEvent } from "@nmshd/consumption";
+import { DeletionStatus } from "@nmshd/consumption";
 import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/transport";
 import {
@@ -12,6 +12,7 @@ import {
     GetVersionsOfAttributeUseCase,
     LocalAttributeDTO,
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+    PeerSharedAttributeDeletedByPeerEvent,
     RepositoryAttributeSucceededEvent,
     ShareRepositoryAttributeRequest,
     ShareRepositoryAttributeUseCase,
