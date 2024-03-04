@@ -215,7 +215,7 @@ describe("Message errors", () => {
                 items: [wrongRequestItem]
             }
         });
-        expect(result).toBeAnError("The Request must have the same content than the LocalRequest.", "error.runtime.validation.invalidPropertyValue");
+        expect(result).toBeAnError("The sent Request must have the same content as the LocalRequest.", "error.runtime.validation.invalidPropertyValue");
     });
 
     test("should throw correct error if Message's recipient doesn't match Request's peer", async () => {

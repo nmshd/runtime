@@ -3,6 +3,7 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { Request } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreId, File, FileController, MessageController } from "@nmshd/transport";
+import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import { MessageDTO } from "../../../types";
 import { AddressString, FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -66,10 +67,8 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
         if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
 
-        for (let i = 0; i < transformedContent.items.length; i++) {
-            if (transformedContent.items[i].toJSON !== localRequest.content.items[i].toJSON) {
-                return RuntimeErrors.general.invalidPropertyValue("The Request must have the same content than the LocalRequest.");
-            }
+        if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
+            return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
         }
 
         if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
