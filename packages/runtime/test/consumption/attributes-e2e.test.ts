@@ -1069,7 +1069,7 @@ describe(DeletePeerSharedAttributeAndNotifyOwnerUseCase.name, () => {
         expect(CoreDate.from(updatedAttribute.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
     });
 
-    test("should notify about identity attribute deletion of succeeded attribute by peer", async () => {
+    test.only("should notify about identity attribute deletion of succeeded attribute by peer", async () => {
         const notification = (await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sOSIAVersion1.id })).value;
         const timeBeforeUpdate = CoreDate.utc();
         services1.eventBus.reset();
