@@ -543,7 +543,7 @@ export async function waitForEvent<TEvent>(
                 reject(
                     new Error(
                         // @ts-expect-error
-                        `timeout exceeded for waiting for event ${typeof subscriptionTarget === "string" ? subscriptionTarget : subscriptionTarget.name} ${eventFired ? "event got fired but assertion function did not match" : ""} ${eventBus.publishedEvents}`
+                        `timeout exceeded for waiting for event ${typeof subscriptionTarget === "string" ? subscriptionTarget : subscriptionTarget.name} ${eventFired ? "event got fired but assertion function did not match" : ""} ${eventBus.publishedEvents.namespace}`
                     )
                 ),
             timeout
