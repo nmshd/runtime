@@ -26,7 +26,11 @@ export class MockEventBus extends EventEmitter2EventBus {
         predicate?: (event: TEvent) => boolean
     ): Promise<TEvent> {
         const alreadyTriggeredEvents = this.publishedEvents.find((e) => {
-            return e.namespace === subscriptionTarget.namespace && e instanceof (subscriptionTarget as any) && (!predicate || predicate(e as TEvent));
+            return (
+                e.namespace === subscriptionTarget.namespace &&
+                (typeof subscriptionTarget === "string" || e instanceof (subscriptionTarget as any)) &&
+                (!predicate || predicate(e as TEvent))
+            );
         }) as TEvent | undefined;
         if (alreadyTriggeredEvents) {
             return alreadyTriggeredEvents;
