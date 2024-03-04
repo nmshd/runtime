@@ -1,4 +1,5 @@
-import { CoreDate } from "@nmshd/transport";
+import { ConsentRequestItemJSON } from "@nmshd/content";
+import { CoreDate, CoreId } from "@nmshd/transport";
 import { GetMessagesQuery, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
 import {
     ensureActiveRelationship,
@@ -15,12 +16,15 @@ import {
 const serviceProvider = new RuntimeServiceProvider();
 let client1: TestRuntimeServices;
 let client2: TestRuntimeServices;
+let client3: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(2);
+    const runtimeServices = await serviceProvider.launch(3);
     client1 = runtimeServices[0];
     client2 = runtimeServices[1];
+    client3 = runtimeServices[2];
     await ensureActiveRelationship(client1.transport, client2.transport);
+    await ensureActiveRelationship(client1.transport, client3.transport);
 }, 30000);
 
 beforeEach(() => {
@@ -102,10 +106,25 @@ describe("Messaging", () => {
 });
 
 describe("Message errors", () => {
-    const fakeAddress = "id1PNvUP4jHD74qo6usnWNoaFGFf33MXZi6c";
+    let requestItem: ConsentRequestItemJSON;
+    let requestId: string;
+    beforeAll(async () => {
+        requestItem = {
+            "@type": "ConsentRequestItem",
+            consent: "I consent to this RequestItem",
+            mustBeAccepted: true
+        };
+        const createRequestResult = await client1.consumption.outgoingRequests.create({
+            content: {
+                items: [requestItem]
+            },
+            peer: client2.address
+        });
+        requestId = createRequestResult.value.id;
+    });
     test("should throw correct error for empty 'to' in the Message", async () => {
         const result = await client1.transport.messages.sendMessage({
-            recipients: [fakeAddress],
+            recipients: [client2.address],
             content: {
                 "@type": "Mail",
                 to: [],
@@ -118,7 +137,7 @@ describe("Message errors", () => {
 
     test("should throw correct error for missing 'to' in the Message", async () => {
         const result = await client1.transport.messages.sendMessage({
-            recipients: [fakeAddress],
+            recipients: [client2.address],
             content: {
                 "@type": "Mail",
                 subject: "A Subject",
@@ -126,6 +145,73 @@ describe("Message errors", () => {
             }
         });
         expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
+    });
+
+    test("should throw correct error for missing Request ID in a Message with Request content", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                items: [requestItem]
+            }
+        });
+        expect(result).toBeAnError("The Request must have an id.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for missing LocalRequest trying to send a Message with Request content", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: CoreId.from("REQxxxxxxxxxxxxxxxxx"),
+                items: [requestItem]
+            }
+        });
+        expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    // TODO: don't allow to send message to yourself
+    // TODO: should allow to send message with mail to multiple recipients
+    // TODO: same with Notifications
+
+    test("should throw correct error for trying to send a Message with Request content to multiple recipients", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address, client3.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result).toBeAnError("Only one recipient is allowed for sending Requests.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for trying to send a Message with a Request content that doesn't match the content of the LocalRequest", async () => {
+        const wrongRequestItem = {
+            "@type": "AuthenticationRequestItem",
+            mustBeAccepted: true
+        };
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [wrongRequestItem]
+            }
+        });
+        expect(result).toBeAnError("The Request must have the same content than the LocalRequest.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error if Message's recipient doesn't match Request's peer", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client3.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result).toBeAnError("The recipient does not match the Request's peer.", "error.runtime.validation.invalidPropertyValue");
     });
 });
 

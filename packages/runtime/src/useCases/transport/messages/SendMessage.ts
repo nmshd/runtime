@@ -60,16 +60,22 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         if (!(transformedContent instanceof Request)) return;
 
         if (typeof transformedContent.id === "undefined") {
-            return RuntimeErrors.general.invalidPropertyValue("The request must have an id.");
+            return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
         }
 
         const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
         if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
 
-        if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending requests.");
+        for (let i = 0; i < transformedContent.items.length; i++) {
+            if (transformedContent.items[i].toJSON !== localRequest.content.items[i].toJSON) {
+                return RuntimeErrors.general.invalidPropertyValue("The Request must have the same content than the LocalRequest.");
+            }
+        }
+
+        if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
 
         const recipient = CoreAddress.from(recipients[0]);
-        if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the request's peer.");
+        if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
 
         return;
     }
