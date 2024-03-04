@@ -521,7 +521,7 @@ export async function waitForEvent<TEvent>(
     eventBus: EventBus,
     subscriptionTarget: SubscriptionTarget<TEvent>,
     assertionFunction?: (t: TEvent) => boolean,
-    timeout = 50000
+    timeout = 5000
 ): Promise<TEvent> {
     let subscriptionId: number;
 
