@@ -1,6 +1,6 @@
 import { ConsentRequestItemJSON } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/transport";
-import { GetMessagesQuery, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
+import { GetMessagesQuery, MessageReceivedEvent, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
 import {
     ensureActiveRelationship,
     establishRelationship,
@@ -66,6 +66,7 @@ describe("Messaging", () => {
         expect(messageId).toBeDefined();
 
         const messages = await syncUntilHasMessages(client2.transport);
+        await expect(client2.eventBus).toHavePublished(MessageReceivedEvent, (m) => m.data.id === messageId);
         expect(messages).toHaveLength(1);
 
         const message = messages[0];
@@ -102,6 +103,25 @@ describe("Messaging", () => {
 
         const response = await client2.transport.messages.getMessage({ id: messageId });
         expect(response).toBeSuccessful();
+    });
+
+    test("send a Message to multiple recipients", async () => {
+        expect(fileId).toBeDefined();
+
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address, client3.address],
+            content: {
+                "@type": "Mail",
+                body: "b",
+                cc: [client3.address],
+                subject: "a",
+                to: [client2.address]
+            },
+            attachments: [fileId]
+        });
+        expect(result).toBeSuccessful();
+        await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
+        messageId = result.value.id;
     });
 });
 
@@ -169,10 +189,6 @@ describe("Message errors", () => {
         });
         expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
-
-    // TODO: don't allow to send message to yourself
-    // TODO: should allow to send message with mail to multiple recipients
-    // TODO: same with Notifications
 
     test("should throw correct error for trying to send a Message with Request content to multiple recipients", async () => {
         const result = await client1.transport.messages.sendMessage({
