@@ -1,4 +1,5 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate } from "@nmshd/transport";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 
 export interface AcceptDeleteAttributeRequestItemParametersJSON extends AcceptRequestItemParametersJSON {
@@ -9,7 +10,7 @@ export interface AcceptDeleteAttributeRequestItemParametersJSON extends AcceptRe
 export class AcceptDeleteAttributeRequestItemParameters extends Serializable {
     @serialize()
     @validate()
-    public deletionDate: string;
+    public deletionDate: CoreDate;
 
     public static from(value: AcceptDeleteAttributeRequestItemParametersJSON): AcceptDeleteAttributeRequestItemParameters {
         return this.fromAny(value);

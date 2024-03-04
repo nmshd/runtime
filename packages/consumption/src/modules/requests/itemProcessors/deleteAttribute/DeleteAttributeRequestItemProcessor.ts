@@ -12,14 +12,14 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
 
         if (!attribute) {
-            return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(`The Attribute with the given attributeId '${requestItem.attributeId.toString()}' could not be found.`)
-            );
+            return ValidationResult.error(CoreErrors.requests.invalidRequestItem(`The Attribute '${requestItem.attributeId.toString()}' could not be found.`));
         }
 
         if (!attribute.isOwnSharedAttribute(this.accountController.identity.address)) {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(`The Attribute with the given attributeId '${requestItem.attributeId.toString()}' is not an own shared Attribute.`)
+                CoreErrors.requests.invalidRequestItem(
+                    `The Attribute '${requestItem.attributeId.toString()}' is not an own shared Attribute. You can only request the deletion of own shared Attributes.`
+                )
             );
         }
 
@@ -29,10 +29,6 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (attribute.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeletedByPeer) {
             return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The peer already accepted the deletion of the Attribute."));
-        }
-
-        if (attribute.content.owner.equals(recipient)) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The deletion of an own Attribute doesn't need to be requested."));
         }
 
         if (!attribute.shareInfo.peer.equals(recipient)) {
@@ -74,13 +70,10 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             deletionDate: deletionDate
         });
 
-        attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-        await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
-
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
-        for (const predecessor of predecessors) {
-            predecessor.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-            await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+        for (const attr of [attribute, ...predecessors]) {
+            attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+            await this.consumptionController.attributes.updateAttributeUnsafe(attr);
         }
 
         return DeleteAttributeAcceptResponseItem.from({
