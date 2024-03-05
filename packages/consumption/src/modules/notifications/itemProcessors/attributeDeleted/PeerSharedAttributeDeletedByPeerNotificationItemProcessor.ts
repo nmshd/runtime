@@ -51,30 +51,26 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
             deletionDate: deletionDate
         });
 
-        attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-        const updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
-
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
-        for (const predecessor of predecessors) {
-            predecessor.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-            await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+
+        for (const attr of [attribute, ...predecessors]) {
+            attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+            await this.consumptionController.attributes.updateAttributeUnsafe(attr);
         }
 
-        return new PeerSharedAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), updatedAttribute);
+        return new PeerSharedAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
     }
 
     public override async rollback(notificationItem: PeerSharedAttributeDeletedByPeerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") return;
 
-        // TODO: the status before might have been 'toBeDeletedByPeer', but I don't think we can save it between process and rollback
-        attribute.deletionInfo = undefined;
-        await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
-
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
-        for (const predecessor of predecessors) {
-            predecessor.deletionInfo = undefined;
-            await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+
+        for (const attr of [attribute, ...predecessors]) {
+            // the previous deletionState cannot be unambiguously known, either it was undefined or 'toBeDeletedByPeer'
+            attr.deletionInfo = undefined;
+            await this.consumptionController.attributes.updateAttributeUnsafe(attr);
         }
     }
 }
