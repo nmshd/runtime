@@ -57,7 +57,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
             [`${nameof<MessageDTO>((m) => m.content)}.@type`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.@type`,
             [`${nameof<MessageDTO>((m) => m.content)}.body`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.body`,
             [`${nameof<MessageDTO>((m) => m.content)}.subject`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.subject`,
-            [nameof<MessageDTO>((m) => m.wasReadAt)]: [nameof<Message>((m) => m.wasReadAt)]
+            [nameof<MessageDTO>((m) => m.wasReadAt)]: nameof<Message>((m) => m.wasReadAt)
         },
 
         custom: {
