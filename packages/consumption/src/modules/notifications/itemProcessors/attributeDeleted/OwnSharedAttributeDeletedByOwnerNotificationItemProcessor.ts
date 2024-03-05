@@ -49,34 +49,26 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
             deletionDate: CoreDate.utc()
         });
 
-        let updatedAttribute = attribute;
-        if (typeof attribute.deletionInfo === "undefined") {
-            attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-            updatedAttribute = await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
-        }
-
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
-        for (const predecessor of predecessors) {
-            if (typeof predecessor.deletionInfo === "undefined") {
-                predecessor.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-                await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+
+        for (const attr of [attribute, ...predecessors]) {
+            if (typeof attr.deletionInfo === "undefined") {
+                attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+                await this.consumptionController.attributes.updateAttributeUnsafe(attr);
             }
         }
 
-        return new OwnSharedAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), updatedAttribute);
+        return new OwnSharedAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
     }
 
     public override async rollback(notificationItem: OwnSharedAttributeDeletedByOwnerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (typeof attribute === "undefined") return;
 
-        attribute.deletionInfo = undefined;
-        await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
-
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
-        for (const predecessor of predecessors) {
-            predecessor.deletionInfo = undefined;
-            await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+        for (const attr of [attribute, ...predecessors]) {
+            attr.deletionInfo = undefined;
+            await this.consumptionController.attributes.updateAttributeUnsafe(attr);
         }
     }
 }

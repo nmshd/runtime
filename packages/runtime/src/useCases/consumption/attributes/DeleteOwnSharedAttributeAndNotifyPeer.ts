@@ -38,11 +38,10 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
         }
 
         const predecessors = await this.attributeController.getPredecessorsOfAttribute(ownSharedAttributeId);
-        for (const predecessor of predecessors) {
-            await this.attributeController.deleteAttribute(predecessor);
-        }
 
-        await this.attributeController.deleteAttribute(ownSharedAttribute);
+        for (const attr of [ownSharedAttribute, ...predecessors]) {
+            await this.attributeController.deleteAttribute(attr);
+        }
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = OwnSharedAttributeDeletedByOwnerNotificationItem.from({ attributeId: ownSharedAttributeId });
