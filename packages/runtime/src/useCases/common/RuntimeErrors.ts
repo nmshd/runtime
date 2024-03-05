@@ -172,6 +172,10 @@ class Attributes {
             `No other version of repository attribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this attribute, use 'ShareRepositoryAttribute'.`
         );
     }
+
+    public isNotOwnSharedAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared attribute.`);
+    }
 }
 
 export class RuntimeErrors {

@@ -10,6 +10,7 @@ export * from "./OutgoingRequestCreatedAndCompletedEvent";
 export * from "./OutgoingRequestCreatedEvent";
 export * from "./OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent";
 export * from "./OutgoingRequestStatusChangedEvent";
+export * from "./OwnSharedAttributeDeletedByOwnerEvent";
 export * from "./OwnSharedAttributeSucceededEvent";
 export * from "./PeerSharedAttributeSucceededEvent";
 export * from "./RelationshipEvent";
