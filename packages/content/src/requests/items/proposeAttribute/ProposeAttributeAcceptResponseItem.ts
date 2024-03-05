@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId, ICoreId } from "@nmshd/transport";
-import { IIdentityAttribute, IRelationshipAttribute, IdentityAttribute, IdentityAttributeJSON, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
+import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
 import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
 
 export interface ProposeAttributeAcceptResponseItemJSON extends AcceptResponseItemJSON {
@@ -24,7 +24,7 @@ export class ProposeAttributeAcceptResponseItem extends AcceptResponseItem imple
     @validate()
     public attribute: IdentityAttribute | RelationshipAttribute;
 
-    public static override from(value: IProposeAttributeAcceptResponseItem | ProposeAttributeAcceptResponseItemJSON): ProposeAttributeAcceptResponseItem {
+    public static override from(value: IProposeAttributeAcceptResponseItem | Omit<ProposeAttributeAcceptResponseItemJSON, "@type">): ProposeAttributeAcceptResponseItem {
         return this.fromAny(value);
     }
 

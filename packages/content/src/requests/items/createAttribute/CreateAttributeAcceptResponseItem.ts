@@ -17,7 +17,7 @@ export class CreateAttributeAcceptResponseItem extends AcceptResponseItem implem
     @validate()
     public attributeId: CoreId;
 
-    public static override from(value: ICreateAttributeAcceptResponseItem | CreateAttributeAcceptResponseItemJSON): CreateAttributeAcceptResponseItem {
+    public static override from(value: ICreateAttributeAcceptResponseItem | Omit<CreateAttributeAcceptResponseItemJSON, "@type">): CreateAttributeAcceptResponseItem {
         return this.fromAny(value);
     }
 

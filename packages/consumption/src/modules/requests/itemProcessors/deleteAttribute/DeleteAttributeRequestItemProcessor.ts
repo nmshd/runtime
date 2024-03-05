@@ -11,7 +11,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
     public override async canCreateOutgoingRequestItem(requestItem: DeleteAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
 
-        if (!attribute) {
+        if (typeof attribute === "undefined") {
             return ValidationResult.error(CoreErrors.requests.invalidRequestItem(`The Attribute '${requestItem.attributeId.toString()}' could not be found.`));
         }
 
@@ -100,14 +100,13 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             deletionStatus: DeletionStatus.ToBeDeletedByPeer,
             deletionDate: responseItem.deletionDate
         });
-        attribute.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-        await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
-        for (const predecessor of predecessors) {
-            if (predecessor.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
-                predecessor.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-                await this.consumptionController.attributes.updateAttributeUnsafe(predecessor);
+
+        for (const attr of [attribute, ...predecessors]) {
+            if (attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+                await this.consumptionController.attributes.updateAttributeUnsafe(attr);
             }
         }
     }

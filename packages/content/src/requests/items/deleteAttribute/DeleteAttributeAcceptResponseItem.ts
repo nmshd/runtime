@@ -17,7 +17,7 @@ export class DeleteAttributeAcceptResponseItem extends AcceptResponseItem implem
     @validate()
     public deletionDate: CoreDate;
 
-    public static override from(value: IDeleteAttributeAcceptResponseItem | DeleteAttributeAcceptResponseItemJSON): DeleteAttributeAcceptResponseItem {
+    public static override from(value: IDeleteAttributeAcceptResponseItem | Omit<DeleteAttributeAcceptResponseItemJSON, "@type">): DeleteAttributeAcceptResponseItem {
         return this.fromAny(value);
     }
 

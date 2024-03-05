@@ -16,7 +16,7 @@ export class FreeTextAcceptResponseItem extends AcceptResponseItem implements IF
     @validate()
     public freeText: string;
 
-    public static override from(value: IFreeTextAcceptResponseItem | FreeTextAcceptResponseItemJSON): FreeTextAcceptResponseItem {
+    public static override from(value: IFreeTextAcceptResponseItem | Omit<FreeTextAcceptResponseItemJSON, "@type">): FreeTextAcceptResponseItem {
         return this.fromAny(value);
     }
 
