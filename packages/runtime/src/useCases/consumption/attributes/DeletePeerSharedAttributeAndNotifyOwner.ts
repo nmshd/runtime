@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionIds, LocalAttribute, NotificationsController } from "@nmshd/consumption";
+import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
 import { Notification, PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { AccountController, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
@@ -20,7 +20,6 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
         @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly messageController: MessageController,
-        @Inject private readonly notificationsController: NotificationsController,
         @Inject validator: Validator
     ) {
         super(validator);
