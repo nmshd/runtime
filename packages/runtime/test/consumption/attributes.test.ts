@@ -131,10 +131,23 @@ describe("get attribute(s)", () => {
             const result = await services1.consumption.attributes.getAttributes({
                 query: { "content.value.@type": "Surname" }
             });
+
             expect(result).toBeSuccessful();
+
             const attributes = result.value;
             expect(attributes).toHaveLength(1);
             expect(attributes[0].id).toStrictEqual(identityAttributeIds[0]);
+        });
+
+        test("should allow to get an attribute by multiple types", async function () {
+            const result = await services1.consumption.attributes.getAttributes({
+                query: { "content.value.@type": ["Surname", "GivenName"] }
+            });
+
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(2);
         });
 
         test("should hide technical attributes when hideTechnical=true", async () => {
