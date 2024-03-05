@@ -32,9 +32,9 @@ export class IdentityAttributeQueryTranslator {
         },
         alias: {
             // @type of attributeValue
-            [nameof<IIdentityAttributeQuery>((x) => x.valueType)]: [`${nameof<LocalAttribute>((x) => x.content)}.${nameof<IdentityAttribute>((x) => x.value)}.@type`],
+            [nameof<IIdentityAttributeQuery>((x) => x.valueType)]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<IdentityAttribute>((x) => x.value)}.@type`,
             // @type of attribute
-            attributeType: [`${nameof<LocalAttribute>((x) => x.content)}.@type`]
+            attributeType: `${nameof<LocalAttribute>((x) => x.content)}.@type`
         },
         custom: {
             // tags
@@ -92,11 +92,11 @@ export class RelationshipAttributeQueryTranslator {
         },
         alias: {
             // key
-            [nameof<IRelationshipAttributeQuery>((x) => x.key)]: [`${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.key)}`],
+            [nameof<IRelationshipAttributeQuery>((x) => x.key)]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.key)}`,
             // @type of attribute
-            attributeType: [`${nameof<LocalAttribute>((x) => x.content)}.@type`],
+            attributeType: `${nameof<LocalAttribute>((x) => x.content)}.@type`,
             // owner
-            [nameof<IRelationshipAttributeQuery>((x) => x.owner)]: [`${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.owner)}`]
+            [nameof<IRelationshipAttributeQuery>((x) => x.owner)]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.owner)}`
         },
         custom: {
             // validFrom
@@ -139,15 +139,13 @@ export class ThirdPartyRelationshipAttributeQueryTranslator {
         },
         alias: {
             // key
-            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.key)]: [`${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.key)}`],
+            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.key)]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.key)}`,
             // @type of attribute
-            attributeType: [`${nameof<LocalAttribute>((x) => x.content)}.@type`],
+            attributeType: `${nameof<LocalAttribute>((x) => x.content)}.@type`,
             // owner
-            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.owner)]: [`${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.owner)}`],
+            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.owner)]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.owner)}`,
             // peer
-            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.thirdParty)]: [
-                `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfo>((x) => x.peer)}`
-            ]
+            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.thirdParty)]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfo>((x) => x.peer)}`
         },
         custom: {
             // validFrom
