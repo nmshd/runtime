@@ -1,5 +1,9 @@
+import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
+import { OutgoingRequestsController } from "@nmshd/consumption";
+import { Request } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreId, File, FileController, MessageController } from "@nmshd/transport";
+import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import { MessageDTO } from "../../../types";
 import { AddressString, FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -26,12 +30,16 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         @Inject private readonly messageController: MessageController,
         @Inject private readonly fileController: FileController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly outgoingRequestsController: OutgoingRequestsController,
         @Inject validator: Validator
     ) {
         super(validator);
     }
 
     protected async executeInternal(request: SendMessageRequest): Promise<Result<MessageDTO>> {
+        const validationError = await this.validateMessageContent(request.content, request.recipients);
+        if (validationError) return Result.fail(validationError);
+
         const transformAttachmentsResult = await this.transformAttachments(request.attachments);
         if (transformAttachmentsResult.isError) {
             return Result.fail(transformAttachmentsResult.error);
@@ -46,6 +54,29 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         await this.accountController.syncDatawallet();
 
         return Result.ok(MessageMapper.toMessageDTO(result));
+    }
+
+    private async validateMessageContent(content: any, recipients: string[]) {
+        const transformedContent = Serializable.fromUnknown(content);
+        if (!(transformedContent instanceof Request)) return;
+
+        if (typeof transformedContent.id === "undefined") {
+            return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
+        }
+
+        const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
+        if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
+
+        if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
+            return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
+        }
+
+        if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
+
+        const recipient = CoreAddress.from(recipients[0]);
+        if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
+
+        return;
     }
 
     private async transformAttachments(attachmentsIds?: string[]): Promise<Result<File[]>> {
