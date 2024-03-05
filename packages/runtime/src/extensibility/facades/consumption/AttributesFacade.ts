@@ -1,4 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
+import { Notification } from "@nmshd/content";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
@@ -6,6 +7,8 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
+    DeleteOwnSharedAttributeAndNotifyPeerRequest,
+    DeleteOwnSharedAttributeAndNotifyPeerUseCase,
     ExecuteIdentityAttributeQueryRequest,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteIQLQueryRequest,
@@ -63,7 +66,8 @@ export class AttributesFacade {
         @Inject private readonly executeIQLQueryUseCase: ExecuteIQLQueryUseCase,
         @Inject private readonly validateIQLQueryUseCase: ValidateIQLQueryUseCase,
         @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
-        @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase
+        @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+        @Inject private readonly deleteOwnSharedAttributeAndNotifyPeerUseCase: DeleteOwnSharedAttributeAndNotifyPeerUseCase
     ) {}
 
     public async createRepositoryAttribute(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
@@ -140,5 +144,9 @@ export class AttributesFacade {
         request: NotifyPeerAboutRepositoryAttributeSuccessionRequest
     ): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
         return await this.notifyPeerAboutRepositoryAttributeSuccessionUseCase.execute(request);
+    }
+
+    public async deleteOwnSharedAttributeAndNotifyPeer(request: DeleteOwnSharedAttributeAndNotifyPeerRequest): Promise<Result<Notification>> {
+        return await this.deleteOwnSharedAttributeAndNotifyPeerUseCase.execute(request);
     }
 }
