@@ -275,7 +275,7 @@ describe("get repository, own shared and peer shared attributes", () => {
 
     let services1RepoGivenNameV0: LocalAttributeDTO;
     let services1RepoGivenNameV1: LocalAttributeDTO;
-    let serives1SharedGivenNameV0: LocalAttributeDTO;
+    let services1SharedGivenNameV0: LocalAttributeDTO;
     let services1SharedGivenNameV1: LocalAttributeDTO;
 
     let services1SharedRelationshipAttributeV0: LocalAttributeDTO;
@@ -309,7 +309,7 @@ describe("get repository, own shared and peer shared attributes", () => {
         ).value);
 
         // own shared succeeded identity attribute
-        serives1SharedGivenNameV0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+        services1SharedGivenNameV0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -317,9 +317,9 @@ describe("get repository, own shared and peer shared attributes", () => {
                 }
             }
         });
-        services1RepoGivenNameV0 = (await services1.consumption.attributes.getAttribute({ id: serives1SharedGivenNameV0.shareInfo!.sourceAttribute! })).value;
+        services1RepoGivenNameV0 = (await services1.consumption.attributes.getAttribute({ id: services1SharedGivenNameV0.shareInfo!.sourceAttribute! })).value;
 
-        ({ predecessor: serives1SharedGivenNameV0, successor: services1SharedGivenNameV1 } = await executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(services1, services2, {
+        ({ predecessor: services1SharedGivenNameV0, successor: services1SharedGivenNameV1 } = await executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(services1, services2, {
             predecessorId: services1RepoGivenNameV0.id,
             successorContent: {
                 value: {
@@ -328,7 +328,7 @@ describe("get repository, own shared and peer shared attributes", () => {
                 }
             }
         }));
-        services1RepoGivenNameV0 = (await services1.consumption.attributes.getAttribute({ id: serives1SharedGivenNameV0.shareInfo!.sourceAttribute! })).value;
+        services1RepoGivenNameV0 = (await services1.consumption.attributes.getAttribute({ id: services1SharedGivenNameV0.shareInfo!.sourceAttribute! })).value;
         services1RepoGivenNameV1 = (await services1.consumption.attributes.getAttribute({ id: services1SharedGivenNameV1.shareInfo!.sourceAttribute! })).value;
 
         // peer shared identity attribute
@@ -447,7 +447,7 @@ describe("get repository, own shared and peer shared attributes", () => {
             expect(result).toBeSuccessful();
             const ownSharedAttributes = result.value;
             expect(ownSharedAttributes).toStrictEqual([
-                serives1SharedGivenNameV0,
+                services1SharedGivenNameV0,
                 services1SharedGivenNameV1,
                 services1SharedRelationshipAttributeV0,
                 services1SharedRelationshipAttributeV1,
@@ -470,7 +470,7 @@ describe("get repository, own shared and peer shared attributes", () => {
         let notTechnicalReceivedAttributes: LocalAttributeDTO[];
         beforeAll(async function () {
             const services1SharedAttributeIds = [
-                serives1SharedGivenNameV0,
+                services1SharedGivenNameV0,
                 services1SharedGivenNameV1,
                 services1SharedRelationshipAttributeV0,
                 services1SharedRelationshipAttributeV1,
