@@ -1,6 +1,6 @@
-import { AttributesController, DeletionStatus } from "@nmshd/consumption";
+import { AttributesController, DeletionStatus, LocalAttribute } from "@nmshd/consumption";
 import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
-import { CoreDate, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/transport";
 import {
     AttributeCreatedEvent,
     CreateAndShareRelationshipAttributeRequest,
@@ -8,6 +8,7 @@ import {
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
     DeleteOwnSharedAttributeAndNotifyPeerUseCase,
+    DeleteRepositoryAttributeUseCase,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryUseCase,
     GetAttributesUseCase,
@@ -1420,6 +1421,7 @@ describe(DeleteOwnSharedAttributeAndNotifyPeerUseCase.name, () => {
             }
         }));
     });
+
     test("should delete an own shared identity attribute", async () => {
         expect(sOSIAVersion0).toBeDefined();
 
@@ -1469,4 +1471,101 @@ describe(DeleteOwnSharedAttributeAndNotifyPeerUseCase.name, () => {
         expect(updatedPredecessor.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByOwner);
         expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
     });
+});
+
+describe(DeleteRepositoryAttributeUseCase.name, () => {
+    let rAVersion0: LocalAttributeDTO;
+    let rAVersion1: LocalAttributeDTO;
+    let sOSIAVersion0: LocalAttributeDTO;
+    let sOSIAVersion1: LocalAttributeDTO;
+    beforeEach(async () => {
+        sOSIAVersion0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Petra Pan"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        });
+        rAVersion0 = (await services1.consumption.attributes.getAttribute({ id: sOSIAVersion0.shareInfo!.sourceAttribute! })).value;
+
+        ({ predecessor: sOSIAVersion0, successor: sOSIAVersion1 } = await executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(services1, services2, {
+            predecessorId: sOSIAVersion0.shareInfo!.sourceAttribute!,
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Tina Turner"
+                }
+            }
+        }));
+        rAVersion1 = (await services1.consumption.attributes.getAttribute({ id: sOSIAVersion1.shareInfo!.sourceAttribute! })).value;
+    });
+
+    test("should delete a repository attribute", async () => {
+        const deletionResult = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: rAVersion0.id });
+        expect(deletionResult.isSuccess).toBe(true);
+
+        const getDeletedAttributeResult = await services1.consumption.attributes.getAttribute({ id: rAVersion0.id });
+        expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should delete a succeeded repository attribute and its predecessors", async () => {
+        const deletionResult = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: rAVersion1.id });
+        expect(deletionResult.isSuccess).toBe(true);
+
+        const getDeletedAttributeResult = await services1.consumption.attributes.getAttribute({ id: rAVersion0.id });
+        expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should remove 'shareInfo.sourceAttribute' from own shared identity attribute copies of a deleted repository attribute", async () => {
+        await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: rAVersion0.id });
+
+        const updatedOSIAVersion0Result = await services1.consumption.attributes.getAttribute({ id: sOSIAVersion0.id });
+        expect(updatedOSIAVersion0Result.isSuccess).toBe(true);
+        const updatedOSIAVersion0 = updatedOSIAVersion0Result.value;
+        expect(updatedOSIAVersion0.shareInfo).toBeDefined();
+        expect(updatedOSIAVersion0.shareInfo!.sourceAttribute).toBeUndefined();
+    });
+
+    test("should remove 'shareInfo.sourceAttribute' from own shared identity attribute predecessors of a deleted repository attribute", async () => {
+        await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: rAVersion1.id });
+
+        const updatedOSIAVersion0Result = await services1.consumption.attributes.getAttribute({ id: sOSIAVersion0.id });
+        expect(updatedOSIAVersion0Result.isSuccess).toBe(true);
+        const updatedOSIAVersion0 = updatedOSIAVersion0Result.value;
+        expect(updatedOSIAVersion0.shareInfo).toBeDefined();
+        expect(updatedOSIAVersion0.shareInfo!.sourceAttribute).toBeUndefined();
+    });
+
+    test("should not change type of own shared identity attribute if 'shareInfo.sourceAttribute' is undefined", async () => {
+        await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: rAVersion0.id });
+
+        const updatedOSIAVersion0 = (await services1.consumption.attributes.getAttribute({ id: sOSIAVersion0.id })).value;
+        expect(updatedOSIAVersion0.shareInfo!.sourceAttribute).toBeUndefined();
+
+        const localAttributeOSIAVersion0 = LocalAttribute.from(updatedOSIAVersion0);
+        expect(localAttributeOSIAVersion0.isOwnSharedIdentityAttribute(CoreAddress.from(services1.address))).toBe(true);
+    });
+
+    test("should throw trying to call with an attribute that is not a repository attribute", async () => {
+        const result = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: sOSIAVersion1.id });
+        expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
+    });
+
+    test("should throw trying to call with an unknown attribute ID", async () => {
+        const unknownAttributeId = "ATTxxxxxxxxxxxxxxxxx";
+        const result = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: unknownAttributeId });
+        expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    // TODO:
+    // - checks use cases that might be affected having an own shared identity attribute without source attribute:
+    // - DeleteOwnSharedAttributeAndNotifyPeerUseCase
+    // - GetOwnSharedAttributesUseCase
+    // - GetSharedVersionsOfRepositoryAttributeUseCase
+    // - NotifyPeerAboutRepositoryAttributeSuccessionUseCase
+
+    // - RequestItemProcessors
+    // - NotificationItemProcessors
 });
