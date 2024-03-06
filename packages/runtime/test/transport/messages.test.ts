@@ -120,7 +120,6 @@ describe("Messaging", () => {
         });
         expect(result).toBeSuccessful();
         await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
-        messageId = result.value.id;
     });
 });
 
