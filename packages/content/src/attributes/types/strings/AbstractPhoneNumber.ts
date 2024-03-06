@@ -4,16 +4,14 @@ import { AbstractString } from "../AbstractString";
 
 export abstract class AbstractPhoneNumber extends AbstractString {
     @serialize()
-    @validate({ min: 3, max: 100, regExp: new RegExp(/^[\d+\-() ]{3,100}$/) })
+    @validate({ min: 3, max: 100, regExp: new RegExp(/^[\d+\-x#*()/[\] ]{3,100}$/) })
     public override value: string;
 
     public static override get valueHints(): ValueHints {
         return super.valueHints.copyWith({
             min: 3,
             max: 100,
-            // prettier-ignore
-            // eslint-disable-next-line no-useless-escape
-            pattern: "^[\d+\-() ]{3,100}$"
+            pattern: "^[\\d+\\-x#*()/[\\] ]{3,100}$"
         });
     }
 
