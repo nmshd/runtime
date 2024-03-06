@@ -1,4 +1,4 @@
-import { LocalRequestStatus } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -10,8 +10,10 @@ import {
 } from "@nmshd/content";
 import {
     ConsumptionServices,
+    CreateOutgoingRequestRequest,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
+    LocalRequestDTO,
     MessageProcessedEvent,
     MessageSentEvent,
     OutgoingRequestCreatedAndCompletedEvent,
@@ -25,37 +27,45 @@ import {
 } from "../../src";
 import {
     ensureActiveRelationship,
+    exchangeAndAcceptRequestByMessage,
+    exchangeMessageWithRequest,
     exchangeTemplate,
     MockEventBus,
     RuntimeServiceProvider,
     sendMessage,
+    sendMessageWithRequest,
     syncUntilHasMessages,
-    syncUntilHasMessageWithRequest,
     syncUntilHasMessageWithResponse,
-    syncUntilHasRelationships
+    syncUntilHasRelationships,
+    TestRuntimeServices
 } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
+let sRuntimeServices: TestRuntimeServices;
 let sTransportServices: TransportServices;
 let sConsumptionServices: ConsumptionServices;
 let sEventBus: MockEventBus;
 
+let rRuntimeServices: TestRuntimeServices;
 let rTransportServices: TransportServices;
 let rConsumptionServices: ConsumptionServices;
 let rEventBus: MockEventBus;
 
 beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(2, { enableRequestModule: true });
-    sTransportServices = runtimeServices[1].transport;
-    sConsumptionServices = runtimeServices[1].consumption;
-    sEventBus = runtimeServices[1].eventBus;
 
-    rTransportServices = runtimeServices[0].transport;
-    rConsumptionServices = runtimeServices[0].consumption;
-    rEventBus = runtimeServices[0].eventBus;
+    sRuntimeServices = runtimeServices[0];
+    sTransportServices = sRuntimeServices.transport;
+    sConsumptionServices = sRuntimeServices.consumption;
+    sEventBus = sRuntimeServices.eventBus;
+
+    rRuntimeServices = runtimeServices[1];
+    rTransportServices = rRuntimeServices.transport;
+    rConsumptionServices = rRuntimeServices.consumption;
+    rEventBus = rRuntimeServices.eventBus;
 }, 30000);
 
-beforeEach(() => {
+afterEach(() => {
     sEventBus.reset();
     rEventBus.reset();
 });
@@ -64,26 +74,49 @@ afterAll(async () => await runtimeServiceProvider.stop());
 
 describe("RequestModule", () => {
     describe("Relationships / RelationshipTemplates (onNewRelationship)", () => {
-        const metadata = { aMetadataKey: "aMetadataValue" };
-        let requestId: string;
         let template: RelationshipTemplateDTO;
 
-        test("creates a request for a loaded peer Relationship Template and checks its prerequisites", async () => {
-            const templateContent: RelationshipTemplateContentJSON = {
-                "@type": "RelationshipTemplateContent",
-                onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
-                metadata
-            };
+        const metadata = { aMetadataKey: "aMetadataValue" };
+        const templateContent: RelationshipTemplateContentJSON = {
+            "@type": "RelationshipTemplateContent",
+            onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
+            metadata
+        };
 
+        async function getRequestIdOfTemplate(eventBus: MockEventBus, templateId: string) {
+            let requests: LocalRequestDTO[];
+            requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
+            if (requests.length === 0) {
+                await eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+                requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
+            }
+            return requests[0].id;
+        }
+
+        async function ensureActiveRelationshipWithTemplate(sRuntimeServices: TestRuntimeServices, rRuntimeServices: TestRuntimeServices, template: RelationshipTemplateDTO) {
+            if ((await sTransportServices.relationships.getRelationships({})).value.length === 0) {
+                await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+                const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+                await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
+                const relationship = (await syncUntilHasRelationships(sTransportServices, 1))[0];
+                await sTransportServices.relationships.acceptRelationshipChange({
+                    relationshipId: relationship.id,
+                    changeId: relationship.changes[0].id,
+                    content: {}
+                });
+            }
+        }
+
+        beforeAll(async () => {
             template = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
+        });
 
+        test("creates a request for a loaded peer Relationship Template and checks its prerequisites", async () => {
             await expect(rEventBus).toHavePublished(IncomingRequestReceivedEvent);
             await expect(rEventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
             const requestsResult = await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } });
             expect(requestsResult.value).toHaveLength(1);
-
-            requestId = requestsResult.value[0].id;
         });
 
         test("does not create a second Request from the same Template if an open Request exists", async () => {
@@ -97,6 +130,7 @@ describe("RequestModule", () => {
         });
 
         test("completes the Request when the Request is accepted by creating a Relationship", async () => {
+            const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
 
             await expect(rEventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -109,6 +143,8 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent when another Template is loaded and a pending Relationship exists", async () => {
+            const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
+            await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
             const templateContent: RelationshipTemplateContentJSON = {
                 "@type": "RelationshipTemplateContent",
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
@@ -127,13 +163,22 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent if a pending Relationship exists", async () => {
+            const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
+            const relationships = (await rTransportServices.relationships.getRelationships({})).value;
+            if (relationships.length === 0) {
+                await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
+                await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+            }
             await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
             await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists);
         });
 
         test("templator: creates a Relationship with the correct data on an incoming Relationship Change with a Response", async () => {
+            const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
+            await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
             const relationships = await syncUntilHasRelationships(sTransportServices, 1);
+
             expect(relationships).toHaveLength(1);
 
             const relationship = relationships[0];
@@ -155,10 +200,12 @@ describe("RequestModule", () => {
             expect(requestsResult).toBeSuccessful();
 
             await sTransportServices.relationships.acceptRelationshipChange({ relationshipId: relationship.id, changeId: relationship.changes[0].id, content: {} });
+            await syncUntilHasRelationships(rTransportServices, 1);
         });
 
         test("does not create a second Request from the same Template if an active Relationship exists", async () => {
-            await syncUntilHasRelationships(rTransportServices);
+            await ensureActiveRelationship(sTransportServices, rTransportServices);
+            rEventBus.reset();
             await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
             await expect(rEventBus).not.toHavePublished(IncomingRequestReceivedEvent);
@@ -169,6 +216,9 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent if an active Relationship exists", async () => {
+            await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
+
+            rEventBus.reset();
             await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
             await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists);
@@ -176,8 +226,6 @@ describe("RequestModule", () => {
     });
 
     describe("Relationships / RelationshipTemplates (onExistingRelationship)", () => {
-        let requestId: string;
-
         beforeAll(async () => await ensureActiveRelationship(sTransportServices, rTransportServices));
 
         test("creates a request from onExistingRelationship if a relationship already exists", async () => {
@@ -208,9 +256,12 @@ describe("RequestModule", () => {
 
             await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
-            const requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
+            const requests = (
+                await rConsumptionServices.incomingRequests.getRequests({
+                    query: { "source.reference": template.id }
+                })
+            ).value;
             const request = requests[0];
-            requestId = request.id;
 
             const requestAfterReject = (await rConsumptionServices.incomingRequests.reject({ requestId: request.id, items: [{ accept: false }] })).value;
 
@@ -220,6 +271,10 @@ describe("RequestModule", () => {
         });
 
         test("receives the rejected Request by Message", async () => {
+            const template = await exchangeRelationshipTemplate();
+            await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+            await rConsumptionServices.incomingRequests.reject({ requestId, items: [{ accept: false }] });
             await syncUntilHasMessageWithResponse(sTransportServices, requestId);
 
             await sEventBus.waitForRunningEventHandlers();
@@ -236,11 +291,9 @@ describe("RequestModule", () => {
 
             await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
-            const requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
-            const request = requests[0];
-            requestId = request.id;
+            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
 
-            const requestAfterReject = (await rConsumptionServices.incomingRequests.accept({ requestId: request.id, items: [{ accept: false }] })).value;
+            const requestAfterReject = (await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: false }] })).value;
 
             await rEventBus.waitForRunningEventHandlers();
 
@@ -248,6 +301,10 @@ describe("RequestModule", () => {
         });
 
         test("receives the accepted Request by Message", async () => {
+            const template = await exchangeRelationshipTemplate();
+            await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+            await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: false }] });
             await syncUntilHasMessageWithResponse(sTransportServices, requestId);
 
             await sEventBus.waitForRunningEventHandlers();
@@ -289,35 +346,42 @@ describe("RequestModule", () => {
 
     describe("Messages", () => {
         let recipientAddress: string;
-        let requestId: string;
+        let requestContent: CreateOutgoingRequestRequest;
+        let responseItems: DecideRequestItemParametersJSON[];
 
         beforeAll(async () => {
             recipientAddress = (await ensureActiveRelationship(sTransportServices, rTransportServices)).peer;
+            requestContent = {
+                content: { items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
+                peer: recipientAddress
+            };
+            responseItems = [{ accept: true }];
         });
 
         test("sending the request moves the request status to open", async () => {
-            const createRequestResult = await sConsumptionServices.outgoingRequests.create({
-                content: { items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
-                peer: recipientAddress
-            });
-
-            requestId = createRequestResult.value.id;
-
-            await sendMessage(sTransportServices, recipientAddress, createRequestResult.value.content);
+            const message = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
 
             await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (event) => event.data.newStatus === LocalRequestStatus.Open);
 
-            const requestAfterAction = (await sConsumptionServices.outgoingRequests.getRequest({ id: requestId })).value;
+            const requestAfterAction = (await sConsumptionServices.outgoingRequests.getRequest({ id: message.content.id })).value;
 
             expect(requestAfterAction.status).toBe(LocalRequestStatus.Open);
         });
 
         test("the incoming request is created and moved to status DecisionRequired", async () => {
-            await syncUntilHasMessageWithRequest(rTransportServices, requestId);
+            const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+
+            // kick every event created from requests of previous tests
+            const receivedEvents = rEventBus.publishedEvents;
+            const lastEvent = receivedEvents[receivedEvents.length - 1];
+            const secondToLastEvent = receivedEvents[receivedEvents.length - 2];
+            rEventBus.reset();
+            rEventBus.publish(secondToLastEvent);
+            rEventBus.publish(lastEvent);
 
             const incomingRequestReceivedEvent = await rEventBus.waitForEvent(IncomingRequestReceivedEvent);
             const request = incomingRequestReceivedEvent.data;
-            expect(request.id).toBe(requestId);
+            expect(request.id).toBe(message.content.id);
 
             const incomingRequestStatusChangedEvent = await rEventBus.waitForEvent(
                 IncomingRequestStatusChangedEvent,
@@ -326,7 +390,7 @@ describe("RequestModule", () => {
 
             expect(incomingRequestStatusChangedEvent.data.newStatus).toBe(LocalRequestStatus.DecisionRequired);
 
-            const requestsResult = await rConsumptionServices.incomingRequests.getRequest({ id: requestId });
+            const requestsResult = await rConsumptionServices.incomingRequests.getRequest({ id: message.content.id });
             expect(requestsResult).toBeSuccessful();
         });
 
@@ -339,7 +403,9 @@ describe("RequestModule", () => {
         });
 
         test("sends a message when the request is accepted", async () => {
-            const acceptRequestResult = await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
+            const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+            await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            const acceptRequestResult = await rConsumptionServices.incomingRequests.accept({ requestId: message.content.id, items: [{ accept: true }] });
             expect(acceptRequestResult).toBeSuccessful();
 
             const incomingRequestStatusChangedEvent = await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -350,10 +416,7 @@ describe("RequestModule", () => {
         });
 
         test("processes the response", async () => {
-            await syncUntilHasMessageWithResponse(sTransportServices, requestId);
-
-            const outgoingRequestStatusChangedEvent = await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
-            expect(outgoingRequestStatusChangedEvent.data.newStatus).toBe(LocalRequestStatus.Completed);
+            await expect(exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems)).resolves.not.toThrow();
         });
     });
 });

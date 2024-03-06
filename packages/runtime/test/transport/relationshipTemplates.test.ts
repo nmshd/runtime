@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { GetRelationshipTemplatesQuery, OwnerRestriction, RelationshipTemplateDTO, TransportServices } from "../../src";
+import { GetRelationshipTemplatesQuery, OwnerRestriction, TransportServices } from "../../src";
 import { QueryParamConditions, RuntimeServiceProvider } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -14,9 +14,6 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 describe("Template Tests", () => {
-    let template: RelationshipTemplateDTO;
-    let templateWithUndefinedMaxNumberOfAllocations: RelationshipTemplateDTO;
-
     test("create a template", async () => {
         const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
             maxNumberOfAllocations: 1,
@@ -25,8 +22,6 @@ describe("Template Tests", () => {
         });
 
         expect(response).toBeSuccessful();
-
-        template = response.value;
     });
 
     test("create a template with undefined expiresAt", async () => {
@@ -44,13 +39,20 @@ describe("Template Tests", () => {
             expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
         });
 
-        templateWithUndefinedMaxNumberOfAllocations = response.value;
+        const templateWithUndefinedMaxNumberOfAllocations = response.value;
 
         expect(response).toBeSuccessful();
         expect(templateWithUndefinedMaxNumberOfAllocations.maxNumberOfAllocations).toBeUndefined();
     });
 
     test("read a template with undefined maxNumberOfAllocations", async () => {
+        const templateWithUndefinedMaxNumberOfAllocations = (
+            await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+                content: { a: "A" },
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
+            })
+        ).value;
+
         const response = await transportServices1.relationshipTemplates.getRelationshipTemplate({
             id: templateWithUndefinedMaxNumberOfAllocations.id
         });
@@ -60,7 +62,13 @@ describe("Template Tests", () => {
     });
 
     test("see If template exists in /RelationshipTemplates/Own", async () => {
-        expect(template).toBeDefined();
+        const template = (
+            await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+                maxNumberOfAllocations: 1,
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: { a: "b" }
+            })
+        ).value;
 
         const response = await transportServices1.relationshipTemplates.getRelationshipTemplates({
             ownerRestriction: OwnerRestriction.Own
@@ -70,7 +78,13 @@ describe("Template Tests", () => {
     });
 
     test("see If template exists in /RelationshipTemplates/{id}", async () => {
-        expect(template).toBeDefined();
+        const template = (
+            await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+                maxNumberOfAllocations: 1,
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: { a: "b" }
+            })
+        ).value;
 
         const response = await transportServices1.relationshipTemplates.getRelationshipTemplate({ id: template.id });
         expect(response).toBeSuccessful();
