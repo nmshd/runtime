@@ -14,6 +14,7 @@ import {
     IncomingRequestStatusChangedEvent,
     OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     PeerRelationshipTemplateDVO,
+    PeerRelationshipTemplateLoadedEvent,
     RelationshipTemplateDTO,
     RequestItemGroupDVO
 } from "../../src";
@@ -206,7 +207,7 @@ describe("RelationshipTemplateDVO", () => {
 
     test("RequestDVO for requestor", async () => {
         const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
-        await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+        await requestor.eventBus.waitForEvent(PeerRelationshipTemplateLoadedEvent);
         const requestResult = await requestor.consumption.incomingRequests.getRequests({
             query: {
                 "source.reference": requestorTemplate.id
