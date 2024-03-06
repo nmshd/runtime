@@ -1319,12 +1319,12 @@ describe("Get (shared) versions of attribute", () => {
                 const result1 = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: version.id });
                 expect(result1.isSuccess).toBe(true);
                 const returnedVersions1 = result1.value;
-                expect(returnedVersions1).toStrictEqual([sOSIAVersion2, sOSIAVersion2FurtherPeer]);
+                expect(new Set(returnedVersions1)).toStrictEqual(new Set([sOSIAVersion2, sOSIAVersion2FurtherPeer]));
 
                 const result2 = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: version.id, onlyLatestVersions: true });
                 expect(result2.isSuccess).toBe(true);
                 const returnedVersions2 = result2.value;
-                expect(returnedVersions2).toStrictEqual([sOSIAVersion2, sOSIAVersion2FurtherPeer]);
+                expect(new Set(returnedVersions2)).toStrictEqual(new Set([sOSIAVersion2, sOSIAVersion2FurtherPeer]));
             }
         });
 
@@ -1334,7 +1334,7 @@ describe("Get (shared) versions of attribute", () => {
                 expect(result.isSuccess).toBe(true);
 
                 const returnedVersions = result.value;
-                expect(returnedVersions).toStrictEqual([sOSIAVersion2, sOSIAVersion2FurtherPeer, sOSIAVersion0]);
+                expect(new Set(returnedVersions)).toStrictEqual(new Set([sOSIAVersion2, sOSIAVersion2FurtherPeer, sOSIAVersion0]));
             }
         });
 

@@ -35,10 +35,9 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
         }
 
-        // TODO:
-        // const ownSharedIdentityAttributePredecessors = await this.attributeController.getSharedPredecessorsOfRepositoryAttribute(repositoryAttributeId, undefined, false);
-        const ownSharedIdentityAttributePredecessors = await this.attributeController.getSharedVersionsOfRepositoryAttribute(repositoryAttributeId);
-        for (const ownSharedAttribute of ownSharedIdentityAttributePredecessors) {
+        const ownSharedIdentityAttributeCopies = await this.attributeController.getLocalAttributes({ "shareInfo.sourceAttribute": repositoryAttributeId });
+        const ownSharedIdentityAttributePredecessors = await this.attributeController.getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute);
+        for (const ownSharedAttribute of [...ownSharedIdentityAttributeCopies, ...ownSharedIdentityAttributePredecessors]) {
             if (!ownSharedAttribute.isOwnSharedAttribute(this.accountController.identity.address)) {
                 return Result.fail(RuntimeErrors.attributes.isNotOwnSharedAttribute(ownSharedAttribute.id));
             }
