@@ -112,8 +112,6 @@ describe("IQL Query", () => {
 
     test("sender: send the outgoing IQL Request via Message", async () => {
         await expect(sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent)).resolves.not.toThrow();
-        // await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        // }).resolves.not.toThrow();
     });
 
     test("sender: mark the outgoing IQL Request as sent", async () => {
