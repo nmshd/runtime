@@ -200,6 +200,7 @@ describe("RequestModule", () => {
             expect(requestsResult).toBeSuccessful();
 
             await sTransportServices.relationships.acceptRelationshipChange({ relationshipId: relationship.id, changeId: relationship.changes[0].id, content: {} });
+            await syncUntilHasRelationships(rTransportServices, 1);
         });
 
         test("does not create a second Request from the same Template if an active Relationship exists", async () => {
@@ -413,9 +414,8 @@ describe("RequestModule", () => {
             expect(messageSentEvent.data.content["@type"]).toBe("ResponseWrapper");
         });
 
-        // eslint-disable-next-line jest/expect-expect
         test("processes the response", async () => {
-            await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+            await expect(exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems)).resolves.not.toThrow();
         });
     });
 });
