@@ -1,4 +1,4 @@
-import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import { AbstractStringJSON, DisplayNameJSON } from "@nmshd/content";
 import {
     ConsumptionServices,
@@ -7,6 +7,8 @@ import {
     CreateOutgoingRequestRequest,
     DataViewExpander,
     DecidableCreateAttributeRequestItemDVO,
+    IncomingRequestStatusChangedEvent,
+    OutgoingRequestStatusChangedEvent,
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
@@ -148,6 +150,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
         const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
             requestId: recipientMessage.content.id,
             items: responseItems
@@ -219,7 +222,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
             })
         ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
-
+        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();

@@ -1,4 +1,4 @@
-import { AcceptReadAttributeRequestItemParametersWithNewAttributeJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
+import { AcceptReadAttributeRequestItemParametersWithNewAttributeJSON, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import { IdentityAttributeQuery, IQLQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
@@ -6,6 +6,7 @@ import {
     DataViewExpander,
     DecidableReadAttributeRequestItemDVO,
     IdentityAttributeQueryDVO,
+    IncomingRequestStatusChangedEvent,
     IQLQueryDVO,
     OutgoingRequestStatusChangedEvent,
     ProcessedIdentityAttributeQueryDVO,
@@ -177,7 +178,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             })
         ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
-
+        await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
             requestId: recipientMessage.content.id,
             items: responseItems
@@ -261,7 +262,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
         });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
-
+        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -436,7 +437,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
-
+        await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
             requestId: recipientMessage.content.id,
             items: responseItems
