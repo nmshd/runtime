@@ -145,13 +145,13 @@ describe("RequestModule", () => {
         test("triggers RelationshipTemplateProcessedEvent when another Template is loaded and a pending Relationship exists", async () => {
             const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-            const templateContent2: RelationshipTemplateContentJSON = {
+            const templateContent: RelationshipTemplateContentJSON = {
                 "@type": "RelationshipTemplateContent",
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 metadata
             };
 
-            await exchangeTemplate(sTransportServices, rTransportServices, templateContent2);
+            await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
 
             await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists);
         });
