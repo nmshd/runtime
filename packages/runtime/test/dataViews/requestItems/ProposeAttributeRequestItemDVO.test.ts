@@ -18,7 +18,6 @@ import {
     DecidableProposeAttributeRequestItemDVO,
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
-    OutgoingRequestStatusChangedEvent,
     ProcessedIdentityAttributeQueryDVO,
     ProposeAttributeAcceptResponseItemDVO,
     ProposeAttributeRequestItemDVO,
@@ -371,8 +370,8 @@ describe("ProposeAttributeRequestItemDVO", () => {
         const baselineNumberOfSurnames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
             query: { "content.value.@type": "Surname", "shareInfo.peer": address2 }
         });
+        eventBus1.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;

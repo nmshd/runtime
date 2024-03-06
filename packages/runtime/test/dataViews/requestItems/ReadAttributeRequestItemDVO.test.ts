@@ -8,7 +8,6 @@ import {
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
     IQLQueryDVO,
-    OutgoingRequestStatusChangedEvent,
     ProcessedIdentityAttributeQueryDVO,
     ProcessedIQLQueryDVO,
     ReadAttributeAcceptResponseItemDVO,
@@ -231,8 +230,8 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
             query: { "content.value.@type": "GivenName", "shareInfo.peer": address2 }
         });
+        eventBus1.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -455,8 +454,9 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
             query: { "content.value.@type": "GivenName", "shareInfo.peer": address2 }
         });
+        eventBus1.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -683,8 +683,8 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
             query: { "content.value.@type": "Surname", "shareInfo.peer": address2 }
         });
+        eventBus1.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();

@@ -8,7 +8,6 @@ import {
     DataViewExpander,
     DecidableCreateAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
-    OutgoingRequestStatusChangedEvent,
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
@@ -221,8 +220,8 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
                 query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
             })
         ).value.length;
+        sEventBus.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
-        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
