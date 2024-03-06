@@ -5,6 +5,7 @@ import {
     CreateRepositoryAttributeRequest,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryUseCase,
+    ExecuteThirdPartyRelationshipAttributeQueryUseCase,
     GetAttributesUseCase,
     GetAttributeUseCase,
     GetOwnSharedAttributesUseCase,
@@ -218,7 +219,7 @@ describe("attribute queries", () => {
         });
     });
 
-    describe(ExecuteRelationshipAttributeQueryUseCase.name, () => {
+    describe(ExecuteThirdPartyRelationshipAttributeQueryUseCase.name, () => {
         test("should allow to execute a thirdPartyRelationshipAttributeQuery", async function () {
             const result = await services2.consumption.attributes.executeThirdPartyRelationshipAttributeQuery({
                 query: {

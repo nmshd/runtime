@@ -171,6 +171,10 @@ export class AttributesController extends ConsumptionBaseController {
         const dbQuery = RelationshipAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.confidentiality"] = { $ne: "private" };
 
+        if (parsedQuery.owner.equals("")) {
+            dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
+        }
+
         const attributes = await this.attributes.find(dbQuery);
         const attribute = attributes.length > 0 ? LocalAttribute.from(attributes[0]) : undefined;
 
@@ -187,11 +191,15 @@ export class AttributesController extends ConsumptionBaseController {
             dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
         }
 
+        function convertCoreAddressToString(value: CoreAddress): string {
+            return value.toString();
+        }
         if (dbQuery["content.owner"] === ThirdPartyRelationshipAttributeQueryOwner.ThirdParty) {
-            function convertCoreAddressToString(value: CoreAddress): string {
-                return value.toString();
-            }
             dbQuery["content.owner"] = { $in: parsedQuery.thirdParty.map(convertCoreAddressToString) };
+        }
+
+        if (parsedQuery.owner === ThirdPartyRelationshipAttributeQueryOwner.Empty) {
+            dbQuery["content.owner"] = { $or: [{ $eq: this.identity.address.toString() }, { $in: parsedQuery.thirdParty.map(convertCoreAddressToString) }] };
         }
 
         const attributes = await this.attributes.find(dbQuery);

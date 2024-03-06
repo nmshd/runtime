@@ -228,293 +228,428 @@ describe("AttributesController", function () {
         mockEventBus.expectLastPublishedEvent(SharedAttributeCopyCreatedEvent);
     });
 
-    test("should allow to query public relationship attributes", async function () {
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Public
-            })
-        };
-        await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
+    describe("Attribute queries", function () {
+        test("should allow to query relationship attributes with empty owner", async function () {
+            const relationshipAttributeParams: ICreateLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATtitle"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                })
+            };
+            await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
 
-        const query: IRelationshipAttributeQuery = {
-            key: "customerId",
-            owner: testAccount.identity.address,
-            attributeCreationHints: {
-                valueType: "ProprietaryString",
-                title: "someHintTitle",
-                confidentiality: "public" as RelationshipAttributeConfidentiality
-            }
-        };
-
-        const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
-        expect(attribute).toBeDefined();
-        expect(attribute!.content).toBeInstanceOf(RelationshipAttribute);
-        expect((attribute!.content as RelationshipAttribute).key).toBe("customerId");
-    });
-
-    test("should allow to query protected relationship attributes", async function () {
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Protected
-            })
-        };
-        await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
-
-        const query: IRelationshipAttributeQuery = {
-            key: "customerId",
-            owner: testAccount.identity.address,
-            attributeCreationHints: {
-                valueType: "ProprietaryString",
-                title: "someHintTitle",
-                confidentiality: RelationshipAttributeConfidentiality.Protected
-            }
-        };
-
-        const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
-        expect(attribute).toBeDefined();
-        expect(attribute!.content).toBeInstanceOf(RelationshipAttribute);
-        expect((attribute!.content as RelationshipAttribute).key).toBe("customerId");
-    });
-
-    test("should not allow to query private relationship attributes", async function () {
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Private
-            })
-        };
-        await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
-
-        const query: IRelationshipAttributeQuery = {
-            key: "customerId",
-            owner: testAccount.identity.address,
-            attributeCreationHints: {
-                valueType: "ProprietaryString",
-                title: "someHintTitle",
-                confidentiality: RelationshipAttributeConfidentiality.Private
-            }
-        };
-
-        const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
-        expect(attribute).toBeUndefined();
-    });
-
-    test("should query relationship attributes using the ThirdPartyRelationshipAttributeQuery", async function () {
-        const relationshipAttribute = await consumptionController.attributes.createPeerLocalAttribute({
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: CoreAddress.from("peerAddress"),
-                confidentiality: RelationshipAttributeConfidentiality.Protected
-            }),
-            peer: CoreAddress.from("peerAddress"),
-            requestReference: CoreId.from("requestId")
-        });
-
-        const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
-            key: "customerId",
-            owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
-            thirdParty: [CoreAddress.from("peerAddress")]
-        });
-        expect(attributes).toHaveLength(1);
-        expect(attributes[0].id.toString()).toStrictEqual(relationshipAttribute.id.toString());
-    });
-
-    test("should not query relationship attributes with confidentiality set to `Private` using the ThirdPartyRelationshipAttributeQuery", async function () {
-        await consumptionController.attributes.createPeerLocalAttribute({
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: CoreAddress.from("peerAddress"),
-                confidentiality: RelationshipAttributeConfidentiality.Private
-            }),
-            peer: CoreAddress.from("peerAddress"),
-            requestReference: CoreId.from("requestId")
-        });
-
-        const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
-            key: "customerId",
-            owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
-            thirdParty: [CoreAddress.from("peerAddress")]
-        });
-        expect(attributes).toHaveLength(0);
-    });
-
-    test("should not query relationship attributes with not matching key using the ThirdPartyRelationshipAttributeQuery", async function () {
-        await consumptionController.attributes.createPeerLocalAttribute({
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: CoreAddress.from("peerAddress"),
-                confidentiality: RelationshipAttributeConfidentiality.Private
-            }),
-            peer: CoreAddress.from("peerAddress"),
-            requestReference: CoreId.from("requestId")
-        });
-
-        const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
-            key: "notMatchingKey",
-            owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
-            thirdParty: [CoreAddress.from("peerAddress")]
-        });
-        expect(attributes).toHaveLength(0);
-    });
-
-    test("should allow to query identity attributes", async function () {
-        const identityAttributeParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "Nationality",
-                    value: "DE"
-                },
-                owner: testAccount.identity.address
-            })
-        };
-        const identityAttribute = await consumptionController.attributes.createLocalAttribute(identityAttributeParams);
-
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer Id"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: "public" as RelationshipAttributeConfidentiality
-            })
-        };
-        const relationshipAttribute = await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
-
-        const query: IIdentityAttributeQuery = {
-            valueType: "Nationality"
-        };
-
-        const attributes = await consumptionController.attributes.executeIdentityAttributeQuery(query);
-        const attributesId = attributes.map((v) => v.id.toString());
-        expect(attributesId).not.toContain(relationshipAttribute.id.toString());
-        expect(attributesId).toContain(identityAttribute.id.toString());
-    });
-
-    test("should successfully execute IQL queries only with repository attributes", async function () {
-        const identityAttributeParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "Nationality",
-                    value: "DE"
-                },
-                owner: testAccount.identity.address
-            })
-        };
-        const identityAttribute = await consumptionController.attributes.createLocalAttribute(identityAttributeParams);
-        await consumptionController.attributes.createSharedLocalAttributeCopy({
-            peer: CoreAddress.from("a-fake-peer"),
-            requestReference: CoreId.from("a-fake-reference"),
-            sourceAttributeId: identityAttribute.id,
-            attributeId: CoreId.from("fake-attribute-id")
-        });
-
-        const iqlQuery: IIQLQuery = { queryString: "Nationality=DE" };
-        const matchedAttributes = await consumptionController.attributes.executeIQLQuery(iqlQuery);
-        expect(matchedAttributes).toHaveLength(1);
-        const matchedAttributeIds = matchedAttributes.map((v) => v.id.toString());
-        expect(matchedAttributeIds).toContain(identityAttribute.id.toString());
-    });
-
-    test("should only return repository attributes on IdentityAttributeQuery", async function () {
-        const identityAttributeParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "DisplayName",
-                    value: "Dis Play"
-                },
-                owner: testAccount.identity.address
-            })
-        };
-        const identityAttribute = await consumptionController.attributes.createLocalAttribute(identityAttributeParams);
-
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "displayName",
-                value: {
-                    "@type": "ProprietaryString",
+            const query: IRelationshipAttributeQuery = {
+                key: "AKey",
+                owner: CoreAddress.from(""),
+                attributeCreationHints: {
+                    valueType: "ProprietaryString",
                     title: "ATitle",
-                    value: "DE"
-                },
+                    confidentiality: "public" as RelationshipAttributeConfidentiality
+                }
+            };
+
+            const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
+            expect(attribute).toBeDefined();
+        });
+
+        test("should allow to query public relationship attributes", async function () {
+            const relationshipAttributeParams: ICreateLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                })
+            };
+            await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
+
+            const query: IRelationshipAttributeQuery = {
+                key: "customerId",
                 owner: testAccount.identity.address,
-                confidentiality: "public" as RelationshipAttributeConfidentiality
-            })
-        };
-        const relationshipAttribute = await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
+                attributeCreationHints: {
+                    valueType: "ProprietaryString",
+                    title: "someHintTitle",
+                    confidentiality: "public" as RelationshipAttributeConfidentiality
+                }
+            };
 
-        const peerAttributeParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "DisplayName",
-                    value: "DE"
-                },
-                owner: CoreAddress.from("peer")
-            })
-        };
-        const peerAttribute = await consumptionController.attributes.createLocalAttribute(peerAttributeParams);
-
-        const sentAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
-            peer: CoreAddress.from("peer"),
-            requestReference: CoreId.from("ref"),
-            sourceAttributeId: identityAttribute.id
+            const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
+            expect(attribute).toBeDefined();
+            expect(attribute!.content).toBeInstanceOf(RelationshipAttribute);
+            expect((attribute!.content as RelationshipAttribute).key).toBe("customerId");
         });
 
-        const receivedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
-            peer: CoreAddress.from("peer"),
-            requestReference: CoreId.from("ref2"),
-            sourceAttributeId: peerAttribute.id,
-            attributeId: CoreId.from("attr1")
+        test("should allow to query protected relationship attributes", async function () {
+            const relationshipAttributeParams: ICreateLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Protected
+                })
+            };
+            await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
+
+            const query: IRelationshipAttributeQuery = {
+                key: "customerId",
+                owner: testAccount.identity.address,
+                attributeCreationHints: {
+                    valueType: "ProprietaryString",
+                    title: "someHintTitle",
+                    confidentiality: RelationshipAttributeConfidentiality.Protected
+                }
+            };
+
+            const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
+            expect(attribute).toBeDefined();
+            expect(attribute!.content).toBeInstanceOf(RelationshipAttribute);
+            expect((attribute!.content as RelationshipAttribute).key).toBe("customerId");
         });
 
-        const query: IIdentityAttributeQuery = {
-            valueType: "DisplayName"
-        };
+        test("should not allow to query private relationship attributes", async function () {
+            const relationshipAttributeParams: ICreateLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Private
+                })
+            };
+            await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
 
-        const attributes = await consumptionController.attributes.executeIdentityAttributeQuery(query);
-        const attributesId = attributes.map((v) => v.id.toString());
-        expect(attributes).toHaveLength(1);
-        expect(attributesId).not.toContain(relationshipAttribute.id.toString());
-        expect(attributesId).not.toContain(peerAttribute.id.toString());
-        expect(attributesId).not.toContain(sentAttribute.id.toString());
-        expect(attributesId).not.toContain(receivedAttribute.id.toString());
-        expect(attributesId).toContain(identityAttribute.id.toString());
+            const query: IRelationshipAttributeQuery = {
+                key: "customerId",
+                owner: testAccount.identity.address,
+                attributeCreationHints: {
+                    valueType: "ProprietaryString",
+                    title: "someHintTitle",
+                    confidentiality: RelationshipAttributeConfidentiality.Private
+                }
+            };
+
+            const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
+            expect(attribute).toBeUndefined();
+        });
+
+        test("should query relationship attributes using the ThirdPartyRelationshipAttributeQuery", async function () {
+            const relationshipAttribute = await consumptionController.attributes.createPeerLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: CoreAddress.from("peerAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Protected
+                }),
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "customerId",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
+                thirdParty: [CoreAddress.from("peerAddress")]
+            });
+            expect(attributes).toHaveLength(1);
+            expect(attributes[0].id.toString()).toStrictEqual(relationshipAttribute.id.toString());
+        });
+
+        test("should not query relationship attributes with confidentiality set to `Private` using the ThirdPartyRelationshipAttributeQuery", async function () {
+            await consumptionController.attributes.createPeerLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: CoreAddress.from("peerAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Private
+                }),
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "customerId",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
+                thirdParty: [CoreAddress.from("peerAddress")]
+            });
+            expect(attributes).toHaveLength(0);
+        });
+
+        test("should not query relationship attributes with not matching key using the ThirdPartyRelationshipAttributeQuery", async function () {
+            await consumptionController.attributes.createPeerLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: CoreAddress.from("peerAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Private
+                }),
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "notMatchingKey",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
+                thirdParty: [CoreAddress.from("peerAddress")]
+            });
+            expect(attributes).toHaveLength(0);
+        });
+
+        test("can call executeThirdPartyRelationshipAttributeQuery with ThirdPartyRelationshipAttributeQueryOwner.Recipient", async function () {
+            const recipient = testAccount.identity.address;
+            await consumptionController.attributes.createPeerLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: recipient,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("thirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "AKey",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                thirdParty: [CoreAddress.from("thirdPartyAddress")]
+            });
+            expect(attributes).toHaveLength(1);
+        });
+
+        test("can call executeThirdPartyRelationshipAttributeQuery with ThirdPartyRelationshipAttributeQueryOwner.ThirdParty", async function () {
+            await consumptionController.attributes.createPeerLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: CoreAddress.from("thirdPartyAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("thirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "AKey",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
+                thirdParty: [CoreAddress.from("thirdPartyAddress")]
+            });
+            expect(attributes).toHaveLength(1);
+        });
+
+        test("can call executeThirdPartyRelationshipAttributeQuery with ThirdPartyRelationshipAttributeQueryOwner.Empty", async function () {
+            const recipient = testAccount.identity.address;
+            await consumptionController.attributes.createPeerLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: recipient,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("thirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            await consumptionController.attributes.createPeerLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: CoreAddress.from("thirdPartyAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("anotherThirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            await consumptionController.attributes.createPeerLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: CoreAddress.from("uninvolvedThirdPartyAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("thirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "AKey",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
+                thirdParty: [CoreAddress.from("thirdPartyAddress"), CoreAddress.from("anotherThirdPartyAddress")]
+            });
+            expect(attributes).toHaveLength(2);
+        });
+
+        test("should allow to query identity attributes", async function () {
+            const identityAttributeParams: ICreateLocalAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const identityAttribute = await consumptionController.attributes.createLocalAttribute(identityAttributeParams);
+
+            const relationshipAttributeParams: ICreateLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer Id"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: "public" as RelationshipAttributeConfidentiality
+                })
+            };
+            const relationshipAttribute = await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
+
+            const query: IIdentityAttributeQuery = {
+                valueType: "Nationality"
+            };
+
+            const attributes = await consumptionController.attributes.executeIdentityAttributeQuery(query);
+            const attributesId = attributes.map((v) => v.id.toString());
+            expect(attributesId).not.toContain(relationshipAttribute.id.toString());
+            expect(attributesId).toContain(identityAttribute.id.toString());
+        });
+
+        test("should successfully execute IQL queries only with repository attributes", async function () {
+            const identityAttributeParams: ICreateLocalAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const identityAttribute = await consumptionController.attributes.createLocalAttribute(identityAttributeParams);
+            await consumptionController.attributes.createSharedLocalAttributeCopy({
+                peer: CoreAddress.from("a-fake-peer"),
+                requestReference: CoreId.from("a-fake-reference"),
+                sourceAttributeId: identityAttribute.id,
+                attributeId: CoreId.from("fake-attribute-id")
+            });
+
+            const iqlQuery: IIQLQuery = { queryString: "Nationality=DE" };
+            const matchedAttributes = await consumptionController.attributes.executeIQLQuery(iqlQuery);
+            expect(matchedAttributes).toHaveLength(1);
+            const matchedAttributeIds = matchedAttributes.map((v) => v.id.toString());
+            expect(matchedAttributeIds).toContain(identityAttribute.id.toString());
+        });
+
+        test("should only return repository attributes on IdentityAttributeQuery", async function () {
+            const identityAttributeParams: ICreateLocalAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "Dis Play"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const identityAttribute = await consumptionController.attributes.createLocalAttribute(identityAttributeParams);
+
+            const relationshipAttributeParams: ICreateLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "displayName",
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "ATitle",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: "public" as RelationshipAttributeConfidentiality
+                })
+            };
+            const relationshipAttribute = await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
+
+            const peerAttributeParams: ICreateLocalAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "DE"
+                    },
+                    owner: CoreAddress.from("peer")
+                })
+            };
+            const peerAttribute = await consumptionController.attributes.createLocalAttribute(peerAttributeParams);
+
+            const sentAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                peer: CoreAddress.from("peer"),
+                requestReference: CoreId.from("ref"),
+                sourceAttributeId: identityAttribute.id
+            });
+
+            const receivedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                peer: CoreAddress.from("peer"),
+                requestReference: CoreId.from("ref2"),
+                sourceAttributeId: peerAttribute.id,
+                attributeId: CoreId.from("attr1")
+            });
+
+            const query: IIdentityAttributeQuery = {
+                valueType: "DisplayName"
+            };
+
+            const attributes = await consumptionController.attributes.executeIdentityAttributeQuery(query);
+            const attributesId = attributes.map((v) => v.id.toString());
+            expect(attributes).toHaveLength(1);
+            expect(attributesId).not.toContain(relationshipAttribute.id.toString());
+            expect(attributesId).not.toContain(peerAttribute.id.toString());
+            expect(attributesId).not.toContain(sentAttribute.id.toString());
+            expect(attributesId).not.toContain(receivedAttribute.id.toString());
+            expect(attributesId).toContain(identityAttribute.id.toString());
+        });
     });
 
     test("should allow to create an attribute shared by a peer", async function () {
