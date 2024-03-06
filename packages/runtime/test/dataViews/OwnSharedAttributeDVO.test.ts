@@ -1,5 +1,5 @@
 import { AbstractIntegerJSON, AbstractStringJSON } from "@nmshd/content";
-import { LocalAttributeDTO, RepositoryAttributeDVO } from "../../src";
+import { RepositoryAttributeDVO } from "../../src";
 import { ensureActiveRelationship, executeFullCreateAndShareRepositoryAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -20,62 +20,22 @@ beforeAll(async () => {
 
 afterAll(() => serviceProvider.stop());
 
-const repositoryAttributes: LocalAttributeDTO[] = [];
-const ownSharedIdentityAttributes: LocalAttributeDTO[] = [];
 describe("SharedToPeerAttributeDVO", () => {
-    beforeAll(async () => {
-        ownSharedIdentityAttributes.push(
-            await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
-                content: {
-                    value: {
-                        "@type": "BirthYear",
-                        value: 2001
-                    }
-                }
-            })
-        );
-        ownSharedIdentityAttributes.push(
-            await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
-                content: {
-                    value: {
-                        "@type": "Sex",
-                        value: "male"
-                    }
-                }
-            })
-        );
-        ownSharedIdentityAttributes.push(
-            await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
-                content: {
-                    value: {
-                        "@type": "Nationality",
-                        value: "DE"
-                    }
-                }
-            })
-        );
-        ownSharedIdentityAttributes.push(
-            await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
-                content: {
-                    value: {
-                        "@type": "CommunicationLanguage",
-                        value: "de"
-                    }
-                }
-            })
-        );
-
-        for (const attr of ownSharedIdentityAttributes) {
-            repositoryAttributes.push((await services1.consumption.attributes.getAttribute({ id: attr.shareInfo!.sourceAttribute! })).value);
-        }
-    });
-
     test("check the BirthYear", async () => {
-        const dtos = [(await services1.consumption.attributes.getAttribute({ id: repositoryAttributes[0].id })).value];
+        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "BirthYear",
+                    value: 2001
+                }
+            }
+        });
+        const repositoryAttribute = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.shareInfo!.sourceAttribute! })).value;
+        const dtos = [(await services1.consumption.attributes.getAttribute({ id: repositoryAttribute.id })).value];
         const dvos = await services1.expander.expandLocalAttributeDTOs(dtos);
         expect(dvos).toHaveLength(1);
         const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = repositoryAttributes[0];
+        const attribute = repositoryAttribute;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -101,7 +61,7 @@ describe("SharedToPeerAttributeDVO", () => {
 
         expect(dvo.sharedWith).toHaveLength(1);
         const shared = dvo.sharedWith[0];
-        const sharedAttribute = ownSharedIdentityAttributes[0];
+        const sharedAttribute = ownSharedIdentityAttribute;
         expect(shared.id).toBe(sharedAttribute.id);
         expect(shared.date).toBe(sharedAttribute.createdAt);
         expect(shared.createdAt).toBe(sharedAttribute.createdAt);
@@ -112,11 +72,20 @@ describe("SharedToPeerAttributeDVO", () => {
     });
 
     test("check the Sex", async () => {
-        const dtos = [(await services1.consumption.attributes.getAttribute({ id: repositoryAttributes[1].id })).value];
+        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "Sex",
+                    value: "male"
+                }
+            }
+        });
+        const repositoryAttribute = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.shareInfo!.sourceAttribute! })).value;
+        const dtos = [(await services1.consumption.attributes.getAttribute({ id: repositoryAttribute.id })).value];
         const dvos = await services1.expander.expandLocalAttributeDTOs(dtos);
         expect(dvos).toHaveLength(1);
         const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = repositoryAttributes[1];
+        const attribute = repositoryAttribute;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -144,7 +113,7 @@ describe("SharedToPeerAttributeDVO", () => {
 
         expect(dvo.sharedWith).toHaveLength(1);
         const shared = dvo.sharedWith[0];
-        const sharedAttribute = ownSharedIdentityAttributes[1];
+        const sharedAttribute = ownSharedIdentityAttribute;
         expect(shared.id).toBe(sharedAttribute.id);
         expect(shared.date).toBe(sharedAttribute.createdAt);
         expect(shared.createdAt).toBe(sharedAttribute.createdAt);
@@ -155,11 +124,20 @@ describe("SharedToPeerAttributeDVO", () => {
     });
 
     test("check the Nationality", async () => {
-        const dtos = [(await services1.consumption.attributes.getAttribute({ id: repositoryAttributes[2].id })).value];
+        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "Nationality",
+                    value: "DE"
+                }
+            }
+        });
+        const repositoryAttribute = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.shareInfo!.sourceAttribute! })).value;
+        const dtos = [(await services1.consumption.attributes.getAttribute({ id: repositoryAttribute.id })).value];
         const dvos = await services1.expander.expandLocalAttributeDTOs(dtos);
         expect(dvos).toHaveLength(1);
         const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = repositoryAttributes[2];
+        const attribute = repositoryAttribute;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -186,7 +164,7 @@ describe("SharedToPeerAttributeDVO", () => {
 
         expect(dvo.sharedWith).toHaveLength(1);
         const shared = dvo.sharedWith[0];
-        const sharedAttribute = ownSharedIdentityAttributes[2];
+        const sharedAttribute = ownSharedIdentityAttribute;
         expect(shared.id).toBe(sharedAttribute.id);
         expect(shared.date).toBe(sharedAttribute.createdAt);
         expect(shared.createdAt).toBe(sharedAttribute.createdAt);
@@ -197,11 +175,20 @@ describe("SharedToPeerAttributeDVO", () => {
     });
 
     test("check the CommunicationLanguage", async () => {
-        const dtos = [(await services1.consumption.attributes.getAttribute({ id: repositoryAttributes[3].id })).value];
+        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "CommunicationLanguage",
+                    value: "de"
+                }
+            }
+        });
+        const repositoryAttribute = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.shareInfo!.sourceAttribute! })).value;
+        const dtos = [(await services1.consumption.attributes.getAttribute({ id: repositoryAttribute.id })).value];
         const dvos = await services1.expander.expandLocalAttributeDTOs(dtos);
         expect(dvos).toHaveLength(1);
         const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = repositoryAttributes[3];
+        const attribute = repositoryAttribute;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -228,7 +215,7 @@ describe("SharedToPeerAttributeDVO", () => {
 
         expect(dvo.sharedWith).toHaveLength(1);
         const shared = dvo.sharedWith[0];
-        const sharedAttribute = ownSharedIdentityAttributes[3];
+        const sharedAttribute = ownSharedIdentityAttribute;
         expect(shared.id).toBe(sharedAttribute.id);
         expect(shared.date).toBe(sharedAttribute.createdAt);
         expect(shared.createdAt).toBe(sharedAttribute.createdAt);

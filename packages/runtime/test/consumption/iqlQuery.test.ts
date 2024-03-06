@@ -2,12 +2,16 @@ import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { IQLQueryJSON, ReadAttributeRequestItemJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
-import { ConsumptionServices, LocalAttributeDTO, LocalRequestDTO, MessageDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
+import { ConsumptionServices, CreateOutgoingRequestRequest, LocalAttributeDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { establishRelationship, RuntimeServiceProvider, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../lib";
+import { establishRelationship, exchangeMessageWithRequest, RuntimeServiceProvider, sendMessageWithRequest, TestRuntimeServices } from "../lib";
+import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";
 
 describe("IQL Query", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider();
+
+    let sRuntimeServices: TestRuntimeServices;
+    let rRuntimeServices: TestRuntimeServices;
     let sConsumptionServices: ConsumptionServices;
     let rConsumptionServices: ConsumptionServices;
     let sTransportServices: TransportServices;
@@ -15,24 +19,19 @@ describe("IQL Query", () => {
     let sEventBus: EventBus;
     let rEventBus: EventBus;
 
-    let sLocalRequest: LocalRequestDTO;
-    let sRequestMessage: MessageDTO;
-    let rRequestMessage: MessageDTO;
-    let rLocalRequest: LocalRequestDTO;
-    let rResponseMessage: MessageDTO;
-    let sResponseMessage: MessageDTO;
-
     let rLocalAttribute: LocalAttributeDTO;
-    let rQueryResult: LocalAttributeDTO[];
+    let requestContent: CreateOutgoingRequestRequest;
 
     beforeAll(async () => {
         const runtimeServices = await runtimeServiceProvider.launch(2);
-        sConsumptionServices = runtimeServices[0].consumption;
-        sTransportServices = runtimeServices[0].transport;
-        sEventBus = runtimeServices[0].eventBus;
-        rConsumptionServices = runtimeServices[1].consumption;
-        rTransportServices = runtimeServices[1].transport;
-        rEventBus = runtimeServices[1].eventBus;
+        sRuntimeServices = runtimeServices[0];
+        rRuntimeServices = runtimeServices[1];
+        sTransportServices = sRuntimeServices.transport;
+        rTransportServices = rRuntimeServices.transport;
+        sConsumptionServices = sRuntimeServices.consumption;
+        rConsumptionServices = rRuntimeServices.consumption;
+        sEventBus = sRuntimeServices.eventBus;
+        rEventBus = rRuntimeServices.eventBus;
 
         await establishRelationship(sTransportServices, rTransportServices);
 
@@ -67,18 +66,8 @@ describe("IQL Query", () => {
                 tags: ["content:someContent"]
             }
         });
-    }, 30000);
-    afterAll(async () => {
-        await runtimeServiceProvider.stop();
-    });
 
-    test("sender: create an outgoing IQL Request in status Draft", async () => {
-        let triggeredEvent: OutgoingRequestCreatedEvent | undefined;
-        sEventBus.subscribeOnce(OutgoingRequestCreatedEvent, (event) => {
-            triggeredEvent = event;
-        });
-
-        const result = await sConsumptionServices.outgoingRequests.create({
+        requestContent = {
             content: {
                 items: [
                     {
@@ -93,11 +82,23 @@ describe("IQL Query", () => {
                 expiresAt: DateTime.now().plus({ hour: 1 }).toISO()
             },
             peer: (await rTransportServices.account.getIdentityInfo()).value.address
+        };
+    }, 30000);
+    afterAll(async () => {
+        await runtimeServiceProvider.stop();
+    });
+
+    test("sender: create an outgoing IQL Request in status Draft", async () => {
+        let triggeredEvent: OutgoingRequestCreatedEvent | undefined;
+        sEventBus.subscribeOnce(OutgoingRequestCreatedEvent, (event) => {
+            triggeredEvent = event;
         });
+
+        const result = await sConsumptionServices.outgoingRequests.create(requestContent);
 
         expect(result).toBeSuccessful();
 
-        sLocalRequest = (await sConsumptionServices.outgoingRequests.getRequest({ id: result.value.id })).value;
+        const sLocalRequest = (await sConsumptionServices.outgoingRequests.getRequest({ id: result.value.id })).value;
 
         expect(triggeredEvent).toBeDefined();
         expect(triggeredEvent!.data).toBeDefined();
@@ -110,14 +111,7 @@ describe("IQL Query", () => {
     });
 
     test("sender: send the outgoing IQL Request via Message", async () => {
-        const result = await sTransportServices.messages.sendMessage({
-            content: sLocalRequest.content,
-            recipients: [(await rTransportServices.account.getIdentityInfo()).value.address]
-        });
-
-        expect(result).toBeSuccessful();
-
-        sRequestMessage = result.value;
+        await expect(sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent)).resolves.not.toThrow();
     });
 
     test("sender: mark the outgoing IQL Request as sent", async () => {
@@ -125,12 +119,10 @@ describe("IQL Query", () => {
         sEventBus.subscribeOnce(OutgoingRequestStatusChangedEvent, (event) => {
             triggeredEvent = event;
         });
-
-        const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sLocalRequest.id, messageId: sRequestMessage.id });
+        const sRequestMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id, messageId: sRequestMessage.id });
 
         expect(result).toBeSuccessful();
-
-        sLocalRequest = result.value;
 
         expect(result.value.status).toBe(LocalRequestStatus.Open);
         expect(triggeredEvent).toBeDefined();
@@ -144,7 +136,7 @@ describe("IQL Query", () => {
             triggeredEvent = event;
         });
 
-        rRequestMessage = await syncUntilHasMessageWithRequest(rTransportServices, sLocalRequest.id);
+        const rRequestMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         const result = await rConsumptionServices.incomingRequests.received({
             receivedRequest: rRequestMessage.content,
             requestSourceId: rRequestMessage.id
@@ -152,11 +144,11 @@ describe("IQL Query", () => {
 
         expect(result).toBeSuccessful();
 
-        rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: result.value.id })).value;
+        const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: result.value.id })).value;
 
         expect(rLocalRequest).toBeDefined();
         expect(rLocalRequest.status).toBe(LocalRequestStatus.Open);
-        expect(rLocalRequest.id).toBe(sLocalRequest.id);
+        expect(rLocalRequest.id).toBe(rRequestMessage.content.id);
 
         expect(triggeredEvent).toBeDefined();
         expect(triggeredEvent!.data).toBeDefined();
@@ -164,18 +156,23 @@ describe("IQL Query", () => {
     });
 
     test("recipient: check prerequisites of incoming IQL Request", async () => {
+        const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        await rConsumptionServices.incomingRequests.received({
+            receivedRequest: message.content,
+            requestSourceId: message.id
+        });
         let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
             triggeredEvent = event;
         });
 
         const result = await rConsumptionServices.incomingRequests.checkPrerequisites({
-            requestId: rLocalRequest.id
+            requestId: message.content.id
         });
 
         expect(result).toBeSuccessful();
 
-        rLocalRequest = result.value;
+        const rLocalRequest = result.value;
 
         expect(rLocalRequest).toBeDefined();
         expect(rLocalRequest.status).toBe(LocalRequestStatus.DecisionRequired);
@@ -187,18 +184,26 @@ describe("IQL Query", () => {
     });
 
     test("recipient: require manual decision of incoming IQL Request", async () => {
+        const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        await rConsumptionServices.incomingRequests.received({
+            receivedRequest: message.content,
+            requestSourceId: message.id
+        });
+        await rConsumptionServices.incomingRequests.checkPrerequisites({
+            requestId: message.content.id
+        });
         let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
             triggeredEvent = event;
         });
 
         const result = await rConsumptionServices.incomingRequests.requireManualDecision({
-            requestId: rLocalRequest.id
+            requestId: message.content.id
         });
 
         expect(result).toBeSuccessful();
 
-        rLocalRequest = result.value;
+        const rLocalRequest = result.value;
 
         expect(rLocalRequest).toBeDefined();
         expect(rLocalRequest.status).toBe(LocalRequestStatus.ManualDecisionRequired);
@@ -210,7 +215,8 @@ describe("IQL Query", () => {
     });
 
     test("recipient: perform IQL Query to find attribute candidates", async () => {
-        const requestItem: ReadAttributeRequestItemJSON = rLocalRequest.content.items[0] as ReadAttributeRequestItemJSON;
+        const request = (await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
+        const requestItem: ReadAttributeRequestItemJSON = request.content.items[0] as ReadAttributeRequestItemJSON;
 
         const query: IQLQueryJSON = requestItem.query as IQLQueryJSON;
 
@@ -218,12 +224,13 @@ describe("IQL Query", () => {
 
         expect(IQL_RESULT).toBeSuccessful();
 
-        rQueryResult = IQL_RESULT.value;
+        const rQueryResult = IQL_RESULT.value;
 
         expect(rQueryResult).toHaveLength(1);
     });
 
     test("recipient: call canAccept for incoming IQL Request", async () => {
+        const rLocalRequest = (await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
         const result = await rConsumptionServices.incomingRequests.canAccept({
             requestId: rLocalRequest.id,
             items: [
@@ -242,13 +249,14 @@ describe("IQL Query", () => {
     });
 
     test("recipient: accept incoming Request", async () => {
+        const request = (await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
         let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
             triggeredEvent = event;
         });
 
         const result = await rConsumptionServices.incomingRequests.accept({
-            requestId: rLocalRequest.id,
+            requestId: request.id,
             items: [
                 {
                     accept: true,
@@ -258,7 +266,7 @@ describe("IQL Query", () => {
         });
         expect(result).toBeSuccessful();
 
-        rLocalRequest = result.value;
+        const rLocalRequest = result.value;
 
         expect(rLocalRequest).toBeDefined();
         expect(rLocalRequest.status).toBe(LocalRequestStatus.Decided);
@@ -272,38 +280,49 @@ describe("IQL Query", () => {
     });
 
     test("recipient: send Response via Message", async () => {
+        const { request, source } = await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent);
+        const acceptedRequest = await rConsumptionServices.incomingRequests.accept({
+            requestId: request.id,
+            items: [
+                {
+                    accept: true,
+                    existingAttributeId: rLocalAttribute.id
+                }
+            ] as any // bug in runtime
+        });
         const result = await rTransportServices.messages.sendMessage({
             content: {
                 "@type": "ResponseWrapper",
-                requestId: sLocalRequest.id,
-                requestSourceReference: sRequestMessage.id,
+                requestId: request.id,
+                requestSourceReference: source,
                 requestSourceType: "Message",
-                response: rLocalRequest.response!.content
+                response: acceptedRequest.value.response!.content
             },
             recipients: [(await sTransportServices.account.getIdentityInfo()).value.address]
         });
-
         expect(result).toBeSuccessful();
 
-        rResponseMessage = result.value;
+        const rResponseMessage = result.value;
 
         expect(rResponseMessage.content["@type"]).toBe("ResponseWrapper");
     });
 
     test("recipient: complete incoming Request", async () => {
+        const rResponseMessage = (await exchangeMessageWithRequestAndSendResponse(sRuntimeServices, rRuntimeServices, requestContent, "accept")).rResponseMessage;
+
         let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
             triggeredEvent = event;
         });
 
         const result = await rConsumptionServices.incomingRequests.complete({
-            requestId: rLocalRequest.id,
+            requestId: rResponseMessage.content.requestId,
             responseSourceId: rResponseMessage.id
         });
 
         expect(result).toBeSuccessful();
 
-        rLocalRequest = result.value;
+        const rLocalRequest = result.value;
 
         expect(rLocalRequest).toBeDefined();
         expect(rLocalRequest.status).toBe(LocalRequestStatus.Completed);
@@ -315,12 +334,13 @@ describe("IQL Query", () => {
     });
 
     test("sender: sync Message with Response and complete the outgoing Request with Response from Message", async () => {
+        const sResponseMessage = (await exchangeMessageWithRequestAndSendResponse(sRuntimeServices, rRuntimeServices, requestContent, "accept")).sResponseMessage;
+
         let triggeredEvent: OutgoingRequestStatusChangedEvent | undefined;
         sEventBus.subscribeOnce(OutgoingRequestStatusChangedEvent, (event) => {
             triggeredEvent = event;
         });
 
-        sResponseMessage = await syncUntilHasMessageWithResponse(sTransportServices, sLocalRequest.id);
         const result = await sConsumptionServices.outgoingRequests.complete({
             messageId: sResponseMessage.id,
             receivedResponse: sResponseMessage.content.response
@@ -328,7 +348,7 @@ describe("IQL Query", () => {
 
         expect(result).toBeSuccessful();
 
-        sLocalRequest = result.value;
+        const sLocalRequest = result.value;
 
         expect(sLocalRequest).toBeDefined();
         expect(sLocalRequest.status).toBe(LocalRequestStatus.Completed);

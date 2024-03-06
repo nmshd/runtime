@@ -12,56 +12,81 @@ afterAll(async () => await runtimeServiceProvider.stop());
 
 describe("Drafts", () => {
     const content = { aKey: "a-Value" };
-    let draftId: string;
 
     test("should create a draft", async () => {
         const result = await consumptionServices.drafts.createDraft({ content: content, type: "test" });
 
         expect(result).toBeSuccessful();
-
-        const draft = result.value;
-        draftId = draft.id;
     });
 
     test("should get the draft", async () => {
-        const result = await consumptionServices.drafts.getDraft({ id: draftId });
-        expect(result).toBeSuccessful();
+        const creationResult = await consumptionServices.drafts.createDraft({ content: content, type: "test" });
 
-        const draft = result.value;
+        expect(creationResult).toBeSuccessful();
+
+        const draftId = creationResult.value.id;
+
+        const getResult = await consumptionServices.drafts.getDraft({ id: draftId });
+        expect(getResult).toBeSuccessful();
+
+        const draft = getResult.value;
         expect(draft.content).toStrictEqual(content);
     });
 
     test("should have query the draft", async () => {
-        const result = await consumptionServices.drafts.getDrafts({});
-        expect(result).toBeSuccessful();
+        const baselineNumberOfDrafts = (await consumptionServices.drafts.getDrafts({})).value.length;
 
-        const drafts = result.value;
-        expect(drafts).toHaveLength(1);
+        const creationResult = await consumptionServices.drafts.createDraft({ content: content, type: "test" });
 
-        expect(drafts[0].id).toStrictEqual(draftId);
+        expect(creationResult).toBeSuccessful();
+
+        const draftId = creationResult.value.id;
+
+        const getResult = await consumptionServices.drafts.getDrafts({});
+        expect(getResult).toBeSuccessful();
+
+        const drafts = getResult.value;
+        const numberOfDrafts = drafts.length;
+        expect(numberOfDrafts - baselineNumberOfDrafts).toBe(1);
+
+        expect(drafts[numberOfDrafts - 1].id).toStrictEqual(draftId);
     });
 
     test("should edit the draft", async () => {
+        const creationResult = await consumptionServices.drafts.createDraft({ content: content, type: "test" });
+
+        expect(creationResult).toBeSuccessful();
+
+        const draftId = creationResult.value.id;
+
         const newContent = { aKey: "another-Value" };
         const updateResult = await consumptionServices.drafts.updateDraft({ id: draftId, content: newContent });
         expect(updateResult).toBeSuccessful();
 
-        const result = await consumptionServices.drafts.getDraft({ id: draftId });
-        expect(result).toBeSuccessful();
+        const getResult = await consumptionServices.drafts.getDraft({ id: draftId });
+        expect(getResult).toBeSuccessful();
 
-        const draft = result.value;
+        const draft = getResult.value;
         expect(draft.content).toStrictEqual(newContent);
     });
 
     test("should delete the draft", async () => {
+        const creationResult = await consumptionServices.drafts.createDraft({ content: content, type: "test" });
+
+        expect(creationResult).toBeSuccessful();
+
+        const draftId = creationResult.value.id;
+
+        const baselineNumberOfDrafts = (await consumptionServices.drafts.getDrafts({})).value.length;
         const deleteResult = await consumptionServices.drafts.deleteDraft({ id: draftId });
         expect(deleteResult).toBeSuccessful();
 
-        const result = await consumptionServices.drafts.getDrafts({});
-        expect(result).toBeSuccessful();
+        const getResult = await consumptionServices.drafts.getDrafts({});
+        expect(getResult).toBeSuccessful();
 
-        const drafts = result.value;
-        expect(drafts).toHaveLength(0);
+        const drafts = getResult.value;
+        const numberOfDrafts = drafts.length;
+        expect(baselineNumberOfDrafts - numberOfDrafts).toBe(1);
     });
 });
 
