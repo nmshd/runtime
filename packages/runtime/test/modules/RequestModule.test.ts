@@ -404,6 +404,7 @@ describe("RequestModule", () => {
 
         test("sends a message when the request is accepted", async () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+            await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             const acceptRequestResult = await rConsumptionServices.incomingRequests.accept({ requestId: message.content.id, items: [{ accept: true }] });
             expect(acceptRequestResult).toBeSuccessful();
 
