@@ -1,6 +1,5 @@
 import { ConsumptionIds, LocalNotificationStatus } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
 import { ConsumptionServices, TransportServices } from "../../src";
 import { establishRelationship, MockEventBus, RuntimeServiceProvider, syncUntilHasMessageWithNotification, TestNotificationItem, TestNotificationItemProcessor } from "../lib";
 
@@ -38,10 +37,8 @@ beforeEach(() => {
 afterAll(async () => await runtimeServiceProvider.stop());
 
 describe("NotificationModule", () => {
-    let notificationId: CoreId;
-
     test("runs sent when sending a Message containing a Notification", async () => {
-        notificationId = await ConsumptionIds.notification.generate();
+        const notificationId = await ConsumptionIds.notification.generate();
         await sTransportServices.messages.sendMessage({
             recipients: [rAddress],
             content: Notification.from({ id: notificationId, items: [TestNotificationItem.from({})] }).toJSON()
@@ -53,6 +50,11 @@ describe("NotificationModule", () => {
     });
 
     test("runs received and process when receiving a Message containing a Notification", async () => {
+        const notificationId = await ConsumptionIds.notification.generate();
+        await sTransportServices.messages.sendMessage({
+            recipients: [rAddress],
+            content: Notification.from({ id: notificationId, items: [TestNotificationItem.from({})] }).toJSON()
+        });
         await syncUntilHasMessageWithNotification(rTransportServices, notificationId);
         await rEventBus.waitForRunningEventHandlers();
 
