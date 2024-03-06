@@ -923,7 +923,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getSharedVersionsOfRepositoryAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
-        let repositoryAttribute = await this.getLocalAttribute(id);
+        const repositoryAttribute = await this.getLocalAttribute(id);
         if (typeof repositoryAttribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
@@ -932,27 +932,33 @@ export class AttributesController extends ConsumptionBaseController {
             throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
         }
 
-        while (repositoryAttribute.succeededBy) {
-            const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
-            if (!successor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
-            }
-
-            repositoryAttribute = successor;
-        }
-
         const query: any = { "shareInfo.sourceAttribute": repositoryAttribute.id.toString() };
-
         if (typeof peers !== "undefined") {
             query["shareInfo.peer"] = { $in: peers.map((address) => address.toString()) };
         }
-
         if (onlyLatestVersions) {
             query["succeededBy"] = { $exists: false };
         }
+        query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
 
-        const ownSharedIdentityAttributeVersions: LocalAttribute[] = await this.getLocalAttributes(query);
+        const ownSharedIdentityAttributeCopies = await this.getLocalAttributes(query);
+        const ownSharedIdentityAttributePredecessors = await this.getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute, query);
+        const ownSharedIdentityAttributeSuccessors = await this.getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute, query);
 
+        const ownSharedIdentityAttributeVersions = [
+            ...ownSharedIdentityAttributeSuccessors.reverse(),
+            ...ownSharedIdentityAttributeCopies,
+            ...ownSharedIdentityAttributePredecessors
+        ];
+        return ownSharedIdentityAttributeVersions;
+    }
+
+    public async getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query?: any): Promise<LocalAttribute[]> {
+        if (typeof query === "undefined") {
+            query = {};
+        }
+
+        const ownSharedIdentityAttributePredecessors: LocalAttribute[] = [];
         while (repositoryAttribute.succeeds) {
             const predecessor = await this.getLocalAttribute(repositoryAttribute.succeeds);
             if (!predecessor) {
@@ -964,9 +970,32 @@ export class AttributesController extends ConsumptionBaseController {
             query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
             const sharedCopies = await this.getLocalAttributes(query);
 
-            ownSharedIdentityAttributeVersions.push(...sharedCopies);
+            ownSharedIdentityAttributePredecessors.push(...sharedCopies);
         }
 
-        return ownSharedIdentityAttributeVersions;
+        return ownSharedIdentityAttributePredecessors;
+    }
+
+    public async getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query?: any): Promise<LocalAttribute[]> {
+        if (typeof query === "undefined") {
+            query = {};
+        }
+
+        const ownSharedIdentityAttributeSuccessors: LocalAttribute[] = [];
+        while (repositoryAttribute.succeededBy) {
+            const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
+            if (!successor) {
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
+            }
+
+            repositoryAttribute = successor;
+
+            query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
+            const sharedCopies = await this.getLocalAttributes(query);
+
+            ownSharedIdentityAttributeSuccessors.push(...sharedCopies);
+        }
+
+        return ownSharedIdentityAttributeSuccessors;
     }
 }
