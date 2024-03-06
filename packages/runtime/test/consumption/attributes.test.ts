@@ -27,7 +27,7 @@ import {
 } from "../../src";
 import {
     acceptIncomingShareAttributeRequest,
-    ensureActiveRelationship,
+    establishRelationship,
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullNotifyPeerAboutAttributeSuccessionFlow,
@@ -44,41 +44,37 @@ let services1: TestRuntimeServices;
 let services2: TestRuntimeServices;
 let services3: TestRuntimeServices;
 
-let services1AttributeController: AttributesController;
-let services2AttributeController: AttributesController;
-
 beforeAll(async () => {
     const numberOfServices = 3;
-    const runtimeServices = await runtimeServiceProvider.launch(numberOfServices, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+    [services1, services2, services3] = await runtimeServiceProvider.launch(numberOfServices, {
+        enableRequestModule: true,
+        enableDeciderModule: true,
+        enableNotificationModule: true
+    });
 
-    services1 = runtimeServices[0];
-    services2 = runtimeServices[1];
-    services3 = runtimeServices[2];
-
-    services1AttributeController = (services1.consumption.attributes as any).getAttributeUseCase.attributeController as AttributesController;
-    services2AttributeController = (services2.consumption.attributes as any).getAttributeUseCase.attributeController as AttributesController;
-
-    await ensureActiveRelationship(services1.transport, services2.transport);
-    await ensureActiveRelationship(services1.transport, services3.transport);
-    await ensureActiveRelationship(services2.transport, services3.transport);
+    await establishRelationship(services1.transport, services2.transport);
+    await establishRelationship(services1.transport, services3.transport);
+    await establishRelationship(services2.transport, services3.transport);
 }, 30000);
 afterAll(async () => await runtimeServiceProvider.stop());
 
 beforeEach(() => {
     services1.eventBus.reset();
     services2.eventBus.reset();
+    services3.eventBus.reset();
 });
 
 async function cleanupAttributes() {
-    const services1AttributesResult = await services1.consumption.attributes.getAttributes({});
-    for (const attribute of services1AttributesResult.value) {
-        await services1AttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
-    }
+    await Promise.all(
+        [services1, services2, services3].map(async (services) => {
+            const servicesAttributeController = (services.consumption.attributes as any).getAttributeUseCase.attributeController as AttributesController;
 
-    const services2AttributesResult = await services2.consumption.attributes.getAttributes({});
-    for (const attribute of services2AttributesResult.value) {
-        await services2AttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
-    }
+            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
+            for (const attribute of servicesAttributesResult.value) {
+                await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
+            }
+        })
+    );
 }
 
 describe("get attribute(s)", () => {

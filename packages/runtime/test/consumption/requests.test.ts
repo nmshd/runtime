@@ -21,8 +21,8 @@ import {
     TestRuntimeServices
 } from "../lib";
 import {
-    exchangeMessageAndReceiverRequiresManualDecision,
-    exchangeMessageAndReceiverSendsResponse,
+    exchangeMessageWithRequestAndRequireManualDecision,
+    exchangeMessageWithRequestAndSendResponse,
     exchangeTemplateAndReceiverRequiresManualDecision,
     exchangeTemplateAndReceiverSendsResponse
 } from "../lib/testUtilsWithInactiveModules";
@@ -205,7 +205,7 @@ describe("Requests", () => {
         });
 
         test(`recipient: call can${action} for incoming Request`, async () => {
-            const rLocalRequest = (await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
+            const rLocalRequest = (await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
             const result = await rConsumptionServices.incomingRequests[`can${action}`]({
                 requestId: rLocalRequest.id,
                 items: [
@@ -226,7 +226,7 @@ describe("Requests", () => {
         });
 
         test(`recipient: ${actionLowerCase} incoming Request`, async () => {
-            const request = (await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
+            const request = (await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
@@ -256,7 +256,7 @@ describe("Requests", () => {
         });
 
         test("recipient: send Response via Message", async () => {
-            const { request, source } = await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestContent);
+            const { request, source } = await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent);
             const acceptedRequest = await rConsumptionServices.incomingRequests[actionLowerCase]({
                 requestId: request.id,
                 items: [
@@ -284,7 +284,7 @@ describe("Requests", () => {
         });
 
         test("recipient: complete incoming Request", async () => {
-            const rResponseMessage = (await exchangeMessageAndReceiverSendsResponse(sRuntimeServices, rRuntimeServices, requestContent, action)).rResponseMessage;
+            const rResponseMessage = (await exchangeMessageWithRequestAndSendResponse(sRuntimeServices, rRuntimeServices, requestContent, action)).rResponseMessage;
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
@@ -309,7 +309,7 @@ describe("Requests", () => {
         });
 
         test("sender: sync Message with Response and complete the outgoing Request with Response from Message", async () => {
-            const sResponseMessage = (await exchangeMessageAndReceiverSendsResponse(sRuntimeServices, rRuntimeServices, requestContent, action)).sResponseMessage;
+            const sResponseMessage = (await exchangeMessageWithRequestAndSendResponse(sRuntimeServices, rRuntimeServices, requestContent, action)).sResponseMessage;
 
             let triggeredEvent: OutgoingRequestStatusChangedEvent | undefined;
             sEventBus.subscribeOnce(OutgoingRequestStatusChangedEvent, (event) => {
@@ -393,9 +393,8 @@ describe("Requests", () => {
             expect(result).toBeSuccessful();
         });
 
-        // eslint-disable-next-line jest/expect-expect
         test("recipient: load the Relationship Template with the Request", async () => {
-            await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
+            await expect(exchangeTemplate(sTransportServices, rTransportServices, templateContent)).resolves.not.toThrow();
         });
 
         test("recipient: create an incoming Request from the Relationship Template content", async () => {
@@ -493,7 +492,7 @@ describe("Requests", () => {
                 requestId: request.id,
                 items: [
                     {
-                        accept: action === "Accept" ? true : false // eslint-disable-line jest/no-if
+                        accept: action === "Accept"
                     }
                 ]
             });

@@ -18,7 +18,7 @@ export interface RelationshipRequestWithRelationshipIfAccepted {
     relationship: RelationshipDTO | undefined;
 }
 
-export async function exchangeMessageAndReceiverRequiresManualDecision(
+export async function exchangeMessageWithRequestAndRequireManualDecision(
     sRuntimeServices: TestRuntimeServices,
     rRuntimeServices: TestRuntimeServices,
     requestForCreate: CreateOutgoingRequestRequest
@@ -43,13 +43,13 @@ export async function exchangeMessageAndReceiverRequiresManualDecision(
     };
 }
 
-export async function exchangeMessageAndReceiverSendsResponse(
+export async function exchangeMessageWithRequestAndSendResponse(
     sRuntimeServices: TestRuntimeServices,
     rRuntimeServices: TestRuntimeServices,
     requestForCreate: CreateOutgoingRequestRequest,
     action: string
 ): Promise<ResponseMessagesForSenderAndRecipient> {
-    const { request, source } = await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestForCreate);
+    const { request, source } = await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestForCreate);
     const acceptedRequest = await rRuntimeServices.consumption.incomingRequests.accept({
         requestId: request.id,
         items: [
@@ -105,7 +105,7 @@ export async function exchangeTemplateAndReceiverSendsResponse(
     sRuntimeServices: TestRuntimeServices,
     rRuntimeServices: TestRuntimeServices,
     templateContent: any,
-    actionLowerCase: string
+    actionLowerCase: "accept" | "reject"
 ): Promise<RelationshipRequestWithRelationshipIfAccepted> {
     const { request, source: templateId } = await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent);
     const decidedRequest = (

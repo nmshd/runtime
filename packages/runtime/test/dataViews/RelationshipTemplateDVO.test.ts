@@ -1,4 +1,4 @@
-import { AcceptProposeAttributeRequestItemParametersJSON, DecideRequestItemGroupParametersJSON } from "@nmshd/consumption";
+import { AcceptProposeAttributeRequestItemParametersJSON, DecideRequestItemGroupParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -10,7 +10,13 @@ import {
     Surname
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
-import { OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, PeerRelationshipTemplateDVO, RelationshipTemplateDTO, RequestItemGroupDVO } from "../../src";
+import {
+    IncomingRequestStatusChangedEvent,
+    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    PeerRelationshipTemplateDVO,
+    RelationshipTemplateDTO,
+    RequestItemGroupDVO
+} from "../../src";
 import { createTemplate, RuntimeServiceProvider, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -45,7 +51,6 @@ describe("RelationshipTemplateDVO", () => {
             key: "givenName",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-
         const relationshipAttributeContent2 = {
             "@type": "RelationshipAttribute",
             owner: templator.address,
@@ -57,7 +62,6 @@ describe("RelationshipTemplateDVO", () => {
             key: "surname",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-
         const templateContent = {
             "@type": "RelationshipTemplateContent",
             onNewRelationship: {
@@ -202,6 +206,7 @@ describe("RelationshipTemplateDVO", () => {
 
     test("RequestDVO for requestor", async () => {
         const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const requestResult = await requestor.consumption.incomingRequests.getRequests({
             query: {
                 "source.reference": requestorTemplate.id
@@ -225,12 +230,21 @@ describe("RelationshipTemplateDVO", () => {
     test("Accept the request and follow-up tests", async () => {
         let dto;
         let dvo;
+        let requestResult;
         const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
-        const requestResult = await requestor.consumption.incomingRequests.getRequests({
+        requestResult = await requestor.consumption.incomingRequests.getRequests({
             query: {
                 "source.reference": requestorTemplate.id
             }
         });
+        if (requestResult.value.length === 0) {
+            await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            requestResult = await requestor.consumption.incomingRequests.getRequests({
+                query: {
+                    "source.reference": requestorTemplate.id
+                }
+            });
+        }
         const acceptResult = await requestor.consumption.incomingRequests.accept({
             requestId: requestResult.value[0].id,
             items: responseItems

@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import { ConsumptionServices, CreateOutgoingRequestRequest, LocalAttributeDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import { establishRelationship, exchangeMessageWithRequest, RuntimeServiceProvider, sendMessageWithRequest, TestRuntimeServices } from "../lib";
-import { exchangeMessageAndReceiverRequiresManualDecision, exchangeMessageAndReceiverSendsResponse } from "../lib/testUtilsWithInactiveModules";
+import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";
 
 describe("IQL Query", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider();
@@ -110,9 +110,10 @@ describe("IQL Query", () => {
         expect(sLocalRequest.content.items[0].mustBeAccepted).toBe(false);
     });
 
-    // eslint-disable-next-line jest/expect-expect
     test("sender: send the outgoing IQL Request via Message", async () => {
-        await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        await expect(sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent)).resolves.not.toThrow();
+        // await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        // }).resolves.not.toThrow();
     });
 
     test("sender: mark the outgoing IQL Request as sent", async () => {
@@ -216,7 +217,7 @@ describe("IQL Query", () => {
     });
 
     test("recipient: perform IQL Query to find attribute candidates", async () => {
-        const request = (await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
+        const request = (await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
         const requestItem: ReadAttributeRequestItemJSON = request.content.items[0] as ReadAttributeRequestItemJSON;
 
         const query: IQLQueryJSON = requestItem.query as IQLQueryJSON;
@@ -231,7 +232,7 @@ describe("IQL Query", () => {
     });
 
     test("recipient: call canAccept for incoming IQL Request", async () => {
-        const rLocalRequest = (await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
+        const rLocalRequest = (await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
         const result = await rConsumptionServices.incomingRequests.canAccept({
             requestId: rLocalRequest.id,
             items: [
@@ -250,7 +251,7 @@ describe("IQL Query", () => {
     });
 
     test("recipient: accept incoming Request", async () => {
-        const request = (await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
+        const request = (await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent)).request;
         let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
             triggeredEvent = event;
@@ -281,7 +282,7 @@ describe("IQL Query", () => {
     });
 
     test("recipient: send Response via Message", async () => {
-        const { request, source } = await exchangeMessageAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, requestContent);
+        const { request, source } = await exchangeMessageWithRequestAndRequireManualDecision(sRuntimeServices, rRuntimeServices, requestContent);
         const acceptedRequest = await rConsumptionServices.incomingRequests.accept({
             requestId: request.id,
             items: [
@@ -309,7 +310,7 @@ describe("IQL Query", () => {
     });
 
     test("recipient: complete incoming Request", async () => {
-        const rResponseMessage = (await exchangeMessageAndReceiverSendsResponse(sRuntimeServices, rRuntimeServices, requestContent, "accept")).rResponseMessage;
+        const rResponseMessage = (await exchangeMessageWithRequestAndSendResponse(sRuntimeServices, rRuntimeServices, requestContent, "accept")).rResponseMessage;
 
         let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
@@ -335,7 +336,7 @@ describe("IQL Query", () => {
     });
 
     test("sender: sync Message with Response and complete the outgoing Request with Response from Message", async () => {
-        const sResponseMessage = (await exchangeMessageAndReceiverSendsResponse(sRuntimeServices, rRuntimeServices, requestContent, "accept")).sResponseMessage;
+        const sResponseMessage = (await exchangeMessageWithRequestAndSendResponse(sRuntimeServices, rRuntimeServices, requestContent, "accept")).sResponseMessage;
 
         let triggeredEvent: OutgoingRequestStatusChangedEvent | undefined;
         sEventBus.subscribeOnce(OutgoingRequestStatusChangedEvent, (event) => {
