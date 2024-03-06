@@ -1110,140 +1110,150 @@ describe("Get (shared) versions of attribute", () => {
     let sOSRAVersion0: LocalAttributeDTO;
     let sOSRAVersion1: LocalAttributeDTO;
     let sOSRAVersion2: LocalAttributeDTO;
-    beforeAll(async () => {
-        await setUpIdentityAttributeVersions();
-        await setUpRelationshipAttributeVersions();
-
-        async function setUpIdentityAttributeVersions() {
-            await createAndShareVersion0();
-            await succeedVersion0();
-            await succeedVersion1();
-            sRAVersions = [sRAVersion2, sRAVersion1, sRAVersion0];
-
-            await notifyPeerAboutVersion2();
-            await shareVersion2WithFurtherPeer();
-
-            async function createAndShareVersion0(): Promise<void> {
-                sOSIAVersion0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
-                    content: {
-                        value: {
-                            "@type": "GivenName",
-                            value: "First Name"
-                        },
-                        tags: ["tag1"]
-                    }
-                });
-
-                sRAVersion0 = (await services1.consumption.attributes.getAttribute({ id: sOSIAVersion0.shareInfo!.sourceAttribute! })).value;
+    async function succeedVersion0(): Promise<void> {
+        const succeedRARequest1: SucceedRepositoryAttributeRequest = {
+            predecessorId: sRAVersion0.id.toString(),
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Second Name"
+                },
+                tags: ["tag2"]
             }
+        };
+        const sRASuccessionResult1 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRARequest1);
+        ({ predecessor: sRAVersion0, successor: sRAVersion1 } = sRASuccessionResult1.value);
+    }
 
-            async function succeedVersion0(): Promise<void> {
-                const succeedRARequest1: SucceedRepositoryAttributeRequest = {
-                    predecessorId: sRAVersion0.id.toString(),
-                    successorContent: {
-                        value: {
-                            "@type": "GivenName",
-                            value: "Second Name"
-                        },
-                        tags: ["tag2"]
-                    }
-                };
-                const sRASuccessionResult1 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRARequest1);
-                ({ predecessor: sRAVersion0, successor: sRAVersion1 } = sRASuccessionResult1.value);
+    async function succeedVersion1(): Promise<void> {
+        const succeedRARequest2: SucceedRepositoryAttributeRequest = {
+            predecessorId: sRAVersion1.id.toString(),
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Third Name"
+                },
+                tags: ["tag3"]
             }
+        };
+        const sRASuccessionResult2 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRARequest2);
+        ({ predecessor: sRAVersion1, successor: sRAVersion2 } = sRASuccessionResult2.value);
+    }
 
-            async function succeedVersion1(): Promise<void> {
-                const succeedRARequest2: SucceedRepositoryAttributeRequest = {
-                    predecessorId: sRAVersion1.id.toString(),
-                    successorContent: {
-                        value: {
-                            "@type": "GivenName",
-                            value: "Third Name"
-                        },
-                        tags: ["tag3"]
-                    }
-                };
-                const sRASuccessionResult2 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRARequest2);
-                ({ predecessor: sRAVersion1, successor: sRAVersion2 } = sRASuccessionResult2.value);
-            }
+    async function setUpRepositoryAttributeVersions() {
+        sRAVersion0 = (
+            await services1.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "First Name"
+                    },
+                    tags: ["tag1"]
+                }
+            })
+        ).value;
+        await succeedVersion0();
+        await succeedVersion1();
+        sRAVersions = [sRAVersion2, sRAVersion1, sRAVersion0];
+    }
+    async function setUpIdentityAttributeVersions() {
+        await createAndShareVersion0();
+        await succeedVersion0();
+        await succeedVersion1();
+        sRAVersions = [sRAVersion2, sRAVersion1, sRAVersion0];
 
-            async function notifyPeerAboutVersion2(): Promise<void> {
-                const notifyRequestResult = (
-                    await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
-                        attributeId: sRAVersion2.id,
-                        peer: services2.address
-                    })
-                ).value;
-                await waitForRecipientToReceiveNotification(services1, services2, notifyRequestResult);
+        await notifyPeerAboutVersion2();
+        await shareVersion2WithFurtherPeer();
 
-                ({ predecessor: sOSIAVersion0, successor: sOSIAVersion2 } = notifyRequestResult);
-            }
+        async function createAndShareVersion0(): Promise<void> {
+            sOSIAVersion0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "First Name"
+                    },
+                    tags: ["tag1"]
+                }
+            });
 
-            async function shareVersion2WithFurtherPeer(): Promise<void> {
-                const shareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute({
+            sRAVersion0 = (await services1.consumption.attributes.getAttribute({ id: sOSIAVersion0.shareInfo!.sourceAttribute! })).value;
+        }
+
+        async function notifyPeerAboutVersion2(): Promise<void> {
+            const notifyRequestResult = (
+                await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
                     attributeId: sRAVersion2.id,
-                    peer: services3.address
-                });
-                const shareRequestId = shareRequestResult.value.id;
-                sOSIAVersion2FurtherPeer = await acceptIncomingShareAttributeRequest(services1, services3, shareRequestId);
-            }
+                    peer: services2.address
+                })
+            ).value;
+            await waitForRecipientToReceiveNotification(services1, services2, notifyRequestResult);
+
+            ({ predecessor: sOSIAVersion0, successor: sOSIAVersion2 } = notifyRequestResult);
         }
 
-        async function setUpRelationshipAttributeVersions() {
-            await createAndShareVersion0();
-            await succeedVersion0();
-            await succeedVersion1();
-
-            async function createAndShareVersion0(): Promise<void> {
-                sOSRAVersion0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
-                    content: {
-                        key: "Some key",
-                        value: {
-                            "@type": "ProprietaryInteger",
-                            title: "Version",
-                            value: 1
-                        },
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                });
-            }
-
-            async function succeedVersion0(): Promise<void> {
-                const sRASuccessionResult1 = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-                    predecessorId: sOSRAVersion0.id.toString(),
-                    successorContent: {
-                        value: {
-                            "@type": "ProprietaryInteger",
-                            title: "Version",
-                            value: 2
-                        }
-                    }
-                });
-                await waitForRecipientToReceiveNotification(services1, services2, sRASuccessionResult1.value);
-
-                ({ predecessor: sOSRAVersion0, successor: sOSRAVersion1 } = sRASuccessionResult1.value);
-            }
-
-            async function succeedVersion1(): Promise<void> {
-                const sRASuccessionResult2 = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-                    predecessorId: sOSRAVersion1.id.toString(),
-                    successorContent: {
-                        value: {
-                            "@type": "ProprietaryInteger",
-                            title: "Version",
-                            value: 3
-                        }
-                    }
-                });
-                await waitForRecipientToReceiveNotification(services1, services2, sRASuccessionResult2.value);
-
-                ({ predecessor: sOSRAVersion1, successor: sOSRAVersion2 } = sRASuccessionResult2.value);
-            }
+        async function shareVersion2WithFurtherPeer(): Promise<void> {
+            const shareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute({
+                attributeId: sRAVersion2.id,
+                peer: services3.address
+            });
+            const shareRequestId = shareRequestResult.value.id;
+            sOSIAVersion2FurtherPeer = await acceptIncomingShareAttributeRequest(services1, services3, shareRequestId);
         }
-    });
+    }
+    async function createAndShareRelationshipAttributeVersion0(): Promise<void> {
+        sOSRAVersion0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
+            content: {
+                key: "Some key",
+                value: {
+                    "@type": "ProprietaryInteger",
+                    title: "Version",
+                    value: 1
+                },
+                confidentiality: RelationshipAttributeConfidentiality.Public
+            }
+        });
+    }
+    async function setUpRelationshipAttributeVersions() {
+        await createAndShareRelationshipAttributeVersion0();
+        await succeedVersion0();
+        await succeedVersion1();
+
+        async function succeedVersion0(): Promise<void> {
+            const sRASuccessionResult1 = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
+                predecessorId: sOSRAVersion0.id.toString(),
+                successorContent: {
+                    value: {
+                        "@type": "ProprietaryInteger",
+                        title: "Version",
+                        value: 2
+                    }
+                }
+            });
+            await waitForRecipientToReceiveNotification(services1, services2, sRASuccessionResult1.value);
+
+            ({ predecessor: sOSRAVersion0, successor: sOSRAVersion1 } = sRASuccessionResult1.value);
+        }
+
+        async function succeedVersion1(): Promise<void> {
+            const sRASuccessionResult2 = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
+                predecessorId: sOSRAVersion1.id.toString(),
+                successorContent: {
+                    value: {
+                        "@type": "ProprietaryInteger",
+                        title: "Version",
+                        value: 3
+                    }
+                }
+            });
+            await waitForRecipientToReceiveNotification(services1, services2, sRASuccessionResult2.value);
+
+            ({ predecessor: sOSRAVersion1, successor: sOSRAVersion2 } = sRASuccessionResult2.value);
+        }
+    }
 
     describe(GetVersionsOfAttributeUseCase.name, () => {
         test("should get all versions of a repository attribute", async () => {
+            await setUpRepositoryAttributeVersions();
             for (const version of sRAVersions) {
                 const result = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
                 expect(result.isSuccess).toBe(true);
@@ -1254,6 +1264,7 @@ describe("Get (shared) versions of attribute", () => {
         });
 
         test("should get all versions of an own shared identity attribute shared with the same peer", async () => {
+            await setUpIdentityAttributeVersions();
             const sOSIAVersions = [sOSIAVersion2, sOSIAVersion0];
             for (const version of sOSIAVersions) {
                 const result1 = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
@@ -1265,6 +1276,7 @@ describe("Get (shared) versions of attribute", () => {
         });
 
         test("should get all versions of a peer shared identity attribute", async () => {
+            await setUpIdentityAttributeVersions();
             const rPSIAVersion2 = (await services2.consumption.attributes.getAttribute({ id: sOSIAVersion2.id })).value;
             const rPSIAVersion0 = (await services2.consumption.attributes.getAttribute({ id: sOSIAVersion0.id })).value;
             const rPSIAVersions = [rPSIAVersion2, rPSIAVersion0];
@@ -1279,6 +1291,7 @@ describe("Get (shared) versions of attribute", () => {
         });
 
         test("should get all versions of an own shared relationship attribute", async () => {
+            await setUpRelationshipAttributeVersions();
             const sOSRAVersions = [sOSRAVersion2, sOSRAVersion1, sOSRAVersion0];
             for (const version of sOSRAVersions) {
                 const result = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
@@ -1290,6 +1303,7 @@ describe("Get (shared) versions of attribute", () => {
         });
 
         test("should get all versions of a peer shared relationship attribute", async () => {
+            await setUpRelationshipAttributeVersions();
             const rPSRAVersion2 = (await services2.consumption.attributes.getAttribute({ id: sOSRAVersion2.id })).value;
             const rPSRAVersion1 = (await services2.consumption.attributes.getAttribute({ id: sOSRAVersion1.id })).value;
             const rPSRAVersion0 = (await services2.consumption.attributes.getAttribute({ id: sOSRAVersion0.id })).value;
@@ -1311,6 +1325,9 @@ describe("Get (shared) versions of attribute", () => {
     });
 
     describe(GetSharedVersionsOfRepositoryAttributeUseCase.name, () => {
+        beforeAll(async () => {
+            await setUpIdentityAttributeVersions();
+        });
         test("should get only latest shared version per peer of a repository attribute", async () => {
             for (const version of sRAVersions) {
                 const result1 = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: version.id });
@@ -1387,7 +1404,8 @@ describe("Get (shared) versions of attribute", () => {
         });
 
         test("should throw trying to call getSharedVersionsOfRepositoryAttribute with a relationship attribute", async () => {
-            const result = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: sOSRAVersion2.id });
+            await createAndShareRelationshipAttributeVersion0();
+            const result = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: sOSRAVersion0.id });
             expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
         });
     });
