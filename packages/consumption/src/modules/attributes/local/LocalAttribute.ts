@@ -125,10 +125,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
             return isOwnSharedAttribute;
         }
 
-        if (this.isIdentityAttribute()) {
-            isOwnSharedAttribute &&= typeof this.shareInfo!.sourceAttribute !== "undefined";
-        }
-
         if (typeof peerAddress !== "undefined") {
             isOwnSharedAttribute &&= this.shareInfo!.peer.equals(peerAddress);
         }
