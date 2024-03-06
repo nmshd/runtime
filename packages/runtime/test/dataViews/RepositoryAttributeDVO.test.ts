@@ -1,5 +1,5 @@
 import { AbstractIntegerJSON, AbstractStringJSON, BiologicalSex, BirthMonth } from "@nmshd/content";
-import { ConsumptionServices, CreateRepositoryAttributeRequest, DataViewExpander, LocalAttributeDTO, RepositoryAttributeDVO } from "../../src";
+import { ConsumptionServices, CreateRepositoryAttributeRequest, DataViewExpander, RepositoryAttributeDVO } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -15,10 +15,10 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 describe("RepositoryAttributeDVO", () => {
-    const attributes: LocalAttributeDTO[] = [];
+    let requests: CreateRepositoryAttributeRequest[];
 
-    beforeAll(async () => {
-        const requests: CreateRepositoryAttributeRequest[] = [
+    beforeAll(() => {
+        requests = [
             {
                 content: {
                     value: {
@@ -83,18 +83,11 @@ describe("RepositoryAttributeDVO", () => {
                 }
             }
         ];
-        for (const request of requests) {
-            const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(request)).value;
-            attributes.push(attribute);
-        }
     });
 
     test("check the GivenName", async () => {
-        const dtos = [(await consumptionServices1.attributes.getAttribute({ id: attributes[0].id })).value];
-        const dvos = await expander1.expandLocalAttributeDTOs(dtos);
-        expect(dvos).toHaveLength(1);
-        const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = attributes[0];
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[0])).value;
+        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -118,11 +111,8 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the Surname", async () => {
-        const dtos = [(await consumptionServices1.attributes.getAttribute({ id: attributes[1].id })).value];
-        const dvos = await expander1.expandLocalAttributeDTOs(dtos);
-        expect(dvos).toHaveLength(1);
-        const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = attributes[1];
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[1])).value;
+        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -146,11 +136,8 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the BirthDay", async () => {
-        const dtos = [(await consumptionServices1.attributes.getAttribute({ id: attributes[2].id })).value];
-        const dvos = await expander1.expandLocalAttributeDTOs(dtos);
-        expect(dvos).toHaveLength(1);
-        const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = attributes[2];
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[2])).value;
+        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -176,11 +163,8 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the BirthMonth", async () => {
-        const dtos = [(await consumptionServices1.attributes.getAttribute({ id: attributes[3].id })).value];
-        const dvos = await expander1.expandLocalAttributeDTOs(dtos);
-        expect(dvos).toHaveLength(1);
-        const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = attributes[3];
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[3])).value;
+        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -206,11 +190,8 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the BirthYear", async () => {
-        const dtos = [(await consumptionServices1.attributes.getAttribute({ id: attributes[4].id })).value];
-        const dvos = await expander1.expandLocalAttributeDTOs(dtos);
-        expect(dvos).toHaveLength(1);
-        const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = attributes[4];
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[4])).value;
+        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -236,11 +217,8 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the Sex", async () => {
-        const dtos = [(await consumptionServices1.attributes.getAttribute({ id: attributes[5].id })).value];
-        const dvos = await expander1.expandLocalAttributeDTOs(dtos);
-        expect(dvos).toHaveLength(1);
-        const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = attributes[5];
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[5])).value;
+        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -269,11 +247,8 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the Nationality", async () => {
-        const dtos = [(await consumptionServices1.attributes.getAttribute({ id: attributes[6].id })).value];
-        const dvos = await expander1.expandLocalAttributeDTOs(dtos);
-        expect(dvos).toHaveLength(1);
-        const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = attributes[6];
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[6])).value;
+        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -301,11 +276,8 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the CommunicationLanguage", async () => {
-        const dtos = [(await consumptionServices1.attributes.getAttribute({ id: attributes[7].id })).value];
-        const dvos = await expander1.expandLocalAttributeDTOs(dtos);
-        expect(dvos).toHaveLength(1);
-        const dvo = dvos[0] as RepositoryAttributeDVO;
-        const attribute = attributes[7];
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[7])).value;
+        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);

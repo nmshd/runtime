@@ -1,7 +1,7 @@
 import fs from "fs";
 import { DateTime } from "luxon";
 import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { QueryParamConditions, RuntimeServiceProvider, createToken, exchangeFile, makeUploadRequest, uploadFile } from "../lib";
+import { createToken, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -18,16 +18,16 @@ beforeAll(async () => {
 afterAll(async () => await serviceProvider.stop());
 
 describe("File upload", () => {
-    let file: FileDTO;
-
     test("can upload file", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
         expect(response).toBeSuccessful();
-
-        file = response.value;
     });
 
     test("uploaded files can be accessed under /Files", async () => {
+        const uploadResponse = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
+        expect(uploadResponse).toBeSuccessful();
+
+        const file = uploadResponse.value;
         expect(file).toBeDefined();
 
         const response = await transportServices1.files.getFiles({ query: { createdAt: file.createdAt } });
@@ -36,6 +36,10 @@ describe("File upload", () => {
     });
 
     test("uploaded files can be accessed under /Files/Own", async () => {
+        const uploadResponse = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
+        expect(uploadResponse).toBeSuccessful();
+
+        const file = uploadResponse.value;
         expect(file).toBeDefined();
 
         const response = await transportServices1.files.getFiles({ query: { createdAt: file.createdAt }, ownerRestriction: OwnerRestriction.Own });
@@ -44,6 +48,10 @@ describe("File upload", () => {
     });
 
     test("uploaded files can be accessed under /Files/{id}", async () => {
+        const uploadResponse = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
+        expect(uploadResponse).toBeSuccessful();
+
+        const file = uploadResponse.value;
         expect(file).toBeDefined();
 
         const response = await transportServices1.files.getFile({ id: file.id });
@@ -51,6 +59,10 @@ describe("File upload", () => {
     });
 
     test("uploaded files keep their size", async () => {
+        const uploadResponse = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
+        expect(uploadResponse).toBeSuccessful();
+
+        const file = uploadResponse.value;
         expect(file).toBeDefined();
 
         const response = await transportServices1.files.downloadFile({ id: file.id });
@@ -100,8 +112,11 @@ describe("File upload", () => {
 });
 
 describe("Get file", () => {
+    let file: FileDTO;
+    beforeAll(async () => {
+        file = await uploadFile(transportServices1);
+    });
     test("can get file by id", async () => {
-        const file = await uploadFile(transportServices1);
         const response = await transportServices1.files.getFile({ id: file.id });
 
         expect(response).toBeSuccessful();
