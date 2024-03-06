@@ -514,8 +514,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
             query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
         });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
-
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent);
+        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;

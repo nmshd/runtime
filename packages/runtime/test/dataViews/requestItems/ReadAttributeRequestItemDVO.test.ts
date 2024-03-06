@@ -162,7 +162,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+        await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
             requestId: recipientMessage.content.id,
             items: responseItems
