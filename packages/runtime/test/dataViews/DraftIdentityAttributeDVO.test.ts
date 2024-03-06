@@ -7,7 +7,6 @@ import {
     CommunicationLanguage,
     GivenName,
     IdentityAttribute,
-    IdentityAttributeJSON,
     Nationality,
     PersonName,
     Sex
@@ -18,71 +17,27 @@ import { RuntimeServiceProvider } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
+let transportService1Address: CoreAddress;
+
 let expander1: DataViewExpander;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(1);
     transportServices1 = runtimeServices[0].transport;
     expander1 = runtimeServices[0].expander;
+
+    transportService1Address = CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address);
 }, 30000);
 
 afterAll(() => serviceProvider.stop());
 
 describe("DraftIdentityAttributeDVO", () => {
-    let transportService1Address: CoreAddress;
-    const attributes: IdentityAttributeJSON[] = [];
-
-    beforeAll(async () => {
-        transportService1Address = CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address);
-        attributes.push(
-            IdentityAttribute.from<GivenName>({
-                owner: transportService1Address,
-                value: GivenName.from("Hugo")
-            }).toJSON()
-        );
-        attributes.push(
-            IdentityAttribute.from<BirthDay>({
-                owner: transportService1Address,
-                value: BirthDay.from(17)
-            }).toJSON()
-        );
-        attributes.push(
-            IdentityAttribute.from<BirthMonth>({
-                owner: transportService1Address,
-                value: BirthMonth.from(11)
-            }).toJSON()
-        );
-        attributes.push(
-            IdentityAttribute.from<BirthYear>({
-                owner: transportService1Address,
-                value: BirthYear.from(2001)
-            }).toJSON()
-        );
-        attributes.push(
-            IdentityAttribute.from<Sex>({
-                owner: transportService1Address,
-                value: Sex.from("male")
-            }).toJSON()
-        );
-        attributes.push(
-            IdentityAttribute.from<Nationality>({
-                owner: transportService1Address,
-                value: Nationality.from("DE")
-            }).toJSON()
-        );
-        attributes.push(
-            IdentityAttribute.from<CommunicationLanguage>({
-                owner: transportService1Address,
-                value: CommunicationLanguage.from("de")
-            }).toJSON()
-        );
-    });
-
     test("check the GivenName", async () => {
-        const dvos = await expander1.expandAttributes(attributes);
-        expect(dvos).toHaveLength(7);
-        const dvo = dvos[0];
-        const attribute = attributes[0];
+        const attribute = IdentityAttribute.from<GivenName>({
+            owner: transportService1Address,
+            value: GivenName.from("Hugo")
+        }).toJSON();
+        const dvo = await expander1.expandAttribute(attribute);
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("DraftIdentityAttributeDVO");
         expect(dvo.id).toBe("");
@@ -104,10 +59,11 @@ describe("DraftIdentityAttributeDVO", () => {
     });
 
     test("check the BirthDay", async () => {
-        const dvos = await expander1.expandAttributes(attributes);
-        expect(dvos).toHaveLength(7);
-        const dvo = dvos[1];
-        const attribute = attributes[1];
+        const attribute = IdentityAttribute.from<BirthDay>({
+            owner: transportService1Address,
+            value: BirthDay.from(17)
+        }).toJSON();
+        const dvo = await expander1.expandAttribute(attribute);
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("DraftIdentityAttributeDVO");
         expect(dvo.id).toBe("");
@@ -131,10 +87,11 @@ describe("DraftIdentityAttributeDVO", () => {
     });
 
     test("check the BirthMonth", async () => {
-        const dvos = await expander1.expandAttributes(attributes);
-        expect(dvos).toHaveLength(7);
-        const dvo = dvos[2];
-        const attribute = attributes[2];
+        const attribute = IdentityAttribute.from<BirthMonth>({
+            owner: transportService1Address,
+            value: BirthMonth.from(11)
+        }).toJSON();
+        const dvo = await expander1.expandAttribute(attribute);
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("DraftIdentityAttributeDVO");
         expect(dvo.id).toBe("");
@@ -158,10 +115,11 @@ describe("DraftIdentityAttributeDVO", () => {
     });
 
     test("check the BirthYear", async () => {
-        const dvos = await expander1.expandAttributes(attributes);
-        expect(dvos).toHaveLength(7);
-        const dvo = dvos[3];
-        const attribute = attributes[3];
+        const attribute = IdentityAttribute.from<BirthYear>({
+            owner: transportService1Address,
+            value: BirthYear.from(2001)
+        }).toJSON();
+        const dvo = await expander1.expandAttribute(attribute);
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("DraftIdentityAttributeDVO");
         expect(dvo.id).toBe("");
@@ -185,10 +143,11 @@ describe("DraftIdentityAttributeDVO", () => {
     });
 
     test("check the Sex", async () => {
-        const dvos = await expander1.expandAttributes(attributes);
-        expect(dvos).toHaveLength(7);
-        const dvo = dvos[4];
-        const attribute = attributes[4];
+        const attribute = IdentityAttribute.from<Sex>({
+            owner: transportService1Address,
+            value: Sex.from("male")
+        }).toJSON();
+        const dvo = await expander1.expandAttribute(attribute);
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("DraftIdentityAttributeDVO");
         expect(dvo.id).toBe("");
@@ -214,10 +173,11 @@ describe("DraftIdentityAttributeDVO", () => {
     });
 
     test("check the Nationality", async () => {
-        const dvos = await expander1.expandAttributes(attributes);
-        expect(dvos).toHaveLength(7);
-        const dvo = dvos[5];
-        const attribute = attributes[5];
+        const attribute = IdentityAttribute.from<Nationality>({
+            owner: transportService1Address,
+            value: Nationality.from("DE")
+        }).toJSON();
+        const dvo = await expander1.expandAttribute(attribute);
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("DraftIdentityAttributeDVO");
         expect(dvo.id).toBe("");
@@ -243,10 +203,11 @@ describe("DraftIdentityAttributeDVO", () => {
     });
 
     test("check the CommunicationLanguage", async () => {
-        const dvos = await expander1.expandAttributes(attributes);
-        expect(dvos).toHaveLength(7);
-        const dvo = dvos[6];
-        const attribute = attributes[6];
+        const attribute = IdentityAttribute.from<CommunicationLanguage>({
+            owner: transportService1Address,
+            value: CommunicationLanguage.from("de")
+        }).toJSON();
+        const dvo = await expander1.expandAttribute(attribute);
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("DraftIdentityAttributeDVO");
         expect(dvo.id).toBe("");
