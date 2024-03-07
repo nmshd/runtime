@@ -1571,8 +1571,8 @@ describe(DeleteRepositoryAttributeUseCase.name, () => {
     // - (x) DeleteOwnSharedAttributeAndNotifyPeerUseCase
     // - (x) GetOwnSharedAttributesUseCase
     // - (x) GetSharedVersionsOfRepositoryAttributeUseCase
-    // - (done) NotifyPeerAboutRepositoryAttributeSuccessionUseCase (succeedOwnSharedIdentityAttribute)
+    // - (done in consumption) NotifyPeerAboutRepositoryAttributeSuccessionUseCase (succeedOwnSharedIdentityAttribute)
 
-    // - RequestItemProcessors
-    // - NotificationItemProcessors
+    // - (x) RequestItemProcessors
+    // - (x) NotificationItemProcessors
 });

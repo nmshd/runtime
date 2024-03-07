@@ -123,6 +123,14 @@ class Attributes {
         return new CoreError("error.consumption.attributes.predecessorDoesNotExist", "The predecessor does not exist.");
     }
 
+    public successorSourceAttributeIsNotSpecified() {
+        return new CoreError("error.consumption.attributes.successorSourceAttributeIsNotSpecified", "You must specify the source attribute of the successor.");
+    }
+
+    public successorSourceAttributeDoesNotExist() {
+        return new CoreError("error.consumption.attributes.successorSourceAttributeDoesNotExist", "The successor source Attribute does not exist.");
+    }
+
     public successionMustNotChangeOwner() {
         return new CoreError(
             "error.consumption.attributes.successionMustNotChangeOwner",

@@ -1039,6 +1039,24 @@ describe("AttributesController", function () {
                 });
             });
 
+            test("should catch if no source attribute is specified for the successor", async function () {
+                successorOSIAParams.shareInfo!.sourceAttribute = undefined;
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.successorSourceAttributeIsNotSpecified"
+                });
+            });
+
+            test("should catch if successor source attribute doesn't exist", async function () {
+                await consumptionController.attributes.deleteAttributeUnsafe(successorRA.id);
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.successorSourceAttributeDoesNotExist"
+                });
+            });
+
             test("should allow to succeed an own shared identity attribute whose predecessor source attribute was deleted", async function () {
                 await consumptionController.attributes.deleteAttributeUnsafe(predecessorRA.id);
 
@@ -1047,17 +1065,6 @@ describe("AttributesController", function () {
 
                 successorRA.succeeds = undefined;
                 await consumptionController.attributes.updateAttributeUnsafe(successorRA);
-
-                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
-                expect(validationResult).successfulValidationResult();
-            });
-
-            test("should allow to succeed an own shared identity attribute whose predecessor and successor source attribute were deleted", async function () {
-                await consumptionController.attributes.deleteAttributeUnsafe(successorRA.id);
-                await consumptionController.attributes.deleteAttributeUnsafe(predecessorRA.id);
-
-                predecessorOSIA.shareInfo!.sourceAttribute = undefined;
-                await consumptionController.attributes.updateAttributeUnsafe(predecessorOSIA);
 
                 const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
                 expect(validationResult).successfulValidationResult();

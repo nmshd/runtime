@@ -599,21 +599,21 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(CoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        let successorSource: any = undefined;
-        let successorSourceVersionIds: any[] = [];
-        if (typeof successor.shareInfo.sourceAttribute !== "undefined") {
-            successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
-            if (typeof successorSource !== "undefined") {
-                if (!successorSource.isRepositoryAttribute(this.identity.address)) {
-                    return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
-                }
+        if (typeof successor.shareInfo.sourceAttribute === "undefined") {
+            return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotSpecified());
+        }
 
-                if (!_.isEqual(successorSource.content, successor.content)) {
-                    return ValidationResult.error(CoreErrors.attributes.successorSourceContentIsNotEqualToCopyContent());
-                }
+        const successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
+        if (typeof successorSource === "undefined") {
+            return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeDoesNotExist());
+        }
 
-                successorSourceVersionIds = (await this.getVersionsOfAttribute(successorSource.id)).map((x) => x.id.toString());
-            }
+        if (!successorSource.isRepositoryAttribute(this.identity.address)) {
+            return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
+        }
+
+        if (!_.isEqual(successorSource.content, successor.content)) {
+            return ValidationResult.error(CoreErrors.attributes.successorSourceContentIsNotEqualToCopyContent());
         }
 
         let predecessorSource: any = undefined;
@@ -625,9 +625,12 @@ export class AttributesController extends ConsumptionBaseController {
             if (!predecessorSource.isRepositoryAttribute(this.identity.address)) {
                 return ValidationResult.error(CoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
             }
+
+            const successorSourceVersionIds = (await this.getVersionsOfAttribute(successorSource.id)).map((x) => x.id.toString());
             if (typeof predecessorSource.succeededBy === "undefined" || !successorSourceVersionIds.some((id) => id === predecessorSource.succeededBy?.toString())) {
                 return ValidationResult.error(CoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
             }
+
             if (!_.isEqual(predecessorSource.content, predecessor.content)) {
                 return ValidationResult.error(CoreErrors.attributes.predecessorSourceContentIsNotEqualToCopyContent());
             }
