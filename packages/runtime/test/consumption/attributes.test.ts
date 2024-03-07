@@ -1548,6 +1548,13 @@ describe(DeleteRepositoryAttributeUseCase.name, () => {
         expect(localAttributeOSIAVersion0.isOwnSharedIdentityAttribute(CoreAddress.from(services1.address))).toBe(true);
     });
 
+    test("should set 'succeeds' of successor to undefined if predecessor repository attribute is deleted", async () => {
+        expect(rAVersion1.succeeds).toBeDefined();
+        await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: rAVersion0.id });
+        const updatedRAVersion1 = (await services1.consumption.attributes.getAttribute({ id: rAVersion1.id })).value;
+        expect(updatedRAVersion1.succeeds).toBeUndefined();
+    });
+
     test("should throw trying to call with an attribute that is not a repository attribute", async () => {
         const result = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: sOSIAVersion1.id });
         expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
@@ -1561,10 +1568,10 @@ describe(DeleteRepositoryAttributeUseCase.name, () => {
 
     // TODO:
     // - checks use cases that might be affected having an own shared identity attribute without source attribute:
-    // - DeleteOwnSharedAttributeAndNotifyPeerUseCase
-    // - GetOwnSharedAttributesUseCase
-    // - GetSharedVersionsOfRepositoryAttributeUseCase
-    // - NotifyPeerAboutRepositoryAttributeSuccessionUseCase
+    // - (x) DeleteOwnSharedAttributeAndNotifyPeerUseCase
+    // - (x) GetOwnSharedAttributesUseCase
+    // - (x) GetSharedVersionsOfRepositoryAttributeUseCase
+    // - (done) NotifyPeerAboutRepositoryAttributeSuccessionUseCase (succeedOwnSharedIdentityAttribute)
 
     // - RequestItemProcessors
     // - NotificationItemProcessors

@@ -46,6 +46,16 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
             await this.attributeController.updateAttributeUnsafe(ownSharedAttribute);
         }
 
+        if (typeof repositoryAttribute.succeededBy !== "undefined") {
+            const successor = await this.attributeController.getLocalAttribute(repositoryAttribute.succeededBy);
+            if (typeof successor === "undefined") {
+                return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
+            }
+
+            successor.succeeds = undefined;
+            await this.attributeController.updateAttributeUnsafe(successor);
+        }
+
         const predecessors = await this.attributeController.getPredecessorsOfAttribute(repositoryAttributeId);
         for (const attr of [repositoryAttribute, ...predecessors]) {
             await this.attributeController.deleteAttribute(attr);
