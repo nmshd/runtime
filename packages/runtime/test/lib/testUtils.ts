@@ -526,7 +526,10 @@ export async function syncAndGetBaselineNumberOfAttributes(sender: TestRuntimeSe
     if (relevantRequestIds.length !== 0) {
         await syncUntilHasMessages(sender.transport, relevantRequestIds.length);
     }
-    relevantRequestIds.forEach(async (requestId) => await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.request.id === requestId));
+    relevantRequestIds.forEach(
+        async (requestId) =>
+            await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.Completed)
+    );
 
     return (await sender.consumption.attributes.getAttributes(filter)).value.length;
 }
