@@ -184,7 +184,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async executeThirdPartyRelationshipAttributeQuery(query: IThirdPartyRelationshipAttributeQuery): Promise<LocalAttribute[]> {
         const parsedQuery = ThirdPartyRelationshipAttributeQuery.from(query);
 
-        const dbQuery = ThirdPartyRelationshipAttributeQueryTranslator.translate(parsedQuery);
+        let dbQuery = ThirdPartyRelationshipAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.confidentiality"] = { $ne: "private" };
 
         if (dbQuery["content.owner"] === ThirdPartyRelationshipAttributeQueryOwner.Recipient) {
@@ -199,7 +199,17 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (parsedQuery.owner === ThirdPartyRelationshipAttributeQueryOwner.Empty) {
-            dbQuery["content.owner"] = { $or: [{ $eq: this.identity.address.toString() }, { $in: parsedQuery.thirdParty.map(convertCoreAddressToString) }] };
+            const ownerQuery = {
+                $or: [
+                    {
+                        ["content.owner"]: { $eq: this.identity.address.toString() }
+                    },
+                    {
+                        ["content.owner"]: { $in: parsedQuery.thirdParty.map(convertCoreAddressToString) }
+                    }
+                ]
+            };
+            dbQuery = { $and: [dbQuery, ownerQuery] };
         }
 
         const attributes = await this.attributes.find(dbQuery);
