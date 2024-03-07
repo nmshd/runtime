@@ -508,12 +508,14 @@ export async function waitForRecipientToReceiveNotification(
 }
 
 /**
- * finds how many attributes will be there in addition to the desired ones
- * Assumes that
+ * finds how many attributes will be there from previous tests in addition to the desired ones
  */
 export async function syncAndGetBaselineNumberOfAttributes(sender: TestRuntimeServices, filter: GetAttributesRequest): Promise<number> {
     await sleep(1000);
-    await sender.transport.account.syncEverything();
+    const syncResult = (await sender.transport.account.syncEverything()).value;
+    if (syncResult.messages.length !== 0) {
+        await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
+    }
     return (await sender.consumption.attributes.getAttributes(filter)).value.length;
 }
 
