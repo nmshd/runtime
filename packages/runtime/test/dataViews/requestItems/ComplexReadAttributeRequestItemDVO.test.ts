@@ -257,7 +257,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, runtimeServices2, {
             query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
         });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
@@ -508,7 +508,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, runtimeServices2, {
             query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
         });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);

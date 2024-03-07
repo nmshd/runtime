@@ -227,7 +227,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, runtimeServices2, {
             query: { "content.value.@type": "GivenName", "shareInfo.peer": address2 }
         });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
@@ -450,7 +450,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, runtimeServices2, {
             query: { "content.value.@type": "GivenName", "shareInfo.peer": address2 }
         });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
@@ -678,7 +678,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, runtimeServices2, {
             query: { "content.value.@type": "Surname", "shareInfo.peer": address2 }
         });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);

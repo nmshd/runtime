@@ -364,10 +364,10 @@ describe("ProposeAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfGivenNames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+        const baselineNumberOfGivenNames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, runtimeServices2, {
             query: { "content.value.@type": "GivenName", "shareInfo.peer": address2 }
         });
-        const baselineNumberOfSurnames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
+        const baselineNumberOfSurnames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, runtimeServices2, {
             query: { "content.value.@type": "Surname", "shareInfo.peer": address2 }
         });
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);

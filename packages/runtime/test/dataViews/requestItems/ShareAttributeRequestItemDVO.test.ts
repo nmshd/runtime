@@ -219,7 +219,7 @@ describe("ShareAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(sRuntimeServices, {
+        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(sRuntimeServices, rRuntimeServices, {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
         });
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
