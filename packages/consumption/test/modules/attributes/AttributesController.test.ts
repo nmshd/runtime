@@ -29,6 +29,7 @@ import {
     ICreateSharedLocalAttributeCopyParams,
     LocalAttribute,
     LocalAttributeDeletionInfo,
+    LocalAttributeShareInfo,
     SharedAttributeCopyCreatedEvent
 } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
@@ -889,15 +890,12 @@ describe("AttributesController", function () {
         });
 
         describe("Validator for own shared identity attribute successions", function () {
-            afterEach(async function () {
-                const attributes = await consumptionController.attributes.getLocalAttributes();
-                for (const attribute of attributes) {
-                    await consumptionController.attributes.deleteAttributeUnsafe(attribute.id);
-                }
-            });
-
-            test("should catch if the source attributes do not succeed one another", async function () {
-                const predecessorRepo = await consumptionController.attributes.createLocalAttribute({
+            let predecessorRA: LocalAttribute;
+            let successorRA: LocalAttribute;
+            let predecessorOSIA: LocalAttribute;
+            let successorOSIAParams: IAttributeSuccessorParams;
+            beforeEach(async function () {
+                predecessorRA = await consumptionController.attributes.createLocalAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Citizenship",
@@ -907,13 +905,7 @@ describe("AttributesController", function () {
                     })
                 });
 
-                const predecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                    sourceAttributeId: predecessorRepo.id,
-                    peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef")
-                });
-
-                const repoAttribute2 = await consumptionController.attributes.createLocalAttribute({
+                ({ successor: successorRA } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRA.id, {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Citizenship",
@@ -921,9 +913,15 @@ describe("AttributesController", function () {
                         },
                         owner: consumptionController.accountController.identity.address
                     })
+                }));
+
+                predecessorOSIA = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: predecessorRA.id,
+                    peer: CoreAddress.from("peer"),
+                    requestReference: CoreId.from("reqRef")
                 });
 
-                const successorParams: IAttributeSuccessorParams = {
+                successorOSIAParams = {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Citizenship",
@@ -933,15 +931,136 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peer"),
-                        requestReference: CoreId.from("reqRef2"),
-                        sourceAttribute: repoAttribute2.id
+                        notificationReference: CoreId.from("notRef"),
+                        sourceAttribute: successorRA.id
                     }
                 };
+            });
+            afterEach(async function () {
+                const attributes = await consumptionController.attributes.getLocalAttributes();
+                for (const attribute of attributes) {
+                    await consumptionController.attributes.deleteAttributeUnsafe(attribute.id);
+                }
+            });
 
-                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessor.id, successorParams);
+            test("should catch if the source attributes do not succeed one another", async function () {
+                predecessorRA.succeededBy = undefined;
+                await consumptionController.attributes.updateAttributeUnsafe(predecessorRA);
+
+                successorRA.succeeds = undefined;
+                await consumptionController.attributes.updateAttributeUnsafe(successorRA);
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
                 expect(validationResult).errorValidationResult({
                     code: "error.consumption.attributes.successorSourceDoesNotSucceedPredecessorSource"
                 });
+            });
+
+            test("should catch if the predecessor is not an own shared identity attribute", async function () {
+                predecessorOSIA.shareInfo = undefined;
+                await consumptionController.attributes.updateAttributeUnsafe(predecessorOSIA);
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.predecessorIsNotOwnSharedIdentityAttribute"
+                });
+            });
+
+            test("should catch if the successor is not an own shared identity attribute", async function () {
+                successorOSIAParams.shareInfo = undefined;
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.successorIsNotOwnSharedIdentityAttribute"
+                });
+            });
+
+            test("should catch if the peer is changed during succession", async function () {
+                successorOSIAParams.shareInfo!.peer = CoreAddress.from("falsyPeer");
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.successionMustNotChangePeer"
+                });
+            });
+
+            test("should catch if the predecessor source attribute is not a repository attribute", async function () {
+                predecessorOSIA.shareInfo!.sourceAttribute = predecessorOSIA.id;
+                await consumptionController.attributes.updateAttributeUnsafe(predecessorOSIA);
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.predecessorSourceAttributeIsNotRepositoryAttribute"
+                });
+            });
+
+            test("should catch if the successor source attribute is not a repository attribute", async function () {
+                successorRA.shareInfo = LocalAttributeShareInfo.from({
+                    peer: CoreAddress.from("peer"),
+                    requestReference: CoreId.from("reqRef")
+                });
+                await consumptionController.attributes.updateAttributeUnsafe(successorRA);
+
+                successorOSIAParams.shareInfo!.sourceAttribute = successorRA.id;
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.successorSourceAttributeIsNotRepositoryAttribute"
+                });
+            });
+
+            test("should catch if the predecessor source attribute's content doesn't match the own shared identity attribute content", async function () {
+                predecessorOSIA.content = IdentityAttribute.from({
+                    value: {
+                        "@type": "Citizenship",
+                        value: "DK"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                });
+                await consumptionController.attributes.updateAttributeUnsafe(predecessorOSIA);
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.predecessorSourceContentIsNotEqualToCopyContent"
+                });
+            });
+
+            test("should catch if the successor source attribute's content doesn't match the own shared identity attribute content", async function () {
+                successorOSIAParams.content = IdentityAttribute.from({
+                    value: {
+                        "@type": "Citizenship",
+                        value: "DK"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                });
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.successorSourceContentIsNotEqualToCopyContent"
+                });
+            });
+
+            test("should allow to succeed an own shared identity attribute whose predecessor source attribute was deleted", async function () {
+                await consumptionController.attributes.deleteAttributeUnsafe(predecessorRA.id);
+
+                predecessorOSIA.shareInfo!.sourceAttribute = undefined;
+                await consumptionController.attributes.updateAttributeUnsafe(predecessorOSIA);
+
+                successorRA.succeeds = undefined;
+                await consumptionController.attributes.updateAttributeUnsafe(successorRA);
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).successfulValidationResult();
+            });
+
+            test("should allow to succeed an own shared identity attribute whose predecessor and successor source attribute were deleted", async function () {
+                await consumptionController.attributes.deleteAttributeUnsafe(successorRA.id);
+                await consumptionController.attributes.deleteAttributeUnsafe(predecessorRA.id);
+
+                predecessorOSIA.shareInfo!.sourceAttribute = undefined;
+                await consumptionController.attributes.updateAttributeUnsafe(predecessorOSIA);
+
+                const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(predecessorOSIA.id, successorOSIAParams);
+                expect(validationResult).successfulValidationResult();
             });
         });
 
