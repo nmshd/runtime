@@ -370,7 +370,6 @@ describe("ProposeAttributeRequestItemDVO", () => {
         const baselineNumberOfSurnames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
             query: { "content.value.@type": "Surname", "shareInfo.peer": address2 }
         });
-        eventBus1.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         const dto = senderMessage;

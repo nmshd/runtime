@@ -260,7 +260,6 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
             query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
         });
-        eventBus1.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
@@ -512,7 +511,6 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
             query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
         });
-        eventBus1.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         const dto = senderMessage;

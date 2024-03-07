@@ -363,7 +363,7 @@ export async function exchangeAndAcceptRequestByMessage(
     expect(acceptIncomingRequestResult).toBeSuccessful();
     await recipient.eventBus.waitForEvent(MessageSentEvent);
     await syncUntilHasMessageWithResponse(sender.transport, requestId);
-    await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+    await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed && e.data.request.id === requestId);
     return senderMessage.value;
 }
 

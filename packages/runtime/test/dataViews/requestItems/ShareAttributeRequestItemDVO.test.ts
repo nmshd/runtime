@@ -222,7 +222,6 @@ describe("ShareAttributeRequestItemDVO", () => {
         const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(sRuntimeServices, {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
         });
-        sEventBus.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;

@@ -227,7 +227,6 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(sRuntimeServices, {
             query: { "content.value.@type": "ProprietaryString", "shareInfo.peer": rAddress }
         });
-        sEventBus.reset();
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
 
         const dto = senderMessage;
