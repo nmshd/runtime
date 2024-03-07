@@ -599,31 +599,38 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(CoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        /* Succession of own shared identity attribute must have
-         * respective repository attributes. */
-        const predecessorSource = await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute);
-        const successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
-        const predecessorSourceVersionIds = (await this.getVersionsOfAttribute(predecessor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
-        const successorSourceVersionIds = (await this.getVersionsOfAttribute(successor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
-        if (typeof predecessorSource === "undefined" || !predecessorSource.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
-        }
-        if (typeof successorSource === "undefined" || !successorSource.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
-        }
-        if (
-            typeof successorSource.succeeds === "undefined" ||
-            !predecessorSourceVersionIds.some((id) => id === successorSource.succeeds?.toString()) ||
-            typeof predecessorSource.succeededBy === "undefined" ||
-            !successorSourceVersionIds.some((id) => id === predecessorSource.succeededBy?.toString())
-        ) {
-            return ValidationResult.error(CoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
+        let successorSource: any = undefined;
+        let successorSourceVersionIds: any[] = [];
+        if (typeof successor.shareInfo.sourceAttribute !== "undefined") {
+            successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
+            if (typeof successorSource !== "undefined") {
+                if (!successorSource.isRepositoryAttribute(this.identity.address)) {
+                    return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
+                }
+
+                if (!_.isEqual(successorSource.content, successor.content)) {
+                    return ValidationResult.error(CoreErrors.attributes.successorSourceContentIsNotEqualToCopyContent());
+                }
+
+                successorSourceVersionIds = (await this.getVersionsOfAttribute(successorSource.id)).map((x) => x.id.toString());
+            }
         }
 
-        const repositoryAttributeContentMatchesItsSharedAttribute =
-            _.isEqual(predecessorSource.content, predecessor.content) && _.isEqual(successorSource.content, successor.content);
-        if (!repositoryAttributeContentMatchesItsSharedAttribute) {
-            return ValidationResult.error(CoreErrors.attributes.sourceContentIsNotEqualToCopyContent());
+        let predecessorSource: any = undefined;
+        if (typeof predecessor.shareInfo.sourceAttribute !== "undefined") {
+            predecessorSource = await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute);
+        }
+
+        if (typeof predecessorSource !== "undefined") {
+            if (!predecessorSource.isRepositoryAttribute(this.identity.address)) {
+                return ValidationResult.error(CoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
+            }
+            if (typeof predecessorSource.succeededBy === "undefined" || !successorSourceVersionIds.some((id) => id === predecessorSource.succeededBy?.toString())) {
+                return ValidationResult.error(CoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
+            }
+            if (!_.isEqual(predecessorSource.content, predecessor.content)) {
+                return ValidationResult.error(CoreErrors.attributes.predecessorSourceContentIsNotEqualToCopyContent());
+            }
         }
 
         return ValidationResult.success();

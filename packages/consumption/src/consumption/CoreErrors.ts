@@ -38,10 +38,17 @@ class Attributes {
         );
     }
 
-    public sourceContentIsNotEqualToCopyContent() {
+    public predecessorSourceContentIsNotEqualToCopyContent() {
         return new CoreError(
-            "error.consumption.attributes.sourceContentIsNotEqualToCopyContent",
-            "Successor source attribute contents don't match successor shared attribute copy."
+            "error.consumption.attributes.predecessorSourceContentIsNotEqualToCopyContent",
+            "Predecessor source attribute content doesn't match predecessor shared attribute copy."
+        );
+    }
+
+    public successorSourceContentIsNotEqualToCopyContent() {
+        return new CoreError(
+            "error.consumption.attributes.successorSourceContentIsNotEqualToCopyContent",
+            "Successor source attribute content doesn't match successor shared attribute copy."
         );
     }
 
