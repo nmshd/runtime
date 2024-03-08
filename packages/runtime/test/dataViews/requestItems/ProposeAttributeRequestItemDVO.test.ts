@@ -18,6 +18,7 @@ import {
     DecidableProposeAttributeRequestItemDVO,
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
+    OutgoingRequestStatusChangedEvent,
     ProcessedIdentityAttributeQueryDVO,
     ProposeAttributeAcceptResponseItemDVO,
     ProposeAttributeRequestItemDVO,
@@ -31,8 +32,8 @@ import {
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncAndGetBaselineNumberOfAttributes,
     syncUntilHasMessageWithRequest,
+    syncUntilHasMessageWithResponse,
     TestRuntimeServices
 } from "../../lib";
 
@@ -361,15 +362,16 @@ describe("ProposeAttributeRequestItemDVO", () => {
 
         expect(responseItem2.attributeId).toStrictEqual(surnameShareResult.value[0].id);
         expect(surname.value).toStrictEqual((responseItem2.attribute.content.value as SurnameJSON).value);
+
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
+        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfGivenNames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, runtimeServices2, {
-            query: { "content.value.@type": "GivenName", "shareInfo.peer": address2 }
-        });
-        const baselineNumberOfSurnames = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, runtimeServices2, {
-            query: { "content.value.@type": "Surname", "shareInfo.peer": address2 }
-        });
+        const baselineNumberOfGivenNames = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "GivenName", "shareInfo.peer": address2 } }))
+            .value.length;
+        const baselineNumberOfSurnames = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "Surname", "shareInfo.peer": address2 } })).value
+            .length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         const dto = senderMessage;

@@ -21,7 +21,6 @@ import {
     CreateTokenForFileRequest,
     CreateTokenQRCodeForFileRequest,
     FileDTO,
-    GetAttributesRequest,
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
@@ -505,33 +504,6 @@ export async function waitForRecipientToReceiveNotification(
     await recipient.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
         return e.data.successor.id === notifyRequestResult.successor.id;
     });
-}
-
-/**
- * finds how many attributes will be there from previous tests in addition to the desired ones
- */
-export async function syncAndGetBaselineNumberOfAttributes(sender: TestRuntimeServices, recipient: TestRuntimeServices, filter: GetAttributesRequest): Promise<number> {
-    const sOpenRequestIds: string[] = [];
-    const rDecidedRequestIds: string[] = [];
-    const sOpenRequests = (await sender.consumption.outgoingRequests.getRequests({ query: { status: LocalRequestStatus.Open } })).value;
-    sOpenRequests.forEach((request) => {
-        sOpenRequestIds.push(request.id);
-    });
-    const rDecidedRequests = (await recipient.consumption.incomingRequests.getRequests({ query: { status: LocalRequestStatus.Decided } })).value;
-    rDecidedRequests.forEach((request) => {
-        rDecidedRequestIds.push(request.id);
-    });
-
-    const relevantRequestIds = sOpenRequestIds.filter((x) => rDecidedRequestIds.includes(x));
-    if (relevantRequestIds.length !== 0) {
-        await syncUntilHasMessages(sender.transport, relevantRequestIds.length);
-    }
-    relevantRequestIds.forEach(
-        async (requestId) =>
-            await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.Completed)
-    );
-
-    return (await sender.consumption.attributes.getAttributes(filter)).value.length;
 }
 
 /**
