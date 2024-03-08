@@ -949,7 +949,6 @@ export class AttributesController extends ConsumptionBaseController {
         if (onlyLatestVersions) {
             query["succeededBy"] = { $exists: false };
         }
-        query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
 
         const ownSharedIdentityAttributeCopies = await this.getLocalAttributes(query);
         const ownSharedIdentityAttributePredecessors = await this.getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute, query);

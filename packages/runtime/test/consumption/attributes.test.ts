@@ -857,8 +857,8 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
 });
 
 describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
-    let sSucceedIARequest1: SucceedRepositoryAttributeRequest;
-    let sSucceedIARequest2: SucceedRepositoryAttributeRequest;
+    let sSucceedRARequest1: SucceedRepositoryAttributeRequest;
+    let sSucceedRARequest2: SucceedRepositoryAttributeRequest;
     let sOSIAVersion0: LocalAttributeDTO;
     let sRAVersion1: LocalAttributeDTO;
     let sRAVersion2: LocalAttributeDTO;
@@ -873,7 +873,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             }
         });
 
-        sSucceedIARequest1 = {
+        sSucceedRARequest1 = {
             predecessorId: sOSIAVersion0.shareInfo!.sourceAttribute!,
             successorContent: {
                 value: {
@@ -883,9 +883,9 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                 tags: ["Bunsen", "Burner"]
             }
         };
-        ({ successor: sRAVersion1 } = (await services1.consumption.attributes.succeedRepositoryAttribute(sSucceedIARequest1)).value);
+        ({ successor: sRAVersion1 } = (await services1.consumption.attributes.succeedRepositoryAttribute(sSucceedRARequest1)).value);
 
-        sSucceedIARequest2 = {
+        sSucceedRARequest2 = {
             predecessorId: sRAVersion1.id,
             successorContent: {
                 value: {
@@ -894,7 +894,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                 }
             }
         };
-        ({ successor: sRAVersion2 } = (await services1.consumption.attributes.succeedRepositoryAttribute(sSucceedIARequest2)).value);
+        ({ successor: sRAVersion2 } = (await services1.consumption.attributes.succeedRepositoryAttribute(sSucceedRARequest2)).value);
     });
 
     test("should successfully notify peer about attribute succession", async () => {
@@ -908,8 +908,8 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
     test("should create sender own shared identity attribute and recipient peer shared identity attribute", async () => {
         const { successor: sOSIAVersion1 } = await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, sRAVersion1.id);
         expect(sOSIAVersion1.succeeds).toStrictEqual(sOSIAVersion0.id);
-        expect(sOSIAVersion1.content.value).toStrictEqual(sSucceedIARequest1.successorContent.value);
-        expect((sOSIAVersion1 as any).content.tags).toStrictEqual(sSucceedIARequest1.successorContent.tags);
+        expect(sOSIAVersion1.content.value).toStrictEqual(sSucceedRARequest1.successorContent.value);
+        expect((sOSIAVersion1 as any).content.tags).toStrictEqual(sSucceedRARequest1.successorContent.tags);
 
         const rPSIAVersion1 = (await services2.consumption.attributes.getAttribute({ id: sOSIAVersion1.id })).value;
         expect(rPSIAVersion1.content).toStrictEqual(sOSIAVersion1.content);
@@ -930,6 +930,27 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
     test("should allow to notify about successor not having notified about predecessor", async () => {
         const { successor: sOSIAVersion2 } = await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, sRAVersion2.id);
         expect(sOSIAVersion2.succeeds).toStrictEqual(sOSIAVersion0.id);
+    });
+
+    test("should throw if the predecessor repository attribute was deleted", async () => {
+        const sRAVersion0 = (await services1.consumption.attributes.getAttribute({ id: sOSIAVersion0.shareInfo!.sourceAttribute! })).value;
+        await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: sRAVersion0.id });
+
+        const notificationResult = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+            attributeId: sRAVersion1.id,
+            peer: services2.address
+        });
+        expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.noOtherVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore");
+    });
+
+    test("should throw if the successor repository attribute was deleted", async () => {
+        await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: sRAVersion1.id });
+
+        const notificationResult = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+            attributeId: sRAVersion1.id,
+            peer: services2.address
+        });
+        expect(notificationResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 
     test("should throw if the same version of the attribute has been notified about already", async () => {
@@ -1565,14 +1586,4 @@ describe(DeleteRepositoryAttributeUseCase.name, () => {
         const result = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: unknownAttributeId });
         expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
-
-    // TODO:
-    // - checks use cases that might be affected having an own shared identity attribute without source attribute:
-    // - (x) DeleteOwnSharedAttributeAndNotifyPeerUseCase
-    // - (x) GetOwnSharedAttributesUseCase
-    // - (x) GetSharedVersionsOfRepositoryAttributeUseCase
-    // - (done in consumption) NotifyPeerAboutRepositoryAttributeSuccessionUseCase (succeedOwnSharedIdentityAttribute)
-
-    // - (x) RequestItemProcessors
-    // - (x) NotificationItemProcessors
 });
