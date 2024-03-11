@@ -19,8 +19,8 @@ import {
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncAndGetBaselineNumberOfAttributes,
     syncUntilHasMessageWithRequest,
+    syncUntilHasMessageWithResponse,
     TestRuntimeServices
 } from "../../lib";
 
@@ -214,6 +214,9 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect(responseItem.attribute).toBeDefined();
         expect(responseItem.attribute.valueType).toBe("ProprietaryString");
         expect(proprietaryString.value).toStrictEqual((responseItem.attribute.content.value as ProprietaryStringJSON).value);
+
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
+        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 
     test("check the sender's dvo for the recipient", async () => {
@@ -225,11 +228,13 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(sRuntimeServices, {
-            query: { "content.value.@type": "ProprietaryString", "shareInfo.peer": rAddress }
-        });
+        const baselineNumberOfAttributes = (
+            await sConsumptionServices.attributes.getAttributes({
+                query: { "content.value.@type": "ProprietaryString", "shareInfo.peer": rAddress }
+            })
+        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
-        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
