@@ -53,7 +53,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
-        let foundLocalAttribute;
         let attribute;
 
         if (parsedParams.isWithExistingAttribute()) {
@@ -63,7 +62,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 );
             }
 
-            foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
+            const foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
 
             if (!foundLocalAttribute) {
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
@@ -84,6 +83,14 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (_requestItem.query instanceof ThirdPartyRelationshipAttributeQuery && attribute instanceof RelationshipAttribute) {
                 if (!foundLocalAttribute.isShared()) {
                     throw new Error("this should never happen");
+                }
+
+                if (foundLocalAttribute.shareInfo.sourceAttribute !== undefined) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidlyAnsweredQuery(
+                            "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided."
+                        )
+                    );
                 }
 
                 function convertCoreAddressToString(value: CoreAddress): string {
