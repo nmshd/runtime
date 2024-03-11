@@ -384,7 +384,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: /The given Attribute belongs to someone else. You can only share own Attributes./
+                message: "The given Attribute belongs to someone else. You can only share own Attributes."
             });
         });
 
@@ -419,7 +419,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: /The given Attribute belongs to someone else. You can only share own Attributes./
+                message: "The given Attribute belongs to someone else. You can only share own Attributes."
             });
         });
     });

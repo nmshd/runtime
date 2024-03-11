@@ -45,7 +45,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSender });
             await Then.theResultShouldBeAnErrorWith({
-                message: /Cannot create own Attributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead./
+                message: "Cannot create own Attributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
             });
         });
 
@@ -65,7 +65,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSomeoneElse });
             await Then.theResultShouldBeAnErrorWith({
-                message: /The owner of the given `attribute` can only be the recipient's address or an empty string. The latter will default to the recipient's address./
+                message: "The owner of the given `attribute` can only be the recipient's address or an empty string. The latter will default to the recipient's address."
             });
         });
 
@@ -113,7 +113,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSomeoneElse });
             await Then.theResultShouldBeAnErrorWith({
                 message:
-                    /The owner of the given 'attribute' can only be the sender's address, the recipient's address or an empty string. The latter will default to the recipient's address./
+                    "The owner of the given 'attribute' can only be the sender's address, the recipient's address or an empty string. The latter will default to the recipient's address."
             });
         });
 

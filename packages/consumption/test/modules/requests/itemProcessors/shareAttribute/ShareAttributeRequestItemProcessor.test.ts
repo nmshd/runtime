@@ -69,7 +69,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
                     message:
-                        /The owner of the given `attribute` can only be an empty string. This is because you can only send Attributes where the recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you./
+                        "The owner of the given `attribute` can only be an empty string. This is because you can only send Attributes where the recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
                 },
                 attribute: IdentityAttribute.from({
                     value: GivenName.fromAny({ value: "AGivenName" }),
@@ -117,7 +117,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: /The confidentiality of the given `attribute` is private. Therefore you are not allowed to share it./
+                    message: "The confidentiality of the given `attribute` is private. Therefore you are not allowed to share it."
                 }
             },
             {
@@ -131,7 +131,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: /It doesn't make sense to share a RelationshipAttribute with its owner./
+                    message: "It doesn't make sense to share a RelationshipAttribute with its owner."
                 }
             }
         ])("returns ${value.result} when passing ${value.scenario}", async function (testParams) {
