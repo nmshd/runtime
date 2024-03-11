@@ -19,8 +19,8 @@ import {
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncAndGetBaselineNumberOfAttributes,
     syncUntilHasMessageWithRequest,
+    syncUntilHasMessageWithResponse,
     TestRuntimeServices
 } from "../../lib";
 
@@ -208,6 +208,9 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
         expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
+        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 
     test("check the sender's dvo for the recipient", async () => {
@@ -220,11 +223,12 @@ describe("ShareAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(sRuntimeServices, {
-            query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
-        });
+        const baselineNumberOfAttributes = (
+            await sConsumptionServices.attributes.getAttributes({
+                query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
+            })
+        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
-        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();

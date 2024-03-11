@@ -21,7 +21,6 @@ import {
     CreateTokenForFileRequest,
     CreateTokenQRCodeForFileRequest,
     FileDTO,
-    GetAttributesRequest,
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
@@ -363,7 +362,7 @@ export async function exchangeAndAcceptRequestByMessage(
     expect(acceptIncomingRequestResult).toBeSuccessful();
     await recipient.eventBus.waitForEvent(MessageSentEvent);
     await syncUntilHasMessageWithResponse(sender.transport, requestId);
-    await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+    await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed && e.data.request.id === requestId);
     return senderMessage.value;
 }
 
@@ -505,16 +504,6 @@ export async function waitForRecipientToReceiveNotification(
     await recipient.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
         return e.data.successor.id === notifyRequestResult.successor.id;
     });
-}
-
-/**
- * finds how many attributes will be there in addition to the desired ones
- * Assumes that
- */
-export async function syncAndGetBaselineNumberOfAttributes(sender: TestRuntimeServices, filter: GetAttributesRequest): Promise<number> {
-    await sleep(1000);
-    await sender.transport.account.syncEverything();
-    return (await sender.consumption.attributes.getAttributes(filter)).value.length;
 }
 
 /**
