@@ -11,7 +11,7 @@ export abstract class AbstractPhoneNumber extends AbstractString {
         return super.valueHints.copyWith({
             min: 3,
             max: 100,
-            pattern: "/^[d+-x#*()/[] ]{3,100}$/"
+            pattern: "^[\\d+\\-x#*()/[\\] ]{3,100}$"
         });
     }
 

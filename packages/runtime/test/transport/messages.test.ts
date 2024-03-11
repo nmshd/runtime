@@ -1,5 +1,6 @@
-import { CoreDate } from "@nmshd/transport";
-import { GetMessagesQuery, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
+import { ConsentRequestItemJSON } from "@nmshd/content";
+import { CoreDate, CoreId } from "@nmshd/transport";
+import { GetMessagesQuery, MessageReceivedEvent, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
 import {
     ensureActiveRelationship,
     establishRelationship,
@@ -7,6 +8,8 @@ import {
     exchangeMessageWithAttachment,
     QueryParamConditions,
     RuntimeServiceProvider,
+    sendMessage,
+    syncUntilHasMessage,
     syncUntilHasMessages,
     TestRuntimeServices,
     uploadFile
@@ -15,12 +18,15 @@ import {
 const serviceProvider = new RuntimeServiceProvider();
 let client1: TestRuntimeServices;
 let client2: TestRuntimeServices;
+let client3: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(2);
+    const runtimeServices = await serviceProvider.launch(3);
     client1 = runtimeServices[0];
     client2 = runtimeServices[1];
+    client3 = runtimeServices[2];
     await ensureActiveRelationship(client1.transport, client2.transport);
+    await ensureActiveRelationship(client1.transport, client3.transport);
 }, 30000);
 
 beforeEach(() => {
@@ -31,7 +37,6 @@ afterAll(() => serviceProvider.stop());
 
 describe("Messaging", () => {
     let fileId: string;
-    let messageId: string;
 
     beforeAll(async () => {
         const file = await uploadFile(client1.transport);
@@ -54,58 +59,90 @@ describe("Messaging", () => {
         });
         expect(result).toBeSuccessful();
         await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
-
-        messageId = result.value.id;
     });
 
     test("receive the message in a sync run", async () => {
-        expect(messageId).toBeDefined();
+        const messageId = (await sendMessage(client1.transport, client2.address, undefined, [fileId])).id;
 
-        const messages = await syncUntilHasMessages(client2.transport);
-        expect(messages).toHaveLength(1);
+        const message = await syncUntilHasMessage(client2.transport, messageId);
+        await expect(client2.eventBus).toHavePublished(MessageReceivedEvent, (m) => m.data.id === messageId);
 
-        const message = messages[0];
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            body: "b",
+            subject: "This is the mail subject",
+            body: "This is the mail body",
             cc: [],
-            subject: "a",
             to: [client2.address]
         });
     });
 
     test("receive the message on TransportService2 in /Messages", async () => {
-        expect(messageId).toBeDefined();
+        const baselineNumberOfMessages = (await client2.transport.messages.getMessages({})).value.length;
+        const messageId = (await exchangeMessage(client1.transport, client2.transport, [fileId])).id;
 
         const response = await client2.transport.messages.getMessages({});
         expect(response).toBeSuccessful();
-        expect(response.value).toHaveLength(1);
+        const numberOfMessages = response.value.length;
+        expect(numberOfMessages - baselineNumberOfMessages).toBe(1);
 
-        const message = response.value[0];
+        const message = response.value[numberOfMessages - 1];
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            body: "b",
+            subject: "This is the mail subject",
+            body: "This is the mail body",
             cc: [],
-            subject: "a",
             to: [client2.address]
         });
     });
 
     test("receive the message on TransportService2 in /Messages/{id}", async () => {
-        expect(messageId).toBeDefined();
+        const messageId = (await exchangeMessage(client1.transport, client2.transport, [fileId])).id;
 
         const response = await client2.transport.messages.getMessage({ id: messageId });
         expect(response).toBeSuccessful();
     });
+
+    test("send a Message to multiple recipients", async () => {
+        expect(fileId).toBeDefined();
+
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address, client3.address],
+            content: {
+                "@type": "Mail",
+                body: "b",
+                cc: [client3.address],
+                subject: "a",
+                to: [client2.address]
+            },
+            attachments: [fileId]
+        });
+        expect(result).toBeSuccessful();
+        await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
+    });
 });
 
 describe("Message errors", () => {
-    const fakeAddress = "id1PNvUP4jHD74qo6usnWNoaFGFf33MXZi6c";
+    let requestItem: ConsentRequestItemJSON;
+    let requestId: string;
+    beforeAll(async () => {
+        requestItem = {
+            "@type": "ConsentRequestItem",
+            consent: "I consent to this RequestItem",
+            mustBeAccepted: true
+        };
+        const createRequestResult = await client1.consumption.outgoingRequests.create({
+            content: {
+                items: [requestItem]
+            },
+            peer: client2.address
+        });
+        requestId = createRequestResult.value.id;
+    });
     test("should throw correct error for empty 'to' in the Message", async () => {
         const result = await client1.transport.messages.sendMessage({
-            recipients: [fakeAddress],
+            recipients: [client2.address],
             content: {
                 "@type": "Mail",
                 to: [],
@@ -118,7 +155,7 @@ describe("Message errors", () => {
 
     test("should throw correct error for missing 'to' in the Message", async () => {
         const result = await client1.transport.messages.sendMessage({
-            recipients: [fakeAddress],
+            recipients: [client2.address],
             content: {
                 "@type": "Mail",
                 subject: "A Subject",
@@ -126,6 +163,69 @@ describe("Message errors", () => {
             }
         });
         expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
+    });
+
+    test("should throw correct error for missing Request ID in a Message with Request content", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                items: [requestItem]
+            }
+        });
+        expect(result).toBeAnError("The Request must have an id.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for missing LocalRequest trying to send a Message with Request content", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: CoreId.from("REQxxxxxxxxxxxxxxxxx"),
+                items: [requestItem]
+            }
+        });
+        expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should throw correct error for trying to send a Message with Request content to multiple recipients", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address, client3.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result).toBeAnError("Only one recipient is allowed for sending Requests.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for trying to send a Message with a Request content that doesn't match the content of the LocalRequest", async () => {
+        const wrongRequestItem = {
+            "@type": "AuthenticationRequestItem",
+            mustBeAccepted: true
+        };
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [wrongRequestItem]
+            }
+        });
+        expect(result).toBeAnError("The sent Request must have the same content as the LocalRequest.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error if Message's recipient doesn't match Request's peer", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client3.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result).toBeAnError("The recipient does not match the Request's peer.", "error.runtime.validation.invalidPropertyValue");
     });
 });
 

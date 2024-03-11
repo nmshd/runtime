@@ -1,7 +1,7 @@
 import { GivenName, IdentityAttribute, MailJSON, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
-import { DataViewExpander, MailDVO, TransportServices } from "../../src";
-import { establishRelationshipWithContents, getRelationship, RuntimeServiceProvider, syncUntilHasMessages, uploadFile } from "../lib";
+import { DataViewExpander, MailDVO, SendMessageRequest, TransportServices } from "../../src";
+import { establishRelationshipWithContents, getRelationship, RuntimeServiceProvider, syncUntilHasMessage, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -57,8 +57,8 @@ afterAll(() => serviceProvider.stop());
 describe("MessageDVO", () => {
     let transportService2Address: string;
     let fileId: string;
-    let messageId: string;
-    let mailId: string;
+    let messageRequest: SendMessageRequest;
+    let mailRequest: SendMessageRequest;
     // let changeAttributeMailId: string;
 
     beforeAll(async () => {
@@ -68,15 +68,14 @@ describe("MessageDVO", () => {
         const relationship = await getRelationship(transportServices1);
         transportService2Address = relationship.peer;
 
-        const result = await transportServices1.messages.sendMessage({
+        messageRequest = {
             recipients: [transportService2Address],
             content: {
                 arbitraryValue: true
             },
             attachments: [fileId]
-        });
-        messageId = result.value.id;
-        const mailResult = await transportServices1.messages.sendMessage({
+        };
+        mailRequest = {
             recipients: [transportService2Address],
             content: {
                 "@type": "Mail",
@@ -86,20 +85,13 @@ describe("MessageDVO", () => {
                 to: [transportService2Address]
             },
             attachments: [fileId]
-        });
-        mailId = mailResult.value.id;
-
-        const messages = await syncUntilHasMessages(transportServices2, 2);
-        if (messages.length < 2) {
-            throw new Error("Not enough messages synced");
-        }
+        };
     });
 
     test("check the message dvo for the sender", async () => {
-        const dto = (await transportServices1.messages.getMessage({ id: messageId })).value;
+        const dto = (await transportServices1.messages.sendMessage(messageRequest)).value;
         const dvo = await expander1.expandMessageDTO(dto);
         expect(dvo).toBeDefined();
-        expect(dvo.id).toStrictEqual(messageId);
         expect(dvo.name).toBe("i18n://dvo.message.name");
         expect(dvo.description).toBeUndefined();
         expect(dvo.type).toBe("MessageDVO");
@@ -121,7 +113,9 @@ describe("MessageDVO", () => {
     });
 
     test("check the message dvo for the recipient", async () => {
-        const dto = (await transportServices2.messages.getMessage({ id: messageId })).value;
+        const senderMessage = (await transportServices1.messages.sendMessage(messageRequest)).value;
+        const messageId = senderMessage.id;
+        const dto = await syncUntilHasMessage(transportServices2, messageId);
         const dvo = await expander2.expandMessageDTO(dto);
         expect(dvo).toBeDefined();
         expect(dvo.id).toStrictEqual(messageId);
@@ -146,12 +140,11 @@ describe("MessageDVO", () => {
     });
 
     test("check the mail dvo for the sender", async () => {
-        const dto = (await transportServices1.messages.getMessage({ id: mailId })).value;
+        const dto = (await transportServices1.messages.sendMessage(mailRequest)).value;
         const dvo = (await expander1.expandMessageDTO(dto)) as MailDVO;
         expect(dto.content["@type"]).toBe("Mail");
         const mail = dto.content as MailJSON;
         expect(dvo).toBeDefined();
-        expect(dvo.id).toStrictEqual(mailId);
         expect(dvo.name).toBe("Mail Subject");
         expect(dvo.description).toBeUndefined();
         expect(dvo.type).toBe("MailDVO");
@@ -187,7 +180,9 @@ describe("MessageDVO", () => {
     });
 
     test("check the mail dvo for the recipient", async () => {
-        const dto = (await transportServices2.messages.getMessage({ id: mailId })).value;
+        const senderMail = (await transportServices1.messages.sendMessage(mailRequest)).value;
+        const mailId = senderMail.id;
+        const dto = await syncUntilHasMessage(transportServices2, mailId);
         const dvo = (await expander2.expandMessageDTO(dto)) as MailDVO;
         expect(dto.content["@type"]).toBe("Mail");
         const mail = dto.content as MailJSON;

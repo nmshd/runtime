@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/transport",
-    "version": "2.3.1",
+    "version": "2.3.4",
     "description": "The transport library handles backbone communication and content encryption.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -93,7 +93,7 @@
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.14.202",
         "@types/luxon": "^3.4.2",
-        "@types/qs": "^6.9.11",
+        "@types/qs": "^6.9.12",
         "@types/uuid": "^9.0.8",
         "expect": "^29.7.0",
         "ts-mockito": "^2.6.1"

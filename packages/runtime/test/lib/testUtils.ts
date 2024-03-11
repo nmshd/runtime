@@ -78,6 +78,14 @@ export async function syncUntilHasMessages(transportServices: TransportServices,
     return syncResult.messages;
 }
 
+export async function syncUntilHasMessage(transportServices: TransportServices, messageId: string | CoreId): Promise<MessageDTO> {
+    const filterMessagesByMessageId = (syncResult: SyncEverythingResponse) => {
+        return syncResult.messages.filter((m) => m.id === messageId.toString());
+    };
+    const syncResult = await syncUntil(transportServices, (syncResult) => filterMessagesByMessageId(syncResult).length !== 0);
+    return filterMessagesByMessageId(syncResult)[0];
+}
+
 export async function syncUntilHasMessageWithRequest(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
     const filterRequestMessagesByRequestId = (syncResult: SyncEverythingResponse) => {
         return syncResult.messages.filter((m) => m.content["@type"] === "Request" && m.content.id === requestId.toString());
@@ -222,6 +230,18 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
+export async function sendMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
+    const createRequestResult = await sender.consumption.outgoingRequests.create(request);
+    expect(createRequestResult).toBeSuccessful();
+    const sendMessageResult = await sender.transport.messages.sendMessage({
+        recipients: [recipient.address],
+        content: createRequestResult.value.content
+    });
+    expect(sendMessageResult).toBeSuccessful();
+
+    return sendMessageResult.value;
+}
+
 export async function exchangeMessage(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices, attachments?: string[]): Promise<MessageDTO> {
     const recipientAddress = (await transportServicesRecipient.account.getIdentityInfo()).value.address;
     const messageId = (await sendMessage(transportServicesCreator, recipientAddress, undefined, attachments)).id;
@@ -232,6 +252,11 @@ export async function exchangeMessage(transportServicesCreator: TransportService
     expect(message.id).toStrictEqual(messageId);
 
     return message;
+}
+
+export async function exchangeMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
+    const sentMessage = await sendMessageWithRequest(sender, recipient, request);
+    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id);
 }
 
 export async function exchangeMessageWithAttachment(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<MessageDTO> {
@@ -249,7 +274,7 @@ export async function getRelationship(transportServices: TransportServices): Pro
     return response.value[0];
 }
 
-export async function establishRelationship(transportServices1: TransportServices, transportServices2: TransportServices): Promise<void> {
+export async function establishRelationship(transportServices1: TransportServices, transportServices2: TransportServices): Promise<RelationshipDTO> {
     const template = await exchangeTemplate(transportServices1, transportServices2, {});
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
@@ -270,6 +295,7 @@ export async function establishRelationship(transportServices1: TransportService
 
     const relationships2 = await syncUntilHasRelationships(transportServices2);
     expect(relationships2).toHaveLength(1);
+    return relationships2[0];
 }
 
 export async function establishRelationshipWithContents(
@@ -319,13 +345,13 @@ export async function exchangeAndAcceptRequestByMessage(
     recipient: TestRuntimeServices,
     request: CreateOutgoingRequestRequest,
     responseItems: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
-): Promise<void> {
+): Promise<MessageDTO> {
     const createRequestResult = await sender.consumption.outgoingRequests.create(request);
     expect(createRequestResult).toBeSuccessful();
 
     const requestId = createRequestResult.value.id;
 
-    await sender.transport.messages.sendMessage({
+    const senderMessage = await sender.transport.messages.sendMessage({
         recipients: [recipient.address],
         content: createRequestResult.value.content
     });
@@ -336,7 +362,8 @@ export async function exchangeAndAcceptRequestByMessage(
     expect(acceptIncomingRequestResult).toBeSuccessful();
     await recipient.eventBus.waitForEvent(MessageSentEvent);
     await syncUntilHasMessageWithResponse(sender.transport, requestId);
-    await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+    await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed && e.data.request.id === requestId);
+    return senderMessage.value;
 }
 
 export async function sendAndReceiveNotification(

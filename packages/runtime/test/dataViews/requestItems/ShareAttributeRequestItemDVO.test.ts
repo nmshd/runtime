@@ -1,20 +1,32 @@
-import { LocalRequestStatus } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import { AbstractStringJSON, DisplayNameJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
 import {
     AcceptResponseItemDVO,
     ConsumptionServices,
+    CreateOutgoingRequestRequest,
     DataViewExpander,
     DecidableShareAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
-    MessageDTO,
     OutgoingRequestStatusChangedEvent,
     RequestMessageDVO,
     ShareAttributeRequestItemDVO,
     TransportServices
 } from "../../../src";
-import { establishRelationship, MockEventBus, RuntimeServiceProvider, sendMessage, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "../../lib";
+import {
+    establishRelationship,
+    exchangeAndAcceptRequestByMessage,
+    exchangeMessageWithRequest,
+    MockEventBus,
+    RuntimeServiceProvider,
+    sendMessageWithRequest,
+    syncUntilHasMessageWithRequest,
+    syncUntilHasMessageWithResponse,
+    TestRuntimeServices
+} from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
+let sRuntimeServices: TestRuntimeServices;
+let rRuntimeServices: TestRuntimeServices;
 let sTransportServices: TransportServices;
 let rTransportServices: TransportServices;
 let sExpander: DataViewExpander;
@@ -23,22 +35,26 @@ let sConsumptionServices: ConsumptionServices;
 let rConsumptionServices: ConsumptionServices;
 let sEventBus: MockEventBus;
 let rEventBus: MockEventBus;
-let senderMessage: MessageDTO;
-let recipientMessage: MessageDTO;
-let requestId: string;
+let requestContent: CreateOutgoingRequestRequest;
+let responseItems: DecideRequestItemParametersJSON[];
+let sAddress: string;
+let rAddress: string;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
-    sTransportServices = runtimeServices[0].transport;
-    rTransportServices = runtimeServices[1].transport;
-    sExpander = runtimeServices[0].expander;
-    rExpander = runtimeServices[1].expander;
-    sConsumptionServices = runtimeServices[0].consumption;
-    rConsumptionServices = runtimeServices[1].consumption;
-    sEventBus = runtimeServices[0].eventBus;
-    rEventBus = runtimeServices[1].eventBus;
+    sRuntimeServices = runtimeServices[0];
+    rRuntimeServices = runtimeServices[1];
+    sTransportServices = sRuntimeServices.transport;
+    rTransportServices = rRuntimeServices.transport;
+    sExpander = sRuntimeServices.expander;
+    rExpander = rRuntimeServices.expander;
+    sConsumptionServices = sRuntimeServices.consumption;
+    rConsumptionServices = rRuntimeServices.consumption;
+    sEventBus = sRuntimeServices.eventBus;
+    rEventBus = rRuntimeServices.eventBus;
     await establishRelationship(sTransportServices, rTransportServices);
-    const rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+    sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
+    rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
     const senderAttribute = await sConsumptionServices.attributes.createRepositoryAttribute({
         content: {
@@ -49,7 +65,7 @@ beforeAll(async () => {
         }
     });
 
-    const localRequest = await sConsumptionServices.outgoingRequests.create({
+    requestContent = {
         content: {
             items: [
                 {
@@ -61,13 +77,8 @@ beforeAll(async () => {
             ]
         },
         peer: rAddress
-    });
-    requestId = localRequest.value.id;
-
-    senderMessage = await sendMessage(sTransportServices, rAddress, localRequest.value.content);
-    recipientMessage = await syncUntilHasMessageWithRequest(rTransportServices, localRequest.value.id);
-
-    await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+    };
+    responseItems = [{ accept: true }];
 }, 30000);
 
 afterAll(() => serviceProvider.stop());
@@ -79,6 +90,8 @@ beforeEach(function () {
 
 describe("ShareAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
+        const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -108,7 +121,8 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
-    test("check the MessageDVO for the recipient and accept it", async () => {
+    test("check the MessageDVO for the recipient", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         const dto = recipientMessage;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -137,15 +151,16 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.isDraft).toBe(true);
         expect(requestItemDVO.attribute.isOwn).toBe(false);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
-
-        const acceptResult = await rConsumptionServices.incomingRequests.accept({
-            requestId: dvo.request.id,
-            items: [{ accept: true }]
-        });
-        expect(acceptResult).toBeSuccessful();
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+        const acceptResult = await rConsumptionServices.incomingRequests.accept({
+            requestId: recipientMessage.content.id,
+            items: responseItems
+        });
+        expect(acceptResult).toBeSuccessful();
         const dto = recipientMessage;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -190,20 +205,30 @@ describe("ShareAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
+        expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
         expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
+        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 
     test("check the sender's dvo for the recipient", async () => {
+        const baselineNumberOfItems = (await rExpander.expandAddress(sAddress)).items?.length ?? 0;
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
         expect(dvo.name).toBe("Dr. Theodor Munchkin von Reichenhardt");
-        expect(dvo.items).toHaveLength(1);
+        const numberOfItems = dvo.items!.length;
+        expect(numberOfItems - baselineNumberOfItems).toBe(1);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        await syncUntilHasMessageWithResponse(sTransportServices, requestId);
-        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
-
+        const baselineNumberOfAttributes = (
+            await sConsumptionServices.attributes.getAttributes({
+                query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
+            })
+        ).value.length;
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -250,23 +275,29 @@ describe("ShareAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
-        expect(attributeResult.value[0].id).toBeDefined();
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        const numberOfAttributes = attributeResult.value.length;
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
     });
 
     test("check the attributes for the sender", async () => {
+        const baselineNumberOfAttributes = (await sConsumptionServices.attributes.getOwnSharedAttributes({ peer: rAddress })).value.length;
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         const attributeResult = await sConsumptionServices.attributes.getOwnSharedAttributes({
             peer: dvo.request.peer.id
         });
 
         expect(attributeResult).toBeSuccessful();
-        expect(attributeResult.value).toHaveLength(1);
-        expect(attributeResult.value[0].id).toBeDefined();
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        const numberOfAttributes = attributeResult.value.length;
+        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
+        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
     });
 
     test("check the recipient's dvo for the sender", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await sExpander.expandAddress(senderMessage.recipients[0].address);
 
         expect(dvo.name).toStrictEqual(senderMessage.recipients[0].address.substring(3, 9));
