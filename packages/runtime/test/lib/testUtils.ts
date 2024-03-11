@@ -45,14 +45,15 @@ import {
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
-export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
+export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean, timeoutMs = 8000): Promise<SyncEverythingResponse> {
     const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [] };
 
+    const iterationSleepMs = 50;
     let iterationNumber = 0;
     let criteriaMet: boolean;
 
     do {
-        await sleep(50);
+        await sleep(iterationSleepMs);
 
         const currentIterationSyncResult = (await transportServices.account.syncEverything()).value;
 
@@ -61,9 +62,9 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
-    } while (!criteriaMet && iterationNumber <= 10);
+    } while (!criteriaMet && iterationNumber <= timeoutMs / iterationSleepMs);
 
-    if (!criteriaMet) throw new Error("syncUntil: the criteria specified in syncUntil were not fulfilled");
+    if (!criteriaMet) throw new Error(`syncUntil: the criteria specified in syncUntil were not fulfilled, iterations run: ${iterationNumber}`);
 
     return finalSyncResult;
 }
