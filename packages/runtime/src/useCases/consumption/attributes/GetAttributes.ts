@@ -115,7 +115,11 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
                 };
             },
             // content.tags
-            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<IdentityAttribute>((x) => x.tags)}`]: (query: any, input: any) => {
+            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<IdentityAttribute>((x) => x.tags)}`]: (query: any, input: string | string[]) => {
+                if (typeof input === "string") {
+                    query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<IdentityAttributeJSON>((x) => x.tags)}`] = { $contains: input };
+                    return;
+                }
                 const allowedTags = [];
                 for (const tag of input) {
                     const tagQuery = { [`${nameof<LocalAttribute>((x) => x.content)}.${nameof<IdentityAttributeJSON>((x) => x.tags)}`]: { $contains: tag } };
