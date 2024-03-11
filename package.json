@@ -24,10 +24,10 @@
         "test:teardown": "docker compose -f .dev/compose.yml down -fsv"
     },
     "devDependencies": {
-        "@js-soft/eslint-config-ts": "^1.6.6",
+        "@js-soft/eslint-config-ts": "^1.6.7",
         "@js-soft/license-check": "^1.0.9",
         "@types/jest": "^29.5.12",
-        "@types/node": "^20.11.24",
+        "@types/node": "^20.11.25",
         "copy-webpack-plugin": "^12.0.2",
         "enhanced-publish": "^1.1.2",
         "eslint": "^8.57.0",
@@ -40,7 +40,7 @@
         "ts-jest": "^29.1.2",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
-        "typescript": "^5.3.3",
+        "typescript": "^5.4.2",
         "webpack": "^5.90.3",
         "webpack-cli": "^5.1.4"
     }
