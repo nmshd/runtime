@@ -80,7 +80,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 scenario: "a Relationship Attribute with owner=sender",
                 result: "success",
                 attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
                     owner: CoreAddress.from("{{sender}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "AKey"
@@ -90,7 +90,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 scenario: "a Relationship Attribute with owner=<empty string>",
                 result: "success",
                 attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
                     owner: CoreAddress.from("{{sender}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "AKey"
@@ -100,7 +100,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 scenario: "a Relationship Attribute with owner=someOtherOwner",
                 result: "success",
                 attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
                     owner: CoreAddress.from("{{sender}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "AKey"
@@ -110,7 +110,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 scenario: "a Relationship Attribute with confidentiality=private",
                 result: "error",
                 attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
                     owner: CoreAddress.from("{{sender}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Private,
                     key: "AKey"
@@ -124,7 +124,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 scenario: "a Relationship Attribute with owner=recipient",
                 result: "error",
                 attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "aTitle" }),
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
                     owner: CoreAddress.from("{{recipient}}"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "AKey"

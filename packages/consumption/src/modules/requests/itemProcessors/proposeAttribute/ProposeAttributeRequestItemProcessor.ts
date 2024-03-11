@@ -67,21 +67,26 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         const parsedParams: AcceptProposeAttributeRequestItemParameters = AcceptProposeAttributeRequestItemParameters.from(params);
-
-        let attribute = parsedParams.attribute;
+        let attribute;
 
         if (parsedParams.isWithExistingAttribute()) {
-            const localAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
+            const foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
 
-            if (!localAttribute) {
+            if (!foundLocalAttribute) {
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
             }
 
-            attribute = localAttribute.content;
+            attribute = foundLocalAttribute.content;
+        } else if (parsedParams.isWithNewAttribute()) {
+            attribute = parsedParams.attribute;
         }
 
-        const ownerIsEmpty = attribute!.owner.equals("");
-        const ownerIsCurrentIdentity = attribute!.owner.equals(this.currentIdentityAddress);
+        if (!attribute) {
+            throw new Error("this should never happen");
+        }
+
+        const ownerIsEmpty = attribute.owner.equals("");
+        const ownerIsCurrentIdentity = attribute.owner.equals(this.currentIdentityAddress);
         if (!ownerIsEmpty && !ownerIsCurrentIdentity) {
             return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The given Attribute belongs to someone else. You can only share own Attributes."));
         }
@@ -95,12 +100,19 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         requestInfo: LocalRequestInfo
     ): Promise<ProposeAttributeAcceptResponseItem> {
         const parsedParams: AcceptProposeAttributeRequestItemParameters = AcceptProposeAttributeRequestItemParameters.from(params);
+        let sharedLocalAttribute;
 
-        let sharedLocalAttribute: LocalAttribute;
         if (parsedParams.isWithExistingAttribute()) {
             sharedLocalAttribute = await this.copyExistingAttribute(parsedParams.attributeId, requestInfo);
-        } else {
-            sharedLocalAttribute = await this.createNewAttribute(parsedParams.attribute!, requestInfo);
+        } else if (parsedParams.isWithNewAttribute()) {
+            if (parsedParams.attribute.owner.equals("")) {
+                parsedParams.attribute.owner = this.currentIdentityAddress;
+            }
+            sharedLocalAttribute = await this.createNewAttribute(parsedParams.attribute, requestInfo);
+        }
+
+        if (!sharedLocalAttribute) {
+            throw new Error("this should never happen");
         }
 
         return ProposeAttributeAcceptResponseItem.from({

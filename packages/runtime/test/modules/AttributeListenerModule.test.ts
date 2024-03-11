@@ -78,8 +78,8 @@ describe("AttributeListenerModule", () => {
             isTechnical: false,
             value: {
                 "@type": "ProprietaryString",
-                title: "aTitle",
-                value: "aProprietaryStringValue"
+                title: "ATitle",
+                value: "AProprietaryStringValue"
             }
         };
 

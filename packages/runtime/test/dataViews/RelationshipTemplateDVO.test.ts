@@ -46,8 +46,8 @@ describe("RelationshipTemplateDVO", () => {
             owner: templator.address,
             value: {
                 "@type": "ProprietaryString",
-                title: "aTitle",
-                value: "aProprietaryStringValue"
+                title: "ATitle",
+                value: "AProprietaryStringValue"
             },
             key: "givenName",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
@@ -57,8 +57,8 @@ describe("RelationshipTemplateDVO", () => {
             owner: templator.address,
             value: {
                 "@type": "ProprietaryString",
-                title: "aTitle",
-                value: "aProprietaryStringValue"
+                title: "ATitle",
+                value: "AProprietaryStringValue"
             },
             key: "surname",
             confidentiality: "protected" as RelationshipAttributeConfidentiality

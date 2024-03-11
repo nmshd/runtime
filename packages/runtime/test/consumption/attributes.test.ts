@@ -212,8 +212,8 @@ describe("attribute queries", () => {
             content: {
                 value: {
                     "@type": "ProprietaryString",
-                    title: "aTitle",
-                    value: "aProprietaryStringValue"
+                    title: "ATitle",
+                    value: "AProprietaryStringValue"
                 },
                 key: "website",
                 confidentiality: RelationshipAttributeConfidentiality.Protected

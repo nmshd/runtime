@@ -82,7 +82,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: CoreAddress.from(""),
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "aTitle",
+                        title: "ATitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -107,7 +107,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: CoreAddress.from(""),
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "aTitle",
+                        title: "ATitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -134,7 +134,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: recipientAddress,
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "aTitle",
+                        title: "ATitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -182,7 +182,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                         mustBeAccepted: false,
                         query: query,
                         attribute: TestObjectFactory.createRelationshipAttribute({
-                            value: ProprietaryString.fromAny({ title: "aTitle", value: "AGivenName" }),
+                            value: ProprietaryString.fromAny({ title: "ATitle", value: "AGivenName" }),
                             owner: CoreAddress.from("")
                         })
                     });
@@ -276,7 +276,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns success when called with a the proposed Attribute", async function () {
+        test("returns success when called with the proposed Attribute", async function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
@@ -499,6 +499,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(createdAttribute).toBeDefined();
             expect(createdAttribute!.shareInfo).toBeDefined();
             expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+            expect(createdAttribute!.content.owner.toString()).toStrictEqual(accountController.identity.address.toString());
         });
 
         test("in case of a given own IdentityAttribute, creates a new Repository Attribute as well as a copy of it for the peer", async function () {
@@ -583,7 +584,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: senderAddress.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "aTitle",
+                        title: "ATitle",
                         value: "AStringValue"
                     }
                 }
