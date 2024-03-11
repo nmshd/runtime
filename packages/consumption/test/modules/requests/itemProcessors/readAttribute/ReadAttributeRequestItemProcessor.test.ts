@@ -317,14 +317,14 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 content: RelationshipAttribute.from({
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: CoreAddress.from("id1"),
+                    owner: CoreAddress.from("AThirdParty"),
                     value: ProprietaryString.from({
                         title: "ATitle",
                         value: "AStringValue"
                     })
                 }),
                 shareInfo: {
-                    peer: CoreAddress.from("id1"),
+                    peer: CoreAddress.from("AThirdParty"),
                     requestReference: await ConsumptionIds.request.generate()
                 }
             });
@@ -334,7 +334,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     key: "AKey",
                     owner: "thirdParty",
-                    thirdParty: ["id1"]
+                    thirdParty: ["AThirdParty"]
                 })
             });
             const requestId = await ConsumptionIds.request.generate();
@@ -342,7 +342,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("sender"),
+                peer: CoreAddress.from("Sender"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -434,12 +434,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
+                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
                 });
             });
 
             test("returns an error when the new IdentityAttribute to be created and shared belongs to a third party", async function () {
-                const sender = CoreAddress.from("id0");
                 const thirdParty = CoreAddress.from("id1");
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -451,7 +450,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     id: requestId,
                     createdAt: CoreDate.utc(),
                     isOwn: false,
-                    peer: sender,
+                    peer: CoreAddress.from("Sender"),
                     status: LocalRequestStatus.DecisionRequired,
                     content: Request.from({
                         id: requestId,
@@ -476,13 +475,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
+                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
                 });
             });
 
             test("returns an error when an IdentityAttribute was queried by an IdentityAttributeQuery and the peer tries to respond with a RelationshipAttribute", async function () {
-                const sender = CoreAddress.from("id0");
-
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: IdentityAttributeQuery.from({ valueType: "GivenName" })
@@ -492,7 +489,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     id: requestId,
                     createdAt: CoreDate.utc(),
                     isOwn: false,
-                    peer: sender,
+                    peer: CoreAddress.from("Sender"),
                     status: LocalRequestStatus.DecisionRequired,
                     content: Request.from({
                         id: requestId,
@@ -520,7 +517,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried./
+                    message: "The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried."
                 });
             });
 
@@ -562,13 +559,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes./
+                    message: "The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes."
                 });
             });
 
             test("returns an error when an IdentityAttribute of a specific type was queried by an IdentityAttributeQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
-                const sender = CoreAddress.from("id0");
-
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: IdentityAttributeQuery.from({ valueType: "GivenName" })
@@ -578,7 +573,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     id: requestId,
                     createdAt: CoreDate.utc(),
                     isOwn: false,
-                    peer: sender,
+                    peer: CoreAddress.from("Sender"),
                     status: LocalRequestStatus.DecisionRequired,
                     content: Request.from({
                         id: requestId,
@@ -603,12 +598,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided IdentityAttribute is not of the queried IdentityAttribute Value Type./
+                    message: "The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."
                 });
             });
 
             test("can be called with property tags used in the IdentityAttributeQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -647,7 +642,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IdentityAttributeQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -684,12 +679,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The number of tags of the provided IdentityAttribute do not match the number of queried tags./
+                    message: "The number of tags of the provided IdentityAttribute do not match the number of queried tags."
                 });
             });
 
             test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IdentityAttributeQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -726,12 +721,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The tags of the provided IdentityAttribute do not match the queried tags./
+                    message: "The tags of the provided IdentityAttribute do not match the queried tags."
                 });
             });
 
             test("returns an error when an IdentityAttribute is not valid in the queried time frame", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -769,14 +764,14 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided Attribute is not valid in the queried time frame./
+                    message: "The provided Attribute is not valid in the queried time frame."
                 });
             });
         });
 
         describe("canAccept ReadAttributeRequestitem with IQLQuery", function () {
             test("returns an error when an IdentityAttribute was queried by an IQLQuery and the peer tries to respond with a RelationshipAttribute", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -815,12 +810,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes should be queried by an IQLQuery./
+                    message: "The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes should be queried by an IQLQuery."
                 });
             });
 
             test("returns an error when the IdentityAttribute queried by an IQLQuery is not owned by the Recipient", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -856,12 +851,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes./
+                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
                 });
             });
 
             test("returns an error when an IdentityAttribute of a specific type was queried by an IQLQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -897,12 +892,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided IdentityAttribute is not of the queried IdentityAttribute Value Type./
+                    message: "The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."
                 });
             });
 
             test("can be called with property tags used in the IQLQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -941,7 +936,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IQLQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -978,12 +973,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The number of tags of the provided IdentityAttribute do not match the number of queried tags./
+                    message: "The number of tags of the provided IdentityAttribute do not match the number of queried tags."
                 });
             });
 
             test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IQLQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1020,14 +1015,14 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The tags of the provided IdentityAttribute do not match the queried tags./
+                    message: "The tags of the provided IdentityAttribute do not match the queried tags."
                 });
             });
         });
 
         describe("canAccept ReadAttributeRequestitem with RelationshipAttributeQuery", function () {
             test("returns an error when a RelationshipAttribute was queried using a RelationshipAttributeQuery and the Recipient tries to respond with an existing RelationshipAttribute", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const recipient = CoreAddress.from(accountController.identity.address);
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1081,12 +1076,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided./
+                    message: "When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided."
                 });
             });
 
             test("returns an error when a RelationshipAttribute was queried and the Recipient tries to respond with an IdentityAttribute", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const recipient = CoreAddress.from(accountController.identity.address);
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1131,12 +1126,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried./
+                    message: "The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried."
                 });
             });
 
             test("returns an error when a RelationshipAttribute of a specific type was queried and the Recipient tries to respond with a RelationshipAttribute of another type", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const recipient = CoreAddress.from(accountController.identity.address);
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1184,12 +1179,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute is not of the queried RelationshipAttribute Value Type./
+                    message: "The provided RelationshipAttribute is not of the queried RelationshipAttribute Value Type."
                 });
             });
 
             test("returns an error when a RelationshipAttribute does not belong to the queried owner", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const recipient = CoreAddress.from(accountController.identity.address);
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1237,12 +1232,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute does not belong to the queried owner./
+                    message: "The provided RelationshipAttribute does not belong to the queried owner."
                 });
             });
 
             test("returns an error when a RelationshipAttribute does not belong to the Recipient, but an empty string was specified for the owner of the query", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1289,12 +1284,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query./
+                    message: "You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
                 });
             });
 
             test("returns an error when a RelationshipAttribute does not have the queried key", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1341,12 +1336,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute has not the queried key./
+                    message: "The provided RelationshipAttribute has not the queried key."
                 });
             });
 
             test("returns an error when a RelationshipAttribute does not have the queried confidentiality", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1393,12 +1388,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute has not the queried confidentiality./
+                    message: "The provided RelationshipAttribute has not the queried confidentiality."
                 });
             });
 
             test("returns an error when a RelationshipAttribute does not have the queried title", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1447,12 +1442,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute has not the queried title./
+                    message: "The provided RelationshipAttribute has not the queried title."
                 });
             });
 
             test("returns an error when a RelationshipAttribute does not have the queried description", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1500,12 +1495,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute has not the queried description./
+                    message: "The provided RelationshipAttribute has not the queried description."
                 });
             });
 
             test("can be called when a RelationshipAttribute of Value Type Consent is queried even though title and description is specified", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1554,7 +1549,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("can be called with properties validFrom and validTo used in the query", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1607,7 +1602,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("returns an error when a RelationshipAttribute is not valid in the queried time frame", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1658,14 +1653,14 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided Attribute is not valid in the queried time frame./
+                    message: "The provided Attribute is not valid in the queried time frame."
                 });
             });
         });
 
         describe("canAccept ReadAttributeRequestitem with ThirdPartyRelationshipAttributeQuery", function () {
             test("returns an error when a RelationshipAttribute was queried using a ThirdPartyRelationshipAttributeQuery and the Recipient tries to respond with an IdentityAttribute", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const recipient = CoreAddress.from(accountController.identity.address);
                 const thirdParty = CoreAddress.from("id2");
 
@@ -1706,12 +1701,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried./
+                    message: "The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried."
                 });
             });
 
             test("returns an error when a RelationshipAttribute is a copy of a sourceAttribute that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const thirdParty = CoreAddress.from("id2");
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1763,12 +1758,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided./
+                    message: "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided."
                 });
             });
 
             test("returns an error when a RelationshipAttribute does not belong to the owner that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const thirdParty = CoreAddress.from("id2");
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1819,12 +1814,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute does not belong to a queried owner./
+                    message: "The provided RelationshipAttribute does not belong to a queried owner."
                 });
             });
 
             test("returns an error when a RelationshipAttribute that was queried by a ThirdPartyRelationshipAttributeQuery does not belong to the Recipient or one of the involved third parties, but an empty string was specified for the owner of the query", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const thirdParty = CoreAddress.from("id2");
                 const notInvolvedThirdParty = CoreAddress.from("id3");
 
@@ -1877,12 +1872,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
                     message:
-                        /Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query./
+                        "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
                 });
             });
 
             test("can be called with an arbitrary third party if the thirdParty string array of the ThirdPartyRelationshipAttributeQuery contains an empty string", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const thirdParty = CoreAddress.from("id2");
                 const notInvolvedThirdParty = CoreAddress.from("id3");
 
@@ -1936,7 +1931,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("returns an error when a RelationshipAttribute does not have the key that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const recipient = CoreAddress.from(accountController.identity.address);
                 const thirdParty = CoreAddress.from("id2");
 
@@ -1987,12 +1982,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute has not the queried key./
+                    message: "The provided RelationshipAttribute has not the queried key."
                 });
             });
 
             test("returns an error when a RelationshipAttribute is not shared with one of the third parties that were queried using a ThirdPartyRelationshipAttributeQuery", async function () {
-                const sender = CoreAddress.from("id0");
+                const sender = CoreAddress.from("Sender");
                 const recipient = CoreAddress.from(accountController.identity.address);
                 const thirdParty = CoreAddress.from("id2");
                 const notInvolvedThirdParty = CoreAddress.from("id3");
@@ -2044,12 +2039,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved./
+                    message: "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
                 });
             });
 
             test("returns an error when a RelationshipAttribute is not valid in the time frame that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
-                const sender = CoreAddress.from("id0");
                 const recipient = CoreAddress.from(accountController.identity.address);
                 const thirdParty = CoreAddress.from("id2");
 
@@ -2069,7 +2063,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     id: requestId,
                     createdAt: CoreDate.utc(),
                     isOwn: false,
-                    peer: sender,
+                    peer: CoreAddress.from("Sender"),
                     status: LocalRequestStatus.DecisionRequired,
                     content: Request.from({
                         id: requestId,
@@ -2105,7 +2099,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: /The provided Attribute is not valid in the queried time frame./
+                    message: "The provided Attribute is not valid in the queried time frame."
                 });
             });
         });
