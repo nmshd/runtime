@@ -23,8 +23,8 @@ import {
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncAndGetBaselineNumberOfAttributes,
     syncUntilHasMessageWithRequest,
+    syncUntilHasMessageWithResponse,
     TestRuntimeServices
 } from "../../lib";
 
@@ -255,14 +255,15 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(attributeValue);
+
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
+        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
-            query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
-        });
+        const baselineNumberOfAttributes = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 } }))
+            .value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -507,14 +508,15 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(returnedValue).toStrictEqual(attributeValue);
+
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
+        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = await syncAndGetBaselineNumberOfAttributes(runtimeServices1, {
-            query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 }
-        });
+        const baselineNumberOfAttributes = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 } }))
+            .value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
-        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
