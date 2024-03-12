@@ -106,5 +106,32 @@ describe("creation of ProposeAttributeRequestItem", () => {
                 )
             );
         });
+
+        test("returns an error when trying to create an invalid ProposeAttributeRequestItem with mismatching RelationshipAttribute value type", function () {
+            const invalidProposeAttributeRequestItemCall = () => {
+                ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    attribute: TestObjectFactory.createRelationshipAttribute({
+                        owner: CoreAddress.from("")
+                    }),
+                    query: RelationshipAttributeQuery.from({
+                        owner: "",
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryInteger",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+            };
+            expect(invalidProposeAttributeRequestItemCall).toThrow(
+                new ValidationError(
+                    ProposeAttributeRequestItem.name,
+                    `${nameof<ProposeAttributeRequestItem>((x) => x.query)}.${nameof<RelationshipAttributeQuery>((x) => x.attributeCreationHints.valueType)}`,
+                    "You cannot propose an Attribute whose type of the value ('ProprietaryString') is different from the value type of the query ('ProprietaryInteger')."
+                )
+            );
+        });
     });
 });
