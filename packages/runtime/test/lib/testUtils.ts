@@ -64,7 +64,7 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
         criteriaMet = until(finalSyncResult);
     } while (!criteriaMet && iterationNumber <= timeoutMs / iterationSleepMs);
 
-    if (!criteriaMet) throw new Error(`syncUntil: the criteria specified in syncUntil were not fulfilled, iterations run: ${iterationNumber}`);
+    if (!criteriaMet) throw new Error(`syncUntil timed out after ${timeoutMs} ms.`);
 
     return finalSyncResult;
 }
