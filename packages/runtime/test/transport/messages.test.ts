@@ -10,7 +10,6 @@ import {
     RuntimeServiceProvider,
     sendMessage,
     syncUntilHasMessage,
-    syncUntilHasMessages,
     TestRuntimeServices,
     uploadFile
 } from "../lib";
@@ -242,8 +241,8 @@ describe("Mark Message as un-/read", () => {
                 to: [client2.address]
             }
         });
-        await syncUntilHasMessages(client2.transport, 1);
         messageId = result.value.id;
+        await syncUntilHasMessage(client2.transport, messageId);
     });
 
     test("Mark Message as read", async () => {
