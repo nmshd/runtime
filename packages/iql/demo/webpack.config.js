@@ -1,9 +1,10 @@
 var path = require("path");
 
+const pathPrefix = path.resolve(__dirname);
 module.exports = {
-    entry: "./app.js",
+    entry: `${pathPrefix}/app.js`,
     output: {
-        path: path.resolve(__dirname),
+        path: pathPrefix,
         filename: "_bundle.js"
     }
 };
