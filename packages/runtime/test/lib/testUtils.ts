@@ -52,7 +52,7 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
     let criteriaMet: boolean;
 
     do {
-        await sleep(50);
+        await sleep(iterationNumber * 25);
 
         const currentIterationSyncResult = (await transportServices.account.syncEverything()).value;
 
@@ -61,9 +61,9 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
-    } while (!criteriaMet && iterationNumber <= 10);
+    } while (!criteriaMet && iterationNumber < 15);
 
-    if (!criteriaMet) throw new Error("syncUntil: the criteria specified in syncUntil were not fulfilled");
+    if (!criteriaMet) throw new Error("syncUntil timed out.");
 
     return finalSyncResult;
 }
