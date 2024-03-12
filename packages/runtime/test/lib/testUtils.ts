@@ -45,15 +45,14 @@ import {
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
-export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean, timeoutMs = 8000): Promise<SyncEverythingResponse> {
+export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
     const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [] };
 
-    const iterationSleepMs = 50;
     let iterationNumber = 0;
     let criteriaMet: boolean;
 
     do {
-        await sleep(iterationSleepMs);
+        await sleep(iterationNumber * 25);
 
         const currentIterationSyncResult = (await transportServices.account.syncEverything()).value;
 
@@ -62,9 +61,9 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
-    } while (!criteriaMet && iterationNumber <= timeoutMs / iterationSleepMs);
+    } while (!criteriaMet && iterationNumber < 15);
 
-    if (!criteriaMet) throw new Error(`syncUntil timed out after ${timeoutMs} ms.`);
+    if (!criteriaMet) throw new Error("syncUntil timed out.");
 
     return finalSyncResult;
 }
