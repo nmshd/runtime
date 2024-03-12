@@ -208,7 +208,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createIdentityAttribute({
                     value: GivenName.fromAny({ value: "AGivenName" }),
-                    owner: recipientAddress
+                    owner: CoreAddress.from("")
                 }),
                 query: IdentityAttributeQuery.from({
                     valueType: "GivenName"
@@ -554,7 +554,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     key: "AKey",
-                    owner: recipientAddress,
+                    owner: "",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
                         title: "ATitle",
@@ -583,7 +583,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     "@type": "RelationshipAttribute",
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: recipientAddress.toString(),
+                    owner: "",
                     value: {
                         "@type": "ProprietaryString",
                         title: "ATitle",
@@ -599,6 +599,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(createdSharedAttribute!.shareInfo).toBeDefined();
             expect(createdSharedAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+            expect(createdSharedAttribute!.content.owner.toString()).toStrictEqual(recipientAddress.toString());
         });
     });
 });

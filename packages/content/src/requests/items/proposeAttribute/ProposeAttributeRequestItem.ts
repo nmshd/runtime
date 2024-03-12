@@ -47,19 +47,6 @@ export class ProposeAttributeRequestItem extends RequestItem implements IPropose
     protected static override postFrom<T extends Serializable>(value: T): T {
         if (!(value instanceof ProposeAttributeRequestItem)) throw new Error("this should never happen");
 
-        if (value.query instanceof IdentityAttributeQuery) {
-            const attributeValueType = (value.attribute.value.toJSON() as any)["@type"];
-            const queryValueType = value.query.valueType;
-
-            if (attributeValueType !== queryValueType) {
-                throw new ValidationError(
-                    ProposeAttributeRequestItem.name,
-                    `${nameof<ProposeAttributeRequestItem>((x) => x.query)}.${nameof<IdentityAttributeQuery>((x) => x.valueType)}`,
-                    `You cannot propose an Attribute whose type of the value ('${attributeValueType}') is different from the value type of the query ('${queryValueType}').`
-                );
-            }
-        }
-
         // IQL queries might also be possible for Relationship Attributes in the future
         if (value.attribute instanceof RelationshipAttribute && !(value.query instanceof RelationshipAttributeQuery)) {
             throw new ValidationError(
@@ -73,8 +60,21 @@ export class ProposeAttributeRequestItem extends RequestItem implements IPropose
             throw new ValidationError(
                 ProposeAttributeRequestItem.name,
                 "",
-                "When proposing an IdentityAttribute, the corresponding query has to be a IdentityAttributeQuery or IQLQuery"
+                "When proposing an IdentityAttribute, the corresponding query has to be a IdentityAttributeQuery or IQLQuery."
             );
+        }
+
+        if (value.query instanceof IdentityAttributeQuery) {
+            const attributeValueType = (value.attribute.value.toJSON() as any)["@type"];
+            const queryValueType = value.query.valueType;
+
+            if (attributeValueType !== queryValueType) {
+                throw new ValidationError(
+                    ProposeAttributeRequestItem.name,
+                    `${nameof<ProposeAttributeRequestItem>((x) => x.query)}.${nameof<IdentityAttributeQuery>((x) => x.valueType)}`,
+                    `You cannot propose an Attribute whose type of the value ('${attributeValueType}') is different from the value type of the query ('${queryValueType}').`
+                );
+            }
         }
 
         return value;
