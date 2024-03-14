@@ -5,6 +5,7 @@ import {
     IdentityAttributeQuery,
     ProposeAttributeRequestItem,
     ProprietaryString,
+    RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     RelationshipAttributeQuery,
     Request
@@ -522,6 +523,73 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
                 message: `The provided IdentityAttribute is outdated. You have already shared the Successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
+            });
+        });
+
+        test("returns an error when a RelationshipAttribute was queried and the Recipient tries to respond with an existing RelationshipAttribute", async function () {
+            const recipient = CoreAddress.from(accountController.identity.address);
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: RelationshipAttributeQuery.from({
+                    owner: recipient.toString(),
+                    key: "AKey",
+                    attributeCreationHints: {
+                        valueType: "ProprietaryString",
+                        title: "ATitle",
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }
+                }),
+                attribute: RelationshipAttribute.from({
+                    key: "AKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: recipient,
+                    value: ProprietaryString.from({
+                        title: "ATitle",
+                        value: "AStringValue"
+                    })
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: CoreAddress.from("Sender"),
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: recipient,
+                    value: ProprietaryString.from({
+                        title: "ATitle",
+                        value: "AnotherStringValue"
+                    })
+                }),
+                shareInfo: {
+                    peer: CoreAddress.from("Sender"),
+                    requestReference: await ConsumptionIds.request.generate()
+                }
+            });
+
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                attributeId: localAttribute.id.toString()
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: "When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided."
             });
         });
     });

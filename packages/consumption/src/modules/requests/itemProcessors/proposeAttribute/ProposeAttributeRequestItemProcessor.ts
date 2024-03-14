@@ -72,6 +72,12 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         let attribute;
 
         if (parsedParams.isWithExistingAttribute()) {
+            if (_requestItem.query instanceof RelationshipAttributeQuery) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidlyAnsweredQuery("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
+                );
+            }
+
             const foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
 
             if (!foundLocalAttribute) {
@@ -116,15 +122,15 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
         } else if (parsedParams.isWithNewAttribute()) {
             attribute = parsedParams.attribute;
+
+            const ownerIsEmpty = attribute.owner.equals("");
+            if (ownerIsEmpty) {
+                attribute.owner = this.currentIdentityAddress;
+            }
         }
 
         if (!attribute) {
             throw new Error("this should never happen");
-        }
-
-        const ownerIsEmpty = attribute.owner.equals("");
-        if (ownerIsEmpty) {
-            attribute.owner = this.currentIdentityAddress;
         }
 
         const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
