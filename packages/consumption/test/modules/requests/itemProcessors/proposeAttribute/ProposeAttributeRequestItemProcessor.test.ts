@@ -382,7 +382,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: "The given Attribute belongs to someone else. You can only share own Attributes."
+                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
             });
         });
 
@@ -415,7 +415,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: "The given Attribute belongs to someone else. You can only share own Attributes."
+                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
             });
         });
     });

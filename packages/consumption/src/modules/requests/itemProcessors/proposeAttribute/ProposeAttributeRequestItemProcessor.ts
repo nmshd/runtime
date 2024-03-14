@@ -14,6 +14,7 @@ import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
+import validateAnswerToQuery from "../utility/validateAnswerToQuery";
 import validateQuery from "../utility/validateQuery";
 import { AcceptProposeAttributeRequestItemParameters, AcceptProposeAttributeRequestItemParametersJSON } from "./AcceptProposeAttributeRequestItemParameters";
 
@@ -86,10 +87,12 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         }
 
         const ownerIsEmpty = attribute.owner.equals("");
-        const ownerIsCurrentIdentity = attribute.owner.equals(this.currentIdentityAddress);
-        if (!ownerIsEmpty && !ownerIsCurrentIdentity) {
-            return ValidationResult.error(CoreErrors.requests.invalidlyAnsweredQuery("The given Attribute belongs to someone else. You can only share own Attributes."));
+        if (ownerIsEmpty) {
+            attribute.owner = this.currentIdentityAddress;
         }
+
+        const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
+        if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
 
         return ValidationResult.success();
     }
