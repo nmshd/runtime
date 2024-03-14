@@ -950,15 +950,11 @@ export class AttributesController extends ConsumptionBaseController {
             query["succeededBy"] = { $exists: false };
         }
 
-        const ownSharedIdentityAttributeCopies = await this.getLocalAttributes(query);
+        const ownSharedIdentityAttributes = await this.getLocalAttributes(query);
         const ownSharedIdentityAttributePredecessors = await this.getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute, query);
         const ownSharedIdentityAttributeSuccessors = await this.getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute, query);
 
-        const ownSharedIdentityAttributeVersions = [
-            ...ownSharedIdentityAttributeSuccessors.reverse(),
-            ...ownSharedIdentityAttributeCopies,
-            ...ownSharedIdentityAttributePredecessors
-        ];
+        const ownSharedIdentityAttributeVersions = [...ownSharedIdentityAttributeSuccessors.reverse(), ...ownSharedIdentityAttributes, ...ownSharedIdentityAttributePredecessors];
         return ownSharedIdentityAttributeVersions;
     }
 
