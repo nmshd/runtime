@@ -20,6 +20,7 @@ import {
     RuntimeServiceProvider,
     sendMessageWithRequest,
     syncUntilHasMessageWithRequest,
+    syncUntilHasMessageWithResponse,
     TestRuntimeServices
 } from "../../lib";
 
@@ -206,6 +207,9 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(responseItem.attribute).toBeDefined();
         expect(responseItem.attribute.valueType).toBe("DisplayName");
         expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
+
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
+        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 
     test("check the sender's dvo for the recipient", async () => {
@@ -222,7 +226,6 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
             })
         ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
-        await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
