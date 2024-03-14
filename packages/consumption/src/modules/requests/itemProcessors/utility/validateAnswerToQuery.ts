@@ -180,10 +180,7 @@ function validateAnswerToThirdPartyRelationshipAttributeQuery(
     const recipientIsAttributeOwner = recipient.equals(attribute.owner);
     const senderIsAttributeOwner = sender.equals(attribute.owner);
 
-    function convertCoreAddressToString(value: CoreAddress): string {
-        return value.toString();
-    }
-    const queriedThirdParties = query.thirdParty.map(convertCoreAddressToString);
+    const queriedThirdParties = query.thirdParty.map((aThirdParty) => aThirdParty.toString());
 
     if (
         senderIsAttributeOwner ||

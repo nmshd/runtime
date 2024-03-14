@@ -191,11 +191,8 @@ export class AttributesController extends ConsumptionBaseController {
             dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
         }
 
-        function convertCoreAddressToString(value: CoreAddress): string {
-            return value.toString();
-        }
         if (dbQuery["content.owner"] === ThirdPartyRelationshipAttributeQueryOwner.ThirdParty) {
-            dbQuery["content.owner"] = { $in: parsedQuery.thirdParty.map(convertCoreAddressToString) };
+            dbQuery["content.owner"] = { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) };
         }
 
         if (parsedQuery.owner === ThirdPartyRelationshipAttributeQueryOwner.Empty) {
@@ -205,7 +202,7 @@ export class AttributesController extends ConsumptionBaseController {
                         ["content.owner"]: { $eq: this.identity.address.toString() }
                     },
                     {
-                        ["content.owner"]: { $in: parsedQuery.thirdParty.map(convertCoreAddressToString) }
+                        ["content.owner"]: { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) }
                     }
                 ]
             };

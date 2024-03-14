@@ -566,6 +566,63 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 });
             });
 
+            test("returns an error when a Successor of the existing IdentityAttribute is already shared", async function () {
+                const recipient = accountController.identity.address;
+
+                const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: recipient
+                    })
+                });
+
+                const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+                    content: {
+                        "@type": "IdentityAttribute",
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "AnotherGivenName"
+                        }
+                    }
+                });
+
+                const ownSharedCopyOfSuccessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: successorOfRepositoryAttribute.id,
+                    peer: CoreAddress.from("Sender"),
+                    requestReference: await ConsumptionIds.request.generate()
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: CoreAddress.from("Sender"),
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: repositoryAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: `The provided IdentityAttribute is outdated. You have already shared the Successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
+                });
+            });
+
             test("returns an error when an IdentityAttribute of a specific type was queried by an IdentityAttributeQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
                 const recipient = accountController.identity.address;
 
