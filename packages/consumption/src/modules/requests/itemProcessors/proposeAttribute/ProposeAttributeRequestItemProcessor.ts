@@ -1,5 +1,6 @@
 import {
     IdentityAttribute,
+    IdentityAttributeQuery,
     ProposeAttributeAcceptResponseItem,
     ProposeAttributeRequestItem,
     RejectResponseItem,
@@ -78,6 +79,41 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
 
             attribute = foundLocalAttribute.content;
+
+            if (_requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
+                if (foundLocalAttribute.isShared()) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes.")
+                    );
+                }
+
+                const ownSharedIdentityAttributeVersions = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
+                    foundLocalAttribute.id,
+                    [requestInfo.peer],
+                    false
+                );
+                const sourceAttributeIdsOfOwnSharedIdentityAttributeVersions = ownSharedIdentityAttributeVersions.map((ownSharedIdentityAttribute) =>
+                    ownSharedIdentityAttribute.shareInfo?.sourceAttribute?.toString()
+                );
+
+                let repositoryAttribute = foundLocalAttribute;
+                let i = 0;
+                while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
+                    const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
+                    if (!successor) {
+                        throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
+                    }
+                    if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
+                        return ValidationResult.error(
+                            CoreErrors.requests.invalidlyAnsweredQuery(
+                                `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
+                            )
+                        );
+                    }
+                    repositoryAttribute = successor;
+                    i++;
+                }
+            }
         } else if (parsedParams.isWithNewAttribute()) {
             attribute = parsedParams.attribute;
         }

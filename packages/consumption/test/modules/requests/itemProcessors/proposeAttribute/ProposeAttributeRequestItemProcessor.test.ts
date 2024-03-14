@@ -12,6 +12,7 @@ import {
 import { AccountController, CoreAddress, CoreDate, Transport } from "@nmshd/transport";
 import {
     AcceptProposeAttributeRequestItemParametersJSON,
+    AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON,
     ConsumptionController,
     ConsumptionIds,
     LocalRequest,
@@ -416,6 +417,111 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidlyAnsweredQuery",
                 message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
+            });
+        });
+
+        test("returns an error when the existing IdentityAttribute is already shared", async function () {
+            const recipient = accountController.identity.address;
+
+            const attribute = await consumptionController.attributes.createPeerLocalAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: recipient
+                }),
+                peer: CoreAddress.from("Sender"),
+                requestReference: await ConsumptionIds.request.generate()
+            });
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                attribute: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from("")
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: CoreAddress.from("Sender"),
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                attributeId: attribute.id.toString()
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: "The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes."
+            });
+        });
+
+        test("returns an error when a Successor of the existing IdentityAttribute is already shared", async function () {
+            const recipient = accountController.identity.address;
+
+            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: recipient
+                })
+            });
+
+            const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+                content: {
+                    "@type": "IdentityAttribute",
+                    owner: recipient.toString(),
+                    value: {
+                        "@type": "GivenName",
+                        value: "AnotherGivenName"
+                    }
+                }
+            });
+
+            const ownSharedCopyOfSuccessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: successorOfRepositoryAttribute.id,
+                peer: CoreAddress.from("Sender"),
+                requestReference: await ConsumptionIds.request.generate()
+            });
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                attribute: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from("")
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: CoreAddress.from("Sender"),
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                attributeId: repositoryAttribute.id.toString()
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                message: `The provided IdentityAttribute is outdated. You have already shared the Successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
             });
         });
     });
