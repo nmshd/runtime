@@ -1,4 +1,5 @@
 import {
+    AttributeSuccessionAcceptResponseItem,
     IdentityAttribute,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
@@ -9,6 +10,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { AttributeSuccessorParams, LocalAttributeShareInfo } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -53,21 +55,77 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         _requestItem: ReadAttributeRequestItem,
         params: AcceptReadAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
-    ): Promise<ReadAttributeAcceptResponseItem> {
+    ): Promise<ReadAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
 
         let sharedLocalAttribute: LocalAttribute;
         if (parsedParams.isWithExistingAttribute()) {
-            sharedLocalAttribute = await this.copyExistingAttribute(parsedParams.existingAttributeId, requestInfo);
+            const existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
+            if (typeof existingSourceAttribute === "undefined") {
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
+            }
+
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
+                parsedParams.existingAttributeId,
+                [requestInfo.peer],
+                true
+            );
+
+            if (latestSharedVersion.length === 0) {
+                sharedLocalAttribute = await this.copyExistingAttribute(existingSourceAttribute.id, requestInfo);
+                return ReadAttributeAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: sharedLocalAttribute.id,
+                    attribute: sharedLocalAttribute.content
+                });
+            }
+
+            const predecessorOwnSharedAttribute = latestSharedVersion[0];
+            if (typeof predecessorOwnSharedAttribute.shareInfo?.sourceAttribute === "undefined") {
+                throw new Error(`The Attribute ${predecessorOwnSharedAttribute.id} does not fulfill the requirements of an own shared Attribute.`);
+            }
+
+            if (predecessorOwnSharedAttribute.shareInfo.sourceAttribute === existingSourceAttribute.id) {
+                // TODO: return new AttributeAlreadySharedResponseItem
+                throw new Error();
+            }
+
+            const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(predecessorOwnSharedAttribute.shareInfo.sourceAttribute);
+            if (typeof predecessorSourceAttribute === "undefined") {
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
+            }
+            if (await this.consumptionController.attributes.isPredecessorOf(predecessorSourceAttribute, existingSourceAttribute)) {
+                if (existingSourceAttribute.isIdentityAttribute()) {
+                    const successorOwnSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(
+                        predecessorOwnSharedAttribute.id,
+                        existingSourceAttribute,
+                        requestInfo
+                    );
+                    return AttributeSuccessionAcceptResponseItem.from({
+                        result: ResponseItemResult.Accepted,
+                        successorId: successorOwnSharedAttribute.id,
+                        successorContent: successorOwnSharedAttribute.content,
+                        predecessorId: predecessorOwnSharedAttribute.id
+                    });
+                }
+                if (existingSourceAttribute.isRelationshipAttribute()) {
+                    // TODO: succeed third party RelationshipAttribute
+                    throw new Error();
+                }
+            } else {
+                throw new Error("You cannot share the predecessor of an already shared Attribute version.");
+            }
         } else {
             sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute!, requestInfo);
+            return ReadAttributeAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                attributeId: sharedLocalAttribute.id,
+                attribute: sharedLocalAttribute.content
+            });
         }
 
-        return ReadAttributeAcceptResponseItem.from({
-            result: ResponseItemResult.Accepted,
-            attributeId: sharedLocalAttribute.id,
-            attribute: sharedLocalAttribute.content
-        });
+        // this should never be reached
+        throw new Error("The ReadAttributeRequestItem must be either answered with an existing or a new Attribute.");
     }
 
     private async copyExistingAttribute(attributeId: CoreId, requestInfo: LocalRequestInfo) {
@@ -76,6 +134,21 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             peer: CoreAddress.from(requestInfo.peer),
             requestReference: CoreId.from(requestInfo.id)
         });
+    }
+
+    private async performOwnSharedIdentityAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
+        const shareInfo = LocalAttributeShareInfo.from({
+            peer: requestInfo.peer,
+            requestReference: requestInfo.id,
+            sourceAttribute: sourceSuccessor.id
+        });
+        const successorParams = {
+            content: sourceSuccessor.content,
+            succeeds: sharedPredecessorId,
+            shareInfo: shareInfo
+        };
+        const { successor } = await this.consumptionController.attributes.succeedOwnSharedIdentityAttribute(sharedPredecessorId, successorParams);
+        return successor;
     }
 
     private async createNewAttribute(attribute: IdentityAttribute | RelationshipAttribute, requestInfo: LocalRequestInfo) {
@@ -103,15 +176,26 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         _requestItem: ReadAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<void> {
-        if (!(responseItem instanceof ReadAttributeAcceptResponseItem)) {
-            return;
+        if (responseItem instanceof ReadAttributeAcceptResponseItem) {
+            await this.consumptionController.attributes.createPeerLocalAttribute({
+                id: responseItem.attributeId,
+                content: responseItem.attribute,
+                peer: requestInfo.peer,
+                requestReference: requestInfo.id
+            });
         }
 
-        await this.consumptionController.attributes.createPeerLocalAttribute({
-            id: responseItem.attributeId,
-            content: responseItem.attribute,
-            peer: requestInfo.peer,
-            requestReference: requestInfo.id
-        });
+        if (responseItem instanceof AttributeSuccessionAcceptResponseItem) {
+            const successorParams = AttributeSuccessorParams.from({
+                content: responseItem.successorContent,
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: requestInfo.peer,
+                    requestReference: requestInfo.id
+                })
+            });
+            await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
+        }
+
+        return;
     }
 }
