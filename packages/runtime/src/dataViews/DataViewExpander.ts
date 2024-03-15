@@ -1007,7 +1007,9 @@ export class DataViewExpander {
                         requestReference: localAttribute.shareInfo.requestReference?.toString(),
                         notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                         valueType,
-                        isTechnical: relationshipAttribute.isTechnical
+                        isTechnical: relationshipAttribute.isTechnical,
+                        deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                        deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                     };
                 }
                 // Own Relationship Attribute
@@ -1032,7 +1034,9 @@ export class DataViewExpander {
                     requestReference: localAttribute.shareInfo.requestReference?.toString(),
                     notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                     valueType,
-                    isTechnical: relationshipAttribute.isTechnical
+                    isTechnical: relationshipAttribute.isTechnical,
+                    deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                 };
             }
             const identityAttribute = localAttribute.content;
@@ -1059,7 +1063,9 @@ export class DataViewExpander {
                     notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                     sourceAttribute: localAttribute.shareInfo.sourceAttribute.toString(),
                     tags: identityAttribute.tags ? identityAttribute.tags : [],
-                    valueType
+                    valueType,
+                    deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                 };
             }
 
@@ -1083,7 +1089,9 @@ export class DataViewExpander {
                 requestReference: localAttribute.shareInfo.requestReference?.toString(),
                 notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                 tags: identityAttribute.tags ? identityAttribute.tags : [],
-                valueType
+                valueType,
+                deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
             };
         }
         const identityAttribute = localAttribute.content as IdentityAttribute;

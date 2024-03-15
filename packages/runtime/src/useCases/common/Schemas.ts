@@ -16566,6 +16566,45 @@ export const GetAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -16593,7 +16632,8 @@ export const GetOwnSharedAttributesRequest: any = {
                     "type": "boolean"
                 },
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 }
             },
             "required": [
@@ -16766,6 +16806,45 @@ export const GetOwnSharedAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -16793,7 +16872,8 @@ export const GetPeerSharedAttributesRequest: any = {
                     "type": "boolean"
                 },
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 }
             },
             "required": [
@@ -16953,6 +17033,45 @@ export const GetPeerSharedAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -16968,7 +17087,8 @@ export const GetRepositoryAttributesRequest: any = {
             "type": "object",
             "properties": {
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 },
                 "query": {
                     "$ref": "#/definitions/GetRepositoryAttributesRequestQuery"
@@ -16981,19 +17101,6 @@ export const GetRepositoryAttributesRequest: any = {
             "properties": {
                 "createdAt": {
                     "type": "string"
-                },
-                "content.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
                 },
                 "content.tags": {
                     "anyOf": [
@@ -17034,46 +17141,46 @@ export const GetRepositoryAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.isTechnical": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.confidentiality": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
                 "content.value.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17109,7 +17216,8 @@ export const GetSharedVersionsOfRepositoryAttributeRequest: any = {
                     }
                 },
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 }
             },
             "required": [
@@ -21194,7 +21302,8 @@ export const GetAttributesForRelationshipRequest: any = {
                     "type": "boolean"
                 },
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 }
             },
             "required": [
