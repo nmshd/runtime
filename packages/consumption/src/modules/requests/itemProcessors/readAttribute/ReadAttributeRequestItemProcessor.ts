@@ -140,7 +140,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     )
                 );
             }
+
             attribute = parsedParams.newAttribute;
+
+            const ownerIsEmpty = attribute.owner.equals("");
+            if (ownerIsEmpty) {
+                attribute.owner = this.currentIdentityAddress;
+            }
         }
 
         if (!attribute) {
@@ -159,12 +165,19 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<ReadAttributeAcceptResponseItem> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
+        let sharedLocalAttribute;
 
-        let sharedLocalAttribute: LocalAttribute;
         if (parsedParams.isWithExistingAttribute()) {
             sharedLocalAttribute = await this.copyExistingAttribute(parsedParams.existingAttributeId, requestInfo);
-        } else {
-            sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute!, requestInfo);
+        } else if (parsedParams.isWithNewAttribute()) {
+            if (parsedParams.newAttribute.owner.equals("")) {
+                parsedParams.newAttribute.owner = this.currentIdentityAddress;
+            }
+            sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute, requestInfo);
+        }
+
+        if (!sharedLocalAttribute) {
+            throw new Error("this should never happen");
         }
 
         return ReadAttributeAcceptResponseItem.from({
