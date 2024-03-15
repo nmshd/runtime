@@ -9,6 +9,8 @@ import {
     CreateRepositoryAttributeUseCase,
     DeleteOwnSharedAttributeAndNotifyPeerRequest,
     DeleteOwnSharedAttributeAndNotifyPeerUseCase,
+    DeletePeerSharedAttributeAndNotifyOwnerRequest,
+    DeletePeerSharedAttributeAndNotifyOwnerUseCase,
     ExecuteIdentityAttributeQueryRequest,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteIQLQueryRequest,
@@ -67,6 +69,7 @@ export class AttributesFacade {
         @Inject private readonly validateIQLQueryUseCase: ValidateIQLQueryUseCase,
         @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
         @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+        @Inject private readonly deletePeerSharedAttributeAndNotifyOwnerUseCase: DeletePeerSharedAttributeAndNotifyOwnerUseCase,
         @Inject private readonly deleteOwnSharedAttributeAndNotifyPeerUseCase: DeleteOwnSharedAttributeAndNotifyPeerUseCase
     ) {}
 
@@ -144,6 +147,10 @@ export class AttributesFacade {
         request: NotifyPeerAboutRepositoryAttributeSuccessionRequest
     ): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
         return await this.notifyPeerAboutRepositoryAttributeSuccessionUseCase.execute(request);
+    }
+
+    public async deletePeerSharedAttributeAndNotifyOwner(request: DeletePeerSharedAttributeAndNotifyOwnerRequest): Promise<Result<Notification>> {
+        return await this.deletePeerSharedAttributeAndNotifyOwnerUseCase.execute(request);
     }
 
     public async deleteOwnSharedAttributeAndNotifyPeer(request: DeleteOwnSharedAttributeAndNotifyPeerRequest): Promise<Result<Notification>> {

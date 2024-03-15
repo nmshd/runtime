@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId, ICoreId } from "@nmshd/transport";
-import { IIdentityAttribute, IRelationshipAttribute, IdentityAttribute, IdentityAttributeJSON, RelationshipAttribute, RelationshipAttributeJSON } from "../../attributes";
+import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../attributes";
 import { INotificationItem, NotificationItem, NotificationItemJSON } from "../NotificationItem";
 
 export interface PeerSharedAttributeSucceededNotificationItemJSON extends NotificationItemJSON {
@@ -30,7 +30,9 @@ export class PeerSharedAttributeSucceededNotificationItem extends NotificationIt
     @serialize({ unionTypes: [IdentityAttribute, RelationshipAttribute] })
     public successorContent: IdentityAttribute | RelationshipAttribute;
 
-    public static from(value: IPeerSharedAttributeSucceededNotificationItem): PeerSharedAttributeSucceededNotificationItem {
+    public static from(
+        value: IPeerSharedAttributeSucceededNotificationItem | Omit<PeerSharedAttributeSucceededNotificationItemJSON, "@type">
+    ): PeerSharedAttributeSucceededNotificationItem {
         return this.fromAny(value);
     }
 }
