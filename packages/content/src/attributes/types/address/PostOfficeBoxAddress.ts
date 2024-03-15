@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "../../constants";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
@@ -28,8 +28,6 @@ export interface IPostOfficeBoxAddress extends IAbstractAddress {
 
 @type("PostOfficeBoxAddress")
 export class PostOfficeBoxAddress extends AbstractAddress implements IPostOfficeBoxAddress {
-    public static override readonly propertyNames = nameOf<PostOfficeBoxAddress, never>();
-
     @serialize()
     @validate({ max: 100 })
     public boxId: string;
@@ -53,11 +51,11 @@ export class PostOfficeBoxAddress extends AbstractAddress implements IPostOffice
     public static override get valueHints(): ValueHints {
         return super.valueHints.copyWith({
             propertyHints: {
-                [this.propertyNames.boxId.$path]: ValueHints.from({}),
-                [this.propertyNames.zipCode.$path]: ZipCode.valueHints,
-                [this.propertyNames.city.$path]: City.valueHints,
-                [this.propertyNames.country.$path]: Country.valueHints,
-                [this.propertyNames.state.$path]: State.valueHints
+                [nameof<PostOfficeBoxAddress>((p) => p.boxId)]: ValueHints.from({}),
+                [nameof<PostOfficeBoxAddress>((p) => p.zipCode)]: ZipCode.valueHints,
+                [nameof<PostOfficeBoxAddress>((p) => p.city)]: City.valueHints,
+                [nameof<PostOfficeBoxAddress>((p) => p.country)]: Country.valueHints,
+                [nameof<PostOfficeBoxAddress>((p) => p.state)]: State.valueHints
             }
         });
     }
@@ -65,14 +63,14 @@ export class PostOfficeBoxAddress extends AbstractAddress implements IPostOffice
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.boxId.$path]: RenderHints.from({
+                [nameof<PostOfficeBoxAddress>((p) => p.boxId)]: RenderHints.from({
                     editType: RenderHintsEditType.InputLike,
                     technicalType: RenderHintsTechnicalType.String
                 }),
-                [this.propertyNames.zipCode.$path]: ZipCode.renderHints,
-                [this.propertyNames.city.$path]: City.renderHints,
-                [this.propertyNames.country.$path]: Country.renderHints,
-                [this.propertyNames.state.$path]: State.renderHints
+                [nameof<PostOfficeBoxAddress>((p) => p.zipCode)]: ZipCode.renderHints,
+                [nameof<PostOfficeBoxAddress>((p) => p.city)]: City.renderHints,
+                [nameof<PostOfficeBoxAddress>((p) => p.country)]: Country.renderHints,
+                [nameof<PostOfficeBoxAddress>((p) => p.state)]: State.renderHints
             }
         });
     }

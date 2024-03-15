@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { nameOf as nameof } from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "../../constants";
 import { RenderHints, ValueHints } from "../../hints";
@@ -32,8 +32,6 @@ export interface IStreetAddress extends IAbstractAddress {
 
 @type("StreetAddress")
 export class StreetAddress extends AbstractAddress implements IStreetAddress {
-    public static override readonly propertyNames = nameof<StreetAddress, never>();
-
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
     @validate()
     public street: Street;
@@ -65,12 +63,12 @@ export class StreetAddress extends AbstractAddress implements IStreetAddress {
     public static override get valueHints(): ValueHints {
         return super.valueHints.copyWith({
             propertyHints: {
-                [this.propertyNames.street.$path]: Street.valueHints,
-                [this.propertyNames.houseNo.$path]: HouseNumber.valueHints,
-                [this.propertyNames.zipCode.$path]: ZipCode.valueHints,
-                [this.propertyNames.city.$path]: City.valueHints,
-                [this.propertyNames.country.$path]: Country.valueHints,
-                [this.propertyNames.state.$path]: State.valueHints
+                [nameof<StreetAddress>((s) => s.street)]: Street.valueHints,
+                [nameof<StreetAddress>((s) => s.houseNo)]: HouseNumber.valueHints,
+                [nameof<StreetAddress>((s) => s.zipCode)]: ZipCode.valueHints,
+                [nameof<StreetAddress>((s) => s.city)]: City.valueHints,
+                [nameof<StreetAddress>((s) => s.country)]: Country.valueHints,
+                [nameof<StreetAddress>((s) => s.state)]: State.valueHints
             }
         });
     }
@@ -78,12 +76,12 @@ export class StreetAddress extends AbstractAddress implements IStreetAddress {
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.street.$path]: Street.renderHints,
-                [this.propertyNames.houseNo.$path]: HouseNumber.renderHints,
-                [this.propertyNames.zipCode.$path]: ZipCode.renderHints,
-                [this.propertyNames.city.$path]: City.renderHints,
-                [this.propertyNames.country.$path]: Country.renderHints,
-                [this.propertyNames.state.$path]: State.renderHints
+                [nameof<StreetAddress>((s) => s.street)]: Street.renderHints,
+                [nameof<StreetAddress>((s) => s.houseNo)]: HouseNumber.renderHints,
+                [nameof<StreetAddress>((s) => s.zipCode)]: ZipCode.renderHints,
+                [nameof<StreetAddress>((s) => s.city)]: City.renderHints,
+                [nameof<StreetAddress>((s) => s.country)]: Country.renderHints,
+                [nameof<StreetAddress>((s) => s.state)]: State.renderHints
             }
         });
     }

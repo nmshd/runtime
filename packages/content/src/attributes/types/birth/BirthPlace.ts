@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, ValueHints } from "../../hints";
@@ -22,8 +22,6 @@ export interface IBirthPlace extends IAbstractComplexValue {
 
 @type("BirthPlace")
 export class BirthPlace extends AbstractComplexValue implements IBirthPlace {
-    public static readonly propertyNames = nameOf<BirthPlace, never>();
-
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
     @validate()
     public city: BirthCity;
@@ -39,9 +37,9 @@ export class BirthPlace extends AbstractComplexValue implements IBirthPlace {
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [this.propertyNames.city.$path]: BirthCity.valueHints,
-                [this.propertyNames.country.$path]: BirthCountry.valueHints,
-                [this.propertyNames.state.$path]: BirthState.valueHints
+                [nameof<BirthPlace>((b) => b.city)]: BirthCity.valueHints,
+                [nameof<BirthPlace>((b) => b.country)]: BirthCountry.valueHints,
+                [nameof<BirthPlace>((b) => b.state)]: BirthState.valueHints
             }
         });
     }
@@ -49,9 +47,9 @@ export class BirthPlace extends AbstractComplexValue implements IBirthPlace {
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.city.$path]: BirthCity.renderHints,
-                [this.propertyNames.country.$path]: BirthCountry.renderHints,
-                [this.propertyNames.state.$path]: BirthState.renderHints
+                [nameof<BirthPlace>((b) => b.city)]: BirthCity.renderHints,
+                [nameof<BirthPlace>((b) => b.country)]: BirthCountry.renderHints,
+                [nameof<BirthPlace>((b) => b.state)]: BirthState.renderHints
             }
         });
     }

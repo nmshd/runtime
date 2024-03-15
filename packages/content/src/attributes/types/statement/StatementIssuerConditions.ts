@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/transport";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 import { DigitalIdentityDescriptor } from "./DigitalIdentityDescriptor";
@@ -26,8 +26,6 @@ export interface IStatementIssuerConditions extends IAbstractComplexValue {
 
 @type("StatementIssuerConditions")
 export class StatementIssuerConditions extends AbstractComplexValue implements IStatementIssuerConditions {
-    public static readonly propertyNames: any = nameOf<StatementIssuerConditions, never>();
-
     @serialize()
     @validate()
     public validFrom: CoreDate;
@@ -59,11 +57,11 @@ export class StatementIssuerConditions extends AbstractComplexValue implements I
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [this.propertyNames.validFrom.$path]: ValueHints.from({}),
-                [this.propertyNames.validTo.$path]: ValueHints.from({}),
-                [this.propertyNames.evidence.$path]: StatementEvidence.valueHints,
-                [this.propertyNames.authorityType.$path]: StatementAuthorityType.valueHints,
-                [this.propertyNames.relayedParty.$path]: DigitalIdentityDescriptor.valueHints
+                [nameof<StatementIssuerConditions>((s) => s.validFrom)]: ValueHints.from({}),
+                [nameof<StatementIssuerConditions>((s) => s.validTo)]: ValueHints.from({}),
+                [nameof<StatementIssuerConditions>((s) => s.evidence)]: StatementEvidence.valueHints,
+                [nameof<StatementIssuerConditions>((s) => s.authorityType)]: StatementAuthorityType.valueHints,
+                [nameof<StatementIssuerConditions>((s) => s.relayedParty)]: DigitalIdentityDescriptor.valueHints
             }
         });
     }
@@ -71,17 +69,17 @@ export class StatementIssuerConditions extends AbstractComplexValue implements I
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.validFrom.$path]: RenderHints.from({
+                [nameof<StatementIssuerConditions>((s) => s.validFrom)]: RenderHints.from({
                     editType: RenderHintsEditType.Secret,
                     technicalType: RenderHintsTechnicalType.String
                 }),
-                [this.propertyNames.validTo.$path]: RenderHints.from({
+                [nameof<StatementIssuerConditions>((s) => s.validTo)]: RenderHints.from({
                     editType: RenderHintsEditType.Secret,
                     technicalType: RenderHintsTechnicalType.String
                 }),
-                [this.propertyNames.evidence.$path]: StatementEvidence.renderHints,
-                [this.propertyNames.authorityType.$path]: StatementAuthorityType.renderHints,
-                [this.propertyNames.relayedParty.$path]: DigitalIdentityDescriptor.renderHints
+                [nameof<StatementIssuerConditions>((s) => s.evidence)]: StatementEvidence.renderHints,
+                [nameof<StatementIssuerConditions>((s) => s.authorityType)]: StatementAuthorityType.renderHints,
+                [nameof<StatementIssuerConditions>((s) => s.relayedParty)]: DigitalIdentityDescriptor.renderHints
             }
         });
     }
