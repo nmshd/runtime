@@ -128,7 +128,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         if (typeof peerAddress !== "undefined") {
             isOwnSharedAttribute &&= this.shareInfo!.peer.equals(peerAddress);
         }
-
         return isOwnSharedAttribute;
     }
 
@@ -145,7 +144,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         if (typeof peerAddress !== "undefined") {
             isPeerSharedAttribute &&= this.isOwnedBy(peerAddress);
         }
-
         return isPeerSharedAttribute;
     }
 

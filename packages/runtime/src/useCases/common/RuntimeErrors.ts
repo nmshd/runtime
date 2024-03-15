@@ -173,6 +173,10 @@ class Attributes {
         );
     }
 
+    public isNotPeerSharedAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotPeerSharedAttribute", `Attribute '${attributeId.toString()}' is not a peer shared attribute.`);
+    }
+
     public isNotOwnSharedAttribute(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared attribute.`);
     }

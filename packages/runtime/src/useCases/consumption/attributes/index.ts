@@ -2,6 +2,7 @@ export * from "./AttributeMapper";
 export * from "./CreateAndShareRelationshipAttribute";
 export * from "./CreateRepositoryAttribute";
 export * from "./DeleteOwnSharedAttributeAndNotifyPeer";
+export * from "./DeletePeerSharedAttributeAndNotifyOwner";
 export * from "./DeleteRepositoryAttribute";
 export * from "./ExecuteIdentityAttributeQuery";
 export * from "./ExecuteIQLQuery";
