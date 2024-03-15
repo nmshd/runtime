@@ -18,7 +18,7 @@ export class DeleteAttributeRequestItem extends RequestItem implements IDeleteAt
     @validate()
     public attributeId: CoreId;
 
-    public static from(value: IDeleteAttributeRequestItem | Omit<DeleteAttributeRequestItemJSON, "@type">): DeleteAttributeRequestItem {
+    public static from(value: IDeleteAttributeRequestItem | Omit<DeleteAttributeRequestItemJSON, "@type"> | DeleteAttributeRequestItemJSON): DeleteAttributeRequestItem {
         return this.fromAny(value);
     }
 

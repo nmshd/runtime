@@ -24,7 +24,9 @@ export class ProposeAttributeAcceptResponseItem extends AcceptResponseItem imple
     @validate()
     public attribute: IdentityAttribute | RelationshipAttribute;
 
-    public static override from(value: IProposeAttributeAcceptResponseItem | Omit<ProposeAttributeAcceptResponseItemJSON, "@type">): ProposeAttributeAcceptResponseItem {
+    public static override from(
+        value: IProposeAttributeAcceptResponseItem | Omit<ProposeAttributeAcceptResponseItemJSON, "@type"> | ProposeAttributeAcceptResponseItemJSON
+    ): ProposeAttributeAcceptResponseItem {
         return this.fromAny(value);
     }
 

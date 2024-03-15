@@ -24,7 +24,9 @@ export class ReadAttributeAcceptResponseItem extends AcceptResponseItem implemen
     @validate()
     public attribute: IdentityAttribute | RelationshipAttribute;
 
-    public static override from(value: IReadAttributeAcceptResponseItem | Omit<ReadAttributeAcceptResponseItemJSON, "@type">): ReadAttributeAcceptResponseItem {
+    public static override from(
+        value: IReadAttributeAcceptResponseItem | Omit<ReadAttributeAcceptResponseItemJSON, "@type"> | ReadAttributeAcceptResponseItemJSON
+    ): ReadAttributeAcceptResponseItem {
         return this.fromAny(value);
     }
 
