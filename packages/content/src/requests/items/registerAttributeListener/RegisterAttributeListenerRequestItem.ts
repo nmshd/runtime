@@ -1,9 +1,9 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import {
-    IIdentityAttributeQuery,
-    IThirdPartyRelationshipAttributeQuery,
     IdentityAttributeQuery,
     IdentityAttributeQueryJSON,
+    IIdentityAttributeQuery,
+    IThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryJSON
 } from "../../../attributes";
@@ -26,7 +26,9 @@ export class RegisterAttributeListenerRequestItem extends RequestItem implements
     @validate()
     public query: IdentityAttributeQuery | ThirdPartyRelationshipAttributeQuery;
 
-    public static from(value: IRegisterAttributeListenerRequestItem | Omit<RegisterAttributeListenerRequestItemJSON, "@type">): RegisterAttributeListenerRequestItem {
+    public static from(
+        value: IRegisterAttributeListenerRequestItem | Omit<RegisterAttributeListenerRequestItemJSON, "@type"> | RegisterAttributeListenerRequestItemJSON
+    ): RegisterAttributeListenerRequestItem {
         return this.fromAny(value);
     }
 
