@@ -16,7 +16,7 @@ export class FreeTextRequestItem extends RequestItem implements IFreeTextRequest
     @validate()
     public freeText: string;
 
-    public static from(value: IFreeTextRequestItem | Omit<FreeTextRequestItemJSON, "@type">): FreeTextRequestItem {
+    public static from(value: IFreeTextRequestItem | Omit<FreeTextRequestItemJSON, "@type"> | FreeTextRequestItemJSON): FreeTextRequestItem {
         return this.fromAny(value);
     }
 
