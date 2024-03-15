@@ -1,5 +1,5 @@
 import { Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, ValueHints } from "../../hints";
 import { DigitalIdentityDescriptor, DigitalIdentityDescriptorJSON, IDigitalIdentityDescriptor } from "./DigitalIdentityDescriptor";
@@ -25,8 +25,6 @@ export interface IAbstractStatement extends IAbstractComplexValue {
 }
 
 export abstract class AbstractStatement extends AbstractComplexValue implements IAbstractStatement {
-    public static readonly propertyNames: any = nameOf<AbstractStatement, never>();
-
     @serialize()
     @validate()
     public subject: StatementSubject;
@@ -53,10 +51,10 @@ export abstract class AbstractStatement extends AbstractComplexValue implements 
         if (value.predicate.value === Predicates.HasAttribute && (value.object.attributes?.length ?? 0) < 1) {
             throw new ValidationError(
                 this.constructor.name,
-                `${nameOf<AbstractStatement>((x) => x.object)}.${nameOf<StatementObject>((x) => x.attributes)}`,
-                `If the predicate of the Statement is '${Predicates.HasAttribute}' you have to define attributes in '${nameOf<AbstractStatement>(
+                `${nameof<AbstractStatement>((x) => x.object)}.${nameof<StatementObject>((x) => x.attributes)}`,
+                `If the predicate of the Statement is '${Predicates.HasAttribute}' you have to define attributes in '${nameof<AbstractStatement>(
                     (x) => x.object
-                )}.${nameOf<StatementObject>((x) => x.attributes)}'.`
+                )}.${nameof<StatementObject>((x) => x.attributes)}'.`
             );
         }
 
@@ -70,11 +68,11 @@ export abstract class AbstractStatement extends AbstractComplexValue implements 
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [this.propertyNames.subject.$path]: StatementSubject.valueHints,
-                [this.propertyNames.predicate.$path]: StatementPredicate.valueHints,
-                [this.propertyNames.object.$path]: StatementObject.valueHints,
-                [this.propertyNames.issuer.$path]: DigitalIdentityDescriptor.valueHints,
-                [this.propertyNames.issuerConditions.$path]: StatementIssuerConditions.valueHints
+                [nameof<AbstractStatement>((a) => a.subject)]: StatementSubject.valueHints,
+                [nameof<AbstractStatement>((a) => a.predicate)]: StatementPredicate.valueHints,
+                [nameof<AbstractStatement>((a) => a.object)]: StatementObject.valueHints,
+                [nameof<AbstractStatement>((a) => a.issuer)]: DigitalIdentityDescriptor.valueHints,
+                [nameof<AbstractStatement>((a) => a.issuerConditions)]: StatementIssuerConditions.valueHints
             }
         });
     }
@@ -82,11 +80,11 @@ export abstract class AbstractStatement extends AbstractComplexValue implements 
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.subject.$path]: StatementSubject.renderHints,
-                [this.propertyNames.predicate.$path]: StatementPredicate.renderHints,
-                [this.propertyNames.object.$path]: StatementObject.renderHints,
-                [this.propertyNames.issuer.$path]: DigitalIdentityDescriptor.renderHints,
-                [this.propertyNames.issuerConditions.$path]: StatementIssuerConditions.renderHints
+                [nameof<AbstractStatement>((a) => a.subject)]: StatementSubject.renderHints,
+                [nameof<AbstractStatement>((a) => a.predicate)]: StatementPredicate.renderHints,
+                [nameof<AbstractStatement>((a) => a.object)]: StatementObject.renderHints,
+                [nameof<AbstractStatement>((a) => a.issuer)]: DigitalIdentityDescriptor.renderHints,
+                [nameof<AbstractStatement>((a) => a.issuerConditions)]: StatementIssuerConditions.renderHints
             }
         });
     }
