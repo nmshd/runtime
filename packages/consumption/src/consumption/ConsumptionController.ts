@@ -5,6 +5,7 @@ import {
     DeleteAttributeRequestItem,
     FreeTextRequestItem,
     OwnSharedAttributeDeletedByOwnerNotificationItem,
+    PeerSharedAttributeDeletedByPeerNotificationItem,
     PeerSharedAttributeSucceededNotificationItem,
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
@@ -27,6 +28,7 @@ import {
     NotificationsController,
     OutgoingRequestsController,
     OwnSharedAttributeDeletedByOwnerNotificationItemProcessor,
+    PeerSharedAttributeDeletedByPeerNotificationItemProcessor,
     PeerSharedAttributeSucceededNotificationItemProcessor,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
@@ -144,6 +146,7 @@ export class ConsumptionController {
     private getDefaultNotificationItemProcessors() {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
             [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
+            [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
             [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor]
         ]);
     }
