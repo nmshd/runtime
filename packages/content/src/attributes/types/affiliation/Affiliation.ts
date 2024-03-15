@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, ValueHints } from "../../hints";
@@ -22,8 +22,6 @@ export interface IAffiliation extends IAbstractComplexValue {
 
 @type("Affiliation")
 export class Affiliation extends AbstractComplexValue implements IAffiliation {
-    public static readonly propertyNames = nameOf<Affiliation, never>();
-
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
     @validate({ nullable: true })
     public role?: AffiliationRole;
@@ -39,9 +37,9 @@ export class Affiliation extends AbstractComplexValue implements IAffiliation {
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [this.propertyNames.role.$path]: AffiliationRole.valueHints,
-                [this.propertyNames.organization.$path]: AffiliationOrganization.valueHints,
-                [this.propertyNames.unit.$path]: AffiliationUnit.valueHints
+                [nameof<Affiliation>((a) => a.role)]: AffiliationRole.valueHints,
+                [nameof<Affiliation>((a) => a.organization)]: AffiliationOrganization.valueHints,
+                [nameof<Affiliation>((a) => a.unit)]: AffiliationUnit.valueHints
             }
         });
     }
@@ -49,9 +47,9 @@ export class Affiliation extends AbstractComplexValue implements IAffiliation {
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.role.$path]: AffiliationRole.renderHints,
-                [this.propertyNames.organization.$path]: AffiliationOrganization.renderHints,
-                [this.propertyNames.unit.$path]: AffiliationUnit.renderHints
+                [nameof<Affiliation>((a) => a.role)]: AffiliationRole.renderHints,
+                [nameof<Affiliation>((a) => a.organization)]: AffiliationOrganization.renderHints,
+                [nameof<Affiliation>((a) => a.unit)]: AffiliationUnit.renderHints
             }
         });
     }

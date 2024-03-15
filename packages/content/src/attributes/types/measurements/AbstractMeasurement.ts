@@ -1,5 +1,5 @@
 import { serialize, validate } from "@js-soft/ts-serval";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 
@@ -17,8 +17,6 @@ export interface IMeasurement extends IAbstractComplexValue {
  * valid unit strings must be defined in the classes extending AbstractMeasurement as enum
  */
 export abstract class AbstractMeasurement extends AbstractComplexValue implements IMeasurement {
-    public static readonly propertyNames = nameOf<AbstractMeasurement, never>();
-
     @serialize()
     @validate({ max: 50 })
     public unit: string;
@@ -30,8 +28,8 @@ export abstract class AbstractMeasurement extends AbstractComplexValue implement
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [this.propertyNames.unit.$path]: ValueHints.from({}),
-                [this.propertyNames.value.$path]: ValueHints.from({})
+                [nameof<AbstractMeasurement>((a) => a.unit)]: ValueHints.from({}),
+                [nameof<AbstractMeasurement>((a) => a.value)]: ValueHints.from({})
             }
         });
     }
@@ -39,11 +37,11 @@ export abstract class AbstractMeasurement extends AbstractComplexValue implement
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.unit.$path]: RenderHints.from({
+                [nameof<AbstractMeasurement>((a) => a.unit)]: RenderHints.from({
                     editType: RenderHintsEditType.InputLike,
                     technicalType: RenderHintsTechnicalType.String
                 }),
-                [this.propertyNames.value.$path]: RenderHints.from({
+                [nameof<AbstractMeasurement>((a) => a.value)]: RenderHints.from({
                     editType: RenderHintsEditType.InputLike,
                     technicalType: RenderHintsTechnicalType.Integer
                 })

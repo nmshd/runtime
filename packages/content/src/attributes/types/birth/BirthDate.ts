@@ -1,6 +1,6 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import nameOf from "easy-tsnameof";
 import { DateTime } from "luxon";
+import { nameof } from "ts-simple-nameof";
 import { ValidationErrorWithoutProperty } from "../../../ValidationErrorWithoutProperty";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
@@ -24,8 +24,6 @@ export interface IBirthDate extends IAbstractComplexValue {
 
 @type("BirthDate")
 export class BirthDate extends AbstractComplexValue implements IBirthDate {
-    public static readonly propertyNames = nameOf<BirthDate, never>();
-
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
     @validate()
     public day: BirthDay;
@@ -58,9 +56,9 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [this.propertyNames.day.$path]: BirthDay.valueHints,
-                [this.propertyNames.month.$path]: BirthMonth.valueHints,
-                [this.propertyNames.year.$path]: BirthYear.valueHints
+                [nameof<BirthDate>((b) => b.day)]: BirthDay.valueHints,
+                [nameof<BirthDate>((b) => b.month)]: BirthMonth.valueHints,
+                [nameof<BirthDate>((b) => b.year)]: BirthYear.valueHints
             }
         });
     }
@@ -68,9 +66,9 @@ export class BirthDate extends AbstractComplexValue implements IBirthDate {
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.day.$path]: BirthDay.renderHints,
-                [this.propertyNames.month.$path]: BirthMonth.renderHints,
-                [this.propertyNames.year.$path]: BirthYear.renderHints
+                [nameof<BirthDate>((b) => b.day)]: BirthDay.renderHints,
+                [nameof<BirthDate>((b) => b.month)]: BirthMonth.renderHints,
+                [nameof<BirthDate>((b) => b.year)]: BirthYear.renderHints
             }
         });
     }
