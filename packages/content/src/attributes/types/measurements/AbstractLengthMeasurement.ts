@@ -1,4 +1,5 @@
 import { serialize, validate } from "@js-soft/ts-serval";
+import { nameof } from "ts-simple-nameof";
 import { ValueHints, ValueHintsValue } from "../../hints";
 import { AbstractMeasurement } from "./AbstractMeasurement";
 
@@ -27,7 +28,7 @@ export class AbstractLengthMeasurement extends AbstractMeasurement {
     public static override get valueHints(): ValueHints {
         return super.valueHints.copyWith({
             propertyHints: {
-                [this.propertyNames.unit.$path]: ValueHints.from({
+                [nameof<AbstractLengthMeasurement>((a) => a.unit)]: ValueHints.from({
                     values: Object.entries(LengthUnit).map((v) =>
                         ValueHintsValue.from({
                             displayName: v[1],
