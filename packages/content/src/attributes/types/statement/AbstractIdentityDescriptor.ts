@@ -1,8 +1,8 @@
 import { serialize, validate } from "@js-soft/ts-serval";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../../attributes/AbstractComplexValue";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../../attributes/hints";
-import { IIdentityAttribute, IdentityAttribute, IdentityAttributeJSON } from "../../IdentityAttribute";
+import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "../../IdentityAttribute";
 
 export interface AbstractIdentityDescriptorJSON extends AbstractComplexValueJSON {
     attributes?: IdentityAttributeJSON[];
@@ -13,8 +13,6 @@ export interface IAbstractIdentityDescriptor extends IAbstractComplexValue {
 }
 
 export abstract class AbstractIdentityDescriptor extends AbstractComplexValue implements IAbstractIdentityDescriptor {
-    public static readonly propertyNames: any = nameOf<AbstractIdentityDescriptor, never>();
-
     // TODO: enable type
     // @serialize({ type: IdentityAttribute })
     @serialize()
@@ -24,7 +22,7 @@ export abstract class AbstractIdentityDescriptor extends AbstractComplexValue im
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [this.propertyNames.attributes.$path]: ValueHints.from({})
+                [nameof<AbstractIdentityDescriptor>((a) => a.attributes)]: ValueHints.from({})
             }
         });
     }
@@ -32,7 +30,7 @@ export abstract class AbstractIdentityDescriptor extends AbstractComplexValue im
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.attributes.$path]: RenderHints.from({
+                [nameof<AbstractIdentityDescriptor>((a) => a.attributes)]: RenderHints.from({
                     editType: RenderHintsEditType.Complex,
                     technicalType: RenderHintsTechnicalType.Object
                 })
