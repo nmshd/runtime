@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/transport";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../../attributes/hints";
 import { AbstractIdentityDescriptor, AbstractIdentityDescriptorJSON, IAbstractIdentityDescriptor } from "./AbstractIdentityDescriptor";
 
@@ -15,8 +15,6 @@ export interface IStatementObject extends IAbstractIdentityDescriptor {
 
 @type("StatementObject")
 export class StatementObject extends AbstractIdentityDescriptor implements IStatementObject {
-    public static override readonly propertyNames: any = nameOf<StatementObject, never>();
-
     @serialize({ type: CoreAddress })
     @validate({ customValidator: (v) => (v.length < 1 ? "may not be empty" : undefined) })
     public address: CoreAddress;
@@ -32,7 +30,7 @@ export class StatementObject extends AbstractIdentityDescriptor implements IStat
     public static override get valueHints(): ValueHints {
         return super.valueHints.copyWith({
             propertyHints: {
-                [this.propertyNames.address.$path]: ValueHints.from({})
+                [nameof<StatementObject>((d) => d.address)]: ValueHints.from({})
             }
         });
     }
@@ -40,7 +38,7 @@ export class StatementObject extends AbstractIdentityDescriptor implements IStat
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.address.$path]: RenderHints.from({
+                [nameof<StatementObject>((d) => d.address)]: RenderHints.from({
                     editType: RenderHintsEditType.InputLike,
                     technicalType: RenderHintsTechnicalType.String
                 })
