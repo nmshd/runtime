@@ -988,7 +988,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
         ).value;
 
         const result = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({ attributeId: repoAttribute.id, peer: services2.address });
-        expect(result).toBeAnError(/.*/, "error.runtime.attributes.noOtherVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore");
+        expect(result).toBeAnError(/.*/, "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore");
     });
 });
 
