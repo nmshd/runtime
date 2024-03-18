@@ -959,11 +959,10 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query?: any): Promise<LocalAttribute[]> {
-        let copiedQuery;
         if (typeof query !== "undefined") {
-            copiedQuery = JSON.parse(JSON.stringify(query));
+            query = JSON.parse(JSON.stringify(query));
         } else {
-            copiedQuery = {};
+            query = {};
         }
 
         const ownSharedIdentityAttributePredecessors: LocalAttribute[] = [];
@@ -975,8 +974,8 @@ export class AttributesController extends ConsumptionBaseController {
 
             repositoryAttribute = predecessor;
 
-            copiedQuery["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
-            const sharedCopies = await this.getLocalAttributes(copiedQuery);
+            query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
+            const sharedCopies = await this.getLocalAttributes(query);
 
             ownSharedIdentityAttributePredecessors.push(...sharedCopies);
         }
@@ -985,11 +984,10 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query?: any): Promise<LocalAttribute[]> {
-        let copiedQuery;
         if (typeof query !== "undefined") {
-            copiedQuery = JSON.parse(JSON.stringify(query));
+            query = JSON.parse(JSON.stringify(query));
         } else {
-            copiedQuery = {};
+            query = {};
         }
 
         const ownSharedIdentityAttributeSuccessors: LocalAttribute[] = [];
@@ -1001,8 +999,8 @@ export class AttributesController extends ConsumptionBaseController {
 
             repositoryAttribute = successor;
 
-            copiedQuery["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
-            const sharedCopies = await this.getLocalAttributes(copiedQuery);
+            query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
+            const sharedCopies = await this.getLocalAttributes(query);
 
             ownSharedIdentityAttributeSuccessors.push(...sharedCopies);
         }
