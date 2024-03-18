@@ -1,10 +1,10 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import {
     AbstractComplexValue,
-    IIdentityAttribute,
-    IRelationshipAttribute,
     IdentityAttribute,
     IdentityAttributeJSON,
+    IIdentityAttribute,
+    IRelationshipAttribute,
     RelationshipAttribute,
     RelationshipAttributeJSON
 } from "@nmshd/content";
@@ -31,27 +31,30 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     parentId?: ICoreId;
 }
 
-export type OwnSharedIdentityAttribute = LocalAttribute & { content: IdentityAttribute } & {
+export type OwnSharedIdentityAttribute = LocalAttribute & {
+    content: IdentityAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: CoreId };
 };
 
-export type OwnSharedRelationshipAttribute = LocalAttribute & { content: RelationshipAttribute } & {
+export type OwnSharedRelationshipAttribute = LocalAttribute & {
+    content: RelationshipAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
 };
 
 export type PeerSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
-} & {
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
 };
 
 export type PeerSharedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
-} & {
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
 };
 
-export type RepositoryAttribute = IdentityAttribute & { shareInfo: undefined };
+export type RepositoryAttribute = LocalAttribute & {
+    content: IdentityAttribute;
+    shareInfo: undefined;
+};
 
 @type("LocalAttribute")
 export class LocalAttribute extends CoreSynchronizable implements ILocalAttribute {
