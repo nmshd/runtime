@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "../../constants";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
@@ -33,8 +33,6 @@ export interface IDeliveryBoxAddress extends IAbstractAddress {
 
 @type("DeliveryBoxAddress")
 export class DeliveryBoxAddress extends AbstractAddress implements IDeliveryBoxAddress {
-    public static override readonly propertyNames = nameOf<DeliveryBoxAddress, never>();
-
     @serialize()
     @validate({ max: 100 })
     public userId: string;
@@ -66,13 +64,13 @@ export class DeliveryBoxAddress extends AbstractAddress implements IDeliveryBoxA
     public static override get valueHints(): ValueHints {
         return super.valueHints.copyWith({
             propertyHints: {
-                [this.propertyNames.userId.$path]: ValueHints.from({}),
-                [this.propertyNames.deliveryBoxId.$path]: ValueHints.from({}),
-                [this.propertyNames.zipCode.$path]: ZipCode.valueHints,
-                [this.propertyNames.city.$path]: City.valueHints,
-                [this.propertyNames.country.$path]: Country.valueHints,
-                [this.propertyNames.phoneNumber.$path]: PhoneNumber.valueHints,
-                [this.propertyNames.state.$path]: State.valueHints
+                [nameof<DeliveryBoxAddress>((d) => d.userId)]: ValueHints.from({}),
+                [nameof<DeliveryBoxAddress>((d) => d.deliveryBoxId)]: ValueHints.from({}),
+                [nameof<DeliveryBoxAddress>((d) => d.zipCode)]: ZipCode.valueHints,
+                [nameof<DeliveryBoxAddress>((d) => d.city)]: City.valueHints,
+                [nameof<DeliveryBoxAddress>((d) => d.country)]: Country.valueHints,
+                [nameof<DeliveryBoxAddress>((d) => d.phoneNumber)]: PhoneNumber.valueHints,
+                [nameof<DeliveryBoxAddress>((d) => d.state)]: State.valueHints
             }
         });
     }
@@ -80,19 +78,19 @@ export class DeliveryBoxAddress extends AbstractAddress implements IDeliveryBoxA
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.userId.$path]: RenderHints.from({
+                [nameof<DeliveryBoxAddress>((d) => d.userId)]: RenderHints.from({
                     editType: RenderHintsEditType.InputLike,
                     technicalType: RenderHintsTechnicalType.String
                 }),
-                [this.propertyNames.deliveryBoxId.$path]: RenderHints.from({
+                [nameof<DeliveryBoxAddress>((d) => d.deliveryBoxId)]: RenderHints.from({
                     editType: RenderHintsEditType.InputLike,
                     technicalType: RenderHintsTechnicalType.String
                 }),
-                [this.propertyNames.zipCode.$path]: ZipCode.renderHints,
-                [this.propertyNames.city.$path]: City.renderHints,
-                [this.propertyNames.country.$path]: Country.renderHints,
-                [this.propertyNames.phoneNumber.$path]: PhoneNumber.renderHints,
-                [this.propertyNames.state.$path]: State.renderHints
+                [nameof<DeliveryBoxAddress>((d) => d.zipCode)]: ZipCode.renderHints,
+                [nameof<DeliveryBoxAddress>((d) => d.city)]: City.renderHints,
+                [nameof<DeliveryBoxAddress>((d) => d.country)]: Country.renderHints,
+                [nameof<DeliveryBoxAddress>((d) => d.phoneNumber)]: PhoneNumber.renderHints,
+                [nameof<DeliveryBoxAddress>((d) => d.state)]: State.renderHints
             }
         });
     }

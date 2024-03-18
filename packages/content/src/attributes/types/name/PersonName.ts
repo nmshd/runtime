@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import nameOf from "easy-tsnameof";
+import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, ValueHints } from "../../hints";
@@ -28,8 +28,6 @@ export interface IPersonName extends IAbstractComplexValue {
 
 @type("PersonName")
 export class PersonName extends AbstractComplexValue implements IPersonName {
-    public static readonly propertyNames = nameOf<PersonName, never>();
-
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
     @validate()
     public givenName: GivenName;
@@ -53,11 +51,11 @@ export class PersonName extends AbstractComplexValue implements IPersonName {
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [this.propertyNames.givenName.$path]: GivenName.valueHints,
-                [this.propertyNames.middleName.$path]: MiddleName.valueHints,
-                [this.propertyNames.surname.$path]: Surname.valueHints,
-                [this.propertyNames.honorificSuffix.$path]: HonorificSuffix.valueHints,
-                [this.propertyNames.honorificPrefix.$path]: HonorificPrefix.valueHints
+                [nameof<PersonName>((p) => p.givenName)]: GivenName.valueHints,
+                [nameof<PersonName>((p) => p.middleName)]: MiddleName.valueHints,
+                [nameof<PersonName>((p) => p.surname)]: Surname.valueHints,
+                [nameof<PersonName>((p) => p.honorificSuffix)]: HonorificSuffix.valueHints,
+                [nameof<PersonName>((p) => p.honorificPrefix)]: HonorificPrefix.valueHints
             }
         });
     }
@@ -65,11 +63,11 @@ export class PersonName extends AbstractComplexValue implements IPersonName {
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [this.propertyNames.givenName.$path]: GivenName.renderHints,
-                [this.propertyNames.middleName.$path]: MiddleName.renderHints,
-                [this.propertyNames.surname.$path]: Surname.renderHints,
-                [this.propertyNames.honorificSuffix.$path]: HonorificSuffix.renderHints,
-                [this.propertyNames.honorificPrefix.$path]: HonorificPrefix.renderHints
+                [nameof<PersonName>((p) => p.givenName)]: GivenName.renderHints,
+                [nameof<PersonName>((p) => p.middleName)]: MiddleName.renderHints,
+                [nameof<PersonName>((p) => p.surname)]: Surname.renderHints,
+                [nameof<PersonName>((p) => p.honorificSuffix)]: HonorificSuffix.renderHints,
+                [nameof<PersonName>((p) => p.honorificPrefix)]: HonorificPrefix.renderHints
             }
         });
     }
