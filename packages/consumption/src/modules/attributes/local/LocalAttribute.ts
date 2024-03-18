@@ -31,23 +31,23 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     parentId?: ICoreId;
 }
 
-export type OwnSharedIdentityAttribute = LocalAttribute & { content: IdentityAttribute } & {
+export type OwnSharedIdentityAttribute = LocalAttribute & {
+    content: IdentityAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: CoreId };
 };
 
-export type OwnSharedRelationshipAttribute = LocalAttribute & { content: RelationshipAttribute } & {
+export type OwnSharedRelationshipAttribute = LocalAttribute & {
+    content: RelationshipAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
 };
 
 export type PeerSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
-} & {
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
 };
 
 export type PeerSharedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
-} & {
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
 };
 
