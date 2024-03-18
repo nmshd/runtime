@@ -942,7 +942,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             attributeId: sRAVersion1.id,
             peer: services2.address
         });
-        expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.noOtherVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore");
+        expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore");
     });
 
     test("should throw if the successor repository attribute was deleted", async () => {
