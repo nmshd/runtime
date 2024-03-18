@@ -16,7 +16,7 @@ import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
-import validateAnswerToQuery from "../utility/validateAnswerToQuery";
+import validateAttributeMatchesWithQuery from "../utility/validateAttributeMatchesWithQuery";
 import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
 
@@ -58,7 +58,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         if (parsedParams.isWithExistingAttribute()) {
             if (_requestItem.query instanceof RelationshipAttributeQuery) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
+                    CoreErrors.requests.invalidAcceptParameters("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
                 );
             }
 
@@ -126,7 +126,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     !queriedThirdParties.includes(foundLocalAttribute.shareInfo.peer.toString())
                 ) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidlyAnsweredQuery(
+                        CoreErrors.requests.attributeQueryMismatch(
                             "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
                         )
                     );
@@ -135,7 +135,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         } else if (parsedParams.isWithNewAttribute()) {
             if (_requestItem.query instanceof ThirdPartyRelationshipAttributeQuery) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery(
+                    CoreErrors.requests.invalidAcceptParameters(
                         "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that already exist may be provided."
                     )
                 );
@@ -153,7 +153,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             throw new Error("this should never happen");
         }
 
-        const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
+        const answerToQueryValidationResult = validateAttributeMatchesWithQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
 
         return ValidationResult.success();

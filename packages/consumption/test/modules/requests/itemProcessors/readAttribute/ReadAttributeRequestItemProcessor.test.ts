@@ -519,7 +519,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried."
                 });
             });
@@ -659,7 +659,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."
                 });
             });
@@ -740,7 +740,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The number of tags of the provided IdentityAttribute do not match the number of queried tags."
                 });
             });
@@ -782,7 +782,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The tags of the provided IdentityAttribute do not match the queried tags."
                 });
             });
@@ -825,7 +825,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided Attribute is not valid in the queried time frame."
                 });
             });
@@ -871,7 +871,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes should be queried by an IQLQuery."
                 });
             });
@@ -951,7 +951,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."
                 });
             });
@@ -1032,7 +1032,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The number of tags of the provided IdentityAttribute do not match the number of queried tags."
                 });
             });
@@ -1074,7 +1074,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The tags of the provided IdentityAttribute do not match the queried tags."
                 });
             });
@@ -1134,7 +1134,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.canAccept.invalidAcceptParameters",
                     message: "When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided."
                 });
             });
@@ -1183,7 +1183,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried."
                 });
             });
@@ -1235,7 +1235,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided RelationshipAttribute is not of the queried RelationshipAttribute Value Type."
                 });
             });
@@ -1287,7 +1287,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided RelationshipAttribute does not belong to the queried owner."
                 });
             });
@@ -1337,7 +1337,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
                 });
             });
@@ -1387,7 +1387,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided RelationshipAttribute has not the queried key."
                 });
             });
@@ -1437,7 +1437,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided RelationshipAttribute has not the queried confidentiality."
                 });
             });
@@ -1489,7 +1489,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided RelationshipAttribute has not the queried title."
                 });
             });
@@ -1540,7 +1540,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided RelationshipAttribute has not the queried description."
                 });
             });
@@ -1692,7 +1692,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided Attribute is not valid in the queried time frame."
                 });
             });
@@ -1738,7 +1738,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried."
                 });
             });
@@ -1847,7 +1847,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided RelationshipAttribute does not belong to a queried owner."
                 });
             });
@@ -1900,7 +1900,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message:
                         "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
                 });
@@ -2059,7 +2059,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided RelationshipAttribute has not the queried key."
                 });
             });
@@ -2113,7 +2113,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
                 });
             });
@@ -2172,7 +2172,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canAccept(requestItem, acceptParams, request);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    code: "error.consumption.requests.attributeQueryMismatch",
                     message: "The provided Attribute is not valid in the queried time frame."
                 });
             });

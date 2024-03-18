@@ -180,12 +180,16 @@ class Requests {
         );
     }
 
-    public invalidAcceptParameters(): ApplicationError {
-        return new ApplicationError("error.consumption.requests.canAccept.invalidAcceptParameters", "The RequestItem was answered with incorrect parameters.");
+    public invalidAcceptParameters(message: string): ApplicationError {
+        return new ApplicationError("error.consumption.requests.canAccept.invalidAcceptParameters", message);
     }
 
     public invalidRequestItem(message: string) {
         return new CoreError("error.consumption.requests.invalidRequestItem", message);
+    }
+
+    public attributeQueryMismatch(message: string) {
+        return new CoreError("error.consumption.requests.attributeQueryMismatch", message);
     }
 
     public invalidlyAnsweredQuery(message: string) {

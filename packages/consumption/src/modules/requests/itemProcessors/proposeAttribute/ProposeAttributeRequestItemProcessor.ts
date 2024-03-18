@@ -15,7 +15,7 @@ import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
-import validateAnswerToQuery from "../utility/validateAnswerToQuery";
+import validateAttributeMatchesWithQuery from "../utility/validateAttributeMatchesWithQuery";
 import validateQuery from "../utility/validateQuery";
 import { AcceptProposeAttributeRequestItemParameters, AcceptProposeAttributeRequestItemParametersJSON } from "./AcceptProposeAttributeRequestItemParameters";
 
@@ -29,6 +29,16 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         const attributeValidationResult = this.validateAttribute(requestItem.attribute);
         if (attributeValidationResult.isError()) {
             return attributeValidationResult;
+        }
+
+        const proposedAttributeMatchesWithQueryValidationResult = validateAttributeMatchesWithQuery(
+            requestItem.query,
+            requestItem.attribute,
+            CoreAddress.from(""),
+            this.currentIdentityAddress
+        );
+        if (proposedAttributeMatchesWithQueryValidationResult.isError()) {
+            return proposedAttributeMatchesWithQueryValidationResult;
         }
 
         return ValidationResult.success();
@@ -74,7 +84,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         if (parsedParams.isWithExistingAttribute()) {
             if (_requestItem.query instanceof RelationshipAttributeQuery) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidlyAnsweredQuery("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
+                    CoreErrors.requests.invalidAcceptParameters("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
                 );
             }
 
@@ -133,7 +143,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             throw new Error("this should never happen");
         }
 
-        const answerToQueryValidationResult = validateAnswerToQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
+        const answerToQueryValidationResult = validateAttributeMatchesWithQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
 
         return ValidationResult.success();
