@@ -1521,13 +1521,6 @@ describe("DeleteAttributeUseCases", () => {
             expect(updatedRAVersion1.succeeds).toBeUndefined();
         });
 
-        test("should set 'succeeds' of successor own shared identity attribute to undefined if predecessor repository attribute is deleted", async () => {
-            expect(sOSIAVersion1.succeeds).toBeDefined();
-            await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: rAVersion0.id });
-            const updatedOSIAVersion1 = (await services1.consumption.attributes.getAttribute({ id: sOSIAVersion1.id })).value;
-            expect(updatedOSIAVersion1.succeeds).toBeUndefined();
-        });
-
         test("should throw trying to call with an attribute that is not a repository attribute", async () => {
             const result = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: sOSIAVersion1.id });
             expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
