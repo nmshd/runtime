@@ -224,12 +224,12 @@ describe("validateAttributeMatchesWithQuery", function () {
             });
         });
 
-        test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IdentityAttributeQuery", async function () {
+        test("returns an error when an IdentityAttribute has no tag but at least one tag was queried by IdentityAttributeQuery", async function () {
             const recipient = accountController.identity.address;
 
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                query: IdentityAttributeQuery.from({ valueType: "GivenName", tags: ["ATag"] })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -250,7 +250,6 @@ describe("validateAttributeMatchesWithQuery", function () {
                 newAttribute: {
                     "@type": "IdentityAttribute",
                     owner: recipient.toString(),
-                    tags: ["Atag"],
                     value: {
                         "@type": "GivenName",
                         value: "AGivenName"
@@ -262,7 +261,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The number of tags of the provided IdentityAttribute do not match the number of queried tags."
+                message: "The tags of the provided IdentityAttribute do not contain at least one queried tag."
             });
         });
 
@@ -304,7 +303,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The tags of the provided IdentityAttribute do not match the queried tags."
+                message: "The tags of the provided IdentityAttribute do not contain at least one queried tag."
             });
         });
 
@@ -477,12 +476,12 @@ describe("validateAttributeMatchesWithQuery", function () {
             });
         });
 
-        test("returns an error when the number of tags of the IdentityAttribute do not match the number of tags queried by IQLQuery", async function () {
+        test("returns an error when an IdentityAttribute has no tag but at least one tag was queried by IQLQuery", async function () {
             const recipient = accountController.identity.address;
 
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
-                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+                query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["ATag"] } })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -503,7 +502,6 @@ describe("validateAttributeMatchesWithQuery", function () {
                 newAttribute: {
                     "@type": "IdentityAttribute",
                     owner: recipient.toString(),
-                    tags: ["Atag"],
                     value: {
                         "@type": "GivenName",
                         value: "AGivenName"
@@ -515,7 +513,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The number of tags of the provided IdentityAttribute do not match the number of queried tags."
+                message: "The tags of the provided IdentityAttribute do not contain at least one queried tag."
             });
         });
 
@@ -557,7 +555,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The tags of the provided IdentityAttribute do not match the queried tags."
+                message: "The tags of the provided IdentityAttribute do not contain at least one queried tag."
             });
         });
     });

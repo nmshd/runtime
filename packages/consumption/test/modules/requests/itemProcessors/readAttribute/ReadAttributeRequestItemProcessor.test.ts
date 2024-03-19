@@ -308,7 +308,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     value: {
                         "@type": "GivenName",
                         value: "AGivenName"
-                    }
+                    },
+                    tags: ["ATag"]
                 }
             };
 
@@ -502,7 +503,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["tagA", "tagB", "tagC"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["ATag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const request = LocalRequest.from({
@@ -523,7 +524,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     newAttribute: {
                         "@type": "IdentityAttribute",
                         owner: recipient.toString(),
-                        tags: ["tagA", "tagB", "tagC"],
+                        tags: ["ATag", "AnotherTag"],
                         value: {
                             "@type": "GivenName",
                             value: "AGivenName"
@@ -564,7 +565,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     newAttribute: {
                         "@type": "IdentityAttribute",
                         owner: recipient.toString(),
-                        tags: ["tagA", "tagB", "tagC"],
+                        tags: ["tagA", "tagD", "tagE"],
                         value: {
                             "@type": "GivenName",
                             value: "AGivenName"

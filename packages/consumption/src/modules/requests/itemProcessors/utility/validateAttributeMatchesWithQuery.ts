@@ -67,15 +67,9 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
         return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
     }
 
-    if (query.tags?.length !== attribute.tags?.length) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The number of tags of the provided IdentityAttribute do not match the number of queried tags."));
-    }
-
-    if (query.tags !== undefined && attribute.tags !== undefined) {
-        const sortedQueriedTags = query.tags.sort();
-        const sortedAttributeTags = attribute.tags.sort();
-        if (!sortedQueriedTags.every((tag, index) => tag === sortedAttributeTags[index])) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not match the queried tags."));
+    if (query.tags !== undefined && query.tags.length !== 0) {
+        if (attribute.tags === undefined || attribute.tags.length === 0 || !query.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))) {
+            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag."));
         }
     }
 
@@ -102,17 +96,9 @@ function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: Identi
             return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
         }
 
-        if (query.attributeCreationHints.tags?.length !== attribute.tags?.length) {
-            return ValidationResult.error(
-                CoreErrors.requests.attributeQueryMismatch("The number of tags of the provided IdentityAttribute do not match the number of queried tags.")
-            );
-        }
-
-        if (query.attributeCreationHints.tags !== undefined && attribute.tags !== undefined) {
-            const sortedQueriedTags = query.attributeCreationHints.tags.sort();
-            const sortedAttributeTags = attribute.tags.sort();
-            if (!sortedQueriedTags.every((tag, index) => tag === sortedAttributeTags[index])) {
-                return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not match the queried tags."));
+        if (query.attributeCreationHints.tags !== undefined && query.attributeCreationHints.tags.length !== 0) {
+            if (attribute.tags === undefined || attribute.tags.length === 0 || !query.attributeCreationHints.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))) {
+                return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag."));
             }
         }
     }
