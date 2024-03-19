@@ -1438,7 +1438,7 @@ describe("Get (shared) versions of attribute", () => {
     });
 });
 
-describe("DeleteSharedAttributeUseCases", () => {
+describe("DeleteAttributeUseCases", () => {
     let rAVersion0: LocalAttributeDTO;
     let rAVersion1: LocalAttributeDTO;
     let sOSIAVersion0: LocalAttributeDTO;
@@ -1514,11 +1514,18 @@ describe("DeleteSharedAttributeUseCases", () => {
             expect(localAttributeOSIAVersion0.isOwnSharedIdentityAttribute(CoreAddress.from(services1.address))).toBe(true);
         });
 
-        test("should set 'succeeds' of successor to undefined if predecessor repository attribute is deleted", async () => {
+        test("should set 'succeeds' of successor repository attribute to undefined if predecessor repository attribute is deleted", async () => {
             expect(rAVersion1.succeeds).toBeDefined();
             await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: rAVersion0.id });
             const updatedRAVersion1 = (await services1.consumption.attributes.getAttribute({ id: rAVersion1.id })).value;
             expect(updatedRAVersion1.succeeds).toBeUndefined();
+        });
+
+        test("should set 'succeeds' of successor own shared identity attribute to undefined if predecessor repository attribute is deleted", async () => {
+            expect(sOSIAVersion1.succeeds).toBeDefined();
+            await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: rAVersion0.id });
+            const updatedOSIAVersion1 = (await services1.consumption.attributes.getAttribute({ id: sOSIAVersion1.id })).value;
+            expect(updatedOSIAVersion1.succeeds).toBeUndefined();
         });
 
         test("should throw trying to call with an attribute that is not a repository attribute", async () => {
