@@ -5,6 +5,7 @@ import {
     ReadAttributeRequestItem,
     RejectResponseItem,
     RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
     RelationshipAttributeQuery,
     Request,
     ResponseItemResult,
@@ -126,7 +127,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     !queriedThirdParties.includes(foundLocalAttribute.shareInfo.peer.toString())
                 ) {
                     return ValidationResult.error(
-                        CoreErrors.requests.attributeQueryMismatch(
+                        CoreErrors.requests.invalidlyAnsweredQuery(
                             "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
                         )
                     );
@@ -155,6 +156,16 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
+
+        if (
+            _requestItem.query instanceof ThirdPartyRelationshipAttributeQuery &&
+            attribute instanceof RelationshipAttribute &&
+            attribute.confidentiality === RelationshipAttributeConfidentiality.Private
+        ) {
+            return ValidationResult.error(
+                CoreErrors.requests.invalidlyAnsweredQuery("The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it.")
+            );
+        }
 
         return ValidationResult.success();
     }

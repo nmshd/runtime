@@ -4,7 +4,6 @@ import {
     IdentityAttributeQuery,
     IQLQuery,
     RelationshipAttribute,
-    RelationshipAttributeConfidentiality,
     RelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
@@ -141,7 +140,7 @@ function validateAttributeMatchesWithRelationshipAttributeQuery(
 
     if (queriedOwnerIsEmpty && !recipientIsAttributeOwner) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch("You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query.")
+            CoreErrors.requests.invalidlyAnsweredQuery("You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query.")
         );
     }
 
@@ -199,15 +198,9 @@ function validateAttributeMatchesWithThirdPartyRelationshipAttributeQuery(
 
     if (query.owner === "" && !recipientIsAttributeOwner && !queriedThirdParties.includes("") && !queriedThirdParties.includes(attribute.owner.toString())) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch(
+            CoreErrors.requests.invalidlyAnsweredQuery(
                 "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
             )
-        );
-    }
-
-    if (attribute.confidentiality === RelationshipAttributeConfidentiality.Private) {
-        return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery("The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it.")
         );
     }
 

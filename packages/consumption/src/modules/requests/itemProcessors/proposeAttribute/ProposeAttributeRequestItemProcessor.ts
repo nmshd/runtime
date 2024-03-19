@@ -114,7 +114,8 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
                 let repositoryAttribute = foundLocalAttribute;
                 let i = 0;
-                while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
+                const iterationLimit = 1000;
+                while (repositoryAttribute.succeededBy !== undefined && i < iterationLimit) {
                     const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
                     if (!successor) {
                         throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());

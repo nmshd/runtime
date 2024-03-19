@@ -398,88 +398,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
 
         describe("canAccept ReadAttributeRequestitem with IdentityAttributeQuery", function () {
-            test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-                const peerAttributeId = await ConsumptionIds.attribute.generate();
-
-                await consumptionController.attributes.createPeerLocalAttribute({
-                    id: peerAttributeId,
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: CoreAddress.from("AThirdParty")
-                    }),
-                    peer: CoreAddress.from("AThirdParty"),
-                    requestReference: await ConsumptionIds.request.generate()
-                });
-
-                const requestItem = ReadAttributeRequestItem.from({
-                    mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-                });
-                const requestId = await ConsumptionIds.request.generate();
-                const request = LocalRequest.from({
-                    id: requestId,
-                    createdAt: CoreDate.utc(),
-                    isOwn: false,
-                    peer: CoreAddress.from("Sender"),
-                    status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
-                    statusLog: []
-                });
-
-                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
-                    accept: true,
-                    existingAttributeId: peerAttributeId.toString()
-                };
-
-                const result = await processor.canAccept(requestItem, acceptParams, request);
-
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
-                });
-            });
-
-            test("returns an error when the new IdentityAttribute to be created and shared belongs to a third party", async function () {
-                const requestItem = ReadAttributeRequestItem.from({
-                    mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-                });
-                const requestId = await ConsumptionIds.request.generate();
-                const request = LocalRequest.from({
-                    id: requestId,
-                    createdAt: CoreDate.utc(),
-                    isOwn: false,
-                    peer: CoreAddress.from("Sender"),
-                    status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
-                    statusLog: []
-                });
-
-                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                    accept: true,
-                    newAttribute: {
-                        "@type": "IdentityAttribute",
-                        owner: "AThirdParty",
-                        value: {
-                            "@type": "GivenName",
-                            value: "AGivenName"
-                        }
-                    }
-                };
-
-                const result = await processor.canAccept(requestItem, acceptParams, request);
-
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
-                });
-            });
-
             test("returns an error when the existing IdentityAttribute is already shared", async function () {
                 const recipient = accountController.identity.address;
 
@@ -658,45 +576,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).successfulValidationResult();
             });
-
-            test("returns an error when the IdentityAttribute queried by an IQLQuery is not owned by the Recipient", async function () {
-                const requestItem = ReadAttributeRequestItem.from({
-                    mustBeAccepted: true,
-                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
-                });
-                const requestId = await ConsumptionIds.request.generate();
-                const request = LocalRequest.from({
-                    id: requestId,
-                    createdAt: CoreDate.utc(),
-                    isOwn: false,
-                    peer: CoreAddress.from("Sender"),
-                    status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
-                    statusLog: []
-                });
-
-                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                    accept: true,
-                    newAttribute: {
-                        "@type": "IdentityAttribute",
-                        owner: "Sender",
-                        value: {
-                            "@type": "GivenName",
-                            value: "AGivenName"
-                        }
-                    }
-                };
-
-                const result = await processor.canAccept(requestItem, acceptParams, request);
-
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
-                });
-            });
         });
 
         describe("canAccept ReadAttributeRequestitem with RelationshipAttributeQuery", function () {
@@ -755,6 +634,56 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.canAccept.invalidAcceptParameters",
                     message: "When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided."
+                });
+            });
+
+            test("returns an error when a RelationshipAttribute does not belong to the Recipient, but an empty string was specified for the owner of the query", async function () {
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        owner: "",
+                        key: "AKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: CoreAddress.from("Sender"),
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: "Sender",
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: "You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
                 });
             });
 
@@ -911,6 +840,60 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
                     message: "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided."
+                });
+            });
+
+            test("returns an error when a RelationshipAttribute is not shared with one of the third parties that were queried using a ThirdPartyRelationshipAttributeQuery", async function () {
+                const recipient = CoreAddress.from(accountController.identity.address);
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: ThirdPartyRelationshipAttributeQuery.from({
+                        owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                        key: "AKey",
+                        thirdParty: ["AThirdParty"]
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: CoreAddress.from("Sender"),
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: recipient,
+                        value: ProprietaryString.from({
+                            title: "ATitle",
+                            value: "AStringValue"
+                        })
+                    }),
+                    shareInfo: {
+                        peer: CoreAddress.from("AnUninvolvedThirdParty"),
+                        requestReference: await ConsumptionIds.request.generate()
+                    }
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: localAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidlyAnsweredQuery",
+                    message: "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
                 });
             });
 
