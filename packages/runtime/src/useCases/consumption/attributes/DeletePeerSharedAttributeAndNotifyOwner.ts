@@ -37,6 +37,16 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
             return Result.fail(RuntimeErrors.attributes.isNotPeerSharedAttribute(peerSharedAttributeId));
         }
 
+        if (typeof peerSharedAttribute.succeededBy !== "undefined") {
+            const successor = await this.attributeController.getLocalAttribute(peerSharedAttribute.succeededBy);
+            if (typeof successor === "undefined") {
+                return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
+            }
+
+            successor.succeeds = undefined;
+            await this.attributeController.updateAttributeUnsafe(successor);
+        }
+
         const predecessors = await this.attributeController.getPredecessorsOfAttribute(peerSharedAttributeId);
 
         for (const attr of [peerSharedAttribute, ...predecessors]) {
