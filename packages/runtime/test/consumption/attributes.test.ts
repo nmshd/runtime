@@ -1462,6 +1462,13 @@ describe("DeleteSharedAttributeUseCases", () => {
             expect(getDeletedPredecessorResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
+        test("should set the 'succeeds' property of the own shared identity attribute successor to undefined", async () => {
+            expect(sOSIAVersion1.succeeds).toBeDefined();
+            await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sOSIAVersion0.id });
+            const updatedOSIAVersion1 = (await services1.consumption.attributes.getAttribute({ id: sOSIAVersion1.id })).value;
+            expect(updatedOSIAVersion1.succeeds).toBeUndefined();
+        });
+
         test("should notify about identity attribute deletion by owner", async () => {
             const notification = (await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sOSIAVersion0.id })).value;
             const timeBeforeUpdate = CoreDate.utc();
@@ -1514,6 +1521,14 @@ describe("DeleteSharedAttributeUseCases", () => {
 
             const getDeletedPredecessorResult = await services2.consumption.attributes.getAttribute({ id: sOSIAVersion0.id });
             expect(getDeletedPredecessorResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("should set the 'succeeds' property of the peer shared identity attribute successor to undefined", async () => {
+            const rPSIAVersion1 = (await services2.consumption.attributes.getAttribute({ id: sOSIAVersion1.id })).value;
+            expect(rPSIAVersion1.succeeds).toBeDefined();
+            await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sOSIAVersion0.id });
+            const updatedrPSIAVersion1 = (await services2.consumption.attributes.getAttribute({ id: rPSIAVersion1.id })).value;
+            expect(updatedrPSIAVersion1.succeeds).toBeUndefined();
         });
 
         test("should notify about identity attribute deletion by peer", async () => {
