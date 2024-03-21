@@ -11,16 +11,9 @@ import {
     TransportServices
 } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
+import { establishRelationship, exchangeTemplate, RuntimeServiceProvider, sendMessageWithRequest, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
 import {
-    establishRelationship,
     exchangeMessageWithRequest,
-    exchangeTemplate,
-    RuntimeServiceProvider,
-    sendMessageWithRequest,
-    syncUntilHasRelationships,
-    TestRuntimeServices
-} from "../lib";
-import {
     exchangeMessageWithRequestAndRequireManualDecision,
     exchangeMessageWithRequestAndSendResponse,
     exchangeTemplateAndReceiverRequiresManualDecision,

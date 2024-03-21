@@ -4,8 +4,8 @@ import { IQLQueryJSON, ReadAttributeRequestItemJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
 import { ConsumptionServices, CreateOutgoingRequestRequest, LocalAttributeDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { establishRelationship, exchangeMessageWithRequest, RuntimeServiceProvider, sendMessageWithRequest, TestRuntimeServices } from "../lib";
-import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";
+import { establishRelationship, RuntimeServiceProvider, sendMessageWithRequest, TestRuntimeServices } from "../lib";
+import { exchangeMessageWithRequest, exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";
 
 describe("IQL Query", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider();

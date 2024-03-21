@@ -256,7 +256,9 @@ export async function exchangeMessage(transportServicesCreator: TransportService
 
 export async function exchangeMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
     const sentMessage = await sendMessageWithRequest(sender, recipient, request);
-    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id);
+    const receivedMessage = await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id);
+    await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+    return receivedMessage;
 }
 
 export async function exchangeMessageWithAttachment(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<MessageDTO> {

@@ -1,7 +1,7 @@
 import { IResponse, RelationshipCreationChangeRequestContent } from "@nmshd/content";
 import { CreateOutgoingRequestRequest, LocalRequestDTO, MessageDTO, RelationshipDTO } from "src";
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
-import { exchangeMessageWithRequest, exchangeTemplate, syncUntilHasMessageWithResponse } from "./testUtils";
+import { exchangeTemplate, sendMessageWithRequest, syncUntilHasMessageWithRequest, syncUntilHasMessageWithResponse } from "./testUtils";
 
 export interface LocalRequestWithSource {
     request: LocalRequestDTO;
@@ -16,6 +16,11 @@ export interface ResponseMessagesForSenderAndRecipient {
 export interface RelationshipRequestWithRelationshipIfAccepted {
     request: LocalRequestDTO;
     relationship: RelationshipDTO | undefined;
+}
+
+export async function exchangeMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
+    const sentMessage = await sendMessageWithRequest(sender, recipient, request);
+    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id);
 }
 
 export async function exchangeMessageWithRequestAndRequireManualDecision(
