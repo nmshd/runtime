@@ -68,8 +68,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 result: "error",
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
-                    message:
-                        "The owner of the given `attribute` can only be an empty string. This is because you can only send Attributes where the recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
+                    message: "The Sender of the given Identityattribute can only be the owner."
                 },
                 attribute: IdentityAttribute.from({
                     value: GivenName.fromAny({ value: "AGivenName" }),
@@ -218,6 +217,37 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 code: "error.consumption.requests.invalidRequestItem",
                 message: `The Attribute with the given sourceAttributeId '${sourceAttribute.id.toString()}' does not match the given attribute.`
             });
+        });
+    });
+
+    test("returns error when the IdentityAttribute is a copy of the attribute", async function () {
+        const recipientAddress = CoreAddress.from("recipientAddress");
+
+        const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            content: IdentityAttribute.from({
+                owner: CoreAddress.from("sender"),
+                value: GivenName.from({
+                    value: "AGivenName"
+                })
+            }),
+            shareInfo: {
+                peer: recipientAddress,
+                requestReference: await ConsumptionIds.request.generate(),
+                sourceAttribute: CoreId.from("sourceAttributeId")
+            }
+        });
+        const requestItem = ShareAttributeRequestItem.from({
+            mustBeAccepted: false,
+            attribute: localAttribute.content,
+            sourceAttributeId: localAttribute.id
+        });
+        const request = Request.from({ items: [requestItem] });
+
+        const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipientAddress);
+
+        expect(result).errorValidationResult({
+            code: "error.consumption.requests.invalidRequestItem",
+            message: "Only Attributes that are not a copy of a sourceAttribute can be shared."
         });
     });
 

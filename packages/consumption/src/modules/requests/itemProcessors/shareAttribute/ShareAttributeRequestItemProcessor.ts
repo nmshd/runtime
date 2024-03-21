@@ -38,6 +38,10 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
         }
 
+        if (attribute.shareInfo?.sourceAttribute !== undefined) {
+            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Only Attributes that are not a copy of a sourceAttribute can be shared."));
+        }
+
         if (requestItem.attribute instanceof IdentityAttribute) {
             return this.canCreateWithIdentityAttribute(requestItem);
         }
@@ -49,11 +53,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         const ownerIsEmpty = requestItem.attribute.owner.toString() === "";
         const ownerIsCurrentIdentity = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         if (!ownerIsEmpty && !ownerIsCurrentIdentity) {
-            return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(
-                    "The owner of the given `attribute` can only be an empty string. This is because you can only send Attributes where the recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
-                )
-            );
+            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The Sender of the given Identityattribute can only be the owner."));
         }
 
         return ValidationResult.success();
