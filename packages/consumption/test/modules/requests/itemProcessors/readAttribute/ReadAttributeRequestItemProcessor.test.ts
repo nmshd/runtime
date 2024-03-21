@@ -1,5 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    AttributeSuccessionAcceptResponseItem,
+    IdentityAttribute,
     IdentityAttributeQuery,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
@@ -395,7 +397,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        test("in case of a given attributeId of an own Local Attribute, creates a copy of the Local Attribute with the given id with share info for the peer of the Request", async function () {
+        test("accept with existing Attribute that wasn't shared before", async function () {
             const attribute = await consumptionController.attributes.createLocalAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
@@ -426,14 +428,15 @@ describe("ReadAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
 
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute(result.attributeId);
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
             expect(createdAttribute).toBeDefined();
             expect(createdAttribute!.shareInfo).toBeDefined();
             expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
         });
 
-        test("in case of a given own IdentityAttribute, creates a new Repository Attribute as well as a copy of it for the peer", async function () {
+        test("accept with new IdentityAttribute", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" })
@@ -465,7 +468,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute(result.attributeId);
+            expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
 
             expect(createdSharedAttribute).toBeDefined();
             expect(createdSharedAttribute!.shareInfo).toBeDefined();
@@ -476,7 +480,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(createdRepositoryAttribute).toBeDefined();
         });
 
-        test("in case of a given peer RelationshipAttribute, creates a new Local Attribute with share info for the peer of the Request - but no Repository Attribute", async function () {
+        test("accept with new RelationshipAttribute", async function () {
             const senderAddress = accountController.identity.address;
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -520,12 +524,72 @@ describe("ReadAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute(result.attributeId);
+            expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
 
             expect(createdSharedAttribute).toBeDefined();
             expect(createdSharedAttribute!.shareInfo).toBeDefined();
             expect(createdSharedAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+        });
+
+        test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
+            const requestId = await ConsumptionIds.request.generate();
+            const peerAddress = CoreAddress.from("peerAddress");
+
+            const predecessorRA = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: predecessorRA.id,
+                peer: peerAddress,
+                requestReference: requestId
+            });
+
+            const { successor: successorRA } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRA.id, {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "US"
+                    },
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: peerAddress,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: successorRA.id.toString()
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+
+            const successorOSIA = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
+            expect(successorOSIA).toBeDefined();
+            expect(successorOSIA!.shareInfo).toBeDefined();
+            expect(successorOSIA!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+            expect(successorOSIA?.shareInfo!.sourceAttribute).toStrictEqual(successorRA.id);
         });
     });
 
