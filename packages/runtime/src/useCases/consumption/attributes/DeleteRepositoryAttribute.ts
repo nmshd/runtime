@@ -39,8 +39,8 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
         const ownSharedIdentityAttributePredecessors = await this.attributeController.getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute);
         for (const ownSharedAttribute of [...ownSharedIdentityAttributes, ...ownSharedIdentityAttributePredecessors]) {
             if (!ownSharedAttribute.isOwnSharedAttribute(this.accountController.identity.address)) {
-                throw RuntimeErrors.attributes.internalAttributeError(
-                    `The Attribute (id: ${ownSharedAttribute.id}) does not fulfill the requirements of an own shared Attribute, so it cannot be adjusted adequately deleting its source Attribute.`
+                throw new Error(
+                    `The Attribute ${ownSharedAttribute.id} does not fulfill the requirements of an own shared Attribute, so it cannot be adjusted adequately, deleting its source Attribute.`
                 );
             }
 
@@ -51,7 +51,7 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
         if (typeof repositoryAttribute.succeededBy !== "undefined") {
             const successor = await this.attributeController.getLocalAttribute(repositoryAttribute.succeededBy);
             if (typeof successor === "undefined") {
-                return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
+                throw new Error(`The Attribute ${repositoryAttribute.succeededBy} was not found, even though it is specified as successor of Attribute ${repositoryAttribute.id}.`);
             }
 
             successor.succeeds = undefined;
