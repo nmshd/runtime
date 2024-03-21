@@ -99,7 +99,9 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             if (_requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes.")
+                        CoreErrors.requests.invalidlyAnsweredQuery(
+                            "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+                        )
                     );
                 }
 

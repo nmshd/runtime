@@ -437,7 +437,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidlyAnsweredQuery",
-                    message: "The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes."
+                    message: "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
                 });
             });
 
