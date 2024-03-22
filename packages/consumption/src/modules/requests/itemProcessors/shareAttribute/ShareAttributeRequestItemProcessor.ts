@@ -19,6 +19,7 @@ import { LocalRequestInfo } from "../IRequestItemProcessor";
 export class ShareAttributeRequestItemProcessor extends GenericRequestItemProcessor<ShareAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: ShareAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
+
         if (!attribute) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(`The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' could not be found.`)
@@ -38,8 +39,8 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
         }
 
-        if (attribute.shareInfo?.sourceAttribute !== undefined) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Only Attributes that are not a copy of a sourceAttribute can be shared."));
+        if (attribute.isShared() && requestItem.attribute instanceof IdentityAttribute) {
+            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Only an IdentityAttribute which isn't a copy of a sourceAttribute can be shared."));
         }
 
         if (requestItem.attribute instanceof IdentityAttribute) {
@@ -53,7 +54,9 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         const ownerIsEmpty = requestItem.attribute.owner.toString() === "";
         const ownerIsCurrentIdentity = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         if (!ownerIsEmpty && !ownerIsCurrentIdentity) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The Sender of the given Identityattribute can only be the owner."));
+            return ValidationResult.error(
+                CoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            );
         }
 
         return ValidationResult.success();

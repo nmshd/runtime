@@ -68,7 +68,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 result: "error",
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: "The Sender of the given Identityattribute can only be the owner."
+                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
                 },
                 attribute: IdentityAttribute.from({
                     value: GivenName.fromAny({ value: "AGivenName" }),
@@ -247,7 +247,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
         expect(result).errorValidationResult({
             code: "error.consumption.requests.invalidRequestItem",
-            message: "Only Attributes that are not a copy of a sourceAttribute can be shared."
+            message: "Only an IdentityAttribute which isn't a copy of a sourceAttribute can be shared."
         });
     });
 
