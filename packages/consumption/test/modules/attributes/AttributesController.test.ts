@@ -1537,6 +1537,53 @@ describe("AttributesController", function () {
                 expect((predecessor.content.value.toJSON() as any).value).toBe("0815");
                 expect((successor.content.value.toJSON() as any).value).toBe("1337");
             });
+
+            test("should succeed a third party owned relationship attribute", async function () {
+                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "customerId",
+                        value: {
+                            "@type": "ProprietaryString",
+                            value: "0815",
+                            title: "Customer ID"
+                        },
+                        owner: CoreAddress.from("thirdPartyAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }),
+                    shareInfo: {
+                        peer: CoreAddress.from("peerAddress"),
+                        requestReference: CoreId.from("reqRefA")
+                    }
+                });
+                const successorParams: IAttributeSuccessorParams = {
+                    content: RelationshipAttribute.from({
+                        key: "customerId",
+                        value: {
+                            "@type": "ProprietaryString",
+                            value: "1337",
+                            title: "Customer ID"
+                        },
+                        owner: CoreAddress.from("thirdPartyAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }),
+                    shareInfo: {
+                        peer: CoreAddress.from("peerAddress"),
+                        requestReference: CoreId.from("reqRefB")
+                    }
+                };
+
+                const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(
+                    predecessor.id,
+                    successorParams
+                );
+                expect(successor).toBeDefined();
+                expect(updatedPredecessor).toBeDefined();
+                expect(predecessor.id.equals(updatedPredecessor.id)).toBe(true);
+                expect(updatedPredecessor.succeededBy!.equals(successor.id)).toBe(true);
+                expect(successor.succeeds!.equals(updatedPredecessor.id)).toBe(true);
+                expect((predecessor.content.value.toJSON() as any).value).toBe("0815");
+                expect((successor.content.value.toJSON() as any).value).toBe("1337");
+            });
         });
     });
 

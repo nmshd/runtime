@@ -24,7 +24,14 @@ import { ConsumptionError } from "../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../consumption/ConsumptionIds";
 import { CoreErrors } from "../../consumption/CoreErrors";
 import { ValidationResult } from "../common";
-import { AttributeCreatedEvent, AttributeDeletedEvent, OwnSharedAttributeSucceededEvent, RepositoryAttributeSucceededEvent, SharedAttributeCopyCreatedEvent } from "./events";
+import {
+    AttributeCreatedEvent,
+    AttributeDeletedEvent,
+    OwnSharedAttributeSucceededEvent,
+    RepositoryAttributeSucceededEvent,
+    SharedAttributeCopyCreatedEvent,
+    ThirdPartyOwnedRelationshipAttributeSucceededEvent
+} from "./events";
 import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
 import { CreateLocalAttributeParams, ICreateLocalAttributeParams } from "./local/CreateLocalAttributeParams";
 import { ICreatePeerLocalAttributeParams } from "./local/CreatePeerLocalAttributeParams";
@@ -399,6 +406,7 @@ export class AttributesController extends ConsumptionBaseController {
             succeededBy: parsedSuccessorParams.succeededBy
         });
 
+        // TODO: succeeding a peer shared IdentityAttribute in a different context than via a received PeerSharedAttributeSucceededNotificationItem, e.g. via AttributeSuccessionAcceptResponseItem, will not publish an event
         /* No succeeded attribute event fired here. This is done by the notification system. */
 
         return { predecessor, successor };
@@ -428,7 +436,39 @@ export class AttributesController extends ConsumptionBaseController {
             succeededBy: parsedSuccessorParams.succeededBy
         });
 
+        // TODO: succeeding a peer shared IdentityAttribute in a different context than via a received PeerSharedAttributeSucceededNotificationItem,
+        // TODO: e.g. via AttributeSuccessionAcceptResponseItem, will not publish an event
+        // TODO: -> perhaps we shouldn't return events in the NotificationItemProcessors
         /* No succeeded attribute event fired here. This is done by the notification system. */
+
+        return { predecessor, successor };
+    }
+
+    public async succeedThirdPartyOwnedRelationshipAttribute(
+        predecessorId: CoreId,
+        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
+        validate = true
+    ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
+        const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
+
+        if (validate) {
+            const validationResult = await this.validateThirdPartyOwnedRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
+            if (validationResult.isError()) {
+                throw validationResult.error;
+            }
+        }
+
+        const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
+            id: parsedSuccessorParams.id,
+            content: parsedSuccessorParams.content,
+            succeeds: predecessorId,
+            shareInfo: parsedSuccessorParams.shareInfo,
+            parentId: parsedSuccessorParams.parentId,
+            createdAt: parsedSuccessorParams.createdAt,
+            succeededBy: parsedSuccessorParams.succeededBy
+        });
+
+        this.eventBus.publish(new ThirdPartyOwnedRelationshipAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -741,6 +781,50 @@ export class AttributesController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
+    public async validateThirdPartyOwnedRelationshipAttributeSuccession(
+        predecessorId: CoreId,
+        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
+        let parsedSuccessorParams;
+        try {
+            parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
+        } catch (e: unknown) {
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotAValidAttribute(e));
+        }
+
+        const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
+        if (commonValidation.isError()) return commonValidation;
+
+        const predecessor = (await this.getLocalAttribute(predecessorId))!;
+        const successor = LocalAttribute.from({
+            id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
+            content: parsedSuccessorParams.content,
+            createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
+            succeeds: parsedSuccessorParams.succeeds,
+            succeededBy: parsedSuccessorParams.succeededBy,
+            shareInfo: parsedSuccessorParams.shareInfo,
+            parentId: parsedSuccessorParams.parentId
+        });
+
+        if (!predecessor.isThirdPartyOwnedRelationshipAttribute(this.identity.address)) {
+            return ValidationResult.error(CoreErrors.attributes.predecessorIsNotThirdPartyOwnedRelationshipAttribute());
+        }
+
+        if (!successor.isThirdPartyOwnedRelationshipAttribute(this.identity.address)) {
+            return ValidationResult.error(CoreErrors.attributes.successorIsNotThirdPartyOwnedRelationshipAttribute());
+        }
+
+        if (successor.content.key !== predecessor.content.key) {
+            return ValidationResult.error(CoreErrors.attributes.successionMustNotChangeKey());
+        }
+
+        if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
+            return ValidationResult.error(CoreErrors.attributes.successionMustNotChangePeer());
+        }
+
+        return ValidationResult.success();
+    }
+
     public async validateAttributeSuccessionCommon(predecessorId: CoreId, successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON): Promise<ValidationResult> {
         let parsedSuccessorParams;
         try {
@@ -885,9 +969,10 @@ export class AttributesController extends ConsumptionBaseController {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
-        if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
-            throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
-        }
+        // TODO:
+        // if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
+        //     throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
+        // }
 
         let i = 0;
         while (repositoryAttribute.succeededBy && i < 1000) {
