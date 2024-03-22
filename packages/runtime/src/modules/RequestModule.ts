@@ -38,6 +38,10 @@ export class RequestModule extends RuntimeModule {
 
     private async handlePeerRelationshipTemplateLoaded(event: PeerRelationshipTemplateLoadedEvent) {
         const template = event.data;
+
+        // make sure to not process an own template by accident
+        if (template.isOwn) return;
+
         if (template.content["@type"] !== "RelationshipTemplateContent") {
             this.runtime.eventBus.publish(new RelationshipTemplateProcessedEvent(event.eventTargetAddress, { template, result: RelationshipTemplateProcessedResult.NoRequest }));
             return;
