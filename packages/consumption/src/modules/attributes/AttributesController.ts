@@ -406,7 +406,6 @@ export class AttributesController extends ConsumptionBaseController {
             succeededBy: parsedSuccessorParams.succeededBy
         });
 
-        // TODO: succeeding a peer shared IdentityAttribute in a different context than via a received PeerSharedAttributeSucceededNotificationItem, e.g. via AttributeSuccessionAcceptResponseItem, will not publish an event
         /* No succeeded attribute event fired here. This is done by the notification system. */
 
         return { predecessor, successor };
@@ -436,9 +435,6 @@ export class AttributesController extends ConsumptionBaseController {
             succeededBy: parsedSuccessorParams.succeededBy
         });
 
-        // TODO: succeeding a peer shared IdentityAttribute in a different context than via a received PeerSharedAttributeSucceededNotificationItem,
-        // TODO: e.g. via AttributeSuccessionAcceptResponseItem, will not publish an event
-        // TODO: -> perhaps we shouldn't return events in the NotificationItemProcessors
         /* No succeeded attribute event fired here. This is done by the notification system. */
 
         return { predecessor, successor };
@@ -969,10 +965,9 @@ export class AttributesController extends ConsumptionBaseController {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
-        // TODO:
-        // if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
-        //     throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
-        // }
+        if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
+            throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
+        }
 
         let i = 0;
         while (repositoryAttribute.succeededBy && i < 1000) {
