@@ -18,9 +18,9 @@ import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export class ShareAttributeRequestItemProcessor extends GenericRequestItemProcessor<ShareAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: ShareAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
-        const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
+        const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
 
-        if (!attribute) {
+        if (!foundAttribute) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(`The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' could not be found.`)
             );
@@ -31,7 +31,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             requestItemAttributeJSON.owner = this.currentIdentityAddress.toString();
         }
 
-        if (!_.isEqual(attribute.content.toJSON(), requestItemAttributeJSON)) {
+        if (!_.isEqual(foundAttribute.content.toJSON(), requestItemAttributeJSON)) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(
                     `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' does not match the given attribute.`
@@ -39,8 +39,10 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
         }
 
-        if (attribute.isShared() && requestItem.attribute instanceof IdentityAttribute) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Only an IdentityAttribute which isn't a copy of a sourceAttribute can be shared."));
+        if (foundAttribute.isShared() && requestItem.attribute instanceof IdentityAttribute && this.accountController.identity.isMe(requestItem.attribute.owner)) {
+            return ValidationResult.error(
+                CoreErrors.requests.invalidRequestItem("The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes.")
+            );
         }
 
         if (requestItem.attribute instanceof IdentityAttribute) {
@@ -51,9 +53,8 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     }
 
     private canCreateWithIdentityAttribute(requestItem: ShareAttributeRequestItem) {
-        const ownerIsEmpty = requestItem.attribute.owner.toString() === "";
         const ownerIsCurrentIdentity = requestItem.attribute.owner.equals(this.currentIdentityAddress);
-        if (!ownerIsEmpty && !ownerIsCurrentIdentity) {
+        if (!ownerIsCurrentIdentity) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
             );
@@ -63,14 +64,14 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     }
 
     private canCreateWithRelationshipAttribute(attribute: RelationshipAttribute, recipient?: CoreAddress) {
+        if (attribute.owner.equals(recipient)) {
+            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("It doesn't make sense to share a RelationshipAttribute with its owner."));
+        }
+
         if (attribute.confidentiality === RelationshipAttributeConfidentiality.Private) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem("The confidentiality of the given `attribute` is private. Therefore you are not allowed to share it.")
             );
-        }
-
-        if (attribute.owner.equals(recipient)) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("It doesn't make sense to share a RelationshipAttribute with its owner."));
         }
 
         return ValidationResult.success();

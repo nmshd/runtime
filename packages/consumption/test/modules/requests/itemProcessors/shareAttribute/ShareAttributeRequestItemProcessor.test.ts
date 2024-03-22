@@ -225,7 +225,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
         const localAttribute = await consumptionController.attributes.createLocalAttribute({
             content: IdentityAttribute.from({
-                owner: CoreAddress.from("sender"),
+                owner: testAccount.identity.address,
                 value: GivenName.from({
                     value: "AGivenName"
                 })
@@ -247,7 +247,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
         expect(result).errorValidationResult({
             code: "error.consumption.requests.invalidRequestItem",
-            message: "Only an IdentityAttribute which isn't a copy of a sourceAttribute can be shared."
+            message: "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
         });
     });
 
