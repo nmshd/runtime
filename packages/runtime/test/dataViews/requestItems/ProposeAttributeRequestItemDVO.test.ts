@@ -174,6 +174,7 @@ describe("ProposeAttributeRequestItemDVO", () => {
 
     test("check the MessageDVO for the recipient", async () => {
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+        await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const dto = recipientMessage;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
