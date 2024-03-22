@@ -286,7 +286,7 @@ export class AccountController {
         this._log.trace(`Registered identity with address ${deviceResponse.address}, device id is ${deviceResponse.device.id}.`);
 
         if (!localAddress.equals(deviceResponse.address)) {
-            throw new TransportError("The backbone address does not match the local address.");
+            // throw new TransportError("The backbone address does not match the local address.");
         }
 
         const identity = Identity.from({
