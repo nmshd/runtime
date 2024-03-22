@@ -225,7 +225,11 @@ export class RelationshipTemplateController extends TransportController {
         const templateDoc = await this.templates.read(id.toString());
         if (templateDoc) {
             const template = await this.updateCacheOfExistingTemplateInDb(id.toString());
-            this.eventBus.publish(new PeerRelationshipTemplateLoadedEvent(this.parent.identity.address.toString(), template));
+
+            if (!template.isOwn) {
+                this.eventBus.publish(new PeerRelationshipTemplateLoadedEvent(this.parent.identity.address.toString(), template));
+            }
+
             return template;
         }
 
