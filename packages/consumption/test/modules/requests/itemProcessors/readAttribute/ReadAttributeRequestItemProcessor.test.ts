@@ -5,6 +5,7 @@ import {
     IdentityAttributeQuery,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
+    RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     RelationshipAttributeQuery,
     Request,
@@ -17,6 +18,7 @@ import {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionController,
     ConsumptionIds,
+    LocalAttributeShareInfo,
     LocalRequest,
     LocalRequestStatus,
     ReadAttributeRequestItemProcessor
@@ -534,7 +536,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
 
         test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
-            const requestId = await ConsumptionIds.request.generate();
             const peerAddress = CoreAddress.from("peerAddress");
 
             const predecessorRA = await consumptionController.attributes.createLocalAttribute({
@@ -543,10 +544,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 })
             });
 
-            await consumptionController.attributes.createSharedLocalAttributeCopy({
+            const predecessorOSIA = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: predecessorRA.id,
                 peer: peerAddress,
-                requestReference: requestId
+                requestReference: CoreId.from("initialRequest")
             });
 
             const { successor: successorRA } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRA.id, {
@@ -564,6 +565,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" })
             });
 
+            const requestId = await ConsumptionIds.request.generate();
             const incomingRequest = LocalRequest.from({
                 id: requestId,
                 createdAt: CoreDate.utc(),
@@ -589,12 +591,174 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(successorOSIA).toBeDefined();
             expect(successorOSIA!.shareInfo).toBeDefined();
             expect(successorOSIA!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
-            expect(successorOSIA?.shareInfo!.sourceAttribute).toStrictEqual(successorRA.id);
+            expect(successorOSIA!.shareInfo!.sourceAttribute).toStrictEqual(successorRA.id);
+            expect(successorOSIA!.succeeds).toStrictEqual(predecessorOSIA.id);
+
+            const updatedPredecessorOSIA = await consumptionController.attributes.getLocalAttribute(predecessorOSIA.id);
+            expect(updatedPredecessorOSIA!.succeededBy).toStrictEqual(successorOSIA!.id);
+        });
+
+        test("accept with existing own shared third party RelationshipAttribute whose predecessor was already shared", async function () {
+            const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
+            const peerAddress = CoreAddress.from("peerAddress");
+
+            const predecessorSourceAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: thirdPartyAddress,
+                    requestReference: CoreId.from("reqRef")
+                })
+            });
+
+            const predecessorOSRA = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: predecessorSourceAttribute.id,
+                peer: peerAddress,
+                requestReference: CoreId.from("initialRequest")
+            });
+
+            const { successor: successorSourceAttribute } = await consumptionController.attributes.succeedOwnSharedRelationshipAttribute(predecessorSourceAttribute.id, {
+                content: RelationshipAttribute.from({
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "A new title",
+                        value: "A new value"
+                    },
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "aKey",
+                    owner: CoreAddress.from(accountController.identity.address)
+                }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: thirdPartyAddress,
+                    notificationReference: CoreId.from("successionNotification")
+                })
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: ThirdPartyRelationshipAttributeQuery.from({
+                    key: "aKey",
+                    owner: accountController.identity.address,
+                    thirdParty: [thirdPartyAddress]
+                })
+            });
+
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: peerAddress,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: successorSourceAttribute.id.toString()
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+
+            const successorOSIA = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
+            expect(successorOSIA).toBeDefined();
+            expect(successorOSIA!.shareInfo).toBeDefined();
+            expect(successorOSIA!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+            expect(successorOSIA?.shareInfo!.sourceAttribute).toStrictEqual(successorSourceAttribute.id);
+            expect(successorOSIA!.succeeds).toStrictEqual(predecessorOSRA.id);
+
+            const updatedPredecessorOSIA = await consumptionController.attributes.getLocalAttribute(predecessorOSRA.id);
+            expect(updatedPredecessorOSIA!.succeededBy).toStrictEqual(successorOSIA!.id);
+        });
+
+        test("accept with existing third party owned RelationshipAttribute whose predecessor was already shared", async function () {
+            const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
+            const peerAddress = CoreAddress.from("peerAddress");
+
+            const predecessorSourceAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({
+                    owner: thirdPartyAddress
+                }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: thirdPartyAddress,
+                    requestReference: CoreId.from("reqRef")
+                })
+            });
+
+            const predecessorOSRA = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: predecessorSourceAttribute.id,
+                peer: peerAddress,
+                requestReference: CoreId.from("initialRequest")
+            });
+
+            const { successor: successorSourceAttribute } = await consumptionController.attributes.succeedPeerSharedRelationshipAttribute(predecessorSourceAttribute.id, {
+                content: RelationshipAttribute.from({
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "A new title",
+                        value: "A new value"
+                    },
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "aKey",
+                    owner: thirdPartyAddress
+                }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: thirdPartyAddress,
+                    notificationReference: CoreId.from("successionNotification")
+                })
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: ThirdPartyRelationshipAttributeQuery.from({
+                    key: "aKey",
+                    owner: accountController.identity.address,
+                    thirdParty: [thirdPartyAddress]
+                })
+            });
+
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: peerAddress,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: successorSourceAttribute.id.toString()
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+
+            const successorOSIA = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
+            expect(successorOSIA).toBeDefined();
+            expect(successorOSIA!.shareInfo).toBeDefined();
+            expect(successorOSIA!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+            expect(successorOSIA?.shareInfo!.sourceAttribute).toStrictEqual(successorSourceAttribute.id);
+            expect(successorOSIA!.succeeds).toStrictEqual(predecessorOSRA.id);
+
+            const updatedPredecessorOSIA = await consumptionController.attributes.getLocalAttribute(predecessorOSRA.id);
+            expect(updatedPredecessorOSIA!.succeededBy).toStrictEqual(successorOSIA!.id);
         });
     });
 
     describe("applyIncomingResponseItem", function () {
-        test("creates a peer Attribute with the Attribute received in the ResponseItem", async function () {
+        test("creates a new peer shared Attribute with the Attribute received in the ResponseItem", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" })
@@ -631,6 +795,122 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.shareInfo).toBeDefined();
             expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             expect(createdAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+        });
+
+        test("succeeds an existing peer shared IdentityAttribute with the Attribute received in the ResponseItem", async function () {
+            const peerAddress = CoreAddress.from("peerAddress");
+
+            const predecessorPSIA = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: peerAddress
+                }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: peerAddress,
+                    requestReference: CoreId.from("oldReqRef")
+                })
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: peerAddress,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const successorId = await ConsumptionIds.attribute.generate();
+            const responseItem = AttributeSuccessionAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                predecessorId: predecessorPSIA.id,
+                successorId: successorId,
+                successorContent: TestObjectFactory.createIdentityAttribute({
+                    owner: peerAddress
+                })
+            });
+
+            await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
+
+            const successorPSIA = await consumptionController.attributes.getLocalAttribute(successorId);
+            expect(successorPSIA).toBeDefined();
+            expect(successorPSIA!.shareInfo).toBeDefined();
+            expect(successorPSIA!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+            expect(successorPSIA!.shareInfo!.sourceAttribute).toBeUndefined();
+            expect(successorPSIA!.succeeds).toStrictEqual(predecessorPSIA.id);
+
+            const updatedPredecessorPSIA = await consumptionController.attributes.getLocalAttribute(predecessorPSIA.id);
+            expect(updatedPredecessorPSIA!.succeededBy).toStrictEqual(successorPSIA!.id);
+        });
+
+        // TODO: ThirdPartyRelationshipAttribute Succession
+        test("succeeds an existing third party owned RelationshipAttribute with the Attribute received in the ResponseItem", async function () {
+            const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
+            const peerAddress = CoreAddress.from("peerAddress");
+
+            const predecessorPSRA = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({
+                    owner: thirdPartyAddress
+                }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: peerAddress,
+                    requestReference: CoreId.from("oldReqRef")
+                })
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: ThirdPartyRelationshipAttributeQuery.from({
+                    key: "aKey",
+                    owner: thirdPartyAddress,
+                    thirdParty: [thirdPartyAddress]
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: peerAddress,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const successorId = await ConsumptionIds.attribute.generate();
+            const responseItem = AttributeSuccessionAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                predecessorId: predecessorPSRA.id,
+                successorId: successorId,
+                successorContent: TestObjectFactory.createRelationshipAttribute({
+                    owner: thirdPartyAddress
+                })
+            });
+
+            await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
+
+            const successorPSRA = await consumptionController.attributes.getLocalAttribute(successorId);
+            expect(successorPSRA).toBeDefined();
+            expect(successorPSRA!.shareInfo).toBeDefined();
+            expect(successorPSRA!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+            expect(successorPSRA!.shareInfo!.sourceAttribute).toBeUndefined();
+            expect(successorPSRA!.succeeds).toStrictEqual(predecessorPSRA.id);
+
+            const updatedPredecessorPSRA = await consumptionController.attributes.getLocalAttribute(predecessorPSRA.id);
+            expect(updatedPredecessorPSRA!.succeededBy).toStrictEqual(successorPSRA!.id);
         });
     });
 });

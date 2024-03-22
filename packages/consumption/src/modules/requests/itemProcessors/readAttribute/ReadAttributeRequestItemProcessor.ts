@@ -65,7 +65,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
             }
 
-            // TODO: this doesn't work with third party RelationshipAttributes
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
                 parsedParams.existingAttributeId,
                 [requestInfo.peer],
