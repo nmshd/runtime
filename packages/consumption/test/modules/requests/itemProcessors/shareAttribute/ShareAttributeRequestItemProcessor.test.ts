@@ -251,6 +251,48 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
     });
 
+    test("returns error when the IdentityAttribute is already shared with this peer", async function () {
+        const recipientAddress = CoreAddress.from("recipientAddress");
+
+        const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            content: IdentityAttribute.from({
+                owner: testAccount.identity.address,
+                value: GivenName.from({
+                    value: "AGivenName"
+                })
+            })
+        });
+
+        const localAttributeCopy = await consumptionController.attributes.createLocalAttribute({
+            content: IdentityAttribute.from({
+                owner: testAccount.identity.address,
+                value: GivenName.from({
+                    value: "AGivenName"
+                })
+            }),
+            shareInfo: {
+                peer: recipientAddress,
+                requestReference: await ConsumptionIds.request.generate(),
+                sourceAttribute: localAttribute.id
+            }
+        });
+        expect(localAttributeCopy.isShared()).toBe(true);
+
+        const requestItem = ShareAttributeRequestItem.from({
+            mustBeAccepted: false,
+            attribute: localAttribute.content,
+            sourceAttributeId: localAttribute.id
+        });
+        const request = Request.from({ items: [requestItem] });
+
+        const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipientAddress);
+
+        expect(result).errorValidationResult({
+            code: "error.consumption.requests.invalidRequestItem",
+            message: `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has been already shared to this peer.`
+        });
+    });
+
     describe("accept", function () {
         test("in case of an IdentityAttribute with 'owner=<empty>', creates a Local Attribute for the sender of the Request", async function () {
             const senderAddress = CoreAddress.from("SenderAddress");

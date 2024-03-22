@@ -45,6 +45,17 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
         }
 
+        if (requestItem.attribute instanceof IdentityAttribute && this.accountController.identity.isMe(requestItem.attribute.owner) && recipient !== undefined) {
+            const attributeshared = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(requestItem.sourceAttributeId, [recipient], true);
+            if (attributeshared[0]) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidRequestItem(
+                        `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has been already shared to this peer.`
+                    )
+                );
+            }
+        }
+
         if (requestItem.attribute instanceof IdentityAttribute) {
             return this.canCreateWithIdentityAttribute(requestItem);
         }
