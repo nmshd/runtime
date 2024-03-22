@@ -65,6 +65,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
             }
 
+            // TODO: this doesn't work with third party RelationshipAttributes
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
                 parsedParams.existingAttributeId,
                 [requestInfo.peer],
@@ -109,8 +110,31 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     });
                 }
                 if (existingSourceAttribute.isRelationshipAttribute()) {
-                    // TODO: succeed third party RelationshipAttribute
-                    throw new Error();
+                    if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
+                        const successorOwnSharedAttribute = await this.performOwnSharedRelationshipAttributeSuccession(
+                            predecessorOwnSharedAttribute.id,
+                            existingSourceAttribute,
+                            requestInfo
+                        );
+                        return AttributeSuccessionAcceptResponseItem.from({
+                            result: ResponseItemResult.Accepted,
+                            successorId: successorOwnSharedAttribute.id,
+                            successorContent: successorOwnSharedAttribute.content,
+                            predecessorId: predecessorOwnSharedAttribute.id
+                        });
+                    }
+
+                    const successorOwnSharedAttribute = await this.performThirdPartyOwnedRelationshipAttributeSuccession(
+                        predecessorOwnSharedAttribute.id,
+                        existingSourceAttribute,
+                        requestInfo
+                    );
+                    return AttributeSuccessionAcceptResponseItem.from({
+                        result: ResponseItemResult.Accepted,
+                        successorId: successorOwnSharedAttribute.id,
+                        successorContent: successorOwnSharedAttribute.content,
+                        predecessorId: predecessorOwnSharedAttribute.id
+                    });
                 }
             } else {
                 throw new Error("You cannot share the predecessor of an already shared Attribute version.");
@@ -137,17 +161,40 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
     }
 
     private async performOwnSharedIdentityAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
-        const shareInfo = LocalAttributeShareInfo.from({
-            peer: requestInfo.peer,
-            requestReference: requestInfo.id,
-            sourceAttribute: sourceSuccessor.id
-        });
         const successorParams = {
             content: sourceSuccessor.content,
-            succeeds: sharedPredecessorId,
-            shareInfo: shareInfo
+            shareInfo: LocalAttributeShareInfo.from({
+                peer: requestInfo.peer,
+                requestReference: requestInfo.id,
+                sourceAttribute: sourceSuccessor.id
+            })
         };
         const { successor } = await this.consumptionController.attributes.succeedOwnSharedIdentityAttribute(sharedPredecessorId, successorParams);
+        return successor;
+    }
+
+    private async performOwnSharedRelationshipAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
+        const successorParams = {
+            content: sourceSuccessor.content,
+            shareInfo: LocalAttributeShareInfo.from({
+                peer: requestInfo.peer,
+                requestReference: requestInfo.id
+            })
+        };
+        const { successor } = await this.consumptionController.attributes.succeedOwnSharedRelationshipAttribute(sharedPredecessorId, successorParams);
+        return successor;
+    }
+
+    private async performThirdPartyOwnedRelationshipAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
+        const successorParams = {
+            content: sourceSuccessor.content,
+            shareInfo: LocalAttributeShareInfo.from({
+                peer: requestInfo.peer,
+                requestReference: requestInfo.id,
+                sourceAttribute: sourceSuccessor.id
+            })
+        };
+        const { successor } = await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(sharedPredecessorId, successorParams);
         return successor;
     }
 
@@ -172,7 +219,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
     }
 
     public override async applyIncomingResponseItem(
-        responseItem: ReadAttributeAcceptResponseItem | RejectResponseItem,
+        responseItem: ReadAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | RejectResponseItem,
         _requestItem: ReadAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<void> {
@@ -187,13 +234,19 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         if (responseItem instanceof AttributeSuccessionAcceptResponseItem) {
             const successorParams = AttributeSuccessorParams.from({
+                id: responseItem.successorId,
                 content: responseItem.successorContent,
                 shareInfo: LocalAttributeShareInfo.from({
                     peer: requestInfo.peer,
                     requestReference: requestInfo.id
                 })
             });
-            await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
+
+            if (responseItem.successorContent instanceof IdentityAttribute) {
+                await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
+            } else {
+                await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(responseItem.predecessorId, successorParams);
+            }
         }
 
         return;
