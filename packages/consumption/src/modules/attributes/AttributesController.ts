@@ -1029,12 +1029,6 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const ownSharedIdentityAttributes = await this.getLocalAttributes(query);
-        try {
-            ownSharedIdentityAttributes.sort((a, b) => (a.shareInfo!.peer < b.shareInfo!.peer ? 1 : -1));
-        } catch (e: unknown) {
-            throw CoreErrors.attributes.cannotSortAttributesByPeers(e);
-        }
-
         const ownSharedIdentityAttributePredecessors = await this.getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute, query);
         const ownSharedIdentityAttributeSuccessors = await this.getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute, query);
 
@@ -1060,11 +1054,6 @@ export class AttributesController extends ConsumptionBaseController {
 
             query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
             const sharedCopies = await this.getLocalAttributes(query);
-            try {
-                sharedCopies.sort((a, b) => (a.shareInfo!.peer < b.shareInfo!.peer ? 1 : -1));
-            } catch (e: unknown) {
-                throw CoreErrors.attributes.cannotSortAttributesByPeers(e);
-            }
 
             ownSharedIdentityAttributePredecessors.push(...sharedCopies);
         }
@@ -1090,11 +1079,6 @@ export class AttributesController extends ConsumptionBaseController {
 
             query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
             const sharedCopies = await this.getLocalAttributes(query);
-            try {
-                sharedCopies.sort((a, b) => (a.shareInfo!.peer < b.shareInfo!.peer ? -1 : 1));
-            } catch (e: unknown) {
-                throw CoreErrors.attributes.cannotSortAttributesByPeers(e);
-            }
 
             ownSharedIdentityAttributeSuccessors.push(...sharedCopies);
         }

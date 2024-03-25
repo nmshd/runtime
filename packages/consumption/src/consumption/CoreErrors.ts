@@ -223,16 +223,6 @@ class Attributes {
             `The sender (id: ${senderId}) is not the peer you shared the attribute (id: ${attributeId}) with.`
         );
     }
-
-    public cannotSortAttributesByPeers(error: any) {
-        return new CoreError(
-            "error.consumption.attributes.cannotSortAttributesByPeers",
-            "An error occured sorting an Array of shared Attributes by peers.",
-            error,
-            undefined,
-            error instanceof Error ? error : undefined
-        );
-    }
 }
 
 class Requests {

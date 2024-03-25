@@ -2195,10 +2195,7 @@ describe("AttributesController", function () {
 
         test("should return all shared predecessors for all peers", async function () {
             const result = await consumptionController.attributes.getSharedPredecessorsOfRepositoryAttribute(repositoryAttributeV2);
-            const expectedPredecessorsSorted = [ownSharedIdentityAttributeV1PeerA, ownSharedIdentityAttributeV1PeerB].sort((a, b) =>
-                a.shareInfo!.peer < b.shareInfo!.peer ? 1 : -1
-            );
-            expect(result).toStrictEqual(expectedPredecessorsSorted);
+            expect(result).toStrictEqual(expect.arrayContaining([ownSharedIdentityAttributeV1PeerA, ownSharedIdentityAttributeV1PeerB]));
         });
 
         test("should return all shared predecessors for a single peer", async function () {
@@ -2208,9 +2205,7 @@ describe("AttributesController", function () {
 
         test("should return all shared successors for all peers", async function () {
             const result = await consumptionController.attributes.getSharedSuccessorsOfRepositoryAttribute(repositoryAttributeV0);
-            const expectedVersion1sSorted = [ownSharedIdentityAttributeV1PeerA, ownSharedIdentityAttributeV1PeerB].sort((a, b) => (a.shareInfo!.peer < b.shareInfo!.peer ? -1 : 1));
-            const expectedSuccessorsSorted = [...expectedVersion1sSorted, ownSharedIdentityAttributeV2PeerB];
-            expect(result).toStrictEqual(expectedSuccessorsSorted);
+            expect(result).toStrictEqual(expect.arrayContaining([ownSharedIdentityAttributeV1PeerA, ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV2PeerB]));
         });
 
         test("should return all shared successors for a single peer", async function () {
@@ -2220,18 +2215,17 @@ describe("AttributesController", function () {
 
         test("should return all shared versions for all peers", async function () {
             const allRepositoryAttributeVersions = [repositoryAttributeV0, repositoryAttributeV1, repositoryAttributeV2];
-            const expectedVersion1sSorted = [ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV1PeerA].sort((a, b) => (a.shareInfo!.peer < b.shareInfo!.peer ? 1 : -1));
-            const allOwnSharedAttributeVersions = [ownSharedIdentityAttributeV2PeerB, ...expectedVersion1sSorted];
+            const allOwnSharedAttributeVersions = [ownSharedIdentityAttributeV2PeerB, ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV1PeerA];
             for (const repositoryAttributeVersion of allRepositoryAttributeVersions) {
                 const result1 = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(repositoryAttributeVersion.id, undefined, false);
-                expect(result1).toStrictEqual(allOwnSharedAttributeVersions);
+                expect(result1).toStrictEqual(expect.arrayContaining(allOwnSharedAttributeVersions));
 
                 const result2 = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
                     repositoryAttributeVersion.id,
                     [CoreAddress.from("peerA"), CoreAddress.from("peerB")],
                     false
                 );
-                expect(result2).toStrictEqual(allOwnSharedAttributeVersions);
+                expect(result2).toStrictEqual(expect.arrayContaining(allOwnSharedAttributeVersions));
             }
         });
 

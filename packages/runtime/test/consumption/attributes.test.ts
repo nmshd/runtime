@@ -1360,13 +1360,12 @@ describe("Get (shared) versions of attribute", () => {
                 const result1 = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: version.id });
                 expect(result1.isSuccess).toBe(true);
                 const returnedVersions1 = result1.value;
-                const expectedVersions = [sOSIAVersion2, sOSIAVersion2FurtherPeer].sort((a, b) => (a.shareInfo!.peer < b.shareInfo!.peer ? 1 : -1));
-                expect(returnedVersions1).toStrictEqual(expectedVersions);
+                expect(returnedVersions1).toStrictEqual(expect.arrayContaining([sOSIAVersion2, sOSIAVersion2FurtherPeer]));
 
                 const result2 = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({ attributeId: version.id, onlyLatestVersions: true });
                 expect(result2.isSuccess).toBe(true);
                 const returnedVersions2 = result2.value;
-                expect(returnedVersions2).toStrictEqual(expectedVersions);
+                expect(returnedVersions2).toStrictEqual(expect.arrayContaining([sOSIAVersion2, sOSIAVersion2FurtherPeer]));
             }
         });
 
@@ -1376,9 +1375,7 @@ describe("Get (shared) versions of attribute", () => {
                 expect(result.isSuccess).toBe(true);
 
                 const returnedVersions = result.value;
-                const expectedVersion2s = [sOSIAVersion2, sOSIAVersion2FurtherPeer].sort((a, b) => (a.shareInfo!.peer < b.shareInfo!.peer ? 1 : -1));
-                const expectedVersions = [...expectedVersion2s, sOSIAVersion0];
-                expect(returnedVersions).toStrictEqual(expectedVersions);
+                expect(returnedVersions).toStrictEqual(expect.arrayContaining([sOSIAVersion2, sOSIAVersion2FurtherPeer, sOSIAVersion0]));
             }
         });
 
