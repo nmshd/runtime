@@ -878,7 +878,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.attributes.delete({ id: id });
     }
 
-    public async deleteSourceAttribute(sourceAttribute: LocalAttribute): Promise<void> {
+    public async deleteRepositoryAttribute(sourceAttribute: LocalAttribute): Promise<void> {
         const validationResult = await this.validateSourceAttributeDeletion(sourceAttribute);
         if (validationResult.isError()) {
             throw validationResult.error;

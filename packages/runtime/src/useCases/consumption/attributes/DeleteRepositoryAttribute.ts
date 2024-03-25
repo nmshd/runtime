@@ -39,7 +39,7 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
             return Result.fail(validationResult.error);
         }
 
-        await this.attributesController.deleteSourceAttribute(repositoryAttribute);
+        await this.attributesController.deleteRepositoryAttribute(repositoryAttribute);
 
         await this.accountController.syncDatawallet();
 
