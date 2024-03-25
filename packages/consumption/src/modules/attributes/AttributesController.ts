@@ -878,6 +878,84 @@ export class AttributesController extends ConsumptionBaseController {
         await this.attributes.delete({ id: id });
     }
 
+    public async deleteSourceAttribute(sourceAttribute: LocalAttribute): Promise<void> {
+        const validationResult = await this.validateSourceAttributeDeletion(sourceAttribute);
+        if (validationResult.isError()) {
+            throw validationResult.error;
+        }
+
+        if (typeof sourceAttribute.succeededBy !== "undefined") {
+            const successor = await this.getLocalAttribute(sourceAttribute.succeededBy);
+            if (typeof successor === "undefined") {
+                throw CoreErrors.attributes.successorDoesNotExist();
+            }
+            await this.detachSuccessor(successor);
+        }
+
+        const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": sourceAttribute.id.toString() });
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(sourceAttribute);
+        const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
+        await this.detachAttributeCopies(attributeCopiesToDetach);
+
+        await this.deletePredecessorsOfAttribute(sourceAttribute.id);
+        await this.deleteAttribute(sourceAttribute);
+    }
+
+    public async validateSourceAttributeDeletion(sourceAttribute: LocalAttribute): Promise<ValidationResult> {
+        const validateSuccessorResult = await this.validateSuccessor(sourceAttribute);
+        if (validateSuccessorResult.isError()) {
+            return validateSuccessorResult;
+        }
+
+        const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": sourceAttribute.id.toString() });
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(sourceAttribute);
+        const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
+
+        const validateSharedAttributesResult = this.validateSharedAttributes(attributeCopiesToDetach);
+        return validateSharedAttributesResult;
+    }
+
+    private async validateSuccessor(predecessor: LocalAttribute): Promise<ValidationResult> {
+        if (typeof predecessor.succeededBy !== "undefined") {
+            const successor = await this.getLocalAttribute(predecessor.succeededBy);
+            if (typeof successor === "undefined") {
+                return ValidationResult.error(CoreErrors.attributes.successorDoesNotExist());
+            }
+        }
+        return ValidationResult.success();
+    }
+
+    private validateSharedAttributes(sharedAttributes: LocalAttribute[]): ValidationResult {
+        for (const sharedAttribute of sharedAttributes) {
+            if (!sharedAttribute.isShared()) {
+                return ValidationResult.error(CoreErrors.attributes.isNotSharedAttribute(sharedAttribute.id));
+            }
+        }
+        return ValidationResult.success();
+    }
+
+    private async detachSuccessor(successor: LocalAttribute): Promise<void> {
+        successor.succeeds = undefined;
+        await this.updateAttributeUnsafe(successor);
+    }
+
+    private async detachAttributeCopies(sharedAttributes: LocalAttribute[]): Promise<void> {
+        for (const sharedAttribute of sharedAttributes) {
+            if (!sharedAttribute.isShared()) {
+                throw CoreErrors.attributes.isNotSharedAttribute(sharedAttribute.id);
+            }
+            sharedAttribute.shareInfo.sourceAttribute = undefined;
+            await this.updateAttributeUnsafe(sharedAttribute);
+        }
+    }
+
+    private async deletePredecessorsOfAttribute(attributeId: CoreId): Promise<void> {
+        const predecessors = await this.getPredecessorsOfAttribute(attributeId);
+        for (const predecessor of predecessors) {
+            await this.deleteAttribute(predecessor);
+        }
+    }
+
     public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
         const attribute = await this.getLocalAttribute(id);
         if (typeof attribute === "undefined") {

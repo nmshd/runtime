@@ -123,6 +123,10 @@ class Attributes {
         return new CoreError("error.consumption.attributes.predecessorDoesNotExist", "The predecessor does not exist.");
     }
 
+    public successorDoesNotExist() {
+        return new CoreError("error.consumption.attributes.successorDoesNotExist", "The successor does not exist.");
+    }
+
     public successorSourceAttributeIsNotSpecified() {
         return new CoreError("error.consumption.attributes.successorSourceAttributeIsNotSpecified", "You must specify the source attribute of the successor.");
     }
@@ -199,6 +203,10 @@ class Attributes {
 
     public invalidPropertyValue(message: string) {
         return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
+    }
+
+    public isNotSharedAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotSharedAttribute", `The attribute (id: ${attributeId}) is not a shared attribute.`);
     }
 
     public isNotOwnSharedAttribute(attributeId: string | CoreId) {

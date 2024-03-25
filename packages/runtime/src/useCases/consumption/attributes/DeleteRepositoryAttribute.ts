@@ -16,7 +16,7 @@ class Validator extends SchemaValidator<DeleteRepositoryAttributeRequest> {
 
 export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAttributeRequest, void> {
     public constructor(
-        @Inject private readonly attributeController: AttributesController,
+        @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
@@ -25,7 +25,7 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
 
     protected async executeInternal(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
         const repositoryAttributeId = CoreId.from(request.attributeId);
-        const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
+        const repositoryAttribute = await this.attributesController.getLocalAttribute(repositoryAttributeId);
 
         if (typeof repositoryAttribute === "undefined") {
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
@@ -35,33 +35,12 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
         }
 
-        const ownSharedIdentityAttributes = await this.attributeController.getLocalAttributes({ "shareInfo.sourceAttribute": repositoryAttributeId.toString() });
-        const ownSharedIdentityAttributePredecessors = await this.attributeController.getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute);
-        for (const ownSharedAttribute of [...ownSharedIdentityAttributes, ...ownSharedIdentityAttributePredecessors]) {
-            if (!ownSharedAttribute.isOwnSharedAttribute(this.accountController.identity.address)) {
-                throw new Error(
-                    `The Attribute ${ownSharedAttribute.id} does not fulfill the requirements of an own shared Attribute, so it cannot be adjusted adequately, deleting its source Attribute.`
-                );
-            }
-
-            ownSharedAttribute.shareInfo.sourceAttribute = undefined;
-            await this.attributeController.updateAttributeUnsafe(ownSharedAttribute);
+        const validationResult = await this.attributesController.validateSourceAttributeDeletion(repositoryAttribute);
+        if (validationResult.isError()) {
+            return Result.fail(validationResult.error);
         }
 
-        if (typeof repositoryAttribute.succeededBy !== "undefined") {
-            const successor = await this.attributeController.getLocalAttribute(repositoryAttribute.succeededBy);
-            if (typeof successor === "undefined") {
-                throw new Error(`The Attribute ${repositoryAttribute.succeededBy} was not found, even though it is specified as successor of Attribute ${repositoryAttribute.id}.`);
-            }
-
-            successor.succeeds = undefined;
-            await this.attributeController.updateAttributeUnsafe(successor);
-        }
-
-        const predecessors = await this.attributeController.getPredecessorsOfAttribute(repositoryAttributeId);
-        for (const attr of [repositoryAttribute, ...predecessors]) {
-            await this.attributeController.deleteAttribute(attr);
-        }
+        await this.attributesController.deleteSourceAttribute(repositoryAttribute);
 
         await this.accountController.syncDatawallet();
 
