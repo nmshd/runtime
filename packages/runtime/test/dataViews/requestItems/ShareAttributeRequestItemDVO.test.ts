@@ -35,7 +35,11 @@ let sConsumptionServices: ConsumptionServices;
 let rConsumptionServices: ConsumptionServices;
 let sEventBus: MockEventBus;
 let rEventBus: MockEventBus;
-let requestContent: CreateOutgoingRequestRequest;
+let requestContent1: CreateOutgoingRequestRequest;
+let requestContent2: CreateOutgoingRequestRequest;
+let requestContent3: CreateOutgoingRequestRequest;
+let requestContent4: CreateOutgoingRequestRequest;
+let requestContent5: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
 let sAddress: string;
 let rAddress: string;
@@ -56,7 +60,7 @@ beforeAll(async () => {
     sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
-    const senderAttribute = await sConsumptionServices.attributes.createRepositoryAttribute({
+    const senderAttribute1 = await sConsumptionServices.attributes.createRepositoryAttribute({
         content: {
             value: {
                 "@type": "DisplayName",
@@ -65,14 +69,102 @@ beforeAll(async () => {
         }
     });
 
-    requestContent = {
+    const senderAttribute2 = await sConsumptionServices.attributes.createRepositoryAttribute({
+        content: {
+            value: {
+                "@type": "DisplayName",
+                value: "Dr. Theodor Munchkin"
+            }
+        }
+    });
+
+    const senderAttribute3 = await sConsumptionServices.attributes.createRepositoryAttribute({
+        content: {
+            value: {
+                "@type": "DisplayName",
+                value: "Dr. Theodor"
+            }
+        }
+    });
+
+    const senderAttribute4 = await sConsumptionServices.attributes.createRepositoryAttribute({
+        content: {
+            value: {
+                "@type": "DisplayName",
+                value: "Dr."
+            }
+        }
+    });
+
+    const senderAttribute5 = await sConsumptionServices.attributes.createRepositoryAttribute({
+        content: {
+            value: {
+                "@type": "GivenName",
+                value: "Theodor"
+            }
+        }
+    });
+
+    requestContent1 = {
         content: {
             items: [
                 {
                     "@type": "ShareAttributeRequestItem",
                     mustBeAccepted: true,
-                    attribute: senderAttribute.value.content,
-                    sourceAttributeId: senderAttribute.value.id
+                    attribute: senderAttribute1.value.content,
+                    sourceAttributeId: senderAttribute1.value.id
+                } as ShareAttributeRequestItemJSON
+            ]
+        },
+        peer: rAddress
+    };
+    requestContent2 = {
+        content: {
+            items: [
+                {
+                    "@type": "ShareAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: senderAttribute2.value.content,
+                    sourceAttributeId: senderAttribute2.value.id
+                } as ShareAttributeRequestItemJSON
+            ]
+        },
+        peer: rAddress
+    };
+    requestContent3 = {
+        content: {
+            items: [
+                {
+                    "@type": "ShareAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: senderAttribute3.value.content,
+                    sourceAttributeId: senderAttribute3.value.id
+                } as ShareAttributeRequestItemJSON
+            ]
+        },
+        peer: rAddress
+    };
+    requestContent4 = {
+        content: {
+            items: [
+                {
+                    "@type": "ShareAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: senderAttribute4.value.content,
+                    sourceAttributeId: senderAttribute4.value.id
+                } as ShareAttributeRequestItemJSON
+            ]
+        },
+        peer: rAddress
+    };
+    requestContent5 = {
+        content: {
+            items: [
+                {
+                    "@type": "ShareAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: senderAttribute5.value.content,
+                    sourceAttributeId: senderAttribute5.value.id
                 } as ShareAttributeRequestItemJSON
             ]
         },
@@ -90,7 +182,7 @@ beforeEach(function () {
 
 describe("ShareAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
-        const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent1);
         await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
@@ -122,7 +214,7 @@ describe("ShareAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the recipient", async () => {
-        const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent1);
         const dto = recipientMessage;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -154,7 +246,7 @@ describe("ShareAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
-        const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+        const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent1);
         await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
             requestId: recipientMessage.content.id,
@@ -215,9 +307,9 @@ describe("ShareAttributeRequestItemDVO", () => {
 
     test("check the sender's dvo for the recipient", async () => {
         const baselineNumberOfItems = (await rExpander.expandAddress(sAddress)).items?.length ?? 0;
-        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent2, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
-        expect(dvo.name).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect(dvo.name).toBe("Dr. Theodor Munchkin");
         const numberOfItems = dvo.items!.length;
         expect(numberOfItems - baselineNumberOfItems).toBe(1);
     });
@@ -228,7 +320,7 @@ describe("ShareAttributeRequestItemDVO", () => {
                 query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
             })
         ).value.length;
-        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent3, responseItems);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -250,7 +342,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("DisplayName");
-        expect(value.value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect(value.value).toBe("Dr. Theodor");
         expect(requestItemDVO.attribute.renderHints.technicalType).toBe("String");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
@@ -278,12 +370,12 @@ describe("ShareAttributeRequestItemDVO", () => {
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor");
     });
 
     test("check the attributes for the sender", async () => {
         const baselineNumberOfAttributes = (await sConsumptionServices.attributes.getOwnSharedAttributes({ peer: rAddress })).value.length;
-        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent4, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         const attributeResult = await sConsumptionServices.attributes.getOwnSharedAttributes({
             peer: dvo.request.peer.id
@@ -293,11 +385,11 @@ describe("ShareAttributeRequestItemDVO", () => {
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr.");
     });
 
     test("check the recipient's dvo for the sender", async () => {
-        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent5, responseItems);
         const dvo = await sExpander.expandAddress(senderMessage.recipients[0].address);
 
         expect(dvo.name).toStrictEqual(senderMessage.recipients[0].address.substring(3, 9));
