@@ -1036,13 +1036,7 @@ export class AttributesController extends ConsumptionBaseController {
         return ownSharedIdentityAttributeVersions;
     }
 
-    public async getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query?: any): Promise<LocalAttribute[]> {
-        if (typeof query !== "undefined") {
-            query = JSON.parse(JSON.stringify(query));
-        } else {
-            query = {};
-        }
-
+    public async getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
         const ownSharedIdentityAttributePredecessors: LocalAttribute[] = [];
         while (typeof repositoryAttribute.succeeds !== "undefined") {
             const predecessor = await this.getLocalAttribute(repositoryAttribute.succeeds);
@@ -1061,13 +1055,7 @@ export class AttributesController extends ConsumptionBaseController {
         return ownSharedIdentityAttributePredecessors;
     }
 
-    public async getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query?: any): Promise<LocalAttribute[]> {
-        if (typeof query !== "undefined") {
-            query = JSON.parse(JSON.stringify(query));
-        } else {
-            query = {};
-        }
-
+    public async getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
         const ownSharedIdentityAttributeSuccessors: LocalAttribute[] = [];
         while (typeof repositoryAttribute.succeededBy !== "undefined") {
             const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
