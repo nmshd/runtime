@@ -5,3 +5,4 @@ export * from "./OwnSharedAttributeSucceededEvent";
 export * from "./PeerSharedAttributeSucceededEvent";
 export * from "./RepositoryAttributeSucceededEvent";
 export * from "./SharedAttributeCopyCreatedEvent";
+export * from "./ThirdPartyOwnedRelationshipAttributeSucceededEvent";

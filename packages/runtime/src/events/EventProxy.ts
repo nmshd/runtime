@@ -14,7 +14,8 @@ import {
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
-    RepositoryAttributeSucceededEvent
+    RepositoryAttributeSucceededEvent,
+    ThirdPartyOwnedRelationshipAttributeSucceededEvent
 } from "./consumption";
 import {
     MessageDeliveredEvent,
@@ -88,6 +89,15 @@ export class EventProxy {
         this.subscribeToSourceEvent(consumption.PeerSharedAttributeSucceededEvent, (event) => {
             this.targetEventBus.publish(
                 new PeerSharedAttributeSucceededEvent(event.eventTargetAddress, {
+                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
+                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
+                })
+            );
+        });
+
+        this.subscribeToSourceEvent(consumption.ThirdPartyOwnedRelationshipAttributeSucceededEvent, (event) => {
+            this.targetEventBus.publish(
+                new ThirdPartyOwnedRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
                     predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
                     successor: AttributeMapper.toAttributeDTO(event.data.successor)
                 })
