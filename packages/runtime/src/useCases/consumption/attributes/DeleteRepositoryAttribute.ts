@@ -24,15 +24,14 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
     }
 
     protected async executeInternal(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
-        const repositoryAttributeId = CoreId.from(request.attributeId);
-        const repositoryAttribute = await this.attributesController.getLocalAttribute(repositoryAttributeId);
+        const repositoryAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
 
         if (typeof repositoryAttribute === "undefined") {
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
         }
 
         if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
-            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
+            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(CoreId.from(request.attributeId)));
         }
 
         const validationResult = await this.attributesController.validateSourceAttributeDeletion(repositoryAttribute);
