@@ -10,7 +10,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { AttributeSuccessorParams, LocalAttributeShareInfo } from "../../../attributes";
+import { AttributeSuccessorParams, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -86,8 +86,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
 
             if (predecessorOwnSharedAttribute.shareInfo.sourceAttribute === existingSourceAttribute.id) {
-                // TODO: return new AttributeAlreadySharedResponseItem
-                throw new Error();
+                // return new AttributeAlreadySharedResponseItem
+                throw new Error("NotImplementedError");
             }
 
             const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(predecessorOwnSharedAttribute.shareInfo.sourceAttribute);
@@ -222,7 +222,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         responseItem: ReadAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | RejectResponseItem,
         _requestItem: ReadAttributeRequestItem,
         requestInfo: LocalRequestInfo
-    ): Promise<void> {
+    ): Promise<PeerSharedAttributeSucceededEvent | void> {
         if (responseItem instanceof ReadAttributeAcceptResponseItem) {
             await this.consumptionController.attributes.createPeerLocalAttribute({
                 id: responseItem.attributeId,
@@ -243,10 +243,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             });
 
             if (responseItem.successorContent instanceof IdentityAttribute) {
-                await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
-            } else {
-                await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(responseItem.predecessorId, successorParams);
+                const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
+                return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
+                // TODO: test if event is fired
             }
+            await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(responseItem.predecessorId, successorParams);
         }
 
         return;
