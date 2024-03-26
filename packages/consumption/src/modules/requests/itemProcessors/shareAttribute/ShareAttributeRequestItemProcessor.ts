@@ -8,9 +8,10 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -46,6 +47,33 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         }
 
         if (requestItem.attribute instanceof IdentityAttribute && this.accountController.identity.isMe(requestItem.attribute.owner) && recipient !== undefined) {
+            const ownSharedIdentityAttributeVersions = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
+                requestItem.sourceAttributeId,
+                [recipient],
+                false
+            );
+            const sourceAttributeIdsOfOwnSharedIdentityAttributeVersions = ownSharedIdentityAttributeVersions.map((ownSharedIdentityAttribute) =>
+                ownSharedIdentityAttribute.shareInfo?.sourceAttribute?.toString()
+            );
+
+            let repositoryAttribute = foundAttribute;
+            let i = 0;
+            while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
+                const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
+                if (!successor) {
+                    throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
+                }
+                if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidRequestItem(
+                            `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
+                        )
+                    );
+                }
+                repositoryAttribute = successor;
+                i++;
+            }
+
             const attributeshared = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(requestItem.sourceAttributeId, [recipient], true);
             if (attributeshared[0]) {
                 return ValidationResult.error(

@@ -293,6 +293,47 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
     });
 
+    test("returns an error when a Successor of the existing IdentityAttribute is already shared", async function () {
+        const recipientAddress = CoreAddress.from("recipientAddress");
+
+        const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            content: TestObjectFactory.createIdentityAttribute({
+                owner: testAccount.identity.address
+            })
+        });
+
+        const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+            content: {
+                "@type": "IdentityAttribute",
+                owner: testAccount.identity.address.toString(),
+                value: {
+                    "@type": "GivenName",
+                    value: "AnotherGivenName"
+                }
+            }
+        });
+
+        const ownSharedCopyOfSuccessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
+            sourceAttributeId: successorOfRepositoryAttribute.id,
+            peer: recipientAddress,
+            requestReference: await ConsumptionIds.request.generate()
+        });
+
+        const requestItem = ShareAttributeRequestItem.from({
+            mustBeAccepted: true,
+            attribute: repositoryAttribute.content,
+            sourceAttributeId: repositoryAttribute.id
+        });
+        const request = Request.from({ items: [requestItem] });
+
+        const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipientAddress);
+
+        expect(result).errorValidationResult({
+            code: "error.consumption.requests.invalidRequestItem",
+            message: `The provided IdentityAttribute is outdated. You have already shared the Successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
+        });
+    });
+
     describe("accept", function () {
         test("in case of an IdentityAttribute with 'owner=<empty>', creates a Local Attribute for the sender of the Request", async function () {
             const senderAddress = CoreAddress.from("SenderAddress");
