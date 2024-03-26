@@ -383,7 +383,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem",
+                code: "error.consumption.requests.invalidAcceptParameters",
                 message: /The given Attribute belongs to someone else. You can only share own Attributes./
             });
         });
@@ -418,7 +418,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem",
+                code: "error.consumption.requests.invalidAcceptParameters",
                 message: /The given Attribute belongs to someone else. You can only share own Attributes./
             });
         });

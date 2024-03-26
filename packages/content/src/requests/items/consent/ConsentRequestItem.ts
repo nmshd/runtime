@@ -30,7 +30,7 @@ export class ConsentRequestItem extends RequestItem implements IConsentRequestIt
     })
     public link?: string;
 
-    public static from(value: IConsentRequestItem | Omit<ConsentRequestItemJSON, "@type">): ConsentRequestItem {
+    public static from(value: IConsentRequestItem | Omit<ConsentRequestItemJSON, "@type"> | ConsentRequestItemJSON): ConsentRequestItem {
         return this.fromAny(value);
     }
 

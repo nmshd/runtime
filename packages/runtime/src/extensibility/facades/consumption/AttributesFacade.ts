@@ -1,4 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
+import { Notification } from "@nmshd/content";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
@@ -6,6 +7,12 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
+    DeleteOwnSharedAttributeAndNotifyPeerRequest,
+    DeleteOwnSharedAttributeAndNotifyPeerUseCase,
+    DeletePeerSharedAttributeAndNotifyOwnerRequest,
+    DeletePeerSharedAttributeAndNotifyOwnerUseCase,
+    DeleteRepositoryAttributeRequest,
+    DeleteRepositoryAttributeUseCase,
     ExecuteIdentityAttributeQueryRequest,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteIQLQueryRequest,
@@ -63,7 +70,10 @@ export class AttributesFacade {
         @Inject private readonly executeIQLQueryUseCase: ExecuteIQLQueryUseCase,
         @Inject private readonly validateIQLQueryUseCase: ValidateIQLQueryUseCase,
         @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
-        @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase
+        @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+        @Inject private readonly deleteOwnSharedAttributeAndNotifyPeerUseCase: DeleteOwnSharedAttributeAndNotifyPeerUseCase,
+        @Inject private readonly deletePeerSharedAttributeAndNotifyOwnerUseCase: DeletePeerSharedAttributeAndNotifyOwnerUseCase,
+        @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase
     ) {}
 
     public async createRepositoryAttribute(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
@@ -140,5 +150,17 @@ export class AttributesFacade {
         request: NotifyPeerAboutRepositoryAttributeSuccessionRequest
     ): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
         return await this.notifyPeerAboutRepositoryAttributeSuccessionUseCase.execute(request);
+    }
+
+    public async deleteOwnSharedAttributeAndNotifyPeer(request: DeleteOwnSharedAttributeAndNotifyPeerRequest): Promise<Result<Notification>> {
+        return await this.deleteOwnSharedAttributeAndNotifyPeerUseCase.execute(request);
+    }
+
+    public async deletePeerSharedAttributeAndNotifyOwner(request: DeletePeerSharedAttributeAndNotifyOwnerRequest): Promise<Result<Notification>> {
+        return await this.deletePeerSharedAttributeAndNotifyOwnerUseCase.execute(request);
+    }
+
+    public async deleteRepositoryAttribute(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
+        return await this.deleteRepositoryAttributeUseCase.execute(request);
     }
 }

@@ -52,7 +52,7 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
         const candidatePredecessors = await this.attributeController.getSharedVersionsOfRepositoryAttribute(repositoryAttributeSuccessorId, [CoreAddress.from(request.peer)]);
 
         if (candidatePredecessors.length === 0) {
-            return Result.fail(RuntimeErrors.attributes.noOtherVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));
+            return Result.fail(RuntimeErrors.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));
         }
 
         if (candidatePredecessors[0].shareInfo?.sourceAttribute?.toString() === request.attributeId) {

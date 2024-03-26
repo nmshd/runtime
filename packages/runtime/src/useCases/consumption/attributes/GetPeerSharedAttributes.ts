@@ -31,6 +31,9 @@ export interface GetPeerSharedAttributesRequestQuery {
     shareInfo?: string | string[];
     "shareInfo.requestReference"?: string | string[];
     "shareInfo.notificationReference"?: string | string[];
+    deletionInfo?: string | string[];
+    "deletionInfo.deletionStatus"?: string | string[];
+    "deletionInfo.deletionDate"?: string | string[];
 }
 
 class Validator extends SchemaValidator<GetPeerSharedAttributesRequest> {

@@ -5,7 +5,7 @@ export interface AcceptFreeTextRequestItemParametersJSON extends AcceptRequestIt
     freeText: string;
 }
 
-@type("FreeTextRequestItemParameters")
+@type("AcceptFreeTextRequestItemParameters")
 export class AcceptFreeTextRequestItemParameters extends Serializable {
     @serialize()
     @validate()

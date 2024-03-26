@@ -11,6 +11,8 @@ import {
 import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
+import { CoreErrors } from "../../../consumption/CoreErrors";
+import { DeletionStatus, ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttributeDeletionInfoJSON } from "./LocalAttributeDeletionInfo";
 import { ILocalAttributeShareInfo, LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "./LocalAttributeShareInfo";
 
 export interface LocalAttributeJSON {
@@ -19,6 +21,7 @@ export interface LocalAttributeJSON {
     succeeds?: string;
     succeededBy?: string;
     shareInfo?: LocalAttributeShareInfoJSON;
+    deletionInfo?: LocalAttributeDeletionInfoJSON;
     parentId?: string;
 }
 
@@ -28,17 +31,18 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     succeeds?: ICoreId;
     succeededBy?: ICoreId;
     shareInfo?: ILocalAttributeShareInfo;
+    deletionInfo?: ILocalAttributeDeletionInfo;
     parentId?: ICoreId;
 }
 
 export type OwnSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
-    shareInfo: LocalAttributeShareInfo & { sourceAttribute: CoreId };
+    shareInfo: LocalAttributeShareInfo;
 };
 
 export type OwnSharedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
-    shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
+    shareInfo: LocalAttributeShareInfo;
 };
 
 export type PeerSharedIdentityAttribute = LocalAttribute & {
@@ -65,6 +69,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         nameof<LocalAttribute>((r) => r.succeeds),
         nameof<LocalAttribute>((r) => r.succeededBy),
         nameof<LocalAttribute>((r) => r.shareInfo),
+        nameof<LocalAttribute>((r) => r.deletionInfo),
         nameof<LocalAttribute>((r) => r.parentId)
     ];
 
@@ -89,6 +94,10 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     @validate({ nullable: true })
     @serialize()
     public shareInfo?: LocalAttributeShareInfo;
+
+    @validate({ nullable: true })
+    @serialize()
+    public deletionInfo?: LocalAttributeDeletionInfo;
 
     @validate({ nullable: true })
     @serialize()
@@ -118,10 +127,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         let isOwnSharedAttribute = this.isShared() && this.isOwnedBy(ownAddress);
         if (!isOwnSharedAttribute) {
             return isOwnSharedAttribute;
-        }
-
-        if (this.isIdentityAttribute()) {
-            isOwnSharedAttribute &&= typeof this.shareInfo!.sourceAttribute !== "undefined";
         }
 
         if (typeof peerAddress !== "undefined") {
@@ -166,6 +171,43 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
     public isShared(): this is LocalAttribute & { shareInfo: LocalAttributeShareInfo } {
         return typeof this.shareInfo !== "undefined";
+    }
+
+    public setDeletionInfo(deletionInfo: LocalAttributeDeletionInfo, ownAddress: CoreAddress): this {
+        if (this.isRepositoryAttribute(ownAddress)) {
+            throw CoreErrors.attributes.cannotSetDeletionInfoOfRepositoryAttributes();
+        }
+
+        if (this.isOwnSharedAttribute(ownAddress) && this.hasPeerSharedAttributeDeletionInfo()) {
+            throw CoreErrors.attributes.invalidDeletionInfoOfOwnSharedAttribute();
+        }
+
+        if (this.isPeerSharedAttribute() && this.hasOwnSharedAttributeDeletionInfo()) {
+            throw CoreErrors.attributes.invalidDeletionInfoOfPeerSharedAttribute();
+        }
+
+        this.deletionInfo = deletionInfo;
+        return this;
+    }
+
+    public hasPeerSharedAttributeDeletionInfo(): this is LocalAttribute & {
+        deletionInfo: LocalAttributeDeletionInfo & { deletionStatus: DeletionStatus.DeletedByOwner | DeletionStatus.ToBeDeleted };
+    } {
+        if (!this.hasDeletionInfo()) return false;
+
+        return this.deletionInfo.deletionStatus === DeletionStatus.DeletedByOwner || this.deletionInfo.deletionStatus === DeletionStatus.ToBeDeleted;
+    }
+
+    public hasOwnSharedAttributeDeletionInfo(): this is LocalAttribute & {
+        deletionInfo: LocalAttributeDeletionInfo & { deletionStatus: DeletionStatus.DeletedByPeer | DeletionStatus.ToBeDeletedByPeer };
+    } {
+        if (!this.hasDeletionInfo()) return false;
+
+        return this.deletionInfo.deletionStatus === DeletionStatus.DeletedByPeer || this.deletionInfo.deletionStatus === DeletionStatus.ToBeDeletedByPeer;
+    }
+
+    public hasDeletionInfo(): this is LocalAttribute & { deletionInfo: LocalAttributeDeletionInfo } {
+        return typeof this.deletionInfo !== "undefined";
     }
 
     public static from(value: ILocalAttribute | LocalAttributeJSON): LocalAttribute {

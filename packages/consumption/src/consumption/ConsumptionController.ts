@@ -2,7 +2,10 @@ import {
     AuthenticationRequestItem,
     ConsentRequestItem,
     CreateAttributeRequestItem,
+    DeleteAttributeRequestItem,
     FreeTextRequestItem,
+    OwnSharedAttributeDeletedByOwnerNotificationItem,
+    PeerSharedAttributeDeletedByPeerNotificationItem,
     PeerSharedAttributeSucceededNotificationItem,
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
@@ -14,6 +17,7 @@ import {
     AttributeListenersController,
     AttributesController,
     CreateAttributeRequestItemProcessor,
+    DeleteAttributeRequestItemProcessor,
     DraftsController,
     FreeTextRequestItemProcessor,
     GenericRequestItemProcessor,
@@ -23,6 +27,8 @@ import {
     NotificationItemProcessorRegistry,
     NotificationsController,
     OutgoingRequestsController,
+    OwnSharedAttributeDeletedByOwnerNotificationItemProcessor,
+    PeerSharedAttributeDeletedByPeerNotificationItemProcessor,
     PeerSharedAttributeSucceededNotificationItemProcessor,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
@@ -127,6 +133,7 @@ export class ConsumptionController {
         return new Map<RequestItemConstructor, RequestItemProcessorConstructor>([
             [ShareAttributeRequestItem, ShareAttributeRequestItemProcessor],
             [CreateAttributeRequestItem, CreateAttributeRequestItemProcessor],
+            [DeleteAttributeRequestItem, DeleteAttributeRequestItemProcessor],
             [ReadAttributeRequestItem, ReadAttributeRequestItemProcessor],
             [ProposeAttributeRequestItem, ProposeAttributeRequestItemProcessor],
             [ConsentRequestItem, GenericRequestItemProcessor],
@@ -138,7 +145,9 @@ export class ConsumptionController {
 
     private getDefaultNotificationItemProcessors() {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
-            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor]
+            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
+            [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
+            [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor]
         ]);
     }
 }

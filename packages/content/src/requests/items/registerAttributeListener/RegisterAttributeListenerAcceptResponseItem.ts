@@ -17,7 +17,7 @@ export class RegisterAttributeListenerAcceptResponseItem extends AcceptResponseI
     public listenerId: string;
 
     public static override from(
-        value: IRegisterAttributeListenerAcceptResponseItem | RegisterAttributeListenerAcceptResponseItemJSON
+        value: IRegisterAttributeListenerAcceptResponseItem | Omit<RegisterAttributeListenerAcceptResponseItemJSON, "@type"> | RegisterAttributeListenerAcceptResponseItemJSON
     ): RegisterAttributeListenerAcceptResponseItem {
         return this.fromAny(value);
     }

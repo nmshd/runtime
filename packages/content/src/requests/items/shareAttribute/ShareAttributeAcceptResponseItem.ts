@@ -17,7 +17,9 @@ export class ShareAttributeAcceptResponseItem extends AcceptResponseItem impleme
     @validate()
     public attributeId: CoreId;
 
-    public static override from(value: IShareAttributeAcceptResponseItem | ShareAttributeAcceptResponseItemJSON): ShareAttributeAcceptResponseItem {
+    public static override from(
+        value: IShareAttributeAcceptResponseItem | Omit<ShareAttributeAcceptResponseItemJSON, "@type"> | ShareAttributeAcceptResponseItemJSON
+    ): ShareAttributeAcceptResponseItem {
         return this.fromAny(value);
     }
 
