@@ -85,7 +85,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 throw new Error(`The Attribute ${predecessorOwnSharedAttribute.id} does not fulfill the requirements of an own shared Attribute.`);
             }
 
-            if (predecessorOwnSharedAttribute.shareInfo.sourceAttribute === existingSourceAttribute.id) {
+            if (predecessorOwnSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
                 // return new AttributeAlreadySharedResponseItem
                 throw new Error("NotImplementedError");
             }
