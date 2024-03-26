@@ -21,6 +21,7 @@ import {
     LocalAttributeShareInfo,
     LocalRequest,
     LocalRequestStatus,
+    PeerSharedAttributeSucceededEvent,
     ReadAttributeRequestItemProcessor
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -839,7 +840,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 })
             });
 
-            await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
+            const event = await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
+            expect(event).toBeInstanceOf(PeerSharedAttributeSucceededEvent);
 
             const successorPSIA = await consumptionController.attributes.getLocalAttribute(successorId);
             expect(successorPSIA).toBeDefined();
@@ -852,7 +854,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(updatedPredecessorPSIA!.succeededBy).toStrictEqual(successorPSIA!.id);
         });
 
-        // TODO: ThirdPartyRelationshipAttribute Succession
         test("succeeds an existing third party owned RelationshipAttribute with the Attribute received in the ResponseItem", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const peerAddress = CoreAddress.from("peerAddress");

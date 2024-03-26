@@ -245,7 +245,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (responseItem.successorContent instanceof IdentityAttribute) {
                 const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
                 return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
-                // TODO: test if event is fired
             }
             await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(responseItem.predecessorId, successorParams);
         }
