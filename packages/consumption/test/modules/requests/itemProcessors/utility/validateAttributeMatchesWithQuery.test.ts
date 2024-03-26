@@ -139,7 +139,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const result = await readProcessor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
             });
         });
@@ -178,7 +178,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const result = await readProcessor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
             });
         });
@@ -430,7 +430,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const result = await readProcessor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
             });
         });
@@ -1118,7 +1118,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const result = await readProcessor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                code: "error.consumption.requests.attributeQueryMismatch",
                 message:
                     "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
             });
@@ -1278,7 +1278,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const result = await proposeProcessor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
             });
         });
@@ -1311,7 +1311,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const result = await proposeProcessor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
             });
         });

@@ -59,7 +59,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
         );
     }
 
@@ -87,7 +87,7 @@ function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: Identi
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
         );
     }
 
@@ -126,7 +126,7 @@ function validateAttributeMatchesWithRelationshipAttributeQuery(
 
     if (queriedOwnerIsEmpty && !recipientIsAttributeOwner) {
         return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery("You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query.")
+            CoreErrors.requests.attributeQueryMismatch("You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query.")
         );
     }
 
@@ -184,7 +184,7 @@ function validateAttributeMatchesWithThirdPartyRelationshipAttributeQuery(
 
     if (query.owner === "" && !recipientIsAttributeOwner && !queriedThirdParties.includes("") && !queriedThirdParties.includes(attribute.owner.toString())) {
         return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery(
+            CoreErrors.requests.attributeQueryMismatch(
                 "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
             )
         );

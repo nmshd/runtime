@@ -384,7 +384,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
             });
         });
@@ -444,7 +444,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                code: "error.consumption.requests.attributeQueryMismatch",
                 message: `The provided IdentityAttribute is outdated. You have already shared the Successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
             });
         });

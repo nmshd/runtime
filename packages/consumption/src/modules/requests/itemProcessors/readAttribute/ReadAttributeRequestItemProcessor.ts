@@ -74,7 +74,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (_requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidlyAnsweredQuery(
+                        CoreErrors.requests.attributeQueryMismatch(
                             "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
                         )
                     );
@@ -98,7 +98,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     }
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
                         return ValidationResult.error(
-                            CoreErrors.requests.invalidlyAnsweredQuery(
+                            CoreErrors.requests.attributeQueryMismatch(
                                 `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
                             )
                         );
@@ -115,7 +115,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
                 if (foundLocalAttribute.shareInfo.sourceAttribute !== undefined) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidlyAnsweredQuery(
+                        CoreErrors.requests.attributeQueryMismatch(
                             "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided."
                         )
                     );
@@ -129,7 +129,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     !queriedThirdParties.includes(foundLocalAttribute.shareInfo.peer.toString())
                 ) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidlyAnsweredQuery(
+                        CoreErrors.requests.attributeQueryMismatch(
                             "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
                         )
                     );
@@ -165,7 +165,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             attribute.confidentiality === RelationshipAttributeConfidentiality.Private
         ) {
             return ValidationResult.error(
-                CoreErrors.requests.invalidlyAnsweredQuery("The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it.")
+                CoreErrors.requests.attributeQueryMismatch("The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it.")
             );
         }
 

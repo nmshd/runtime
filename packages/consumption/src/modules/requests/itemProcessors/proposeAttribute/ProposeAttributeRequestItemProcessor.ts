@@ -99,7 +99,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             if (_requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidlyAnsweredQuery(
+                        CoreErrors.requests.attributeQueryMismatch(
                             "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
                         )
                     );
@@ -124,7 +124,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     }
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
                         return ValidationResult.error(
-                            CoreErrors.requests.invalidlyAnsweredQuery(
+                            CoreErrors.requests.attributeQueryMismatch(
                                 `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
                             )
                         );
