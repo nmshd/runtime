@@ -38,13 +38,33 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         if (parsedParams.isWithExistingAttribute()) {
             const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
 
-            if (!foundAttribute) {
+            if (typeof foundAttribute === "undefined") {
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
             }
 
             const ownerIsCurrentIdentity = this.accountController.identity.isMe(foundAttribute.content.owner);
             if (!ownerIsCurrentIdentity && foundAttribute.content instanceof IdentityAttribute) {
                 return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The given Attribute belongs to someone else. You can only share own Attributes."));
+            }
+
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
+                parsedParams.existingAttributeId,
+                [requestInfo.peer],
+                true
+            );
+            if (latestSharedVersion.length > 0) {
+                if (typeof latestSharedVersion[0].shareInfo?.sourceAttribute === "undefined") {
+                    throw new Error(`The Attribute ${latestSharedVersion[0].id} does not fulfill the requirements of an own shared Attribute.`);
+                }
+
+                const latestSharedVersionSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedVersion[0].shareInfo.sourceAttribute);
+                if (typeof latestSharedVersionSourceAttribute === "undefined") {
+                    throw new Error(`The Attribute ${latestSharedVersion[0].shareInfo.sourceAttribute} was not found.`);
+                }
+
+                if (await this.consumptionController.attributes.isSuccessorOf(latestSharedVersionSourceAttribute, foundAttribute)) {
+                    return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You cannot share the predecessor of an already shared Attribute version."));
+                }
             }
         }
 
@@ -87,7 +107,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             if (predecessorOwnSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
                 // return new AttributeAlreadySharedResponseItem
-                throw new Error("NotImplementedError");
             }
 
             const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(predecessorOwnSharedAttribute.shareInfo.sourceAttribute);
@@ -135,20 +154,14 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                         predecessorId: predecessorOwnSharedAttribute.id
                     });
                 }
-            } else {
-                throw new Error("You cannot share the predecessor of an already shared Attribute version.");
             }
-        } else {
-            sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute!, requestInfo);
-            return ReadAttributeAcceptResponseItem.from({
-                result: ResponseItemResult.Accepted,
-                attributeId: sharedLocalAttribute.id,
-                attribute: sharedLocalAttribute.content
-            });
         }
-
-        // this should never be reached
-        throw new Error("The ReadAttributeRequestItem must be either answered with an existing or a new Attribute.");
+        sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute!, requestInfo);
+        return ReadAttributeAcceptResponseItem.from({
+            result: ResponseItemResult.Accepted,
+            attributeId: sharedLocalAttribute.id,
+            attribute: sharedLocalAttribute.content
+        });
     }
 
     private async copyExistingAttribute(attributeId: CoreId, requestInfo: LocalRequestInfo) {
