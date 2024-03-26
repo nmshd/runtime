@@ -997,11 +997,6 @@ export class AttributesController extends ConsumptionBaseController {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
-        // TODO:
-        // if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
-        //     throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
-        // }
-
         let i = 0;
         while (repositoryAttribute.succeededBy && i < 1000) {
             const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);

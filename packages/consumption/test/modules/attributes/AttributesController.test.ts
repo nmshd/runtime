@@ -1552,7 +1552,8 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefA")
+                        requestReference: CoreId.from("reqRefA"),
+                        sourceAttribute: CoreId.from("ATT0")
                     }
                 });
                 const successorParams: IAttributeSuccessorParams = {
@@ -1568,7 +1569,8 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefB")
+                        requestReference: CoreId.from("reqRefB"),
+                        sourceAttribute: CoreId.from("ATT1")
                     }
                 };
 
@@ -2189,10 +2191,8 @@ describe("AttributesController", function () {
                 }
             });
 
-            await TestUtil.expectThrowsAsync(
-                consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(sharedIdentityAttribute.id),
-                "error.consumption.attributes.invalidPropertyValue"
-            );
+            const result = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(sharedIdentityAttribute.id);
+            expect(result).toHaveLength(0);
         });
 
         test("should throw if a relationship attribute is queried", async function () {
@@ -2213,10 +2213,8 @@ describe("AttributesController", function () {
                 }
             });
 
-            await TestUtil.expectThrowsAsync(
-                consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(relationshipAttribute.id),
-                "error.consumption.attributes.invalidPropertyValue"
-            );
+            const result = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(relationshipAttribute.id);
+            expect(result).toHaveLength(0);
         });
     });
 });
