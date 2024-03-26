@@ -69,6 +69,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         nameof<LocalAttribute>((r) => r.succeeds),
         nameof<LocalAttribute>((r) => r.succeededBy),
         nameof<LocalAttribute>((r) => r.shareInfo),
+        nameof<LocalAttribute>((r) => r.deletionInfo),
         nameof<LocalAttribute>((r) => r.parentId)
     ];
 
