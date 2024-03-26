@@ -37,12 +37,12 @@ export interface ILocalAttribute extends ICoreSynchronizable {
 
 export type OwnSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
-    shareInfo: LocalAttributeShareInfo & { sourceAttribute: CoreId };
+    shareInfo: LocalAttributeShareInfo;
 };
 
 export type OwnSharedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
-    shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
+    shareInfo: LocalAttributeShareInfo;
 };
 
 export type PeerSharedIdentityAttribute = LocalAttribute & {
@@ -126,10 +126,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         let isOwnSharedAttribute = this.isShared() && this.isOwnedBy(ownAddress);
         if (!isOwnSharedAttribute) {
             return isOwnSharedAttribute;
-        }
-
-        if (this.isIdentityAttribute()) {
-            isOwnSharedAttribute &&= typeof this.shareInfo!.sourceAttribute !== "undefined";
         }
 
         if (typeof peerAddress !== "undefined") {

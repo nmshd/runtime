@@ -15856,6 +15856,29 @@ export const DeletePeerSharedAttributeAndNotifyOwnerRequest: any = {
     }
 }
 
+export const DeleteRepositoryAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteRepositoryAttributeRequest",
+    "definitions": {
+        "DeleteRepositoryAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const ExecuteIdentityAttributeQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",

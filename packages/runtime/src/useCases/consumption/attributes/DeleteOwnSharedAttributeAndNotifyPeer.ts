@@ -40,7 +40,7 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
         if (typeof ownSharedAttribute.succeededBy !== "undefined") {
             const successor = await this.attributeController.getLocalAttribute(ownSharedAttribute.succeededBy);
             if (typeof successor === "undefined") {
-                return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
+                throw new Error(`The Attribute ${ownSharedAttribute.succeededBy} was not found, even though it is specified as successor of Attribute ${ownSharedAttribute.id}.`);
             }
 
             successor.succeeds = undefined;

@@ -599,31 +599,41 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(CoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        /* Succession of own shared identity attribute must have
-         * respective repository attributes. */
-        const predecessorSource = await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute);
-        const successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
-        const predecessorSourceVersionIds = (await this.getVersionsOfAttribute(predecessor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
-        const successorSourceVersionIds = (await this.getVersionsOfAttribute(successor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
-        if (typeof predecessorSource === "undefined" || !predecessorSource.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
-        }
-        if (typeof successorSource === "undefined" || !successorSource.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
-        }
-        if (
-            typeof successorSource.succeeds === "undefined" ||
-            !predecessorSourceVersionIds.some((id) => id === successorSource.succeeds?.toString()) ||
-            typeof predecessorSource.succeededBy === "undefined" ||
-            !successorSourceVersionIds.some((id) => id === predecessorSource.succeededBy?.toString())
-        ) {
-            return ValidationResult.error(CoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
+        if (typeof successor.shareInfo.sourceAttribute === "undefined") {
+            return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotSpecified());
         }
 
-        const repositoryAttributeContentMatchesItsSharedAttribute =
-            _.isEqual(predecessorSource.content, predecessor.content) && _.isEqual(successorSource.content, successor.content);
-        if (!repositoryAttributeContentMatchesItsSharedAttribute) {
-            return ValidationResult.error(CoreErrors.attributes.sourceContentIsNotEqualToCopyContent());
+        const successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
+        if (typeof successorSource === "undefined") {
+            return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeDoesNotExist());
+        }
+
+        if (!successorSource.isRepositoryAttribute(this.identity.address)) {
+            return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
+        }
+
+        if (!_.isEqual(successorSource.content, successor.content)) {
+            return ValidationResult.error(CoreErrors.attributes.successorSourceContentIsNotEqualToCopyContent());
+        }
+
+        let predecessorSource: any = undefined;
+        if (typeof predecessor.shareInfo.sourceAttribute !== "undefined") {
+            predecessorSource = await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute);
+        }
+
+        if (typeof predecessorSource !== "undefined") {
+            if (!predecessorSource.isRepositoryAttribute(this.identity.address)) {
+                return ValidationResult.error(CoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
+            }
+
+            const successorSourceVersionIds = (await this.getVersionsOfAttribute(successorSource.id)).map((x) => x.id.toString());
+            if (typeof predecessorSource.succeededBy === "undefined" || !successorSourceVersionIds.some((id) => id === predecessorSource.succeededBy?.toString())) {
+                return ValidationResult.error(CoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
+            }
+
+            if (!_.isEqual(predecessorSource.content, predecessor.content)) {
+                return ValidationResult.error(CoreErrors.attributes.predecessorSourceContentIsNotEqualToCopyContent());
+            }
         }
 
         return ValidationResult.success();
@@ -868,6 +878,84 @@ export class AttributesController extends ConsumptionBaseController {
         await this.attributes.delete({ id: id });
     }
 
+    public async deleteRepositoryAttribute(sourceAttribute: LocalAttribute): Promise<void> {
+        const validationResult = await this.validateSourceAttributeDeletion(sourceAttribute);
+        if (validationResult.isError()) {
+            throw validationResult.error;
+        }
+
+        if (typeof sourceAttribute.succeededBy !== "undefined") {
+            const successor = await this.getLocalAttribute(sourceAttribute.succeededBy);
+            if (typeof successor === "undefined") {
+                throw CoreErrors.attributes.successorDoesNotExist();
+            }
+            await this.detachSuccessor(successor);
+        }
+
+        const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": sourceAttribute.id.toString() });
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(sourceAttribute);
+        const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
+        await this.detachAttributeCopies(attributeCopiesToDetach);
+
+        await this.deletePredecessorsOfAttribute(sourceAttribute.id);
+        await this.deleteAttribute(sourceAttribute);
+    }
+
+    public async validateSourceAttributeDeletion(sourceAttribute: LocalAttribute): Promise<ValidationResult> {
+        const validateSuccessorResult = await this.validateSuccessor(sourceAttribute);
+        if (validateSuccessorResult.isError()) {
+            return validateSuccessorResult;
+        }
+
+        const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": sourceAttribute.id.toString() });
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(sourceAttribute);
+        const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
+
+        const validateSharedAttributesResult = this.validateSharedAttributes(attributeCopiesToDetach);
+        return validateSharedAttributesResult;
+    }
+
+    private async validateSuccessor(predecessor: LocalAttribute): Promise<ValidationResult> {
+        if (typeof predecessor.succeededBy !== "undefined") {
+            const successor = await this.getLocalAttribute(predecessor.succeededBy);
+            if (typeof successor === "undefined") {
+                return ValidationResult.error(CoreErrors.attributes.successorDoesNotExist());
+            }
+        }
+        return ValidationResult.success();
+    }
+
+    private validateSharedAttributes(sharedAttributes: LocalAttribute[]): ValidationResult {
+        for (const sharedAttribute of sharedAttributes) {
+            if (!sharedAttribute.isShared()) {
+                return ValidationResult.error(CoreErrors.attributes.isNotSharedAttribute(sharedAttribute.id));
+            }
+        }
+        return ValidationResult.success();
+    }
+
+    private async detachSuccessor(successor: LocalAttribute): Promise<void> {
+        successor.succeeds = undefined;
+        await this.updateAttributeUnsafe(successor);
+    }
+
+    private async detachAttributeCopies(sharedAttributes: LocalAttribute[]): Promise<void> {
+        for (const sharedAttribute of sharedAttributes) {
+            if (!sharedAttribute.isShared()) {
+                throw CoreErrors.attributes.isNotSharedAttribute(sharedAttribute.id);
+            }
+            sharedAttribute.shareInfo.sourceAttribute = undefined;
+            await this.updateAttributeUnsafe(sharedAttribute);
+        }
+    }
+
+    private async deletePredecessorsOfAttribute(attributeId: CoreId): Promise<void> {
+        const predecessors = await this.getPredecessorsOfAttribute(attributeId);
+        for (const predecessor of predecessors) {
+            await this.deleteAttribute(predecessor);
+        }
+    }
+
     public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
         const attribute = await this.getLocalAttribute(id);
         if (typeof attribute === "undefined") {
@@ -889,9 +977,9 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const predecessors: LocalAttribute[] = [];
-        while (attribute.succeeds) {
+        while (typeof attribute.succeeds !== "undefined") {
             const predecessor = await this.getLocalAttribute(attribute.succeeds);
-            if (!predecessor) {
+            if (typeof predecessor === "undefined") {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
             }
 
@@ -909,9 +997,9 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const successors: LocalAttribute[] = [];
-        while (attribute.succeededBy) {
+        while (typeof attribute.succeededBy !== "undefined") {
             const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (!successor) {
+            if (typeof successor === "undefined") {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
             }
 
@@ -923,7 +1011,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getSharedVersionsOfRepositoryAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
-        let repositoryAttribute = await this.getLocalAttribute(id);
+        const repositoryAttribute = await this.getLocalAttribute(id);
         if (typeof repositoryAttribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
@@ -932,30 +1020,27 @@ export class AttributesController extends ConsumptionBaseController {
             throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
         }
 
-        while (repositoryAttribute.succeededBy) {
-            const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
-            if (!successor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
-            }
-
-            repositoryAttribute = successor;
-        }
-
         const query: any = { "shareInfo.sourceAttribute": repositoryAttribute.id.toString() };
-
         if (typeof peers !== "undefined") {
             query["shareInfo.peer"] = { $in: peers.map((address) => address.toString()) };
         }
-
         if (onlyLatestVersions) {
             query["succeededBy"] = { $exists: false };
         }
 
-        const ownSharedIdentityAttributeVersions: LocalAttribute[] = await this.getLocalAttributes(query);
+        const ownSharedIdentityAttributes = await this.getLocalAttributes(query);
+        const ownSharedIdentityAttributePredecessors = await this.getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute, query);
+        const ownSharedIdentityAttributeSuccessors = await this.getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute, query);
 
-        while (repositoryAttribute.succeeds) {
+        const ownSharedIdentityAttributeVersions = [...ownSharedIdentityAttributeSuccessors.reverse(), ...ownSharedIdentityAttributes, ...ownSharedIdentityAttributePredecessors];
+        return ownSharedIdentityAttributeVersions;
+    }
+
+    public async getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
+        const ownSharedIdentityAttributePredecessors: LocalAttribute[] = [];
+        while (typeof repositoryAttribute.succeeds !== "undefined") {
             const predecessor = await this.getLocalAttribute(repositoryAttribute.succeeds);
-            if (!predecessor) {
+            if (typeof predecessor === "undefined") {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeeds.toString());
             }
 
@@ -964,9 +1049,28 @@ export class AttributesController extends ConsumptionBaseController {
             query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
             const sharedCopies = await this.getLocalAttributes(query);
 
-            ownSharedIdentityAttributeVersions.push(...sharedCopies);
+            ownSharedIdentityAttributePredecessors.push(...sharedCopies);
         }
 
-        return ownSharedIdentityAttributeVersions;
+        return ownSharedIdentityAttributePredecessors;
+    }
+
+    public async getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
+        const ownSharedIdentityAttributeSuccessors: LocalAttribute[] = [];
+        while (typeof repositoryAttribute.succeededBy !== "undefined") {
+            const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
+            if (typeof successor === "undefined") {
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
+            }
+
+            repositoryAttribute = successor;
+
+            query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
+            const sharedCopies = await this.getLocalAttributes(query);
+
+            ownSharedIdentityAttributeSuccessors.push(...sharedCopies);
+        }
+
+        return ownSharedIdentityAttributeSuccessors;
     }
 }

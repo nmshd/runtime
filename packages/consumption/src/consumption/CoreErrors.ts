@@ -38,10 +38,17 @@ class Attributes {
         );
     }
 
-    public sourceContentIsNotEqualToCopyContent() {
+    public predecessorSourceContentIsNotEqualToCopyContent() {
         return new CoreError(
-            "error.consumption.attributes.sourceContentIsNotEqualToCopyContent",
-            "Successor source attribute contents don't match successor shared attribute copy."
+            "error.consumption.attributes.predecessorSourceContentIsNotEqualToCopyContent",
+            "Predecessor source attribute content doesn't match predecessor shared attribute copy."
+        );
+    }
+
+    public successorSourceContentIsNotEqualToCopyContent() {
+        return new CoreError(
+            "error.consumption.attributes.successorSourceContentIsNotEqualToCopyContent",
+            "Successor source attribute content doesn't match successor shared attribute copy."
         );
     }
 
@@ -116,6 +123,18 @@ class Attributes {
         return new CoreError("error.consumption.attributes.predecessorDoesNotExist", "The predecessor does not exist.");
     }
 
+    public successorDoesNotExist() {
+        return new CoreError("error.consumption.attributes.successorDoesNotExist", "The successor does not exist.");
+    }
+
+    public successorSourceAttributeIsNotSpecified() {
+        return new CoreError("error.consumption.attributes.successorSourceAttributeIsNotSpecified", "You must specify the source attribute of the successor.");
+    }
+
+    public successorSourceAttributeDoesNotExist() {
+        return new CoreError("error.consumption.attributes.successorSourceAttributeDoesNotExist", "The successor source Attribute does not exist.");
+    }
+
     public successionMustNotChangeOwner() {
         return new CoreError(
             "error.consumption.attributes.successionMustNotChangeOwner",
@@ -184,6 +203,10 @@ class Attributes {
 
     public invalidPropertyValue(message: string) {
         return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
+    }
+
+    public isNotSharedAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotSharedAttribute", `The attribute (id: ${attributeId}) is not a shared attribute.`);
     }
 
     public isNotOwnSharedAttribute(attributeId: string | CoreId) {

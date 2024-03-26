@@ -9,9 +9,9 @@ import {
     LocalNotificationStatus,
     OwnSharedAttributeDeletedByOwnerEvent,
     OwnSharedAttributeDeletedByOwnerNotificationItemProcessor
-} from "../../../../src";
-import { TestUtil } from "../../../core/TestUtil";
-import { MockEventBus } from "../../MockEventBus";
+} from "../../../../../src";
+import { TestUtil } from "../../../../core/TestUtil";
+import { MockEventBus } from "../../../MockEventBus";
 
 const mockEventBus = new MockEventBus();
 
