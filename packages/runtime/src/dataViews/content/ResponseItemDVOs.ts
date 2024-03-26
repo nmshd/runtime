@@ -32,7 +32,8 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "ProposeAttributeAcceptResponseItemDVO"
         | "CreateAttributeAcceptResponseItemDVO"
         | "ShareAttributeAcceptResponseItemDVO"
-        | "RegisterAttributeListenerAcceptResponseItemDVO";
+        | "RegisterAttributeListenerAcceptResponseItemDVO"
+        | "AttributeSuccessionAcceptResponseItemDVO";
     result: ResponseItemResult.Accepted;
 }
 
@@ -64,4 +65,12 @@ export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptRe
     type: "RegisterAttributeListenerAcceptResponseItemDVO";
     listenerId: string;
     listener: LocalAttributeListenerDVO;
+}
+
+export interface AttributeSuccessionAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "AttributeSuccessionAcceptResponseItemDVO";
+    predecessorId: string;
+    successorId: string;
+    predecessor: LocalAttributeDVO;
+    successor: LocalAttributeDVO;
 }
