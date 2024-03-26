@@ -110,7 +110,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 }
                 if (existingSourceAttribute.isRelationshipAttribute()) {
                     if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
-                        const successorOwnSharedAttribute = await this.performOwnSharedRelationshipAttributeSuccession(
+                        const successorOwnSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(
                             predecessorOwnSharedAttribute.id,
                             existingSourceAttribute,
                             requestInfo
@@ -172,12 +172,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         return successor;
     }
 
-    private async performOwnSharedRelationshipAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
+    private async performOwnSharedThirdPartyRelationshipAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
         const successorParams = {
             content: sourceSuccessor.content,
             shareInfo: LocalAttributeShareInfo.from({
                 peer: requestInfo.peer,
-                requestReference: requestInfo.id
+                requestReference: requestInfo.id,
+                sourceAttribute: sourceSuccessor.id
             })
         };
         const { successor } = await this.consumptionController.attributes.succeedOwnSharedRelationshipAttribute(sharedPredecessorId, successorParams);
