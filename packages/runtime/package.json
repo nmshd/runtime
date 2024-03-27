@@ -88,6 +88,7 @@
         "@types/lodash": "^4.17.0",
         "@types/luxon": "^3.4.2",
         "@types/qrcode": "^1.5.5",
+        "msw": "^2.2.11",
         "ts-json-schema-generator": "^1.5.0"
     },
     "publishConfig": {
