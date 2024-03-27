@@ -37,7 +37,8 @@ import {
     syncUntilHasMessages,
     syncUntilHasMessageWithResponse,
     syncUntilHasRelationships,
-    TestRuntimeServices
+    TestRuntimeServices,
+    waitForEvent
 } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
@@ -245,7 +246,11 @@ describe("RequestModule", () => {
 
         test("triggers RelationshipTemplateProcessedEvent if an active Relationship exists", async () => {
             const template = await exchangeRelationshipTemplate();
-
+            await waitForEvent(
+                rEventBus,
+                IncomingRequestStatusChangedEvent,
+                (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired && e.data.request.source!.reference === template.id
+            );
             await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
             await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.NonCompletedRequestExists);
