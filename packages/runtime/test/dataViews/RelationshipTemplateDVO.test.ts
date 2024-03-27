@@ -233,6 +233,7 @@ describe("RelationshipTemplateDVO", () => {
         let dvo;
         let requestResult;
         const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        await requestor.eventBus.waitForEvent(PeerRelationshipTemplateLoadedEvent);
         requestResult = await requestor.consumption.incomingRequests.getRequests({
             query: {
                 "source.reference": requestorTemplate.id
