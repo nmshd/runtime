@@ -40,6 +40,12 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
         }
 
+        if (foundAttribute.isShared() && requestItem.attribute instanceof RelationshipAttribute && this.accountController.identity.isMe(requestItem.attribute.owner)) {
+            return ValidationResult.error(
+                CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes.")
+            );
+        }
+
         if (foundAttribute.isShared() && requestItem.attribute instanceof IdentityAttribute && this.accountController.identity.isMe(requestItem.attribute.owner)) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem("The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes.")

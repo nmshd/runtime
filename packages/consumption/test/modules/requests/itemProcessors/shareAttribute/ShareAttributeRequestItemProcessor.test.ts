@@ -379,6 +379,37 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
     });
 
+    test("returns error when the RelationshipAttribute is a copy of the attribute", async function () {
+        const recipientAddress = CoreAddress.from("recipientAddress");
+
+        const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            content: RelationshipAttribute.from({
+                owner: testAccount.identity.address,
+                value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                confidentiality: RelationshipAttributeConfidentiality.Public,
+                key: "AKey"
+            }),
+            shareInfo: {
+                peer: recipientAddress,
+                requestReference: await ConsumptionIds.request.generate(),
+                sourceAttribute: CoreId.from("sourceAttributeId")
+            }
+        });
+        const requestItem = ShareAttributeRequestItem.from({
+            mustBeAccepted: false,
+            attribute: localAttribute.content,
+            sourceAttributeId: localAttribute.id
+        });
+        const request = Request.from({ items: [requestItem] });
+
+        const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipientAddress);
+
+        expect(result).errorValidationResult({
+            code: "error.consumption.requests.invalidRequestItem",
+            message: "The provided RelationshipAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+        });
+    });
+
     describe("accept", function () {
         test("in case of an IdentityAttribute with 'owner=<empty>', creates a Local Attribute for the sender of the Request", async function () {
             const senderAddress = CoreAddress.from("SenderAddress");
