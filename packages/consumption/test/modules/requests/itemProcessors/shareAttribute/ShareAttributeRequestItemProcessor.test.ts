@@ -334,6 +334,51 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
     });
 
+    test("returns an error when a Predecessor of the existing IdentityAttribute is already shared and therefore the user should succeed it instead of share it.", async function () {
+        const recipientAddress = CoreAddress.from("recipientAddress");
+
+        const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            content: TestObjectFactory.createIdentityAttribute({
+                owner: testAccount.identity.address
+            })
+        });
+
+        const ownSharedCopyOfPredecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
+            sourceAttributeId: repositoryAttribute.id,
+            peer: recipientAddress,
+            requestReference: await ConsumptionIds.request.generate()
+        });
+
+        expect(ownSharedCopyOfPredecessor.isShared()).toBe(true);
+
+        const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+            content: {
+                "@type": "IdentityAttribute",
+                owner: testAccount.identity.address.toString(),
+                value: {
+                    "@type": "GivenName",
+                    value: "AnotherGivenName"
+                }
+            }
+        });
+
+        expect(successorOfRepositoryAttribute.isShared()).toBe(false);
+
+        const requestItem = ShareAttributeRequestItem.from({
+            mustBeAccepted: true,
+            attribute: successorOfRepositoryAttribute.content,
+            sourceAttributeId: successorOfRepositoryAttribute.id
+        });
+        const request = Request.from({ items: [requestItem] });
+
+        const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipientAddress);
+
+        expect(result).errorValidationResult({
+            code: "error.consumption.requests.invalidRequestItem",
+            message: `You have already shared the Predecessor '${ownSharedCopyOfPredecessor.shareInfo?.sourceAttribute?.toString()}' of it. An Attribute succession should be performed instead.`
+        });
+    });
+
     describe("accept", function () {
         test("in case of an IdentityAttribute with 'owner=<empty>', creates a Local Attribute for the sender of the Request", async function () {
             const senderAddress = CoreAddress.from("SenderAddress");

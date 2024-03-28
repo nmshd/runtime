@@ -74,6 +74,23 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 i++;
             }
 
+            let j = 0;
+            while (repositoryAttribute.succeeds !== undefined && j < 1000) {
+                const predecessor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeeds);
+                if (!predecessor) {
+                    throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeeds.toString());
+                }
+                if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(predecessor.id.toString())) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidRequestItem(
+                            `You have already shared the Predecessor '${predecessor.id.toString()}' of it. An Attribute succession should be performed instead.`
+                        )
+                    );
+                }
+                repositoryAttribute = predecessor;
+                j++;
+            }
+
             const attributeshared = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(requestItem.sourceAttributeId, [recipient], true);
             if (attributeshared[0]) {
                 return ValidationResult.error(
