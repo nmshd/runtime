@@ -145,12 +145,28 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 testParams.attribute.owner = recipientAddress;
             }
 
-            const sourceAttribute = await consumptionController.attributes.createLocalAttribute({
-                content: {
-                    ...testParams.attribute.toJSON(),
-                    owner: testParams.attribute.owner.equals("") ? senderAddress : testParams.attribute.owner
-                } as IIdentityAttribute | IRelationshipAttribute
-            });
+            let sourceAttribute;
+
+            if (testParams.attribute instanceof IdentityAttribute) {
+                sourceAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: {
+                        ...testParams.attribute.toJSON(),
+                        owner: testParams.attribute.owner.equals("") ? senderAddress : testParams.attribute.owner
+                    } as IIdentityAttribute
+                });
+            } else {
+                sourceAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: {
+                        ...testParams.attribute.toJSON(),
+                        owner: testParams.attribute.owner.equals("") ? senderAddress : testParams.attribute.owner
+                    } as IRelationshipAttribute,
+                    shareInfo: {
+                        peer: CoreAddress.from("{{recipient}}"),
+                        requestReference: await ConsumptionIds.request.generate()
+                    }
+                });
+            }
+
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: sourceAttribute.content,
@@ -215,7 +231,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The Attribute with the given sourceAttributeId '${sourceAttribute.id.toString()}' does not match the given attribute.`
+                message: `The Attribute with the given sourceAttributeId '${sourceAttribute.id.toString()}' does not match the given Attribute.`
             });
         });
     });
@@ -251,7 +267,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
     });
 
-    test("returns error when the IdentityAttribute is already shared with this peer", async function () {
+    test("returns error when the IdentityAttribute is already shared with the peer", async function () {
         const recipientAddress = CoreAddress.from("recipientAddress");
 
         const localAttribute = await consumptionController.attributes.createLocalAttribute({
@@ -289,7 +305,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
         expect(result).errorValidationResult({
             code: "error.consumption.requests.invalidRequestItem",
-            message: `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has been already shared to this peer.`
+            message: `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has already been shared to the peer.`
         });
     });
 
@@ -406,7 +422,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
         expect(result).errorValidationResult({
             code: "error.consumption.requests.invalidRequestItem",
-            message: "The provided RelationshipAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+            message: "You can only share RelationshipAttributes that are not a copy of a sourceAttribute."
         });
     });
 
