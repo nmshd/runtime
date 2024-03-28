@@ -62,7 +62,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     throw new Error(`The Attribute ${latestSharedVersion[0].shareInfo.sourceAttribute} was not found.`);
                 }
 
-                if (await this.consumptionController.attributes.isSuccessorOf(latestSharedVersionSourceAttribute, foundAttribute)) {
+                if (await this.consumptionController.attributes.isASuccessorOf(latestSharedVersionSourceAttribute, foundAttribute)) {
                     return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You cannot share the predecessor of an already shared Attribute version."));
                 }
             }
@@ -100,60 +100,52 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
             }
 
-            const predecessorOwnSharedAttribute = latestSharedVersion[0];
-            if (typeof predecessorOwnSharedAttribute.shareInfo?.sourceAttribute === "undefined") {
-                throw new Error(`The Attribute ${predecessorOwnSharedAttribute.id} does not fulfill the requirements of an own shared Attribute.`);
+            const latestSharedAttribute = latestSharedVersion[0];
+            if (typeof latestSharedAttribute.shareInfo?.sourceAttribute === "undefined") {
+                throw new Error(`The Attribute ${latestSharedAttribute.id} does not fulfill the requirements of an own shared Attribute.`);
             }
 
-            if (predecessorOwnSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
+            if (latestSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
                 // return new AttributeAlreadySharedResponseItem
             }
 
-            const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(predecessorOwnSharedAttribute.shareInfo.sourceAttribute);
+            const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedAttribute.shareInfo.sourceAttribute);
             if (typeof predecessorSourceAttribute === "undefined") {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, latestSharedAttribute.shareInfo.sourceAttribute.toString());
             }
-            if (await this.consumptionController.attributes.isPredecessorOf(predecessorSourceAttribute, existingSourceAttribute)) {
+            if (await this.consumptionController.attributes.isAPredecessorOf(predecessorSourceAttribute, existingSourceAttribute)) {
+                let successorSharedAttribute: LocalAttribute;
                 if (existingSourceAttribute.isIdentityAttribute()) {
-                    const successorOwnSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(
-                        predecessorOwnSharedAttribute.id,
-                        existingSourceAttribute,
-                        requestInfo
-                    );
-                    return AttributeSuccessionAcceptResponseItem.from({
-                        result: ResponseItemResult.Accepted,
-                        successorId: successorOwnSharedAttribute.id,
-                        successorContent: successorOwnSharedAttribute.content,
-                        predecessorId: predecessorOwnSharedAttribute.id
-                    });
-                }
-                if (existingSourceAttribute.isRelationshipAttribute()) {
+                    successorSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
+                    // return AttributeSuccessionAcceptResponseItem.from({
+                    //     result: ResponseItemResult.Accepted,
+                    //     successorId: successorOwnSharedAttribute.id,
+                    //     successorContent: successorOwnSharedAttribute.content,
+                    //     predecessorId: latestOwnSharedAttribute.id
+                    // });
+                } else {
                     if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
-                        const successorOwnSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(
-                            predecessorOwnSharedAttribute.id,
+                        successorSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(
+                            latestSharedAttribute.id,
                             existingSourceAttribute,
                             requestInfo
                         );
-                        return AttributeSuccessionAcceptResponseItem.from({
-                            result: ResponseItemResult.Accepted,
-                            successorId: successorOwnSharedAttribute.id,
-                            successorContent: successorOwnSharedAttribute.content,
-                            predecessorId: predecessorOwnSharedAttribute.id
-                        });
+                        // return AttributeSuccessionAcceptResponseItem.from({
+                        //     result: ResponseItemResult.Accepted,
+                        //     successorId: successorOwnSharedAttribute.id,
+                        //     successorContent: successorOwnSharedAttribute.content,
+                        //     predecessorId: latestOwnSharedAttribute.id
+                        // });
+                    } else {
+                        successorSharedAttribute = await this.performThirdPartyOwnedRelationshipAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
                     }
-
-                    const successorOwnSharedAttribute = await this.performThirdPartyOwnedRelationshipAttributeSuccession(
-                        predecessorOwnSharedAttribute.id,
-                        existingSourceAttribute,
-                        requestInfo
-                    );
-                    return AttributeSuccessionAcceptResponseItem.from({
-                        result: ResponseItemResult.Accepted,
-                        successorId: successorOwnSharedAttribute.id,
-                        successorContent: successorOwnSharedAttribute.content,
-                        predecessorId: predecessorOwnSharedAttribute.id
-                    });
                 }
+                return AttributeSuccessionAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    successorId: successorSharedAttribute.id,
+                    successorContent: successorSharedAttribute.content,
+                    predecessorId: latestSharedAttribute.id
+                });
             }
         }
         sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute!, requestInfo);

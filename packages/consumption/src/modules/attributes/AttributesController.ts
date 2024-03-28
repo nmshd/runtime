@@ -959,7 +959,7 @@ export class AttributesController extends ConsumptionBaseController {
         return attributeVersions;
     }
 
-    public async isPredecessorOf(probedAttribute: LocalAttribute, referencedAttribute: LocalAttribute): Promise<boolean> {
+    public async isAPredecessorOf(probedAttribute: LocalAttribute, referencedAttribute: LocalAttribute): Promise<boolean> {
         while (referencedAttribute.succeeds) {
             const predecessor = await this.getLocalAttribute(referencedAttribute.succeeds);
             if (!predecessor) {
@@ -973,7 +973,7 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
-    public async isSuccessorOf(probedAttribute: LocalAttribute, referencedAttribute: LocalAttribute): Promise<boolean> {
+    public async isASuccessorOf(probedAttribute: LocalAttribute, referencedAttribute: LocalAttribute): Promise<boolean> {
         while (referencedAttribute.succeededBy) {
             const successor = await this.getLocalAttribute(referencedAttribute.succeededBy);
             if (!successor) {

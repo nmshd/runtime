@@ -36,17 +36,17 @@ describe("IQL Query", () => {
 
         await establishRelationship(sTransportServices, rTransportServices);
 
-        const response = await rConsumptionServices.attributes.createRepositoryAttribute({
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "AGivenName1"
-                },
-                tags: ["language:de"]
-            }
-        });
-
-        rLocalAttribute1 = response.value;
+        rLocalAttribute1 = (
+            await rConsumptionServices.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName1"
+                    },
+                    tags: ["language:de"]
+                }
+            })
+        ).value;
 
         rLocalAttribute2 = (
             await rConsumptionServices.attributes.createRepositoryAttribute({
