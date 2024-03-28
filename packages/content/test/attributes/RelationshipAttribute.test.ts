@@ -21,7 +21,7 @@ describe("RelationshipAttribute", function () {
 
     test("should create a RelationshipAttribute (isTechnical: true)", function () {
         const attribute = RelationshipAttribute.from<ProprietaryURL>({
-            key: "aKey",
+            key: "AKey",
             value: attributeValue,
             owner: CoreAddress.from("address"),
             isTechnical: true,
@@ -33,7 +33,7 @@ describe("RelationshipAttribute", function () {
 
     test("should create a RelationshipAttribute (isTechnical: false)", function () {
         const attribute = RelationshipAttribute.from<ProprietaryURL>({
-            key: "aKey",
+            key: "AKey",
             value: attributeValue,
             owner: CoreAddress.from("address"),
             isTechnical: false,
@@ -45,7 +45,7 @@ describe("RelationshipAttribute", function () {
 
     test("should create a RelationshipAttribute (isTechnical: undefined)", function () {
         const attribute = RelationshipAttribute.from<ProprietaryURL>({
-            key: "aKey",
+            key: "AKey",
             value: attributeValue,
             owner: CoreAddress.from("address"),
             confidentiality: RelationshipAttributeConfidentiality.Public

@@ -8,9 +8,10 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -18,8 +19,9 @@ import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export class ShareAttributeRequestItemProcessor extends GenericRequestItemProcessor<ShareAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: ShareAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
-        const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
-        if (!attribute) {
+        const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
+
+        if (!foundAttribute) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(`The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' could not be found.`)
             );
@@ -30,12 +32,89 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             requestItemAttributeJSON.owner = this.currentIdentityAddress.toString();
         }
 
-        if (!_.isEqual(attribute.content.toJSON(), requestItemAttributeJSON)) {
+        if (!_.isEqual(foundAttribute.content.toJSON(), requestItemAttributeJSON)) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(
-                    `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' does not match the given attribute.`
+                    `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' does not match the given Attribute.`
                 )
             );
+        }
+
+        if (requestItem.attribute instanceof IdentityAttribute && this.accountController.identity.isMe(requestItem.attribute.owner)) {
+            if (foundAttribute.isShared()) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidRequestItem("The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes.")
+                );
+            }
+
+            if (recipient !== undefined) {
+                const ownSharedIdentityAttributeVersions = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
+                    requestItem.sourceAttributeId,
+                    [recipient],
+                    false
+                );
+                const sourceAttributeIdsOfOwnSharedIdentityAttributeVersions = ownSharedIdentityAttributeVersions.map((ownSharedIdentityAttribute) =>
+                    ownSharedIdentityAttribute.shareInfo?.sourceAttribute?.toString()
+                );
+
+                let repositoryAttribute = foundAttribute;
+                if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(repositoryAttribute.id.toString())) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidRequestItem(
+                            `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has already been shared with the peer.`
+                        )
+                    );
+                }
+                let i = 0;
+                while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
+                    const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
+                    if (!successor) {
+                        throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
+                    }
+                    if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
+                        return ValidationResult.error(
+                            CoreErrors.requests.invalidRequestItem(
+                                `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
+                            )
+                        );
+                    }
+                    repositoryAttribute = successor;
+                    i++;
+                }
+
+                let j = 0;
+                while (repositoryAttribute.succeeds !== undefined && j < 1000) {
+                    const predecessor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeeds);
+                    if (!predecessor) {
+                        throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeeds.toString());
+                    }
+                    if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(predecessor.id.toString())) {
+                        return ValidationResult.error(
+                            CoreErrors.requests.invalidRequestItem(
+                                `You have already shared the Predecessor '${predecessor.id.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                            )
+                        );
+                    }
+                    repositoryAttribute = predecessor;
+                    j++;
+                }
+            }
+        }
+
+        if (requestItem.attribute instanceof RelationshipAttribute) {
+            if (!foundAttribute.isShared()) {
+                throw new Error("this should never happen");
+            }
+
+            if (foundAttribute.shareInfo.sourceAttribute !== undefined) {
+                return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You can only share RelationshipAttributes that are not a copy of a sourceAttribute."));
+            }
+
+            if (recipient !== undefined && foundAttribute.shareInfo.peer.equals(recipient)) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
+                );
+            }
         }
 
         if (requestItem.attribute instanceof IdentityAttribute) {
@@ -46,13 +125,10 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     }
 
     private canCreateWithIdentityAttribute(requestItem: ShareAttributeRequestItem) {
-        const ownerIsEmpty = requestItem.attribute.owner.toString() === "";
         const ownerIsCurrentIdentity = requestItem.attribute.owner.equals(this.currentIdentityAddress);
-        if (!ownerIsEmpty && !ownerIsCurrentIdentity) {
+        if (!ownerIsCurrentIdentity) {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(
-                    "The owner of the given `attribute` can only be an empty string. This is because you can only send Attributes where the recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
-                )
+                CoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
             );
         }
 
@@ -60,14 +136,14 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     }
 
     private canCreateWithRelationshipAttribute(attribute: RelationshipAttribute, recipient?: CoreAddress) {
+        if (attribute.owner.equals(recipient)) {
+            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("It doesn't make sense to share a RelationshipAttribute with its owner."));
+        }
+
         if (attribute.confidentiality === RelationshipAttributeConfidentiality.Private) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem("The confidentiality of the given `attribute` is private. Therefore you are not allowed to share it.")
             );
-        }
-
-        if (attribute.owner.equals(recipient)) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("It doesn't make sense to share a RelationshipAttribute with its owner."));
         }
 
         return ValidationResult.success();

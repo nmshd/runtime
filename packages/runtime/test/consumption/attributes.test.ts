@@ -9,6 +9,7 @@ import {
     CreateRepositoryAttributeUseCase,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryUseCase,
+    ExecuteThirdPartyRelationshipAttributeQueryUseCase,
     GetAttributesUseCase,
     GetAttributeUseCase,
     GetOwnSharedAttributesUseCase,
@@ -211,8 +212,8 @@ describe("attribute queries", () => {
             content: {
                 value: {
                     "@type": "ProprietaryString",
-                    title: "aTitle",
-                    value: "aProprietaryStringValue"
+                    title: "ATitle",
+                    value: "AProprietaryStringValue"
                 },
                 key: "website",
                 confidentiality: RelationshipAttributeConfidentiality.Protected
@@ -250,13 +251,13 @@ describe("attribute queries", () => {
         });
     });
 
-    describe(ExecuteRelationshipAttributeQueryUseCase.name, () => {
+    describe(ExecuteThirdPartyRelationshipAttributeQueryUseCase.name, () => {
         test("should allow to execute a thirdPartyRelationshipAttributeQuery", async function () {
             const result = await services2.consumption.attributes.executeThirdPartyRelationshipAttributeQuery({
                 query: {
                     "@type": "ThirdPartyRelationshipAttributeQuery",
                     key: "website",
-                    owner: services1.address,
+                    owner: "thirdParty",
                     thirdParty: [services1.address]
                 }
             });

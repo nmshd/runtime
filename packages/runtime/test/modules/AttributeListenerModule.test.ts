@@ -36,8 +36,8 @@ beforeAll(async () => {
                         "@type": "RegisterAttributeListenerRequestItem",
                         query: {
                             "@type": "ThirdPartyRelationshipAttributeQuery",
-                            key: "aKey",
-                            owner: thirdParty.address,
+                            key: "AKey",
+                            owner: "thirdParty",
                             thirdParty: [thirdParty.address]
                         },
                         mustBeAccepted: true
@@ -73,13 +73,13 @@ describe("AttributeListenerModule", () => {
         const attributeContent: RelationshipAttributeJSON = {
             "@type": "RelationshipAttribute",
             owner: thirdParty.address,
-            key: "aKey",
+            key: "AKey",
             confidentiality: RelationshipAttributeConfidentiality.Public,
             isTechnical: false,
             value: {
                 "@type": "ProprietaryString",
-                title: "aTitle",
-                value: "aProprietaryStringValue"
+                title: "ATitle",
+                value: "AProprietaryStringValue"
             }
         };
 

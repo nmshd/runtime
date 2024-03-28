@@ -1,11 +1,15 @@
 import {
     IdentityAttribute,
+    IdentityAttributeQuery,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
     RejectResponseItem,
     RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    RelationshipAttributeQuery,
     Request,
-    ResponseItemResult
+    ResponseItemResult,
+    ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
 import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
@@ -13,14 +17,32 @@ import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
+import validateAttributeMatchesWithQuery from "../utility/validateAttributeMatchesWithQuery";
 import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
 
 export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcessor<ReadAttributeRequestItem, AcceptReadAttributeRequestItemParametersJSON> {
     public override canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient?: CoreAddress): ValidationResult {
-        const queryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
+        const queryValidationResult = this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
+        }
+
+        return ValidationResult.success();
+    }
+
+    private validateQuery(requestItem: ReadAttributeRequestItem, recipient?: CoreAddress) {
+        const commonQueryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
+        if (commonQueryValidationResult.isError()) {
+            return commonQueryValidationResult;
+        }
+
+        if (requestItem.query instanceof RelationshipAttributeQuery && !["", this.currentIdentityAddress.toString()].includes(requestItem.query.owner.toString())) {
+            return ValidationResult.error(
+                CoreErrors.requests.invalidRequestItem(
+                    "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically becomes the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
+                )
+            );
         }
 
         return ValidationResult.success();
@@ -32,18 +54,119 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
+        let attribute;
 
         if (parsedParams.isWithExistingAttribute()) {
-            const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
+            if (_requestItem.query instanceof RelationshipAttributeQuery) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidAcceptParameters("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
+                );
+            }
 
-            if (!foundAttribute) {
+            const foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
+
+            if (!foundLocalAttribute) {
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
             }
 
-            const ownerIsCurrentIdentity = this.accountController.identity.isMe(foundAttribute.content.owner);
-            if (!ownerIsCurrentIdentity && foundAttribute.content instanceof IdentityAttribute) {
-                return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The given Attribute belongs to someone else. You can only share own Attributes."));
+            attribute = foundLocalAttribute.content;
+
+            if (_requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
+                if (foundLocalAttribute.isShared()) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.attributeQueryMismatch(
+                            "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+                        )
+                    );
+                }
+
+                const ownSharedIdentityAttributeVersions = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
+                    foundLocalAttribute.id,
+                    [requestInfo.peer],
+                    false
+                );
+                const sourceAttributeIdsOfOwnSharedIdentityAttributeVersions = ownSharedIdentityAttributeVersions.map((ownSharedIdentityAttribute) =>
+                    ownSharedIdentityAttribute.shareInfo?.sourceAttribute?.toString()
+                );
+
+                let repositoryAttribute = foundLocalAttribute;
+                let i = 0;
+                while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
+                    const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
+                    if (!successor) {
+                        throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
+                    }
+                    if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
+                        return ValidationResult.error(
+                            CoreErrors.requests.attributeQueryMismatch(
+                                `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
+                            )
+                        );
+                    }
+                    repositoryAttribute = successor;
+                    i++;
+                }
             }
+
+            if (_requestItem.query instanceof ThirdPartyRelationshipAttributeQuery && attribute instanceof RelationshipAttribute) {
+                if (!foundLocalAttribute.isShared()) {
+                    throw new Error("this should never happen");
+                }
+
+                if (foundLocalAttribute.shareInfo.sourceAttribute !== undefined) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.attributeQueryMismatch(
+                            "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided."
+                        )
+                    );
+                }
+
+                const queriedThirdParties = _requestItem.query.thirdParty.map((aThirdParty) => aThirdParty.toString());
+
+                if (
+                    (this.accountController.identity.isMe(attribute.owner) || queriedThirdParties.includes(attribute.owner.toString())) &&
+                    !queriedThirdParties.includes("") &&
+                    !queriedThirdParties.includes(foundLocalAttribute.shareInfo.peer.toString())
+                ) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.attributeQueryMismatch(
+                            "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
+                        )
+                    );
+                }
+            }
+        } else if (parsedParams.isWithNewAttribute()) {
+            if (_requestItem.query instanceof ThirdPartyRelationshipAttributeQuery) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidAcceptParameters(
+                        "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that already exist may be provided."
+                    )
+                );
+            }
+
+            attribute = parsedParams.newAttribute;
+
+            const ownerIsEmpty = attribute.owner.equals("");
+            if (ownerIsEmpty) {
+                attribute.owner = this.currentIdentityAddress;
+            }
+        }
+
+        if (!attribute) {
+            throw new Error("this should never happen");
+        }
+
+        const answerToQueryValidationResult = validateAttributeMatchesWithQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
+        if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
+
+        if (
+            _requestItem.query instanceof ThirdPartyRelationshipAttributeQuery &&
+            attribute instanceof RelationshipAttribute &&
+            attribute.confidentiality === RelationshipAttributeConfidentiality.Private
+        ) {
+            return ValidationResult.error(
+                CoreErrors.requests.attributeQueryMismatch("The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it.")
+            );
         }
 
         return ValidationResult.success();
@@ -55,12 +178,19 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<ReadAttributeAcceptResponseItem> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
+        let sharedLocalAttribute;
 
-        let sharedLocalAttribute: LocalAttribute;
         if (parsedParams.isWithExistingAttribute()) {
             sharedLocalAttribute = await this.copyExistingAttribute(parsedParams.existingAttributeId, requestInfo);
-        } else {
-            sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute!, requestInfo);
+        } else if (parsedParams.isWithNewAttribute()) {
+            if (parsedParams.newAttribute.owner.equals("")) {
+                parsedParams.newAttribute.owner = this.currentIdentityAddress;
+            }
+            sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute, requestInfo);
+        }
+
+        if (!sharedLocalAttribute) {
+            throw new Error("this should never happen");
         }
 
         return ReadAttributeAcceptResponseItem.from({

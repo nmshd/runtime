@@ -11,7 +11,8 @@ import {
     IThirdPartyRelationshipAttributeQuery,
     RelationshipAttributeJSON,
     RelationshipAttributeQuery,
-    ThirdPartyRelationshipAttributeQuery
+    ThirdPartyRelationshipAttributeQuery,
+    ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
 import * as iql from "@nmshd/iql";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
@@ -170,6 +171,10 @@ export class AttributesController extends ConsumptionBaseController {
         const dbQuery = RelationshipAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.confidentiality"] = { $ne: "private" };
 
+        if (parsedQuery.owner.equals("")) {
+            dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
+        }
+
         const attributes = await this.attributes.find(dbQuery);
         const attribute = attributes.length > 0 ? LocalAttribute.from(attributes[0]) : undefined;
 
@@ -179,8 +184,30 @@ export class AttributesController extends ConsumptionBaseController {
     public async executeThirdPartyRelationshipAttributeQuery(query: IThirdPartyRelationshipAttributeQuery): Promise<LocalAttribute[]> {
         const parsedQuery = ThirdPartyRelationshipAttributeQuery.from(query);
 
-        const dbQuery = ThirdPartyRelationshipAttributeQueryTranslator.translate(parsedQuery);
+        let dbQuery = ThirdPartyRelationshipAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.confidentiality"] = { $ne: "private" };
+
+        if (dbQuery["content.owner"] === ThirdPartyRelationshipAttributeQueryOwner.Recipient) {
+            dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
+        }
+
+        if (dbQuery["content.owner"] === ThirdPartyRelationshipAttributeQueryOwner.ThirdParty) {
+            dbQuery["content.owner"] = { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) };
+        }
+
+        if (parsedQuery.owner === ThirdPartyRelationshipAttributeQueryOwner.Empty) {
+            const ownerQuery = {
+                $or: [
+                    {
+                        ["content.owner"]: { $eq: this.identity.address.toString() }
+                    },
+                    {
+                        ["content.owner"]: { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) }
+                    }
+                ]
+            };
+            dbQuery = { $and: [dbQuery, ownerQuery] };
+        }
 
         const attributes = await this.attributes.find(dbQuery);
 

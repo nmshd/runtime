@@ -37,7 +37,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
     ])("accepts '$in' as thirdParty", function (params) {
         const serialized = ThirdPartyRelationshipAttributeQuery.from({
             key: "test",
-            owner: "test",
+            owner: "thirdParty",
 
             // casting as any to test backwards compatibility
             thirdParty: params.in as unknown as any
@@ -53,7 +53,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
         expect(() => {
             ThirdPartyRelationshipAttributeQuery.from({
                 key: "test",
-                owner: "test",
+                owner: "",
                 thirdParty: thirdParty
             });
             // eslint-disable-next-line jest/require-to-throw-message
@@ -71,7 +71,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
                 query: {
                     "@type": "ThirdPartyRelationshipAttributeQuery",
                     key: "test",
-                    owner: "test",
+                    owner: "thirdParty",
 
                     // casting as any to test backwards compatibility
                     thirdParty: params.in as unknown as any
@@ -81,7 +81,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
             const json = test.toJSON();
             expect(json.query).toStrictEqual({
                 key: "test",
-                owner: "test",
+                owner: "thirdParty",
                 thirdParty: params.out
             });
         }
