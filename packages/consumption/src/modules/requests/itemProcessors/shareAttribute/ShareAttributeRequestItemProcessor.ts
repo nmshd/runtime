@@ -89,7 +89,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(predecessor.id.toString())) {
                     return ValidationResult.error(
                         CoreErrors.requests.invalidRequestItem(
-                            `You have already shared the Predecessor '${predecessor.id.toString()}' of it. An Attribute succession should be performed instead.`
+                            `You have already shared the Predecessor '${predecessor.id.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify your peer about the Attribute succession.`
                         )
                     );
                 }
