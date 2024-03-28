@@ -375,7 +375,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
         expect(result).errorValidationResult({
             code: "error.consumption.requests.invalidRequestItem",
-            message: `You have already shared the Predecessor '${ownSharedCopyOfPredecessor.shareInfo?.sourceAttribute?.toString()}' of it. An Attribute succession should be performed instead.`
+            message: `You have already shared the Predecessor '${ownSharedCopyOfPredecessor.shareInfo?.sourceAttribute?.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
         });
     });
 

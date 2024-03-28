@@ -63,6 +63,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
 
             let repositoryAttribute = foundAttribute;
+            if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(repositoryAttribute.id.toString())) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidRequestItem(
+                        `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has been already shared to this peer.`
+                    )
+                );
+            }
             let i = 0;
             while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
                 const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
@@ -89,21 +96,12 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(predecessor.id.toString())) {
                     return ValidationResult.error(
                         CoreErrors.requests.invalidRequestItem(
-                            `You have already shared the Predecessor '${predecessor.id.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify your peer about the Attribute succession.`
+                            `You have already shared the Predecessor '${predecessor.id.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
                         )
                     );
                 }
                 repositoryAttribute = predecessor;
                 j++;
-            }
-
-            const attributeshared = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(requestItem.sourceAttributeId, [recipient], true);
-            if (attributeshared[0]) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidRequestItem(
-                        `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has been already shared to this peer.`
-                    )
-                );
             }
         }
 
