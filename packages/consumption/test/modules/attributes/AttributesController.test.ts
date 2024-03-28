@@ -1997,12 +1997,12 @@ describe("AttributesController", function () {
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedRepositoryAttribute(version0.id, successorParams1);
             const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedRepositoryAttribute(version1.id, successorParams2);
 
-            expect(await consumptionController.attributes.isPredecessorOf(updatedVersion0, updatedVersion1)).toBe(true);
-            expect(await consumptionController.attributes.isPredecessorOf(updatedVersion0, version2)).toBe(true);
+            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion0, updatedVersion1)).toBe(true);
+            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion0, version2)).toBe(true);
 
-            expect(await consumptionController.attributes.isPredecessorOf(updatedVersion0, updatedVersion0)).toBe(false);
-            expect(await consumptionController.attributes.isPredecessorOf(updatedVersion1, updatedVersion0)).toBe(false);
-            expect(await consumptionController.attributes.isPredecessorOf(version2, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion0, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion1, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isAPredecessorOf(version2, updatedVersion0)).toBe(false);
         });
 
         test("should check if an attribute is a successor of another attribute", async function () {
@@ -2037,12 +2037,12 @@ describe("AttributesController", function () {
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedRepositoryAttribute(version0.id, successorParams1);
             const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedRepositoryAttribute(version1.id, successorParams2);
 
-            expect(await consumptionController.attributes.isSuccessorOf(updatedVersion1, updatedVersion0)).toBe(true);
-            expect(await consumptionController.attributes.isSuccessorOf(version2, updatedVersion0)).toBe(true);
+            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion1, updatedVersion0)).toBe(true);
+            expect(await consumptionController.attributes.isASuccessorOf(version2, updatedVersion0)).toBe(true);
 
-            expect(await consumptionController.attributes.isSuccessorOf(updatedVersion0, updatedVersion0)).toBe(false);
-            expect(await consumptionController.attributes.isSuccessorOf(updatedVersion0, updatedVersion1)).toBe(false);
-            expect(await consumptionController.attributes.isSuccessorOf(updatedVersion0, version2)).toBe(false);
+            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion0, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion0, updatedVersion1)).toBe(false);
+            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion0, version2)).toBe(false);
         });
     });
 
