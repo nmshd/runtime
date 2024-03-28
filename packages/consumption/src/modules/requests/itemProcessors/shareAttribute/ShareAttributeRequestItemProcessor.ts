@@ -61,7 +61,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(repositoryAttribute.id.toString())) {
                     return ValidationResult.error(
                         CoreErrors.requests.invalidRequestItem(
-                            `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has already been shared to the peer.`
+                            `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has already been shared with the peer.`
                         )
                     );
                 }
