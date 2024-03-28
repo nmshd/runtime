@@ -1552,7 +1552,8 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefA")
+                        requestReference: CoreId.from("reqRefA"),
+                        sourceAttribute: CoreId.from("ATT0")
                     }
                 });
                 const successorParams: IAttributeSuccessorParams = {
@@ -1568,7 +1569,8 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefB")
+                        requestReference: CoreId.from("reqRefB"),
+                        sourceAttribute: CoreId.from("ATT1")
                     }
                 };
 
@@ -1962,6 +1964,86 @@ describe("AttributesController", function () {
         test("should throw if an unassigned attribute id is queried", async function () {
             await TestUtil.expectThrowsAsync(consumptionController.attributes.getVersionsOfAttribute(CoreId.from("ATTxxxxxxxxxxxxxxxxx")), "error.transport.recordNotFound");
         });
+
+        test("should check if an attribute is a predecessor of another attribute", async function () {
+            const version0 = await consumptionController.attributes.createLocalAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            const successorParams1: IAttributeSuccessorParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "US"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const successorParams2: IAttributeSuccessorParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "CZ"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+
+            const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedRepositoryAttribute(version0.id, successorParams1);
+            const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedRepositoryAttribute(version1.id, successorParams2);
+
+            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion0, updatedVersion1)).toBe(true);
+            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion0, version2)).toBe(true);
+
+            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion0, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion1, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isAPredecessorOf(version2, updatedVersion0)).toBe(false);
+        });
+
+        test("should check if an attribute is a successor of another attribute", async function () {
+            const version0 = await consumptionController.attributes.createLocalAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            const successorParams1: IAttributeSuccessorParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "US"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const successorParams2: IAttributeSuccessorParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "CZ"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+
+            const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedRepositoryAttribute(version0.id, successorParams1);
+            const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedRepositoryAttribute(version1.id, successorParams2);
+
+            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion1, updatedVersion0)).toBe(true);
+            expect(await consumptionController.attributes.isASuccessorOf(version2, updatedVersion0)).toBe(true);
+
+            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion0, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion0, updatedVersion1)).toBe(false);
+            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion0, version2)).toBe(false);
+        });
     });
 
     describe("get shared versions of a repository attribute", function () {
@@ -2109,10 +2191,8 @@ describe("AttributesController", function () {
                 }
             });
 
-            await TestUtil.expectThrowsAsync(
-                consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(sharedIdentityAttribute.id),
-                "error.consumption.attributes.invalidPropertyValue"
-            );
+            const result = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(sharedIdentityAttribute.id);
+            expect(result).toHaveLength(0);
         });
 
         test("should throw if a relationship attribute is queried", async function () {
@@ -2133,10 +2213,8 @@ describe("AttributesController", function () {
                 }
             });
 
-            await TestUtil.expectThrowsAsync(
-                consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(relationshipAttribute.id),
-                "error.consumption.attributes.invalidPropertyValue"
-            );
+            const result = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(relationshipAttribute.id);
+            expect(result).toHaveLength(0);
         });
     });
 });

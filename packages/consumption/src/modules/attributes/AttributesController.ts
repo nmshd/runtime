@@ -959,14 +959,38 @@ export class AttributesController extends ConsumptionBaseController {
         return attributeVersions;
     }
 
+    public async isAPredecessorOf(probedAttribute: LocalAttribute, referencedAttribute: LocalAttribute): Promise<boolean> {
+        while (referencedAttribute.succeeds) {
+            const predecessor = await this.getLocalAttribute(referencedAttribute.succeeds);
+            if (!predecessor) {
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referencedAttribute.succeeds.toString());
+            }
+
+            if (_.isEqual(predecessor, probedAttribute)) return true;
+
+            referencedAttribute = predecessor;
+        }
+        return false;
+    }
+
+    public async isASuccessorOf(probedAttribute: LocalAttribute, referencedAttribute: LocalAttribute): Promise<boolean> {
+        while (referencedAttribute.succeededBy) {
+            const successor = await this.getLocalAttribute(referencedAttribute.succeededBy);
+            if (!successor) {
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referencedAttribute.succeededBy.toString());
+            }
+
+            if (_.isEqual(successor, probedAttribute)) return true;
+
+            referencedAttribute = successor;
+        }
+        return false;
+    }
+
     public async getSharedVersionsOfRepositoryAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
         let repositoryAttribute = await this.getLocalAttribute(id);
         if (typeof repositoryAttribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
-        }
-
-        if (!repositoryAttribute.isRepositoryAttribute(this.identity.address)) {
-            throw CoreErrors.attributes.invalidPropertyValue(`Attribute '${id}' isn't a repository attribute.`);
         }
 
         let i = 0;

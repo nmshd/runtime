@@ -1,6 +1,7 @@
 import { Serializable, SerializableBase } from "@js-soft/ts-serval";
 import { ConsumptionController, LocalRequestStatus } from "@nmshd/consumption";
 import {
+    AttributeSuccessionAcceptResponseItemJSON,
     AuthenticationRequestItemJSON,
     ConsentRequestItemJSON,
     CreateAttributeAcceptResponseItemJSON,
@@ -121,6 +122,7 @@ import {
 import { MailDVO, RequestMessageDVO } from "./content/MailDVOs";
 import { RequestDVO } from "./content/RequestDVO";
 import {
+    AttributeSuccessionAcceptResponseItemDVO,
     CreateAttributeAcceptResponseItemDVO,
     ErrorResponseItemDVO,
     ProposeAttributeAcceptResponseItemDVO,
@@ -835,6 +837,24 @@ export class DataViewExpander {
                         name: name,
                         listener: localAttributeListener
                     } as RegisterAttributeListenerAcceptResponseItemDVO;
+
+                case "AttributeSuccessionAcceptResponseItem":
+                    const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;
+                    const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
+                    const localPredecessorDVOResult = await this.expandLocalAttributeDTO(localPredecessorResult.value);
+                    const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
+                    const localSuccessorDVOResult = await this.expandLocalAttributeDTO(localSuccessorResult.value);
+
+                    return {
+                        ...attributeSuccessionResponseItem,
+                        type: "AttributeSuccessionAcceptResponseItemDVO",
+                        id: attributeSuccessionResponseItem.successorId,
+                        name: name,
+                        predecessorId: attributeSuccessionResponseItem.predecessorId,
+                        successorId: attributeSuccessionResponseItem.successorId,
+                        predecessor: localPredecessorDVOResult,
+                        successor: localSuccessorDVOResult
+                    } as AttributeSuccessionAcceptResponseItemDVO;
 
                 default:
                     return {

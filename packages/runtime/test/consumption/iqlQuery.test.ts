@@ -19,7 +19,8 @@ describe("IQL Query", () => {
     let sEventBus: EventBus;
     let rEventBus: EventBus;
 
-    let rLocalAttribute: LocalAttributeDTO;
+    let rLocalAttribute1: LocalAttributeDTO;
+    let rLocalAttribute2: LocalAttributeDTO;
     let requestContent: CreateOutgoingRequestRequest;
 
     beforeAll(async () => {
@@ -35,27 +36,29 @@ describe("IQL Query", () => {
 
         await establishRelationship(sTransportServices, rTransportServices);
 
-        const response = await rConsumptionServices.attributes.createRepositoryAttribute({
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "AGivenName1"
-                },
-                tags: ["language:de"]
-            }
-        });
+        rLocalAttribute1 = (
+            await rConsumptionServices.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName1"
+                    },
+                    tags: ["language:de"]
+                }
+            })
+        ).value;
 
-        rLocalAttribute = response.value;
-
-        await rConsumptionServices.attributes.createRepositoryAttribute({
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "AGivenName2"
-                },
-                tags: ["language:en"]
-            }
-        });
+        rLocalAttribute2 = (
+            await rConsumptionServices.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName2"
+                    },
+                    tags: ["language:en"]
+                }
+            })
+        ).value;
 
         await rConsumptionServices.attributes.createRepositoryAttribute({
             content: {
@@ -236,7 +239,7 @@ describe("IQL Query", () => {
             items: [
                 {
                     accept: true,
-                    existingAttributeId: rLocalAttribute.id
+                    existingAttributeId: rLocalAttribute1.id
                 }
             ] as any // bug in runtime
         });
@@ -260,7 +263,7 @@ describe("IQL Query", () => {
             items: [
                 {
                     accept: true,
-                    existingAttributeId: rLocalAttribute.id
+                    existingAttributeId: rLocalAttribute1.id
                 }
             ] as any // bug in runtime
         });
@@ -286,7 +289,7 @@ describe("IQL Query", () => {
             items: [
                 {
                     accept: true,
-                    existingAttributeId: rLocalAttribute.id
+                    existingAttributeId: rLocalAttribute2.id
                 }
             ] as any // bug in runtime
         });
