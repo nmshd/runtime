@@ -4,7 +4,6 @@ import {
     IdentityAttributeQuery,
     IQLQuery,
     RelationshipAttribute,
-    RelationshipAttributeConfidentiality,
     RelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
@@ -60,7 +59,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
         );
     }
 
@@ -68,15 +67,9 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
         return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
     }
 
-    if (query.tags?.length !== attribute.tags?.length) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The number of tags of the provided IdentityAttribute do not match the number of queried tags."));
-    }
-
-    if (query.tags !== undefined && attribute.tags !== undefined) {
-        const sortedQueriedTags = query.tags.sort();
-        const sortedAttributeTags = attribute.tags.sort();
-        if (!sortedQueriedTags.every((tag, index) => tag === sortedAttributeTags[index])) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not match the queried tags."));
+    if (query.tags !== undefined && query.tags.length !== 0) {
+        if (attribute.tags === undefined || attribute.tags.length === 0 || !query.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))) {
+            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag."));
         }
     }
 
@@ -94,7 +87,7 @@ function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: Identi
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
         );
     }
 
@@ -103,17 +96,9 @@ function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: Identi
             return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
         }
 
-        if (query.attributeCreationHints.tags?.length !== attribute.tags?.length) {
-            return ValidationResult.error(
-                CoreErrors.requests.attributeQueryMismatch("The number of tags of the provided IdentityAttribute do not match the number of queried tags.")
-            );
-        }
-
-        if (query.attributeCreationHints.tags !== undefined && attribute.tags !== undefined) {
-            const sortedQueriedTags = query.attributeCreationHints.tags.sort();
-            const sortedAttributeTags = attribute.tags.sort();
-            if (!sortedQueriedTags.every((tag, index) => tag === sortedAttributeTags[index])) {
-                return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not match the queried tags."));
+        if (query.attributeCreationHints.tags !== undefined && query.attributeCreationHints.tags.length !== 0) {
+            if (attribute.tags === undefined || attribute.tags.length === 0 || !query.attributeCreationHints.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))) {
+                return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag."));
             }
         }
     }
@@ -202,12 +187,6 @@ function validateAttributeMatchesWithThirdPartyRelationshipAttributeQuery(
             CoreErrors.requests.attributeQueryMismatch(
                 "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
             )
-        );
-    }
-
-    if (attribute.confidentiality === RelationshipAttributeConfidentiality.Private) {
-        return ValidationResult.error(
-            CoreErrors.requests.invalidlyAnsweredQuery("The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it.")
         );
     }
 

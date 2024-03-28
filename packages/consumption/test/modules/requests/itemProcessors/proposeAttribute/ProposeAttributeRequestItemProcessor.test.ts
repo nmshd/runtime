@@ -344,83 +344,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const idOfAttributeOfThirdParty = await ConsumptionIds.attribute.generate();
-
-            await consumptionController.attributes.createPeerLocalAttribute({
-                id: idOfAttributeOfThirdParty,
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from("AThirdParty")
-                }),
-                peer: CoreAddress.from("AThirdParty"),
-                requestReference: await ConsumptionIds.request.generate()
-            });
-
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: TestObjectFactory.createIdentityAttribute()
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: CoreAddress.from("Sender"),
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
-                accept: true,
-                attributeId: idOfAttributeOfThirdParty.toString()
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
-            });
-        });
-
-        test("returns an error when the given Attribute's owner is not the current identity", async function () {
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: TestObjectFactory.createIdentityAttribute()
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: CoreAddress.from("Sender"),
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
-                accept: true,
-                attribute: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from("AThirdParty") }).toJSON()
-            };
-
-            const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
-            });
-        });
-
         test("returns an error when the existing IdentityAttribute is already shared", async function () {
             const recipient = accountController.identity.address;
 
@@ -461,8 +384,8 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
-                message: "The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes."
+                code: "error.consumption.requests.attributeQueryMismatch",
+                message: "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
             });
         });
 
@@ -521,7 +444,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidlyAnsweredQuery",
+                code: "error.consumption.requests.attributeQueryMismatch",
                 message: `The provided IdentityAttribute is outdated. You have already shared the Successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
             });
         });

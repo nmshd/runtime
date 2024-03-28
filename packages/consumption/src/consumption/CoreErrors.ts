@@ -192,10 +192,6 @@ class Requests {
         return new CoreError("error.consumption.requests.attributeQueryMismatch", message);
     }
 
-    public invalidlyAnsweredQuery(message: string) {
-        return new CoreError("error.consumption.requests.invalidlyAnsweredQuery", message);
-    }
-
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);

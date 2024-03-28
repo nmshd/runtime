@@ -20,28 +20,44 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         if (requestItem.attribute instanceof IdentityAttribute) {
             if (senderIsAttributeOwner) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidRequestItem("Cannot create own Attributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead.")
+                    CoreErrors.requests.invalidRequestItem("Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead.")
                 );
             }
 
-            if (recipientIsAttributeOwner || ownerIsEmptyString || typeof recipient === "undefined") {
+            if (recipientIsAttributeOwner || ownerIsEmptyString) {
                 return ValidationResult.success();
+            }
+
+            if (recipient !== undefined) {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidRequestItem(
+                        "The owner of the provided IdentityAttribute for the `attribute` property can only be the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
+                    )
+                );
             }
 
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(
-                    "The owner of the given `attribute` can only be the recipient's address or an empty string. The latter will default to the recipient's address."
+                    "The owner of the provided IdentityAttribute for the `attribute` property can only be an empty string. It will default to the Recipient's Address."
                 )
             );
         }
 
-        if (recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString || typeof recipient === "undefined") {
+        if (recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString) {
             return ValidationResult.success();
+        }
+
+        if (recipient !== undefined) {
+            return ValidationResult.error(
+                CoreErrors.requests.invalidRequestItem(
+                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address, the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
+                )
+            );
         }
 
         return ValidationResult.error(
             CoreErrors.requests.invalidRequestItem(
-                "The owner of the given 'attribute' can only be the sender's address, the recipient's address or an empty string. The latter will default to the recipient's address."
+                "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
             )
         );
     }

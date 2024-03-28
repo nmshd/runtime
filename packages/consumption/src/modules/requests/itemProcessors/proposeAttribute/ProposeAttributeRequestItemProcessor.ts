@@ -99,7 +99,9 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             if (_requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes.")
+                        CoreErrors.requests.attributeQueryMismatch(
+                            "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+                        )
                     );
                 }
 
@@ -114,14 +116,15 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
                 let repositoryAttribute = foundLocalAttribute;
                 let i = 0;
-                while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
+                const iterationLimit = 1000;
+                while (repositoryAttribute.succeededBy !== undefined && i < iterationLimit) {
                     const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
                     if (!successor) {
                         throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
                     }
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
                         return ValidationResult.error(
-                            CoreErrors.requests.invalidlyAnsweredQuery(
+                            CoreErrors.requests.attributeQueryMismatch(
                                 `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
                             )
                         );

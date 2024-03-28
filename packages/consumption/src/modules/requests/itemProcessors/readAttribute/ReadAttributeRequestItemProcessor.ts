@@ -5,6 +5,7 @@ import {
     ReadAttributeRequestItem,
     RejectResponseItem,
     RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
     RelationshipAttributeQuery,
     Request,
     ResponseItemResult,
@@ -73,7 +74,9 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (_requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidlyAnsweredQuery("The provided IdentityAttribute is already shared. You can only share unshared IdentityAttributes.")
+                        CoreErrors.requests.attributeQueryMismatch(
+                            "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+                        )
                     );
                 }
 
@@ -95,7 +98,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     }
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
                         return ValidationResult.error(
-                            CoreErrors.requests.invalidlyAnsweredQuery(
+                            CoreErrors.requests.attributeQueryMismatch(
                                 `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
                             )
                         );
@@ -112,7 +115,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
                 if (foundLocalAttribute.shareInfo.sourceAttribute !== undefined) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidlyAnsweredQuery(
+                        CoreErrors.requests.attributeQueryMismatch(
                             "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided."
                         )
                     );
@@ -155,6 +158,16 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
+
+        if (
+            _requestItem.query instanceof ThirdPartyRelationshipAttributeQuery &&
+            attribute instanceof RelationshipAttribute &&
+            attribute.confidentiality === RelationshipAttributeConfidentiality.Private
+        ) {
+            return ValidationResult.error(
+                CoreErrors.requests.attributeQueryMismatch("The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it.")
+            );
+        }
 
         return ValidationResult.success();
     }
