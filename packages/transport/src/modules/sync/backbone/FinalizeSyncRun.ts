@@ -25,7 +25,7 @@ export interface FinalizeExternalEventSyncResponse {
 }
 
 export interface FinalizeDatawalletVersionUpgradeResponse {
-    newDatawalletVersion: number;
+    newDatawalletModificationIndex: number;
     datawalletModifications: {
         id: string;
         index: number;
