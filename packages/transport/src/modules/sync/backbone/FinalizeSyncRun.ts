@@ -21,11 +21,11 @@ export interface FinalizeExternalEventSyncResponse {
         id: string;
         index: number;
         createdAt: string;
-    };
+    }[];
 }
 
 export interface FinalizeDatawalletVersionUpgradeResponse {
-    newDatawalletVersion: number;
+    newDatawalletModificationIndex: number;
     datawalletModifications: {
         id: string;
         index: number;
