@@ -54,8 +54,8 @@ export class FakeSyncClient implements ISyncClient {
 
         return Promise.resolve(
             ClientResult.ok<FinalizeDatawalletVersionUpgradeResponse>({
-                datawalletModifications: [],
-                newDatawalletVersion: request.newDatawalletVersion
+                newDatawalletModificationIndex: 0,
+                datawalletModifications: []
             })
         );
     }
