@@ -67,6 +67,7 @@ jobs:
       - uses: js-soft/ferretdb-github-action@1.1.0
         with:
           ferretdb-telemetry: "enabled"
+          ferretdb-version: "1.20.1"
       - run: npm run build:node
       - run: npm run test:ci:mongodb --workspace=@nmshd/consumption
         env:
@@ -144,7 +145,7 @@ jobs:
       - uses: js-soft/ferretdb-github-action@1.1.0
         with:
           ferretdb-telemetry: "enabled"
-          ferretdb-version: latest
+          ferretdb-version: "1.20.1"
       - run: npm ci
       - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
@@ -213,6 +214,7 @@ jobs:
       - uses: js-soft/ferretdb-github-action@1.1.0
         with:
           ferretdb-telemetry: "enabled"
+          ferretdb-version: "1.20.1"
       - run: npm run test:ci:mongodb --workspace=@nmshd/transport
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
