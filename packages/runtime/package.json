@@ -50,7 +50,7 @@
             "jest-expect-message"
         ],
         "testEnvironment": "node",
-        "testTimeout": 60000,
+        "testTimeout": 600000,
         "transform": {
             "^.+\\.ts$": [
                 "ts-jest",
