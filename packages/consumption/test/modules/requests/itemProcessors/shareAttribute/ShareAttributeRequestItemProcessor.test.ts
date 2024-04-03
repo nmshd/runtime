@@ -135,13 +135,15 @@ describe("ShareAttributeRequestItemProcessor", function () {
             }
         ])("returns ${value.result} when passing ${value.scenario}", async function (testParams) {
             const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+            const aThirdParty = CoreAddress.from("AThirdParty");
 
             if (testParams.attribute.owner.address === "Sender") {
                 testParams.attribute.owner = sender;
             }
 
             if (testParams.attribute.owner.address === "Recipient") {
-                testParams.attribute.owner = CoreAddress.from("Recipient");
+                testParams.attribute.owner = recipient;
             }
 
             let sourceAttribute;
@@ -160,7 +162,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                         owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
                     } as IRelationshipAttribute,
                     shareInfo: {
-                        peer: CoreAddress.from("AThirdParty"),
+                        peer: aThirdParty,
                         requestReference: await ConsumptionIds.request.generate()
                     }
                 });
@@ -173,7 +175,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
             const request = Request.from({ items: [requestItem] });
 
-            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, CoreAddress.from("Recipient"));
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
             if (testParams.result === "success") {
                 // eslint-disable-next-line jest/no-conditional-expect
@@ -185,17 +187,20 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
 
         test("returns error when the attribute doesn't exists", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: IdentityAttribute.from({
                     value: GivenName.fromAny({ value: "AGivenName" }),
-                    owner: CoreAddress.from("Sender")
+                    owner: sender
                 }),
                 sourceAttributeId: CoreId.from("anIdThatDoesntExist")
             });
             const request = Request.from({ items: [requestItem] });
 
-            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, CoreAddress.from("Recipient"));
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
@@ -204,9 +209,12 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
 
         test("returns error when the attribute content is not equal to the content persisted in the attribute collection", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+
             const attribute = IdentityAttribute.from({
                 value: GivenName.fromAny({ value: "AGivenName" }),
-                owner: CoreAddress.from("Sender")
+                owner: sender
             });
 
             const sourceAttribute = await consumptionController.attributes.createLocalAttribute({
@@ -216,13 +224,13 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: IdentityAttribute.from({
                     ...sourceAttribute.content.toJSON(),
-                    value: Surname.from("aSurname").toJSON()
+                    value: Surname.from("ASurname").toJSON()
                 }),
                 sourceAttributeId: sourceAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
-            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, CoreAddress.from("Recipient"));
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
@@ -232,6 +240,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
         test("returns error when the IdentityAttribute is a shared copy of a RepositoryAttribute", async function () {
             const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+            const aThirdParty = CoreAddress.from("AThirdParty");
+
             const localAttribute = await consumptionController.attributes.createLocalAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
@@ -240,7 +251,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     })
                 }),
                 shareInfo: {
-                    peer: CoreAddress.from("AThirdParty"),
+                    peer: aThirdParty,
                     requestReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: CoreId.from("sourceAttributeId")
                 }
@@ -252,7 +263,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
             const request = Request.from({ items: [requestItem] });
 
-            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, CoreAddress.from("Recipient"));
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
@@ -393,6 +404,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
         test("returns error when the RelationshipAttribute is a copy of another RelationshipAttribute", async function () {
             const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+            const aThirdParty = CoreAddress.from("AThirdParty");
+
             const relationshipAttribute = await consumptionController.attributes.createLocalAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
@@ -401,7 +415,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     key: "AKey"
                 }),
                 shareInfo: {
-                    peer: CoreAddress.from("AThirdParty"),
+                    peer: aThirdParty,
                     requestReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: CoreId.from("sourceAttributeId")
                 }
@@ -413,7 +427,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
             const request = Request.from({ items: [requestItem] });
 
-            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, CoreAddress.from("Recipient"));
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
@@ -454,8 +468,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        test("in case of an IdentityAttribute with 'owner=<empty>', creates a Local Attribute for the sender of the Request", async function () {
+        test("in case of an IdentityAttribute with 'owner=<empty>', creates a Local Attribute for the Sender of the Request", async function () {
             const sender = CoreAddress.from("Sender");
+
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 sourceAttributeId: CoreId.from("aSourceAttributeId"),
@@ -489,8 +504,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.content.owner.toString()).toStrictEqual(sender.toString());
         });
 
-        test("in case of a RelationshipAttribute with 'owner=<empty>', creates a Local Attribute for the sender of the Request", async function () {
+        test("in case of a RelationshipAttribute with 'owner=<empty>', creates a Local Attribute for the Sender of the Request", async function () {
             const sender = CoreAddress.from("Sender");
+
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 sourceAttributeId: CoreId.from("aSourceAttributeId"),

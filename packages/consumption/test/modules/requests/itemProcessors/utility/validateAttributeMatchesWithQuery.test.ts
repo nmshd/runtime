@@ -37,6 +37,10 @@ describe("validateAttributeMatchesWithQuery", function () {
     let readProcessor: ReadAttributeRequestItemProcessor;
     let proposeProcessor: ProposeAttributeRequestItemProcessor;
 
+    let recipient: CoreAddress;
+    const sender = CoreAddress.from("Sender");
+    const aThirdParty = CoreAddress.from("AThirdParty");
+    const anUninvolvedThirdParty = CoreAddress.from("AnUninvolvedThirdParty");
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
@@ -45,6 +49,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
         const accounts = await TestUtil.provideAccounts(transport, 1);
         ({ accountController, consumptionController } = accounts[0]);
+        recipient = accountController.identity.address;
     });
 
     afterAll(async function () {
@@ -58,8 +63,6 @@ describe("validateAttributeMatchesWithQuery", function () {
 
     describe("ReadAttributeRequestitem with IdentityAttributeQuery", function () {
         test("returns an error when an IdentityAttribute was queried by an IdentityAttributeQuery and the peer tries to respond with a RelationshipAttribute", async function () {
-            const recipient = accountController.identity.address;
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" })
@@ -69,7 +72,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -102,14 +105,13 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const peerAttributeId = await ConsumptionIds.attribute.generate();
-
+            const thirdPartyAttributeId = await ConsumptionIds.attribute.generate();
             await consumptionController.attributes.createPeerLocalAttribute({
-                id: peerAttributeId,
+                id: thirdPartyAttributeId,
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from("AThirdParty")
+                    owner: aThirdParty
                 }),
-                peer: CoreAddress.from("AThirdParty"),
+                peer: aThirdParty,
                 requestReference: await ConsumptionIds.request.generate()
             });
 
@@ -122,7 +124,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -133,7 +135,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                 accept: true,
-                existingAttributeId: peerAttributeId.toString()
+                existingAttributeId: thirdPartyAttributeId.toString()
             };
 
             const result = await readProcessor.canAccept(requestItem, acceptParams, request);
@@ -154,7 +156,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -167,7 +169,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "IdentityAttribute",
-                    owner: "AThirdParty",
+                    owner: aThirdParty.toString(),
                     value: {
                         "@type": "GivenName",
                         value: "AGivenName"
@@ -184,8 +186,6 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when an IdentityAttribute of a specific type was queried by an IdentityAttributeQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
-            const recipient = accountController.identity.address;
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" })
@@ -195,7 +195,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -225,8 +225,6 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when an IdentityAttribute has no tag but at least one tag was queried by IdentityAttributeQuery", async function () {
-            const recipient = accountController.identity.address;
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName", tags: ["ATag"] })
@@ -236,7 +234,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -266,8 +264,6 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IdentityAttributeQuery", async function () {
-            const recipient = accountController.identity.address;
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ tags: ["tagA", "tagB", "tagC"], valueType: "GivenName" })
@@ -277,7 +273,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -308,8 +304,6 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when an IdentityAttribute is not valid in the queried time frame", async function () {
-            const recipient = accountController.identity.address;
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ validTo: "2024-02-14T09:35:12.824Z", valueType: "GivenName" })
@@ -319,7 +313,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -353,8 +347,6 @@ describe("validateAttributeMatchesWithQuery", function () {
 
     describe("ReadAttributeRequestitem with IQLQuery", function () {
         test("returns an error when an IdentityAttribute was queried by an IQLQuery and the peer tries to respond with a RelationshipAttribute", async function () {
-            const recipient = accountController.identity.address;
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
@@ -364,7 +356,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -406,7 +398,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -419,7 +411,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "IdentityAttribute",
-                    owner: "Sender",
+                    owner: sender.toString(),
                     value: {
                         "@type": "GivenName",
                         value: "AGivenName"
@@ -436,8 +428,6 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when an IdentityAttribute of a specific type was queried by an IQLQuery and the peer tries to respond with an IdentityAttribute of another type", async function () {
-            const recipient = accountController.identity.address;
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
@@ -447,7 +437,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -477,8 +467,6 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when an IdentityAttribute has no tag but at least one tag was queried by IQLQuery", async function () {
-            const recipient = accountController.identity.address;
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["ATag"] } })
@@ -488,7 +476,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -518,8 +506,6 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IQLQuery", async function () {
-            const recipient = accountController.identity.address;
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["tagA", "tagB", "tagC"] } })
@@ -529,7 +515,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -562,8 +548,6 @@ describe("validateAttributeMatchesWithQuery", function () {
 
     describe("ReadAttributeRequestitem with RelationshipAttributeQuery", function () {
         test("returns an error when a RelationshipAttribute was queried and the Recipient tries to respond with an IdentityAttribute", async function () {
-            const recipient = CoreAddress.from(accountController.identity.address);
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
@@ -581,7 +565,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -611,8 +595,6 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when a RelationshipAttribute of a specific type was queried and the Recipient tries to respond with a RelationshipAttribute of another type", async function () {
-            const recipient = CoreAddress.from(accountController.identity.address);
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
@@ -630,7 +612,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -663,12 +645,10 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when a RelationshipAttribute does not belong to the queried owner", async function () {
-            const recipient = CoreAddress.from(accountController.identity.address);
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    owner: "Sender",
+                    owner: sender.toString(),
                     key: "AKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
@@ -682,7 +662,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -718,7 +698,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    owner: "Sender",
+                    owner: sender.toString(),
                     key: "AKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
@@ -732,7 +712,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -747,7 +727,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     "@type": "RelationshipAttribute",
                     key: "AnotherKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: "Sender",
+                    owner: sender.toString(),
                     value: {
                         "@type": "ProprietaryString",
                         title: "ATitle",
@@ -768,7 +748,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    owner: "Sender",
+                    owner: sender.toString(),
                     key: "AKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
@@ -782,7 +762,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -797,7 +777,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     "@type": "RelationshipAttribute",
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Private,
-                    owner: "Sender",
+                    owner: sender.toString(),
                     value: {
                         "@type": "ProprietaryString",
                         title: "ATitle",
@@ -818,7 +798,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    owner: "Sender",
+                    owner: sender.toString(),
                     key: "AKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
@@ -833,7 +813,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -848,7 +828,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     "@type": "RelationshipAttribute",
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Private,
-                    owner: "Sender",
+                    owner: sender.toString(),
                     value: {
                         "@type": "ProprietaryString",
                         title: "AnotherTitle",
@@ -870,7 +850,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    owner: "Sender",
+                    owner: sender.toString(),
                     key: "AKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
@@ -885,7 +865,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -900,7 +880,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     "@type": "RelationshipAttribute",
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Private,
-                    owner: "Sender",
+                    owner: sender.toString(),
                     value: {
                         "@type": "ProprietaryString",
                         title: "ATitle",
@@ -921,7 +901,7 @@ describe("validateAttributeMatchesWithQuery", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    owner: "Sender",
+                    owner: sender.toString(),
                     key: "AKey",
                     validFrom: "2024-02-14T08:47:35.077Z",
                     validTo: "2024-02-14T09:35:12.824Z",
@@ -937,7 +917,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -952,7 +932,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     "@type": "RelationshipAttribute",
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: "Sender",
+                    owner: sender.toString(),
                     validFrom: "2024-02-14T08:47:35.077Z",
                     validTo: "2024-02-14T09:30:00.000Z",
                     value: {
@@ -974,14 +954,12 @@ describe("validateAttributeMatchesWithQuery", function () {
 
     describe("ReadAttributeRequestitem with ThirdPartyRelationshipAttributeQuery", function () {
         test("returns an error when a RelationshipAttribute was queried using a ThirdPartyRelationshipAttributeQuery and the Recipient tries to respond with an IdentityAttribute", async function () {
-            const recipient = CoreAddress.from(accountController.identity.address);
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                     key: "AKey",
-                    thirdParty: ["AThirdParty"]
+                    thirdParty: [aThirdParty.toString()]
                 })
             });
             const requestId = await ConsumptionIds.request.generate();
@@ -989,7 +967,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -1023,7 +1001,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                     key: "AKey",
-                    thirdParty: ["AThirdParty"]
+                    thirdParty: [aThirdParty.toString()]
                 })
             });
 
@@ -1032,7 +1010,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -1045,14 +1023,14 @@ describe("validateAttributeMatchesWithQuery", function () {
                 content: RelationshipAttribute.from({
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: CoreAddress.from("AThirdParty"),
+                    owner: aThirdParty,
                     value: ProprietaryString.from({
                         title: "ATitle",
                         value: "AStringValue"
                     })
                 }),
                 shareInfo: {
-                    peer: CoreAddress.from("AThirdParty"),
+                    peer: aThirdParty,
                     requestReference: await ConsumptionIds.request.generate()
                 }
             });
@@ -1074,9 +1052,9 @@ describe("validateAttributeMatchesWithQuery", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    owner: "",
+                    owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
                     key: "AKey",
-                    thirdParty: ["AThirdParty"]
+                    thirdParty: [aThirdParty.toString()]
                 })
             });
 
@@ -1085,7 +1063,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -1098,14 +1076,14 @@ describe("validateAttributeMatchesWithQuery", function () {
                 content: RelationshipAttribute.from({
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: CoreAddress.from("AnUninvolvedThirdParty"),
+                    owner: anUninvolvedThirdParty,
                     value: ProprietaryString.from({
                         title: "ATitle",
                         value: "AStringValue"
                     })
                 }),
                 shareInfo: {
-                    peer: CoreAddress.from("AnUninvolvedThirdParty"),
+                    peer: anUninvolvedThirdParty,
                     requestReference: await ConsumptionIds.request.generate()
                 }
             });
@@ -1125,14 +1103,12 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when a RelationshipAttribute does not have the key that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
-            const recipient = CoreAddress.from(accountController.identity.address);
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                     key: "AKey",
-                    thirdParty: ["AThirdParty"]
+                    thirdParty: [aThirdParty.toString()]
                 })
             });
             const requestId = await ConsumptionIds.request.generate();
@@ -1140,7 +1116,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -1160,7 +1136,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     })
                 }),
                 shareInfo: {
-                    peer: CoreAddress.from("AThirdParty"),
+                    peer: aThirdParty,
                     requestReference: await ConsumptionIds.request.generate()
                 }
             });
@@ -1179,8 +1155,6 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when a RelationshipAttribute is not valid in the time frame that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
-            const recipient = CoreAddress.from(accountController.identity.address);
-
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
@@ -1188,7 +1162,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     validFrom: "2024-02-14T08:47:35.077Z",
                     validTo: "2024-02-14T09:35:12.824Z",
                     key: "AKey",
-                    thirdParty: ["AThirdParty"]
+                    thirdParty: [aThirdParty.toString()]
                 })
             });
 
@@ -1197,7 +1171,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -1219,7 +1193,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     })
                 }),
                 shareInfo: {
-                    peer: CoreAddress.from("AThirdParty"),
+                    peer: aThirdParty,
                     requestReference: await ConsumptionIds.request.generate()
                 }
             });
@@ -1240,14 +1214,13 @@ describe("validateAttributeMatchesWithQuery", function () {
 
     describe("ProposeAttributeRequestitem with IdentityAttributeQuery", function () {
         test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const idOfAttributeOfThirdParty = await ConsumptionIds.attribute.generate();
-
+            const thirdPartyAttributeId = await ConsumptionIds.attribute.generate();
             await consumptionController.attributes.createPeerLocalAttribute({
-                id: idOfAttributeOfThirdParty,
+                id: thirdPartyAttributeId,
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from("AThirdParty")
+                    owner: aThirdParty
                 }),
-                peer: CoreAddress.from("AThirdParty"),
+                peer: aThirdParty,
                 requestReference: await ConsumptionIds.request.generate()
             });
 
@@ -1261,7 +1234,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -1272,7 +1245,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
                 accept: true,
-                attributeId: idOfAttributeOfThirdParty.toString()
+                attributeId: thirdPartyAttributeId.toString()
             };
 
             const result = await proposeProcessor.canAccept(requestItem, acceptParams, request);
@@ -1294,7 +1267,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("Sender"),
+                peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -1305,7 +1278,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
                 accept: true,
-                attribute: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from("AThirdParty") }).toJSON()
+                attribute: TestObjectFactory.createIdentityAttribute({ owner: aThirdParty }).toJSON()
             };
 
             const result = await proposeProcessor.canAccept(requestItem, acceptParams, request);
