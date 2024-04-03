@@ -3,7 +3,7 @@ import { RelationshipChangedEvent } from "../../../events";
 import { RelationshipsController } from "../../relationships/RelationshipsController";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ChangedItems } from "../ChangedItems";
-import { ExternalEventProcessor } from "../ExternalEventsProcessor";
+import { ExternalEventProcessor } from "./AbstractExternalEventProcessor";
 
 export class RelationshipChangeCompletedEventProcessor extends ExternalEventProcessor {
     public constructor(

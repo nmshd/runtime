@@ -14,15 +14,6 @@ import {
 } from "./externalEvents";
 import { SyncProgressReporter, SyncProgressReporterStep, SyncStep } from "./SyncCallback";
 
-export abstract class ExternalEventProcessor {
-    public constructor(
-        protected readonly eventBus: EventBus,
-        protected readonly changedItems: ChangedItems,
-        protected readonly ownAddress: string
-    ) {}
-    public abstract execute(externalEvent: BackboneExternalEvent): Promise<void>;
-}
-
 export class ExternalEventsProcessor {
     private readonly log: ILogger;
     public readonly changedItems: ChangedItems = new ChangedItems();

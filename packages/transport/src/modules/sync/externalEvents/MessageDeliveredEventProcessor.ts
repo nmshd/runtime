@@ -3,7 +3,7 @@ import { MessageDeliveredEvent } from "../../../events";
 import { MessageController } from "../../messages/MessageController";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ChangedItems } from "../ChangedItems";
-import { ExternalEventProcessor } from "../ExternalEventsProcessor";
+import { ExternalEventProcessor } from "./AbstractExternalEventProcessor";
 
 export class MessageDeliveredEventProcessor extends ExternalEventProcessor {
     public constructor(

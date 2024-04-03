@@ -4,7 +4,7 @@ import { MessageReceivedEvent } from "../../../events";
 import { MessageController } from "../../messages/MessageController";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ChangedItems } from "../ChangedItems";
-import { ExternalEventProcessor } from "../ExternalEventsProcessor";
+import { ExternalEventProcessor } from "./AbstractExternalEventProcessor";
 
 export class MessageReceivedEventProcessor extends ExternalEventProcessor {
     public constructor(
