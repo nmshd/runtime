@@ -12,18 +12,18 @@ import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
-import { RelationshipSecretController } from "./RelationshipSecretController";
 import { BackboneGetRelationshipsResponse } from "./backbone/BackboneGetRelationships";
 import { BackboneGetRelationshipsChangesResponse, BackboneGetRelationshipsChangesSingleChangeResponse } from "./backbone/BackboneGetRelationshipsChanges";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { CachedRelationship } from "./local/CachedRelationship";
 import { Relationship } from "./local/Relationship";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
-import { RelationshipStatus } from "./transmission/RelationshipStatus";
+import { RelationshipSecretController } from "./RelationshipSecretController";
 import { RelationshipChange } from "./transmission/changes/RelationshipChange";
 import { RelationshipChangeResponse } from "./transmission/changes/RelationshipChangeResponse";
 import { RelationshipChangeStatus } from "./transmission/changes/RelationshipChangeStatus";
 import { RelationshipChangeType } from "./transmission/changes/RelationshipChangeType";
+import { RelationshipStatus } from "./transmission/RelationshipStatus";
 import { RelationshipCreationChangeRequestCipher } from "./transmission/requests/RelationshipCreationChangeRequestCipher";
 import { RelationshipCreationChangeRequestContentWrapper } from "./transmission/requests/RelationshipCreationChangeRequestContentWrapper";
 import { RelationshipCreationChangeRequestSigned } from "./transmission/requests/RelationshipCreationChangeRequestSigned";
@@ -190,16 +190,16 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async acceptChange(change: RelationshipChange, content?: ICoreSerializable): Promise<Relationship> {
-        return await this.completeChange(RelationshipChangeStatus.Accepted, change, content);
+    public async accept(relationshipId: CoreId): Promise<Relationship> {
+        return await this.completeStateTransition(RelationshipChangeStatus.Accepted, relationshipId);
     }
 
-    public async rejectChange(change: RelationshipChange, content?: ICoreSerializable): Promise<Relationship> {
-        return await this.completeChange(RelationshipChangeStatus.Rejected, change, content);
+    public async reject(relationshipId: CoreId): Promise<Relationship> {
+        return await this.completeStateTransition(RelationshipChangeStatus.Rejected, relationshipId);
     }
 
-    public async revokeChange(change: RelationshipChange, content?: ICoreSerializable): Promise<Relationship> {
-        return await this.completeChange(RelationshipChangeStatus.Revoked, change, content);
+    public async revoke(relationshipId: CoreId): Promise<Relationship> {
+        return await this.completeStateTransition(RelationshipChangeStatus.Revoked, relationshipId);
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneGetRelationshipsResponse) {
@@ -510,10 +510,10 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async completeChange(targetStatus: RelationshipChangeStatus, change: RelationshipChange, content?: ISerializable) {
-        const relationshipDoc = await this.relationships.read(change.relationshipId.toString());
+    private async completeStateTransition(targetStatus: RelationshipChangeStatus, id: CoreId) {
+        const relationshipDoc = await this.relationships.read(id.toString());
         if (!relationshipDoc) {
-            throw CoreErrors.general.recordNotFound(Relationship, change.relationshipId.toString());
+            throw CoreErrors.general.recordNotFound(Relationship, id.toString());
         }
 
         const relationship = Relationship.from(relationshipDoc);
@@ -523,47 +523,26 @@ export class RelationshipsController extends TransportController {
         }
 
         if (!relationship.cache) {
-            throw this.newCacheEmptyError(Relationship, relationship.id.toString());
-        }
-
-        const queriedChange = relationship.cache.changes.find((r) => r.id.toString() === change.id.toString());
-        if (!queriedChange) {
-            throw CoreErrors.general.recordNotFound(RelationshipChange, change.id.toString());
-        }
-
-        if (queriedChange.status !== RelationshipChangeStatus.Pending) {
-            throw CoreErrors.relationships.wrongChangeStatus(queriedChange.status);
-        }
-
-        let encryptedContent;
-        if (content) {
-            encryptedContent =
-                targetStatus === RelationshipChangeStatus.Revoked
-                    ? await this.encryptRevokeContent(relationship, content)
-                    : await this.encryptAcceptRejectContent(relationship, content);
+            throw this.newCacheEmptyError(Relationship, id.toString());
         }
 
         let backboneResponse: BackboneGetRelationshipsResponse;
         switch (targetStatus) {
             case RelationshipChangeStatus.Accepted:
-                backboneResponse = (await this.client.acceptRelationshipChange(relationship.id.toString(), change.id.toString(), encryptedContent)).value;
+                backboneResponse = (await this.client.acceptRelationship(id.toString())).value;
                 break;
 
             case RelationshipChangeStatus.Rejected:
-                backboneResponse = (await this.client.rejectRelationshipChange(relationship.id.toString(), change.id.toString(), encryptedContent)).value;
+                backboneResponse = (await this.client.rejectRelationship(id.toString())).value;
                 break;
 
             case RelationshipChangeStatus.Revoked:
-                backboneResponse = (await this.client.revokeRelationshipChange(relationship.id.toString(), change.id.toString(), encryptedContent)).value;
+                backboneResponse = (await this.client.revokeRelationship(id.toString())).value;
                 break;
 
             default:
                 throw new TransportError("target change status not supported");
         }
-        const backboneChange = backboneResponse.changes[backboneResponse.changes.length - 1];
-
-        queriedChange.response = RelationshipChangeResponse.fromBackbone(backboneResponse.changes[backboneResponse.changes.length - 1].response!, content);
-        queriedChange.status = backboneChange.status;
         relationship.status = backboneResponse.status;
 
         await this.relationships.update(relationshipDoc, relationship);

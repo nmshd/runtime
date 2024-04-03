@@ -14,22 +14,16 @@ export class RelationshipClient extends RESTClientAuthenticate {
         return await this.post<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${id}/Changes`, request);
     }
 
-    public async acceptRelationshipChange(relationshipId: string, changeId: string, content?: any): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Changes/${changeId}/Accept`, {
-            content: content
-        });
+    public async acceptRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
+        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Accept`);
     }
 
-    public async rejectRelationshipChange(relationshipId: string, changeId: string, content?: any): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Changes/${changeId}/Reject`, {
-            content: content
-        });
+    public async rejectRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
+        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reject`);
     }
 
-    public async revokeRelationshipChange(relationshipId: string, changeId: string, content?: any): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Changes/${changeId}/Revoke`, {
-            content: content
-        });
+    public async revokeRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
+        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Revoke`);
     }
 
     public async getRelationships(request?: BackboneGetRelationshipsRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipsResponse>>> {
