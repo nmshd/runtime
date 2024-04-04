@@ -12,7 +12,7 @@ import { ISyncClient, SyncClient } from "./backbone/SyncClient";
 import { ChangedItems } from "./ChangedItems";
 import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
 import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
-import { ExternalEventProcessor } from "./externalEventProcessors/ExternalEventProcessor";
+import { ExternalEventProcessorRegistry } from "./externalEventProcessors/ExternalEventProcessorRegistry";
 import { DatawalletModification } from "./local/DatawalletModification";
 import { DeviceMigrations } from "./migrations/DeviceMigrations";
 import { IdentityMigrations } from "./migrations/IdentityMigrations";
@@ -409,21 +409,11 @@ export class SyncController extends TransportController {
         const changedItems = new ChangedItems();
         const ownAddress = this.parent.identity.address.toString();
 
-        const externalEventRegistry = ExternalEventProcessor.getExternalEventProcessorRegistry(
-            this.eventBus,
-            changedItems,
-            ownAddress,
-            this.parent.messages,
-            this.parent.relationships
-        );
+        const externalEventRegistry = new ExternalEventProcessorRegistry(this.eventBus, changedItems, ownAddress, this.parent.messages, this.parent.relationships);
         for (const externalEvent of externalEvents) {
             try {
-                const externalEventProcessor = externalEventRegistry.get(externalEvent.type);
-                if (externalEventProcessor) {
-                    await externalEventProcessor.execute(externalEvent);
-                } else {
-                    throw new TransportError(`'${externalEvent.type}' is not a supported external event type.`);
-                }
+                const externalEventProcessor = externalEventRegistry.getProcessorForItem(externalEvent.type);
+                await externalEventProcessor.execute(externalEvent);
 
                 results.push({
                     externalEventId: externalEvent.id
