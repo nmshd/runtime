@@ -1,11 +1,11 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { RelationshipChangedEvent } from "../../../events";
 import { RelationshipsController } from "../../relationships/RelationshipsController";
-import { ChangedItems } from "../ChangedItems";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
+import { ChangedItems } from "../ChangedItems";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
-export class RelationshipChangeCompletedEventProcessor extends ExternalEventProcessor {
+export class RelationshipChangeCreatedExternalEventProcessor extends ExternalEventProcessor {
     public constructor(
         eventBus: EventBus,
         changedItems: ChangedItems,
@@ -16,7 +16,7 @@ export class RelationshipChangeCompletedEventProcessor extends ExternalEventProc
     }
 
     public override async execute(externalEvent: BackboneExternalEvent): Promise<void> {
-        const payload = externalEvent.payload as { changeId: string };
+        const payload = externalEvent.payload as { changeId: string; relationshipId: string };
         const relationship = await this.relationshipsController.applyChangeById(payload.changeId);
 
         if (relationship) {

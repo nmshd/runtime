@@ -3,21 +3,21 @@ import { log } from "@js-soft/ts-utils";
 import { ControllerName, CoreDate, CoreError, CoreErrors, CoreId, RequestError, TransportController, TransportError, TransportLoggerFactory } from "../../core";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { AccountController } from "../accounts/AccountController";
-import { ChangedItems } from "./ChangedItems";
-import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
-import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
-import { ExternalEventsProcessor } from "./ExternalEventsProcessor";
-import { SyncProgressReporter, SyncStep } from "./SyncCallback";
-import { WhatToSync } from "./WhatToSync";
 import { BackboneDatawalletModification } from "./backbone/BackboneDatawalletModification";
 import { BackboneSyncRun } from "./backbone/BackboneSyncRun";
 import { CreateDatawalletModificationsRequestItem } from "./backbone/CreateDatawalletModifications";
 import { FinalizeSyncRunRequestExternalEventResult } from "./backbone/FinalizeSyncRun";
 import { StartSyncRunStatus, SyncRunType } from "./backbone/StartSyncRun";
 import { ISyncClient, SyncClient } from "./backbone/SyncClient";
+import { ChangedItems } from "./ChangedItems";
+import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
+import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
+import { ExternalEventProcessor } from "./externalEventProcessors/ExternalEventProcessor";
 import { DatawalletModification } from "./local/DatawalletModification";
 import { DeviceMigrations } from "./migrations/DeviceMigrations";
 import { IdentityMigrations } from "./migrations/IdentityMigrations";
+import { SyncProgressReporter, SyncStep } from "./SyncCallback";
+import { WhatToSync } from "./WhatToSync";
 
 export class SyncController extends TransportController {
     private syncInfo: IDatabaseMap;
@@ -404,21 +404,56 @@ export class SyncController extends TransportController {
 
         const externalEvents = await getExternalEventsResult.value.collect();
 
-        const externalEventProcessor = new ExternalEventsProcessor(
-            this.parent.messages,
-            this.parent.relationships,
-            externalEvents,
-            reporter,
+        const syncStep = reporter.createStep(SyncStep.ExternalEventsProcessing, externalEvents.length);
+        const results: FinalizeSyncRunRequestExternalEventResult[] = [];
+        const changedItems = new ChangedItems();
+        const ownAddress = this.parent.identity.address.toString();
+
+        const externalEventRegistry = ExternalEventProcessor.getExternalEventProcessorRegistry(
             this.eventBus,
-            this.parent.identity.address.toString()
+            changedItems,
+            ownAddress,
+            this.parent.messages,
+            this.parent.relationships
         );
-        await externalEventProcessor.execute();
+        for (const externalEvent of externalEvents) {
+            try {
+                const externalEventProcessor = externalEventRegistry.get(externalEvent.type);
+                if (externalEventProcessor) {
+                    await externalEventProcessor.execute(externalEvent);
+                } else {
+                    throw new TransportError(`'${externalEvent.type}' is not a supported external event type.`);
+                }
+
+                results.push({
+                    externalEventId: externalEvent.id
+                });
+            } catch (e: any) {
+                this.log.error("There was an error while trying to apply an external event: ", e);
+
+                let errorCode;
+                if (e.code) {
+                    errorCode = e.code;
+                } else if (e.message) {
+                    errorCode = e.message;
+                } else {
+                    errorCode = JSON.stringify(e);
+                }
+
+                results.push({
+                    externalEventId: externalEvent.id,
+                    errorCode: errorCode
+                });
+            } finally {
+                syncStep.progress();
+            }
+        }
 
         externalEventStep.finish();
 
         return {
-            externalEventResults: externalEventProcessor.results,
-            changedItems: externalEventProcessor.changedItems
+            externalEventResults: results,
+            changedItems: changedItems
         };
     }
 
