@@ -12,7 +12,7 @@ import { ISyncClient, SyncClient } from "./backbone/SyncClient";
 import { ChangedItems } from "./ChangedItems";
 import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
 import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
-import { ExternalEventProcessorRegistry } from "./externalEventProcessors/ExternalEventProcessorRegistry";
+import { ExternalEventProcessorRegistry } from "./externalEventProcessors";
 import { DatawalletModification } from "./local/DatawalletModification";
 import { DeviceMigrations } from "./migrations/DeviceMigrations";
 import { IdentityMigrations } from "./migrations/IdentityMigrations";
