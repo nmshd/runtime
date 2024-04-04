@@ -1,12 +1,10 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
 import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
-import { IIdentity, Identity } from "../../accounts/data/Identity";
+import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
-import { IRelationshipChange } from "../transmission/changes/RelationshipChange";
-import { RelationshipChangeResponse } from "../transmission/changes/RelationshipChangeResponse";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 
 export interface IRelationship extends ICoreSynchronizable {
@@ -72,9 +70,9 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         return json;
     }
 
-    public static fromRequestSent(id: CoreId, template: IRelationshipTemplate, peer: IIdentity, creationChange: IRelationshipChange, relationshipSecretId: CoreId): Relationship {
+    public static fromRequestSent(id: CoreId, template: IRelationshipTemplate, peer: IIdentity, creationContent: any, relationshipSecretId: CoreId): Relationship {
         const cache = CachedRelationship.from({
-            changes: [creationChange],
+            creationContent,
             template: template
         });
 
@@ -88,15 +86,15 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         });
     }
 
-    public static fromCreationChangeReceived(
+    public static fromCreationContentReceived(
         response: BackboneGetRelationshipsResponse,
         template: IRelationshipTemplate,
         peer: IIdentity,
-        creationChange: IRelationshipChange,
+        creationContent: any,
         relationshipSecretId: CoreId
     ): Relationship {
         const cache = CachedRelationship.from({
-            changes: [creationChange],
+            creationContent,
             template: template
         });
         return Relationship.from({
@@ -109,24 +107,21 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         });
     }
 
-    public toActive(response: RelationshipChangeResponse): void {
+    public toActive(): void {
         if (!this.cache) throw this.newCacheEmptyError();
 
-        this.cache.changes[0].response = response;
         this.status = RelationshipStatus.Active;
     }
 
-    public toRejected(response: RelationshipChangeResponse): void {
+    public toRejected(): void {
         if (!this.cache) throw this.newCacheEmptyError();
 
-        this.cache.changes[0].response = response;
         this.status = RelationshipStatus.Rejected;
     }
 
-    public toRevoked(response: RelationshipChangeResponse): void {
+    public toRevoked(): void {
         if (!this.cache) throw this.newCacheEmptyError();
 
-        this.cache.changes[0].response = response;
         this.status = RelationshipStatus.Revoked;
     }
 
