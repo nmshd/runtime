@@ -1,9 +1,9 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { MessageDeliveredEvent } from "../../../events";
 import { MessageController } from "../../messages/MessageController";
-import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ChangedItems } from "../ChangedItems";
-import { ExternalEventProcessor } from "./AbstractExternalEventProcessor";
+import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
+import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
 export class MessageDeliveredEventProcessor extends ExternalEventProcessor {
     public constructor(

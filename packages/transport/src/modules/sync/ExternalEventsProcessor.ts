@@ -11,7 +11,7 @@ import {
     MessageReceivedEventProcessor,
     RelationshipChangeCompletedEventProcessor,
     RelationshipChangeCreatedEventProcessor
-} from "./externalEvents";
+} from "./externalEventProcessors";
 import { SyncProgressReporter, SyncProgressReporterStep, SyncStep } from "./SyncCallback";
 
 export class ExternalEventsProcessor {

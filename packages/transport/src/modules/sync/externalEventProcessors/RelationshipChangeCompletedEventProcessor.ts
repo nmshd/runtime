@@ -1,9 +1,9 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { RelationshipChangedEvent } from "../../../events";
 import { RelationshipsController } from "../../relationships/RelationshipsController";
-import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ChangedItems } from "../ChangedItems";
-import { ExternalEventProcessor } from "./AbstractExternalEventProcessor";
+import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
+import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
 export class RelationshipChangeCompletedEventProcessor extends ExternalEventProcessor {
     public constructor(

@@ -2,9 +2,9 @@ import { EventBus } from "@js-soft/ts-utils";
 import { CoreId } from "../../../core";
 import { MessageReceivedEvent } from "../../../events";
 import { MessageController } from "../../messages/MessageController";
-import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ChangedItems } from "../ChangedItems";
-import { ExternalEventProcessor } from "./AbstractExternalEventProcessor";
+import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
+import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
 export class MessageReceivedEventProcessor extends ExternalEventProcessor {
     public constructor(
