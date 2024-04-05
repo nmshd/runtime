@@ -7,3 +7,4 @@ export * from "./LoadItemFromTruncatedReference";
 export * from "./RegisterPushNotificationToken";
 export * from "./SyncDatawallet";
 export * from "./SyncEverything";
+export * from "./UnregisterPushNotificationToken";

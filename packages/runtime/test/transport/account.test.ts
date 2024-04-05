@@ -187,3 +187,11 @@ describe("RegisterPushNotificationToken", () => {
         expect(result).toBeSuccessful();
     });
 });
+
+describe("UnregisterPushNotificationToken", () => {
+    test("valid enviroment", async () => {
+        const result = await sTransportServices.account.unregisterPushNotificationToken();
+
+        expect(result).toBeSuccessful();
+    });
+});
