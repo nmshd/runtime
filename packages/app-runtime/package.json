@@ -50,7 +50,7 @@
         }
     },
     "dependencies": {
-        "@js-soft/docdb-access-loki": "^1.0.6",
+        "@js-soft/docdb-access-loki": "^1.1.0",
         "@js-soft/native-abstractions": "^1.2.2",
         "lodash": "^4.17.21"
     },
