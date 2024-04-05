@@ -1,5 +1,5 @@
+import { AuditLog } from "../transmission/AuditLog";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
-import { BackboneGetRelationshipsChangesResponse } from "./BackboneGetRelationshipsChanges";
 
 export interface BackboneGetRelationshipsRequest {
     ids: string[];
@@ -10,9 +10,11 @@ export interface BackboneGetRelationshipsResponse {
     relationshipTemplateId: string;
     from: string;
     to: string;
-    changes: BackboneGetRelationshipsChangesResponse[];
+
     createdAt: string;
     status: RelationshipStatus;
+    creationContent: any;
+    auditLog: AuditLog;
 }
 
 export interface BackboneGetRelationshipsDateRange<T> {

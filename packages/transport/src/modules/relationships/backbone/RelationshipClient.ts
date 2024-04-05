@@ -2,16 +2,11 @@ import { ClientResult } from "../../../core/backbone/ClientResult";
 import { Paginator } from "../../../core/backbone/Paginator";
 import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
 import { BackboneGetRelationshipsRequest, BackboneGetRelationshipsResponse } from "./BackboneGetRelationships";
-import { BackboneGetRelationshipsChangesRequest, BackboneGetRelationshipsChangesResponse } from "./BackboneGetRelationshipsChanges";
-import { BackbonePostRelationshipsChangesRequest, BackbonePostRelationshipsRequest } from "./BackbonePostRelationshipsChanges";
+import { BackbonePostRelationshipsRequest } from "./BackbonePostRelationship";
 
 export class RelationshipClient extends RESTClientAuthenticate {
     public async createRelationship(request: BackbonePostRelationshipsRequest): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
         return await this.post<BackboneGetRelationshipsResponse>("/api/v1/Relationships", request);
-    }
-
-    public async createRelationshipChange(id: string, request: BackbonePostRelationshipsChangesRequest): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.post<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${id}/Changes`, request);
     }
 
     public async acceptRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
@@ -32,14 +27,5 @@ export class RelationshipClient extends RESTClientAuthenticate {
 
     public async getRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
         return await this.get<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}`);
-    }
-
-    public async getRelationshipChanges(request?: BackboneGetRelationshipsChangesRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipsChangesResponse>>> {
-        return await this.getPaged<BackboneGetRelationshipsChangesResponse>("/api/v1/Relationships/Changes", request);
-    }
-
-    public async getRelationshipChange(relationshipChangeId: string): Promise<ClientResult<BackboneGetRelationshipsChangesResponse>> {
-        const change = await this.get<BackboneGetRelationshipsChangesResponse>(`/api/v1/Relationships/Changes/${relationshipChangeId}`);
-        return change;
     }
 }
