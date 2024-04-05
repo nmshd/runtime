@@ -32,4 +32,8 @@ export class DeviceAuthClient extends RESTClientAuthenticate {
     public async registerPushNotificationToken(input: BackbonePutDevicesPushNotificationRequest): Promise<ClientResult<void>> {
         return await this.put<void>("/api/v1/Devices/Self/PushNotifications", input);
     }
+
+    public async unregisterPushNotificationToken(): Promise<ClientResult<void>> {
+        return await this.delete<void>("/api/v1/Devices/Self/PushNotifications");
+    }
 }
