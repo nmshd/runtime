@@ -13,7 +13,7 @@ export interface BackboneGetRelationshipsResponse {
 
     createdAt: string;
     status: RelationshipStatus;
-    creationContent: any;
+    creationContent: string;
     auditLog: AuditLog;
 }
 
