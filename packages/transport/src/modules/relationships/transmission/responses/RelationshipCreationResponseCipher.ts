@@ -2,13 +2,13 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoCipher, CryptoRelationshipPublicResponse, ICryptoCipher, ICryptoRelationshipPublicResponse } from "@nmshd/crypto";
 import { CoreSerializable, ICoreSerializable } from "../../../../core";
 
-export interface IRelationshipCreationChangeResponseCipher extends ICoreSerializable {
+export interface IRelationshipCreationResponseCipher extends ICoreSerializable {
     cipher: ICryptoCipher;
     publicResponseCrypto?: ICryptoRelationshipPublicResponse;
 }
 
-@type("RelationshipCreationChangeResponseCipher")
-export class RelationshipCreationChangeResponseCipher extends CoreSerializable implements IRelationshipCreationChangeResponseCipher {
+@type("RelationshipCreationResponseCipher")
+export class RelationshipCreationResponseCipher extends CoreSerializable implements IRelationshipCreationResponseCipher {
     @validate()
     @serialize()
     public cipher: CryptoCipher;
@@ -17,11 +17,11 @@ export class RelationshipCreationChangeResponseCipher extends CoreSerializable i
     @serialize()
     public publicResponseCrypto?: CryptoRelationshipPublicResponse;
 
-    public static from(value: IRelationshipCreationChangeResponseCipher): RelationshipCreationChangeResponseCipher {
+    public static from(value: IRelationshipCreationResponseCipher): RelationshipCreationResponseCipher {
         return this.fromAny(value);
     }
 
-    public static fromBase64(value: string): RelationshipCreationChangeResponseCipher {
+    public static fromBase64(value: string): RelationshipCreationResponseCipher {
         return super.fromBase64T(value);
     }
 }
