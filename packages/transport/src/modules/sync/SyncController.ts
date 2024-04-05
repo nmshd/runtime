@@ -24,6 +24,7 @@ export class SyncController extends TransportController {
     private readonly client: ISyncClient;
     private readonly deviceMigrations: DeviceMigrations;
     private readonly identityMigrations: IdentityMigrations;
+    private readonly externalEventRegistry = new ExternalEventProcessorRegistry();
 
     private _cacheFetcher?: CacheFetcher;
     private get cacheFetcher() {
@@ -408,11 +409,14 @@ export class SyncController extends TransportController {
         const results: FinalizeSyncRunRequestExternalEventResult[] = [];
         const changedItems = new ChangedItems();
 
-        const externalEventRegistry = new ExternalEventProcessorRegistry();
         for (const externalEvent of externalEvents) {
             try {
-                const externalEventProcessorConstructor = externalEventRegistry.getProcessorForItem(externalEvent.type);
-                await new externalEventProcessorConstructor(this.eventBus, changedItems, this.parent).execute(externalEvent);
+                const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEvent.type);
+                const item = await new externalEventProcessorConstructor(this.eventBus, changedItems, this.parent).execute(externalEvent);
+
+                if (item) {
+                    changedItems.addItem(item);
+                }
 
                 results.push({
                     externalEventId: externalEvent.id
