@@ -3,21 +3,21 @@ import { log } from "@js-soft/ts-utils";
 import { ControllerName, CoreDate, CoreError, CoreErrors, CoreId, RequestError, TransportController, TransportError, TransportLoggerFactory } from "../../core";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { AccountController } from "../accounts/AccountController";
-import { ChangedItems } from "./ChangedItems";
-import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
-import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
-import { ExternalEventsProcessor } from "./ExternalEventsProcessor";
-import { SyncProgressReporter, SyncStep } from "./SyncCallback";
-import { WhatToSync } from "./WhatToSync";
 import { BackboneDatawalletModification } from "./backbone/BackboneDatawalletModification";
 import { BackboneSyncRun } from "./backbone/BackboneSyncRun";
 import { CreateDatawalletModificationsRequestItem } from "./backbone/CreateDatawalletModifications";
 import { FinalizeSyncRunRequestExternalEventResult } from "./backbone/FinalizeSyncRun";
 import { StartSyncRunStatus, SyncRunType } from "./backbone/StartSyncRun";
 import { ISyncClient, SyncClient } from "./backbone/SyncClient";
+import { ChangedItems } from "./ChangedItems";
+import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
+import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
+import { ExternalEventsProcessor } from "./ExternalEventsProcessor";
 import { DatawalletModification } from "./local/DatawalletModification";
 import { DeviceMigrations } from "./migrations/DeviceMigrations";
 import { IdentityMigrations } from "./migrations/IdentityMigrations";
+import { SyncProgressReporter, SyncStep } from "./SyncCallback";
+import { WhatToSync } from "./WhatToSync";
 
 export class SyncController extends TransportController {
     private syncInfo: IDatabaseMap;
