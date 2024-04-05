@@ -399,6 +399,10 @@ export class AccountController {
         await this.deviceAuthClient.registerPushNotificationToken(token);
     }
 
+    public async unregisterPushNotificationToken(): Promise<void> {
+        await this.deviceAuthClient.unregisterPushNotificationToken();
+    }
+
     public fetchDeviceInfo(): Promise<DeviceInfo> {
         return Promise.resolve({
             operatingSystem: "",
