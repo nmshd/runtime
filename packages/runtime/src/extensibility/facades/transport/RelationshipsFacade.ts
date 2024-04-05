@@ -49,15 +49,15 @@ export class RelationshipsFacade {
         return await this.createRelationshipUseCase.execute(request);
     }
 
-    public async acceptRelationshipChange(request: AcceptRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+    public async acceptRelationship(request: AcceptRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
         return await this.acceptRelationshipUseCase.execute(request);
     }
 
-    public async rejectRelationshipChange(request: RejectRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+    public async rejectRelationship(request: RejectRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
         return await this.rejectRelationshipUseCase.execute(request);
     }
 
-    public async revokeRelationshipChange(request: RevokeRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+    public async revokeRelationship(request: RevokeRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
         return await this.revokeRelationshipUseCase.execute(request);
     }
 
