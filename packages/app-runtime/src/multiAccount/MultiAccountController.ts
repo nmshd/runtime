@@ -130,18 +130,16 @@ export class MultiAccountController {
         if (openedAccount) {
             await openedAccount.unregisterPushNotificationToken();
             await openedAccount.activeDevice.markAsOffboarded();
-            await openedAccount.close();
             this._openAccounts.splice(this._openAccounts.indexOf(openedAccount), 1);
         } else {
             const [, accountController] = await this.selectAccount(id, "");
             await accountController.unregisterPushNotificationToken();
             await accountController.activeDevice.markAsOffboarded();
-            await accountController.close();
             this._openAccounts.splice(this._openAccounts.indexOf(accountController), 1);
         }
 
         await this.databaseConnection.deleteDatabase(`acc-${id.toString()}`);
-        await this._localAccounts.delete(account);
+        await this._localAccounts.delete({ id: id.toString() });
     }
 
     public async clearAccounts(): Promise<void> {
