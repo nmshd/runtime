@@ -407,13 +407,12 @@ export class SyncController extends TransportController {
         const syncStep = reporter.createStep(SyncStep.ExternalEventsProcessing, externalEvents.length);
         const results: FinalizeSyncRunRequestExternalEventResult[] = [];
         const changedItems = new ChangedItems();
-        const ownAddress = this.parent.identity.address.toString();
 
-        const externalEventRegistry = new ExternalEventProcessorRegistry(this.eventBus, changedItems, ownAddress, this.parent.messages, this.parent.relationships);
+        const externalEventRegistry = new ExternalEventProcessorRegistry();
         for (const externalEvent of externalEvents) {
             try {
-                const externalEventProcessor = externalEventRegistry.getProcessorForItem(externalEvent.type);
-                await externalEventProcessor.execute(externalEvent);
+                const externalEventProcessorConstructor = externalEventRegistry.getProcessorForItem(externalEvent.type);
+                await new externalEventProcessorConstructor(this.eventBus, changedItems, this.parent).execute(externalEvent);
 
                 results.push({
                     externalEventId: externalEvent.id
