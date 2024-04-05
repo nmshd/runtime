@@ -9,8 +9,6 @@ import { AppConfig, AppConfigOverwrite, createAppConfig } from "./AppConfig";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
 import { AppStringProcessor } from "./AppStringProcessor";
-import { SessionStorage } from "./SessionStorage";
-import { UserfriendlyResult } from "./UserfriendlyResult";
 import { AccountSelectedEvent, RelationshipSelectedEvent } from "./events";
 import { AppServices, IUIBridge } from "./extensibility";
 import {
@@ -27,6 +25,8 @@ import {
 } from "./modules";
 import { AccountServices, LocalAccountDTO, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
 import { RuntimeNativeBootstrapper, RuntimeNativeEnvironment } from "./runtimeNatives";
+import { SessionStorage } from "./SessionStorage";
+import { UserfriendlyResult } from "./UserfriendlyResult";
 
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(
@@ -231,7 +231,7 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     protected async initAccount(): Promise<void> {
-        this._multiAccountController = new MultiAccountController(this.transport, this.runtimeConfig);
+        this._multiAccountController = new MultiAccountController(this.transport, this.runtimeConfig, this.lokiConnection);
         await this._multiAccountController.init();
         this._accountServices = new AccountServices(this._multiAccountController);
     }

@@ -1,4 +1,5 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider } from "@js-soft/docdb-access-abstractions";
+import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { ILogger } from "@js-soft/logging-abstractions";
 import {
     AccountController,
@@ -34,7 +35,8 @@ export class MultiAccountController {
 
     public constructor(
         transport: Transport,
-        private readonly config: AppConfig
+        private readonly config: AppConfig,
+        private readonly databaseConnection: LokiJsConnection
     ) {
         this._transport = transport;
         this._log = TransportLoggerFactory.getLogger(MultiAccountController);
@@ -114,6 +116,24 @@ export class MultiAccountController {
         }
 
         return [localAccount, accountController];
+    }
+
+    public async deleteAccount(id: CoreId): Promise<void> {
+        const account = await this._localAccounts.read(id.toString());
+        if (!account) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAccount, id.toString()).logWith(this._log);
+        }
+
+        const localAccount: LocalAccount = LocalAccount.from(account);
+
+        const openedAccount = this._openAccounts.find((a) => a.identity.address.equals(localAccount.address));
+        if (openedAccount) {
+            await openedAccount.close();
+            this._openAccounts.splice(this._openAccounts.indexOf(openedAccount), 1);
+        }
+
+        await this.databaseConnection.deleteDatabase(`acc-${id.toString()}`);
+        await this._localAccounts.delete(account);
     }
 
     public async clearAccounts(): Promise<void> {
