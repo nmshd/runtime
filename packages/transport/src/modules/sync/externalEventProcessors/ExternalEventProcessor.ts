@@ -14,7 +14,7 @@ export abstract class ExternalEventProcessor {
         protected readonly accountController: AccountController
     ) {}
     public abstract execute(externalEvent: BackboneExternalEvent): Promise<Message | Relationship | undefined>;
-    protected getAddress(): string {
+    protected get address(): string {
         return this.accountController.identity.address.toString();
     }
 }

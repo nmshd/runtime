@@ -9,7 +9,7 @@ export class RelationshipChangeCreatedExternalEventProcessor extends ExternalEve
         const relationship = await this.accountController.relationships.applyChangeById(payload.changeId);
 
         if (relationship) {
-            this.eventBus.publish(new RelationshipChangedEvent(this.getAddress(), relationship));
+            this.eventBus.publish(new RelationshipChangedEvent(this.address, relationship));
             return relationship;
         }
         return;

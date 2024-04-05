@@ -9,7 +9,7 @@ export class MessageReceivedExternalEventProcessor extends ExternalEventProcesso
         const newMessagePayload = externalEvent.payload as { id: string };
         const newMessage = await this.accountController.messages.loadPeerMessage(CoreId.from(newMessagePayload.id));
 
-        this.eventBus.publish(new MessageReceivedEvent(this.getAddress(), newMessage));
+        this.eventBus.publish(new MessageReceivedEvent(this.address, newMessage));
         return newMessage;
     }
 }
