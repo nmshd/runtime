@@ -4,10 +4,10 @@ import { CoreId, TransportError, TransportLoggerFactory } from "../../core";
 import { MessageDeliveredEvent, MessageReceivedEvent, RelationshipChangedEvent } from "../../events";
 import { MessageController } from "../messages/MessageController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
-import { ChangedItems } from "./ChangedItems";
-import { SyncProgressReporter, SyncProgressReporterStep, SyncStep } from "./SyncCallback";
 import { BackboneExternalEvent } from "./backbone/BackboneExternalEvent";
 import { FinalizeSyncRunRequestExternalEventResult } from "./backbone/FinalizeSyncRun";
+import { ChangedItems } from "./ChangedItems";
+import { SyncProgressReporter, SyncProgressReporterStep, SyncStep } from "./SyncCallback";
 
 export class ExternalEventsProcessor {
     private readonly log: ILogger;
@@ -37,11 +37,11 @@ export class ExternalEventsProcessor {
                     case "MessageDelivered":
                         await this.applyMessageDeliveredEvent(externalEvent);
                         break;
-                    case "RelationshipChangeCreated":
-                        await this.applyRelationshipChangeCreatedEvent(externalEvent);
+                    case "RelationshipCreated":
+                        await this.applyRelationshipCreatedEvent(externalEvent);
                         break;
-                    case "RelationshipChangeCompleted":
-                        await this.applyRelationshipChangeCompletedEvent(externalEvent);
+                    case "RelationshipStatusChanged":
+                        await this.applyRelationshipStatusChangedEvent(externalEvent);
                         break;
                     default:
                         throw new TransportError(`'${externalEvent.type}' is not a supported external event type.`);
@@ -72,19 +72,17 @@ export class ExternalEventsProcessor {
         }
     }
 
-    private async applyRelationshipChangeCompletedEvent(externalEvent: BackboneExternalEvent) {
-        const payload = externalEvent.payload as { changeId: string };
-        const relationship = await this.relationshipsController.applyChangeById(payload.changeId);
+    private async applyRelationshipStatusChangedEvent(externalEvent: BackboneExternalEvent) {
+        const payload = externalEvent.payload as { relationshipId: string; peer: string };
+        const relationship = (await this.relationshipsController.updateCache([payload.relationshipId]))[0];
 
-        if (relationship) {
-            this.eventBus.publish(new RelationshipChangedEvent(this.ownAddress, relationship));
-            this.changedItems.addRelationship(relationship);
-        }
+        this.eventBus.publish(new RelationshipChangedEvent(this.ownAddress, relationship));
+        this.changedItems.addRelationship(relationship);
     }
 
-    private async applyRelationshipChangeCreatedEvent(externalEvent: BackboneExternalEvent) {
-        const payload = externalEvent.payload as { changeId: string; relationshipId: string };
-        const relationship = await this.relationshipsController.applyChangeById(payload.changeId);
+    private async applyRelationshipCreatedEvent(externalEvent: BackboneExternalEvent) {
+        const payload = externalEvent.payload as { from: string; to: string; relationshipId: string };
+        const relationship = await this.relationshipsController.applyIncomingCreation(payload.relationshipId);
 
         if (relationship) {
             this.eventBus.publish(new RelationshipChangedEvent(this.ownAddress, relationship));
