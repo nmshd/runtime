@@ -129,11 +129,13 @@ export class MultiAccountController {
         const openedAccount = this._openAccounts.find((a) => a.identity.address.equals(localAccount.address));
         if (openedAccount) {
             await openedAccount.unregisterPushNotificationToken();
+            await openedAccount.activeDevice.markAsOffboarded();
             await openedAccount.close();
             this._openAccounts.splice(this._openAccounts.indexOf(openedAccount), 1);
         } else {
             const [, accountController] = await this.selectAccount(id, "");
             await accountController.unregisterPushNotificationToken();
+            await accountController.activeDevice.markAsOffboarded();
             await accountController.close();
             this._openAccounts.splice(this._openAccounts.indexOf(accountController), 1);
         }

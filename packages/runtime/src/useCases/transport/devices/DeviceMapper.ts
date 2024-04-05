@@ -17,7 +17,8 @@ export class DeviceMapper {
             lastLoginAt: device.lastLoginAt?.toString(),
             operatingSystem: device.operatingSystem,
             publicKey: device.publicKey?.toBase64(false),
-            isCurrentDevice: isCurrentDevice
+            isCurrentDevice: isCurrentDevice,
+            isOffboarded: device.isOffboarded
         };
     }
 
