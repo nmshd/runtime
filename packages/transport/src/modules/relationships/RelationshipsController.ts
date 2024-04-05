@@ -2,7 +2,7 @@ import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { ControllerName, CoreAddress, CoreCrypto, CoreDate, CoreId, ICoreSerializable, TransportController, TransportError } from "../../core";
+import { ControllerName, CoreAddress, CoreCrypto, CoreDate, CoreId, TransportController, TransportError } from "../../core";
 import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { DbCollectionName } from "../../core/DbCollectionName";
@@ -13,23 +13,15 @@ import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetRelationshipsResponse } from "./backbone/BackboneGetRelationships";
-import { BackboneGetRelationshipsChangesResponse, BackboneGetRelationshipsChangesSingleChangeResponse } from "./backbone/BackboneGetRelationshipsChanges";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { CachedRelationship } from "./local/CachedRelationship";
 import { Relationship } from "./local/Relationship";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
 import { RelationshipSecretController } from "./RelationshipSecretController";
-import { RelationshipChange } from "./transmission/changes/RelationshipChange";
-import { RelationshipChangeResponse } from "./transmission/changes/RelationshipChangeResponse";
-import { RelationshipChangeStatus } from "./transmission/changes/RelationshipChangeStatus";
-import { RelationshipChangeType } from "./transmission/changes/RelationshipChangeType";
 import { RelationshipStatus } from "./transmission/RelationshipStatus";
-import { RelationshipCreationChangeRequestCipher } from "./transmission/requests/RelationshipCreationChangeRequestCipher";
-import { RelationshipCreationChangeRequestContentWrapper } from "./transmission/requests/RelationshipCreationChangeRequestContentWrapper";
-import { RelationshipCreationChangeRequestSigned } from "./transmission/requests/RelationshipCreationChangeRequestSigned";
-import { RelationshipCreationChangeResponseCipher } from "./transmission/responses/RelationshipCreationChangeResponseCipher";
-import { RelationshipCreationChangeResponseContentWrapper } from "./transmission/responses/RelationshipCreationChangeResponseContentWrapper";
-import { RelationshipCreationChangeResponseSigned } from "./transmission/responses/RelationshipCreationChangeResponseSigned";
+import { RelationshipCreationRequestCipher } from "./transmission/requests/RelationshipCreationRequestCipher";
+import { RelationshipCreationRequestContentWrapper } from "./transmission/requests/RelationshipCreationRequestContentWrapper";
+import { RelationshipCreationRequestSigned } from "./transmission/requests/RelationshipCreationRequestSigned";
 
 export class RelationshipsController extends TransportController {
     private client: RelationshipClient;
@@ -152,7 +144,7 @@ export class RelationshipsController extends TransportController {
 
         const secretId = await TransportIds.relationshipSecret.generate();
 
-        const { requestCipher, requestContent } = await this.prepareRequest(secretId, template, parameters.content);
+        const requestCipher = await this.prepareRequest(secretId, template, parameters.content);
 
         const backboneResponse = (
             await this.client.createRelationship({
@@ -165,7 +157,8 @@ export class RelationshipsController extends TransportController {
             CoreId.from(backboneResponse.id),
             template,
             template.cache.identity,
-            RelationshipChange.fromBackbone(backboneResponse.changes[0], requestContent.content),
+            backboneResponse.creationContent,
+
             secretId
         );
 
@@ -191,15 +184,15 @@ export class RelationshipsController extends TransportController {
     }
 
     public async accept(relationshipId: CoreId): Promise<Relationship> {
-        return await this.completeStateTransition(RelationshipChangeStatus.Accepted, relationshipId);
+        return await this.completeStateTransition(RelationshipStatus.Active, relationshipId);
     }
 
     public async reject(relationshipId: CoreId): Promise<Relationship> {
-        return await this.completeStateTransition(RelationshipChangeStatus.Rejected, relationshipId);
+        return await this.completeStateTransition(RelationshipStatus.Rejected, relationshipId);
     }
 
     public async revoke(relationshipId: CoreId): Promise<Relationship> {
-        return await this.completeStateTransition(RelationshipChangeStatus.Revoked, relationshipId);
+        return await this.completeStateTransition(RelationshipStatus.Revoked, relationshipId);
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneGetRelationshipsResponse) {
@@ -221,44 +214,25 @@ export class RelationshipsController extends TransportController {
             throw CoreErrors.general.recordNotFound(RelationshipTemplate, templateId.toString());
         }
 
-        this._log.trace(`Parsing relationship changes of ${response.id}...`);
+        this._log.trace(`Parsing relationship creation content of ${response.id}...`);
 
-        const changesPromises = [];
-        for (const change of response.changes) {
-            switch (change.type) {
-                case RelationshipChangeType.Creation:
-                    changesPromises.push(this.parseCreationChange(change, relationshipSecretId, templateId));
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        const changes = await Promise.all(changesPromises);
-
+        const creationContent = this.decryptCreationContent(response.creationContent, CoreAddress.from(response.to), relationshipSecretId);
         const cachedRelationship = CachedRelationship.from({
-            changes: changes,
+            creationContent,
             template: template
         });
 
         return cachedRelationship;
     }
 
-    private async prepareRequest(
-        relationshipSecretId: CoreId,
-        template: RelationshipTemplate,
-        content: ISerializable
-    ): Promise<{
-        requestCipher: RelationshipCreationChangeRequestCipher;
-        requestContent: RelationshipCreationChangeRequestContentWrapper;
-    }> {
+    private async prepareRequest(relationshipSecretId: CoreId, template: RelationshipTemplate, content: ISerializable): Promise<RelationshipCreationRequestCipher> {
         if (!template.cache) {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
 
         const requestPublic = await this.secrets.createRequestorSecrets(template.cache, relationshipSecretId);
 
-        const requestContent: RelationshipCreationChangeRequestContentWrapper = RelationshipCreationChangeRequestContentWrapper.from({
+        const requestContent: RelationshipCreationRequestContentWrapper = RelationshipCreationRequestContentWrapper.from({
             content: content,
             identity: this.parent.identity.identity,
             templateId: template.id
@@ -268,97 +242,42 @@ export class RelationshipsController extends TransportController {
 
         const [deviceSignature, relationshipSignature] = await Promise.all([this.parent.activeDevice.sign(buffer), this.secrets.sign(relationshipSecretId, buffer)]);
 
-        const signedRequest = RelationshipCreationChangeRequestSigned.from({
+        const signedRequest = RelationshipCreationRequestSigned.from({
             serializedRequest: serializedRequest,
             deviceSignature: deviceSignature,
             relationshipSignature: relationshipSignature
         });
 
         const cipher = await this.secrets.encryptRequest(relationshipSecretId, signedRequest);
-        const requestCipher = RelationshipCreationChangeRequestCipher.from({
+        const requestCipher = RelationshipCreationRequestCipher.from({
             cipher: cipher,
             publicRequestCrypto: requestPublic
         });
 
-        return { requestCipher, requestContent };
+        return requestCipher;
     }
 
-    public async applyChangeById(changeId: string): Promise<Relationship | undefined> {
-        const relationshipChange = (await this.client.getRelationshipChange(changeId.toString())).value;
-        return await this.applyChange(relationshipChange);
-    }
-
-    @log()
-    public async applyChange(change: BackboneGetRelationshipsChangesResponse): Promise<Relationship | undefined> {
-        switch (change.type) {
-            case RelationshipChangeType.Creation:
-                return await this.applyCreationChange(change);
-            case RelationshipChangeType.Termination:
-            case RelationshipChangeType.TerminationCancellation:
-            default:
-                throw CoreErrors.general.notSupported();
-        }
-    }
-
-    private async applyCreationChange(change: BackboneGetRelationshipsChangesResponse): Promise<Relationship | undefined> {
-        const relationshipDoc = await this.relationships.read(change.relationshipId);
+    public async applyIncomingCreation(relationshipId: string): Promise<Relationship | undefined> {
+        const relationshipDoc = await this.relationships.read(relationshipId);
         if (relationshipDoc) {
-            // Incoming change from sync might still have an empty response
-            // This could happen if we've processed the change before (duplicate)
-            if (change.response) {
-                return await this.updatePendingRelationshipWithPeerResponse(relationshipDoc, change);
-            }
-
             // If we have a relationship already but no response, do nothing
             return undefined;
         }
 
-        const newRelationship = await this.createNewRelationshipByIncomingCreationChange(change);
-
-        if (change.response) {
-            // The request was revoked before we fetched the creation,
-            // thus the creation and revoke change is one
-            const relationshipDoc = await this.relationships.read(change.relationshipId);
-            return await this.updatePendingRelationshipWithPeerResponse(relationshipDoc, change);
-        }
+        const newRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
         return newRelationship;
     }
 
     @log()
-    private async parseCreationChange(change: BackboneGetRelationshipsChangesResponse, relationshipSecretId: CoreId, templateId: CoreId) {
-        if (change.type !== RelationshipChangeType.Creation) this.throwWrongChangeType(change.type);
+    private async decryptCreationContent(creationContent: string, creationContentCreator: CoreAddress, secretId: CoreId): Promise<any> {
+        const isOwnContent = this.parent.identity.isMe(creationContentCreator);
 
-        const promises: any[] = [];
-        promises.push(this.decryptCreationChangeRequest(change.request, relationshipSecretId, templateId));
-
-        const hasRelationshipSecret = await this.secrets.hasCryptoRelationshipSecrets(relationshipSecretId);
-
-        if (change.response && hasRelationshipSecret) {
-            promises.push(this.decryptCreationChangeResponse(change, relationshipSecretId));
-        }
-
-        const [requestContent, responseContent] = await Promise.all(promises);
-
-        const creationChange = RelationshipChange.fromBackbone(change, requestContent.content, responseContent?.content);
-        return creationChange;
-    }
-
-    @log()
-    private async decryptCreationChangeRequest(
-        change: BackboneGetRelationshipsChangesSingleChangeResponse,
-        secretId: CoreId,
-        templateId: CoreId
-    ): Promise<RelationshipCreationChangeRequestContentWrapper> {
-        if (!change.content) throw this.newEmptyOrInvalidContentError();
-
-        const isOwnChange = this.parent.identity.isMe(CoreAddress.from(change.createdBy));
-
-        const requestCipher = RelationshipCreationChangeRequestCipher.fromBase64(change.content);
+        const requestCipher = RelationshipCreationRequestCipher.fromBase64(creationContent);
         const signedRequestBuffer = await this.secrets.decryptRequest(secretId, requestCipher.cipher);
-        const signedRequest = RelationshipCreationChangeRequestSigned.deserialize(signedRequestBuffer.toUtf8());
+        const signedRequest = RelationshipCreationRequestSigned.deserialize(signedRequestBuffer.toUtf8());
 
         let relationshipSignatureValid;
-        if (isOwnChange) {
+        if (isOwnContent) {
             relationshipSignatureValid = await this.secrets.verifyOwn(secretId, CoreBuffer.fromUtf8(signedRequest.serializedRequest), signedRequest.relationshipSignature);
         } else {
             relationshipSignatureValid = await this.secrets.verifyPeer(secretId, CoreBuffer.fromUtf8(signedRequest.serializedRequest), signedRequest.relationshipSignature);
@@ -368,149 +287,35 @@ export class RelationshipsController extends TransportController {
             throw CoreErrors.general.signatureNotValid("relationshipRequest");
         }
 
-        const requestContent = RelationshipCreationChangeRequestContentWrapper.deserialize(signedRequest.serializedRequest);
-        if (!requestContent.templateId.equals(templateId)) {
-            throw new TransportError("The relationship request contains a wrong template id.");
-        }
+        const requestContent = RelationshipCreationRequestContentWrapper.deserialize(signedRequest.serializedRequest);
 
         return requestContent;
     }
 
     @log()
-    private async decryptCreationChangeResponse(
-        change: BackboneGetRelationshipsChangesResponse,
-        relationshipSecretId: CoreId
-    ): Promise<RelationshipCreationChangeResponseContentWrapper> {
-        if (!change.response) throw this.newChangeResponseMissingError(change.id);
-
-        if (change.type !== RelationshipChangeType.Creation) this.throwWrongChangeType(change.type);
-
-        if (!change.response.content) {
-            throw this.newEmptyOrInvalidContentError(change);
-        }
-
-        const isOwnChange = this.parent.identity.isMe(CoreAddress.from(change.response.createdBy));
-
-        const cipher = RelationshipCreationChangeResponseCipher.fromBase64(change.response.content);
-        let signedResponseBuffer;
-        if (change.status !== RelationshipChangeStatus.Revoked) {
-            if (isOwnChange) {
-                signedResponseBuffer = await this.secrets.decryptOwn(relationshipSecretId, cipher.cipher);
-            } else {
-                signedResponseBuffer = await this.secrets.decryptPeer(relationshipSecretId, cipher.cipher, true);
-            }
-        } else {
-            signedResponseBuffer = await this.secrets.decryptRequest(relationshipSecretId, cipher.cipher);
-        }
-
-        const signedResponse = RelationshipCreationChangeResponseSigned.deserialize(signedResponseBuffer.toUtf8());
-        let relationshipSignatureValid;
-        if (isOwnChange) {
-            relationshipSignatureValid = await this.secrets.verifyOwn(
-                relationshipSecretId,
-                CoreBuffer.fromUtf8(signedResponse.serializedResponse),
-                signedResponse.relationshipSignature
-            );
-        } else {
-            relationshipSignatureValid = await this.secrets.verifyPeer(
-                relationshipSecretId,
-                CoreBuffer.fromUtf8(signedResponse.serializedResponse),
-                signedResponse.relationshipSignature
-            );
-        }
-
-        if (!relationshipSignatureValid) {
-            throw CoreErrors.general.signatureNotValid("relationshipResponse");
-        }
-
-        const responseContent = RelationshipCreationChangeResponseContentWrapper.deserialize(signedResponse.serializedResponse);
-
-        if (!responseContent.relationshipId.equals(change.relationshipId)) {
-            throw new TransportError("The relationship response contains a wrong relationship id.");
-        }
-        return responseContent;
-    }
-
-    @log()
-    private async updatePendingRelationshipWithPeerResponse(relationshipDoc: any, change: BackboneGetRelationshipsChangesResponse): Promise<Relationship | undefined> {
-        const relationship = Relationship.from(relationshipDoc);
-
-        if (relationship.status !== RelationshipStatus.Pending) {
-            this.log.debug("Trying to update non-pending relationship with creation change", change);
-            return;
-        }
-
-        if (!relationship.cache) {
-            await this.updateCacheOfRelationship(relationship, undefined);
-        }
-
-        if (!change.response) throw this.newChangeResponseMissingError(change.id);
-
-        if (!change.response.content) {
-            throw this.newEmptyOrInvalidContentError(change);
-        }
-
-        const cipher = RelationshipCreationChangeResponseCipher.fromBase64(change.response.content);
-
-        if (change.status !== RelationshipChangeStatus.Revoked) {
-            if (!cipher.publicResponseCrypto) {
-                throw new TransportError("The response crypto is missing.");
-            }
-            await this.secrets.convertSecrets(relationship.relationshipSecretId, cipher.publicResponseCrypto);
-        }
-
-        const responseContent = await this.decryptCreationChangeResponse(change, relationship.relationshipSecretId);
-
-        const response = RelationshipChangeResponse.fromBackbone(change.response, responseContent.content);
-
-        if (!relationship.cache) {
-            throw this.newCacheEmptyError(Relationship, relationship.id.toString());
-        }
-        relationship.cache.changes[0].status = change.status;
-        switch (change.status) {
-            case RelationshipChangeStatus.Accepted:
-                relationship.toActive(response);
-                break;
-            case RelationshipChangeStatus.Rejected:
-                relationship.toRejected(response);
-                break;
-            case RelationshipChangeStatus.Revoked:
-                relationship.toRevoked(response);
-                break;
-            default:
-                throw CoreErrors.general.notSupported();
-        }
-
-        await this.relationships.update(relationshipDoc, relationship);
-        return relationship;
-    }
-
-    @log()
-    private async createNewRelationshipByIncomingCreationChange(change: BackboneGetRelationshipsChangesResponse): Promise<Relationship> {
-        const backboneRelationship = (await this.client.getRelationship(change.relationshipId)).value;
+    private async createNewRelationshipByIncomingCreation(relationshipId: string): Promise<Relationship> {
+        const backboneRelationship = (await this.client.getRelationship(relationshipId)).value;
 
         const templateId = CoreId.from(backboneRelationship.relationshipTemplateId);
         const template = await this.parent.relationshipTemplates.getRelationshipTemplate(templateId);
 
         if (!template) throw CoreErrors.general.recordNotFound(RelationshipTemplate, templateId.toString());
         if (!template.cache) throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
-        if (!change.request.content) throw this.newEmptyOrInvalidContentError(change);
 
         const secretId = await TransportIds.relationshipSecret.generate();
-        const requestCipher = RelationshipCreationChangeRequestCipher.fromBase64(change.request.content);
+        const requestCipher = RelationshipCreationRequestCipher.fromBase64(backboneRelationship.creationContent);
         await this.secrets.createTemplatorSecrets(secretId, template.cache, requestCipher.publicRequestCrypto);
 
-        const requestContent = await this.decryptCreationChangeRequest(backboneRelationship.changes[0].request, secretId, templateId);
-        const relationshipChange = RelationshipChange.fromBackbone(change, requestContent.content);
+        const requestContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.to), secretId);
 
-        const relationship = Relationship.fromCreationChangeReceived(backboneRelationship, template, requestContent.identity, relationshipChange, secretId);
+        const relationship = Relationship.fromCreationContentReceived(backboneRelationship, template, requestContent.identity, requestContent, secretId);
 
         await this.relationships.create(relationship);
         return relationship;
     }
 
     @log()
-    private async completeStateTransition(targetStatus: RelationshipChangeStatus, id: CoreId) {
+    private async completeStateTransition(targetStatus: RelationshipStatus, id: CoreId) {
         const relationshipDoc = await this.relationships.read(id.toString());
         if (!relationshipDoc) {
             throw CoreErrors.general.recordNotFound(Relationship, id.toString());
@@ -528,15 +333,15 @@ export class RelationshipsController extends TransportController {
 
         let backboneResponse: BackboneGetRelationshipsResponse;
         switch (targetStatus) {
-            case RelationshipChangeStatus.Accepted:
+            case RelationshipStatus.Active:
                 backboneResponse = (await this.client.acceptRelationship(id.toString())).value;
                 break;
 
-            case RelationshipChangeStatus.Rejected:
+            case RelationshipStatus.Rejected:
                 backboneResponse = (await this.client.rejectRelationship(id.toString())).value;
                 break;
 
-            case RelationshipChangeStatus.Revoked:
+            case RelationshipStatus.Revoked:
                 backboneResponse = (await this.client.revokeRelationship(id.toString())).value;
                 break;
 
@@ -550,70 +355,5 @@ export class RelationshipsController extends TransportController {
         this.eventBus.publish(new RelationshipChangedEvent(this.parent.identity.address.toString(), relationship));
 
         return relationship;
-    }
-
-    private async encryptRevokeContent(relationship: Relationship, content: ICoreSerializable) {
-        const responseContent = RelationshipCreationChangeResponseContentWrapper.from({
-            relationshipId: relationship.id,
-            content: content
-        });
-
-        const serializedResponse = responseContent.serialize();
-        const buffer = CoreUtil.toBuffer(serializedResponse);
-
-        const [deviceSignature, relationshipSignature] = await Promise.all([this.parent.activeDevice.sign(buffer), this.secrets.sign(relationship.relationshipSecretId, buffer)]);
-
-        const signedResponse = RelationshipCreationChangeResponseSigned.from({
-            serializedResponse: serializedResponse,
-            deviceSignature: deviceSignature,
-            relationshipSignature: relationshipSignature
-        });
-
-        const cipher = await this.secrets.encryptRequest(relationship.relationshipSecretId, signedResponse);
-        const responseCipher = RelationshipCreationChangeResponseCipher.from({
-            cipher: cipher
-        });
-
-        return responseCipher.toBase64();
-    }
-
-    private async encryptAcceptRejectContent(relationship: Relationship, content: ICoreSerializable) {
-        const publicResponseCrypto = await this.secrets.getPublicResponse(relationship.relationshipSecretId);
-
-        const responseContent = RelationshipCreationChangeResponseContentWrapper.from({
-            relationshipId: relationship.id,
-            content: content
-        });
-
-        const serializedResponse = responseContent.serialize();
-        const buffer = CoreUtil.toBuffer(serializedResponse);
-
-        const [deviceSignature, relationshipSignature] = await Promise.all([this.parent.activeDevice.sign(buffer), this.secrets.sign(relationship.relationshipSecretId, buffer)]);
-
-        const signedResponse = RelationshipCreationChangeResponseSigned.from({
-            serializedResponse: serializedResponse,
-            deviceSignature: deviceSignature,
-            relationshipSignature: relationshipSignature
-        });
-
-        const cipher = await this.secrets.encrypt(relationship.relationshipSecretId, signedResponse);
-        const responseCipher = RelationshipCreationChangeResponseCipher.from({
-            cipher: cipher,
-            publicResponseCrypto: publicResponseCrypto
-        });
-
-        return responseCipher.toBase64();
-    }
-
-    private throwWrongChangeType(type: RelationshipChangeType) {
-        throw new TransportError(`The relationship change has the wrong type (${type}) to run this operation`);
-    }
-
-    private newChangeResponseMissingError(changeId: string) {
-        return new TransportError(`The response of the relationship change (${changeId}) is missing`);
-    }
-
-    private newEmptyOrInvalidContentError(change?: RelationshipChange | BackboneGetRelationshipsChangesResponse) {
-        return new TransportError(`The content property of the relationship change ${change?.id} is missing or invalid`);
     }
 }
