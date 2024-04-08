@@ -142,4 +142,11 @@ export class DeviceController extends TransportController {
             password: credentials.password
         };
     }
+
+    public async markAsOffboarded(): Promise<void> {
+        this.device.isOffboarded = true;
+        await this.parent.devices.update(this.device);
+
+        await this.parent.syncDatawallet();
+    }
 }
