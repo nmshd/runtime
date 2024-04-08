@@ -231,7 +231,7 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     protected async initAccount(): Promise<void> {
-        this._multiAccountController = new MultiAccountController(this.transport, this.runtimeConfig, this.lokiConnection);
+        this._multiAccountController = new MultiAccountController(this.transport, this.runtimeConfig, this.lokiConnection, this.sessionStorage);
         await this._multiAccountController.init();
         this._accountServices = new AccountServices(this._multiAccountController);
     }

@@ -14,6 +14,7 @@ import {
     TransportLoggerFactory
 } from "@nmshd/transport";
 import { AppConfig } from "../AppConfig";
+import { SessionStorage } from "../SessionStorage";
 import { LocalAccount } from "./data/LocalAccount";
 
 export class MultiAccountController {
@@ -37,7 +38,8 @@ export class MultiAccountController {
     public constructor(
         transport: Transport,
         private readonly config: AppConfig,
-        private readonly databaseConnection: LokiJsConnection
+        private readonly databaseConnection: LokiJsConnection,
+        private readonly sessionStorage: SessionStorage
     ) {
         this._transport = transport;
         this._log = TransportLoggerFactory.getLogger(MultiAccountController);
@@ -130,6 +132,7 @@ export class MultiAccountController {
 
         await this.databaseConnection.deleteDatabase(`acc-${id.toString()}`);
         await this._localAccounts.delete({ id: id.toString() });
+        this.sessionStorage.removeSession(id.toString());
     }
 
     public async clearAccounts(): Promise<void> {
