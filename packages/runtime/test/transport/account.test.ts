@@ -163,8 +163,8 @@ describe("LoadItemFromTruncatedReference", () => {
     });
 });
 
-describe("RegisterPushNotificationToken", () => {
-    test("invalid environment", async () => {
+describe("Un-/RegisterPushNotificationToken", () => {
+    test("register with invalid environment", async () => {
         const result = await sTransportServices.account.registerPushNotificationToken({
             handle: "handle",
             platform: "platform",
@@ -176,13 +176,19 @@ describe("RegisterPushNotificationToken", () => {
         expect(result).toBeAnError("environment must be equal to one of the allowed values", "error.runtime.validation.invalidPropertyValue");
     });
 
-    test.each(["Development", "Production"])("valid enviroment", async (environment: any) => {
+    test.each(["Development", "Production"])("register with valid enviroment", async (environment: any) => {
         const result = await sTransportServices.account.registerPushNotificationToken({
             handle: "handle",
             platform: "platform",
             appId: "appId",
             environment: environment
         });
+
+        expect(result).toBeSuccessful();
+    });
+
+    test("unregister", async () => {
+        const result = await sTransportServices.account.unregisterPushNotificationToken();
 
         expect(result).toBeSuccessful();
     });
