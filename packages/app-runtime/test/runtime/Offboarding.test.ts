@@ -1,4 +1,3 @@
-import { sleep } from "@js-soft/ts-utils";
 import { AppRuntime, AppRuntimeServices, LocalAccountDTO } from "../../src";
 import { TestUtil } from "../lib";
 
@@ -8,7 +7,6 @@ describe("Offboarding", function () {
     let localAccount2: LocalAccountDTO;
 
     let services1: AppRuntimeServices;
-    let services2: AppRuntimeServices;
 
     let device2Id: string;
 
@@ -28,7 +26,7 @@ describe("Offboarding", function () {
         const onboardingInfoResult = await services1.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id });
 
         localAccount2 = await runtime.accountServices.onboardAccount(onboardingInfoResult.value);
-        services2 = await runtime.getServices(localAccount2.id);
+        const services2 = await runtime.getServices(localAccount2.id);
 
         await services2.transportServices.account.syncDatawallet();
         await services1.transportServices.account.syncDatawallet();
@@ -58,8 +56,6 @@ describe("Offboarding", function () {
 
     test("device should be flagged as offboarded in the list of devices", async function () {
         await services1.transportServices.account.syncDatawallet();
-        await sleep(1000);
-        await services1.transportServices.account.syncDatawallet();
 
         const devices = await services1.transportServices.devices.getDevices();
         const device = devices.value.find((d) => d.id === device2Id);
@@ -69,8 +65,6 @@ describe("Offboarding", function () {
     });
 
     test("device should be flagged as offboarded when querying the device", async function () {
-        await services1.transportServices.account.syncDatawallet();
-
         const deviceResult = await services1.transportServices.devices.getDevice({ id: device2Id });
         const device = deviceResult.value;
 
