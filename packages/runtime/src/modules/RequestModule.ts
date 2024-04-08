@@ -1,7 +1,6 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import {
-    RelationshipCreationChangeRequestContent,
-    RelationshipCreationChangeRequestContentJSON,
+    RelationshipCreationRequestContent,
     RelationshipTemplateContentJSON,
     RequestJSON,
     ResponseJSON,
@@ -226,8 +225,8 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        const creationChangeContent = RelationshipCreationChangeRequestContent.from({ response: request.response!.content });
-        const createRelationshipResult = await services.transportServices.relationships.createRelationship({ templateId, content: creationChangeContent });
+        const creationContent = RelationshipCreationRequestContent.from({ response: request.response!.content });
+        const createRelationshipResult = await services.transportServices.relationships.createRelationship({ templateId, creationContent: creationContent });
         if (createRelationshipResult.isError) {
             this.logger.error(`Could not create relationship for templateId '${templateId}'. Root error:`, createRelationshipResult.error);
             return;
@@ -236,7 +235,7 @@ export class RequestModule extends RuntimeModule {
         const requestId = request.id;
         const completeRequestResult = await services.consumptionServices.incomingRequests.complete({
             requestId,
-            responseSourceId: createRelationshipResult.value.changes[0].id
+            responseSourceId: createRelationshipResult.value.id
         });
         if (completeRequestResult.isError) {
             this.logger.error(`Could not complete the request '${requestId}'. Root error:`, completeRequestResult.error);
@@ -291,19 +290,13 @@ export class RequestModule extends RuntimeModule {
         // do not trigger for templates without the correct content type
         if (template.content["@type"] !== "RelationshipTemplateContent") return;
 
-        const relationshipCreationChange = createdRelationship.changes[0];
-        const relationshipChangeId = relationshipCreationChange.id;
-        // do not trigger for creation changes without the correct content type
-        if (relationshipCreationChange.request.content["@type"] !== "RelationshipCreationChangeRequestContent") return;
-
-        const relationshipCreationChangeContent = relationshipCreationChange.request.content as RelationshipCreationChangeRequestContentJSON;
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,
-            responseSourceId: relationshipChangeId,
-            response: relationshipCreationChangeContent.response
+            responseSourceId: createdRelationship.id,
+            response: createdRelationship.creationContent
         });
         if (result.isError) {
-            this.logger.error(`Could not create and complete request for templateId '${templateId}' and changeId '${relationshipChangeId}'. Root error:`, result.error);
+            this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${createdRelationship.id}'. Root error:`, result.error);
             return;
         }
     }
