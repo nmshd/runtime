@@ -1,15 +1,15 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { Response, ResponseJSON } from "@nmshd/content";
-import { CoreId, MessageController, RelationshipChange, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { CoreDate, CoreId, MessageController, Relationship, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
-import { MessageIdString, RelationshipChangeIdString, RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
+import { MessageIdString, RelationshipIdString, RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
 import { RequestMapper } from "./RequestMapper";
 
 export interface CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseRequest {
     templateId: RelationshipTemplateIdString;
-    responseSourceId: RelationshipChangeIdString | MessageIdString;
+    responseSourceId: RelationshipIdString | MessageIdString;
     response: ResponseJSON;
 }
 
@@ -33,15 +33,19 @@ export class CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseUse
         }
 
         const responseSource = await this.getResponseSource(request.responseSourceId);
-
+        let responseCreationDate: CoreDate | undefined;
+        if (request.responseSourceId.startsWith("REL")) {
+            responseCreationDate = (await this.relationshipController.getAuditLog(CoreId.from(request.responseSourceId)))[0].createdAt;
+        }
         if (!responseSource) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipChange));
+            return Result.fail(RuntimeErrors.general.recordNotFound(Relationship)); // TODO: assess if Relationship is correct
         }
 
         const localRequest = await this.outgoingRequestsController.createAndCompleteFromRelationshipTemplateResponse({
             template,
             responseSource,
-            response: Response.from(request.response)
+            response: Response.from(request.response),
+            responseCreationDate: responseCreationDate
         });
 
         return Result.ok(RequestMapper.toLocalRequestDTO(localRequest));
@@ -50,12 +54,6 @@ export class CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseUse
     private async getResponseSource(responseSourceId: string) {
         if (responseSourceId.startsWith("MSG")) return await this.messageController.getMessage(CoreId.from(responseSourceId));
 
-        const relationships = await this.relationshipController.getRelationships({ "cache.changes.id": responseSourceId });
-        if (relationships.length !== 0) {
-            const relationship = relationships[0];
-            return relationship.cache!.creationChange;
-        }
-
-        return;
+        return await this.relationshipController.getRelationship(CoreId.from(responseSourceId));
     }
 }

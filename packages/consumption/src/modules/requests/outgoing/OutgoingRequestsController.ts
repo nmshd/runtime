@@ -8,7 +8,6 @@ import {
     ICoreId,
     Message,
     Relationship,
-    RelationshipChange,
     RelationshipTemplate,
     SynchronizedCollection,
     CoreErrors as TransportCoreErrors
@@ -127,7 +126,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     public async createAndCompleteFromRelationshipTemplateResponse(params: ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters): Promise<LocalRequest> {
         const parsedParams = CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters.from(params);
 
-        const peer = parsedParams.responseSource instanceof RelationshipChange ? parsedParams.responseSource.request.createdBy : parsedParams.responseSource.cache!.createdBy;
+        const peer = parsedParams.responseSource instanceof Relationship ? parsedParams.responseSource.peer : parsedParams.responseSource.cache!.createdBy;
         const response = parsedParams.response;
         const requestId = response.requestId;
 
@@ -137,8 +136,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         }
 
         // checking for an active relationship is not secure as in the meantime the relationship could have been accepted
-        const isFromNewRelationship = parsedParams.responseSource instanceof RelationshipChange && parsedParams.responseSource.type === "Creation";
-
+        const isFromNewRelationship = parsedParams.responseSource instanceof Relationship;
         const requestContent = isFromNewRelationship ? templateContent.onNewRelationship : templateContent.onExistingRelationship;
 
         if (!requestContent) {
@@ -147,10 +145,10 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             );
         }
 
-        await this._create(requestId, requestContent, peer);
+        await this._create(requestId, requestContent, peer as CoreAddress); // TODO: check if this downcast works
         await this._sent(requestId, parsedParams.template);
 
-        const request = await this._complete(requestId, parsedParams.responseSource, response);
+        const request = await this._complete(requestId, parsedParams.responseSource, response, parsedParams.responseCreationDate);
         this.eventBus.publish(new OutgoingRequestCreatedAndCompletedEvent(this.identity.address.toString(), request));
 
         return request;
@@ -220,12 +218,12 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    private async _complete(requestId: CoreId, responseSourceObject: Message | RelationshipChange, receivedResponse: Response): Promise<LocalRequest> {
+    private async _complete(requestId: CoreId, responseSourceObject: Message | Relationship, receivedResponse: Response, responseCreationDate?: CoreDate): Promise<LocalRequest> {
         const request = await this.getOrThrow(requestId);
 
         this.assertRequestStatus(request, LocalRequestStatus.Open, LocalRequestStatus.Expired);
-
-        const responseSourceObjectCreationDate = responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.request.createdAt;
+        // only the message contains a creation date
+        const responseSourceObjectCreationDate = responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseCreationDate;
         if (request.status === LocalRequestStatus.Expired && request.isExpired(responseSourceObjectCreationDate)) {
             throw new ConsumptionError("Cannot complete an expired request with a response that was created before the expiration date");
         }
@@ -238,12 +236,12 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
         await this.applyItems(request.content.items, receivedResponse.items, request);
 
-        let responseSource: "Message" | "RelationshipChange";
+        let responseSource: "Message" | "Relationship";
 
         if (responseSourceObject instanceof Message) {
             responseSource = "Message";
-        } else if (responseSourceObject instanceof RelationshipChange) {
-            responseSource = "RelationshipChange";
+        } else if (responseSourceObject instanceof Relationship) {
+            responseSource = "Relationship";
         } else {
             throw new ConsumptionError("Invalid responseSourceObject");
         }

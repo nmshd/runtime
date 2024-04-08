@@ -15,7 +15,7 @@ import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetRelationshipsResponse } from "./backbone/BackboneGetRelationships";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { CachedRelationship } from "./local/CachedRelationship";
-import { IAuditLog, IEntireRelationship, Relationship } from "./local/Relationship";
+import { IAuditLog, Relationship } from "./local/Relationship";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
 import { RelationshipSecretController } from "./RelationshipSecretController";
 import { RelationshipStatus } from "./transmission/RelationshipStatus";
@@ -123,18 +123,13 @@ export class RelationshipsController extends TransportController {
         return Relationship.from(relationshipDoc);
     }
 
-    public async getRelationshipWithAuditLog(id: CoreId): Promise<IEntireRelationship | undefined> {
-        const relationship = await this.getRelationship(id);
-        if (!relationship) {
-            return;
-        }
-
+    public async getAuditLog(id: CoreId): Promise<IAuditLog> {
         const backboneAuditLog = (await this.client.getRelationship(id.toString())).value.auditLog;
         const auditLog: IAuditLog = [];
         backboneAuditLog.forEach((entry) => {
             auditLog.push({ ...entry, createdAt: CoreDate.from(entry.createdAt), createdBy: CoreAddress.from(entry.createdBy) });
-        });
-        return { ...relationship, auditLog };
+        }); // TODO: error handling
+        return auditLog;
     }
 
     public async sign(relationship: Relationship, content: CoreBuffer): Promise<CryptoSignature> {
