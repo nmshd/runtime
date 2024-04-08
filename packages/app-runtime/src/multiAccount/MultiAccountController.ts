@@ -64,10 +64,7 @@ export class MultiAccountController {
         }
     }
 
-    private readonly _openAccounts: AccountController[] = [];
-    public get openAccounts(): AccountController[] {
-        return this._openAccounts;
-    }
+    private readonly _openAccounts: Record<string, AccountController | undefined> = {};
 
     public async getAccount(id: CoreId): Promise<LocalAccount> {
         const dbAccount = await this._localAccounts.read(id.toString());
@@ -92,13 +89,17 @@ export class MultiAccountController {
         return dbAccounts.map((account) => LocalAccount.from(account));
     }
 
-    public async selectAccount(id: CoreId, _masterPassword: string): Promise<[LocalAccount, AccountController]> {
+    public async selectAccount(id: CoreId): Promise<[LocalAccount, AccountController]> {
         this._log.trace(`Selecting LocalAccount with id ${id}...`);
         const account = await this._localAccounts.read(id.toString());
         if (!account) {
             throw TransportCoreErrors.general.recordNotFound(LocalAccount, id.toString()).logWith(this._log);
         }
         let localAccount: LocalAccount = LocalAccount.from(account);
+
+        if (this._openAccounts[localAccount.id.toString()]) {
+            return [localAccount, this._openAccounts[localAccount.id.toString()]!];
+        }
 
         this._log.trace(`Opening DB for account ${localAccount.id}...`);
         const db: IDatabaseCollectionProvider = await this.transport.createDatabase(`acc-${localAccount.id.toString()}`);
@@ -109,7 +110,7 @@ export class MultiAccountController {
         await accountController.init();
         this._log.trace(`AccountController for local account ${id} initialized.`);
 
-        this._openAccounts.push(accountController);
+        this._openAccounts[localAccount.id.toString()] = accountController;
 
         if (!localAccount.address) {
             // Update address after first login if not set already
@@ -120,24 +121,12 @@ export class MultiAccountController {
     }
 
     public async deleteAccount(id: CoreId): Promise<void> {
-        const account = await this._localAccounts.read(id.toString());
-        if (!account) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAccount, id.toString()).logWith(this._log);
-        }
-
-        const localAccount = LocalAccount.from(account);
-
-        const [, accountController] = await this.selectAccount(id, "");
+        const [localAccount, accountController] = await this.selectAccount(id);
         await accountController.unregisterPushNotificationToken();
         await accountController.activeDevice.markAsOffboarded();
         await accountController.close();
-        this._openAccounts.splice(this._openAccounts.indexOf(accountController), 1);
 
-        const openAccountsWithSameAddress = this._openAccounts.filter((a) => a.identity.address.equals(localAccount.address));
-        for (const openAccount of openAccountsWithSameAddress) {
-            await openAccount.close();
-            this._openAccounts.splice(this._openAccounts.indexOf(openAccount), 1);
-        }
+        delete this._openAccounts[localAccount.id.toString()];
 
         await this.databaseConnection.deleteDatabase(`acc-${id.toString()}`);
         await this._localAccounts.delete({ id: id.toString() });
@@ -148,9 +137,8 @@ export class MultiAccountController {
     }
 
     public async closeAccounts(): Promise<void> {
-        for (let i = 0, l = this._openAccounts.length; i < l; i++) {
-            const account = this._openAccounts[i];
-            await account.close();
+        for (const account of Object.values(this._openAccounts)) {
+            await account?.close();
         }
     }
 
@@ -187,7 +175,7 @@ export class MultiAccountController {
         await accountController.init(deviceSharedSecret);
         this._log.trace(`AccountController for local account ${id} initialized.`);
 
-        this._openAccounts.push(accountController);
+        this._openAccounts[id.toString()] = accountController;
 
         const updatedLocalAccount = await this.updateLocalAccountAddress(localAccount.id, accountController.identity.address);
 
@@ -217,7 +205,7 @@ export class MultiAccountController {
         await accountController.init();
         this._log.trace(`AccountController for local account ${id} initialized.`);
 
-        this._openAccounts.push(accountController);
+        this._openAccounts[id.toString()] = accountController;
 
         localAccount = await this.updateLocalAccountAddress(localAccount.id, accountController.identity.address);
 

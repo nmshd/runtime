@@ -142,7 +142,7 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     private currentSessionPromise: { promise: Promise<LocalAccountSession>; accountId: string } | undefined;
-    private async createSession(accountReference: string, masterPassword = ""): Promise<LocalAccountSession> {
+    private async createSession(accountReference: string): Promise<LocalAccountSession> {
         const accountId = accountReference.length === 20 ? accountReference : (await this.multiAccountController.getAccountByAddress(accountReference)).id.toString();
 
         if (this.currentSessionPromise?.accountId === accountId) {
@@ -154,10 +154,10 @@ export class AppRuntime extends Runtime<AppConfig> {
                 // ignore
             });
 
-            return await this.createSession(accountId, masterPassword);
+            return await this.createSession(accountId);
         }
 
-        this.currentSessionPromise = { promise: this._createSession(accountId, masterPassword), accountId };
+        this.currentSessionPromise = { promise: this._createSession(accountId), accountId };
 
         try {
             return await this.currentSessionPromise.promise;
@@ -166,8 +166,8 @@ export class AppRuntime extends Runtime<AppConfig> {
         }
     }
 
-    private async _createSession(accountId: string, masterPassword: string) {
-        const [localAccount, accountController] = await this._multiAccountController.selectAccount(CoreId.from(accountId), masterPassword);
+    private async _createSession(accountId: string) {
+        const [localAccount, accountController] = await this._multiAccountController.selectAccount(CoreId.from(accountId));
         if (!localAccount.address) {
             throw AppRuntimeErrors.general.addressUnavailable().logWith(this.logger);
         }
