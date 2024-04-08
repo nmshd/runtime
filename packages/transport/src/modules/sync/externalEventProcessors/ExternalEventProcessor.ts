@@ -3,9 +3,8 @@ import { AccountController } from "../../accounts/AccountController";
 import { Message } from "../../messages/local/Message";
 import { Relationship } from "../../relationships/local/Relationship";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
-import { ChangedItems } from "../ChangedItems";
 
-export type ExternalEventProcessorConstructor = new (eventBus: EventBus, changedItems: ChangedItems, accountController: AccountController) => ExternalEventProcessor;
+export type ExternalEventProcessorConstructor = new (eventBus: EventBus, accountController: AccountController) => ExternalEventProcessor;
 
 export abstract class ExternalEventProcessor {
     public constructor(
