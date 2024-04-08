@@ -1,9 +1,10 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
+import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
+import { AuditLogEntryReason } from "../transmission/AuditLog";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 
@@ -17,6 +18,20 @@ export interface IRelationship extends ICoreSynchronizable {
 
     metadata?: any;
     metadataModifiedAt?: CoreDate;
+}
+
+export interface IAuditLogEntry {
+    createdAt: CoreDate;
+    createdBy: CoreAddress;
+    reason: AuditLogEntryReason;
+    oldStatus?: RelationshipStatus;
+    newStatus: RelationshipStatus;
+}
+
+export interface IAuditLog extends Array<IAuditLogEntry> {}
+
+export interface IEntireRelationship extends IRelationship {
+    auditLog: IAuditLog;
 }
 
 @type("Relationship")

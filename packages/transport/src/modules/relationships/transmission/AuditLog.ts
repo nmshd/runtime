@@ -7,7 +7,7 @@ export interface AuditLogEntry {
     createdBy: string;
     createdByDevice: string;
     reason: AuditLogEntryReason;
-    oldStatus: RelationshipStatus;
+    oldStatus?: RelationshipStatus;
     newStatus: RelationshipStatus;
 }
 
