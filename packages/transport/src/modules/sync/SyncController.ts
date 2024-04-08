@@ -414,9 +414,7 @@ export class SyncController extends TransportController {
                 const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEvent.type);
                 const item = await new externalEventProcessorConstructor(this.eventBus, changedItems, this.parent).execute(externalEvent);
 
-                if (item) {
-                    changedItems.addItem(item);
-                }
+                if (item) changedItems.addItem(item);
 
                 results.push({
                     externalEventId: externalEvent.id

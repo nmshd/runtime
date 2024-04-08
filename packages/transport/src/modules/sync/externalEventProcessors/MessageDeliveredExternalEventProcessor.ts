@@ -10,7 +10,7 @@ export class MessageDeliveredExternalEventProcessor extends ExternalEventProcess
 
         const deliveredMessage = updatedMessages[0];
 
-        this.eventBus.publish(new MessageDeliveredEvent(this.address, deliveredMessage));
+        this.eventBus.publish(new MessageDeliveredEvent(this.ownAddress, deliveredMessage));
         return deliveredMessage;
     }
 }

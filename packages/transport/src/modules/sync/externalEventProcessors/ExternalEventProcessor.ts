@@ -10,11 +10,10 @@ export type ExternalEventProcessorConstructor = new (eventBus: EventBus, changed
 export abstract class ExternalEventProcessor {
     public constructor(
         protected readonly eventBus: EventBus,
-        protected readonly changedItems: ChangedItems,
         protected readonly accountController: AccountController
     ) {}
     public abstract execute(externalEvent: BackboneExternalEvent): Promise<Message | Relationship | undefined>;
-    protected get address(): string {
+    protected get ownAddress(): string {
         return this.accountController.identity.address.toString();
     }
 }
