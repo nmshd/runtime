@@ -1,13 +1,11 @@
-import { AppRuntime, AppRuntimeServices, LocalAccountDTO } from "../../src";
+import { AppRuntime, AppRuntimeServices } from "../../src";
 import { TestUtil } from "../lib";
 
 describe("Offboarding", function () {
     let runtime: AppRuntime;
 
-    let localAccount2: LocalAccountDTO;
-
     let services1: AppRuntimeServices;
-
+    let localAccount2Id: string;
     let device2Id: string;
 
     beforeAll(async function () {
@@ -25,7 +23,8 @@ describe("Offboarding", function () {
 
         const onboardingInfoResult = await services1.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id });
 
-        localAccount2 = await runtime.accountServices.onboardAccount(onboardingInfoResult.value);
+        const localAccount2 = await runtime.accountServices.onboardAccount(onboardingInfoResult.value);
+        localAccount2Id = localAccount2.id;
         const services2 = await runtime.getServices(localAccount2.id);
 
         await services2.transportServices.account.syncDatawallet();
@@ -45,7 +44,8 @@ describe("Offboarding", function () {
     // validate that the account is deleted, test is valid if no error is thrown
     // eslint-disable-next-line jest/expect-expect
     test("delete account 2", async function () {
-        await runtime.accountServices.deleteAccount(localAccount2.id);
+        await runtime.accountServices.deleteAccount(localAccount2Id);
+        await services1.transportServices.account.syncDatawallet();
     });
 
     test("should have 1 account", async function () {
@@ -55,8 +55,6 @@ describe("Offboarding", function () {
     });
 
     test("device should be flagged as offboarded in the list of devices", async function () {
-        await services1.transportServices.account.syncDatawallet();
-
         const devices = await services1.transportServices.devices.getDevices();
         const device = devices.value.find((d) => d.id === device2Id);
 
@@ -70,5 +68,10 @@ describe("Offboarding", function () {
 
         expect(device).toBeDefined();
         expect(device.isOffboarded).toBe(true);
+    });
+
+    test("logging in with localAccount2 should throw an error", async function () {
+        await expect(runtime.getServices(localAccount2Id)).rejects.toThrow("error.transport.recordNotFound");
+        await expect(runtime.selectAccount(localAccount2Id)).rejects.toThrow("error.transport.recordNotFound");
     });
 });

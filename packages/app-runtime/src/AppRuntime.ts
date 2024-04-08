@@ -122,7 +122,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         };
     }
 
-    public async selectAccount(accountReference: string, _password: string): Promise<LocalAccountSession> {
+    public async selectAccount(accountReference: string): Promise<LocalAccountSession> {
         const session = await this.getOrCreateSession(accountReference);
         this.sessionStorage.currentSession = session;
         this.eventBus.publish(new AccountSelectedEvent(session.address, session.account.id));
@@ -204,7 +204,7 @@ export class AppRuntime extends Runtime<AppConfig> {
             return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailable(accountSelectionResult.error));
         }
 
-        if (accountSelectionResult.value) await this.selectAccount(accountSelectionResult.value.id, "");
+        if (accountSelectionResult.value) await this.selectAccount(accountSelectionResult.value.id);
         return UserfriendlyResult.ok(accountSelectionResult.value);
     }
 
