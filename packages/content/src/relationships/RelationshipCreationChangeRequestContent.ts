@@ -2,26 +2,26 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { ContentJSON } from "../ContentJSON";
 import { IResponse, Response, ResponseJSON } from "../requests/response/Response";
 
-export interface RelationshipCreationChangeRequestContentJSON extends ContentJSON {
+export interface RelationshipCreationRequestContentJSON extends ContentJSON {
     "@type": "RelationshipCreationChangeRequestContent";
     response: ResponseJSON;
 }
 
-export interface IRelationshipCreationChangeRequestContent extends ISerializable {
+export interface IRelationshipCreationRequestContent extends ISerializable {
     response: IResponse;
 }
 
-@type("RelationshipCreationChangeRequestContent")
-export class RelationshipCreationChangeRequestContent extends Serializable implements IRelationshipCreationChangeRequestContent {
+@type("RelationshipCreationRequestContent")
+export class RelationshipCreationRequestContent extends Serializable implements IRelationshipCreationRequestContent {
     @serialize()
     @validate()
     public response: Response;
 
-    public static from(value: IRelationshipCreationChangeRequestContent | Omit<RelationshipCreationChangeRequestContentJSON, "@type">): RelationshipCreationChangeRequestContent {
+    public static from(value: IRelationshipCreationRequestContent | Omit<RelationshipCreationRequestContentJSON, "@type">): RelationshipCreationRequestContent {
         return this.fromAny(value);
     }
 
-    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): RelationshipCreationChangeRequestContentJSON {
-        return super.toJSON(verbose, serializeAsString) as RelationshipCreationChangeRequestContentJSON;
+    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): RelationshipCreationRequestContentJSON {
+        return super.toJSON(verbose, serializeAsString) as RelationshipCreationRequestContentJSON;
     }
 }
