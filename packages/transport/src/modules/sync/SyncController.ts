@@ -12,7 +12,7 @@ import { ISyncClient, SyncClient } from "./backbone/SyncClient";
 import { ChangedItems } from "./ChangedItems";
 import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
 import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
-import { ExternalEventsProcessor } from "./ExternalEventsProcessor";
+import { ExternalEventProcessorRegistry } from "./externalEventProcessors";
 import { DatawalletModification } from "./local/DatawalletModification";
 import { DeviceMigrations } from "./migrations/DeviceMigrations";
 import { IdentityMigrations } from "./migrations/IdentityMigrations";
@@ -24,6 +24,7 @@ export class SyncController extends TransportController {
     private readonly client: ISyncClient;
     private readonly deviceMigrations: DeviceMigrations;
     private readonly identityMigrations: IdentityMigrations;
+    private readonly externalEventRegistry = new ExternalEventProcessorRegistry();
 
     private _cacheFetcher?: CacheFetcher;
     private get cacheFetcher() {
@@ -404,21 +405,46 @@ export class SyncController extends TransportController {
 
         const externalEvents = await getExternalEventsResult.value.collect();
 
-        const externalEventProcessor = new ExternalEventsProcessor(
-            this.parent.messages,
-            this.parent.relationships,
-            externalEvents,
-            reporter,
-            this.eventBus,
-            this.parent.identity.address.toString()
-        );
-        await externalEventProcessor.execute();
+        const syncStep = reporter.createStep(SyncStep.ExternalEventsProcessing, externalEvents.length);
+        const results: FinalizeSyncRunRequestExternalEventResult[] = [];
+        const changedItems = new ChangedItems();
+
+        for (const externalEvent of externalEvents) {
+            try {
+                const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEvent.type);
+                const item = await new externalEventProcessorConstructor(this.eventBus, this.parent).execute(externalEvent);
+
+                if (item) changedItems.addItem(item);
+
+                results.push({
+                    externalEventId: externalEvent.id
+                });
+            } catch (e: any) {
+                this.log.error("There was an error while trying to apply an external event: ", e);
+
+                let errorCode;
+                if (e.code) {
+                    errorCode = e.code;
+                } else if (e.message) {
+                    errorCode = e.message;
+                } else {
+                    errorCode = JSON.stringify(e);
+                }
+
+                results.push({
+                    externalEventId: externalEvent.id,
+                    errorCode: errorCode
+                });
+            } finally {
+                syncStep.progress();
+            }
+        }
 
         externalEventStep.finish();
 
         return {
-            externalEventResults: externalEventProcessor.results,
-            changedItems: externalEventProcessor.changedItems
+            externalEventResults: results,
+            changedItems: changedItems
         };
     }
 
