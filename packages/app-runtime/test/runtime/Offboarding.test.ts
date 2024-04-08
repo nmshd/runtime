@@ -35,42 +35,24 @@ describe("Offboarding", function () {
         await runtime.stop();
     });
 
-    test("should have 2 accounts", async function () {
-        const accounts = await runtime.accountServices.getAccounts();
-
-        expect(accounts).toHaveLength(2);
-    });
-
-    // validate that the account is deleted, test is valid if no error is thrown
-    // eslint-disable-next-line jest/expect-expect
     test("delete account 2", async function () {
         await runtime.accountServices.deleteAccount(localAccount2Id);
         await services1.transportServices.account.syncDatawallet();
-    });
 
-    test("should have 1 account", async function () {
         const accounts = await runtime.accountServices.getAccounts();
-
         expect(accounts).toHaveLength(1);
-    });
 
-    test("device should be flagged as offboarded in the list of devices", async function () {
-        const devices = await services1.transportServices.devices.getDevices();
-        const device = devices.value.find((d) => d.id === device2Id);
+        const devicesResult = await services1.transportServices.devices.getDevices();
+        const filteredDevice = devicesResult.value.find((d) => d.id === device2Id);
 
-        expect(device).toBeDefined();
-        expect(device!.isOffboarded).toBe(true);
-    });
+        expect(filteredDevice).toBeDefined();
+        expect(filteredDevice!.isOffboarded).toBe(true);
 
-    test("device should be flagged as offboarded when querying the device", async function () {
         const deviceResult = await services1.transportServices.devices.getDevice({ id: device2Id });
         const device = deviceResult.value;
 
-        expect(device).toBeDefined();
         expect(device.isOffboarded).toBe(true);
-    });
 
-    test("logging in with localAccount2 should throw an error", async function () {
         await expect(runtime.getServices(localAccount2Id)).rejects.toThrow("error.transport.recordNotFound");
         await expect(runtime.selectAccount(localAccount2Id)).rejects.toThrow("error.transport.recordNotFound");
     });
