@@ -5,7 +5,6 @@ import { TestUtil } from "../lib";
 describe("Offboarding", function () {
     let runtime: AppRuntime;
 
-    let localAccount1: LocalAccountDTO;
     let localAccount2: LocalAccountDTO;
 
     let services1: AppRuntimeServices;
@@ -14,12 +13,14 @@ describe("Offboarding", function () {
     let device2Id: string;
 
     beforeAll(async function () {
-        runtime = await TestUtil.createRuntime();
+        // as we can't pop up multiple runtimes we have to allow multiple accounts with
+        // the same address to test offboarding
+        const configOverride = { allowMultipleAccountsWithSameAddress: true };
+        runtime = await TestUtil.createRuntime(configOverride);
         await runtime.start();
 
-        [localAccount1] = await TestUtil.provideAccounts(runtime, 1);
-
-        services1 = await runtime.getServices(localAccount1.address!);
+        const [localAccount1] = await TestUtil.provideAccounts(runtime, 1);
+        services1 = await runtime.getServices(localAccount1.id);
 
         const createDeviceResult = await services1.transportServices.devices.createDevice({});
         device2Id = createDeviceResult.value.id;
@@ -27,7 +28,7 @@ describe("Offboarding", function () {
         const onboardingInfoResult = await services1.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id });
 
         localAccount2 = await runtime.accountServices.onboardAccount(onboardingInfoResult.value);
-        services2 = await runtime.getServices(localAccount2.address!);
+        services2 = await runtime.getServices(localAccount2.id);
 
         await services2.transportServices.account.syncDatawallet();
         await services1.transportServices.account.syncDatawallet();
