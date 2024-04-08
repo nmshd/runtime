@@ -12,7 +12,7 @@ describe("MessageFacade", function () {
         await runtime.start();
 
         localAccount = await runtime.accountServices.createAccount(Realm.Prod, "Profil 1");
-        await runtime.selectAccount(localAccount.id, "test");
+        await runtime.selectAccount(localAccount.id);
     });
 
     afterAll(async function () {
