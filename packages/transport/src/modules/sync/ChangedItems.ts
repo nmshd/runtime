@@ -7,11 +7,11 @@ export class ChangedItems {
         public readonly messages: Message[] = []
     ) {}
 
-    public addRelationship(relationship: Relationship): void {
-        this.relationships.push(relationship);
-    }
-
-    public addMessage(message: Message): void {
-        this.messages.push(message);
+    public addItem(item: Relationship | Message): void {
+        if (item instanceof Message) {
+            this.messages.push(item);
+        } else if (item instanceof Relationship) {
+            this.relationships.push(item);
+        }
     }
 }
