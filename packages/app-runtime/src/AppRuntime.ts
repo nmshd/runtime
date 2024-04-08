@@ -9,8 +9,6 @@ import { AppConfig, AppConfigOverwrite, createAppConfig } from "./AppConfig";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
 import { AppStringProcessor } from "./AppStringProcessor";
-import { SessionStorage } from "./SessionStorage";
-import { UserfriendlyResult } from "./UserfriendlyResult";
 import { AccountSelectedEvent, RelationshipSelectedEvent } from "./events";
 import { AppServices, IUIBridge } from "./extensibility";
 import {
@@ -27,6 +25,8 @@ import {
 } from "./modules";
 import { AccountServices, LocalAccountDTO, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
 import { RuntimeNativeBootstrapper, RuntimeNativeEnvironment } from "./runtimeNatives";
+import { SessionStorage } from "./SessionStorage";
+import { UserfriendlyResult } from "./UserfriendlyResult";
 
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(
@@ -122,7 +122,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         };
     }
 
-    public async selectAccount(accountReference: string, _password: string): Promise<LocalAccountSession> {
+    public async selectAccount(accountReference: string): Promise<LocalAccountSession> {
         const session = await this.getOrCreateSession(accountReference);
         this.sessionStorage.currentSession = session;
         this.eventBus.publish(new AccountSelectedEvent(session.address, session.account.id));
@@ -142,7 +142,7 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     private currentSessionPromise: { promise: Promise<LocalAccountSession>; accountId: string } | undefined;
-    private async createSession(accountReference: string, masterPassword = ""): Promise<LocalAccountSession> {
+    private async createSession(accountReference: string): Promise<LocalAccountSession> {
         const accountId = accountReference.length === 20 ? accountReference : (await this.multiAccountController.getAccountByAddress(accountReference)).id.toString();
 
         if (this.currentSessionPromise?.accountId === accountId) {
@@ -154,10 +154,10 @@ export class AppRuntime extends Runtime<AppConfig> {
                 // ignore
             });
 
-            return await this.createSession(accountId, masterPassword);
+            return await this.createSession(accountId);
         }
 
-        this.currentSessionPromise = { promise: this._createSession(accountId, masterPassword), accountId };
+        this.currentSessionPromise = { promise: this._createSession(accountId), accountId };
 
         try {
             return await this.currentSessionPromise.promise;
@@ -166,8 +166,8 @@ export class AppRuntime extends Runtime<AppConfig> {
         }
     }
 
-    private async _createSession(accountId: string, masterPassword: string) {
-        const [localAccount, accountController] = await this._multiAccountController.selectAccount(CoreId.from(accountId), masterPassword);
+    private async _createSession(accountId: string) {
+        const [localAccount, accountController] = await this._multiAccountController.selectAccount(CoreId.from(accountId));
         if (!localAccount.address) {
             throw AppRuntimeErrors.general.addressUnavailable().logWith(this.logger);
         }
@@ -204,7 +204,7 @@ export class AppRuntime extends Runtime<AppConfig> {
             return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailable(accountSelectionResult.error));
         }
 
-        if (accountSelectionResult.value) await this.selectAccount(accountSelectionResult.value.id, "");
+        if (accountSelectionResult.value) await this.selectAccount(accountSelectionResult.value.id);
         return UserfriendlyResult.ok(accountSelectionResult.value);
     }
 
@@ -231,7 +231,7 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     protected async initAccount(): Promise<void> {
-        this._multiAccountController = new MultiAccountController(this.transport, this.runtimeConfig);
+        this._multiAccountController = new MultiAccountController(this.transport, this.runtimeConfig, this.lokiConnection, this.sessionStorage);
         await this._multiAccountController.init();
         this._accountServices = new AccountServices(this._multiAccountController);
     }

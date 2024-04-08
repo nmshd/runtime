@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/app-runtime",
-    "version": "3.0.4",
+    "version": "3.1.0",
     "description": "The App Runtime",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -29,8 +29,8 @@
         "bundle:notest": "npm run bundle:lib && npm run bundle:min",
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "jest",
-        "test:ci": "jest -i"
+        "test": "jest --forceExit",
+        "test:ci": "jest -i --forceExit"
     },
     "jest": {
         "maxWorkers": 5,
@@ -50,7 +50,7 @@
         }
     },
     "dependencies": {
-        "@js-soft/docdb-access-loki": "^1.0.6",
+        "@js-soft/docdb-access-loki": "^1.1.0",
         "@js-soft/native-abstractions": "^1.2.2",
         "lodash": "^4.17.21"
     },
@@ -61,7 +61,7 @@
         "@types/luxon": "^3.4.2"
     },
     "peerDependencies": {
-        "@nmshd/runtime": "^4.0.0"
+        "@nmshd/runtime": "^4.4.1"
     },
     "publishConfig": {
         "access": "public",

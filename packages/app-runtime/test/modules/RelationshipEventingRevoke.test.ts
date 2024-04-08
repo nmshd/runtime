@@ -1,4 +1,4 @@
-import { RelationshipChangeStatus, RelationshipChangedEvent, RelationshipStatus } from "@nmshd/runtime";
+import { RelationshipChangedEvent, RelationshipChangeStatus, RelationshipStatus } from "@nmshd/runtime";
 import { AppRuntime, LocalAccountSession, OnboardingChangeReceivedEvent } from "../../src";
 import { EventListener, TestUtil } from "../lib";
 
@@ -14,8 +14,8 @@ describe("RelationshipEventingRevokeTest", function () {
         await runtime.start();
 
         const accounts = await TestUtil.provideAccounts(runtime, 2);
-        sessionA = await runtime.selectAccount(accounts[0].id, "");
-        await runtime.selectAccount(accounts[1].id, "");
+        sessionA = await runtime.selectAccount(accounts[0].id);
+        await runtime.selectAccount(accounts[1].id);
         sessionB = await runtime.getOrCreateSession(accounts[1].id);
     });
 

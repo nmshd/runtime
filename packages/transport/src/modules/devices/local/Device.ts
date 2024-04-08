@@ -32,6 +32,7 @@ export interface IDevice extends ICoreSynchronizable {
     username: string;
     initialPassword?: string;
     datawalletVersion?: number;
+    isOffboarded?: boolean;
 }
 
 @type("Device")
@@ -49,7 +50,8 @@ export class Device extends CoreSynchronizable implements IDevice {
         nameof<Device>((d) => d.lastLoginAt),
         nameof<Device>((d) => d.username),
         nameof<Device>((d) => d.initialPassword),
-        nameof<Device>((d) => d.datawalletVersion)
+        nameof<Device>((d) => d.datawalletVersion),
+        nameof<Device>((d) => d.isOffboarded)
     ];
 
     public override readonly userdataProperties = [nameof<Device>((d) => d.name), nameof<Device>((d) => d.description)];
@@ -105,6 +107,10 @@ export class Device extends CoreSynchronizable implements IDevice {
     @validate({ nullable: true })
     @serialize()
     public datawalletVersion?: number;
+
+    @validate({ nullable: true })
+    @serialize()
+    public isOffboarded?: boolean;
 
     public static from(value: IDevice): Device {
         return this.fromAny(value);
