@@ -29,8 +29,8 @@
         "bundle:notest": "npm run bundle:lib && npm run bundle:min",
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "jest",
-        "test:ci": "jest -i"
+        "test": "jest --forceExit",
+        "test:ci": "jest -i --forceExit"
     },
     "jest": {
         "maxWorkers": 5,
