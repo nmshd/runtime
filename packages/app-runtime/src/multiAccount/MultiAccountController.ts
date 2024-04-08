@@ -5,6 +5,7 @@ import {
     AccountController,
     CoreAddress,
     CoreDate,
+    CoreError,
     CoreId,
     DeviceSharedSecret,
     Realm,
@@ -156,11 +157,19 @@ export class MultiAccountController {
     }
 
     public async onboardDevice(deviceSharedSecret: DeviceSharedSecret): Promise<[LocalAccount, AccountController]> {
+        const existingAccounts = await this._localAccounts.find({ address: deviceSharedSecret.identity.address.toString() });
+        if (existingAccounts.length > 0 && !this.config.allowMultipleAccountsWithSameAddress) {
+            throw new CoreError(
+                "error.app-runtime.onboardedAccountAlreadyExists",
+                `An account with the address '${deviceSharedSecret.identity.address.toString()}' already exists in this app-runtime instance.`
+            ).logWith(this._log);
+        }
+
         this._log.trace(`Onboarding device ${deviceSharedSecret.id} for identity ${deviceSharedSecret.identity.address}...`);
 
         const id = await CoreId.generate();
 
-        let localAccount = LocalAccount.from({
+        const localAccount = LocalAccount.from({
             id,
             address: deviceSharedSecret.identity.address,
             directory: ".",
@@ -182,9 +191,9 @@ export class MultiAccountController {
 
         this._openAccounts.push(accountController);
 
-        localAccount = await this.updateLocalAccountAddress(localAccount.id, accountController.identity.address);
+        const updatedLocalAccount = await this.updateLocalAccountAddress(localAccount.id, accountController.identity.address);
 
-        return [localAccount, accountController];
+        return [updatedLocalAccount, accountController];
     }
 
     public async createAccount(realm: Realm, name: string): Promise<[LocalAccount, AccountController]> {

@@ -7,6 +7,7 @@ export interface AppConfig extends RuntimeConfig {
     accountsDbName: string;
     applicationId: string;
     applePushEnvironment?: "Development" | "Production";
+    allowMultipleAccountsWithSameAddress: boolean;
 }
 
 export interface AppConfigOverwrite {
@@ -15,6 +16,7 @@ export interface AppConfigOverwrite {
     accountsDbName?: string;
     applicationId: string;
     applePushEnvironment?: "Development" | "Production";
+    allowMultipleAccountsWithSameAddress?: boolean;
 }
 
 export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
@@ -91,7 +93,8 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
                 displayName: "Notification Module",
                 location: "@nmshd/runtime:NotificationModule"
             }
-        }
+        },
+        allowMultipleAccountsWithSameAddress: false
     };
 
     const mergedConfig = defaultsDeep({}, ...configs, appConfig);
