@@ -848,10 +848,8 @@ export class DataViewExpander {
                     return {
                         ...attributeSuccessionResponseItem,
                         type: "AttributeSuccessionAcceptResponseItemDVO",
-                        id: attributeSuccessionResponseItem.successorId,
+                        id: "",
                         name: name,
-                        predecessorId: attributeSuccessionResponseItem.predecessorId,
-                        successorId: attributeSuccessionResponseItem.successorId,
                         predecessor: localPredecessorDVOResult,
                         successor: localSuccessorDVOResult
                     } as AttributeSuccessionAcceptResponseItemDVO;

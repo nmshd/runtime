@@ -113,33 +113,17 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (typeof predecessorSourceAttribute === "undefined") {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, latestSharedAttribute.shareInfo.sourceAttribute.toString());
             }
+
             if (await this.consumptionController.attributes.isAPredecessorOf(predecessorSourceAttribute, existingSourceAttribute)) {
                 let successorSharedAttribute: LocalAttribute;
                 if (existingSourceAttribute.isIdentityAttribute()) {
                     successorSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
-                    // return AttributeSuccessionAcceptResponseItem.from({
-                    //     result: ResponseItemResult.Accepted,
-                    //     successorId: successorOwnSharedAttribute.id,
-                    //     successorContent: successorOwnSharedAttribute.content,
-                    //     predecessorId: latestOwnSharedAttribute.id
-                    // });
+                } else if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
+                    successorSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
                 } else {
-                    if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
-                        successorSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(
-                            latestSharedAttribute.id,
-                            existingSourceAttribute,
-                            requestInfo
-                        );
-                        // return AttributeSuccessionAcceptResponseItem.from({
-                        //     result: ResponseItemResult.Accepted,
-                        //     successorId: successorOwnSharedAttribute.id,
-                        //     successorContent: successorOwnSharedAttribute.content,
-                        //     predecessorId: latestOwnSharedAttribute.id
-                        // });
-                    } else {
-                        successorSharedAttribute = await this.performThirdPartyOwnedRelationshipAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
-                    }
+                    successorSharedAttribute = await this.performThirdPartyOwnedRelationshipAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
                 }
+
                 return AttributeSuccessionAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     successorId: successorSharedAttribute.id,
@@ -250,8 +234,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (responseItem.successorContent instanceof IdentityAttribute) {
                 const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
                 return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
+            } else if (responseItem.successorContent.owner === requestInfo.peer) {
+                await this.consumptionController.attributes.succeedPeerSharedRelationshipAttribute(responseItem.predecessorId, successorParams);
+            } else {
+                await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(responseItem.predecessorId, successorParams);
             }
-            await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(responseItem.predecessorId, successorParams);
         }
 
         return;
