@@ -32,6 +32,6 @@ export interface LocalResponseDVO extends DataViewObject {
 }
 
 export interface LocalResponseSourceDVO {
-    type: "Message" | "RelationshipChange";
+    type: "Message" | "Relationship";
     reference: string;
 }
