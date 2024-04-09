@@ -42,9 +42,13 @@ export class RelationshipsController extends TransportController {
         return this;
     }
 
-    public async getRelationships(query?: any): Promise<Relationship[]> {
+    public async getRelationships(query?: any, withAuditLog?: boolean): Promise<Relationship[]> {
         const relationshipDocs = await this.relationships.find(query);
-        return this.parseArray<Relationship>(relationshipDocs, Relationship);
+        const relationships = this.parseArray<Relationship>(relationshipDocs, Relationship);
+        if (withAuditLog) {
+            relationships.forEach((relationship) => this.addAuditLog(relationship));
+        }
+        return relationships;
     }
 
     public async updateCache(ids: string[]): Promise<Relationship[]> {
@@ -90,7 +94,7 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
+    public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus, withAuditLog?: boolean): Promise<Relationship | undefined> {
         const query: any = { peerAddress: address.toString() };
         if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
         let relationshipDoc = await this.relationships.findOne(query);
@@ -107,29 +111,43 @@ export class RelationshipsController extends TransportController {
             return;
         }
 
-        return Relationship.from(relationshipDoc);
+        const relationship = Relationship.from(relationshipDoc);
+        if (withAuditLog) {
+            await this.addAuditLog(relationship);
+        }
+
+        return relationship;
     }
 
-    public async getActiveRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
-        return await this.getRelationshipToIdentity(address, RelationshipStatus.Active);
+    public async getActiveRelationshipToIdentity(address: CoreAddress, withAuditLog?: boolean): Promise<Relationship | undefined> {
+        return await this.getRelationshipToIdentity(address, RelationshipStatus.Active, withAuditLog);
     }
 
-    public async getRelationship(id: CoreId): Promise<Relationship | undefined> {
+    public async getRelationship(id: CoreId, withAuditLog?: boolean): Promise<Relationship | undefined> {
         const relationshipDoc = await this.relationships.read(id.toString());
         if (!relationshipDoc) {
             return;
         }
 
-        return Relationship.from(relationshipDoc);
+        const relationship = Relationship.from(relationshipDoc);
+        if (withAuditLog) {
+            await this.addAuditLog(relationship);
+        }
+
+        return relationship;
     }
 
-    public async getAuditLog(id: CoreId): Promise<IAuditLog> {
+    private async getAuditLog(id: CoreId): Promise<IAuditLog> {
         const backboneAuditLog = (await this.client.getRelationship(id.toString())).value.auditLog;
         const auditLog: IAuditLog = [];
         backboneAuditLog.forEach((entry) => {
             auditLog.push({ ...entry, createdAt: CoreDate.from(entry.createdAt), createdBy: CoreAddress.from(entry.createdBy) });
         }); // TODO: error handling
         return auditLog;
+    }
+
+    private async addAuditLog(relationship: Relationship): Promise<void> {
+        relationship.auditLog = await this.getAuditLog(relationship.id);
     }
 
     public async sign(relationship: Relationship, content: CoreBuffer): Promise<CryptoSignature> {

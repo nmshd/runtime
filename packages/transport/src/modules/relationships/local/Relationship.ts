@@ -18,6 +18,8 @@ export interface IRelationship extends ICoreSynchronizable {
 
     metadata?: any;
     metadataModifiedAt?: CoreDate;
+
+    auditLog?: IAuditLog;
 }
 
 export interface IAuditLogEntry {
@@ -29,10 +31,6 @@ export interface IAuditLogEntry {
 }
 
 export interface IAuditLog extends Array<IAuditLogEntry> {}
-
-export interface IEntireRelationship extends IRelationship {
-    auditLog: IAuditLog;
-}
 
 @type("Relationship")
 export class Relationship extends CoreSynchronizable implements IRelationship {
@@ -73,6 +71,10 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @validate({ nullable: true })
     @serialize()
     public metadataModifiedAt?: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public auditLog?: IAuditLog;
 
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): Object {
         const json = super.toJSON(verbose, serializeAsString) as any;
@@ -120,24 +122,6 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
             cache: cache,
             cachedAt: CoreDate.utc()
         });
-    }
-
-    public toActive(): void {
-        if (!this.cache) throw this.newCacheEmptyError();
-
-        this.status = RelationshipStatus.Active;
-    }
-
-    public toRejected(): void {
-        if (!this.cache) throw this.newCacheEmptyError();
-
-        this.status = RelationshipStatus.Rejected;
-    }
-
-    public toRevoked(): void {
-        if (!this.cache) throw this.newCacheEmptyError();
-
-        this.status = RelationshipStatus.Revoked;
     }
 
     public static from(value: IRelationship): Relationship {

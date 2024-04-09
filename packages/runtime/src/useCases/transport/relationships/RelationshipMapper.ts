@@ -1,5 +1,5 @@
 import { Relationship } from "@nmshd/transport";
-import { RelationshipDTO } from "../../../types";
+import { AuditLog, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
 
@@ -8,6 +8,11 @@ export class RelationshipMapper {
         if (!relationship.cache) {
             throw RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString());
         }
+
+        const auditLogDTO: AuditLog = [];
+        relationship.auditLog?.forEach((entry) => {
+            auditLogDTO.push({ ...entry, createdAt: entry.createdAt.toString(), createdBy: entry.createdBy.toString() });
+        });
 
         return {
             id: relationship.id.toString(),
@@ -19,6 +24,7 @@ export class RelationshipMapper {
                 publicKey: relationship.peer.publicKey.toBase64(false),
                 realm: relationship.peer.realm
             },
+            auditLog: auditLogDTO,
             creationContent: relationship.cache.creationContent
         };
     }
