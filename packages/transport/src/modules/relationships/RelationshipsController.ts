@@ -171,7 +171,7 @@ export class RelationshipsController extends TransportController {
 
         const secretId = await TransportIds.relationshipSecret.generate();
 
-        const requestCipher = await this.prepareRequest(secretId, template, parameters.content);
+        const requestCipher = await this.prepareRequest(secretId, template, parameters.creationContent);
 
         const backboneResponse = (
             await this.client.createRelationship({

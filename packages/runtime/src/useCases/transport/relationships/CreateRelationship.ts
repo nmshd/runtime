@@ -34,7 +34,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
 
         const relationship = await this.relationshipsController.sendRelationship({
             template: template,
-            content: request.creationContent
+            creationContent: request.creationContent
         });
 
         await this.accountController.syncDatawallet();
