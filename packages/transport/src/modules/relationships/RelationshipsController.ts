@@ -211,14 +211,26 @@ export class RelationshipsController extends TransportController {
     }
 
     public async accept(relationshipId: CoreId): Promise<Relationship> {
+        const relationshipStatus = (await this.getRelationship(relationshipId))!.status;
+        if (relationshipStatus !== RelationshipStatus.Pending) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationshipStatus);
+        }
         return await this.completeStateTransition(RelationshipStatus.Active, relationshipId);
     }
 
     public async reject(relationshipId: CoreId): Promise<Relationship> {
+        const relationshipStatus = (await this.getRelationship(relationshipId))!.status;
+        if (relationshipStatus !== RelationshipStatus.Pending) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationshipStatus);
+        }
         return await this.completeStateTransition(RelationshipStatus.Rejected, relationshipId);
     }
 
     public async revoke(relationshipId: CoreId): Promise<Relationship> {
+        const relationshipStatus = (await this.getRelationship(relationshipId))!.status;
+        if (relationshipStatus !== RelationshipStatus.Pending) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationshipStatus);
+        }
         return await this.completeStateTransition(RelationshipStatus.Revoked, relationshipId);
     }
 

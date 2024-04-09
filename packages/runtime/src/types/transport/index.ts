@@ -6,7 +6,6 @@ export * from "./IdentityDTO";
 export * from "./MessageDTO";
 export * from "./MessageWithAttachmentsDTO";
 export * from "./RecipientDTO";
-export * from "./RelationshipChangeDTO";
 export * from "./RelationshipDTO";
 export * from "./RelationshipTemplateDTO";
 export * from "./TokenDTO";
