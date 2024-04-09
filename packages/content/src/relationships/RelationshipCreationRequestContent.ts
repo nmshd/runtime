@@ -3,7 +3,7 @@ import { ContentJSON } from "../ContentJSON";
 import { IResponse, Response, ResponseJSON } from "../requests/response/Response";
 
 export interface RelationshipCreationRequestContentJSON extends ContentJSON {
-    "@type": "RelationshipCreationChangeRequestContent";
+    "@type": "RelationshipCreationRequestContent";
     response: ResponseJSON;
 }
 
