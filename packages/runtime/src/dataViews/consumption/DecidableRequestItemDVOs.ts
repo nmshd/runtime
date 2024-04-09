@@ -1,6 +1,6 @@
 import { RequestItemDVO } from "../content";
 import { DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "../content/AttributeDVOs";
-import { ProcessedAttributeQueryDVO } from "./LocalAttributeDVO";
+import { LocalAttributeDVO, ProcessedAttributeQueryDVO } from "./LocalAttributeDVO";
 
 export interface DecidableRequestItemDVO extends RequestItemDVO {}
 
@@ -18,6 +18,12 @@ export interface DecidableProposeAttributeRequestItemDVO extends DecidableReques
 export interface DecidableCreateAttributeRequestItemDVO extends DecidableRequestItemDVO {
     type: "DecidableCreateAttributeRequestItemDVO";
     attribute: DraftIdentityAttributeDVO | DraftRelationshipAttributeDVO;
+}
+
+export interface DecidableDeleteAttributeRequestItemDVO extends DecidableRequestItemDVO {
+    type: "DecidableDeleteAttributeRequestItemDVO";
+    attributeId: string;
+    attribute: LocalAttributeDVO;
 }
 
 export interface DecidableShareAttributeRequestItemDVO extends DecidableRequestItemDVO {
