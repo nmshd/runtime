@@ -145,7 +145,7 @@ export class MultiAccountController {
         }
     }
 
-    public async onboardDevice(deviceSharedSecret: DeviceSharedSecret): Promise<[LocalAccount, AccountController]> {
+    public async onboardDevice(deviceSharedSecret: DeviceSharedSecret, name?: string): Promise<[LocalAccount, AccountController]> {
         const existingAccounts = await this._localAccounts.find({ address: deviceSharedSecret.identity.address.toString() });
         if (existingAccounts.length > 0 && !this.config.allowMultipleAccountsWithSameAddress) {
             throw new CoreError(
@@ -163,7 +163,7 @@ export class MultiAccountController {
             address: deviceSharedSecret.identity.address,
             directory: ".",
             realm: deviceSharedSecret.identity.realm,
-            name: deviceSharedSecret.name ? deviceSharedSecret.name : deviceSharedSecret.identity.address.toString(),
+            name: name ?? deviceSharedSecret.name ?? deviceSharedSecret.identity.address.toString(),
             order: -1
         });
         await this._localAccounts.create(localAccount);

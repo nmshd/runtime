@@ -18,9 +18,9 @@ export class AccountServices {
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
     }
 
-    public async onboardAccount(onboardingInfo: DeviceOnboardingInfoDTO): Promise<LocalAccountDTO> {
+    public async onboardAccount(onboardingInfo: DeviceOnboardingInfoDTO, name?: string): Promise<LocalAccountDTO> {
         const sharedSecret = DeviceMapper.toDeviceSharedSecret(onboardingInfo);
-        const [localAccount] = await this.multiAccountController.onboardDevice(sharedSecret);
+        const [localAccount] = await this.multiAccountController.onboardDevice(sharedSecret, name);
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
     }
 
