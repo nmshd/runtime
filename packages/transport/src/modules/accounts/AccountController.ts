@@ -301,7 +301,6 @@ export class AccountController {
             createdAt: CoreDate.from(deviceResponse.createdAt),
             createdByDevice: deviceId,
             id: deviceId,
-            description: "",
             name: "Device 1",
             lastLoginAt: CoreDate.utc(),
             operatingSystem: deviceInfo.operatingSystem,
@@ -351,7 +350,7 @@ export class AccountController {
         const device = Device.from({
             id: deviceSharedSecret.id,
             name: deviceSharedSecret.name ? deviceSharedSecret.name : "",
-            description: deviceSharedSecret.description ? deviceSharedSecret.name : "",
+            description: deviceSharedSecret.description,
             lastLoginAt: CoreDate.utc(),
             createdAt: deviceSharedSecret.createdAt,
             createdByDevice: deviceSharedSecret.createdByDevice,
