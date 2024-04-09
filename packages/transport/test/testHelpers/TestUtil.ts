@@ -315,7 +315,7 @@ export class TestUtil {
 
         await to.relationships.sendRelationship({
             template: templateTo,
-            content: {
+            creationContent: {
                 mycontent: "request"
             }
         });
@@ -326,7 +326,7 @@ export class TestUtil {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        const rejectedRelationshipFromSelf = await from.relationships.rejectChange(pendingRelationship.cache!.creationChange, {});
+        const rejectedRelationshipFromSelf = await from.relationships.reject(pendingRelationship.id);
         expect(rejectedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Rejected);
 
         // Get accepted relationship
@@ -349,7 +349,7 @@ export class TestUtil {
 
         const relRequest = await to.relationships.sendRelationship({
             template: templateTo,
-            content: {
+            creationContent: {
                 mycontent: "request"
             }
         });
@@ -360,7 +360,7 @@ export class TestUtil {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        const acceptedRelationshipFromSelf = await from.relationships.acceptChange(pendingRelationship.cache!.creationChange, {});
+        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         // Get accepted relationship
@@ -481,7 +481,7 @@ export class TestUtil {
         }
         return await account.relationships.sendRelationship({
             template: template,
-            content: body
+            creationContent: body
         });
     }
 
