@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    AcceptResponseItem,
     DeleteAttributeAcceptResponseItem,
     DeleteAttributeRequestItem,
     IdentityAttribute,
@@ -464,7 +465,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             expect(responseItem).toBeDefined();
             expect(responseItem).toBeInstanceOf(DeleteAttributeAcceptResponseItem);
             expect(responseItem.result).toStrictEqual(ResponseItemResult.Accepted);
-            expect(responseItem.deletionDate).toStrictEqual(dateInFuture);
+            expect((responseItem as DeleteAttributeAcceptResponseItem).deletionDate).toStrictEqual(dateInFuture);
         });
 
         test("sets the deletionInfo of a peer shared Identity Attribute", async function () {
@@ -564,6 +565,38 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             expect(updatedRPSRA!.deletionInfo).toBeDefined();
             expect(updatedRPSRA!.deletionInfo!.deletionStatus).toStrictEqual(DeletionStatus.ToBeDeleted);
             expect(updatedRPSRA!.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
+        });
+
+        test("returns an AcceptResponseItem", async function () {
+            const requestItem = DeleteAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attributeId: (await CoreId.generate()).toString()
+            });
+
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: peerAddress,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const dateInFuture = CoreDate.utc().add({ days: 1 });
+            const acceptParams: AcceptDeleteAttributeRequestItemParametersJSON = {
+                accept: true,
+                deletionDate: dateInFuture.toString()
+            };
+
+            const responseItem = await processor.accept(requestItem, acceptParams, incomingRequest);
+
+            expect(responseItem).toBeDefined();
+            expect(responseItem).toBeInstanceOf(AcceptResponseItem);
         });
     });
 

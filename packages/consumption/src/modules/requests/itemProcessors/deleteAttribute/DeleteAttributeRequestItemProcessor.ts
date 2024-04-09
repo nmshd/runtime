@@ -1,7 +1,7 @@
-import { DeleteAttributeAcceptResponseItem, DeleteAttributeRequestItem, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { AcceptResponseItem, DeleteAttributeAcceptResponseItem, DeleteAttributeRequestItem, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
+import { CoreAddress, CoreDate } from "@nmshd/transport";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { DeletionStatus, LocalAttribute, LocalAttributeDeletionInfo } from "../../../attributes";
+import { DeletionStatus, LocalAttributeDeletionInfo } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
@@ -58,10 +58,10 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         requestItem: DeleteAttributeRequestItem,
         params: AcceptDeleteAttributeRequestItemParametersJSON,
         _requestInfo: LocalRequestInfo
-    ): Promise<DeleteAttributeAcceptResponseItem> {
+    ): Promise<DeleteAttributeAcceptResponseItem | AcceptResponseItem> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
         if (typeof attribute === "undefined") {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, requestItem.attributeId.toString());
+            return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
         }
 
         const deletionDate = CoreDate.from(params.deletionDate);
@@ -83,7 +83,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
     }
 
     public override async applyIncomingResponseItem(
-        responseItem: DeleteAttributeAcceptResponseItem | RejectResponseItem,
+        responseItem: DeleteAttributeAcceptResponseItem | AcceptResponseItem | RejectResponseItem,
         requestItem: DeleteAttributeRequestItem,
         _requestInfo: LocalRequestInfo
     ): Promise<void> {
