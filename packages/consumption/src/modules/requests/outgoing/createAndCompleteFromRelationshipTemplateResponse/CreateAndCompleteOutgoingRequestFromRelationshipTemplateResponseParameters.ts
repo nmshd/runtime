@@ -9,7 +9,7 @@ export interface ICreateAndCompleteOutgoingRequestFromRelationshipTemplateRespon
     responseCreationDate?: ICoreDate;
 }
 
-@type("CreateAndCompleteOutgoingRequestFromRelationshipCreationChangeParameters")
+@type("CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters")
 export class CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters
     extends Serializable
     implements ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters

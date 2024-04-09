@@ -2,7 +2,7 @@ import { LocalRequestDTO } from "../../types";
 import { DataEvent } from "../DataEvent";
 
 export class OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent extends DataEvent<LocalRequestDTO> {
-    public static readonly namespace = "consumption.outgoingRequestFromRelationshipCreationChangeCreatedAndCompleted";
+    public static readonly namespace = "consumption.outgoingRequestFromRelationshipCreationCreatedAndCompleted";
 
     public constructor(eventTargetAddress: string, data: LocalRequestDTO) {
         super(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent.namespace, eventTargetAddress, data);
