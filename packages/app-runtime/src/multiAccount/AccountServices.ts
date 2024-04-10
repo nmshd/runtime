@@ -1,9 +1,9 @@
 import { DeviceMapper, DeviceOnboardingInfoDTO } from "@nmshd/runtime";
 import { CoreId, Realm } from "@nmshd/transport";
 import { AppRuntimeErrors } from "../AppRuntimeErrors";
-import { MultiAccountController } from "./MultiAccountController";
 import { LocalAccountDTO } from "./data/LocalAccountDTO";
 import { LocalAccountMapper } from "./data/LocalAccountMapper";
+import { MultiAccountController } from "./MultiAccountController";
 
 export class AccountServices {
     public constructor(protected readonly multiAccountController: MultiAccountController) {}
@@ -18,9 +18,9 @@ export class AccountServices {
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
     }
 
-    public async onboardAccount(onboardingInfo: DeviceOnboardingInfoDTO): Promise<LocalAccountDTO> {
+    public async onboardAccount(onboardingInfo: DeviceOnboardingInfoDTO, name?: string): Promise<LocalAccountDTO> {
         const sharedSecret = DeviceMapper.toDeviceSharedSecret(onboardingInfo);
-        const [localAccount] = await this.multiAccountController.onboardDevice(sharedSecret);
+        const [localAccount] = await this.multiAccountController.onboardDevice(sharedSecret, name);
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
     }
 
@@ -32,6 +32,10 @@ export class AccountServices {
     public async getAccount(id: string): Promise<LocalAccountDTO> {
         const localAccount = await this.multiAccountController.getAccount(CoreId.from(id));
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
+    }
+
+    public async deleteAccount(id: string): Promise<void> {
+        await this.multiAccountController.deleteAccount(CoreId.from(id));
     }
 
     public async getAccountByAddress(address: string): Promise<LocalAccountDTO> {
