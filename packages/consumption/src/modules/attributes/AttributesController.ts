@@ -589,10 +589,10 @@ export class AttributesController extends ConsumptionBaseController {
         const successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
         const predecessorSourceVersionIds = (await this.getVersionsOfAttribute(predecessor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
         const successorSourceVersionIds = (await this.getVersionsOfAttribute(successor.shareInfo.sourceAttribute)).map((x) => x.id.toString());
-        if (typeof predecessorSource === "undefined" || !predecessorSource.isRepositoryAttribute(this.identity.address)) {
+        if (!predecessorSource?.isRepositoryAttribute(this.identity.address)) {
             return ValidationResult.error(CoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
         }
-        if (typeof successorSource === "undefined" || !successorSource.isRepositoryAttribute(this.identity.address)) {
+        if (!successorSource?.isRepositoryAttribute(this.identity.address)) {
             return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
         }
         if (
