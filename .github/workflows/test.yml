@@ -18,7 +18,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -37,7 +37,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -59,7 +59,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -83,7 +83,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -116,7 +116,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -138,7 +138,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -163,7 +163,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -183,7 +183,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -205,7 +205,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -229,7 +229,7 @@ jobs:
       - name: Start Backbone
         uses: nmshd/start-backbone@latest
         with:
-          consumerapi-version: v4.2.6
+          consumerapi-version: v4.5.0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
