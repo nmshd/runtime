@@ -108,9 +108,9 @@ publicFunctions[RelationshipsController.name] = [
     nameof<RelationshipsController>((r) => r.verify),
     nameof<RelationshipsController>((r) => r.verifyIdentity),
     nameof<RelationshipsController>((r) => r.sendRelationship),
-    nameof<RelationshipsController>((r) => r.acceptChange),
-    nameof<RelationshipsController>((r) => r.rejectChange),
-    nameof<RelationshipsController>((r) => r.revokeChange),
+    nameof<RelationshipsController>((r) => r.accept),
+    nameof<RelationshipsController>((r) => r.reject),
+    nameof<RelationshipsController>((r) => r.revoke),
     nameof<FileController>((r) => r.updateCache)
 ];
 publicFunctions[RelationshipSecretController.name] = [
