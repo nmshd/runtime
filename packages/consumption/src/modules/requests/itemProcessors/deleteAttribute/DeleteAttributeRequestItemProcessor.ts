@@ -40,7 +40,16 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         return ValidationResult.success();
     }
 
-    public override canAccept(_requestItem: DeleteAttributeRequestItem, params: AcceptDeleteAttributeRequestItemParametersJSON, _requestInfo: LocalRequestInfo): ValidationResult {
+    public override async canAccept(
+        requestItem: DeleteAttributeRequestItem,
+        params: AcceptDeleteAttributeRequestItemParametersJSON,
+        _requestInfo: LocalRequestInfo
+    ): Promise<ValidationResult> {
+        const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
+        if (typeof attribute === "undefined") {
+            return ValidationResult.success();
+        }
+
         const deletionDate = CoreDate.from(params.deletionDate);
 
         if (!deletionDate.dateTime.isValid) {
