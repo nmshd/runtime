@@ -56,7 +56,7 @@ export class TestUtil {
 
     public static async createSession(runtime: AppRuntime): Promise<LocalAccountSession> {
         const localAccount1 = await runtime.accountServices.createAccount(Realm.Prod, "Profil 1");
-        return await runtime.selectAccount(localAccount1.id, "test");
+        return await runtime.selectAccount(localAccount1.id);
     }
 
     private static readonly fatalLogger = new SimpleLoggerFactory(LogLevel.Fatal);

@@ -60,7 +60,7 @@ describe("Runtime Startup", function () {
     });
 
     test("should login to created account", async function () {
-        const selectedAccount = await runtime.selectAccount(localAccount.id, "test");
+        const selectedAccount = await runtime.selectAccount(localAccount.id);
         expect(selectedAccount).toBeDefined();
         expect(selectedAccount.account.id.toString()).toBe(localAccount.id.toString());
     });
