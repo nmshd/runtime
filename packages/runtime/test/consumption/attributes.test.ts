@@ -1,5 +1,15 @@
 import { AttributesController, DeletionStatus, LocalAttribute } from "@nmshd/consumption";
-import { CityJSON, CountryJSON, HouseNumberJSON, RelationshipAttributeConfidentiality, RequestItemJSONDerivations, StreetJSON, ZipCodeJSON } from "@nmshd/content";
+import {
+    CityJSON,
+    CountryJSON,
+    HouseNumberJSON,
+    ReadAttributeRequestItem,
+    RelationshipAttributeConfidentiality,
+    RequestItemJSONDerivations,
+    StreetJSON,
+    ThirdPartyRelationshipAttributeQuery,
+    ZipCodeJSON
+} from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/transport";
 import {
     AttributeCreatedEvent,
@@ -36,6 +46,7 @@ import {
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullNotifyPeerAboutAttributeSuccessionFlow,
+    executeFullRequestAndShareThirdPartyRelationshipAttributeFlow,
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     RuntimeServiceProvider,
@@ -1558,6 +1569,47 @@ describe("DeleteAttributeUseCases", () => {
             expect(getDeletedPredecessorResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
+        test("should remove 'shareInfo.sourceAttribute' from own shared third party relationship attribute copies of a deleted repository attribute", async () => {
+            const ownSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services3, {
+                content: {
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "My amazing string",
+                        title: "Nothing is this amazing"
+                    },
+                    key: "amazing",
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }
+            });
+
+            const requestParams = {
+                peer: services1.address,
+                content: {
+                    items: [
+                        ReadAttributeRequestItem.from({
+                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "amazing", owner: services1.address, thirdParty: [services3.address] }),
+                            mustBeAccepted: true
+                        }).toJSON()
+                    ]
+                }
+            };
+
+            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+                services1,
+                services2,
+                requestParams,
+                ownSharedRelationshipAttribute.id
+            );
+
+            await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedRelationshipAttribute.id });
+
+            const updatedOwnSharedThirdPartyRelationshipAttributeResult = await services1.consumption.attributes.getAttribute({ id: ownSharedThirdPartyRelationshipAttribute.id });
+            expect(updatedOwnSharedThirdPartyRelationshipAttributeResult.isSuccess).toBe(true);
+            const updatedOwnSharedThirdPartyRelationshipAttribute = updatedOwnSharedThirdPartyRelationshipAttributeResult.value;
+            expect(updatedOwnSharedThirdPartyRelationshipAttribute.shareInfo).toBeDefined();
+            expect(updatedOwnSharedThirdPartyRelationshipAttribute.shareInfo!.sourceAttribute).toBeUndefined();
+        });
+
         test("should set the 'succeeds' property of the own shared identity attribute successor to undefined", async () => {
             expect(ownSharedIdentityAttributeVersion1.succeeds).toBeDefined();
             await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttributeVersion0.id });
@@ -1617,6 +1669,49 @@ describe("DeleteAttributeUseCases", () => {
 
             const getDeletedPredecessorResult = await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.id });
             expect(getDeletedPredecessorResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("should remove 'shareInfo.sourceAttribute' from peer shared third party relationship attribute copies of a deleted repository attribute", async () => {
+            const peerSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services3, services1, {
+                content: {
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "My amazing string",
+                        title: "Nothing is this amazing"
+                    },
+                    key: "amazing",
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }
+            });
+
+            const requestParams = {
+                peer: services1.address,
+                content: {
+                    items: [
+                        ReadAttributeRequestItem.from({
+                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "amazing", owner: services3.address, thirdParty: [services3.address] }),
+                            mustBeAccepted: true
+                        }).toJSON()
+                    ]
+                }
+            };
+
+            const peerSharedThirdPartyRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+                services1,
+                services2,
+                requestParams,
+                peerSharedRelationshipAttribute.id
+            );
+
+            await services1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: peerSharedRelationshipAttribute.id });
+
+            const updatedPeerSharedThirdPartyRelationshipAttributeResult = await services1.consumption.attributes.getAttribute({
+                id: peerSharedThirdPartyRelationshipAttribute.id
+            });
+            expect(updatedPeerSharedThirdPartyRelationshipAttributeResult.isSuccess).toBe(true);
+            const updatedPeerSharedThirdPartyRelationshipAttribute = updatedPeerSharedThirdPartyRelationshipAttributeResult.value;
+            expect(updatedPeerSharedThirdPartyRelationshipAttribute.shareInfo).toBeDefined();
+            expect(updatedPeerSharedThirdPartyRelationshipAttribute.shareInfo!.sourceAttribute).toBeUndefined();
         });
 
         test("should set the 'succeeds' property of the peer shared identity attribute successor to undefined", async () => {
