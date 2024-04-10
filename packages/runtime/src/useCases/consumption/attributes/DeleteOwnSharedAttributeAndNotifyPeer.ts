@@ -17,7 +17,7 @@ class Validator extends SchemaValidator<DeleteOwnSharedAttributeAndNotifyPeerReq
 
 export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<DeleteOwnSharedAttributeAndNotifyPeerRequest, Notification> {
     public constructor(
-        @Inject private readonly attributeController: AttributesController,
+        @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly messageController: MessageController,
         @Inject validator: Validator
@@ -27,7 +27,7 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
 
     protected async executeInternal(request: DeleteOwnSharedAttributeAndNotifyPeerRequest): Promise<Result<Notification>> {
         const ownSharedAttributeId = CoreId.from(request.attributeId);
-        const ownSharedAttribute = await this.attributeController.getLocalAttribute(ownSharedAttributeId);
+        const ownSharedAttribute = await this.attributesController.getLocalAttribute(ownSharedAttributeId);
 
         if (typeof ownSharedAttribute === "undefined") {
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
@@ -37,21 +37,12 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
             return Result.fail(RuntimeErrors.attributes.isNotOwnSharedAttribute(ownSharedAttributeId));
         }
 
-        if (typeof ownSharedAttribute.succeededBy !== "undefined") {
-            const successor = await this.attributeController.getLocalAttribute(ownSharedAttribute.succeededBy);
-            if (typeof successor === "undefined") {
-                throw new Error(`The Attribute ${ownSharedAttribute.succeededBy} was not found, even though it is specified as successor of Attribute ${ownSharedAttribute.id}.`);
-            }
-
-            successor.succeeds = undefined;
-            await this.attributeController.updateAttributeUnsafe(successor);
+        const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(ownSharedAttribute);
+        if (validationResult.isError()) {
+            return Result.fail(validationResult.error);
         }
 
-        const predecessors = await this.attributeController.getPredecessorsOfAttribute(ownSharedAttributeId);
-
-        for (const attr of [ownSharedAttribute, ...predecessors]) {
-            await this.attributeController.deleteAttribute(attr);
-        }
+        await this.attributesController.executeFullAttributeDeletionProcess(ownSharedAttribute);
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = OwnSharedAttributeDeletedByOwnerNotificationItem.from({ attributeId: ownSharedAttributeId });

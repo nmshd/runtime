@@ -878,37 +878,37 @@ export class AttributesController extends ConsumptionBaseController {
         await this.attributes.delete({ id: id });
     }
 
-    public async deleteRepositoryAttribute(sourceAttribute: LocalAttribute): Promise<void> {
-        const validationResult = await this.validateSourceAttributeDeletion(sourceAttribute);
+    public async executeFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<void> {
+        const validationResult = await this.validateFullAttributeDeletionProcess(attribute);
         if (validationResult.isError()) {
             throw validationResult.error;
         }
 
-        if (typeof sourceAttribute.succeededBy !== "undefined") {
-            const successor = await this.getLocalAttribute(sourceAttribute.succeededBy);
+        if (typeof attribute.succeededBy !== "undefined") {
+            const successor = await this.getLocalAttribute(attribute.succeededBy);
             if (typeof successor === "undefined") {
                 throw CoreErrors.attributes.successorDoesNotExist();
             }
             await this.detachSuccessor(successor);
         }
 
-        const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": sourceAttribute.id.toString() });
-        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(sourceAttribute);
+        const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": attribute.id.toString() });
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(attribute);
         const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
         await this.detachAttributeCopies(attributeCopiesToDetach);
 
-        await this.deletePredecessorsOfAttribute(sourceAttribute.id);
-        await this.deleteAttribute(sourceAttribute);
+        await this.deletePredecessorsOfAttribute(attribute.id);
+        await this.deleteAttribute(attribute);
     }
 
-    public async validateSourceAttributeDeletion(sourceAttribute: LocalAttribute): Promise<ValidationResult> {
-        const validateSuccessorResult = await this.validateSuccessor(sourceAttribute);
+    public async validateFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<ValidationResult> {
+        const validateSuccessorResult = await this.validateSuccessor(attribute);
         if (validateSuccessorResult.isError()) {
             return validateSuccessorResult;
         }
 
-        const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": sourceAttribute.id.toString() });
-        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(sourceAttribute);
+        const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": attribute.id.toString() });
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(attribute);
         const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
 
         const validateSharedAttributesResult = this.validateSharedAttributes(attributeCopiesToDetach);

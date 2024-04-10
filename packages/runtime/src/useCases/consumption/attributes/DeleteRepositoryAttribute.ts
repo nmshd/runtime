@@ -34,12 +34,12 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(CoreId.from(request.attributeId)));
         }
 
-        const validationResult = await this.attributesController.validateSourceAttributeDeletion(repositoryAttribute);
+        const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(repositoryAttribute);
         if (validationResult.isError()) {
             return Result.fail(validationResult.error);
         }
 
-        await this.attributesController.deleteRepositoryAttribute(repositoryAttribute);
+        await this.attributesController.executeFullAttributeDeletionProcess(repositoryAttribute);
 
         await this.accountController.syncDatawallet();
 
