@@ -2176,7 +2176,7 @@ describe("AttributesController", function () {
             );
         });
 
-        test("should throw if a shared identity attribute is queried", async function () {
+        test("should return an empty list if a shared identity attribute is queried", async function () {
             const sharedIdentityAttribute = await consumptionController.attributes.createLocalAttribute({
                 content: IdentityAttribute.from({
                     value: {
@@ -2195,7 +2195,7 @@ describe("AttributesController", function () {
             expect(result).toHaveLength(0);
         });
 
-        test("should throw if a relationship attribute is queried", async function () {
+        test("should return an empty list if a relationship attribute without associated third party relationship attributes is queried", async function () {
             const relationshipAttribute = await consumptionController.attributes.createLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "Some key",
