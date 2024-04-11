@@ -175,7 +175,7 @@ export class RelationshipsController extends TransportController {
 
         const backboneResponse = (
             await this.client.createRelationship({
-                content: requestCipher.toBase64(),
+                creationContent: requestCipher.toBase64(),
                 relationshipTemplateId: template.id.toString()
             })
         ).value;
@@ -255,7 +255,7 @@ export class RelationshipsController extends TransportController {
 
         this._log.trace(`Parsing relationship creation content of ${response.id}...`);
 
-        const creationContent = this.decryptCreationContent(response.creationContent, CoreAddress.from(response.to), relationshipSecretId);
+        const creationContent = this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
         const cachedRelationship = CachedRelationship.from({
             creationContent,
             template: template
@@ -345,7 +345,7 @@ export class RelationshipsController extends TransportController {
         const requestCipher = RelationshipCreationRequestCipher.fromBase64(backboneRelationship.creationContent);
         await this.secrets.createTemplatorSecrets(secretId, template.cache, requestCipher.publicRequestCrypto);
 
-        const requestContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.to), secretId);
+        const requestContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.from), secretId);
         // TODO: transform peer identity from string to identity
         const relationship = Relationship.fromCreationContentReceived(backboneRelationship, template, requestContent.identity, requestContent, secretId);
 
