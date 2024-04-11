@@ -255,7 +255,7 @@ export class RelationshipsController extends TransportController {
 
         this._log.trace(`Parsing relationship creation content of ${response.id}...`);
 
-        const creationContent = this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
+        const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
         const cachedRelationship = CachedRelationship.from({
             creationContent,
             template: template
