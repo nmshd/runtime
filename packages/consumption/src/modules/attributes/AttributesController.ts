@@ -959,30 +959,16 @@ export class AttributesController extends ConsumptionBaseController {
         return attributeVersions;
     }
 
-    public async isAPredecessorOf(probedAttribute: LocalAttribute, referencedAttribute: LocalAttribute): Promise<boolean> {
-        while (referencedAttribute.succeeds) {
-            const predecessor = await this.getLocalAttribute(referencedAttribute.succeeds);
-            if (!predecessor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referencedAttribute.succeeds.toString());
+    public async isSubsequentInSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<boolean> {
+        while (typeof predecessor.succeededBy !== "undefined") {
+            const directSuccessor = await this.getLocalAttribute(predecessor.succeededBy);
+            if (typeof directSuccessor === "undefined") {
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessor.succeededBy.toString());
             }
 
-            if (_.isEqual(predecessor, probedAttribute)) return true;
+            if (predecessor.succeededBy.toString() === successor.id.toString()) return true;
 
-            referencedAttribute = predecessor;
-        }
-        return false;
-    }
-
-    public async isASuccessorOf(probedAttribute: LocalAttribute, referencedAttribute: LocalAttribute): Promise<boolean> {
-        while (referencedAttribute.succeededBy) {
-            const successor = await this.getLocalAttribute(referencedAttribute.succeededBy);
-            if (!successor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referencedAttribute.succeededBy.toString());
-            }
-
-            if (_.isEqual(successor, probedAttribute)) return true;
-
-            referencedAttribute = successor;
+            predecessor = directSuccessor;
         }
         return false;
     }

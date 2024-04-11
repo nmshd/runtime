@@ -62,7 +62,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     throw new Error(`The Attribute ${latestSharedVersion[0].shareInfo.sourceAttribute} was not found.`);
                 }
 
-                if (await this.consumptionController.attributes.isASuccessorOf(latestSharedVersionSourceAttribute, foundAttribute)) {
+                if (await this.consumptionController.attributes.isSubsequentInSuccession(foundAttribute, latestSharedVersionSourceAttribute)) {
                     return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You cannot share the predecessor of an already shared Attribute version."));
                 }
             }
@@ -114,7 +114,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, latestSharedAttribute.shareInfo.sourceAttribute.toString());
             }
 
-            if (await this.consumptionController.attributes.isAPredecessorOf(predecessorSourceAttribute, existingSourceAttribute)) {
+            if (await this.consumptionController.attributes.isSubsequentInSuccession(predecessorSourceAttribute, existingSourceAttribute)) {
                 let successorSharedAttribute: LocalAttribute;
                 if (existingSourceAttribute.isIdentityAttribute()) {
                     successorSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);

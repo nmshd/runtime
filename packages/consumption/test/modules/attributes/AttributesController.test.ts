@@ -1965,7 +1965,7 @@ describe("AttributesController", function () {
             await TestUtil.expectThrowsAsync(consumptionController.attributes.getVersionsOfAttribute(CoreId.from("ATTxxxxxxxxxxxxxxxxx")), "error.transport.recordNotFound");
         });
 
-        test("should check if an attribute is a predecessor of another attribute", async function () {
+        test("should check if two attributes are subsequent in succession", async function () {
             const version0 = await consumptionController.attributes.createLocalAttribute({
                 content: IdentityAttribute.from({
                     value: {
@@ -1997,52 +1997,12 @@ describe("AttributesController", function () {
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedRepositoryAttribute(version0.id, successorParams1);
             const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedRepositoryAttribute(version1.id, successorParams2);
 
-            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion0, updatedVersion1)).toBe(true);
-            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion0, version2)).toBe(true);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion0, updatedVersion1)).toBe(true);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion0, version2)).toBe(true);
 
-            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion0, updatedVersion0)).toBe(false);
-            expect(await consumptionController.attributes.isAPredecessorOf(updatedVersion1, updatedVersion0)).toBe(false);
-            expect(await consumptionController.attributes.isAPredecessorOf(version2, updatedVersion0)).toBe(false);
-        });
-
-        test("should check if an attribute is a successor of another attribute", async function () {
-            const version0 = await consumptionController.attributes.createLocalAttribute({
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "Nationality",
-                        value: "DE"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                })
-            });
-            const successorParams1: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "Nationality",
-                        value: "US"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const successorParams2: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "Nationality",
-                        value: "CZ"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-
-            const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedRepositoryAttribute(version0.id, successorParams1);
-            const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedRepositoryAttribute(version1.id, successorParams2);
-
-            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion1, updatedVersion0)).toBe(true);
-            expect(await consumptionController.attributes.isASuccessorOf(version2, updatedVersion0)).toBe(true);
-
-            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion0, updatedVersion0)).toBe(false);
-            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion0, updatedVersion1)).toBe(false);
-            expect(await consumptionController.attributes.isASuccessorOf(updatedVersion0, version2)).toBe(false);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion0, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion1, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(version2, updatedVersion0)).toBe(false);
         });
     });
 
