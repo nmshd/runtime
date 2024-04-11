@@ -513,10 +513,11 @@ export async function waitForRecipientToReceiveNotification(
 }
 
 /**
- * Creates a repository attribute on sender's side and shares it with
- * recipient, waiting for all communication and event processing to finish.
+ * The owner of a RelationshipAttribute receives a Request of a
+ * peer and forwards them the ThirdPartyRelationshipAttribute,
+ * waiting for all communication and event processing to finish.
  *
- * Returns the sender's own shared identity attribute.
+ * Returns the sender's own shared ThirdPartyRelationshipAttribute.
  */
 export async function executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
     owner: TestRuntimeServices,
