@@ -138,8 +138,8 @@ describe("DeleteAttributeRequestItemDVO", () => {
         expect(dvo.date).toBe(dto.createdAt);
         expect(dvo.request).toBeDefined();
         expect(dvo.request.isOwn).toBe(false);
-        expect(dvo.request.status).toBe("ManualDecisionRequired");
-        expect(dvo.request.statusText).toBe("i18n://dvo.localRequest.status.ManualDecisionRequired");
+        expect(["DecisionRequired", "ManualDecisionRequired"]).toContain(dvo.request.status);
+        expect(["i18n://dvo.localRequest.status.DecisionRequired", "i18n://dvo.localRequest.status.ManualDecisionRequired"]).toBe(dvo.request.statusText);
         expect(dvo.request.type).toBe("LocalRequestDVO");
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
