@@ -577,7 +577,7 @@ export class DataViewExpander {
                         ...deleteAttributeRequestItem,
                         type: "DecidableDeleteAttributeRequestItemDVO",
                         id: "",
-                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableConsentRequestItem.name",
+                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableDeleteAttributeRequestItem.name",
                         isDecidable,
                         response: responseItemDVO,
                         attribute: localAttributeDVOForDelete
@@ -587,7 +587,7 @@ export class DataViewExpander {
                     ...deleteAttributeRequestItem,
                     type: "DeleteAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.ConsentRequestItem.name",
+                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DeleteAttributeRequestItem.name",
                     isDecidable,
                     response: responseItemDVO,
                     attribute: localAttributeDVOForDelete
