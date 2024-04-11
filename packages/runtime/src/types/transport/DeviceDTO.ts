@@ -12,4 +12,5 @@ export interface DeviceDTO {
     type: string;
     username: string;
     isCurrentDevice: boolean;
+    isOffboarded?: boolean;
 }

@@ -18,7 +18,8 @@ import {
     SyncEverythingRequest,
     SyncEverythingResponse,
     SyncEverythingUseCase,
-    SyncInfo
+    SyncInfo,
+    UnregisterPushNotificationTokenUseCase
 } from "../../../useCases";
 
 export class AccountFacade {
@@ -26,6 +27,7 @@ export class AccountFacade {
         @Inject private readonly getIdentityInfoUseCase: GetIdentityInfoUseCase,
         @Inject private readonly getDeviceInfoUseCase: GetDeviceInfoUseCase,
         @Inject private readonly registerPushNotificationTokenUseCase: RegisterPushNotificationTokenUseCase,
+        @Inject private readonly unregisterPushNotificationTokenUseCase: UnregisterPushNotificationTokenUseCase,
         @Inject private readonly syncDatawalletUseCase: SyncDatawalletUseCase,
         @Inject private readonly syncEverythingUseCase: SyncEverythingUseCase,
         @Inject private readonly getSyncInfoUseCase: GetSyncInfoUseCase,
@@ -44,6 +46,10 @@ export class AccountFacade {
 
     public async registerPushNotificationToken(request: RegisterPushNotificationTokenRequest): Promise<Result<void, ApplicationError>> {
         return await this.registerPushNotificationTokenUseCase.execute(request);
+    }
+
+    public async unregisterPushNotificationToken(): Promise<Result<void, ApplicationError>> {
+        return await this.unregisterPushNotificationTokenUseCase.execute();
     }
 
     public async syncDatawallet(request: SyncDatawalletRequest = {}): Promise<Result<void, ApplicationError>> {

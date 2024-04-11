@@ -95,7 +95,6 @@ export * from "./sync/backbone/StartSyncRun";
 export * from "./sync/backbone/SyncClient";
 export * from "./sync/ChangedItems";
 export * from "./sync/DatawalletModificationsProcessor";
-export * from "./sync/ExternalEventsProcessor";
 export * from "./sync/local/DatawalletModification";
 export { SyncProgressCallback as SyncPercentageCallback, SyncStep } from "./sync/SyncCallback";
 export * from "./sync/SyncController";
