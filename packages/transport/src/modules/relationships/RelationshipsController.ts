@@ -59,7 +59,7 @@ export class RelationshipsController extends TransportController {
         const resultItems = (await this.client.getRelationships({ ids })).value;
         const promises = [];
         for await (const resultItem of resultItems) {
-            promises.push(this.updateCacheOfExistingRelationshipInDb(resultItem.id, resultItem));
+            promises.push(this.updateExistingRelationshipInDb(resultItem.id, resultItem));
         }
         return await Promise.all(promises);
     }
@@ -83,13 +83,14 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async updateCacheOfExistingRelationshipInDb(id: string, response?: BackboneGetRelationshipsResponse) {
+    private async updateExistingRelationshipInDb(id: string, response?: BackboneGetRelationshipsResponse) {
         const relationshipDoc = await this.relationships.read(id);
         if (!relationshipDoc) throw CoreErrors.general.recordNotFound(Relationship, id);
 
         const relationship = Relationship.from(relationshipDoc);
 
         await this.updateCacheOfRelationship(relationship, response);
+        relationship.status = response!.status;
         await this.relationships.update(relationshipDoc, relationship);
         return relationship;
     }
