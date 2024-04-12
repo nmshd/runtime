@@ -29,4 +29,11 @@ export class SessionStorage {
 
         this._availableSessions.push(session);
     }
+
+    public removeSession(accountReference: string): void {
+        const session = this.findSession(accountReference);
+        if (!session) return;
+
+        this._availableSessions.splice(this._availableSessions.indexOf(session), 1);
+    }
 }
