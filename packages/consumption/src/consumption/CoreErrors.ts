@@ -217,6 +217,13 @@ class Attributes {
         return new CoreError("error.consumption.attributes.isNotPeerSharedAttribute", `The attribute (id: ${attributeId}) is not a peer shared attribute.`);
     }
 
+    public isNotThirdPartyOwnedRelationshipAttribute(attributeId: string | CoreId) {
+        return new CoreError(
+            "error.consumption.attributes.isNotThirdPartyOwnedRelationshipAttribute",
+            `The attribute (id: ${attributeId}) is not a third party owned RelationshipAttribute.`
+        );
+    }
+
     public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.senderIsNotPeerOfSharedAttribute",

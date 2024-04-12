@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
-import { Notification } from "@nmshd/content";
+import { Notification, ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { AccountController, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
