@@ -17,7 +17,7 @@ class Validator extends SchemaValidator<DeletePeerSharedAttributeAndNotifyOwnerR
 
 export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<DeletePeerSharedAttributeAndNotifyOwnerRequest, Notification> {
     public constructor(
-        @Inject private readonly attributeController: AttributesController,
+        @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly messageController: MessageController,
         @Inject validator: Validator
@@ -27,7 +27,7 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
 
     protected async executeInternal(request: DeletePeerSharedAttributeAndNotifyOwnerRequest): Promise<Result<Notification>> {
         const peerSharedAttributeId = CoreId.from(request.attributeId);
-        const peerSharedAttribute = await this.attributeController.getLocalAttribute(peerSharedAttributeId);
+        const peerSharedAttribute = await this.attributesController.getLocalAttribute(peerSharedAttributeId);
 
         if (typeof peerSharedAttribute === "undefined") {
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
@@ -37,21 +37,12 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
             return Result.fail(RuntimeErrors.attributes.isNotPeerSharedAttribute(peerSharedAttributeId));
         }
 
-        if (typeof peerSharedAttribute.succeededBy !== "undefined") {
-            const successor = await this.attributeController.getLocalAttribute(peerSharedAttribute.succeededBy);
-            if (typeof successor === "undefined") {
-                throw new Error(`The Attribute ${peerSharedAttribute.succeededBy} was not found, even though it is specified as successor of Attribute ${peerSharedAttribute.id}.`);
-            }
-
-            successor.succeeds = undefined;
-            await this.attributeController.updateAttributeUnsafe(successor);
+        const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(peerSharedAttribute);
+        if (validationResult.isError()) {
+            return Result.fail(validationResult.error);
         }
 
-        const predecessors = await this.attributeController.getPredecessorsOfAttribute(peerSharedAttributeId);
-
-        for (const attr of [peerSharedAttribute, ...predecessors]) {
-            await this.attributeController.deleteAttribute(attr);
-        }
+        await this.attributesController.executeFullAttributeDeletionProcess(peerSharedAttribute);
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({ attributeId: peerSharedAttributeId });
