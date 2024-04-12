@@ -2,7 +2,9 @@ import { RequestItemDVO } from "../content";
 import { DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "../content/AttributeDVOs";
 import { LocalAttributeDVO, ProcessedAttributeQueryDVO } from "./LocalAttributeDVO";
 
-export interface DecidableRequestItemDVO extends RequestItemDVO {}
+export interface DecidableRequestItemDVO extends RequestItemDVO {
+    isDecidable: true;
+}
 
 export interface DecidableReadAttributeRequestItemDVO extends DecidableRequestItemDVO {
     type: "DecidableReadAttributeRequestItemDVO";
