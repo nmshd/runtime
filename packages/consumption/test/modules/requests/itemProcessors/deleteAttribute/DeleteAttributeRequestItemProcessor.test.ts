@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    AcceptResponseItem,
     DeleteAttributeAcceptResponseItem,
     DeleteAttributeRequestItem,
     IdentityAttribute,
@@ -320,10 +321,55 @@ describe("DeleteAttributeRequestItemProcessor", function () {
     });
 
     describe("canAccept", function () {
-        test("returns success when called with a valid date in the future", async function () {
+        test("returns success when called with any deletionDate if Attribute doesn't exist", async function () {
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attributeId: CoreId.from("ATT12345678901234567")
+                attributeId: await CoreId.generate()
+            });
+
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: peerAddress,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const freeTextDeletionDate = "I deleted the Attribute already";
+            const acceptParams: AcceptDeleteAttributeRequestItemParametersJSON = {
+                accept: true,
+                deletionDate: freeTextDeletionDate
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).successfulValidationResult();
+        });
+
+        test("returns success when called with a valid date in the future", async function () {
+            const rPSIA = await consumptionController.attributes.createAttributeUnsafe({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "BirthName",
+                        value: "Schenkel"
+                    },
+                    owner: peerAddress
+                }),
+                shareInfo: {
+                    peer: peerAddress,
+                    requestReference: CoreId.from("reqRef")
+                }
+            });
+
+            const requestItem = DeleteAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attributeId: rPSIA.id
             });
 
             const requestId = await ConsumptionIds.request.generate();
@@ -346,15 +392,29 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 deletionDate: dateInFuture.toString()
             };
 
-            const result = processor.canAccept(requestItem, acceptParams, request);
+            const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).successfulValidationResult();
         });
 
         test("returns an error when called with a valid date in the past", async function () {
+            const rPSIA = await consumptionController.attributes.createAttributeUnsafe({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "BirthName",
+                        value: "Schenkel"
+                    },
+                    owner: peerAddress
+                }),
+                shareInfo: {
+                    peer: peerAddress,
+                    requestReference: CoreId.from("reqRef")
+                }
+            });
+
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attributeId: CoreId.from("ATT12345678901234567")
+                attributeId: rPSIA.id
             });
 
             const requestId = await ConsumptionIds.request.generate();
@@ -377,7 +437,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 deletionDate: dateInPast.toString()
             };
 
-            const result = processor.canAccept(requestItem, acceptParams, request);
+            const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters"
@@ -385,9 +445,23 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when called with an invalid date", async function () {
+            const rPSIA = await consumptionController.attributes.createAttributeUnsafe({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "BirthName",
+                        value: "Schenkel"
+                    },
+                    owner: peerAddress
+                }),
+                shareInfo: {
+                    peer: peerAddress,
+                    requestReference: CoreId.from("reqRef")
+                }
+            });
+
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attributeId: CoreId.from("ATT12345678901234567")
+                attributeId: rPSIA.id
             });
 
             const requestId = await ConsumptionIds.request.generate();
@@ -410,7 +484,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 deletionDate: invalidDate
             };
 
-            const result = processor.canAccept(requestItem, acceptParams, request);
+            const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters"
@@ -464,7 +538,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             expect(responseItem).toBeDefined();
             expect(responseItem).toBeInstanceOf(DeleteAttributeAcceptResponseItem);
             expect(responseItem.result).toStrictEqual(ResponseItemResult.Accepted);
-            expect(responseItem.deletionDate).toStrictEqual(dateInFuture);
+            expect((responseItem as DeleteAttributeAcceptResponseItem).deletionDate).toStrictEqual(dateInFuture);
         });
 
         test("sets the deletionInfo of a peer shared Identity Attribute", async function () {
@@ -564,6 +638,38 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             expect(updatedRPSRA!.deletionInfo).toBeDefined();
             expect(updatedRPSRA!.deletionInfo!.deletionStatus).toStrictEqual(DeletionStatus.ToBeDeleted);
             expect(updatedRPSRA!.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
+        });
+
+        test("returns an AcceptResponseItem", async function () {
+            const requestItem = DeleteAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attributeId: (await CoreId.generate()).toString()
+            });
+
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: peerAddress,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const dateInFuture = CoreDate.utc().add({ days: 1 });
+            const acceptParams: AcceptDeleteAttributeRequestItemParametersJSON = {
+                accept: true,
+                deletionDate: dateInFuture.toString()
+            };
+
+            const responseItem = await processor.accept(requestItem, acceptParams, incomingRequest);
+
+            expect(responseItem).toBeDefined();
+            expect(responseItem).toBeInstanceOf(AcceptResponseItem);
         });
     });
 
