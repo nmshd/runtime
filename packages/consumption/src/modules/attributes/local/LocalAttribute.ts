@@ -55,6 +55,11 @@ export type PeerSharedRelationshipAttribute = LocalAttribute & {
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
 };
 
+export type ThirdPartyOwnedRelationshipAttribute = LocalAttribute & {
+    content: RelationshipAttribute;
+    shareInfo: LocalAttributeShareInfo & { sourceAttribute: CoreId };
+};
+
 export type RepositoryAttribute = LocalAttribute & {
     content: IdentityAttribute;
     shareInfo: undefined;
@@ -119,6 +124,10 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return this.isRelationshipAttribute() && this.isPeerSharedAttribute(peerAddress);
     }
 
+    public isThirdPartyOwnedRelationshipAttribute(ownAddress: CoreAddress, thirdPartyAddress?: CoreAddress): this is ThirdPartyOwnedRelationshipAttribute {
+        return this.isRelationshipAttribute() && this.isThirdPartyOwnedAttribute(ownAddress, thirdPartyAddress);
+    }
+
     public isRepositoryAttribute(ownAddress: CoreAddress): this is RepositoryAttribute {
         return this.isIdentityAttribute() && !this.isShared() && this.isOwnedBy(ownAddress);
     }
@@ -151,14 +160,26 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return isPeerSharedAttribute;
     }
 
+    public isThirdPartyOwnedAttribute(ownAddress: CoreAddress, thirdPartyAddress?: CoreAddress): this is ThirdPartyOwnedRelationshipAttribute {
+        let isThirdPartyOwnedAttribute = this.isShared() && !this.isOwnedBy(ownAddress) && !this.isOwnedBy(this.shareInfo.peer);
+        if (!isThirdPartyOwnedAttribute) {
+            return isThirdPartyOwnedAttribute;
+        }
+
+        if (typeof thirdPartyAddress !== "undefined") {
+            isThirdPartyOwnedAttribute &&= this.isOwnedBy(thirdPartyAddress);
+        }
+        return isThirdPartyOwnedAttribute;
+    }
+
     public isIdentityAttribute(): this is LocalAttribute & { content: IdentityAttribute } {
         return this.content instanceof IdentityAttribute;
     }
 
     public isRelationshipAttribute(): this is LocalAttribute & { content: RelationshipAttribute } & {
-        shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
+        shareInfo: LocalAttributeShareInfo;
     } {
-        return this.content instanceof RelationshipAttribute && this.isShared() && typeof this.shareInfo.sourceAttribute === "undefined";
+        return this.content instanceof RelationshipAttribute && this.isShared();
     }
 
     public isComplexAttribute(): boolean {
