@@ -5,6 +5,8 @@ import {
     ConsentRequestItemJSON,
     CreateAttributeAcceptResponseItemJSON,
     CreateAttributeRequestItemJSON,
+    DeleteAttributeAcceptResponseItemJSON,
+    DeleteAttributeRequestItemJSON,
     DisplayNameJSON,
     ErrorResponseItemJSON,
     FreeTextRequestItemJSON,
@@ -51,6 +53,7 @@ import {
     AuthenticationRequestItemDVO,
     ConsentRequestItemDVO,
     CreateAttributeRequestItemDVO,
+    DeleteAttributeRequestItemDVO,
     DVOError,
     FileDVO,
     FreeTextRequestItemDVO,
@@ -102,6 +105,7 @@ import {
     DecidableAuthenticationRequestItemDVO,
     DecidableConsentRequestItemDVO,
     DecidableCreateAttributeRequestItemDVO,
+    DecidableDeleteAttributeRequestItemDVO,
     DecidableFreeTextRequestItemDVO,
     DecidableProposeAttributeRequestItemDVO,
     DecidableReadAttributeRequestItemDVO,
@@ -122,6 +126,7 @@ import { MailDVO, RequestMessageDVO } from "./content/MailDVOs";
 import { RequestDVO } from "./content/RequestDVO";
 import {
     CreateAttributeAcceptResponseItemDVO,
+    DeleteAttributeAcceptResponseItemDVO,
     ErrorResponseItemDVO,
     ProposeAttributeAcceptResponseItemDVO,
     ReadAttributeAcceptResponseItemDVO,
@@ -562,6 +567,32 @@ export class DataViewExpander {
                     response: responseItemDVO
                 } as CreateAttributeRequestItemDVO;
 
+            case "DeleteAttributeRequestItem":
+                const deleteAttributeRequestItem = requestItem as DeleteAttributeRequestItemJSON;
+                const localAttributeResultForDelete = await this.consumption.attributes.getAttribute({ id: deleteAttributeRequestItem.attributeId });
+                const localAttributeDVOForDelete = await this.expandLocalAttributeDTO(localAttributeResultForDelete.value);
+
+                if (isDecidable) {
+                    return {
+                        ...deleteAttributeRequestItem,
+                        type: "DecidableDeleteAttributeRequestItemDVO",
+                        id: "",
+                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableDeleteAttributeRequestItem.name",
+                        isDecidable,
+                        response: responseItemDVO,
+                        attribute: localAttributeDVOForDelete
+                    } as DecidableDeleteAttributeRequestItemDVO;
+                }
+                return {
+                    ...deleteAttributeRequestItem,
+                    type: "DeleteAttributeRequestItemDVO",
+                    id: "",
+                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DeleteAttributeRequestItem.name",
+                    isDecidable,
+                    response: responseItemDVO,
+                    attribute: localAttributeDVOForDelete
+                } as DeleteAttributeRequestItemDVO;
+
             case "ProposeAttributeRequestItem":
                 const proposeAttributeRequestItem = requestItem as ProposeAttributeRequestItemJSON;
                 if (localRequestDTO) {
@@ -796,6 +827,16 @@ export class DataViewExpander {
                         name: name,
                         attribute: localAttributeDVOForCreate
                     } as CreateAttributeAcceptResponseItemDVO;
+
+                case "DeleteAttributeAcceptResponseItem":
+                    const deleteAttributeResponseItem = responseItem as DeleteAttributeAcceptResponseItemJSON;
+
+                    return {
+                        ...deleteAttributeResponseItem,
+                        type: "DeleteAttributeAcceptResponseItemDVO",
+                        id: "",
+                        name: name
+                    } as DeleteAttributeAcceptResponseItemDVO;
 
                 case "ProposeAttributeAcceptResponseItem":
                     const proposeAttributeResponseItem = responseItem as ProposeAttributeAcceptResponseItemJSON;
