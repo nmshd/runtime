@@ -44,7 +44,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const ownerIsCurrentIdentity = this.accountController.identity.isMe(foundAttribute.content.owner);
             if (!ownerIsCurrentIdentity && foundAttribute.content instanceof IdentityAttribute) {
-                return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The given Attribute belongs to someone else. You can only share own Attributes."));
+                return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The given Attribute belongs to someone else. You can only share own Attributes."));
             }
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
@@ -63,7 +63,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 }
 
                 if (await this.consumptionController.attributes.isSubsequentInSuccession(foundAttribute, latestSharedVersionSourceAttribute)) {
-                    return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You cannot share the predecessor of an already shared Attribute version."));
+                    return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("You cannot share the predecessor of an already shared Attribute version."));
                 }
             }
         }
