@@ -1767,10 +1767,10 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "ProprietaryString",
-                        value: "My amazing string",
-                        title: "Nothing is this amazing"
+                        value: "A proprietary string",
+                        title: "A title"
                     },
-                    key: "amazing",
+                    key: "A key",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             });
@@ -1780,7 +1780,7 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     items: [
                         ReadAttributeRequestItem.from({
-                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "amazing", owner: services3.address, thirdParty: [services3.address] }),
+                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "A key", owner: services3.address, thirdParty: [services3.address] }),
                             mustBeAccepted: true
                         }).toJSON()
                     ]
@@ -1795,7 +1795,7 @@ describe("DeleteAttributeUseCases", () => {
             );
         });
 
-        test("should delete a third party owned RelationshipAttribute as the sender", async () => {
+        test("should delete a third party owned RelationshipAttribute as the sender of it", async () => {
             const senderThirdPartyOwnedRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: thirdPartyOwnedRelationshipAttribute.id })).value;
             expect(senderThirdPartyOwnedRelationshipAttribute).toBeDefined();
 
@@ -1808,7 +1808,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
-        test("should delete a third party owned RelationshipAttribute as the recipient", async () => {
+        test("should delete a third party owned RelationshipAttribute as the recipient of it", async () => {
             const recipientThirdPartyOwnedRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: thirdPartyOwnedRelationshipAttribute.id })).value;
             expect(recipientThirdPartyOwnedRelationshipAttribute).toBeDefined();
 
@@ -1821,7 +1821,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
-        test("should notify about third party owned RelationshipAttribute as the sender", async () => {
+        test("should notify about third party owned RelationshipAttribute as the sender of it", async () => {
             const notification = (
                 await services1.consumption.attributes.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer({ attributeId: thirdPartyOwnedRelationshipAttribute.id })
             ).value;
@@ -1840,7 +1840,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(CoreDate.from(updatedAttribute.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
         });
 
-        test("should notify about third party owned RelationshipAttribute as the recipient", async () => {
+        test("should notify about third party owned RelationshipAttribute as the recipient of it", async () => {
             const notification = (
                 await services2.consumption.attributes.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer({ attributeId: thirdPartyOwnedRelationshipAttribute.id })
             ).value;

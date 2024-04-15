@@ -1,11 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import {
-    Notification,
-    PeerSharedAttributeDeletedByPeerNotificationItem,
-    RelationshipAttribute,
-    RelationshipAttributeConfidentiality,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem
-} from "@nmshd/content";
+import { Notification, RelationshipAttribute, RelationshipAttributeConfidentiality, ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
@@ -77,7 +71,7 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
             }
         });
 
-        const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({
+        const notificationItem = ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem.from({
             attributeId: thirdPartyOwnedRelationshipAttribute.id
         });
         const notification = LocalNotification.from({

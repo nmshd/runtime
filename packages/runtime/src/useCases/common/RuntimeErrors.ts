@@ -181,8 +181,11 @@ class Attributes {
         return new ApplicationError("error.runtime.attributes.isNotPeerSharedAttribute", `Attribute '${attributeId.toString()}' is not a peer shared attribute.`);
     }
 
-    public isNotThirdPartyOwnedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotThirdPartyOwnedAttribute", `Attribute '${attributeId.toString()}' is not a third party owned attribute.`);
+    public isNotThirdPartyOwnedRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.isNotThirdPartyOwnedRelationshipAttribute",
+            `Attribute '${attributeId.toString()}' is not a third party owned relationship attribute.`
+        );
     }
 }
 

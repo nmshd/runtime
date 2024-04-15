@@ -34,7 +34,7 @@ export class DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase exte
         }
 
         if (!thirdPartyOwnedRelationshipAttribute.isThirdPartyOwnedAttribute(this.accountController.identity.address)) {
-            return Result.fail(RuntimeErrors.attributes.isNotThirdPartyOwnedAttribute(thirdPartyOwnedRelationshipAttributeId));
+            return Result.fail(RuntimeErrors.attributes.isNotThirdPartyOwnedRelationshipAttribute(thirdPartyOwnedRelationshipAttributeId));
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(thirdPartyOwnedRelationshipAttribute);

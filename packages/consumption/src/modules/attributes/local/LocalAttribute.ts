@@ -57,7 +57,7 @@ export type PeerSharedRelationshipAttribute = LocalAttribute & {
 
 export type ThirdPartyOwnedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
-    shareInfo: LocalAttributeShareInfo & { sourceAttribute: CoreId };
+    shareInfo: LocalAttributeShareInfo;
 };
 
 export type RepositoryAttribute = LocalAttribute & {
