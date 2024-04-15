@@ -13,6 +13,8 @@ import {
     DeletePeerSharedAttributeAndNotifyOwnerUseCase,
     DeleteRepositoryAttributeRequest,
     DeleteRepositoryAttributeUseCase,
+    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest,
+    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
     ExecuteIdentityAttributeQueryRequest,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteIQLQueryRequest,
@@ -73,6 +75,7 @@ export class AttributesFacade {
         @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
         @Inject private readonly deleteOwnSharedAttributeAndNotifyPeerUseCase: DeleteOwnSharedAttributeAndNotifyPeerUseCase,
         @Inject private readonly deletePeerSharedAttributeAndNotifyOwnerUseCase: DeletePeerSharedAttributeAndNotifyOwnerUseCase,
+        @Inject private readonly deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase
     ) {}
 
@@ -158,6 +161,10 @@ export class AttributesFacade {
 
     public async deletePeerSharedAttributeAndNotifyOwner(request: DeletePeerSharedAttributeAndNotifyOwnerRequest): Promise<Result<Notification>> {
         return await this.deletePeerSharedAttributeAndNotifyOwnerUseCase.execute(request);
+    }
+
+    public async deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer(request: DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest): Promise<Result<Notification>> {
+        return await this.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase.execute(request);
     }
 
     public async deleteRepositoryAttribute(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {

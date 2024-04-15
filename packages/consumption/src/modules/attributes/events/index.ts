@@ -7,3 +7,4 @@ export * from "./PeerSharedAttributeDeletedByPeerEvent";
 export * from "./PeerSharedAttributeSucceededEvent";
 export * from "./RepositoryAttributeSucceededEvent";
 export * from "./SharedAttributeCopyCreatedEvent";
+export * from "./ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent";

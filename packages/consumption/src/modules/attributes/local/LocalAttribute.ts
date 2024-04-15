@@ -55,6 +55,11 @@ export type PeerSharedRelationshipAttribute = LocalAttribute & {
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
 };
 
+export type ThirdPartyOwnedRelationshipAttribute = LocalAttribute & {
+    content: RelationshipAttribute;
+    shareInfo: LocalAttributeShareInfo;
+};
+
 export type RepositoryAttribute = LocalAttribute & {
     content: IdentityAttribute;
     shareInfo: undefined;
@@ -119,15 +124,16 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return this.isRelationshipAttribute() && this.isPeerSharedAttribute(peerAddress);
     }
 
+    public isThirdPartyOwnedRelationshipAttribute(ownAddress: CoreAddress, thirdPartyAddress?: CoreAddress): this is ThirdPartyOwnedRelationshipAttribute {
+        return this.isRelationshipAttribute() && this.isThirdPartyOwnedAttribute(ownAddress, thirdPartyAddress);
+    }
+
     public isRepositoryAttribute(ownAddress: CoreAddress): this is RepositoryAttribute {
         return this.isIdentityAttribute() && !this.isShared() && this.isOwnedBy(ownAddress);
     }
 
     public isOwnSharedAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute | OwnSharedRelationshipAttribute {
         let isOwnSharedAttribute = this.isShared() && this.isOwnedBy(ownAddress);
-        if (!isOwnSharedAttribute) {
-            return isOwnSharedAttribute;
-        }
 
         if (typeof peerAddress !== "undefined") {
             isOwnSharedAttribute &&= this.shareInfo!.peer.equals(peerAddress);
@@ -137,13 +143,8 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
     public isPeerSharedAttribute(peerAddress?: CoreAddress): this is PeerSharedIdentityAttribute | PeerSharedRelationshipAttribute {
         let isPeerSharedAttribute = this.isShared() && this.isOwnedBy(this.shareInfo.peer);
-        if (!isPeerSharedAttribute) {
-            return isPeerSharedAttribute;
-        }
 
-        if (this.isIdentityAttribute()) {
-            isPeerSharedAttribute &&= typeof this.shareInfo!.sourceAttribute === "undefined";
-        }
+        isPeerSharedAttribute &&= typeof this.shareInfo!.sourceAttribute === "undefined";
 
         if (typeof peerAddress !== "undefined") {
             isPeerSharedAttribute &&= this.isOwnedBy(peerAddress);
@@ -151,14 +152,23 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return isPeerSharedAttribute;
     }
 
+    public isThirdPartyOwnedAttribute(ownAddress: CoreAddress, thirdPartyAddress?: CoreAddress): this is ThirdPartyOwnedRelationshipAttribute {
+        let isThirdPartyOwnedAttribute = this.isShared() && !this.isOwnedBy(ownAddress) && !this.isOwnedBy(this.shareInfo.peer);
+
+        if (typeof thirdPartyAddress !== "undefined") {
+            isThirdPartyOwnedAttribute &&= this.isOwnedBy(thirdPartyAddress);
+        }
+        return isThirdPartyOwnedAttribute;
+    }
+
     public isIdentityAttribute(): this is LocalAttribute & { content: IdentityAttribute } {
         return this.content instanceof IdentityAttribute;
     }
 
     public isRelationshipAttribute(): this is LocalAttribute & { content: RelationshipAttribute } & {
-        shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
+        shareInfo: LocalAttributeShareInfo;
     } {
-        return this.content instanceof RelationshipAttribute && this.isShared() && typeof this.shareInfo.sourceAttribute === "undefined";
+        return this.content instanceof RelationshipAttribute && this.isShared();
     }
 
     public isComplexAttribute(): boolean {

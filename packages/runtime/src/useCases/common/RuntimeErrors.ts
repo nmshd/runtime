@@ -173,12 +173,19 @@ class Attributes {
         );
     }
 
+    public isNotOwnSharedAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared attribute.`);
+    }
+
     public isNotPeerSharedAttribute(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError("error.runtime.attributes.isNotPeerSharedAttribute", `Attribute '${attributeId.toString()}' is not a peer shared attribute.`);
     }
 
-    public isNotOwnSharedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared attribute.`);
+    public isNotThirdPartyOwnedRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.isNotThirdPartyOwnedRelationshipAttribute",
+            `Attribute '${attributeId.toString()}' is not a third party owned relationship attribute.`
+        );
     }
 }
 

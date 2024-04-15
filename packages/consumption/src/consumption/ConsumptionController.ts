@@ -10,7 +10,8 @@ import {
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
     RegisterAttributeListenerRequestItem,
-    ShareAttributeRequestItem
+    ShareAttributeRequestItem,
+    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem
 } from "@nmshd/content";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
@@ -37,7 +38,8 @@ import {
     RequestItemProcessorConstructor,
     RequestItemProcessorRegistry,
     SettingsController,
-    ShareAttributeRequestItemProcessor
+    ShareAttributeRequestItemProcessor,
+    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor
 } from "../modules";
 
 export class ConsumptionController {
@@ -146,8 +148,9 @@ export class ConsumptionController {
     private getDefaultNotificationItemProcessors() {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
             [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
+            [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor],
             [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
-            [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor]
+            [ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor]
         ]);
     }
 }

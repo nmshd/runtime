@@ -20,6 +20,7 @@ import {
     DeleteOwnSharedAttributeAndNotifyPeerUseCase,
     DeletePeerSharedAttributeAndNotifyOwnerUseCase,
     DeleteRepositoryAttributeUseCase,
+    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryUseCase,
     GetAttributesUseCase,
@@ -38,7 +39,8 @@ import {
     ShareRepositoryAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerUseCase,
     SucceedRepositoryAttributeRequest,
-    SucceedRepositoryAttributeUseCase
+    SucceedRepositoryAttributeUseCase,
+    ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent
 } from "../../src";
 import {
     acceptIncomingShareAttributeRequest,
@@ -1671,7 +1673,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(getDeletedPredecessorResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
-        test("should remove 'shareInfo.sourceAttribute' from peer shared third party relationship attribute copies of a deleted repository attribute", async () => {
+        test("should remove 'shareInfo.sourceAttribute' from third party relationship attribute copies of a deleted relationship attribute", async () => {
             const peerSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services3, services1, {
                 content: {
                     value: {
@@ -1696,7 +1698,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            const peerSharedThirdPartyRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+            const thirdPartyOwnedRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
                 services1,
                 services2,
                 requestParams,
@@ -1705,13 +1707,13 @@ describe("DeleteAttributeUseCases", () => {
 
             await services1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: peerSharedRelationshipAttribute.id });
 
-            const updatedPeerSharedThirdPartyRelationshipAttributeResult = await services1.consumption.attributes.getAttribute({
-                id: peerSharedThirdPartyRelationshipAttribute.id
+            const updatedThirdPartyOwnedRelationshipAttributeResult = await services1.consumption.attributes.getAttribute({
+                id: thirdPartyOwnedRelationshipAttribute.id
             });
-            expect(updatedPeerSharedThirdPartyRelationshipAttributeResult.isSuccess).toBe(true);
-            const updatedPeerSharedThirdPartyRelationshipAttribute = updatedPeerSharedThirdPartyRelationshipAttributeResult.value;
-            expect(updatedPeerSharedThirdPartyRelationshipAttribute.shareInfo).toBeDefined();
-            expect(updatedPeerSharedThirdPartyRelationshipAttribute.shareInfo!.sourceAttribute).toBeUndefined();
+            expect(updatedThirdPartyOwnedRelationshipAttributeResult.isSuccess).toBe(true);
+            const updatedThirdPartyOwnedRelationshipAttribute = updatedThirdPartyOwnedRelationshipAttributeResult.value;
+            expect(updatedThirdPartyOwnedRelationshipAttribute.shareInfo).toBeDefined();
+            expect(updatedThirdPartyOwnedRelationshipAttribute.shareInfo!.sourceAttribute).toBeUndefined();
         });
 
         test("should set the 'succeeds' property of the peer shared identity attribute successor to undefined", async () => {
@@ -1754,6 +1756,107 @@ describe("DeleteAttributeUseCases", () => {
             const updatedPredecessor = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.id })).value;
             expect(updatedPredecessor.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
             expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+        });
+    });
+
+    describe(DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
+        let peerSharedRelationshipAttribute: LocalAttributeDTO;
+        let thirdPartyOwnedRelationshipAttribute: LocalAttributeDTO;
+        beforeEach(async () => {
+            peerSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services3, services1, {
+                content: {
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "A proprietary string",
+                        title: "A title"
+                    },
+                    key: "A key",
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }
+            });
+
+            const requestParams = {
+                peer: services1.address,
+                content: {
+                    items: [
+                        ReadAttributeRequestItem.from({
+                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "A key", owner: services3.address, thirdParty: [services3.address] }),
+                            mustBeAccepted: true
+                        }).toJSON()
+                    ]
+                }
+            };
+
+            thirdPartyOwnedRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+                services1,
+                services2,
+                requestParams,
+                peerSharedRelationshipAttribute.id
+            );
+        });
+
+        test("should delete a third party owned RelationshipAttribute as the sender of it", async () => {
+            const senderThirdPartyOwnedRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: thirdPartyOwnedRelationshipAttribute.id })).value;
+            expect(senderThirdPartyOwnedRelationshipAttribute).toBeDefined();
+
+            const deletionResult = await services1.consumption.attributes.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer({
+                attributeId: senderThirdPartyOwnedRelationshipAttribute.id
+            });
+            expect(deletionResult.isSuccess).toBe(true);
+
+            const getDeletedAttributeResult = await services1.consumption.attributes.getAttribute({ id: senderThirdPartyOwnedRelationshipAttribute.id });
+            expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("should delete a third party owned RelationshipAttribute as the recipient of it", async () => {
+            const recipientThirdPartyOwnedRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: thirdPartyOwnedRelationshipAttribute.id })).value;
+            expect(recipientThirdPartyOwnedRelationshipAttribute).toBeDefined();
+
+            const deletionResult = await services2.consumption.attributes.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer({
+                attributeId: recipientThirdPartyOwnedRelationshipAttribute.id
+            });
+            expect(deletionResult.isSuccess).toBe(true);
+
+            const getDeletedAttributeResult = await services2.consumption.attributes.getAttribute({ id: recipientThirdPartyOwnedRelationshipAttribute.id });
+            expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("should notify about third party owned RelationshipAttribute as the sender of it", async () => {
+            const notification = (
+                await services1.consumption.attributes.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer({ attributeId: thirdPartyOwnedRelationshipAttribute.id })
+            ).value;
+            const timeBeforeUpdate = CoreDate.utc();
+            await syncUntilHasMessageWithNotification(services2.transport, notification.id);
+            await services2.eventBus.waitForEvent(ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent, (e) => {
+                return e.data.id.toString() === thirdPartyOwnedRelationshipAttribute.id;
+            });
+
+            const timeAfterUpdate = CoreDate.utc();
+
+            const result = await services2.consumption.attributes.getAttribute({ id: thirdPartyOwnedRelationshipAttribute.id });
+            expect(result.isSuccess).toBe(true);
+            const updatedAttribute = result.value;
+            expect(updatedAttribute.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
+            expect(CoreDate.from(updatedAttribute.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+        });
+
+        test("should notify about third party owned RelationshipAttribute as the recipient of it", async () => {
+            const notification = (
+                await services2.consumption.attributes.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer({ attributeId: thirdPartyOwnedRelationshipAttribute.id })
+            ).value;
+            const timeBeforeUpdate = CoreDate.utc();
+            await syncUntilHasMessageWithNotification(services1.transport, notification.id);
+            await services1.eventBus.waitForEvent(ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent, (e) => {
+                return e.data.id.toString() === thirdPartyOwnedRelationshipAttribute.id;
+            });
+
+            const timeAfterUpdate = CoreDate.utc();
+
+            const result = await services1.consumption.attributes.getAttribute({ id: thirdPartyOwnedRelationshipAttribute.id });
+            expect(result.isSuccess).toBe(true);
+            const updatedAttribute = result.value;
+            expect(updatedAttribute.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
+            expect(CoreDate.from(updatedAttribute.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
         });
     });
 });
