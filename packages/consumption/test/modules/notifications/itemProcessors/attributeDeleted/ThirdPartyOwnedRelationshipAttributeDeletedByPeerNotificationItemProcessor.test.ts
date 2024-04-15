@@ -148,9 +148,9 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
 
     test("detects spoofing attempts", async function () {
         /* A naughty peer is trying to delete attributes shared
-         * not with him, but with another peer. This must be
+         * not with them, but with another peer. This must be
          * caught by the validation. */
-        const differentThirdPartyOwnedRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+        const thirdPartyOwnedRelationshipAttributeSharedWithOtherPeer = await consumptionController.attributes.createAttributeUnsafe({
             content: RelationshipAttribute.from({
                 key: "customerId",
                 value: {
@@ -168,7 +168,7 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
         });
 
         const notificationItem = ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem.from({
-            attributeId: differentThirdPartyOwnedRelationshipAttribute.id
+            attributeId: thirdPartyOwnedRelationshipAttributeSharedWithOtherPeer.id
         });
 
         const notification = LocalNotification.from({
