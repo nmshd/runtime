@@ -24,7 +24,6 @@ export interface GetOrLoadFileViaSecretRequest {
      * @minLength 10
      */
     secretKey: string;
-    ephemeral?: boolean;
 }
 
 /**
@@ -32,7 +31,6 @@ export interface GetOrLoadFileViaSecretRequest {
  */
 export interface GetOrLoadFileViaReferenceRequest {
     reference: TokenReferenceString | FileReferenceString;
-    ephemeral?: boolean;
 }
 
 export type GetOrLoadFileRequest = GetOrLoadFileViaSecretRequest | GetOrLoadFileViaReferenceRequest;
@@ -89,9 +87,9 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
 
         if (isViaSecret(request)) {
             const key = CryptoSecretKey.fromBase64(request.secretKey);
-            createdFileResult = await this.loadFile(CoreId.from(request.id), key, request.ephemeral);
+            createdFileResult = await this.loadFile(CoreId.from(request.id), key);
         } else if (isViaReference(request)) {
-            createdFileResult = await this.loadFileFromReference(request.reference, request.ephemeral);
+            createdFileResult = await this.loadFileFromReference(request.reference);
         } else {
             throw new Error("Invalid request format.");
         }
@@ -101,24 +99,24 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         return createdFileResult;
     }
 
-    private async loadFileFromReference(reference: string, ephemeral?: boolean): Promise<Result<FileDTO>> {
+    private async loadFileFromReference(reference: string): Promise<Result<FileDTO>> {
         if (reference.startsWith(Base64ForIdPrefix.File)) {
-            return await this.loadFileFromFileReference(reference, ephemeral);
+            return await this.loadFileFromFileReference(reference);
         }
 
         if (reference.startsWith(Base64ForIdPrefix.Token)) {
-            return await this.loadFileFromTokenReference(reference, ephemeral);
+            return await this.loadFileFromTokenReference(reference);
         }
 
         throw RuntimeErrors.files.invalidReference(reference);
     }
 
-    private async loadFileFromFileReference(truncatedReference: string, ephemeral?: boolean): Promise<Result<FileDTO>> {
-        const file = await this.fileController.getOrLoadFileByTruncated(truncatedReference, ephemeral);
+    private async loadFileFromFileReference(truncatedReference: string): Promise<Result<FileDTO>> {
+        const file = await this.fileController.getOrLoadFileByTruncated(truncatedReference);
         return Result.ok(FileMapper.toFileDTO(file));
     }
 
-    private async loadFileFromTokenReference(truncatedReference: string, ephemeral?: boolean): Promise<Result<FileDTO>> {
+    private async loadFileFromTokenReference(truncatedReference: string): Promise<Result<FileDTO>> {
         const token = await this.tokenController.loadPeerTokenByTruncated(truncatedReference, true);
 
         if (!token.cache) {
@@ -130,11 +128,11 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         }
 
         const content = token.cache.content;
-        return await this.loadFile(content.fileId, content.secretKey, ephemeral);
+        return await this.loadFile(content.fileId, content.secretKey);
     }
 
-    private async loadFile(id: CoreId, key: CryptoSecretKey, ephemeral?: boolean): Promise<Result<FileDTO>> {
-        const file = await this.fileController.getOrLoadFile(id, key, ephemeral);
+    private async loadFile(id: CoreId, key: CryptoSecretKey): Promise<Result<FileDTO>> {
+        const file = await this.fileController.getOrLoadFile(id, key);
         return Result.ok(FileMapper.toFileDTO(file));
     }
 }

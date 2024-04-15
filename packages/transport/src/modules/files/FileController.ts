@@ -111,16 +111,16 @@ export class FileController extends TransportController {
         return cachedFile;
     }
 
-    public async getOrLoadFileByTruncated(truncated: string, ephemeral = false): Promise<File> {
+    public async getOrLoadFileByTruncated(truncated: string): Promise<File> {
         const reference = FileReference.fromTruncated(truncated);
-        return await this.getOrLoadFileByReference(reference, ephemeral);
+        return await this.getOrLoadFileByReference(reference);
     }
 
-    public async getOrLoadFileByReference(fileReference: FileReference, ephemeral = false): Promise<File> {
-        return await this.getOrLoadFile(fileReference.id, fileReference.key, ephemeral);
+    public async getOrLoadFileByReference(fileReference: FileReference): Promise<File> {
+        return await this.getOrLoadFile(fileReference.id, fileReference.key);
     }
 
-    public async getOrLoadFile(id: CoreId, secretKey: CryptoSecretKey, ephemeral = false): Promise<File> {
+    public async getOrLoadFile(id: CoreId, secretKey: CryptoSecretKey): Promise<File> {
         const fileDoc = await this.files.read(id.toString());
         if (fileDoc) {
             if (fileDoc.cache) return File.from(fileDoc);
@@ -134,8 +134,6 @@ export class FileController extends TransportController {
         });
 
         await this.updateCacheOfFile(file);
-
-        if (ephemeral) return file;
 
         await this.files.create(file);
         return file;

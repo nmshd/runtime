@@ -6,7 +6,6 @@ import { FileMapper } from "./FileMapper";
 
 export interface DownloadFileRequest {
     id: FileIdString;
-    ephemeral?: boolean;
 }
 
 class Validator extends SchemaValidator<DownloadFileRequest> {
