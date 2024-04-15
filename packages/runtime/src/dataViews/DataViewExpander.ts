@@ -572,9 +572,16 @@ export class DataViewExpander {
 
                 let proposedValueOverruled = false;
                 if (responseItemDVO && responseItemDVO.result === ResponseItemResult.Accepted) {
-                    const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
-                    if (JSON.stringify(proposeAttributeResponseItem.attribute.content.value) !== JSON.stringify(proposeAttributeRequestItem.attribute.value)) {
-                        proposedValueOverruled = true;
+                    if (responseItemDVO.type === "AttributeSuccessionAcceptResponseItemDVO") {
+                        const attributeSuccessionResponseItem = responseItemDVO as AttributeSuccessionAcceptResponseItemDVO;
+                        if (JSON.stringify(attributeSuccessionResponseItem.successor.content.value) !== JSON.stringify(proposeAttributeRequestItem.attribute.value)) {
+                            proposedValueOverruled = true;
+                        }
+                    } else {
+                        const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
+                        if (JSON.stringify(proposeAttributeResponseItem.attribute.content.value) !== JSON.stringify(proposeAttributeRequestItem.attribute.value)) {
+                            proposedValueOverruled = true;
+                        }
                     }
                 }
 

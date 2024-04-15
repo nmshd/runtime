@@ -773,7 +773,6 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
                 items: [
                     ReadAttributeRequestItem.from({
                         mustBeAccepted: true,
-
                         query: IdentityAttributeQuery.from({
                             valueType: "GivenName"
                         })
