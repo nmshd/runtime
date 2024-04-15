@@ -1,10 +1,9 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
+import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
-import { AuditLogEntryReason } from "../transmission/AuditLog";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 
@@ -18,19 +17,7 @@ export interface IRelationship extends ICoreSynchronizable {
 
     metadata?: any;
     metadataModifiedAt?: CoreDate;
-
-    auditLog?: IAuditLog;
 }
-
-export interface IAuditLogEntry {
-    createdAt: CoreDate;
-    createdBy: CoreAddress;
-    reason: AuditLogEntryReason;
-    oldStatus?: RelationshipStatus;
-    newStatus: RelationshipStatus;
-}
-
-export interface IAuditLog extends Array<IAuditLogEntry> {}
 
 @type("Relationship")
 export class Relationship extends CoreSynchronizable implements IRelationship {
@@ -71,10 +58,6 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @validate({ nullable: true })
     @serialize()
     public metadataModifiedAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public auditLog?: IAuditLog;
 
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): Object {
         const json = super.toJSON(verbose, serializeAsString) as any;
