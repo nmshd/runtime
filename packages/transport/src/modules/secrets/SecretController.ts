@@ -2,7 +2,6 @@ import { Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import {
     CoreBuffer,
-    CryptoCipher,
     CryptoExchangeKeypair,
     CryptoExchangePrivateKey,
     CryptoExchangePublicKey,
@@ -18,7 +17,7 @@ import { ControllerName, TransportController } from "../../core/TransportControl
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
-import { ISecretContainerCipher, SecretContainerCipher } from "./data/SecretContainerCipher";
+import { SecretContainerCipher } from "./data/SecretContainerCipher";
 import { SecretContainerPlain } from "./data/SecretContainerPlain";
 
 export enum SecretBaseKeyType {
@@ -74,15 +73,15 @@ export class SecretController extends TransportController {
         description = "",
         validTo?: CoreDate
     ): Promise<SecretContainerCipher> {
-        const plainString: string = secret.serialize();
-        const plainBuffer: CoreBuffer = CoreBuffer.fromUtf8(plainString);
+        const plainString = secret.serialize();
+        const plainBuffer = CoreBuffer.fromUtf8(plainString);
 
-        const nonce: number = await this.increaseNonce();
-        const encryptionKey: CryptoSecretKey = await CoreCrypto.deriveKeyFromBase(await this.getBaseKey(), nonce, SecretController.secretContext);
+        const nonce = await this.increaseNonce();
+        const encryptionKey = await CoreCrypto.deriveKeyFromBase(await this.getBaseKey(), nonce, SecretController.secretContext);
 
-        const cipher: CryptoCipher = await CoreCrypto.encrypt(plainBuffer, encryptionKey);
-        const createdAt: CoreDate = CoreDate.utc();
-        const secretContainerInterface: ISecretContainerCipher = {
+        const cipher = await CoreCrypto.encrypt(plainBuffer, encryptionKey);
+        const createdAt = CoreDate.utc();
+        const secretContainerInterface = {
             cipher: cipher,
             createdAt: createdAt,
             name: name,
@@ -93,7 +92,7 @@ export class SecretController extends TransportController {
             validTo: validTo,
             active: true
         };
-        const container: SecretContainerCipher = SecretContainerCipher.from(secretContainerInterface);
+        const container = SecretContainerCipher.from(secretContainerInterface);
 
         this.log.trace(`Created secret id:${container.id} name:${container.name} on ${container.createdAt.toISOString()}.`);
 
@@ -106,8 +105,8 @@ export class SecretController extends TransportController {
         const secrets = await this.secrets.find({ name: name });
         const plainSecrets: SecretContainerPlain[] = [];
         for (const secretObj of secrets) {
-            const secret: SecretContainerCipher = SecretContainerCipher.from(secretObj);
-            const plainSecret: SecretContainerPlain | undefined = await this.loadSecretById(secret.id);
+            const secret = SecretContainerCipher.from(secretObj);
+            const plainSecret = await this.loadSecretById(secret.id);
             if (plainSecret) {
                 plainSecrets.push(plainSecret);
             }
@@ -119,7 +118,7 @@ export class SecretController extends TransportController {
         const secret = await this.getActiveSecretContainerByName(name);
         if (!secret) return;
 
-        const plainSecret: SecretContainerPlain | undefined = await this.loadSecretById(secret.id);
+        const plainSecret = await this.loadSecretById(secret.id);
 
         return plainSecret;
     }
@@ -132,7 +131,7 @@ export class SecretController extends TransportController {
             this.log.warn(`More than one active secret has been found for secret name '${name}'.`);
         }
 
-        const secret: SecretContainerCipher = SecretContainerCipher.from(secrets[0]);
+        const secret = SecretContainerCipher.from(secrets[0]);
         return secret;
     }
 
@@ -160,13 +159,13 @@ export class SecretController extends TransportController {
     }
 
     private async decryptSecret(secret: SecretContainerCipher): Promise<SecretContainerPlain> {
-        const baseKey: CryptoSecretKey = await this.getBaseKey();
-        const decryptionKey: CryptoSecretKey = await CoreCrypto.deriveKeyFromBase(baseKey, secret.nonce ? secret.nonce : 0, SecretController.secretContext);
-        const plainBuffer: CoreBuffer = await CoreCrypto.decrypt(secret.cipher, decryptionKey);
-        const plainString: string = plainBuffer.toUtf8();
+        const baseKey = await this.getBaseKey();
+        const decryptionKey = await CoreCrypto.deriveKeyFromBase(baseKey, secret.nonce ? secret.nonce : 0, SecretController.secretContext);
+        const plainBuffer = await CoreCrypto.decrypt(secret.cipher, decryptionKey);
+        const plainString = plainBuffer.toUtf8();
         const decryptedSecret = Serializable.deserializeUnknown(plainString);
 
-        const plainSecret: SecretContainerPlain = SecretContainerPlain.from({
+        const plainSecret = SecretContainerPlain.from({
             id: secret.id,
             createdAt: secret.createdAt,
             description: secret.description,
@@ -185,7 +184,7 @@ export class SecretController extends TransportController {
     public async loadSecretById(id: CoreId): Promise<SecretContainerPlain | undefined> {
         const secretObj = await this.secrets.findOne({ id: id.toString() });
         if (!secretObj) return;
-        const secret: SecretContainerCipher = SecretContainerCipher.from(secretObj);
+        const secret = SecretContainerCipher.from(secretObj);
 
         return await this.decryptSecret(secret);
     }
@@ -202,7 +201,7 @@ export class SecretController extends TransportController {
     }
 
     public async createExchangeKey(name = "", description = "", validTo?: CoreDate): Promise<[CryptoExchangePublicKey, SecretContainerCipher]> {
-        const exchangeKeypair: CryptoExchangeKeypair = await CoreCrypto.generateExchangeKeypair();
+        const exchangeKeypair = await CoreCrypto.generateExchangeKeypair();
         const secretContainer = await this.storeSecret(exchangeKeypair, name, description, validTo);
         return [exchangeKeypair.publicKey, secretContainer];
     }

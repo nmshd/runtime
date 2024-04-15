@@ -72,7 +72,7 @@ describe("AttachmentTest", function () {
         if (!recipientMessage) return;
         expect(recipientMessage.cache!.attachments).toHaveLength(1);
 
-        const downloadedContent: CoreBuffer = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
@@ -83,7 +83,7 @@ describe("AttachmentTest", function () {
         if (!recipientMessage) return;
         expect(recipientMessage.cache!.attachments).toHaveLength(1);
 
-        const downloadedContent: CoreBuffer = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
@@ -94,7 +94,7 @@ describe("AttachmentTest", function () {
         if (!recipientMessage) return;
         expect(recipientMessage.cache!.attachments).toHaveLength(2);
 
-        const downloadedContent: CoreBuffer = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
 
@@ -109,7 +109,7 @@ describe("AttachmentTest", function () {
         if (!recipientMessage) return;
         expect(recipientMessage.cache!.attachments).toHaveLength(1);
 
-        const downloadedContent: CoreBuffer = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
@@ -120,7 +120,7 @@ describe("AttachmentTest", function () {
         if (!recipientMessage) return;
         expect(recipientMessage.cache!.attachments).toHaveLength(1);
 
-        const downloadedContent: CoreBuffer = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
@@ -131,7 +131,7 @@ describe("AttachmentTest", function () {
         if (!recipientMessage) return;
         expect(recipientMessage.cache!.attachments).toHaveLength(2);
 
-        const downloadedContent: CoreBuffer = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
 

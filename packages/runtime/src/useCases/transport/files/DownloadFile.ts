@@ -6,6 +6,7 @@ import { FileMapper } from "./FileMapper";
 
 export interface DownloadFileRequest {
     id: FileIdString;
+    ephemeral?: boolean;
 }
 
 class Validator extends SchemaValidator<DownloadFileRequest> {
@@ -36,10 +37,9 @@ export class DownloadFileUseCase extends UseCase<DownloadFileRequest, DownloadFi
             return Result.fail(RuntimeErrors.general.recordNotFound(File));
         }
 
-        const fileContent = await this.fileController.downloadFileContent(fileMetadata.id);
+        const fileContent = await this.fileController.downloadFileContent(fileMetadata);
 
         const result = Result.ok(FileMapper.toDownloadFileResponse(fileContent, fileMetadata));
-
         return result;
     }
 }
