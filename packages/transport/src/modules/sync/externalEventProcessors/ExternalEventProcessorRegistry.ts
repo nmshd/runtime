@@ -2,16 +2,15 @@ import { TransportError } from "../../../core";
 import { ExternalEventProcessorConstructor } from "./ExternalEventProcessor";
 import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor";
 import { MessageReceivedExternalEventProcessor } from "./MessageReceivedExternalEventProcessor";
-import { RelationshipCreatedExternalEventProcessor } from "./RelationshipCreatedExternalEventProcessor";
-import { RelationshipStatusChangedExternalEventProcessor } from "./RelationshipStatusChangedExternalEventProcessor";
+import { RelationshipCreatedOrChangedExternalEventProcessor } from "./RelationshipCreatedExternalEventProcessor";
 
 export class ExternalEventProcessorRegistry {
     private readonly processors = new Map<string, ExternalEventProcessorConstructor>();
     public constructor() {
         this.registerProcessor("MessageReceived", MessageReceivedExternalEventProcessor);
         this.registerProcessor("MessageDelivered", MessageDeliveredExternalEventProcessor);
-        this.registerProcessor("RelationshipCreated", RelationshipCreatedExternalEventProcessor);
-        this.registerProcessor("RelationshipStatusChanged", RelationshipStatusChangedExternalEventProcessor);
+        this.registerProcessor("RelationshipCreated", RelationshipCreatedOrChangedExternalEventProcessor);
+        this.registerProcessor("RelationshipStatusChanged", RelationshipCreatedOrChangedExternalEventProcessor);
     }
 
     public registerProcessor(externalEventName: string, externalEventProcessor: ExternalEventProcessorConstructor): void {
