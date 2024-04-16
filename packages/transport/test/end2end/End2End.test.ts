@@ -397,9 +397,10 @@ describe("RelationshipTest: Revoke", function () {
         expect(revokedRelationshipSelf.status).toStrictEqual(RelationshipStatus.Revoked);
 
         // Get revoked relationship
-        const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(templator);
-        expect(syncedRelationshipsPeer).toHaveLength(1);
-        const revokedRelationshipPeer = syncedRelationshipsPeer[0];
+        await TestUtil.syncUntilHasRelationships(templator);
+        const relationshipsPeer = await templator.relationships.getRelationships({});
+        expect(relationshipsPeer).toHaveLength(1);
+        const revokedRelationshipPeer = relationshipsPeer[0];
         expect(revokedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Revoked);
     });
 });
