@@ -101,16 +101,15 @@ export class DeviceSecretController extends TransportController {
 
     public async deleteSecret(name: string): Promise<boolean> {
         const secretObj = await this.secrets.get(name);
-        if (!secretObj) {
-            return false;
-        }
+        if (!secretObj) return false;
+
         await this.secrets.delete(name);
         this.log.trace(`Deleted device secret id:${secretObj.id} name:${secretObj.name} on ${CoreDate.utc().toISOString()}.`);
         return true;
     }
 
     @log()
-    public async createDeviceSharedSecret(device: Device, deviceIndex: number, includeIdentityPrivateKey = false): Promise<DeviceSharedSecret> {
+    public async createDeviceSharedSecret(device: Device, deviceIndex: number, includeIdentityPrivateKey = false, profileName?: string): Promise<DeviceSharedSecret> {
         const synchronizationKey = await this.loadSecret(DeviceSecretType.IdentitySynchronizationMaster);
         if (!synchronizationKey || !(synchronizationKey.secret instanceof CryptoSecretKey)) {
             throw CoreErrors.secrets.secretNotFound("SynchronizationKey");
@@ -137,6 +136,7 @@ export class DeviceSecretController extends TransportController {
             secretBaseKey: baseKey.secret,
             name: device.name,
             description: device.description,
+            profileName,
             synchronizationKey: synchronizationKey.secret,
             identityPrivateKey: identityPrivateKey?.secret as CryptoSignaturePrivateKey,
             username: device.username,
