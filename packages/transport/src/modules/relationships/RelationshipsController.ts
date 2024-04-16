@@ -1,4 +1,4 @@
-import { ISerializable, Serializable } from "@js-soft/ts-serval";
+import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -162,7 +162,7 @@ export class RelationshipsController extends TransportController {
             })
         ).value;
 
-        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template, template.cache.identity, backboneResponse.creationContent, secretId);
+        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template, template.cache.identity, parameters.creationContent, secretId);
 
         await this.relationships.create(newRelationship);
 
@@ -231,13 +231,13 @@ export class RelationshipsController extends TransportController {
         this._log.trace(`Parsing relationship creation content of ${response.id}...`);
 
         const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
-        let acceptanceContent: Serializable | undefined;
+        let acceptanceContent: RelationshipCreationResponseContentWrapper | undefined;
         if (response.acceptanceContent) {
             acceptanceContent = await this.decryptAcceptanceContent(response.acceptanceContent, CoreAddress.from(response.to), relationshipSecretId);
         }
         const cachedRelationship = CachedRelationship.from({
-            creationContent,
-            acceptanceContent,
+            creationContent: creationContent.content,
+            acceptanceContent: acceptanceContent?.content,
             template: template,
             auditLog: AuditLog.fromBackboneAuditLog(response.auditLog)
         });
@@ -288,7 +288,7 @@ export class RelationshipsController extends TransportController {
             await this.secrets.convertSecrets(relationship.relationshipSecretId, cipher.publicResponseCrypto!);
 
             const acceptanceContentDecrypted = await this.decryptAcceptanceContent(acceptanceContent, relationship.peer.address, relationship.relationshipSecretId);
-            relationship.cache!.acceptanceContent = acceptanceContentDecrypted;
+            relationship.cache!.acceptanceContent = acceptanceContentDecrypted.content;
         }
         relationship.cache!.auditLog = AuditLog.fromBackboneAuditLog(backboneRelationship.auditLog);
         relationship.status = backboneRelationship.status;
@@ -298,7 +298,11 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async decryptAcceptanceContent(acceptanceContent: string, acceptanceContentCreator: CoreAddress, relationshipSecretId: CoreId): Promise<Serializable> {
+    private async decryptAcceptanceContent(
+        acceptanceContent: string,
+        acceptanceContentCreator: CoreAddress,
+        relationshipSecretId: CoreId
+    ): Promise<RelationshipCreationResponseContentWrapper> {
         const isOwnContent = this.parent.identity.isMe(CoreAddress.from(acceptanceContentCreator));
 
         const cipher = RelationshipCreationResponseCipher.fromBase64(acceptanceContent);
@@ -335,7 +339,7 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async decryptCreationContent(creationContent: string, creationContentCreator: CoreAddress, secretId: CoreId): Promise<any> {
+    private async decryptCreationContent(creationContent: string, creationContentCreator: CoreAddress, secretId: CoreId): Promise<RelationshipCreationRequestContentWrapper> {
         const isOwnContent = this.parent.identity.isMe(creationContentCreator);
 
         const requestCipher = RelationshipCreationRequestCipher.fromBase64(creationContent);
@@ -355,7 +359,7 @@ export class RelationshipsController extends TransportController {
 
         const requestContent = RelationshipCreationRequestContentWrapper.deserialize(signedRequest.serializedRequest);
 
-        return requestContent.content;
+        return requestContent;
     }
 
     @log()
@@ -374,7 +378,7 @@ export class RelationshipsController extends TransportController {
 
         const requestContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.from), secretId);
         // TODO: transform peer identity from string to identity
-        const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, template, requestContent.identity, requestContent, secretId);
+        const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, template, requestContent.identity, requestContent.content, secretId);
 
         await this.relationships.create(relationship);
         return relationship;
