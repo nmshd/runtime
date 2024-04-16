@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecretKey, CryptoSignature, Encoding } from "@nmshd/crypto";
+import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecretKey, Encoding } from "@nmshd/crypto";
 import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreHash, CoreId } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
@@ -101,7 +101,7 @@ export class FileController extends TransportController {
     private async decryptFile(response: BackboneGetFilesResponse, secretKey: CryptoSecretKey) {
         const cipher = CryptoCipher.fromBase64(response.encryptedProperties);
         const plaintextMetadataBuffer = await CoreCrypto.decrypt(cipher, secretKey);
-        const plaintextMetadata: FileMetadata = FileMetadata.deserialize(plaintextMetadataBuffer.toUtf8());
+        const plaintextMetadata = FileMetadata.deserialize(plaintextMetadataBuffer.toUtf8());
 
         if (!(plaintextMetadata instanceof FileMetadata)) {
             throw CoreErrors.files.invalidMetadata(response.id);
@@ -134,6 +134,7 @@ export class FileController extends TransportController {
         });
 
         await this.updateCacheOfFile(file);
+
         await this.files.create(file);
         return file;
     }
@@ -162,19 +163,19 @@ export class FileController extends TransportController {
             throw CoreErrors.files.maxFileSizeExceeded(fileSize, this.config.platformMaxUnencryptedFileSize);
         }
 
-        const plaintextHashBuffer: CoreBuffer = await CryptoHash.hash(content, CryptoHashAlgorithm.SHA512);
-        const plaintextHash: CoreHash = CoreHash.from(plaintextHashBuffer.toBase64URL());
+        const plaintextHashBuffer = await CryptoHash.hash(content, CryptoHashAlgorithm.SHA512);
+        const plaintextHash = CoreHash.from(plaintextHashBuffer.toBase64URL());
 
-        const signature: CryptoSignature = await this.parent.activeDevice.sign(plaintextHashBuffer);
-        const signatureB64: string = signature.toBase64();
+        const signature = await this.parent.activeDevice.sign(plaintextHashBuffer);
+        const signatureB64 = signature.toBase64();
 
-        const fileDownloadSecretKey: CryptoSecretKey = await CoreCrypto.generateSecretKey();
-        const cipher: CryptoCipher = await CoreCrypto.encrypt(content, fileDownloadSecretKey);
-        const cipherBuffer: CoreBuffer = CoreBuffer.fromBase64URL(cipher.toBase64());
-        const cipherHash: CoreBuffer = await CryptoHash.hash(cipherBuffer, CryptoHashAlgorithm.SHA512);
-        const cipherCoreHash: CoreHash = CoreHash.from(cipherHash.toBase64URL());
+        const fileDownloadSecretKey = await CoreCrypto.generateSecretKey();
+        const cipher = await CoreCrypto.encrypt(content, fileDownloadSecretKey);
+        const cipherBuffer = CoreBuffer.fromBase64URL(cipher.toBase64());
+        const cipherHash = await CryptoHash.hash(cipherBuffer, CryptoHashAlgorithm.SHA512);
+        const cipherCoreHash = CoreHash.from(cipherHash.toBase64URL());
 
-        const metadata: FileMetadata = FileMetadata.from({
+        const metadata = FileMetadata.from({
             title: input.title,
             description: input.description,
             filename: input.filename,
@@ -185,13 +186,13 @@ export class FileController extends TransportController {
             mimetype: input.mimetype
         });
 
-        const serializedMetadata: string = metadata.serialize();
+        const serializedMetadata = metadata.serialize();
 
-        const metadataBuffer: CoreBuffer = CoreBuffer.fromString(serializedMetadata, Encoding.Utf8);
-        const metadataKey: CryptoSecretKey = await CoreCrypto.generateSecretKey();
-        const metadataCipher: CryptoCipher = await CoreCrypto.encrypt(metadataBuffer, metadataKey);
+        const metadataBuffer = CoreBuffer.fromString(serializedMetadata, Encoding.Utf8);
+        const metadataKey = await CoreCrypto.generateSecretKey();
+        const metadataCipher = await CoreCrypto.encrypt(metadataBuffer, metadataKey);
 
-        const owner: CoreAddress = this.parent.identity.address;
+        const owner = this.parent.identity.address;
 
         const response: BackbonePostFilesResponse = (
             await this.client.createFile({
@@ -204,7 +205,7 @@ export class FileController extends TransportController {
             })
         ).value;
 
-        const cachedFile: CachedFile = CachedFile.from({
+        const cachedFile = CachedFile.from({
             title: input.title,
             description: input.description,
             filename: input.filename,
@@ -222,7 +223,7 @@ export class FileController extends TransportController {
             plaintextHash: plaintextHash
         });
 
-        const file: File = File.from({
+        const file = File.from({
             id: CoreId.from(response.id),
             secretKey: metadataKey,
             isOwn: true
@@ -244,7 +245,7 @@ export class FileController extends TransportController {
         if (!file.cache) throw this.newCacheEmptyError(File, file.id.toString());
 
         const downloadResponse = (await this.client.downloadFile(file.id.toString())).value;
-        const buffer: CoreBuffer = CoreBuffer.fromObject(downloadResponse);
+        const buffer = CoreBuffer.fromObject(downloadResponse);
 
         const hash = await CryptoHash.hash(buffer, CryptoHashAlgorithm.SHA512);
         const hashb64 = hash.toBase64URL();
@@ -253,7 +254,7 @@ export class FileController extends TransportController {
             throw CoreErrors.files.cipherMismatch();
         }
 
-        const cipher: CryptoCipher = CryptoCipher.fromBase64(buffer.toBase64URL());
+        const cipher = CryptoCipher.fromBase64(buffer.toBase64URL());
         const decrypt = await CoreCrypto.decrypt(cipher, file.cache.cipherKey);
         const plaintextHashesMatch = await file.cache.plaintextHash.verify(decrypt, CryptoHashAlgorithm.SHA512);
 
