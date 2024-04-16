@@ -66,7 +66,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         params: AcceptProposeAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
-        const parsedParams: AcceptProposeAttributeRequestItemParameters = AcceptProposeAttributeRequestItemParameters.from(params);
+        const parsedParams = AcceptProposeAttributeRequestItemParameters.from(params);
 
         let attribute = parsedParams.attribute;
 
@@ -94,7 +94,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         params: AcceptProposeAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<ProposeAttributeAcceptResponseItem> {
-        const parsedParams: AcceptProposeAttributeRequestItemParameters = AcceptProposeAttributeRequestItemParameters.from(params);
+        const parsedParams = AcceptProposeAttributeRequestItemParameters.from(params);
 
         let sharedLocalAttribute: LocalAttribute;
         if (parsedParams.isWithExistingAttribute()) {

@@ -104,11 +104,11 @@ export class MultiAccountController {
         }
 
         this._log.trace(`Opening DB for account ${localAccount.id}...`);
-        const db: IDatabaseCollectionProvider = await this.transport.createDatabase(`acc-${localAccount.id.toString()}`);
+        const db = await this.transport.createDatabase(`acc-${localAccount.id.toString()}`);
         this._log.trace(`DB for account ${id} opened.`);
 
         this._log.trace(`Initializing AccountController for local account ${id}...`);
-        const accountController: AccountController = new AccountController(this.transport, db, this.transport.config);
+        const accountController = new AccountController(this.transport, db, this.transport.config);
         await accountController.init();
         this._log.trace(`AccountController for local account ${id} initialized.`);
 
