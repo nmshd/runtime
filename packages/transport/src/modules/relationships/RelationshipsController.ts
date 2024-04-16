@@ -232,7 +232,8 @@ export class RelationshipsController extends TransportController {
 
         const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
         let acceptanceContent: RelationshipCreationResponseContentWrapper | undefined;
-        if (response.acceptanceContent) {
+
+        if (response.acceptanceContent && (await this.secrets.hasCryptoRelationshipSecrets(relationshipSecretId))) {
             acceptanceContent = await this.decryptAcceptanceContent(response.acceptanceContent, CoreAddress.from(response.to), relationshipSecretId);
         }
         const cachedRelationship = CachedRelationship.from({
@@ -294,6 +295,7 @@ export class RelationshipsController extends TransportController {
         relationship.status = backboneRelationship.status;
 
         await this.relationships.update(relationshipDoc, relationship);
+        const relationships = await this.relationships.read(relationship.id.toString());
         return relationship;
     }
 
