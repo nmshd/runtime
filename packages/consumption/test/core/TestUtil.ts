@@ -198,7 +198,7 @@ export class TestUtil {
         notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
     ): Promise<{ accountController: AccountController; consumptionController: ConsumptionController }> {
         const db = await transport.createDatabase(`x${Math.random().toString(36).substring(7)}`);
-        const accountController: AccountController = new AccountController(transport, db, transport.config);
+        const accountController = new AccountController(transport, db, transport.config);
         await accountController.init();
 
         const consumptionController = await new ConsumptionController(transport, accountController).init(requestItemProcessors, notificationItemProcessors);

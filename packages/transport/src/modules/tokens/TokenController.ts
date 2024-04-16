@@ -37,11 +37,11 @@ export class TokenController extends TransportController {
 
     public async sendToken(parameters: ISendTokenParameters): Promise<Token> {
         const input = SendTokenParameters.from(parameters);
-        const secretKey: CryptoSecretKey = await CoreCrypto.generateSecretKey();
-        const serializedToken: string = input.content.serialize();
-        const serializedTokenBuffer: CoreBuffer = CoreBuffer.fromUtf8(serializedToken);
+        const secretKey = await CoreCrypto.generateSecretKey();
+        const serializedToken = input.content.serialize();
+        const serializedTokenBuffer = CoreBuffer.fromUtf8(serializedToken);
 
-        const cipher: CryptoCipher = await CoreCrypto.encrypt(serializedTokenBuffer, secretKey);
+        const cipher = await CoreCrypto.encrypt(serializedTokenBuffer, secretKey);
 
         const response = (
             await this.client.createToken({
@@ -58,7 +58,7 @@ export class TokenController extends TransportController {
             content: input.content
         });
 
-        const token: Token = Token.from({
+        const token = Token.from({
             id: CoreId.from(response.id),
             secretKey: secretKey,
             isOwn: true,

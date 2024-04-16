@@ -5,10 +5,10 @@ import { AnonymousServices, Base64ForIdPrefix, DeviceMapper } from "@nmshd/runti
 import { ICoreAddress, TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
+import { IUIBridge } from "./extensibility";
+import { LocalAccountDTO } from "./multiAccount";
 import { UserfriendlyApplicationError } from "./UserfriendlyApplicationError";
 import { UserfriendlyResult } from "./UserfriendlyResult";
-import { IUIBridge } from "./extensibility";
-import { LocalAccountDTO } from "./multiAccount/data/LocalAccountDTO";
 
 export class AppStringProcessor {
     private readonly logger: ILogger;
