@@ -14,6 +14,7 @@ export interface BackboneGetRelationshipsResponse {
     createdAt: string;
     status: RelationshipStatus;
     creationContent: string;
+    acceptanceContent: string;
     auditLog: AuditLog;
 }
 

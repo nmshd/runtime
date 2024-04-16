@@ -1,10 +1,11 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
 import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
+import { AuditLog } from "./AuditLog";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 
 export interface IRelationship extends ICoreSynchronizable {
@@ -70,7 +71,7 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         return json;
     }
 
-    public static fromRequestSent(id: CoreId, template: IRelationshipTemplate, peer: IIdentity, creationContent: any, relationshipSecretId: CoreId): Relationship {
+    public static fromRequestSent(id: CoreId, template: IRelationshipTemplate, peer: IIdentity, creationContent: ISerializable, relationshipSecretId: CoreId): Relationship {
         const cache = CachedRelationship.from({
             creationContent,
             template: template
@@ -86,16 +87,17 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         });
     }
 
-    public static fromCreationContentReceived(
+    public static fromBackboneAndCreationContent(
         response: BackboneGetRelationshipsResponse,
         template: IRelationshipTemplate,
         peer: IIdentity,
-        creationContent: any,
+        creationContent: ISerializable,
         relationshipSecretId: CoreId
     ): Relationship {
         const cache = CachedRelationship.from({
             creationContent,
-            template: template
+            template: template,
+            auditLog: AuditLog.fromBackboneAuditLog(response.auditLog)
         });
         return Relationship.from({
             id: CoreId.from(response.id),
