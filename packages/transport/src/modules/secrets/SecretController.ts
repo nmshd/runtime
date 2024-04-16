@@ -81,7 +81,7 @@ export class SecretController extends TransportController {
 
         const cipher = await CoreCrypto.encrypt(plainBuffer, encryptionKey);
         const createdAt = CoreDate.utc();
-        const secretContainerInterface = {
+        const container = SecretContainerCipher.from({
             cipher: cipher,
             createdAt: createdAt,
             name: name,
@@ -91,8 +91,7 @@ export class SecretController extends TransportController {
             validFrom: createdAt,
             validTo: validTo,
             active: true
-        };
-        const container = SecretContainerCipher.from(secretContainerInterface);
+        });
 
         this.log.trace(`Created secret id:${container.id} name:${container.name} on ${container.createdAt.toISOString()}.`);
 

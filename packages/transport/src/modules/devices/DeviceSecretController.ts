@@ -58,15 +58,14 @@ export class DeviceSecretController extends TransportController {
 
         const cipher = await CoreCrypto.encrypt(plainBuffer, encryptionKey);
         const date = CoreDate.utc();
-        const secretContainerInterface = {
+        const container = SecretContainerCipher.from({
             cipher: cipher,
             createdAt: date,
             name: name,
             id: await TransportIds.secret.generate(),
             validFrom: date,
             active: true
-        };
-        const container = SecretContainerCipher.from(secretContainerInterface);
+        });
 
         this.log.trace(`Created device secret id:${container.id} name:${container.name} on ${container.createdAt.toISOString()}.`);
 
