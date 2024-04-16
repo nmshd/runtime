@@ -1,4 +1,4 @@
-import { ISerializable } from "@js-soft/ts-serval";
+import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -14,14 +14,18 @@ import { RelationshipTemplate } from "../relationshipTemplates/local/Relationshi
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetRelationshipsResponse } from "./backbone/BackboneGetRelationships";
 import { RelationshipClient } from "./backbone/RelationshipClient";
+import { AuditLog } from "./local/AuditLog";
 import { CachedRelationship } from "./local/CachedRelationship";
-import { IAuditLog, Relationship } from "./local/Relationship";
+import { Relationship } from "./local/Relationship";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
 import { RelationshipSecretController } from "./RelationshipSecretController";
 import { RelationshipStatus } from "./transmission/RelationshipStatus";
 import { RelationshipCreationRequestCipher } from "./transmission/requests/RelationshipCreationRequestCipher";
 import { RelationshipCreationRequestContentWrapper } from "./transmission/requests/RelationshipCreationRequestContentWrapper";
 import { RelationshipCreationRequestSigned } from "./transmission/requests/RelationshipCreationRequestSigned";
+import { RelationshipCreationResponseCipher } from "./transmission/responses/RelationshipCreationResponseCipher";
+import { RelationshipCreationResponseContentWrapper } from "./transmission/responses/RelationshipCreationResponseContentWrapper";
+import { RelationshipCreationResponseSigned } from "./transmission/responses/RelationshipCreationResponseSigned";
 
 export class RelationshipsController extends TransportController {
     private client: RelationshipClient;
@@ -42,12 +46,10 @@ export class RelationshipsController extends TransportController {
         return this;
     }
 
-    public async getRelationships(query?: any, withAuditLog?: boolean): Promise<Relationship[]> {
+    public async getRelationships(query?: any): Promise<Relationship[]> {
         const relationshipDocs = await this.relationships.find(query);
         const relationships = this.parseArray<Relationship>(relationshipDocs, Relationship);
-        if (withAuditLog) {
-            relationships.forEach((relationship) => this.addAuditLog(relationship));
-        }
+
         return relationships;
     }
 
@@ -95,7 +97,7 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus, withAuditLog?: boolean): Promise<Relationship | undefined> {
+    public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
         const query: any = { peerAddress: address.toString() };
         if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
         let relationshipDoc = await this.relationships.findOne(query);
@@ -112,43 +114,22 @@ export class RelationshipsController extends TransportController {
             return;
         }
 
-        const relationship = Relationship.from(relationshipDoc);
-        if (withAuditLog) {
-            await this.addAuditLog(relationship);
-        }
-
-        return relationship;
+        return Relationship.from(relationshipDoc);
     }
 
-    public async getActiveRelationshipToIdentity(address: CoreAddress, withAuditLog?: boolean): Promise<Relationship | undefined> {
-        return await this.getRelationshipToIdentity(address, RelationshipStatus.Active, withAuditLog);
+    public async getActiveRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
+        return await this.getRelationshipToIdentity(address, RelationshipStatus.Active);
     }
 
-    public async getRelationship(id: CoreId, withAuditLog?: boolean): Promise<Relationship | undefined> {
+    public async getRelationship(id: CoreId): Promise<Relationship | undefined> {
         const relationshipDoc = await this.relationships.read(id.toString());
         if (!relationshipDoc) {
             return;
         }
 
         const relationship = Relationship.from(relationshipDoc);
-        if (withAuditLog) {
-            await this.addAuditLog(relationship);
-        }
 
         return relationship;
-    }
-
-    private async getAuditLog(id: CoreId): Promise<IAuditLog> {
-        const backboneAuditLog = (await this.client.getRelationship(id.toString())).value.auditLog;
-        const auditLog: IAuditLog = [];
-        backboneAuditLog.forEach((entry) => {
-            auditLog.push({ ...entry, createdAt: CoreDate.from(entry.createdAt), createdBy: CoreAddress.from(entry.createdBy) });
-        }); // TODO: error handling
-        return auditLog;
-    }
-
-    private async addAuditLog(relationship: Relationship): Promise<void> {
-        relationship.auditLog = await this.getAuditLog(relationship.id);
     }
 
     public async sign(relationship: Relationship, content: CoreBuffer): Promise<CryptoSignature> {
@@ -181,14 +162,7 @@ export class RelationshipsController extends TransportController {
             })
         ).value;
 
-        const newRelationship = Relationship.fromRequestSent(
-            CoreId.from(backboneResponse.id),
-            template,
-            template.cache.identity,
-            backboneResponse.creationContent,
-
-            secretId
-        );
+        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template, template.cache.identity, backboneResponse.creationContent, secretId);
 
         await this.relationships.create(newRelationship);
 
@@ -257,9 +231,15 @@ export class RelationshipsController extends TransportController {
         this._log.trace(`Parsing relationship creation content of ${response.id}...`);
 
         const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
+        let acceptanceContent: Serializable | undefined;
+        if (response.acceptanceContent) {
+            acceptanceContent = await this.decryptAcceptanceContent(response.acceptanceContent, CoreAddress.from(response.to), relationshipSecretId);
+        }
         const cachedRelationship = CachedRelationship.from({
             creationContent,
-            template: template
+            acceptanceContent,
+            template: template,
+            auditLog: AuditLog.fromBackboneAuditLog(response.auditLog)
         });
 
         return cachedRelationship;
@@ -297,15 +277,61 @@ export class RelationshipsController extends TransportController {
         return requestCipher;
     }
 
-    public async applyIncomingCreation(relationshipId: string): Promise<Relationship | undefined> {
-        const relationshipDoc = await this.relationships.read(relationshipId);
-        if (relationshipDoc) {
-            // If we have a relationship already but no response, do nothing
-            return undefined;
+    @log()
+    private async updatePendingRelationshipWithPeerResponse(relationshipDoc: any): Promise<Relationship | undefined> {
+        const relationship = Relationship.from(relationshipDoc);
+        const backboneRelationship = (await this.client.getRelationship(relationship.id.toString())).value;
+
+        if (!relationship.cache?.acceptanceContent && backboneRelationship.acceptanceContent) {
+            const acceptanceContent = backboneRelationship.acceptanceContent;
+            const cipher = RelationshipCreationResponseCipher.fromBase64(acceptanceContent);
+            await this.secrets.convertSecrets(relationship.relationshipSecretId, cipher.publicResponseCrypto!);
+
+            const acceptanceContentDecrypted = await this.decryptAcceptanceContent(acceptanceContent, relationship.peer.address, relationship.relationshipSecretId);
+            relationship.cache!.acceptanceContent = acceptanceContentDecrypted;
+        }
+        relationship.cache!.auditLog = AuditLog.fromBackboneAuditLog(backboneRelationship.auditLog);
+        relationship.status = backboneRelationship.status;
+
+        await this.relationships.update(relationshipDoc, relationship);
+        return relationship;
+    }
+
+    @log()
+    private async decryptAcceptanceContent(acceptanceContent: string, acceptanceContentCreator: CoreAddress, relationshipSecretId: CoreId): Promise<Serializable> {
+        const isOwnContent = this.parent.identity.isMe(CoreAddress.from(acceptanceContentCreator));
+
+        const cipher = RelationshipCreationResponseCipher.fromBase64(acceptanceContent);
+        let signedResponseBuffer;
+        if (isOwnContent) {
+            signedResponseBuffer = await this.secrets.decryptOwn(relationshipSecretId, cipher.cipher);
+        } else {
+            signedResponseBuffer = await this.secrets.decryptPeer(relationshipSecretId, cipher.cipher, true);
         }
 
-        const newRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
-        return newRelationship;
+        const signedResponse = RelationshipCreationResponseSigned.deserialize(signedResponseBuffer.toUtf8());
+        let relationshipSignatureValid;
+        if (isOwnContent) {
+            relationshipSignatureValid = await this.secrets.verifyOwn(
+                relationshipSecretId,
+                CoreBuffer.fromUtf8(signedResponse.serializedResponse),
+                signedResponse.relationshipSignature
+            );
+        } else {
+            relationshipSignatureValid = await this.secrets.verifyPeer(
+                relationshipSecretId,
+                CoreBuffer.fromUtf8(signedResponse.serializedResponse),
+                signedResponse.relationshipSignature
+            );
+        }
+
+        if (!relationshipSignatureValid) {
+            throw CoreErrors.general.signatureNotValid("relationshipResponse");
+        }
+
+        const responseContent = RelationshipCreationResponseContentWrapper.deserialize(signedResponse.serializedResponse);
+
+        return responseContent;
     }
 
     @log()
@@ -329,7 +355,7 @@ export class RelationshipsController extends TransportController {
 
         const requestContent = RelationshipCreationRequestContentWrapper.deserialize(signedRequest.serializedRequest);
 
-        return requestContent;
+        return requestContent.content;
     }
 
     @log()
@@ -348,10 +374,52 @@ export class RelationshipsController extends TransportController {
 
         const requestContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.from), secretId);
         // TODO: transform peer identity from string to identity
-        const relationship = Relationship.fromCreationContentReceived(backboneRelationship, template, requestContent.identity, requestContent, secretId);
+        const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, template, requestContent.identity, requestContent, secretId);
 
         await this.relationships.create(relationship);
         return relationship;
+    }
+
+    public async applyIncomingEvent(relationshipId: string): Promise<Relationship | undefined> {
+        let relationshipDoc;
+        relationshipDoc = await this.relationships.read(relationshipId);
+        if (!relationshipDoc) {
+            const newRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
+            if (newRelationship.status === RelationshipStatus.Pending) {
+                return newRelationship;
+            }
+            // this path is for a revocation that is processed before its corresponding creation
+            relationshipDoc = await this.relationships.read(relationshipId);
+        }
+
+        return await this.updatePendingRelationshipWithPeerResponse(relationshipDoc);
+    }
+    private async encryptAcceptanceContent(relationship: Relationship) {
+        const publicResponseCrypto = await this.secrets.getPublicResponse(relationship.relationshipSecretId);
+
+        const responseContent = RelationshipCreationResponseContentWrapper.from({
+            relationshipId: relationship.id,
+            content: ""
+        });
+
+        const serializedResponse = responseContent.serialize();
+        const buffer = CoreUtil.toBuffer(serializedResponse);
+
+        const [deviceSignature, relationshipSignature] = await Promise.all([this.parent.activeDevice.sign(buffer), this.secrets.sign(relationship.relationshipSecretId, buffer)]);
+
+        const signedResponse = RelationshipCreationResponseSigned.from({
+            serializedResponse: serializedResponse,
+            deviceSignature: deviceSignature,
+            relationshipSignature: relationshipSignature
+        });
+
+        const cipher = await this.secrets.encrypt(relationship.relationshipSecretId, signedResponse);
+        const responseCipher = RelationshipCreationResponseCipher.from({
+            cipher: cipher,
+            publicResponseCrypto: publicResponseCrypto
+        });
+
+        return responseCipher.toBase64();
     }
 
     @log()
@@ -374,7 +442,9 @@ export class RelationshipsController extends TransportController {
         let backboneResponse: BackboneGetRelationshipsResponse;
         switch (targetStatus) {
             case RelationshipStatus.Active:
-                backboneResponse = (await this.client.acceptRelationship(id.toString())).value;
+                const encryptedContent = await this.encryptAcceptanceContent(relationship);
+
+                backboneResponse = (await this.client.acceptRelationship(id.toString(), { acceptanceContent: encryptedContent })).value;
                 break;
 
             case RelationshipStatus.Rejected:
