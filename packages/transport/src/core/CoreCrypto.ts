@@ -98,8 +98,8 @@ export abstract class CoreCrypto {
         keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoSecretKey> {
-        const masterBuffer: CoreBuffer = CoreBuffer.fromString(master, Encoding.Utf8);
-        const saltBuffer: CoreBuffer = CoreBuffer.fromString(salt, Encoding.Utf8);
+        const masterBuffer = CoreBuffer.fromString(master, Encoding.Utf8);
+        const saltBuffer = CoreBuffer.fromString(salt, Encoding.Utf8);
         switch (version) {
             case TransportVersion.V1:
                 return await CryptoDerivation.deriveKeyFromMaster(masterBuffer, 150000, keyAlgorithm, saltBuffer);
@@ -148,7 +148,7 @@ export abstract class CoreCrypto {
     ): Promise<CryptoExchangeSecrets> {
         switch (version) {
             case TransportVersion.V1:
-                const base: CryptoExchangeSecrets = await CryptoExchange.deriveRequestor(server, clientPublicKey, keyAlgorithm);
+                const base = await CryptoExchange.deriveRequestor(server, clientPublicKey, keyAlgorithm);
                 return base;
             default:
                 throw this.invalidVersion(version);

@@ -1,22 +1,12 @@
 import { IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import {
-    CoreBuffer,
-    CryptoCipher,
-    CryptoExchangeKeypair,
-    CryptoExchangePrivateKey,
-    CryptoSecretKey,
-    CryptoSignatureKeypair,
-    CryptoSignaturePrivateKey,
-    ICoreBuffer,
-    ICryptoCipher
-} from "@nmshd/crypto";
+import { CoreBuffer, CryptoCipher, CryptoExchangeKeypair, CryptoExchangePrivateKey, CryptoSecretKey, CryptoSignatureKeypair, CryptoSignaturePrivateKey } from "@nmshd/crypto";
 import { CoreCrypto, CoreDate, CoreErrors } from "../../core";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { TransportIds } from "../../core/TransportIds";
 import { AccountController } from "../accounts/AccountController";
-import { ISecretContainerCipher, SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
+import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
 import { SecretContainerPlain } from "../secrets/data/SecretContainerPlain";
 import { DatawalletModification } from "../sync/local/DatawalletModification";
 import { Device } from "./local/Device";
@@ -61,22 +51,21 @@ export class DeviceSecretController extends TransportController {
         secret: DeviceSecretCredentials | CryptoExchangeKeypair | CryptoExchangePrivateKey | CryptoSignatureKeypair | CryptoSignaturePrivateKey | CryptoSecretKey,
         name: string
     ): Promise<SecretContainerCipher> {
-        const plainString: string = secret.serialize();
-        const plainBuffer: CoreBuffer = CoreBuffer.fromUtf8(plainString);
+        const plainString = secret.serialize();
+        const plainBuffer = CoreBuffer.fromUtf8(plainString);
 
-        const encryptionKey: CryptoSecretKey = await CoreCrypto.deriveKeyFromBase(this.getBaseKey(), 1, DeviceSecretController.secretContext);
+        const encryptionKey = await CoreCrypto.deriveKeyFromBase(this.getBaseKey(), 1, DeviceSecretController.secretContext);
 
-        const cipher: ICryptoCipher = await CoreCrypto.encrypt(plainBuffer, encryptionKey);
-        const date: CoreDate = CoreDate.utc();
-        const secretContainerInterface: ISecretContainerCipher = {
+        const cipher = await CoreCrypto.encrypt(plainBuffer, encryptionKey);
+        const date = CoreDate.utc();
+        const container = SecretContainerCipher.from({
             cipher: cipher,
             createdAt: date,
             name: name,
             id: await TransportIds.secret.generate(),
             validFrom: date,
             active: true
-        };
-        const container: SecretContainerCipher = SecretContainerCipher.from(secretContainerInterface);
+        });
 
         this.log.trace(`Created device secret id:${container.id} name:${container.name} on ${container.createdAt.toISOString()}.`);
 
@@ -89,15 +78,15 @@ export class DeviceSecretController extends TransportController {
         const secretObj = await this.secrets.get(name);
         if (!secretObj) return;
 
-        const baseKey: CryptoSecretKey = this.getBaseKey();
-        const secret: SecretContainerCipher = SecretContainerCipher.from(secretObj);
-        const decryptionKey: CryptoSecretKey = await CoreCrypto.deriveKeyFromBase(baseKey, 1, DeviceSecretController.secretContext);
-        const plainBuffer: ICoreBuffer = await CoreCrypto.decrypt(secret.cipher, decryptionKey);
-        const plainString: string = plainBuffer.toUtf8();
+        const baseKey = this.getBaseKey();
+        const secret = SecretContainerCipher.from(secretObj);
+        const decryptionKey = await CoreCrypto.deriveKeyFromBase(baseKey, 1, DeviceSecretController.secretContext);
+        const plainBuffer = await CoreCrypto.decrypt(secret.cipher, decryptionKey);
+        const plainString = plainBuffer.toUtf8();
 
         const decryptedSecret = Serializable.deserializeUnknown(plainString);
 
-        const plainSecret: SecretContainerPlain = SecretContainerPlain.from({
+        const plainSecret = SecretContainerPlain.from({
             id: secret.id,
             createdAt: secret.createdAt,
             name: secret.name,

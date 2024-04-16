@@ -1,4 +1,4 @@
-import { MailDVO, MessageReceivedEvent } from "@nmshd/runtime";
+import { MessageReceivedEvent } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { MailReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
@@ -22,8 +22,7 @@ export class MessageReceivedModule extends AppRuntimeModule<MessageReceivedModul
 
         switch (messageDVO.type) {
             case "MailDVO":
-                const mail: MailDVO = messageDVO;
-                this.runtime.eventBus.publish(new MailReceivedEvent(event.eventTargetAddress, mail));
+                this.runtime.eventBus.publish(new MailReceivedEvent(event.eventTargetAddress, messageDVO));
                 break;
             default:
                 break;
