@@ -1,4 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import _ from "lodash";
 import { CoreAddress, CoreDate, CoreSerializable, ICoreAddress, ICoreDate } from "../../../core";
 import { AuditLogEntryReason, AuditLog as BackboneAuditLog } from "../transmission/AuditLog";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
@@ -44,6 +45,6 @@ export class AuditLog {
         backboneAuditLog.forEach((entry) =>
             auditLog.push(AuditLogEntry.from({ ...entry, createdAt: CoreDate.from(entry.createdAt), createdBy: CoreAddress.from(entry.createdBy) }))
         );
-        return auditLog;
+        return _.orderBy(auditLog, ["createdAt"], ["asc"]);
     }
 }

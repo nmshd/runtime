@@ -281,6 +281,7 @@ export class RelationshipsController extends TransportController {
     @log()
     private async updatePendingRelationshipWithPeerResponse(relationshipDoc: any): Promise<Relationship | undefined> {
         const relationship = Relationship.from(relationshipDoc);
+
         const backboneRelationship = (await this.client.getRelationship(relationship.id.toString())).value;
 
         if (!relationship.cache?.acceptanceContent && backboneRelationship.acceptanceContent) {
@@ -463,6 +464,7 @@ export class RelationshipsController extends TransportController {
                 throw new TransportError("target change status not supported");
         }
         relationship.status = backboneResponse.status;
+        relationship.cache.auditLog = AuditLog.fromBackboneAuditLog(backboneResponse.auditLog);
 
         await this.relationships.update(relationshipDoc, relationship);
 

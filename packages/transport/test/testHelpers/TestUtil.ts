@@ -404,8 +404,8 @@ export class TestUtil {
         return syncResult;
     }
 
-    public static async syncUntilHasRelationships(accountController: AccountController): Promise<Relationship[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.relationships.length > 0);
+    public static async syncUntilHasRelationships(accountController: AccountController, numberOfRelationships = 1): Promise<Relationship[]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.relationships.length > numberOfRelationships - 1);
         return syncResult.relationships;
     }
 
