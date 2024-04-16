@@ -7,8 +7,11 @@ export abstract class AbstractEMailAddress extends AbstractString {
     @serialize()
     @validate({
         min: 3,
-        max: 100,
-        regExp: new RegExp("^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,}$", "i")
+        max: 254,
+        regExp: new RegExp(
+            "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][a-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9]){0,1}[.])+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$",
+            "i"
+        )
     })
     public override value: string;
 
@@ -16,7 +19,7 @@ export abstract class AbstractEMailAddress extends AbstractString {
         return super.valueHints.copyWith({
             min: 3,
             max: 100,
-            pattern: "/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,}$/i"
+            pattern: "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][a-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9]){0,1}[.])+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/i"
         });
     }
 
