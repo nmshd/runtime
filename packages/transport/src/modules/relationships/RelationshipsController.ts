@@ -295,7 +295,6 @@ export class RelationshipsController extends TransportController {
         relationship.status = backboneRelationship.status;
 
         await this.relationships.update(relationshipDoc, relationship);
-        const relationships = await this.relationships.read(relationship.id.toString());
         return relationship;
     }
 
@@ -379,7 +378,6 @@ export class RelationshipsController extends TransportController {
         await this.secrets.createTemplatorSecrets(secretId, template.cache, requestCipher.publicRequestCrypto);
 
         const requestContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.from), secretId);
-        // TODO: transform peer identity from string to identity
         const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, template, requestContent.identity, requestContent.content, secretId);
 
         await this.relationships.create(relationship);
