@@ -39,7 +39,8 @@ export class DeviceMapper {
                 realm: deviceSharedSecret.identity.realm.toString()
             },
             password: deviceSharedSecret.password,
-            username: deviceSharedSecret.username
+            username: deviceSharedSecret.username,
+            profileName: deviceSharedSecret.profileName
         };
     }
 
@@ -60,7 +61,8 @@ export class DeviceMapper {
                 realm: deviceOnboardingDTO.identity.realm as Realm
             },
             password: deviceOnboardingDTO.password,
-            username: deviceOnboardingDTO.username
+            username: deviceOnboardingDTO.username,
+            profileName: deviceOnboardingDTO.profileName
         });
         return sharedSecret;
     }
