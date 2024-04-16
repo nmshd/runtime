@@ -255,7 +255,7 @@ export class TestUtil {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        const acceptedRelationshipFromSelf = await from.relationships.acceptChange(pendingRelationship.cache!.creationChange, {});
+        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         // Get accepted relationship

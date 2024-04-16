@@ -264,7 +264,16 @@ export class TestObjectFactory {
             // @ts-expect-error
             "@type": "Relationship",
             id: CoreId.from("REL1"),
-            status: RelationshipStatus.Pending
+            status: RelationshipStatus.Pending,
+            relationshipSecretId: CoreId.from("REL1"),
+            peer: {
+                address: CoreAddress.from("id2"),
+                publicKey: CryptoSignaturePublicKey.from({
+                    algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
+                    publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
+                }),
+                realm: Realm.Prod
+            }
         };
     }
 
@@ -273,7 +282,16 @@ export class TestObjectFactory {
             // @ts-expect-error
             "@type": "Relationship",
             id: CoreId.from("REL1"),
-            status: RelationshipStatus.Pending
+            status: RelationshipStatus.Pending,
+            relationshipSecretId: CoreId.from("REL1"),
+            peer: {
+                address: CoreAddress.from("id2"),
+                publicKey: CryptoSignaturePublicKey.from({
+                    algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
+                    publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
+                }),
+                realm: Realm.Prod
+            }
         };
     }
 

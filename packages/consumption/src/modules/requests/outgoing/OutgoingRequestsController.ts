@@ -145,7 +145,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             );
         }
 
-        await this._create(requestId, requestContent, peer as CoreAddress); // TODO: check if this downcast works
+        await this._create(requestId, requestContent, peer instanceof CoreAddress ? peer : peer.address);
         await this._sent(requestId, parsedParams.template);
 
         const request = await this._complete(requestId, parsedParams.responseSource, response, parsedParams.responseCreationDate);
