@@ -5,7 +5,7 @@ import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
 export class RelationshipCreatedOrChangedExternalEventProcessor extends ExternalEventProcessor {
     public override async execute(externalEvent: BackboneExternalEvent): Promise<Relationship | undefined> {
-        const payload = externalEvent.payload as { from: string; to: string; relationshipId: string };
+        const payload = externalEvent.payload as { relationshipId: string };
         const relationship = await this.accountController.relationships.applyIncomingEvent(payload.relationshipId);
 
         if (relationship) {
