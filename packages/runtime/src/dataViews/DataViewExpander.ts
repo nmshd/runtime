@@ -47,6 +47,7 @@ import {
 } from "@nmshd/content";
 import { ThirdPartyRelationshipAttributeQueryJSON } from "@nmshd/content/dist/attributes/ThirdPartyRelationshipAttributeQuery";
 import { CoreAddress, CoreId, IdentityController, Realm, Relationship, RelationshipStatus } from "@nmshd/transport";
+import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import {
     AuthenticationRequestItemDVO,
@@ -574,14 +575,10 @@ export class DataViewExpander {
                 if (responseItemDVO && responseItemDVO.result === ResponseItemResult.Accepted) {
                     if (responseItemDVO.type === "AttributeSuccessionAcceptResponseItemDVO") {
                         const attributeSuccessionResponseItem = responseItemDVO as AttributeSuccessionAcceptResponseItemDVO;
-                        if (JSON.stringify(attributeSuccessionResponseItem.successor.content.value) !== JSON.stringify(proposeAttributeRequestItem.attribute.value)) {
-                            proposedValueOverruled = true;
-                        }
+                        proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor.content.value, proposeAttributeRequestItem.attribute.value);
                     } else {
                         const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
-                        if (JSON.stringify(proposeAttributeResponseItem.attribute.content.value) !== JSON.stringify(proposeAttributeRequestItem.attribute.value)) {
-                            proposedValueOverruled = true;
-                        }
+                        proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
                     }
                 }
 

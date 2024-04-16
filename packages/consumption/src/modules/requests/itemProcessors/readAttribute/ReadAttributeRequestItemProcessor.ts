@@ -54,7 +54,9 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             );
             if (latestSharedVersion.length > 0) {
                 if (typeof latestSharedVersion[0].shareInfo?.sourceAttribute === "undefined") {
-                    throw new Error(`The Attribute ${latestSharedVersion[0].id} does not fulfill the requirements of an own shared Attribute.`);
+                    throw new Error(
+                        `The Attribute ${latestSharedVersion[0].id} doesn't have a 'shareInfo.sourceAttribute', even though it was found as shared version of an Attribute.`
+                    );
                 }
 
                 const latestSharedVersionSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedVersion[0].shareInfo.sourceAttribute);
@@ -102,7 +104,9 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const latestSharedAttribute = latestSharedVersion[0];
             if (typeof latestSharedAttribute.shareInfo?.sourceAttribute === "undefined") {
-                throw new Error(`The Attribute ${latestSharedAttribute.id} does not fulfill the requirements of an own shared Attribute.`);
+                throw new Error(
+                    `The Attribute ${latestSharedAttribute.id} doesn't have a 'shareInfo.sourceAttribute', even though it was found as shared version of an Attribute.`
+                );
             }
 
             if (latestSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
@@ -116,7 +120,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             if (await this.consumptionController.attributes.isSubsequentInSuccession(predecessorSourceAttribute, existingSourceAttribute)) {
                 let successorSharedAttribute: LocalAttribute;
-                if (existingSourceAttribute.isIdentityAttribute()) {
+                if (existingSourceAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
                     successorSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
                 } else if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
                     successorSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
