@@ -34,7 +34,7 @@ export class AuditLogEntry extends CoreSerializable implements IAuditLogEntry {
     public newStatus: RelationshipStatus;
 
     public static from(value: IAuditLogEntry): AuditLogEntry {
-        return this.fromAny(value);
+        return this.fromAny({ ...value, oldStatus: value.oldStatus ?? undefined });
     }
 }
 
