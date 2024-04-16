@@ -1,5 +1,4 @@
 import { Result } from "@js-soft/ts-utils";
-import { Notification } from "@nmshd/content";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
@@ -8,12 +7,15 @@ import {
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
     DeleteOwnSharedAttributeAndNotifyPeerRequest,
+    DeleteOwnSharedAttributeAndNotifyPeerResponse,
     DeleteOwnSharedAttributeAndNotifyPeerUseCase,
     DeletePeerSharedAttributeAndNotifyOwnerRequest,
+    DeletePeerSharedAttributeAndNotifyOwnerResponse,
     DeletePeerSharedAttributeAndNotifyOwnerUseCase,
     DeleteRepositoryAttributeRequest,
     DeleteRepositoryAttributeUseCase,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest,
+    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
     ExecuteIdentityAttributeQueryRequest,
     ExecuteIdentityAttributeQueryUseCase,
@@ -155,15 +157,19 @@ export class AttributesFacade {
         return await this.notifyPeerAboutRepositoryAttributeSuccessionUseCase.execute(request);
     }
 
-    public async deleteOwnSharedAttributeAndNotifyPeer(request: DeleteOwnSharedAttributeAndNotifyPeerRequest): Promise<Result<Notification>> {
+    public async deleteOwnSharedAttributeAndNotifyPeer(request: DeleteOwnSharedAttributeAndNotifyPeerRequest): Promise<Result<DeleteOwnSharedAttributeAndNotifyPeerResponse>> {
         return await this.deleteOwnSharedAttributeAndNotifyPeerUseCase.execute(request);
     }
 
-    public async deletePeerSharedAttributeAndNotifyOwner(request: DeletePeerSharedAttributeAndNotifyOwnerRequest): Promise<Result<Notification>> {
+    public async deletePeerSharedAttributeAndNotifyOwner(
+        request: DeletePeerSharedAttributeAndNotifyOwnerRequest
+    ): Promise<Result<DeletePeerSharedAttributeAndNotifyOwnerResponse>> {
         return await this.deletePeerSharedAttributeAndNotifyOwnerUseCase.execute(request);
     }
 
-    public async deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer(request: DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest): Promise<Result<Notification>> {
+    public async deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer(
+        request: DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest
+    ): Promise<Result<DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse>> {
         return await this.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase.execute(request);
     }
 

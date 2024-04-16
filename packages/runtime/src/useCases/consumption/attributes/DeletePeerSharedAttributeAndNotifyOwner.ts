@@ -3,10 +3,14 @@ import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/con
 import { Notification, PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { AccountController, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeletePeerSharedAttributeAndNotifyOwnerRequest {
     attributeId: AttributeIdString;
+}
+
+export interface DeletePeerSharedAttributeAndNotifyOwnerResponse {
+    notificationId: NotificationIdString;
 }
 
 class Validator extends SchemaValidator<DeletePeerSharedAttributeAndNotifyOwnerRequest> {
@@ -15,7 +19,7 @@ class Validator extends SchemaValidator<DeletePeerSharedAttributeAndNotifyOwnerR
     }
 }
 
-export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<DeletePeerSharedAttributeAndNotifyOwnerRequest, Notification> {
+export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<DeletePeerSharedAttributeAndNotifyOwnerRequest, DeletePeerSharedAttributeAndNotifyOwnerResponse> {
     public constructor(
         @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -25,7 +29,7 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
         super(validator);
     }
 
-    protected async executeInternal(request: DeletePeerSharedAttributeAndNotifyOwnerRequest): Promise<Result<Notification>> {
+    protected async executeInternal(request: DeletePeerSharedAttributeAndNotifyOwnerRequest): Promise<Result<DeletePeerSharedAttributeAndNotifyOwnerResponse>> {
         const peerSharedAttributeId = CoreId.from(request.attributeId);
         const peerSharedAttribute = await this.attributesController.getLocalAttribute(peerSharedAttributeId);
 
@@ -57,6 +61,7 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(notification);
+        const result = { notificationId: notificationId.toString() };
+        return Result.ok(result);
     }
 }

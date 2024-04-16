@@ -3,10 +3,14 @@ import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/con
 import { Notification, ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { AccountController, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest {
     attributeId: AttributeIdString;
+}
+
+export interface DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse {
+    notificationId: NotificationIdString;
 }
 
 class Validator extends SchemaValidator<DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest> {
@@ -15,7 +19,10 @@ class Validator extends SchemaValidator<DeleteThirdPartyOwnedRelationshipAttribu
     }
 }
 
-export class DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest, Notification> {
+export class DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<
+    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest,
+    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse
+> {
     public constructor(
         @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -25,7 +32,9 @@ export class DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase exte
         super(validator);
     }
 
-    protected async executeInternal(request: DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest): Promise<Result<Notification>> {
+    protected async executeInternal(
+        request: DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest
+    ): Promise<Result<DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse>> {
         const thirdPartyOwnedRelationshipAttributeId = CoreId.from(request.attributeId);
         const thirdPartyOwnedRelationshipAttribute = await this.attributesController.getLocalAttribute(thirdPartyOwnedRelationshipAttributeId);
 
@@ -57,6 +66,7 @@ export class DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase exte
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(notification);
+        const result = { notificationId: notificationId.toString() };
+        return Result.ok(result);
     }
 }
