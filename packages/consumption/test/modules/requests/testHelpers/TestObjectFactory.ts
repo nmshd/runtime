@@ -268,7 +268,7 @@ export class TestObjectFactory {
         return RelationshipTemplate.from(this.createIncomingIRelationshipTemplate());
     }
 
-    public static createIncomingIRelationship(): IRelationship {
+    public static createIRelationship(): IRelationship {
         return {
             // @ts-expect-error
             "@type": "Relationship",
@@ -282,24 +282,17 @@ export class TestObjectFactory {
                     publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
                 }),
                 realm: Realm.Prod
-            }
-        };
-    }
-
-    public static createOutgoingIRelationship(): IRelationship {
-        return {
-            // @ts-expect-error
-            "@type": "Relationship",
-            id: CoreId.from("REL1"),
-            status: RelationshipStatus.Pending,
-            relationshipSecretId: CoreId.from("REL1"),
-            peer: {
-                address: CoreAddress.from("id2"),
-                publicKey: CryptoSignaturePublicKey.from({
-                    algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
-                    publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
-                }),
-                realm: Realm.Prod
+            },
+            cache: {
+                template: this.createIncomingIRelationshipTemplate(),
+                auditLog: [
+                    {
+                        createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                        createdBy: CoreAddress.from("id2"),
+                        reason: AuditLogEntryReason.Creation,
+                        newStatus: RelationshipStatus.Active
+                    }
+                ]
             }
         };
     }

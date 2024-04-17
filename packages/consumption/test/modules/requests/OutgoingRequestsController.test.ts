@@ -248,7 +248,7 @@ describe("OutgoingRequestsController", function () {
 
             test("uses the id from the response for the created Local Request", async function () {
                 await When.iCreateAnOutgoingRequestFromRelationshipCreationWith({
-                    responseSource: TestObjectFactory.createIncomingIRelationship(),
+                    responseSource: TestObjectFactory.createIRelationship(),
                     response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
 
@@ -267,7 +267,7 @@ describe("OutgoingRequestsController", function () {
                             onNewRelationship: TestObjectFactory.createRequestWithOneItem()
                         })
                     ),
-                    responseSource: TestObjectFactory.createIncomingIRelationship(),
+                    responseSource: TestObjectFactory.createIRelationship(),
                     response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
 

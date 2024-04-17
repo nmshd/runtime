@@ -10,7 +10,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus
 } from "../../../src";
-import { loggerFactory, TestUtil } from "../../core/TestUtil";
+import { TestUtil, loggerFactory } from "../../core/TestUtil";
 import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
@@ -796,7 +796,7 @@ describe("IncomingRequestsController", function () {
 
         test("can handle valid input with a Relationship as responseSource", async function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.Decided);
-            const outgoingRelationship = TestObjectFactory.createOutgoingIRelationship();
+            const outgoingRelationship = TestObjectFactory.createIRelationship();
             await When.iCompleteTheIncomingRequestWith({
                 responseSourceObject: outgoingRelationship
             });
@@ -981,7 +981,7 @@ describe("IncomingRequestsController", function () {
                 ]
             });
 
-            const relationship = TestObjectFactory.createOutgoingIRelationship();
+            const relationship = TestObjectFactory.createIRelationship();
 
             cnsRequest = await context.incomingRequestsController.complete({
                 requestId: cnsRequest.id,

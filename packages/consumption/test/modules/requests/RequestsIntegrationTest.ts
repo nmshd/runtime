@@ -598,7 +598,7 @@ export class RequestsWhen {
                 onExistingRelationship: TestObjectFactory.createRequestWithTwoItems()
             })
         );
-        params.responseSource ??= TestObjectFactory.createIncomingIRelationship();
+        params.responseSource ??= TestObjectFactory.createIRelationship();
         params.response ??= TestObjectFactory.createResponse();
 
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.createAndCompleteFromRelationshipTemplateResponse(
