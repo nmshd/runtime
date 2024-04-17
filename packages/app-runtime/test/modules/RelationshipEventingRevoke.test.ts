@@ -43,6 +43,7 @@ describe("RelationshipEventingRevokeTest", function () {
         const onboardingChangeReceivedEvent = events[1].instance as OnboardingChangeReceivedEvent;
         expect(onboardingChangeReceivedEvent).toBeInstanceOf(OnboardingChangeReceivedEvent);
         expect(onboardingChangeReceivedEvent.data).toBeDefined();
+        expect(onboardingChangeReceivedEvent.data.auditLogEntry.newStatus).toBe(RelationshipStatus.Pending);
         expect(onboardingChangeReceivedEvent.data.identity).toBeDefined();
 
         expect(onboardingChangeReceivedEvent.data.identity.name).toBe(sessionB.accountController.identity.address.toString().substring(3, 9));
@@ -84,6 +85,7 @@ describe("RelationshipEventingRevokeTest", function () {
         const onboardingChangeReceivedEvent = events[1].instance as OnboardingChangeReceivedEvent;
         expect(onboardingChangeReceivedEvent).toBeInstanceOf(OnboardingChangeReceivedEvent);
         expect(onboardingChangeReceivedEvent.data).toBeDefined();
+        expect(onboardingChangeReceivedEvent.data.auditLogEntry.newStatus).toBe(RelationshipStatus.Revoked);
         expect(onboardingChangeReceivedEvent.data.identity).toBeDefined();
 
         expect(onboardingChangeReceivedEvent.data.identity.name).toBe(sessionB.accountController.identity.address.toString().substring(3, 9));
