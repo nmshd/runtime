@@ -1,4 +1,4 @@
-import { AuditLog } from "../../types/transport/RelationshipDTO";
+import { AuditLogDTO } from "../../types/transport/RelationshipDTO";
 import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 
@@ -15,7 +15,7 @@ export interface RelationshipDVO extends DataViewObject {
     isPinned: boolean;
     theme?: RelationshipTheme;
     creationContent?: any;
-    auditLog?: AuditLog;
+    auditLog?: AuditLogDTO;
     items: LocalAttributeDVO[];
     attributeMap: Record<string, undefined | LocalAttributeDVO[]>;
     nameMap: Record<string, undefined | string>;

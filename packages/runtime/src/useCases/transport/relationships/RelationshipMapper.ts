@@ -1,5 +1,6 @@
 import { Relationship } from "@nmshd/transport";
-import { AuditLog, RelationshipDTO } from "../../../types";
+import { AuditLogEntry } from "@nmshd/transport/src/modules/relationships/local/AuditLog";
+import { AuditLogEntryDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
 
@@ -8,11 +9,6 @@ export class RelationshipMapper {
         if (!relationship.cache) {
             throw RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString());
         }
-
-        const auditLogDTO: AuditLog = [];
-        relationship.cache.auditLog?.forEach((entry) => {
-            auditLogDTO.push({ ...entry, createdAt: entry.createdAt.toString(), createdBy: entry.createdBy.toString() });
-        });
 
         return {
             id: relationship.id.toString(),
@@ -24,8 +20,18 @@ export class RelationshipMapper {
                 publicKey: relationship.peer.publicKey.toBase64(false),
                 realm: relationship.peer.realm
             },
-            auditLog: auditLogDTO,
+            auditLog: relationship.cache.auditLog?.map((entry) => this.toAuditLogEntryDTO(entry)),
             creationContent: relationship.cache.creationContent?.toJSON()
+        };
+    }
+
+    private static toAuditLogEntryDTO(entry: AuditLogEntry): AuditLogEntryDTO {
+        return {
+            createdAt: entry.createdAt.toString(),
+            createdBy: entry.createdBy.toString(),
+            reason: entry.reason,
+            oldStatus: entry.oldStatus,
+            newStatus: entry.newStatus
         };
     }
 

@@ -16,7 +16,7 @@ export enum AuditLogEntryReason {
     RejectionOfCreation = "RejectionofCreation",
     RevocationOfCreation = "RevocationOfCreation"
 }
-export interface AuditLogEntry {
+export interface AuditLogEntryDTO {
     createdAt: string;
     createdBy: string;
     reason: AuditLogEntryReason;
@@ -24,7 +24,7 @@ export interface AuditLogEntry {
     newStatus: RelationshipStatus;
 }
 
-export interface AuditLog extends Array<AuditLogEntry> {}
+export interface AuditLogDTO extends Array<AuditLogEntryDTO> {}
 
 export interface RelationshipDTO {
     id: string;
@@ -33,5 +33,5 @@ export interface RelationshipDTO {
     peer: string;
     peerIdentity: IdentityDTO;
     creationContent: any;
-    auditLog?: AuditLog;
+    auditLog?: AuditLogDTO;
 }
