@@ -126,7 +126,11 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(parsedParams.attributeId, [requestInfo.peer], true);
 
             if (latestSharedVersion.length === 0) {
-                sharedLocalAttribute = await this.copyExistingAttribute(existingSourceAttribute.id, requestInfo);
+                sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: CoreId.from(existingSourceAttribute.id),
+                    peer: CoreAddress.from(requestInfo.peer),
+                    requestReference: CoreId.from(requestInfo.id)
+                });
                 return ProposeAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: sharedLocalAttribute.id,
@@ -168,14 +172,6 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             result: ResponseItemResult.Accepted,
             attributeId: sharedLocalAttribute.id,
             attribute: sharedLocalAttribute.content
-        });
-    }
-
-    private async copyExistingAttribute(attributeId: CoreId, requestInfo: LocalRequestInfo) {
-        return await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-            sourceAttributeId: CoreId.from(attributeId),
-            peer: CoreAddress.from(requestInfo.peer),
-            requestReference: CoreId.from(requestInfo.id)
         });
     }
 
@@ -226,7 +222,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             });
         }
 
-        if (responseItem instanceof AttributeSuccessionAcceptResponseItem) {
+        if (responseItem instanceof AttributeSuccessionAcceptResponseItem && responseItem.successorContent instanceof IdentityAttribute) {
             const successorParams = AttributeSuccessorParams.from({
                 id: responseItem.successorId,
                 content: responseItem.successorContent,
@@ -235,17 +231,9 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     requestReference: requestInfo.id
                 })
             });
-
-            if (responseItem.successorContent instanceof IdentityAttribute) {
-                const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
-                return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
-            } else if (responseItem.successorContent.owner === requestInfo.peer) {
-                await this.consumptionController.attributes.succeedPeerSharedRelationshipAttribute(responseItem.predecessorId, successorParams);
-            } else {
-                await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(responseItem.predecessorId, successorParams);
-            }
+            const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
+            return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
         }
-
         return;
     }
 }

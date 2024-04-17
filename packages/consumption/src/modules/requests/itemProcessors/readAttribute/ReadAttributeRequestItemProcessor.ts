@@ -94,7 +94,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             );
 
             if (latestSharedVersion.length === 0) {
-                sharedLocalAttribute = await this.copyExistingAttribute(existingSourceAttribute.id, requestInfo);
+                sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: CoreId.from(existingSourceAttribute.id),
+                    peer: CoreAddress.from(requestInfo.peer),
+                    requestReference: CoreId.from(requestInfo.id)
+                });
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: sharedLocalAttribute.id,
@@ -141,14 +145,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             result: ResponseItemResult.Accepted,
             attributeId: sharedLocalAttribute.id,
             attribute: sharedLocalAttribute.content
-        });
-    }
-
-    private async copyExistingAttribute(attributeId: CoreId, requestInfo: LocalRequestInfo) {
-        return await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-            sourceAttributeId: CoreId.from(attributeId),
-            peer: CoreAddress.from(requestInfo.peer),
-            requestReference: CoreId.from(requestInfo.id)
         });
     }
 
