@@ -148,7 +148,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         await this._create(requestId, requestContent, peer instanceof CoreAddress ? peer : peer.address);
         await this._sent(requestId, parsedParams.template);
 
-        const request = await this._complete(requestId, parsedParams.responseSource, response, parsedParams.responseCreationDate);
+        const request = await this._complete(requestId, parsedParams.responseSource, response);
         this.eventBus.publish(new OutgoingRequestCreatedAndCompletedEvent(this.identity.address.toString(), request));
 
         return request;
@@ -218,12 +218,13 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    private async _complete(requestId: CoreId, responseSourceObject: Message | Relationship, receivedResponse: Response, responseCreationDate?: CoreDate): Promise<LocalRequest> {
+    private async _complete(requestId: CoreId, responseSourceObject: Message | Relationship, receivedResponse: Response): Promise<LocalRequest> {
         const request = await this.getOrThrow(requestId);
 
         this.assertRequestStatus(request, LocalRequestStatus.Open, LocalRequestStatus.Expired);
-        // only the message contains a creation date
-        const responseSourceObjectCreationDate = responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseCreationDate;
+
+        const responseSourceObjectCreationDate =
+            responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.cache?.auditLog![0].createdAt;
         if (request.status === LocalRequestStatus.Expired && request.isExpired(responseSourceObjectCreationDate)) {
             throw new ConsumptionError("Cannot complete an expired request with a response that was created before the expiration date");
         }

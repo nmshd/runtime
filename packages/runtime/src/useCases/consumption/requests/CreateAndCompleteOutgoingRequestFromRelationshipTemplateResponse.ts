@@ -1,7 +1,7 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { Response, ResponseJSON } from "@nmshd/content";
-import { CoreDate, CoreId, MessageController, Relationship, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { CoreId, MessageController, Relationship, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
 import { MessageIdString, RelationshipIdString, RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
@@ -33,19 +33,14 @@ export class CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseUse
         }
 
         const responseSource = await this.getResponseSource(request.responseSourceId);
-        let responseCreationDate: CoreDate | undefined;
-        if (request.responseSourceId.startsWith("REL")) {
-            responseCreationDate = (await this.relationshipController.getAuditLog(CoreId.from(request.responseSourceId)))[0].createdAt;
-        }
         if (!responseSource) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(Relationship)); // TODO: assess if Relationship is correct
+            return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }
 
         const localRequest = await this.outgoingRequestsController.createAndCompleteFromRelationshipTemplateResponse({
             template,
             responseSource,
-            response: Response.from(request.response),
-            responseCreationDate: responseCreationDate
+            response: Response.from(request.response)
         });
 
         return Result.ok(RequestMapper.toLocalRequestDTO(localRequest));

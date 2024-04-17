@@ -1550,7 +1550,7 @@ export class DataViewExpander {
         }
 
         let direction = RelationshipDirection.Incoming;
-        if (relationship.template.isOwn) {
+        if (!relationship.template.isOwn) {
             direction = RelationshipDirection.Outgoing;
         }
 

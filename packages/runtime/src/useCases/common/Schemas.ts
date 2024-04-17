@@ -21124,11 +21124,11 @@ export const CreateRelationshipRequest: any = {
                 "templateId": {
                     "$ref": "#/definitions/RelationshipTemplateIdString"
                 },
-                "content": {}
+                "creationContent": {}
             },
             "required": [
                 "templateId",
-                "content"
+                "creationContent"
             ],
             "additionalProperties": false
         },

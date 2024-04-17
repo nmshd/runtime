@@ -293,7 +293,7 @@ export class RequestModule extends RuntimeModule {
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,
             responseSourceId: createdRelationship.id,
-            response: createdRelationship.creationContent
+            response: createdRelationship.creationContent.response
         });
         if (result.isError) {
             this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${createdRelationship.id}'. Root error:`, result.error);

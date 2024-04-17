@@ -10,7 +10,7 @@ export class RelationshipMapper {
         }
 
         const auditLogDTO: AuditLog = [];
-        relationship.auditLog?.forEach((entry) => {
+        relationship.cache.auditLog?.forEach((entry) => {
             auditLogDTO.push({ ...entry, createdAt: entry.createdAt.toString(), createdBy: entry.createdBy.toString() });
         });
 
@@ -25,7 +25,7 @@ export class RelationshipMapper {
                 realm: relationship.peer.realm
             },
             auditLog: auditLogDTO,
-            creationContent: relationship.cache.creationContent
+            creationContent: relationship.cache.creationContent?.toJSON()
         };
     }
 
