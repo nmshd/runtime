@@ -101,7 +101,7 @@ describe("RelationshipTest: Accept", function () {
         expect(request.status).toStrictEqual(RelationshipStatus.Pending);
 
         expect(request.cache?.auditLog).toHaveLength(1);
-        expect(request.cache!.auditLog![0].newStatus).toBe(RelationshipStatus.Pending);
+        expect(request.cache!.auditLog[0].newStatus).toBe(RelationshipStatus.Pending);
 
         // Accept relationship
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
@@ -122,7 +122,7 @@ describe("RelationshipTest: Accept", function () {
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         expect(acceptedRelationshipFromSelf.cache?.auditLog).toHaveLength(2);
-        expect(acceptedRelationshipFromSelf.cache!.auditLog![1].newStatus).toBe(RelationshipStatus.Active);
+        expect(acceptedRelationshipFromSelf.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Active);
 
         expect(acceptedRelationshipFromSelf.peer).toBeDefined();
 
@@ -135,7 +135,7 @@ describe("RelationshipTest: Accept", function () {
         expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
 
         expect(acceptedRelationshipPeer.cache?.auditLog).toHaveLength(2);
-        expect(acceptedRelationshipPeer.cache!.auditLog![1].newStatus).toBe(RelationshipStatus.Active);
+        expect(acceptedRelationshipPeer.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Active);
         expect(acceptedRelationshipPeer.peer).toBeDefined();
         expect(acceptedRelationshipPeer.peer.address.toString()).toStrictEqual(templateTo.cache?.identity.address.toString());
     });
@@ -233,7 +233,7 @@ describe("RelationshipTest: Reject", function () {
         expect(rejectedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
         expect(rejectedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Rejected);
         expect(rejectedRelationshipFromSelf.cache?.auditLog).toHaveLength(2);
-        expect(rejectedRelationshipFromSelf.cache!.auditLog![1].newStatus).toBe(RelationshipStatus.Rejected);
+        expect(rejectedRelationshipFromSelf.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Rejected);
 
         expect(rejectedRelationshipFromSelf.peer).toBeDefined();
 
@@ -246,7 +246,7 @@ describe("RelationshipTest: Reject", function () {
         expect(rejectedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
         expect(rejectedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
         expect(rejectedRelationshipPeer.cache?.auditLog).toHaveLength(2);
-        expect(rejectedRelationshipPeer.cache!.auditLog![1].newStatus).toBe(RelationshipStatus.Rejected);
+        expect(rejectedRelationshipPeer.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Rejected);
         expect(rejectedRelationshipPeer.peer).toBeDefined();
         expect(rejectedRelationshipPeer.peer.address.toString()).toStrictEqual(templateTo.cache?.identity.address.toString());
     });
@@ -351,7 +351,7 @@ describe("RelationshipTest: Revoke", function () {
         expect(revokedRelationshipSelf.id.toString()).toStrictEqual(relationshipId.toString());
         expect(revokedRelationshipSelf.status).toStrictEqual(RelationshipStatus.Revoked);
         expect(revokedRelationshipSelf.cache?.auditLog).toHaveLength(2);
-        expect(revokedRelationshipSelf.cache!.auditLog![1].newStatus).toBe(RelationshipStatus.Revoked);
+        expect(revokedRelationshipSelf.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Revoked);
         expect(revokedRelationshipSelf.peer).toBeDefined();
         expect(revokedRelationshipSelf.peer.address.toString()).toStrictEqual(revokedRelationshipSelf.cache!.template.cache?.identity.address.toString());
 
@@ -363,7 +363,7 @@ describe("RelationshipTest: Revoke", function () {
         expect(revokedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
         expect(revokedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Revoked);
         expect(revokedRelationshipPeer.cache?.auditLog).toHaveLength(2);
-        expect(revokedRelationshipPeer.cache!.auditLog![1].newStatus).toBe(RelationshipStatus.Revoked);
+        expect(revokedRelationshipPeer.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Revoked);
         expect(revokedRelationshipPeer.peer).toBeDefined();
     });
 

@@ -1567,7 +1567,7 @@ export class DataViewExpander {
             statusText = DataViewTranslateable.transport.relationshipActive;
         }
 
-        const creationDate = relationship.auditLog?.[0].createdAt;
+        const creationDate = relationship.auditLog[0].createdAt;
 
         let name;
         if (stringByType["DisplayName"]) {

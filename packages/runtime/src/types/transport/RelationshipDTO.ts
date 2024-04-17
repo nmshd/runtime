@@ -33,5 +33,5 @@ export interface RelationshipDTO {
     peer: string;
     peerIdentity: IdentityDTO;
     creationContent: any;
-    auditLog?: AuditLogDTO;
+    auditLog: AuditLogDTO;
 }

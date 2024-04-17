@@ -15,7 +15,7 @@ export interface RelationshipDVO extends DataViewObject {
     isPinned: boolean;
     theme?: RelationshipTheme;
     creationContent?: any;
-    auditLog?: AuditLogDTO;
+    auditLog: AuditLogDTO;
     items: LocalAttributeDVO[];
     attributeMap: Record<string, undefined | LocalAttributeDVO[]>;
     nameMap: Record<string, undefined | string>;

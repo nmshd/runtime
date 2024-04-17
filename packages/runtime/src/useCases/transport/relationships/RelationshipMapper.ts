@@ -19,7 +19,7 @@ export class RelationshipMapper {
                 publicKey: relationship.peer.publicKey.toBase64(false),
                 realm: relationship.peer.realm
             },
-            auditLog: relationship.cache.auditLog?.map((entry) => this.toAuditLogEntryDTO(entry)),
+            auditLog: relationship.cache.auditLog.map((entry) => this.toAuditLogEntryDTO(entry)),
             creationContent: relationship.cache.creationContent?.toJSON()
         };
     }

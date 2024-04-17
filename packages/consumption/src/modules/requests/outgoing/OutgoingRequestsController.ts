@@ -224,7 +224,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         this.assertRequestStatus(request, LocalRequestStatus.Open, LocalRequestStatus.Expired);
 
         const responseSourceObjectCreationDate =
-            responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.cache?.auditLog![0].createdAt;
+            responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.cache!.auditLog[0].createdAt;
         if (request.status === LocalRequestStatus.Expired && request.isExpired(responseSourceObjectCreationDate)) {
             throw new ConsumptionError("Cannot complete an expired request with a response that was created before the expiration date");
         }
