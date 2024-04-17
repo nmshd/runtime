@@ -19,19 +19,16 @@ export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChan
     private async handleRelationshipChanged(event: RelationshipChangedEvent) {
         const relationship = event.data;
         // Only listen for the creation change (the first one)
-        if (relationship.changes.length !== 1) return;
+        if (relationship.auditLog?.length !== 1) return;
 
-        const change = relationship.changes[0];
+        const auditLogEntry = relationship.auditLog[0];
 
-        // response doest not exist and request created by the current identity
-        if (!change.response && change.request.createdBy === event.eventTargetAddress) return;
-
-        // response exists and created by the current identity
-        if (change.response && change.response.createdBy === event.eventTargetAddress) return;
+        // relationship created by the current identity
+        if (auditLogEntry.createdBy === event.eventTargetAddress) return;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const relationshipDVO = await services.dataViewExpander.expandRelationshipDTO(relationship);
-        this.runtime.eventBus.publish(new OnboardingChangeReceivedEvent(event.eventTargetAddress, change, relationship, relationshipDVO));
+        this.runtime.eventBus.publish(new OnboardingChangeReceivedEvent(event.eventTargetAddress, relationship, relationshipDVO));
     }
 
     public stop(): void {
