@@ -59,6 +59,7 @@ export * from "./messages/transmission/MessageSigned";
 export * from "./relationships/backbone/BackboneGetRelationships";
 export * from "./relationships/backbone/BackbonePostRelationship";
 export * from "./relationships/backbone/RelationshipClient";
+export * from "./relationships/local/AuditLog";
 export * from "./relationships/local/CachedRelationship";
 export * from "./relationships/local/Relationship";
 export * from "./relationships/local/SendRelationshipParameters";
