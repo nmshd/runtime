@@ -71,22 +71,6 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         return json;
     }
 
-    public static fromRequestSent(id: CoreId, template: IRelationshipTemplate, peer: IIdentity, creationContent: ISerializable, relationshipSecretId: CoreId): Relationship {
-        const cache = CachedRelationship.from({
-            creationContent,
-            template: template
-        });
-
-        return Relationship.from({
-            id: id,
-            peer: peer,
-            status: RelationshipStatus.Pending,
-            cache: cache,
-            cachedAt: CoreDate.utc(),
-            relationshipSecretId: relationshipSecretId
-        });
-    }
-
     public static fromBackboneAndCreationContent(
         response: BackboneGetRelationshipsResponse,
         template: IRelationshipTemplate,

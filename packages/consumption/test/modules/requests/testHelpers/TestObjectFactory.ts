@@ -35,6 +35,7 @@ import {
     RelationshipTemplate,
     RelationshipTemplatePublicKey
 } from "@nmshd/transport";
+import { AuditLogEntryReason } from "@nmshd/transport/dist/modules/relationships/transmission/AuditLog";
 import { ILocalRequest, LocalRequest, LocalRequestStatus, LocalRequestStatusLogEntry } from "../../../../src";
 import { TestRequestItem } from "./TestRequestItem";
 
@@ -57,6 +58,14 @@ export class TestObjectFactory {
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
+                    auditLog: [
+                        {
+                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("id2"),
+                            reason: AuditLogEntryReason.Creation,
+                            newStatus: RelationshipStatus.Active
+                        }
+                    ],
                     template: this.createIncomingRelationshipTemplate()
                 })
         });

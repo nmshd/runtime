@@ -10,7 +10,7 @@ export interface ICachedRelationship extends ICoreSerializable {
 
     lastMessageSentAt?: ICoreDate;
     lastMessageReceivedAt?: ICoreDate;
-    auditLog?: IAuditLogEntry[];
+    auditLog: IAuditLogEntry[];
 }
 
 @type("CachedRelationship")
@@ -35,9 +35,9 @@ export class CachedRelationship extends CoreSerializable implements ICachedRelat
     @serialize()
     public lastMessageReceivedAt?: CoreDate;
 
-    @validate({ nullable: true })
-    @serialize()
-    public auditLog?: AuditLogEntry[];
+    @validate()
+    @serialize({ type: AuditLogEntry })
+    public auditLog: AuditLogEntry[];
 
     public static from(value: ICachedRelationship): CachedRelationship {
         return this.fromAny(value);
