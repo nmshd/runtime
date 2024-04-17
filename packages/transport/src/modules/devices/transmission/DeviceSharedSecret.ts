@@ -1,7 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoSecretKey, CryptoSignaturePrivateKey, ICryptoSecretKey, ICryptoSignaturePrivateKey } from "@nmshd/crypto";
 import { CoreDate, CoreId, CoreSerializable, ICoreId } from "../../../core";
-import { IIdentity, Identity } from "../../accounts/data/Identity";
+import { Identity, IIdentity } from "../../accounts/data/Identity";
 
 export interface IDeviceSharedSecret {
     id: ICoreId;
@@ -9,6 +9,7 @@ export interface IDeviceSharedSecret {
     createdByDevice: CoreId;
     name?: string;
     description?: string;
+    profileName?: string;
     secretBaseKey: CryptoSecretKey;
     deviceIndex: number;
     synchronizationKey: ICryptoSecretKey;
@@ -39,6 +40,10 @@ export class DeviceSharedSecret extends CoreSerializable implements IDeviceShare
     @serialize()
     @validate({ nullable: true })
     public description?: string;
+
+    @serialize()
+    @validate({ nullable: true })
+    public profileName?: string;
 
     @serialize()
     @validate()
