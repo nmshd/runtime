@@ -1,4 +1,4 @@
-import { RelationshipChangedEvent } from "@nmshd/runtime";
+import { AuditLogEntryReason, RelationshipChangedEvent } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { OnboardingChangeReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
@@ -18,17 +18,23 @@ export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChan
 
     private async handleRelationshipChanged(event: RelationshipChangedEvent) {
         const relationship = event.data;
-        // Only listen for the creation change (the first one)
-        if (relationship.auditLog?.length !== 1) return;
 
-        const auditLogEntry = relationship.auditLog[0];
+        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
 
-        // relationship created by the current identity
-        if (auditLogEntry.createdBy === event.eventTargetAddress) return;
+        switch (lastAuditLogEntry.reason) {
+            case AuditLogEntryReason.Creation:
+            case AuditLogEntryReason.AcceptanceOfCreation:
+            case AuditLogEntryReason.RevocationOfCreation:
+            case AuditLogEntryReason.RejectionOfCreation:
+                break;
+
+            default:
+                return;
+        }
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const relationshipDVO = await services.dataViewExpander.expandRelationshipDTO(relationship);
-        this.runtime.eventBus.publish(new OnboardingChangeReceivedEvent(event.eventTargetAddress, relationship, relationshipDVO));
+        this.runtime.eventBus.publish(new OnboardingChangeReceivedEvent(event.eventTargetAddress, relationship, lastAuditLogEntry, relationshipDVO));
     }
 
     public stop(): void {
