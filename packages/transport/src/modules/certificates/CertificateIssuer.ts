@@ -30,11 +30,11 @@ export class CertificateIssuer extends TransportController {
     public async issueCertificate(value: CertificateContentParam | ICertificateContent): Promise<Certificate> {
         const content = CertificateContent.from(value);
         const serializedContent = content.serialize();
-        const contentBuffer: CoreBuffer = CoreBuffer.fromUtf8(serializedContent);
+        const contentBuffer = CoreBuffer.fromUtf8(serializedContent);
 
         const signature = await this.parent.identity.sign(contentBuffer);
 
-        const cert: Certificate = Certificate.from({
+        const cert = Certificate.from({
             content: serializedContent,
             signature: signature
         });

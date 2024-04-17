@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/runtime",
-    "version": "4.4.2",
+    "version": "4.5.0",
     "description": "The enmeshed client runtime.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -68,7 +68,7 @@
         "@nmshd/consumption": "3.9.7",
         "@nmshd/content": "2.8.11",
         "@nmshd/crypto": "2.0.6",
-        "@nmshd/transport": "2.4.2",
+        "@nmshd/transport": "2.5.0",
         "ajv": "^8.12.0",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
@@ -88,7 +88,7 @@
         "@types/lodash": "^4.17.0",
         "@types/luxon": "^3.4.2",
         "@types/qrcode": "^1.5.5",
-        "ts-json-schema-generator": "^1.5.1"
+        "ts-json-schema-generator": "^2.0.1"
     },
     "publishConfig": {
         "access": "public",

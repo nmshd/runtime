@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CoreBuffer } from "@nmshd/crypto";
-import { AccountController, CoreDate, File, FileReference, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "../../src";
+import { AccountController, CoreDate, FileReference, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "../../src";
 import { TestUtil } from "../testHelpers/TestUtil";
 
 describe("AccountTest", function () {
@@ -518,32 +518,32 @@ describe("FileTest", function () {
     });
 
     test("should upload a file directly and download it afterwards", async function () {
-        const content: CoreBuffer = CoreBuffer.fromUtf8("abcd");
+        const content = CoreBuffer.fromUtf8("abcd");
 
-        const file: File = await TestUtil.uploadFile(from, content);
+        const file = await TestUtil.uploadFile(from, content);
         const ref: any = file.toFileReference().toJSON();
 
-        const parcelRef: FileReference = FileReference.from(ref);
+        const parcelRef = FileReference.from(ref);
 
-        const downloadedFile: File = await to.files.getOrLoadFileByReference(parcelRef);
+        const downloadedFile = await to.files.getOrLoadFileByReference(parcelRef);
 
-        const downloadedContent: CoreBuffer = await to.files.downloadFileContent(downloadedFile);
+        const downloadedContent = await to.files.downloadFileContent(downloadedFile);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
 
     test("should again upload a file directly and download it afterwards from the same account", async function () {
-        const content: CoreBuffer = CoreBuffer.fromUtf8("abcd");
+        const content = CoreBuffer.fromUtf8("abcd");
 
-        const file: File = await TestUtil.uploadFile(from, content);
+        const file = await TestUtil.uploadFile(from, content);
 
         const ref: any = file.toFileReference().toJSON();
 
-        const parcelRef: FileReference = FileReference.from(ref);
+        const parcelRef = FileReference.from(ref);
 
-        const downloadedFile: File = await from.files.getOrLoadFileByReference(parcelRef);
+        const downloadedFile = await from.files.getOrLoadFileByReference(parcelRef);
 
-        const downloadedContent: CoreBuffer = await from.files.downloadFileContent(downloadedFile);
+        const downloadedContent = await from.files.downloadFileContent(downloadedFile);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
