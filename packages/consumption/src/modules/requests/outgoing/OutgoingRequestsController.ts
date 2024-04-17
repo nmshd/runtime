@@ -126,7 +126,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     public async createAndCompleteFromRelationshipTemplateResponse(params: ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters): Promise<LocalRequest> {
         const parsedParams = CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters.from(params);
 
-        const peer = parsedParams.responseSource instanceof Relationship ? parsedParams.responseSource.peer : parsedParams.responseSource.cache!.createdBy;
+        const peer = parsedParams.responseSource instanceof Relationship ? parsedParams.responseSource.peer.address : parsedParams.responseSource.cache!.createdBy;
         const response = parsedParams.response;
         const requestId = response.requestId;
 
@@ -145,7 +145,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             );
         }
 
-        await this._create(requestId, requestContent, peer instanceof CoreAddress ? peer : peer.address);
+        await this._create(requestId, requestContent, peer);
         await this._sent(requestId, parsedParams.template);
 
         const request = await this._complete(requestId, parsedParams.responseSource, response);
