@@ -14,6 +14,6 @@ export interface AuditLogEntry {
 export enum AuditLogEntryReason {
     Creation = "Creation",
     AcceptanceOfCreation = "AcceptanceOfCreation",
-    RejectionOfCreation = "RejectionofCreation",
+    RejectionOfCreation = "RejectionOfCreation",
     RevocationOfCreation = "RevocationOfCreation"
 }

@@ -13,7 +13,7 @@ export enum RelationshipStatus {
 export enum AuditLogEntryReason {
     Creation = "Creation",
     AcceptanceOfCreation = "AcceptanceOfCreation",
-    RejectionOfCreation = "RejectionofCreation",
+    RejectionOfCreation = "RejectionOfCreation",
     RevocationOfCreation = "RevocationOfCreation"
 }
 export interface AuditLogEntryDTO {
