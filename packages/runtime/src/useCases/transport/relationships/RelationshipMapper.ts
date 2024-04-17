@@ -1,5 +1,4 @@
-import { Relationship } from "@nmshd/transport";
-import { AuditLogEntry } from "@nmshd/transport/src/modules/relationships/local/AuditLog";
+import { AuditLogEntry, Relationship } from "@nmshd/transport";
 import { AuditLogEntryDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
