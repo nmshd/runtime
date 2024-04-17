@@ -21,6 +21,9 @@ export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChan
 
         const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
 
+        // Do not process changes that were created by the current user
+        if (lastAuditLogEntry.createdBy === event.eventTargetAddress) return;
+
         switch (lastAuditLogEntry.reason) {
             case AuditLogEntryReason.Creation:
             case AuditLogEntryReason.AcceptanceOfCreation:
@@ -34,7 +37,9 @@ export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChan
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const relationshipDVO = await services.dataViewExpander.expandRelationshipDTO(relationship);
-        this.runtime.eventBus.publish(new OnboardingChangeReceivedEvent(event.eventTargetAddress, relationship, lastAuditLogEntry, relationshipDVO));
+
+        const eventToPublish = new OnboardingChangeReceivedEvent(event.eventTargetAddress, relationship, lastAuditLogEntry, relationshipDVO);
+        this.runtime.eventBus.publish(eventToPublish);
     }
 
     public stop(): void {
