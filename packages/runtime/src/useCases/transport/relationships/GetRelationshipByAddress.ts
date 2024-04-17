@@ -7,7 +7,6 @@ import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface GetRelationshipByAddressRequest {
     address: AddressString;
-    withAuditLog?: boolean;
 }
 
 class Validator extends SchemaValidator<GetRelationshipByAddressRequest> {
@@ -25,7 +24,7 @@ export class GetRelationshipByAddressUseCase extends UseCase<GetRelationshipByAd
     }
 
     protected async executeInternal(request: GetRelationshipByAddressRequest): Promise<Result<RelationshipDTO>> {
-        const relationship = await this.relationshipsController.getRelationshipToIdentity(CoreAddress.from(request.address), undefined, request.withAuditLog);
+        const relationship = await this.relationshipsController.getRelationshipToIdentity(CoreAddress.from(request.address), undefined);
         if (!relationship) {
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }

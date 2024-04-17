@@ -15,7 +15,6 @@ export interface GetRelationshipsQuery {
 
 export interface GetRelationshipsRequest {
     query?: GetRelationshipsQuery;
-    withAuditLog?: boolean;
 }
 
 class Validator extends SchemaValidator<GetRelationshipsRequest> {
@@ -50,7 +49,7 @@ export class GetRelationshipsUseCase extends UseCase<GetRelationshipsRequest, Re
     protected async executeInternal(request: GetRelationshipsRequest): Promise<Result<RelationshipDTO[]>> {
         const query = GetRelationshipsUseCase.queryTranslator.parse(request.query);
 
-        const relationships = await this.relationshipsController.getRelationships(query, request.withAuditLog);
+        const relationships = await this.relationshipsController.getRelationships(query);
 
         return Result.ok(RelationshipMapper.toRelationshipDTOList(relationships));
     }
