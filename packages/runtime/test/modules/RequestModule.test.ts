@@ -1,5 +1,14 @@
 import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
-import { GivenName, IdentityAttribute, RelationshipTemplateContentJSON, ResponseItemJSON, ResponseItemResult, ResponseResult } from "@nmshd/content";
+import {
+    GivenName,
+    IdentityAttribute,
+    RelationshipCreationChangeRequestContentJSON,
+    RelationshipCreationContentJSON,
+    RelationshipTemplateContentJSON,
+    ResponseItemJSON,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -173,7 +182,11 @@ describe("RequestModule", () => {
 
             const relationship = relationships[0];
 
-            const creationContent = relationship.creationContent;
+            const creationContent = relationship.creationContent as RelationshipCreationContentJSON;
+            expect(creationContent["@type"]).toBe("RelatinshipCreationContent");
+
+            const creationChangeRequestContent = relationship.changes[0].request.content as RelationshipCreationChangeRequestContentJSON;
+            expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationChangeRequestContent");
 
             const response = creationContent.response;
             const responseItems = response.items;
