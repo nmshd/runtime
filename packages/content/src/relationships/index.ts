@@ -1,2 +1,2 @@
-export * from "./RelationshipCreationRequestContent";
+export * from "./RelationshipCreationContent";
 export * from "./RelationshipTemplateContent";

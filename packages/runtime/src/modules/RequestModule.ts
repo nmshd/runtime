@@ -1,13 +1,6 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import {
-    RelationshipCreationRequestContent,
-    RelationshipTemplateContentJSON,
-    RequestJSON,
-    ResponseJSON,
-    ResponseResult,
-    ResponseWrapper,
-    ResponseWrapperJSON
-} from "@nmshd/content";
+import { RelationshipCreationContent, RelationshipTemplateContentJSON, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper, ResponseWrapperJSON } from "@nmshd/content";
+import { RuntimeServices } from "../Runtime";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -19,7 +12,6 @@ import {
 } from "../events";
 import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
-import { RuntimeServices } from "../Runtime";
 import { LocalRequestDTO, RelationshipStatus } from "../types";
 
 export class RequestModule extends RuntimeModule {
@@ -225,7 +217,7 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        const creationContent = RelationshipCreationRequestContent.from({ response: request.response!.content });
+        const creationContent = RelationshipCreationContent.from({ response: request.response!.content });
         const createRelationshipResult = await services.transportServices.relationships.createRelationship({ templateId, creationContent: creationContent });
         if (createRelationshipResult.isError) {
             this.logger.error(`Could not create relationship for templateId '${templateId}'. Root error:`, createRelationshipResult.error);
