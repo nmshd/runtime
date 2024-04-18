@@ -1,4 +1,5 @@
 export * from "./authentication/AuthenticationRequestItem";
+export * from "./common/AttributeAlreadySharedAcceptResponseItem";
 export * from "./common/AttributeSuccessionAcceptResponseItem";
 export * from "./consent/ConsentRequestItem";
 export * from "./createAttribute/CreateAttributeAcceptResponseItem";

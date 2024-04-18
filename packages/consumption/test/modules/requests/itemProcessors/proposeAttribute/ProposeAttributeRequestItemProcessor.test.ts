@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    AttributeAlreadySharedAcceptResponseItem,
     AttributeSuccessionAcceptResponseItem,
     GivenName,
     IdentityAttribute,
@@ -669,6 +670,54 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.succeededBy).toStrictEqual(successorOwnSharedIdentityAttribute!.id);
+        });
+
+        test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
+            const sender = CoreAddress.from("Sender");
+
+            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            const alreadySharedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: repositoryAttribute.id,
+                peer: sender,
+                requestReference: await CoreId.generate()
+            });
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                attribute: IdentityAttribute.from({
+                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    owner: CoreAddress.from("")
+                })
+            });
+
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                attributeId: repositoryAttribute.id.toString()
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
+            expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(alreadySharedAttribute.id);
         });
     });
 

@@ -1,4 +1,5 @@
 import {
+    AttributeAlreadySharedAcceptResponseItem,
     AttributeSuccessionAcceptResponseItem,
     IdentityAttribute,
     ProposeAttributeAcceptResponseItem,
@@ -113,7 +114,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         _requestItem: ProposeAttributeRequestItem,
         params: AcceptProposeAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
-    ): Promise<ProposeAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem> {
+    ): Promise<ProposeAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
         const parsedParams = AcceptProposeAttributeRequestItemParameters.from(params);
 
         let sharedLocalAttribute: LocalAttribute;
@@ -146,7 +147,10 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
 
             if (latestSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
-                // return new AttributeAlreadySharedResponseItem
+                return AttributeAlreadySharedAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: latestSharedAttribute.id
+                });
             }
 
             const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedAttribute.shareInfo.sourceAttribute);
@@ -209,7 +213,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
     }
 
     public override async applyIncomingResponseItem(
-        responseItem: ProposeAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | RejectResponseItem,
+        responseItem: ProposeAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         _requestItem: ProposeAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<PeerSharedAttributeSucceededEvent | void> {

@@ -1,6 +1,7 @@
 import { Serializable, SerializableBase } from "@js-soft/ts-serval";
 import { ConsumptionController, LocalRequestStatus } from "@nmshd/consumption";
 import {
+    AttributeAlreadySharedAcceptResponseItemJSON,
     AttributeSuccessionAcceptResponseItemJSON,
     AuthenticationRequestItemJSON,
     ConsentRequestItemJSON,
@@ -123,6 +124,7 @@ import {
 import { MailDVO, RequestMessageDVO } from "./content/MailDVOs";
 import { RequestDVO } from "./content/RequestDVO";
 import {
+    AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeSuccessionAcceptResponseItemDVO,
     CreateAttributeAcceptResponseItemDVO,
     ErrorResponseItemDVO,
@@ -576,6 +578,9 @@ export class DataViewExpander {
                     if (responseItemDVO.type === "AttributeSuccessionAcceptResponseItemDVO") {
                         const attributeSuccessionResponseItem = responseItemDVO as AttributeSuccessionAcceptResponseItemDVO;
                         proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor.content.value, proposeAttributeRequestItem.attribute.value);
+                    } else if (responseItemDVO.type === "AttributeAlreadySharedAcceptResponseItemDVO") {
+                        const attributeAlreadySharedResponseItem = responseItemDVO as AttributeAlreadySharedAcceptResponseItemDVO;
+                        proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
                     } else {
                         const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
                         proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
@@ -857,6 +862,19 @@ export class DataViewExpander {
                         predecessor: localPredecessorDVOResult,
                         successor: localSuccessorDVOResult
                     } as AttributeSuccessionAcceptResponseItemDVO;
+
+                case "AttributeAlreadySharedAcceptResponseItem":
+                    const attributeAlreadySharedResponseItem = responseItem as AttributeAlreadySharedAcceptResponseItemJSON;
+                    const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
+                    const localAttributeDVOResult = await this.expandLocalAttributeDTO(localAttributeResult.value);
+
+                    return {
+                        ...attributeAlreadySharedResponseItem,
+                        type: "AttributeAlreadySharedAcceptResponseItemDVO",
+                        id: "",
+                        name: name,
+                        attribute: localAttributeDVOResult
+                    } as AttributeAlreadySharedAcceptResponseItemDVO;
 
                 default:
                     return {

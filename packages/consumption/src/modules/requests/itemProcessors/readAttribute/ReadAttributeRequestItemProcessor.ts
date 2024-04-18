@@ -1,4 +1,5 @@
 import {
+    AttributeAlreadySharedAcceptResponseItem,
     AttributeSuccessionAcceptResponseItem,
     IdentityAttribute,
     ReadAttributeAcceptResponseItem,
@@ -73,7 +74,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         _requestItem: ReadAttributeRequestItem,
         params: AcceptReadAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
-    ): Promise<ReadAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem> {
+    ): Promise<ReadAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
 
         let sharedLocalAttribute: LocalAttribute;
@@ -106,7 +107,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
 
             if (latestSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
-                // return new AttributeAlreadySharedResponseItem
+                return AttributeAlreadySharedAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: latestSharedAttribute.id
+                });
             }
 
             const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedAttribute.shareInfo.sourceAttribute);
@@ -200,7 +204,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
     }
 
     public override async applyIncomingResponseItem(
-        responseItem: ReadAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | RejectResponseItem,
+        responseItem: ReadAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         _requestItem: ReadAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<PeerSharedAttributeSucceededEvent | void> {
