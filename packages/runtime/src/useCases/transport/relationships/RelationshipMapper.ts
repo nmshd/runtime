@@ -28,7 +28,7 @@ export class RelationshipMapper {
                         createdAt: relationship.cache.auditLog[0].createdAt.toString(),
                         createdBy: relationship.cache.auditLog[0].createdBy.toString(),
                         createdByDevice: relationship.cache.auditLog[0].createdByDevice.toString(),
-                        content: relationship.cache.creationContent?.toJSON()
+                        content: { ...relationship.cache.creationContent?.toJSON(), "@type": "RelationshipCreationChangeRequestContent" }
                     },
                     status: this.getStatus(relationship.cache.auditLog),
                     type: RelationshipChangeType.Creation

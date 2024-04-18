@@ -183,7 +183,7 @@ describe("RequestModule", () => {
             const relationship = relationships[0];
 
             const creationContent = relationship.creationContent as RelationshipCreationContentJSON;
-            expect(creationContent["@type"]).toBe("RelatinshipCreationContent");
+            expect(creationContent["@type"]).toBe("RelationshipCreationContent");
 
             const creationChangeRequestContent = relationship.changes[0].request.content as RelationshipCreationChangeRequestContentJSON;
             expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationChangeRequestContent");
