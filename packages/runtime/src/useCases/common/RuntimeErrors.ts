@@ -92,6 +92,11 @@ class RelationshipTemplates {
     }
 }
 
+class Relationships {
+    public faultyRelationshipAuditLog() {
+        return new ApplicationError("error.runtime.relationships.faultyRelationshipAuditLog", "The relationship status change sequence indicated by the audit log is incorrect.");
+    }
+}
 class Messages {
     public fileNotFoundInMessage(attachmentId: string) {
         return new ApplicationError("error.runtime.messages.fileNotFoundInMessage", `The requested file '${attachmentId}' was not found in the given message.`);
@@ -180,6 +185,7 @@ export class RuntimeErrors {
     public static readonly startup = new Startup();
     public static readonly files = new Files();
     public static readonly relationshipTemplates = new RelationshipTemplates();
+    public static readonly relationships = new Relationships();
     public static readonly messages = new Messages();
     public static readonly challenges = new Challenges();
     public static readonly notifications = new Notifications();
