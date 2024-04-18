@@ -20,6 +20,7 @@ export enum AuditLogEntryReason {
 export interface AuditLogEntryDTO {
     createdAt: string;
     createdBy: string;
+    createdByDevice: string;
     reason: AuditLogEntryReason;
     oldStatus?: RelationshipStatus;
     newStatus: RelationshipStatus;
