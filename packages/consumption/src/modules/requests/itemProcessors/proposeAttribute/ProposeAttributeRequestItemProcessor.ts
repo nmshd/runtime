@@ -74,7 +74,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
     }
 
     public override async canAccept(
-        _requestItem: ProposeAttributeRequestItem,
+        requestItem: ProposeAttributeRequestItem,
         params: AcceptProposeAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
@@ -82,7 +82,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         let attribute;
 
         if (parsedParams.isWithExistingAttribute()) {
-            if (_requestItem.query instanceof RelationshipAttributeQuery) {
+            if (requestItem.query instanceof RelationshipAttributeQuery) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidAcceptParameters("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
                 );
@@ -96,7 +96,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             attribute = foundLocalAttribute.content;
 
-            if (_requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
+            if (requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
                         CoreErrors.requests.attributeQueryMismatch(
@@ -125,7 +125,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
                         return ValidationResult.error(
                             CoreErrors.requests.attributeQueryMismatch(
-                                `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
+                                `The provided IdentityAttribute is outdated. You have already shared the successor '${successor.id.toString()}' of it.`
                             )
                         );
                     }
@@ -146,7 +146,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             throw new Error("this should never happen");
         }
 
-        const answerToQueryValidationResult = validateAttributeMatchesWithQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
+        const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
 
         return ValidationResult.success();

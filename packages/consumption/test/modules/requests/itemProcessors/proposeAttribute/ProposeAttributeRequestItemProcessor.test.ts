@@ -458,7 +458,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: `The provided IdentityAttribute is outdated. You have already shared the Successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
+                message: `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
             });
         });
 

@@ -22,7 +22,7 @@ import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
 
 export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcessor<ReadAttributeRequestItem, AcceptReadAttributeRequestItemParametersJSON> {
-    public override canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient?: CoreAddress): ValidationResult {
+    public override canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient: CoreAddress): ValidationResult {
         const queryValidationResult = this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
@@ -31,7 +31,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         return ValidationResult.success();
     }
 
-    private validateQuery(requestItem: ReadAttributeRequestItem, recipient?: CoreAddress) {
+    private validateQuery(requestItem: ReadAttributeRequestItem, recipient: CoreAddress) {
         const commonQueryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
         if (commonQueryValidationResult.isError()) {
             return commonQueryValidationResult;
@@ -40,7 +40,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         if (requestItem.query instanceof RelationshipAttributeQuery && !["", this.currentIdentityAddress.toString()].includes(requestItem.query.owner.toString())) {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(
-                    "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically becomes the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
+                    "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically will become the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
                 )
             );
         }
@@ -49,7 +49,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
     }
 
     public override async canAccept(
-        _requestItem: ReadAttributeRequestItem,
+        requestItem: ReadAttributeRequestItem,
         params: AcceptReadAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
@@ -57,7 +57,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         let attribute;
 
         if (parsedParams.isWithExistingAttribute()) {
-            if (_requestItem.query instanceof RelationshipAttributeQuery) {
+            if (requestItem.query instanceof RelationshipAttributeQuery) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidAcceptParameters("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
                 );
@@ -65,13 +65,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
 
-            if (!foundLocalAttribute) {
+            if (typeof foundLocalAttribute === "undefined") {
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
             }
 
             attribute = foundLocalAttribute.content;
 
-            if (_requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
+            if (requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
                         CoreErrors.requests.attributeQueryMismatch(
@@ -93,13 +93,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 let i = 0;
                 while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
                     const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
-                    if (!successor) {
+                    if (typeof successor === "undefined") {
                         throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
                     }
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
                         return ValidationResult.error(
                             CoreErrors.requests.attributeQueryMismatch(
-                                `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
+                                `The provided IdentityAttribute is outdated. You have already shared the successor '${successor.id.toString()}' of it.`
                             )
                         );
                     }
@@ -108,7 +108,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 }
             }
 
-            if (_requestItem.query instanceof ThirdPartyRelationshipAttributeQuery && attribute instanceof RelationshipAttribute) {
+            if (requestItem.query instanceof ThirdPartyRelationshipAttributeQuery && attribute instanceof RelationshipAttribute) {
                 if (!foundLocalAttribute.isShared()) {
                     throw new Error("this should never happen");
                 }
@@ -121,7 +121,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     );
                 }
 
-                const queriedThirdParties = _requestItem.query.thirdParty.map((aThirdParty) => aThirdParty.toString());
+                const queriedThirdParties = requestItem.query.thirdParty.map((aThirdParty) => aThirdParty.toString());
 
                 if (
                     (this.accountController.identity.isMe(attribute.owner) || queriedThirdParties.includes(attribute.owner.toString())) &&
@@ -136,7 +136,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 }
             }
         } else if (parsedParams.isWithNewAttribute()) {
-            if (_requestItem.query instanceof ThirdPartyRelationshipAttributeQuery) {
+            if (requestItem.query instanceof ThirdPartyRelationshipAttributeQuery) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidAcceptParameters(
                         "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that already exist may be provided."
@@ -156,11 +156,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             throw new Error("this should never happen");
         }
 
-        const answerToQueryValidationResult = validateAttributeMatchesWithQuery(_requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
+        const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
 
         if (
-            _requestItem.query instanceof ThirdPartyRelationshipAttributeQuery &&
+            requestItem.query instanceof ThirdPartyRelationshipAttributeQuery &&
             attribute instanceof RelationshipAttribute &&
             attribute.confidentiality === RelationshipAttributeConfidentiality.Private
         ) {

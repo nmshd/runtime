@@ -121,7 +121,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     expectedOutput: {
                         errorCode: "error.consumption.requests.invalidRequestItem",
                         errorMessage:
-                            "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically becomes the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
+                            "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically will become the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
                     }
                 },
                 {
@@ -132,7 +132,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     expectedOutput: {
                         errorCode: "error.consumption.requests.invalidRequestItem",
                         errorMessage:
-                            "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically becomes the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
+                            "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically will become the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
                     }
                 },
                 {
@@ -503,7 +503,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.attributeQueryMismatch",
-                    message: `The provided IdentityAttribute is outdated. You have already shared the Successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
+                    message: `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
                 });
             });
 

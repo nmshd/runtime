@@ -74,7 +74,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
                         return ValidationResult.error(
                             CoreErrors.requests.invalidRequestItem(
-                                `The provided IdentityAttribute is outdated. You have already shared the Successor '${successor.id.toString()}' of it.`
+                                `The provided IdentityAttribute is outdated. You have already shared the successor '${successor.id.toString()}' of it.`
                             )
                         );
                     }
