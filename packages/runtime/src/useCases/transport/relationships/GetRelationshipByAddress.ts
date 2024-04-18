@@ -24,7 +24,7 @@ export class GetRelationshipByAddressUseCase extends UseCase<GetRelationshipByAd
     }
 
     protected async executeInternal(request: GetRelationshipByAddressRequest): Promise<Result<RelationshipDTO>> {
-        const relationship = await this.relationshipsController.getRelationshipToIdentity(CoreAddress.from(request.address), undefined);
+        const relationship = await this.relationshipsController.getRelationshipToIdentity(CoreAddress.from(request.address));
         if (!relationship) {
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }
