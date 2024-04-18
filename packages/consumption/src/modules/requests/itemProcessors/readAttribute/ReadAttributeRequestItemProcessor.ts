@@ -44,7 +44,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const ownerIsCurrentIdentity = this.accountController.identity.isMe(foundAttribute.content.owner);
             if (!ownerIsCurrentIdentity && foundAttribute.content instanceof IdentityAttribute) {
-                return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The given Attribute belongs to someone else. You can only share own Attributes."));
+                return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The given Attribute belongs to someone else. You can only share own Attributes."));
             }
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
@@ -54,7 +54,9 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             );
             if (latestSharedVersion.length > 0) {
                 if (typeof latestSharedVersion[0].shareInfo?.sourceAttribute === "undefined") {
-                    throw new Error(`The Attribute ${latestSharedVersion[0].id} does not fulfill the requirements of an own shared Attribute.`);
+                    throw new Error(
+                        `The Attribute ${latestSharedVersion[0].id} doesn't have a 'shareInfo.sourceAttribute', even though it was found as shared version of an Attribute.`
+                    );
                 }
 
                 const latestSharedVersionSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedVersion[0].shareInfo.sourceAttribute);
@@ -63,7 +65,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 }
 
                 if (await this.consumptionController.attributes.isSubsequentInSuccession(foundAttribute, latestSharedVersionSourceAttribute)) {
-                    return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You cannot share the predecessor of an already shared Attribute version."));
+                    return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("You cannot share the predecessor of an already shared Attribute version."));
                 }
             }
         }
@@ -92,7 +94,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             );
 
             if (latestSharedVersion.length === 0) {
-                sharedLocalAttribute = await this.copyExistingAttribute(existingSourceAttribute.id, requestInfo);
+                sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: CoreId.from(existingSourceAttribute.id),
+                    peer: CoreAddress.from(requestInfo.peer),
+                    requestReference: CoreId.from(requestInfo.id)
+                });
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: sharedLocalAttribute.id,
@@ -102,7 +108,9 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const latestSharedAttribute = latestSharedVersion[0];
             if (typeof latestSharedAttribute.shareInfo?.sourceAttribute === "undefined") {
-                throw new Error(`The Attribute ${latestSharedAttribute.id} does not fulfill the requirements of an own shared Attribute.`);
+                throw new Error(
+                    `The Attribute ${latestSharedAttribute.id} doesn't have a 'shareInfo.sourceAttribute', even though it was found as shared version of an Attribute.`
+                );
             }
 
             if (latestSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
@@ -116,7 +124,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             if (await this.consumptionController.attributes.isSubsequentInSuccession(predecessorSourceAttribute, existingSourceAttribute)) {
                 let successorSharedAttribute: LocalAttribute;
-                if (existingSourceAttribute.isIdentityAttribute()) {
+                if (existingSourceAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
                     successorSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
                 } else if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
                     successorSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
@@ -137,14 +145,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             result: ResponseItemResult.Accepted,
             attributeId: sharedLocalAttribute.id,
             attribute: sharedLocalAttribute.content
-        });
-    }
-
-    private async copyExistingAttribute(attributeId: CoreId, requestInfo: LocalRequestInfo) {
-        return await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-            sourceAttributeId: CoreId.from(attributeId),
-            peer: CoreAddress.from(requestInfo.peer),
-            requestReference: CoreId.from(requestInfo.id)
         });
     }
 
