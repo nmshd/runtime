@@ -1,4 +1,4 @@
-import { AuditLogEntry, Relationship } from "@nmshd/transport";
+import { Relationship, RelationshipAuditLogEntry } from "@nmshd/transport";
 import { AuditLogEntryDTO, AuditLogEntryReason, RelationshipChangeStatus, RelationshipChangeType, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
@@ -9,7 +9,7 @@ export class RelationshipMapper {
             throw RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString());
         }
 
-        const dtoWithoutChanges = {
+        return {
             id: relationship.id.toString(),
             template: RelationshipTemplateMapper.toRelationshipTemplateDTO(relationship.cache.template),
             status: relationship.status,
@@ -20,30 +20,25 @@ export class RelationshipMapper {
                 realm: relationship.peer.realm
             },
             auditLog: relationship.cache.auditLog.map((entry) => this.toAuditLogEntryDTO(entry)),
-            creationContent: relationship.cache.creationContent?.toJSON()
-        };
-        return {
-            ...dtoWithoutChanges,
+            creationContent: relationship.cache.creationContent?.toJSON(),
             changes: [
                 {
                     id: "RCH00000000000000001",
                     request: {
-                        createdAt: dtoWithoutChanges.auditLog[0].createdAt,
-                        createdBy: dtoWithoutChanges.auditLog[0].createdBy,
-                        createdByDevice: "DVC00000000000000001",
-                        content: dtoWithoutChanges.creationContent
+                        createdAt: relationship.cache.auditLog[0].createdAt.toString(),
+                        createdBy: relationship.cache.auditLog[0].createdBy.toString(),
+                        createdByDevice: relationship.cache.auditLog[0].createdByDevice.toString(),
+                        content: relationship.cache.creationContent?.toJSON()
                     },
-                    status: this.getStatus(dtoWithoutChanges.auditLog),
+                    status: this.getStatus(relationship.cache.auditLog),
                     type: RelationshipChangeType.Creation
                 }
             ]
         };
     }
 
-    private static getStatus(auditLog: AuditLogEntryDTO[]): RelationshipChangeStatus {
+    private static getStatus(auditLog: RelationshipAuditLogEntry[]): RelationshipChangeStatus {
         switch (auditLog[1]?.reason) {
-            case undefined:
-                return RelationshipChangeStatus.Pending;
             case AuditLogEntryReason.AcceptanceOfCreation:
                 return RelationshipChangeStatus.Accepted;
             case AuditLogEntryReason.RejectionOfCreation:
@@ -51,11 +46,11 @@ export class RelationshipMapper {
             case AuditLogEntryReason.RevocationOfCreation:
                 return RelationshipChangeStatus.Revoked;
             default:
-                throw RuntimeErrors.relationships.faultyRelationshipAuditLog();
+                return RelationshipChangeStatus.Pending;
         }
     }
 
-    private static toAuditLogEntryDTO(entry: AuditLogEntry): AuditLogEntryDTO {
+    private static toAuditLogEntryDTO(entry: RelationshipAuditLogEntry): AuditLogEntryDTO {
         return {
             createdAt: entry.createdAt.toString(),
             createdBy: entry.createdBy.toString(),
