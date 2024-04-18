@@ -2086,10 +2086,10 @@ describe("AttributesController", function () {
             const allRepositoryAttributeVersions = [repositoryAttributeV0, repositoryAttributeV1, repositoryAttributeV2];
             const allOwnSharedAttributeVersions = [ownSharedIdentityAttributeV2PeerB, ownSharedIdentityAttributeV1PeerA, ownSharedIdentityAttributeV1PeerB];
             for (const repositoryAttributeVersion of allRepositoryAttributeVersions) {
-                const result1 = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(repositoryAttributeVersion.id, undefined, false);
+                const result1 = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, undefined, false);
                 expect(result1).toStrictEqual(allOwnSharedAttributeVersions);
 
-                const result2 = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
+                const result2 = await consumptionController.attributes.getSharedVersionsOfAttribute(
                     repositoryAttributeVersion.id,
                     [CoreAddress.from("peerA"), CoreAddress.from("peerB")],
                     false
@@ -2102,10 +2102,10 @@ describe("AttributesController", function () {
             const allRepositoryAttributeVersions = [repositoryAttributeV0, repositoryAttributeV1, repositoryAttributeV2];
             const allOwnSharedAttributeVersionsPeerB = [ownSharedIdentityAttributeV2PeerB, ownSharedIdentityAttributeV1PeerB];
             for (const repositoryAttributeVersion of allRepositoryAttributeVersions) {
-                const resultA = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerA")], false);
+                const resultA = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerA")], false);
                 expect(resultA).toStrictEqual([ownSharedIdentityAttributeV1PeerA]);
 
-                const resultB = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerB")], false);
+                const resultB = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerB")], false);
                 expect(resultB).toStrictEqual(allOwnSharedAttributeVersionsPeerB);
             }
         });
@@ -2113,7 +2113,7 @@ describe("AttributesController", function () {
         test("should return only latest shared versions for all peers", async function () {
             const allRepositoryAttributeVersions = [repositoryAttributeV0, repositoryAttributeV1, repositoryAttributeV2];
             for (const repositoryAttributeVersion of allRepositoryAttributeVersions) {
-                const result = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(repositoryAttributeVersion.id);
+                const result = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id);
                 expect(result).toStrictEqual([ownSharedIdentityAttributeV2PeerB, ownSharedIdentityAttributeV1PeerA]);
             }
         });
@@ -2121,19 +2121,16 @@ describe("AttributesController", function () {
         test("should return only latest shared version for a single peer", async function () {
             const allRepositoryAttributeVersions = [repositoryAttributeV0, repositoryAttributeV1, repositoryAttributeV2];
             for (const repositoryAttributeVersion of allRepositoryAttributeVersions) {
-                const resultA = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerA")]);
+                const resultA = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerA")]);
                 expect(resultA).toStrictEqual([ownSharedIdentityAttributeV1PeerA]);
 
-                const resultB = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerB")]);
+                const resultB = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerB")]);
                 expect(resultB).toStrictEqual([ownSharedIdentityAttributeV2PeerB]);
             }
         });
 
         test("should throw if an unassigned attribute id is queried", async function () {
-            await TestUtil.expectThrowsAsync(
-                consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(CoreId.from("ATTxxxxxxxxxxxxxxxxx")),
-                "error.transport.recordNotFound"
-            );
+            await TestUtil.expectThrowsAsync(consumptionController.attributes.getSharedVersionsOfAttribute(CoreId.from("ATTxxxxxxxxxxxxxxxxx")), "error.transport.recordNotFound");
         });
 
         test("should return an empty list if a shared identity attribute is queried", async function () {
@@ -2151,7 +2148,7 @@ describe("AttributesController", function () {
                 }
             });
 
-            const result = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(sharedIdentityAttribute.id);
+            const result = await consumptionController.attributes.getSharedVersionsOfAttribute(sharedIdentityAttribute.id);
             expect(result).toHaveLength(0);
         });
 
@@ -2173,7 +2170,7 @@ describe("AttributesController", function () {
                 }
             });
 
-            const result = await consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(relationshipAttribute.id);
+            const result = await consumptionController.attributes.getSharedVersionsOfAttribute(relationshipAttribute.id);
             expect(result).toHaveLength(0);
         });
     });

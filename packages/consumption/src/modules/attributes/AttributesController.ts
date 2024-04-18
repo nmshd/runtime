@@ -974,7 +974,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     // TODO: rename this and the respective runtime use case
-    public async getSharedVersionsOfRepositoryAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
+    public async getSharedVersionsOfAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
         let repositoryAttribute = await this.getLocalAttribute(id);
         if (typeof repositoryAttribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());

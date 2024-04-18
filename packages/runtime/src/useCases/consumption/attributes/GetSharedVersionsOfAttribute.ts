@@ -6,7 +6,7 @@ import { LocalAttributeDTO } from "../../../types";
 import { AddressString, AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
-export interface GetSharedVersionsOfRepositoryAttributeRequest {
+export interface GetSharedVersionsOfAttributeRequest {
     attributeId: AttributeIdString;
     peers?: AddressString[];
     /**
@@ -15,13 +15,13 @@ export interface GetSharedVersionsOfRepositoryAttributeRequest {
     onlyLatestVersions?: boolean;
 }
 
-class Validator extends SchemaValidator<GetSharedVersionsOfRepositoryAttributeRequest> {
+class Validator extends SchemaValidator<GetSharedVersionsOfAttributeRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("GetSharedVersionsOfRepositoryAttributeRequest"));
+        super(schemaRepository.getSchema("GetSharedVersionsOfAttributeRequest"));
     }
 }
 
-export class GetSharedVersionsOfRepositoryAttributeUseCase extends UseCase<GetSharedVersionsOfRepositoryAttributeRequest, LocalAttributeDTO[]> {
+export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersionsOfAttributeRequest, LocalAttributeDTO[]> {
     public constructor(
         @Inject private readonly accountController: AccountController,
         @Inject private readonly attributeController: AttributesController,
@@ -30,7 +30,7 @@ export class GetSharedVersionsOfRepositoryAttributeUseCase extends UseCase<GetSh
         super(validator);
     }
 
-    protected async executeInternal(request: GetSharedVersionsOfRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
+    protected async executeInternal(request: GetSharedVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
         const repositoryAttributeId = CoreId.from(request.attributeId);
         const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
 
@@ -47,7 +47,7 @@ export class GetSharedVersionsOfRepositoryAttributeUseCase extends UseCase<GetSh
         }
 
         const peers = request.peers?.map((address) => CoreAddress.from(address));
-        const sharedVersions = await this.attributeController.getSharedVersionsOfRepositoryAttribute(repositoryAttributeId, peers, request.onlyLatestVersions);
+        const sharedVersions = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeId, peers, request.onlyLatestVersions);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(sharedVersions));
     }

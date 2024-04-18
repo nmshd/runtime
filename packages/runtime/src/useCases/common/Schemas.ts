@@ -17020,11 +17020,11 @@ export const GetRepositoryAttributesRequest: any = {
     }
 }
 
-export const GetSharedVersionsOfRepositoryAttributeRequest: any = {
+export const GetSharedVersionsOfAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetSharedVersionsOfRepositoryAttributeRequest",
+    "$ref": "#/definitions/GetSharedVersionsOfAttributeRequest",
     "definitions": {
-        "GetSharedVersionsOfRepositoryAttributeRequest": {
+        "GetSharedVersionsOfAttributeRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
