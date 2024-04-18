@@ -136,11 +136,8 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         }
 
         // checking for an active relationship is not secure as in the meantime the relationship could have been accepted
-        const isFromNewRelationship = parsedParams.responseSource instanceof Relationship;
+        const isFromNewRelationship = parsedParams.responseSource instanceof Relationship && parsedParams.responseSource.cache!.auditLog.length !== 1;
 
-        if (isFromNewRelationship && (parsedParams.responseSource as Relationship).cache!.auditLog.length !== 1) {
-            throw new ConsumptionError("The relationship is not newly created which is necessary to create the requests contained in the template.");
-        }
         const requestContent = isFromNewRelationship ? templateContent.onNewRelationship : templateContent.onExistingRelationship;
 
         if (!requestContent) {
