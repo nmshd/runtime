@@ -5,7 +5,7 @@ import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
-import { AuditLog } from "./AuditLog";
+import { RelationshipAuditLog } from "./AuditLog";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 
 export interface IRelationship extends ICoreSynchronizable {
@@ -81,7 +81,7 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         const cache = CachedRelationship.from({
             creationContent,
             template: template,
-            auditLog: AuditLog.fromBackboneAuditLog(response.auditLog)
+            auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
         return Relationship.from({
             id: CoreId.from(response.id),
