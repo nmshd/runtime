@@ -974,23 +974,23 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getSharedVersionsOfAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
-        let repositoryAttribute = await this.getLocalAttribute(id);
-        if (typeof repositoryAttribute === "undefined") {
+        let sourceAttribute = await this.getLocalAttribute(id);
+        if (typeof sourceAttribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
         let i = 0;
-        while (repositoryAttribute.succeededBy && i < 1000) {
-            const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
+        while (sourceAttribute.succeededBy && i < 1000) {
+            const successor = await this.getLocalAttribute(sourceAttribute.succeededBy);
             if (!successor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, sourceAttribute.succeededBy.toString());
             }
 
-            repositoryAttribute = successor;
+            sourceAttribute = successor;
             i++;
         }
 
-        const query: any = { "shareInfo.sourceAttribute": repositoryAttribute.id.toString() };
+        const query: any = { "shareInfo.sourceAttribute": sourceAttribute.id.toString() };
 
         if (typeof peers !== "undefined") {
             query["shareInfo.peer"] = { $in: peers.map((address) => address.toString()) };
@@ -1000,24 +1000,24 @@ export class AttributesController extends ConsumptionBaseController {
             query["succeededBy"] = { $exists: false };
         }
 
-        const ownSharedIdentityAttributeVersions: LocalAttribute[] = await this.getLocalAttributes(query);
+        const sharedAttributeVersions: LocalAttribute[] = await this.getLocalAttributes(query);
 
         let j = 0;
-        while (repositoryAttribute.succeeds && j < 1000) {
-            const predecessor = await this.getLocalAttribute(repositoryAttribute.succeeds);
+        while (sourceAttribute.succeeds && j < 1000) {
+            const predecessor = await this.getLocalAttribute(sourceAttribute.succeeds);
             if (!predecessor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeeds.toString());
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, sourceAttribute.succeeds.toString());
             }
 
-            repositoryAttribute = predecessor;
+            sourceAttribute = predecessor;
 
-            query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
+            query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
             const sharedCopies = await this.getLocalAttributes(query);
 
-            ownSharedIdentityAttributeVersions.push(...sharedCopies);
+            sharedAttributeVersions.push(...sharedCopies);
             j++;
         }
 
-        return ownSharedIdentityAttributeVersions;
+        return sharedAttributeVersions;
     }
 }
