@@ -54,6 +54,7 @@ export class RelationshipMapper {
         return {
             createdAt: entry.createdAt.toString(),
             createdBy: entry.createdBy.toString(),
+            createdByDevice: entry.createdByDevice.toString(),
             reason: entry.reason,
             oldStatus: entry.oldStatus,
             newStatus: entry.newStatus
