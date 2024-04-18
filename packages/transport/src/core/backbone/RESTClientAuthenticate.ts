@@ -68,7 +68,7 @@ export class RESTClientAuthenticate extends RESTClient {
         });
     }
 
-    public override async put<T>(path: string, data: any = {}, config: AxiosRequestConfig = {}): Promise<ClientResult<T>> {
+    public override async put<T>(path: string, data: any, config: AxiosRequestConfig = {}): Promise<ClientResult<T>> {
         return await this.runAuthenticated(async (token) => {
             return await super.put<T>(path, data, this.buildAuthenticatedConfig(token, config));
         });

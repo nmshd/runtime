@@ -15,11 +15,11 @@ export class RelationshipClient extends RESTClientAuthenticate {
     }
 
     public async rejectRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reject`);
+        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reject`, {});
     }
 
     public async revokeRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Revoke`);
+        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Revoke`, {});
     }
 
     public async getRelationships(request?: BackboneGetRelationshipsRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipsResponse>>> {
