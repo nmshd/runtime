@@ -548,7 +548,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "StreetAddress",
                     recipient: "ARecipient",
                     street: "AStreet",
-                    houseNo: "AHouseNo",
+                    houseNo: "7/2",
                     zipCode: "AZipCode",
                     city: "ACity",
                     country: "DE"
@@ -571,7 +571,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect(childAttributes[0].content.value["@type"]).toBe("Street");
         expect((childAttributes[0].content.value as StreetJSON).value).toBe("AStreet");
         expect(childAttributes[1].content.value["@type"]).toBe("HouseNumber");
-        expect((childAttributes[1].content.value as HouseNumberJSON).value).toBe("AHouseNo");
+        expect((childAttributes[1].content.value as HouseNumberJSON).value).toBe("7/2");
         expect(childAttributes[2].content.value["@type"]).toBe("ZipCode");
         expect((childAttributes[2].content.value as ZipCodeJSON).value).toBe("AZipCode");
         expect(childAttributes[3].content.value["@type"]).toBe("City");

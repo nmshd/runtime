@@ -126,7 +126,7 @@ describe("AttributesController", function () {
                 "@type": "StreetAddress",
                 recipient: "ARecipient",
                 street: "AStreet",
-                houseNo: "AHouseNo",
+                houseNo: "6No",
                 zipCode: "AZipCode",
                 city: "ACity",
                 country: "DE"
@@ -165,7 +165,7 @@ describe("AttributesController", function () {
                 "@type": "StreetAddress",
                 recipient: "ARecipient",
                 street: "AStreet",
-                houseNo: "AHouseNo",
+                houseNo: "6No",
                 zipCode: "AZipCode",
                 city: "ACity",
                 country: "DE"
@@ -1027,7 +1027,7 @@ describe("AttributesController", function () {
                 let repoVersion0: LocalAttribute;
                 let repoVersion1Params: IAttributeSuccessorParams;
                 beforeEach(async function () {
-                    version0ChildValues = ["AStreet", "AHouseNo", "AZipCode", "ACity", "DE"];
+                    version0ChildValues = ["AStreet", "6No", "AZipCode", "ACity", "DE"];
 
                     const identityAttribute = IdentityAttribute.from({
                         value: {
@@ -1046,7 +1046,7 @@ describe("AttributesController", function () {
                         content: identityAttribute
                     });
 
-                    version1ChildValues = ["ANewStreet", "ANewHouseNo", "ANewZipCode", "ANewCity", "DE"];
+                    version1ChildValues = ["ANewStreet", "7", "ANewZipCode", "ANewCity", "DE"];
 
                     repoVersion1Params = {
                         content: IdentityAttribute.from({
@@ -1290,7 +1290,7 @@ describe("AttributesController", function () {
                     repoVersion0 = interimSuccessionResult.predecessor;
                     let repoVersion1 = interimSuccessionResult.successor;
 
-                    const version2ChildValues = ["ANewNewStreet", "ANewNewHouseNo", "ANewNewZipCode", "ANewNewCity", "DE"];
+                    const version2ChildValues = ["ANewNewStreet", "7", "ANewNewZipCode", "ANewNewCity", "DE"];
 
                     const repoVersion2Params: IAttributeSuccessorParams = {
                         content: IdentityAttribute.from({

@@ -16,5 +16,6 @@ export enum RenderHintsDataType {
     Day = "Day",
     Month = "Month",
     Year = "Year",
-    XML = "XML"
+    XML = "XML",
+    HouseNumber = "HouseNumber"
 }
