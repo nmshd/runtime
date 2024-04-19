@@ -231,14 +231,9 @@ export class RelationshipsController extends TransportController {
         this._log.trace(`Parsing relationship creation content of ${response.id}...`);
 
         const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
-        let acceptanceContent: RelationshipCreationResponseContentWrapper | undefined;
 
-        if (response.acceptanceContent && (await this.secrets.hasCryptoRelationshipSecrets(relationshipSecretId))) {
-            acceptanceContent = await this.decryptAcceptanceContent(response.acceptanceContent, CoreAddress.from(response.to), relationshipSecretId);
-        }
         const cachedRelationship = CachedRelationship.from({
             creationContent: creationContent.content,
-            acceptanceContent: acceptanceContent?.content,
             template: template,
             auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
@@ -284,60 +279,16 @@ export class RelationshipsController extends TransportController {
 
         const backboneRelationship = (await this.client.getRelationship(relationship.id.toString())).value;
 
-        if (!relationship.cache?.acceptanceContent && backboneRelationship.acceptanceContent) {
+        if (!(await this.secrets.hasCryptoRelationshipSecrets(relationship.relationshipSecretId)) && backboneRelationship.acceptanceContent) {
             const acceptanceContent = backboneRelationship.acceptanceContent;
             const cipher = RelationshipCreationResponseCipher.fromBase64(acceptanceContent);
             await this.secrets.convertSecrets(relationship.relationshipSecretId, cipher.publicResponseCrypto!);
-
-            const acceptanceContentDecrypted = await this.decryptAcceptanceContent(acceptanceContent, relationship.peer.address, relationship.relationshipSecretId);
-            relationship.cache!.acceptanceContent = acceptanceContentDecrypted.content;
         }
         relationship.cache!.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneRelationship.auditLog);
         relationship.status = backboneRelationship.status;
 
         await this.relationships.update(relationshipDoc, relationship);
         return relationship;
-    }
-
-    @log()
-    private async decryptAcceptanceContent(
-        acceptanceContent: string,
-        acceptanceContentCreator: CoreAddress,
-        relationshipSecretId: CoreId
-    ): Promise<RelationshipCreationResponseContentWrapper> {
-        const isOwnContent = this.parent.identity.isMe(CoreAddress.from(acceptanceContentCreator));
-
-        const cipher = RelationshipCreationResponseCipher.fromBase64(acceptanceContent);
-        let signedResponseBuffer;
-        if (isOwnContent) {
-            signedResponseBuffer = await this.secrets.decryptOwn(relationshipSecretId, cipher.cipher);
-        } else {
-            signedResponseBuffer = await this.secrets.decryptPeer(relationshipSecretId, cipher.cipher, true);
-        }
-
-        const signedResponse = RelationshipCreationResponseSigned.deserialize(signedResponseBuffer.toUtf8());
-        let relationshipSignatureValid;
-        if (isOwnContent) {
-            relationshipSignatureValid = await this.secrets.verifyOwn(
-                relationshipSecretId,
-                CoreBuffer.fromUtf8(signedResponse.serializedResponse),
-                signedResponse.relationshipSignature
-            );
-        } else {
-            relationshipSignatureValid = await this.secrets.verifyPeer(
-                relationshipSecretId,
-                CoreBuffer.fromUtf8(signedResponse.serializedResponse),
-                signedResponse.relationshipSignature
-            );
-        }
-
-        if (!relationshipSignatureValid) {
-            throw CoreErrors.general.signatureNotValid("relationshipResponse");
-        }
-
-        const responseContent = RelationshipCreationResponseContentWrapper.deserialize(signedResponse.serializedResponse);
-
-        return responseContent;
     }
 
     @log()
@@ -400,7 +351,7 @@ export class RelationshipsController extends TransportController {
         return await this.updatePendingRelationshipWithPeerResponse(relationshipDoc);
     }
 
-    private async encryptAcceptanceContent(relationship: Relationship) {
+    private async prepareResponse(relationship: Relationship) {
         const publicResponseCrypto = await this.secrets.getPublicResponse(relationship.relationshipSecretId);
 
         const responseContent = RelationshipCreationResponseContentWrapper.from({
@@ -448,7 +399,7 @@ export class RelationshipsController extends TransportController {
         let backboneResponse: BackboneGetRelationshipsResponse;
         switch (targetStatus) {
             case RelationshipStatus.Active:
-                const encryptedContent = await this.encryptAcceptanceContent(relationship);
+                const encryptedContent = await this.prepareResponse(relationship);
 
                 backboneResponse = (await this.client.acceptRelationship(id.toString(), { acceptanceContent: encryptedContent })).value;
                 break;

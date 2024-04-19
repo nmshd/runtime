@@ -6,7 +6,6 @@ import { IRelationshipAuditLogEntry, RelationshipAuditLogEntry } from "./Relatio
 export interface ICachedRelationship extends ICoreSerializable {
     template: IRelationshipTemplate;
     creationContent?: ISerializable;
-    acceptanceContent?: ISerializable;
 
     lastMessageSentAt?: ICoreDate;
     lastMessageReceivedAt?: ICoreDate;
@@ -22,10 +21,6 @@ export class CachedRelationship extends CoreSerializable implements ICachedRelat
     @validate({ nullable: true })
     @serialize()
     public creationContent?: Serializable;
-
-    @validate({ nullable: true })
-    @serialize()
-    public acceptanceContent?: Serializable;
 
     @validate({ nullable: true })
     @serialize()
