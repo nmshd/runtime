@@ -5,8 +5,8 @@ import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
-import { RelationshipAuditLog } from "./AuditLog";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
+import { RelationshipAuditLog } from "./RelationshipAuditLog";
 
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;

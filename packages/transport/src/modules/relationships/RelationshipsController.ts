@@ -14,9 +14,9 @@ import { RelationshipTemplate } from "../relationshipTemplates/local/Relationshi
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetRelationshipsResponse } from "./backbone/BackboneGetRelationships";
 import { RelationshipClient } from "./backbone/RelationshipClient";
-import { AuditLog } from "./local/AuditLog";
 import { CachedRelationship } from "./local/CachedRelationship";
 import { Relationship } from "./local/Relationship";
+import { RelationshipAuditLog } from "./local/RelationshipAuditLog";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
 import { RelationshipSecretController } from "./RelationshipSecretController";
 import { RelationshipStatus } from "./transmission/RelationshipStatus";
@@ -240,7 +240,7 @@ export class RelationshipsController extends TransportController {
             creationContent: creationContent.content,
             acceptanceContent: acceptanceContent?.content,
             template: template,
-            auditLog: AuditLog.fromBackboneAuditLog(response.auditLog)
+            auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
 
         return cachedRelationship;
@@ -292,7 +292,7 @@ export class RelationshipsController extends TransportController {
             const acceptanceContentDecrypted = await this.decryptAcceptanceContent(acceptanceContent, relationship.peer.address, relationship.relationshipSecretId);
             relationship.cache!.acceptanceContent = acceptanceContentDecrypted.content;
         }
-        relationship.cache!.auditLog = AuditLog.fromBackboneAuditLog(backboneRelationship.auditLog);
+        relationship.cache!.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneRelationship.auditLog);
         relationship.status = backboneRelationship.status;
 
         await this.relationships.update(relationshipDoc, relationship);
@@ -464,7 +464,7 @@ export class RelationshipsController extends TransportController {
                 throw new TransportError("target change status not supported");
         }
         relationship.status = backboneResponse.status;
-        relationship.cache.auditLog = AuditLog.fromBackboneAuditLog(backboneResponse.auditLog);
+        relationship.cache.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneResponse.auditLog);
 
         await this.relationships.update(relationshipDoc, relationship);
 
