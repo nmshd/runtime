@@ -55,6 +55,7 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
@@ -64,6 +65,14 @@ export class TestObjectFactory {
                             createdBy: CoreAddress.from("id2"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: AuditLogEntryReason.Creation,
+                            newStatus: RelationshipStatus.Pending
+                        },
+
+                        {
+                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("id1"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: AuditLogEntryReason.AcceptanceOfCreation,
                             newStatus: RelationshipStatus.Active
                         }
                     ],
