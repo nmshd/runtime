@@ -399,6 +399,7 @@ export class RelationshipsController extends TransportController {
 
         return await this.updatePendingRelationshipWithPeerResponse(relationshipDoc);
     }
+
     private async encryptAcceptanceContent(relationship: Relationship) {
         const publicResponseCrypto = await this.secrets.getPublicResponse(relationship.relationshipSecretId);
 

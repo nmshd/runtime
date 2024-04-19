@@ -56,6 +56,7 @@ export class RelationshipAuditLog {
                 newStatus: entry.newStatus
             });
         });
+
         return _.orderBy(auditLog, ["createdAt"], ["asc"]);
     }
 }

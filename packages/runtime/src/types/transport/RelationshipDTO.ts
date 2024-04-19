@@ -17,6 +17,7 @@ export enum AuditLogEntryReason {
     RejectionOfCreation = "RejectionOfCreation",
     RevocationOfCreation = "RevocationOfCreation"
 }
+
 export interface AuditLogEntryDTO {
     createdAt: string;
     createdBy: string;
