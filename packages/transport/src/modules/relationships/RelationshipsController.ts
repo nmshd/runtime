@@ -85,9 +85,9 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async updateExistingRelationshipInDb(id: string, response?: BackboneGetRelationshipsResponse) {
+    private async updateExistingRelationshipInDb(id: string, response: BackboneGetRelationshipsResponse) {
         const relationshipDoc = await this.relationships.read(id);
-        if (!response || !relationshipDoc) throw CoreErrors.general.recordNotFound(Relationship, id);
+        if (!relationshipDoc) throw CoreErrors.general.recordNotFound(Relationship, id);
 
         const relationship = Relationship.from(relationshipDoc);
 
@@ -230,7 +230,7 @@ export class RelationshipsController extends TransportController {
 
         this._log.trace(`Parsing relationship creation content of ${response.id}...`);
 
-        const creationContent = await this.decryptCreationContent(response.creationContent!, CoreAddress.from(response.from), relationshipSecretId);
+        const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
 
         const cachedRelationship = CachedRelationship.from({
             creationContent: creationContent.content,
@@ -334,10 +334,10 @@ export class RelationshipsController extends TransportController {
         if (!template.cache) throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
 
         const secretId = await TransportIds.relationshipSecret.generate();
-        const creationContentCipher = RelationshipCreationContentCipher.fromBase64(backboneRelationship.creationContent!);
+        const creationContentCipher = RelationshipCreationContentCipher.fromBase64(backboneRelationship.creationContent);
         await this.secrets.createTemplatorSecrets(secretId, template.cache, creationContentCipher.publicCreationContentCrypto);
 
-        const creationContent = await this.decryptCreationContent(backboneRelationship.creationContent!, CoreAddress.from(backboneRelationship.from), secretId);
+        const creationContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.from), secretId);
         const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, template, creationContent.identity, creationContent.content, secretId);
 
         await this.relationships.create(relationship);
