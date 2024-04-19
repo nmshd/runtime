@@ -12,7 +12,7 @@ import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
-import { BackboneGetRelationshipsResponse } from "./backbone/BackboneGetRelationships";
+import { BackboneRelationship } from "./backbone/BackboneRelationship";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { CachedRelationship } from "./local/CachedRelationship";
 import { Relationship } from "./local/Relationship";
@@ -85,7 +85,7 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async updateExistingRelationshipInDb(id: string, response: BackboneGetRelationshipsResponse) {
+    private async updateExistingRelationshipInDb(id: string, response: BackboneRelationship) {
         const relationshipDoc = await this.relationships.read(id);
         if (!relationshipDoc) throw CoreErrors.general.recordNotFound(Relationship, id);
 
@@ -209,7 +209,7 @@ export class RelationshipsController extends TransportController {
         return await this.completeStateTransition(RelationshipStatus.Revoked, relationshipId);
     }
 
-    private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneGetRelationshipsResponse) {
+    private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
         if (!response) {
             response = (await this.client.getRelationship(relationship.id.toString())).value;
         }
@@ -219,10 +219,7 @@ export class RelationshipsController extends TransportController {
         relationship.setCache(cachedRelationship);
     }
 
-    private async decryptRelationship(response: BackboneGetRelationshipsResponse, relationshipSecretId: CoreId) {
-        if (!response.creationContent) {
-            throw new TransportError("The relationship on the backbone has no creation content.");
-        }
+    private async decryptRelationship(response: BackboneRelationship, relationshipSecretId: CoreId) {
         const templateId = CoreId.from(response.relationshipTemplateId);
 
         this._log.trace(`Parsing relationship template ${templateId} for ${response.id}...`);
@@ -409,7 +406,7 @@ export class RelationshipsController extends TransportController {
             throw this.newCacheEmptyError(Relationship, id.toString());
         }
 
-        let backboneResponse: BackboneGetRelationshipsResponse;
+        let backboneResponse: BackboneRelationship;
         switch (targetStatus) {
             case RelationshipStatus.Active:
                 const encryptedContent = await this.prepareAcceptanceContent(relationship);
