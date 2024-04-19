@@ -2,17 +2,17 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoSignature, ICryptoSignature } from "@nmshd/crypto";
 import { CoreSerializable, ICoreSerializable } from "../../../../core";
 
-export interface IRelationshipCreationResponseSigned extends ICoreSerializable {
-    serializedResponse: string;
+export interface IRelationshipAcceptanceContentSigned extends ICoreSerializable {
+    serializedAcceptanceContent: string;
     deviceSignature: ICryptoSignature;
     relationshipSignature: ICryptoSignature;
 }
 
-@type("RelationshipCreationResponseSigned")
-export class RelationshipCreationResponseSigned extends CoreSerializable implements IRelationshipCreationResponseSigned {
+@type("RelationshipAcceptanceContentSigned")
+export class RelationshipAcceptanceContentSigned extends CoreSerializable implements IRelationshipAcceptanceContentSigned {
     @validate()
     @serialize()
-    public serializedResponse: string;
+    public serializedAcceptanceContent: string;
 
     @validate()
     @serialize()
@@ -22,7 +22,7 @@ export class RelationshipCreationResponseSigned extends CoreSerializable impleme
     @serialize()
     public relationshipSignature: CryptoSignature;
 
-    public static from(value: IRelationshipCreationResponseSigned): RelationshipCreationResponseSigned {
+    public static from(value: IRelationshipAcceptanceContentSigned): RelationshipAcceptanceContentSigned {
         return this.fromAny(value);
     }
 }
