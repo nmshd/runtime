@@ -73,6 +73,7 @@ export class TestObjectFactory {
                             createdBy: CoreAddress.from("id1"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: AuditLogEntryReason.AcceptanceOfCreation,
+                            oldStatus: RelationshipStatus.Pending,
                             newStatus: RelationshipStatus.Active
                         }
                     ],
