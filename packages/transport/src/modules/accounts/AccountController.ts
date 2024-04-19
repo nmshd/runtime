@@ -292,7 +292,9 @@ export class AccountController {
         const identity = Identity.from({
             address: CoreAddress.from(deviceResponse.address),
             realm: this._config.realm,
-            publicKey: identityKeypair.publicKey
+            publicKey: identityKeypair.publicKey,
+            deletionGracePeridEndsAt: undefined,
+            deletionProcesses: [] // TODO get the from backbone/local
         });
 
         const deviceId = CoreId.from(deviceResponse.device.id);

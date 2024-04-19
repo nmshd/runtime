@@ -1,11 +1,16 @@
 import { log } from "@js-soft/ts-utils";
 import { CoreBuffer, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
 import { ControllerName, CoreAddress, CoreCrypto, CoreErrors, TransportController } from "../../core";
+import { IdentityStatusChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
-import { Identity, Realm } from "./data/Identity";
+import { IdentityAuthClient } from "./backbone/IdentityAuthClient";
+import { Identity, IdentityStatus, Realm } from "./data/Identity";
+import { IdentityDeletionProcess } from "./data/IdentityDeletionProcess";
 
 export class IdentityController extends TransportController {
+    public identityClient: IdentityAuthClient;
+
     public get address(): CoreAddress {
         return this._identity.address;
     }
@@ -16,6 +21,10 @@ export class IdentityController extends TransportController {
 
     public get realm(): Realm {
         return this._identity.realm;
+    }
+
+    public get status(): IdentityStatus {
+        return this._identity.status;
     }
 
     public get identity(): Identity {
@@ -59,5 +68,15 @@ export class IdentityController extends TransportController {
     public async verify(content: CoreBuffer, signature: CryptoSignature): Promise<boolean> {
         const valid = await CoreCrypto.verify(content, signature, this.publicKey);
         return valid;
+    }
+
+    public async initiateIdentityDeletion(): Promise<IdentityDeletionProcess> {
+        const initiateIdentityDeletionResponse = await this.identityClient.initiateIdentityDeletion();
+        const identityDeletionProcess = IdentityDeletionProcess.from(initiateIdentityDeletionResponse.value);
+
+        this._identity.status = IdentityStatus.ToBeDeleted;
+        this.eventBus.publish(new IdentityStatusChangedEvent(this.parent.identity.address.toString(), this.status));
+
+        return identityDeletionProcess;
     }
 }
