@@ -220,6 +220,9 @@ export class RelationshipsController extends TransportController {
     }
 
     private async decryptRelationship(response: BackboneGetRelationshipsResponse, relationshipSecretId: CoreId) {
+        if (!response.creationContent) {
+            throw new TransportError("The relationship on the backbone has no creation content.");
+        }
         const templateId = CoreId.from(response.relationshipTemplateId);
 
         this._log.trace(`Parsing relationship template ${templateId} for ${response.id}...`);
@@ -326,7 +329,9 @@ export class RelationshipsController extends TransportController {
     @log()
     private async createNewRelationshipByIncomingCreation(relationshipId: string): Promise<Relationship> {
         const backboneRelationship = (await this.client.getRelationship(relationshipId)).value;
-
+        if (!backboneRelationship.creationContent) {
+            throw new TransportError("The relationship on the backbone has no creation content.");
+        }
         const templateId = CoreId.from(backboneRelationship.relationshipTemplateId);
         const template = await this.parent.relationshipTemplates.getRelationshipTemplate(templateId);
 
