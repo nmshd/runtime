@@ -9,11 +9,11 @@ import { BackboneRelationship } from "./BackboneRelationship";
 
 export class RelationshipClient extends RESTClientAuthenticate {
     public async createRelationship(request: BackbonePostRelationshipsRequest): Promise<ClientResult<BackboneRelationship>> {
-        const response = await this.post<BackboneGetRelationshipsResponse>("/api/v1/Relationships", request);
-        if (!response.value.creationContent) {
+        try {
+            return (await this.post<BackboneGetRelationshipsResponse>("/api/v1/Relationships", request)) as ClientResult<BackboneRelationship>;
+        } catch {
             throw new TransportError("The backbone has returned a relationship with no creation content.");
         }
-        return response as ClientResult<BackboneRelationship>;
     }
 
     public async acceptRelationship(relationshipId: string, request: BackboneAcceptRelationshipsRequest): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
@@ -29,15 +29,18 @@ export class RelationshipClient extends RESTClientAuthenticate {
     }
 
     public async getRelationships(request?: BackboneGetRelationshipsRequest): Promise<ClientResult<Paginator<BackboneRelationship>>> {
-        const response = await this.getPaged<BackboneGetRelationshipsResponse>("/api/v1/Relationships", request);
-        response.value.collect();
+        try {
+            return (await this.getPaged<BackboneGetRelationshipsResponse>("/api/v1/Relationships", request)) as ClientResult<Paginator<BackboneRelationship>>;
+        } catch {
+            throw new TransportError("The backbone has returned a relationship with no creation content.");
+        }
     }
 
     public async getRelationship(relationshipId: string): Promise<ClientResult<BackboneRelationship>> {
-        const response = await this.get<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}`);
-        if (!response.value.creationContent) {
+        try {
+            return (await this.get<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}`)) as ClientResult<BackboneRelationship>;
+        } catch {
             throw new TransportError("The backbone has returned a relationship with no creation content.");
         }
-        return response as ClientResult<BackboneRelationship>;
     }
 }

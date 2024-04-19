@@ -12,6 +12,7 @@ import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
+import { BackbonePutRelationshipsResponse } from "./backbone/BackbonePutRelationship";
 import { BackboneRelationship } from "./backbone/BackboneRelationship";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { CachedRelationship } from "./local/CachedRelationship";
@@ -406,7 +407,7 @@ export class RelationshipsController extends TransportController {
             throw this.newCacheEmptyError(Relationship, id.toString());
         }
 
-        let backboneResponse: BackboneRelationship;
+        let backboneResponse: BackbonePutRelationshipsResponse;
         switch (targetStatus) {
             case RelationshipStatus.Active:
                 const encryptedContent = await this.prepareAcceptanceContent(relationship);
