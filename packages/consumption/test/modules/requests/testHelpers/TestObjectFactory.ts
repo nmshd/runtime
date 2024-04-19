@@ -62,6 +62,7 @@ export class TestObjectFactory {
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
                             createdBy: CoreAddress.from("id2"),
+                            createdByDevice: CoreId.from("DVC1"),
                             reason: AuditLogEntryReason.Creation,
                             newStatus: RelationshipStatus.Active
                         }
@@ -289,6 +290,7 @@ export class TestObjectFactory {
                     {
                         createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
                         createdBy: CoreAddress.from("id2"),
+                        createdByDevice: CoreId.from("DVC1"),
                         reason: AuditLogEntryReason.Creation,
                         newStatus: RelationshipStatus.Active
                     }
