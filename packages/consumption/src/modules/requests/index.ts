@@ -12,6 +12,8 @@ export * from "./incoming/received/ReceivedIncomingRequestParameters";
 export * from "./incoming/requireManualDecision/RequireManualDecisionOfIncomingRequestParameters";
 export * from "./itemProcessors/AbstractRequestItemProcessor";
 export * from "./itemProcessors/createAttribute/CreateAttributeRequestItemProcessor";
+export * from "./itemProcessors/deleteAttribute/AcceptDeleteAttributeRequestItemParameters";
+export * from "./itemProcessors/deleteAttribute/DeleteAttributeRequestItemProcessor";
 export * from "./itemProcessors/freeText/AcceptFreeTextRequestItemParameters";
 export * from "./itemProcessors/freeText/FreeTextRequestItemProcessor";
 export * from "./itemProcessors/GenericRequestItemProcessor";
