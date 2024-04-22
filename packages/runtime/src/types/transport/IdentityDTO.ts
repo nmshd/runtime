@@ -1,3 +1,4 @@
+import { IdentityStatus } from "@nmshd/transport";
 import { IdentityDeletionProcessDTO } from "./IdentityDeletionProcessDTO";
 
 export interface IdentityDTO {
@@ -6,4 +7,5 @@ export interface IdentityDTO {
     realm: string;
     deletionGracePeriodEndsAt?: string;
     deletionProcesses: IdentityDeletionProcessDTO[];
+    status: IdentityStatus;
 }
