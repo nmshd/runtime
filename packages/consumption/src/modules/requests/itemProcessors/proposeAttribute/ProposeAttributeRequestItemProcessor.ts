@@ -160,7 +160,6 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         const parsedParams = AcceptProposeAttributeRequestItemParameters.from(params);
         let sharedLocalAttribute;
 
-
         if (parsedParams.isWithExistingAttribute()) {
             sharedLocalAttribute = await this.copyExistingAttribute(parsedParams.attributeId, requestInfo);
         } else if (parsedParams.isWithNewAttribute()) {
