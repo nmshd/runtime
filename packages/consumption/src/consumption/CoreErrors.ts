@@ -183,21 +183,28 @@ class Attributes {
     public cannotSetDeletionInfoOfRepositoryAttributes() {
         return new CoreError(
             "error.consumption.attributes.cannotSetDeletionInfoOfRepositoryAttributes",
-            "RepositoryAttributes may not have a deletionInfo, since they don't have a peer and you can delete them directly."
+            "RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly."
         );
     }
 
     public invalidDeletionInfoOfOwnSharedAttribute() {
         return new CoreError(
             "error.consumption.attributes.invalidDeletionInfoOfOwnSharedAttribute",
-            "The deletionStatus 'DeletedByOwner' and 'ToBeDeleted' can only be set for peer shared Attributes."
+            "The only valid deletionStatuses for own shared Attributes are 'DeletedByPeer' or 'ToBeDeletedByPeer'."
         );
     }
 
     public invalidDeletionInfoOfPeerSharedAttribute() {
         return new CoreError(
             "error.consumption.attributes.invalidDeletionInfoOfPeerSharedAttribute",
-            "The deletionStatus 'DeletedByPeer' and 'ToBeDeletedByPeer' can only be set for own shared Attributes."
+            "The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'."
+        );
+    }
+
+    public invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute() {
+        return new CoreError(
+            "error.consumption.attributes.invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute",
+            "The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'."
         );
     }
 

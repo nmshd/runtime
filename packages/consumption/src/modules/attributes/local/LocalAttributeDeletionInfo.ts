@@ -1,13 +1,6 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreSerializable, ICoreDate } from "@nmshd/transport";
 
-// export enum DeletionStatus {
-//     ToBeDeleted = <string>"ToBeDeleted",
-//     ToBeDeletedByPeer = <any>"ToBeDeletedByPeer",
-//     DeletedByPeer = "DeletedByPeer" as "DeletedByPeer",
-//     DeletedByOwner = "DeletedByOwner"
-// }
-
 export enum DeletionStatus {
     ToBeDeleted = "ToBeDeleted",
     ToBeDeletedByPeer = "ToBeDeletedByPeer",
@@ -27,13 +20,9 @@ export interface ILocalAttributeDeletionInfo {
 
 export class LocalAttributeDeletionInfo extends CoreSerializable implements ILocalAttributeDeletionInfo {
     @serialize()
-    @validate()
-    // {
-    // customValidator: (v) =>
-    //     !Number.isInteger(v) || !DeletionStatus[v]
-    //         ? `must be one of the defined deletion statuses: ${DeletionStatus.ToBeDeleted}, ${DeletionStatus.ToBeDeletedByPeer}, ${DeletionStatus.DeletedByPeer} or ${DeletionStatus.DeletedByOwner}`
-    //         : undefined
-    // }
+    @validate({
+        customValidator: (v) => (!Object.values(DeletionStatus).includes(v) ? `must be one of: ${Object.values(DeletionStatus).map((o) => `"${o}"`)}` : undefined)
+    })
     public deletionStatus: DeletionStatus;
 
     @serialize()
