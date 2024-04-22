@@ -90,7 +90,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             const foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
 
-            if (!foundLocalAttribute) {
+            if (typeof foundLocalAttribute === "undefined") {
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
             }
 
@@ -117,9 +117,9 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 let repositoryAttribute = foundLocalAttribute;
                 let i = 0;
                 const iterationLimit = 1000;
-                while (repositoryAttribute.succeededBy !== undefined && i < iterationLimit) {
+                while (typeof repositoryAttribute.succeededBy !== "undefined" && i < iterationLimit) {
                     const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
-                    if (!successor) {
+                    if (typeof successor === "undefined") {
                         throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
                     }
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
@@ -142,7 +142,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
         }
 
-        if (!attribute) {
+        if (typeof attribute === "undefined") {
             throw new Error("this should never happen");
         }
 
@@ -169,7 +169,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             sharedLocalAttribute = await this.createNewAttribute(parsedParams.attribute, requestInfo);
         }
 
-        if (!sharedLocalAttribute) {
+        if (typeof sharedLocalAttribute === "undefined") {
             throw new Error("this should never happen");
         }
 

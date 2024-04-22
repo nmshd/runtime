@@ -21,7 +21,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     public override async canCreateOutgoingRequestItem(requestItem: ShareAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
 
-        if (!foundAttribute) {
+        if (typeof foundAttribute === "undefined") {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(`The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' could not be found.`)
             );
@@ -47,7 +47,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 );
             }
 
-            if (recipient !== undefined) {
+            if (typeof recipient !== "undefined") {
                 const ownSharedIdentityAttributeVersions = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
                     requestItem.sourceAttributeId,
                     [recipient],
@@ -66,9 +66,9 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
                 let i = 0;
-                while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
+                while (typeof repositoryAttribute.succeededBy !== "undefined" && i < 1000) {
                     const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
-                    if (!successor) {
+                    if (typeof successor === "undefined") {
                         throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
                     }
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
@@ -83,15 +83,15 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 }
 
                 let j = 0;
-                while (repositoryAttribute.succeeds !== undefined && j < 1000) {
+                while (typeof repositoryAttribute.succeeds !== "undefined" && j < 1000) {
                     const predecessor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeeds);
-                    if (!predecessor) {
+                    if (typeof predecessor === "undefined") {
                         throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeeds.toString());
                     }
                     if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(predecessor.id.toString())) {
                         return ValidationResult.error(
                             CoreErrors.requests.invalidRequestItem(
-                                `You have already shared the Predecessor '${predecessor.id.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                                `You have already shared the predecessor '${predecessor.id.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
                             )
                         );
                     }
@@ -106,11 +106,11 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 throw new Error("this should never happen");
             }
 
-            if (foundAttribute.shareInfo.sourceAttribute !== undefined) {
+            if (typeof foundAttribute.shareInfo.sourceAttribute !== "undefined") {
                 return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You can only share RelationshipAttributes that are not a copy of a sourceAttribute."));
             }
 
-            if (recipient !== undefined && foundAttribute.shareInfo.peer.equals(recipient)) {
+            if (typeof recipient !== "undefined" && foundAttribute.shareInfo.peer.equals(recipient)) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
                 );

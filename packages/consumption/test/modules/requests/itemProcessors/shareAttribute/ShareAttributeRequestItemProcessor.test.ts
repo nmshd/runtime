@@ -314,7 +314,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when a Successor of the existing IdentityAttribute is already shared", async function () {
+        test("returns an error when a successor of the existing IdentityAttribute is already shared", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
@@ -356,7 +356,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when a Predecessor of the existing IdentityAttribute is already shared and therefore the user should notify about the Attribute succession instead of share it.", async function () {
+        test("returns an error when a predecessor of the existing IdentityAttribute is already shared and therefore the user should notify about the Attribute succession instead of share it.", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
@@ -398,7 +398,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `You have already shared the Predecessor '${ownSharedCopyOfPredecessor.shareInfo?.sourceAttribute?.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                message: `You have already shared the predecessor '${ownSharedCopyOfPredecessor.shareInfo?.sourceAttribute?.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
             });
         });
 

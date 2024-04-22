@@ -34,11 +34,17 @@ export default function validateAttributeMatchesWithQuery(
     }
 
     if (query instanceof IdentityAttributeQuery || query instanceof RelationshipAttributeQuery || query instanceof ThirdPartyRelationshipAttributeQuery) {
-        if ((!query.validFrom && attribute.validFrom !== undefined) || (query.validFrom && attribute.validFrom && query.validFrom.isBefore(attribute.validFrom))) {
+        if (
+            (typeof query.validFrom === "undefined" && typeof attribute.validFrom !== "undefined") ||
+            (typeof query.validFrom !== "undefined" && typeof attribute.validFrom !== "undefined" && query.validFrom.isBefore(attribute.validFrom))
+        ) {
             return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
         }
 
-        if ((!query.validTo && attribute.validTo !== undefined) || (query.validTo && attribute.validTo && query.validTo.isAfter(attribute.validTo))) {
+        if (
+            (typeof query.validTo === "undefined" && typeof attribute.validTo !== "undefined") ||
+            (typeof query.validTo !== "undefined" && typeof attribute.validTo !== "undefined" && query.validTo.isAfter(attribute.validTo))
+        ) {
             return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
         }
     }
@@ -67,7 +73,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
         return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
     }
 
-    if (query.tags !== undefined && query.tags.length !== 0) {
+    if (typeof query.tags !== "undefined" && query.tags.length !== 0) {
         if (attribute.tags === undefined || attribute.tags.length === 0 || !query.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))) {
             return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag."));
         }
@@ -79,7 +85,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
 function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: IdentityAttribute | RelationshipAttribute, recipient: CoreAddress): ValidationResult {
     if (!(attribute instanceof IdentityAttribute)) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes should be queried by an IQLQuery.")
+            CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes can be queried by an IQLQuery.")
         );
     }
 
@@ -91,13 +97,17 @@ function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: Identi
         );
     }
 
-    if (query.attributeCreationHints !== undefined) {
+    if (typeof query.attributeCreationHints !== "undefined") {
         if (query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
             return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
         }
 
-        if (query.attributeCreationHints.tags !== undefined && query.attributeCreationHints.tags.length !== 0) {
-            if (attribute.tags === undefined || attribute.tags.length === 0 || !query.attributeCreationHints.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))) {
+        if (typeof query.attributeCreationHints.tags !== "undefined" && query.attributeCreationHints.tags.length !== 0) {
+            if (
+                typeof attribute.tags === "undefined" ||
+                attribute.tags.length === 0 ||
+                !query.attributeCreationHints.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))
+            ) {
                 return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag."));
             }
         }
@@ -131,11 +141,11 @@ function validateAttributeMatchesWithRelationshipAttributeQuery(
     }
 
     if (query.key !== attribute.key) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute has not the queried key."));
+        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried key."));
     }
 
     if (query.attributeCreationHints.confidentiality !== attribute.confidentiality) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute has not the queried confidentiality."));
+        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried confidentiality."));
     }
 
     if (query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
@@ -144,11 +154,11 @@ function validateAttributeMatchesWithRelationshipAttributeQuery(
 
     if (!(attribute.value instanceof Consent)) {
         if (query.attributeCreationHints.title !== attribute.value.title) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute has not the queried title."));
+            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried title."));
         }
 
         if (query.attributeCreationHints.description !== attribute.value.description) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute has not the queried description."));
+            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried description."));
         }
     }
 
@@ -191,7 +201,7 @@ function validateAttributeMatchesWithThirdPartyRelationshipAttributeQuery(
     }
 
     if (query.key !== attribute.key) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute has not the queried key."));
+        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried key."));
     }
 
     return ValidationResult.success();

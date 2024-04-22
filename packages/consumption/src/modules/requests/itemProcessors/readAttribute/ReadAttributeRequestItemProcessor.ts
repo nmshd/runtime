@@ -22,7 +22,7 @@ import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
 
 export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcessor<ReadAttributeRequestItem, AcceptReadAttributeRequestItemParametersJSON> {
-    public override canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient: CoreAddress): ValidationResult {
+    public override canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient?: CoreAddress): ValidationResult {
         const queryValidationResult = this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
@@ -31,7 +31,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         return ValidationResult.success();
     }
 
-    private validateQuery(requestItem: ReadAttributeRequestItem, recipient: CoreAddress) {
+    private validateQuery(requestItem: ReadAttributeRequestItem, recipient?: CoreAddress) {
         const commonQueryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
         if (commonQueryValidationResult.isError()) {
             return commonQueryValidationResult;
@@ -91,7 +91,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
                 let repositoryAttribute = foundLocalAttribute;
                 let i = 0;
-                while (repositoryAttribute.succeededBy !== undefined && i < 1000) {
+                while (typeof repositoryAttribute.succeededBy !== "undefined" && i < 1000) {
                     const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
                     if (typeof successor === "undefined") {
                         throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
@@ -113,7 +113,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     throw new Error("this should never happen");
                 }
 
-                if (foundLocalAttribute.shareInfo.sourceAttribute !== undefined) {
+                if (typeof foundLocalAttribute.shareInfo.sourceAttribute !== "undefined") {
                     return ValidationResult.error(
                         CoreErrors.requests.attributeQueryMismatch(
                             "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided."
@@ -152,7 +152,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
         }
 
-        if (!attribute) {
+        if (typeof attribute === "undefined") {
             throw new Error("this should never happen");
         }
 
@@ -189,7 +189,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute, requestInfo);
         }
 
-        if (!sharedLocalAttribute) {
+        if (typeof sharedLocalAttribute === "undefined") {
             throw new Error("this should never happen");
         }
 

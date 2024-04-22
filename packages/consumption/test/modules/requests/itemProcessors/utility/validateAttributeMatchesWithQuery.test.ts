@@ -384,7 +384,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes should be queried by an IQLQuery."
+                message: "The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes can be queried by an IQLQuery."
             });
         });
 
@@ -740,7 +740,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided RelationshipAttribute has not the queried key."
+                message: "The provided RelationshipAttribute does not have the queried key."
             });
         });
 
@@ -790,7 +790,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided RelationshipAttribute has not the queried confidentiality."
+                message: "The provided RelationshipAttribute does not have the queried confidentiality."
             });
         });
 
@@ -842,7 +842,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided RelationshipAttribute has not the queried title."
+                message: "The provided RelationshipAttribute does not have the queried title."
             });
         });
 
@@ -893,7 +893,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided RelationshipAttribute has not the queried description."
+                message: "The provided RelationshipAttribute does not have the queried description."
             });
         });
 
@@ -1150,7 +1150,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided RelationshipAttribute has not the queried key."
+                message: "The provided RelationshipAttribute does not have the queried key."
             });
         });
 

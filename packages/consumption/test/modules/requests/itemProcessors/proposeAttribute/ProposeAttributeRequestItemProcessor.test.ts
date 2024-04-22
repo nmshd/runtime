@@ -401,7 +401,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when a Successor of the existing IdentityAttribute is already shared", async function () {
+        test("returns an error when a successor of the existing IdentityAttribute is already shared", async function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
 
