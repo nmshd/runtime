@@ -34,6 +34,8 @@ export class IdentityController extends TransportController {
 
     public constructor(parent: AccountController) {
         super(ControllerName.Identity, parent);
+
+        this.identityClient = new IdentityAuthClient(this.config, this.parent.authenticator);
     }
 
     @log()

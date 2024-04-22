@@ -1,6 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, CoreSerializable, ICoreSerializable } from "../../../core";
-import { IdentityDeletionProcessAuditLogEntry } from "./IdentityDeletionProcessAuditLogEntry";
 import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
 
 export interface IdentityDeletionProcessJSON extends ICoreSerializable {
@@ -31,7 +30,7 @@ export interface IdentityDeletionProcessJSON extends ICoreSerializable {
 
     // Cross Cutting
     status: IdentityDeletionProcessStatus;
-    auditLog: IdentityDeletionProcessAuditLogEntry[];
+    // auditLog?: IdentityDeletionProcessAuditLogEntry[];
 }
 
 export interface IIdentityDeletionProcess extends ICoreSerializable {
@@ -62,7 +61,7 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
 
     // Cross Cutting
     status: IdentityDeletionProcessStatus;
-    auditLog: IdentityDeletionProcessAuditLogEntry[];
+    // auditLog?: IdentityDeletionProcessAuditLogEntry[];
 }
 
 @type("IdentityDeletionProcess")
@@ -131,11 +130,11 @@ export class IdentityDeletionProcess extends CoreSerializable implements IIdenti
     @serialize()
     public status: IdentityDeletionProcessStatus;
 
-    @validate()
-    @serialize()
-    public auditLog: IdentityDeletionProcessAuditLogEntry[];
+    // @validate()
+    // @serialize()
+    // public auditLog?: IdentityDeletionProcessAuditLogEntry[];
 
-    public static from(value: IIdentityDeletionProcess | IdentityDeletionProcessJSON | Omit<IdentityDeletionProcessJSON, "@type">): IdentityDeletionProcess {
+    public static from(value: IIdentityDeletionProcess | IdentityDeletionProcessJSON): IdentityDeletionProcess {
         return this.fromAny(value);
     }
 }

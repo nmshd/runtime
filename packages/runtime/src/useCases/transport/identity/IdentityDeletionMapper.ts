@@ -20,8 +20,8 @@ export class IdentityDeletionMapper {
             deletionStartedAt: process.deletionStartedAt ? CoreDate.from(process.deletionStartedAt) : undefined,
             completedAt: process.completedAt ? CoreDate.from(process.completedAt) : undefined,
             completedByDevice: process.completedByDevice ? CoreId.from(process.completedByDevice) : undefined,
-            status: process.status,
-            auditLog: process.auditLog.map((log) => IdentityDeletionMapper.toIdentityDeletionProcessAuditLogEntry(log))
+            status: process.status
+            // auditLog: process.auditLog?.map((log) => IdentityDeletionMapper.toIdentityDeletionProcessAuditLogEntry(log))
         });
     }
     static toIdentityDeletionProcessAuditLogEntry(log: IdentityDeletionProcessAuditLogEntryDTO): IdentityDeletionProcessAuditLogEntry {
@@ -54,8 +54,8 @@ export class IdentityDeletionMapper {
             deletionStartedAt: identityDeletion.deletionStartedAt?.toString(),
             completedAt: identityDeletion.completedAt?.toString(),
             completedByDevice: identityDeletion.completedByDevice?.toString(),
-            status: identityDeletion.status,
-            auditLog: identityDeletion.auditLog.map((log) => IdentityDeletionMapper.toIdentityDeletionProcessAuditLogEntryDTO(log))
+            status: identityDeletion.status
+            // auditLog: identityDeletion.auditLog?.map((log) => IdentityDeletionMapper.toIdentityDeletionProcessAuditLogEntryDTO(log))
         };
     }
     public static toIdentityDeletionProcessAuditLogEntryDTO(auditLogEntry: IdentityDeletionProcessAuditLogEntry): IdentityDeletionProcessAuditLogEntryDTO {

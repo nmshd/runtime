@@ -11,6 +11,6 @@ export class IdentityAuthClient extends RESTClientAuthenticate {
     }
 
     public async initiateIdentityDeletion(): Promise<ClientResult<IdentityDeletionProcessJSON>> {
-        return await this.post<IdentityDeletionProcessJSON>("/api/v1/Identities/Self/DeletionProcess", {});
+        return await this.post<IdentityDeletionProcessJSON>("/api/v1/Identities/Self/DeletionProcesses", {});
     }
 }

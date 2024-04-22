@@ -1,5 +1,4 @@
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
-import { IdentityDeletionProcessAuditLogEntryDTO } from "./IdentityDeletionProcessAuditLogEntryDTO";
 
 export interface IdentityDeletionProcessDTO {
     id: string;
@@ -29,5 +28,5 @@ export interface IdentityDeletionProcessDTO {
 
     // Cross Cutting
     status: IdentityDeletionProcessStatus;
-    auditLog: IdentityDeletionProcessAuditLogEntryDTO[];
+    // auditLog?: IdentityDeletionProcessAuditLogEntryDTO[];
 }
