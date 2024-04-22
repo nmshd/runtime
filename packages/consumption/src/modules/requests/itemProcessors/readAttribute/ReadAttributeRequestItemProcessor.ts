@@ -110,7 +110,9 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             if (requestItem.query instanceof ThirdPartyRelationshipAttributeQuery && attribute instanceof RelationshipAttribute) {
                 if (!foundLocalAttribute.isShared()) {
-                    throw new Error("this should never happen");
+                    throw new Error(
+                        "The LocalAttribute found is faulty because its shareInfo is undefined, although its content is given by a RelationshipAttribute. Since RelationshipAttributes only make sense in the context of Relationships, they must always be shared."
+                    );
                 }
 
                 if (typeof foundLocalAttribute.shareInfo.sourceAttribute !== "undefined") {
