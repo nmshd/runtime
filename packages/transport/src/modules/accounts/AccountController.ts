@@ -293,7 +293,7 @@ export class AccountController {
             address: CoreAddress.from(deviceResponse.address),
             realm: this._config.realm,
             publicKey: identityKeypair.publicKey,
-            deletionGracePeridEndsAt: undefined,
+            deletionGracePeriodEndsAt: undefined,
             deletionProcesses: [] // TODO get the from backbone/local
         });
 

@@ -3,13 +3,14 @@ import { CryptoSignaturePublicKey, ICryptoSignaturePublicKey } from "@nmshd/cryp
 import { CoreDate } from "../../../core";
 import { CoreSerializable, ICoreSerializable } from "../../../core/CoreSerializable";
 import { CoreAddress } from "../../../core/types/CoreAddress";
-import { IIdentityDeletionProcess } from "./IdentityDeletionProcess";
+import { IdentityDeletionProcess, IIdentityDeletionProcess } from "./IdentityDeletionProcess";
 
 export interface IIdentity extends ICoreSerializable {
     address: CoreAddress;
     publicKey: ICryptoSignaturePublicKey;
     realm: Realm;
-    deletionGracePeridEndsAt?: CoreDate;
+    status: IdentityStatus;
+    deletionGracePeriodEndsAt?: CoreDate;
     deletionProcesses: IIdentityDeletionProcess[];
 }
 
@@ -43,13 +44,13 @@ export class Identity extends CoreSerializable implements IIdentity {
     @serialize()
     public status: IdentityStatus;
 
-    @validate()
-    @serialize()
-    public deletionGracePeridEndsAt?: CoreDate;
+    @validate({ nullable: true })
+    @serialize({ type: CoreDate })
+    public deletionGracePeriodEndsAt?: CoreDate;
 
     @validate()
     @serialize()
-    public deletionProcesses: any[];
+    public deletionProcesses: IdentityDeletionProcess[];
 
     public static from(value: IIdentity): Identity {
         return this.fromAny(value);

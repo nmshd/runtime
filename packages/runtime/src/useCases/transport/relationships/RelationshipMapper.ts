@@ -2,6 +2,7 @@ import { Relationship, RelationshipChange, RelationshipChangeRequest, Relationsh
 import { RelationshipChangeDTO, RelationshipChangeRequestDTO, RelationshipChangeResponseDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
+import { IdentityDeletionMapper } from "../identity";
 
 export class RelationshipMapper {
     public static toRelationshipDTO(relationship: Relationship): RelationshipDTO {
@@ -17,7 +18,9 @@ export class RelationshipMapper {
             peerIdentity: {
                 address: relationship.peer.address.toString(),
                 publicKey: relationship.peer.publicKey.toBase64(false),
-                realm: relationship.peer.realm
+                realm: relationship.peer.realm,
+                deletionGracePeriodEndsAt: relationship.peer.deletionGracePeriodEndsAt?.toString(),
+                deletionProcesses: relationship.peer.deletionProcesses.map((p) => IdentityDeletionMapper.toIdentityDeletionProcessDTO(p))
             },
             changes: relationship.cache.changes.map((c) => this.toRelationshipChangeDTO(c))
         };

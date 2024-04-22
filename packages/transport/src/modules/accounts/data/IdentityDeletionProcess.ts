@@ -70,51 +70,67 @@ export class IdentityDeletionProcess extends CoreSerializable implements IIdenti
     @validate()
     @serialize()
     public id: CoreId;
+
     @validate()
     @serialize()
     public createdAt: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public createdByDevice?: CoreId;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public approvalReminder1SentAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public approvalReminder2SentAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public approvalReminder3SentAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public approvedAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public approvedByDevice?: CoreId;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public gracePeriodEndsAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public gracePeriodReminder1SentAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public gracePeriodReminder2SentAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public gracePeriodReminder3SentAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public deletionStartedAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public completedAt?: CoreDate;
-    @validate()
+
+    @validate({ nullable: true })
     @serialize()
     public completedByDevice?: CoreId;
+
     @validate()
     @serialize()
     public status: IdentityDeletionProcessStatus;
+
     @validate()
     @serialize()
     public auditLog: IdentityDeletionProcessAuditLogEntry[];
