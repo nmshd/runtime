@@ -2,7 +2,7 @@ import { TransportError } from "../../../core";
 import { ExternalEventProcessorConstructor } from "./ExternalEventProcessor";
 import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor";
 import { MessageReceivedExternalEventProcessor } from "./MessageReceivedExternalEventProcessor";
-import { RelationshipCreatedOrChangedExternalEventProcessor } from "./RelationshipCreatedExternalEventProcessor";
+import { RelationshipCreatedOrChangedExternalEventProcessor } from "./RelationshipCreatedOrChangedExternalEventProcessor";
 
 export class ExternalEventProcessorRegistry {
     private readonly processors = new Map<string, ExternalEventProcessorConstructor>();
