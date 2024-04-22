@@ -11,23 +11,23 @@ export enum RelationshipStatus {
     Terminated = "Terminated"
 }
 
-export enum AuditLogEntryReason {
+export enum RelationshipAuditLogEntryReason {
     Creation = "Creation",
     AcceptanceOfCreation = "AcceptanceOfCreation",
     RejectionOfCreation = "RejectionOfCreation",
     RevocationOfCreation = "RevocationOfCreation"
 }
 
-export interface AuditLogEntryDTO {
+export interface RelationshipAuditLogEntryDTO {
     createdAt: string;
     createdBy: string;
     createdByDevice: string;
-    reason: AuditLogEntryReason;
+    reason: RelationshipAuditLogEntryReason;
     oldStatus?: RelationshipStatus;
     newStatus: RelationshipStatus;
 }
 
-export interface AuditLogDTO extends Array<AuditLogEntryDTO> {}
+export interface RelationshipAuditLogDTO extends Array<RelationshipAuditLogEntryDTO> {}
 
 export interface RelationshipDTO {
     id: string;
@@ -37,5 +37,5 @@ export interface RelationshipDTO {
     peerIdentity: IdentityDTO;
     changes: RelationshipChangeDTO[];
     creationContent: any;
-    auditLog: AuditLogDTO;
+    auditLog: RelationshipAuditLogDTO;
 }

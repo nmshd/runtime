@@ -1,4 +1,4 @@
-import { AuditLog } from "../transmission/AuditLog";
+import { BackboneRelationshipAuditLog } from "../transmission/RelationshipAuditLog";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 
 export interface BackboneGetRelationshipsRequest {
@@ -13,7 +13,7 @@ export interface BackboneGetRelationshipsResponse {
 
     createdAt: string;
     status: RelationshipStatus;
-    auditLog: AuditLog;
+    auditLog: BackboneRelationshipAuditLog;
     creationContent?: string;
     acceptanceContent?: string;
 }

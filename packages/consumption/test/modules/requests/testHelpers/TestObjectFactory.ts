@@ -31,11 +31,11 @@ import {
     Message,
     Realm,
     Relationship,
+    RelationshipAuditLogEntryReason,
     RelationshipStatus,
     RelationshipTemplate,
     RelationshipTemplatePublicKey
 } from "@nmshd/transport";
-import { AuditLogEntryReason } from "@nmshd/transport/dist/modules/relationships/transmission/AuditLog";
 import { ILocalRequest, LocalRequest, LocalRequestStatus, LocalRequestStatusLogEntry } from "../../../../src";
 import { TestRequestItem } from "./TestRequestItem";
 
@@ -64,7 +64,7 @@ export class TestObjectFactory {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
                             createdBy: CoreAddress.from("id2"),
                             createdByDevice: CoreId.from("DVC1"),
-                            reason: AuditLogEntryReason.Creation,
+                            reason: RelationshipAuditLogEntryReason.Creation,
                             newStatus: RelationshipStatus.Pending
                         },
 
@@ -72,7 +72,7 @@ export class TestObjectFactory {
                             createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
                             createdBy: CoreAddress.from("id1"),
                             createdByDevice: CoreId.from("DVC1"),
-                            reason: AuditLogEntryReason.AcceptanceOfCreation,
+                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
                             oldStatus: RelationshipStatus.Pending,
                             newStatus: RelationshipStatus.Active
                         }
@@ -301,7 +301,7 @@ export class TestObjectFactory {
                         createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
                         createdBy: CoreAddress.from("id2"),
                         createdByDevice: CoreId.from("DVC1"),
-                        reason: AuditLogEntryReason.Creation,
+                        reason: RelationshipAuditLogEntryReason.Creation,
                         newStatus: RelationshipStatus.Active
                     }
                 ]

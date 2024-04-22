@@ -291,13 +291,13 @@ export async function establishRelationshipWithContents(
     transportServices1: TransportServices,
     transportServices2: TransportServices,
     templateContent: RelationshipTemplateContentJSON | RelationshipTemplateContent | IRelationshipTemplateContent,
-    requestContent: any
+    creationContent: any
 ): Promise<void> {
     const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
         templateId: template.id,
-        creationContent: requestContent
+        creationContent: creationContent
     });
     expect(createRelationshipResponse).toBeSuccessful();
 

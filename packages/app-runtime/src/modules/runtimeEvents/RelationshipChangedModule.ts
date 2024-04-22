@@ -1,4 +1,4 @@
-import { AuditLogEntryReason, RelationshipChangedEvent } from "@nmshd/runtime";
+import { RelationshipAuditLogEntryReason, RelationshipChangedEvent } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { OnboardingChangeReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
@@ -25,10 +25,10 @@ export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChan
         if (lastAuditLogEntry.createdBy === event.eventTargetAddress) return;
 
         switch (lastAuditLogEntry.reason) {
-            case AuditLogEntryReason.Creation:
-            case AuditLogEntryReason.AcceptanceOfCreation:
-            case AuditLogEntryReason.RevocationOfCreation:
-            case AuditLogEntryReason.RejectionOfCreation:
+            case RelationshipAuditLogEntryReason.Creation:
+            case RelationshipAuditLogEntryReason.AcceptanceOfCreation:
+            case RelationshipAuditLogEntryReason.RevocationOfCreation:
+            case RelationshipAuditLogEntryReason.RejectionOfCreation:
                 break;
 
             default:

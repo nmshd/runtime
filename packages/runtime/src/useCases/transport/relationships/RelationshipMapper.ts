@@ -1,5 +1,5 @@
 import { Relationship, RelationshipAuditLogEntry } from "@nmshd/transport";
-import { AuditLogEntryDTO, AuditLogEntryReason, RelationshipChangeStatus, RelationshipChangeType, RelationshipDTO } from "../../../types";
+import { RelationshipAuditLogEntryDTO, RelationshipAuditLogEntryReason, RelationshipChangeStatus, RelationshipChangeType, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
 
@@ -39,18 +39,18 @@ export class RelationshipMapper {
 
     private static getStatus(auditLog: RelationshipAuditLogEntry[]): RelationshipChangeStatus {
         switch (auditLog[1]?.reason) {
-            case AuditLogEntryReason.AcceptanceOfCreation:
+            case RelationshipAuditLogEntryReason.AcceptanceOfCreation:
                 return RelationshipChangeStatus.Accepted;
-            case AuditLogEntryReason.RejectionOfCreation:
+            case RelationshipAuditLogEntryReason.RejectionOfCreation:
                 return RelationshipChangeStatus.Rejected;
-            case AuditLogEntryReason.RevocationOfCreation:
+            case RelationshipAuditLogEntryReason.RevocationOfCreation:
                 return RelationshipChangeStatus.Revoked;
             default:
                 return RelationshipChangeStatus.Pending;
         }
     }
 
-    private static toAuditLogEntryDTO(entry: RelationshipAuditLogEntry): AuditLogEntryDTO {
+    private static toAuditLogEntryDTO(entry: RelationshipAuditLogEntry): RelationshipAuditLogEntryDTO {
         return {
             createdAt: entry.createdAt.toString(),
             createdBy: entry.createdBy.toString(),

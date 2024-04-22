@@ -1,4 +1,4 @@
-import { AuditLogEntryReason } from "@nmshd/runtime";
+import { RelationshipAuditLogEntryReason } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { OnboardingChangeReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
@@ -24,22 +24,22 @@ export class OnboardingChangeReceivedModule extends AppRuntimeModule<OnboardingC
         const session = await this.runtime.getOrCreateSession(event.eventTargetAddress);
 
         switch (auditLogEntry.reason) {
-            case AuditLogEntryReason.AcceptanceOfCreation:
+            case RelationshipAuditLogEntryReason.AcceptanceOfCreation:
                 title = "Kontaktanfrage genehmigt";
                 text = `Du kannst nun mit ${identity.name} kommunizieren`;
                 break;
 
-            case AuditLogEntryReason.Creation:
+            case RelationshipAuditLogEntryReason.Creation:
                 title = "Kontaktanfrage erhalten";
                 text = `Du hast eine Kontaktanfrage von ${identity.name} erhalten`;
                 break;
 
-            case AuditLogEntryReason.RejectionOfCreation:
+            case RelationshipAuditLogEntryReason.RejectionOfCreation:
                 title = "Kontaktanfrage abgelehnt";
                 text = `${identity.name} hat ihre Kontaktanfrage abgelehnt`;
                 break;
 
-            case AuditLogEntryReason.RevocationOfCreation:
+            case RelationshipAuditLogEntryReason.RevocationOfCreation:
                 title = "Kontaktanfrage zurückgezogen";
                 text = `${identity.name} hat die Kontaktanfrage zurückgezogen`;
                 break;
