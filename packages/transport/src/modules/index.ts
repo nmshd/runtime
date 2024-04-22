@@ -5,6 +5,7 @@ export * from "./accounts/data/Identity";
 export * from "./accounts/data/IdentityDeletionProcess";
 export * from "./accounts/data/IdentityDeletionProcessAuditLogEntry";
 export * from "./accounts/data/IdentityDeletionProcessStatus";
+export * from "./accounts/data/Realm";
 export * from "./accounts/IdentityController";
 export * from "./accounts/IdentityUtil";
 export * from "./certificates/CertificateController";
@@ -121,4 +122,3 @@ export * from "./tokens/transmission/TokenContentDeviceSharedSecret";
 export * from "./tokens/transmission/TokenContentFile";
 export * from "./tokens/transmission/TokenContentRelationshipTemplate";
 export * from "./tokens/transmission/TokenReference";
-

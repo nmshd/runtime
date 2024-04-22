@@ -5,8 +5,9 @@ import { IdentityStatusChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { IdentityAuthClient } from "./backbone/IdentityAuthClient";
-import { Identity, IdentityStatus, Realm } from "./data/Identity";
+import { Identity, IdentityStatus } from "./data/Identity";
 import { IdentityDeletionProcess } from "./data/IdentityDeletionProcess";
+import { Realm } from "./data/Realm";
 
 export class IdentityController extends TransportController {
     public identityClient: IdentityAuthClient;

@@ -6,7 +6,7 @@ import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { Realm } from "../modules/accounts/data/Identity";
+import { Realm } from "../modules/accounts/data/Realm";
 import { CoreErrors } from "./CoreErrors";
 import { TransportContext } from "./TransportContext";
 import { TransportError } from "./TransportError";
