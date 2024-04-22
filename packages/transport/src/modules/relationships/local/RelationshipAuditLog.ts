@@ -1,48 +1,7 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
 import _ from "lodash";
-import { CoreAddress, CoreDate, CoreId, CoreSerializable, ICoreAddress, ICoreDate, ICoreId } from "../../../core";
-import { AuditLogEntryReason, AuditLog as BackboneAuditLog } from "../transmission/AuditLog";
-import { RelationshipStatus } from "../transmission/RelationshipStatus";
-
-export interface IRelationshipAuditLogEntry {
-    createdAt: ICoreDate;
-    createdBy: ICoreAddress;
-    createdByDevice: ICoreId;
-    reason: AuditLogEntryReason;
-    oldStatus?: RelationshipStatus;
-    newStatus: RelationshipStatus;
-}
-
-@type("RelationshipAuditLogEntry")
-export class RelationshipAuditLogEntry extends CoreSerializable implements IRelationshipAuditLogEntry {
-    @validate()
-    @serialize()
-    public createdAt: CoreDate;
-
-    @validate()
-    @serialize()
-    public createdBy: CoreAddress;
-
-    @validate()
-    @serialize()
-    public createdByDevice: CoreId;
-
-    @validate()
-    @serialize()
-    public reason: AuditLogEntryReason;
-
-    @validate({ nullable: true })
-    @serialize()
-    public oldStatus?: RelationshipStatus;
-
-    @validate()
-    @serialize()
-    public newStatus: RelationshipStatus;
-
-    public static from(value: IRelationshipAuditLogEntry): RelationshipAuditLogEntry {
-        return this.fromAny({ ...value, oldStatus: value.oldStatus ?? undefined });
-    }
-}
+import { CoreAddress, CoreDate, CoreId } from "../../../core";
+import { BackboneRelationshipAuditLog as BackboneAuditLog } from "../transmission/RelationshipAuditLog";
+import { RelationshipAuditLogEntry } from "./RelationshipAuditLogEntry";
 
 export class RelationshipAuditLog {
     public static fromBackboneAuditLog(backboneAuditLog: BackboneAuditLog): RelationshipAuditLogEntry[] {
