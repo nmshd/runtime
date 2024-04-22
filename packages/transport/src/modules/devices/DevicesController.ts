@@ -39,7 +39,7 @@ export class DevicesController extends TransportController {
         await this.devices.create(device);
     }
 
-    private async createDevice(name = "", description = "", isAdmin = false): Promise<Device> {
+    private async createDevice(name = "", description?: string, isAdmin = false): Promise<Device> {
         const [signedChallenge, devicePwdDn] = await Promise.all([this.parent.challenges.createChallenge(ChallengeType.Identity), PasswordGenerator.createStrongPassword(45, 50)]);
 
         this.log.trace("Device Creation Challenge signed. Creating device on backbone...");
@@ -83,7 +83,7 @@ export class DevicesController extends TransportController {
         return device;
     }
 
-    public async getSharedSecret(id: CoreId): Promise<DeviceSharedSecret> {
+    public async getSharedSecret(id: CoreId, profileName?: string): Promise<DeviceSharedSecret> {
         const deviceDoc = await this.devices.read(id.toString());
         if (!deviceDoc) {
             throw CoreErrors.general.recordNotFound(Device, id.toString());
@@ -98,7 +98,7 @@ export class DevicesController extends TransportController {
 
         const isAdmin = device.isAdmin === true;
 
-        const secret = await this.parent.activeDevice.secrets.createDeviceSharedSecret(device, count, isAdmin);
+        const secret = await this.parent.activeDevice.secrets.createDeviceSharedSecret(device, count, isAdmin, profileName);
         return secret;
     }
 

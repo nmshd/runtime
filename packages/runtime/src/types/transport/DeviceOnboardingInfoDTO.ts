@@ -6,6 +6,7 @@ export interface DeviceOnboardingInfoDTO {
     createdByDevice: string;
     name?: string;
     description?: string;
+    profileName?: string;
     secretBaseKey: string;
     deviceIndex: number;
     synchronizationKey: string;

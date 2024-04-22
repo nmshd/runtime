@@ -13,8 +13,8 @@ describe("MessageEventingTest", function () {
         await runtime.start();
 
         const accounts = await TestUtil.provideAccounts(runtime, 2);
-        sessionA = await runtime.selectAccount(accounts[0].id, "");
-        sessionB = await runtime.selectAccount(accounts[1].id, "");
+        sessionA = await runtime.selectAccount(accounts[0].id);
+        sessionB = await runtime.selectAccount(accounts[1].id);
 
         await TestUtil.addRelationship(sessionA, sessionB);
     });
