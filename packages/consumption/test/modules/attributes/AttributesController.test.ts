@@ -568,6 +568,7 @@ describe("AttributesController", function () {
                 })
             };
             const complexAttribute = await consumptionController.attributes.createLocalAttribute(attributeParams);
+            mockEventBus.clearPublishedEvents();
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(complexAttribute.id);
             expect(createdAttribute).toBeDefined();
@@ -577,6 +578,10 @@ describe("AttributesController", function () {
             expect(childAttributes).toHaveLength(3);
 
             await consumptionController.attributes.deleteAttribute(complexAttribute);
+            expect(mockEventBus.publishedEvents).toHaveLength(1 + childAttributes.length);
+            for (const event of mockEventBus.publishedEvents) {
+                expect(event.namespace).toBe(AttributeDeletedEvent.namespace);
+            }
 
             const deletedAttribute = await consumptionController.attributes.getLocalAttribute(complexAttribute.id);
             expect(deletedAttribute).toBeUndefined();

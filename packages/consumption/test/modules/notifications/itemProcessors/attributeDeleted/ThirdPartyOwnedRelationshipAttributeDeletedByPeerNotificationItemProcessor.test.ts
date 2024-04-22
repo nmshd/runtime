@@ -99,14 +99,17 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
         /* Run process() and validate its results. */
         const event = await processor.process(notificationItem, notification);
         expect(event).toBeInstanceOf(ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent);
-        const updatedAttribute = event?.data;
-        expect(notificationItem.attributeId.equals(updatedAttribute!.id)).toBe(true);
-        expect(updatedAttribute!.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
+        const updatedAttribute = (event as ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent).data;
+        expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
+        expect(updatedAttribute.deletionInfo!.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
+
+        const databaseAttribute = await consumptionController.attributes.getLocalAttribute(updatedAttribute.id);
+        expect(databaseAttribute!.deletionInfo!.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        expect(attributeAfterRollback?.deletionInfo).toBeUndefined();
+        expect(attributeAfterRollback!.deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for an unknown attribute", async function () {

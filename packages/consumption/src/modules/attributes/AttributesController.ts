@@ -225,7 +225,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     private async createLocalAttributesForChildrenOfComplexAttribute(localAttribute: LocalAttribute): Promise<void> {
         if (!(localAttribute.content instanceof IdentityAttribute)) {
-            throw new ConsumptionError("Only identity attributes are allowed here");
+            throw new ConsumptionError("Only IdentityAttributes may have child Attributes.");
         }
 
         const childAttributeValues = Object.values(localAttribute.content.value).filter((p) => p instanceof AbstractAttributeValue) as AttributeValues.Identity.Class[];
@@ -280,18 +280,18 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
-        await this.deleteAttributeUnsafe(attribute.id);
-
         if (attribute.content instanceof IdentityAttribute && attribute.content.value instanceof AbstractComplexValue) {
             await this.deleteChildAttributesOfComplexAttribute(attribute);
         }
+
+        await this.deleteAttributeUnsafe(attribute.id);
 
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
     }
 
     private async deleteChildAttributesOfComplexAttribute(complexAttribute: LocalAttribute): Promise<void> {
         if (!(complexAttribute.content instanceof IdentityAttribute)) {
-            throw new ConsumptionError("Only identity attributes are allowed here");
+            throw new ConsumptionError("Only IdentityAttributes may have child Attributes.");
         }
 
         const childAttributes = await this.getLocalAttributes({ parentId: complexAttribute.id.toString() });

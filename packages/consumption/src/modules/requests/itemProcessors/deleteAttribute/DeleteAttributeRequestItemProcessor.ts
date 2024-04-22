@@ -57,7 +57,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (deletionDate.isBefore(CoreDate.utc())) {
-            return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The deletionDate must be located in the future."));
+            return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The deletionDate must be in the future."));
         }
 
         return ValidationResult.success();
