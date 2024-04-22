@@ -13,7 +13,7 @@ export class FreeTextRequestItemProcessor extends GenericRequestItemProcessor<Fr
         } catch (error) {
             if (!(error instanceof ParsingError)) throw error;
 
-            return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters());
+            return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The RequestItem was answered with incorrect parameters."));
         }
 
         return ValidationResult.success();
