@@ -1,4 +1,4 @@
-import { ISerializable } from "@js-soft/ts-serval";
+import { ISerializable, JSONWrapper } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -187,25 +187,34 @@ export class RelationshipsController extends TransportController {
     }
 
     public async accept(relationshipId: CoreId): Promise<Relationship> {
-        const relationshipStatus = (await this.getRelationship(relationshipId))!.status;
-        if (relationshipStatus !== RelationshipStatus.Pending) {
-            throw CoreErrors.relationships.wrongRelationshipStatus(relationshipStatus);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Pending) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
         return await this.completeStateTransition(RelationshipStatus.Active, relationshipId);
     }
 
     public async reject(relationshipId: CoreId): Promise<Relationship> {
-        const relationshipStatus = (await this.getRelationship(relationshipId))!.status;
-        if (relationshipStatus !== RelationshipStatus.Pending) {
-            throw CoreErrors.relationships.wrongRelationshipStatus(relationshipStatus);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Pending) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
         return await this.completeStateTransition(RelationshipStatus.Rejected, relationshipId);
     }
 
     public async revoke(relationshipId: CoreId): Promise<Relationship> {
-        const relationshipStatus = (await this.getRelationship(relationshipId))!.status;
-        if (relationshipStatus !== RelationshipStatus.Pending) {
-            throw CoreErrors.relationships.wrongRelationshipStatus(relationshipStatus);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Pending) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
         return await this.completeStateTransition(RelationshipStatus.Revoked, relationshipId);
     }
@@ -327,9 +336,7 @@ export class RelationshipsController extends TransportController {
     @log()
     private async createNewRelationshipByIncomingCreation(relationshipId: string): Promise<Relationship> {
         const backboneRelationship = (await this.client.getRelationship(relationshipId)).value;
-        if (!backboneRelationship.creationContent) {
-            throw new TransportError("The relationship on the backbone has no creation content.");
-        }
+
         const templateId = CoreId.from(backboneRelationship.relationshipTemplateId);
         const template = await this.parent.relationshipTemplates.getRelationshipTemplate(templateId);
 
@@ -367,7 +374,7 @@ export class RelationshipsController extends TransportController {
 
         const acceptanceContent = RelationshipAcceptanceContentWrapper.from({
             relationshipId: relationship.id,
-            content: ""
+            content: JSONWrapper.from({})
         });
 
         const serializedAcceptanceContent = acceptanceContent.serialize();
