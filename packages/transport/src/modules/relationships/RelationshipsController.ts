@@ -12,18 +12,18 @@ import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
-import { RelationshipSecretController } from "./RelationshipSecretController";
 import { BackboneGetRelationshipsResponse } from "./backbone/BackboneGetRelationships";
 import { BackboneGetRelationshipsChangesResponse, BackboneGetRelationshipsChangesSingleChangeResponse } from "./backbone/BackboneGetRelationshipsChanges";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { CachedRelationship } from "./local/CachedRelationship";
 import { Relationship } from "./local/Relationship";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
-import { RelationshipStatus } from "./transmission/RelationshipStatus";
+import { RelationshipSecretController } from "./RelationshipSecretController";
 import { RelationshipChange } from "./transmission/changes/RelationshipChange";
 import { RelationshipChangeResponse } from "./transmission/changes/RelationshipChangeResponse";
 import { RelationshipChangeStatus } from "./transmission/changes/RelationshipChangeStatus";
 import { RelationshipChangeType } from "./transmission/changes/RelationshipChangeType";
+import { RelationshipStatus } from "./transmission/RelationshipStatus";
 import { RelationshipCreationChangeRequestCipher } from "./transmission/requests/RelationshipCreationChangeRequestCipher";
 import { RelationshipCreationChangeRequestContentWrapper } from "./transmission/requests/RelationshipCreationChangeRequestContentWrapper";
 import { RelationshipCreationChangeRequestSigned } from "./transmission/requests/RelationshipCreationChangeRequestSigned";
@@ -258,7 +258,7 @@ export class RelationshipsController extends TransportController {
 
         const requestPublic = await this.secrets.createRequestorSecrets(template.cache, relationshipSecretId);
 
-        const requestContent: RelationshipCreationChangeRequestContentWrapper = RelationshipCreationChangeRequestContentWrapper.from({
+        const requestContent = RelationshipCreationChangeRequestContentWrapper.from({
             content: content,
             identity: this.parent.identity.identity,
             templateId: template.id

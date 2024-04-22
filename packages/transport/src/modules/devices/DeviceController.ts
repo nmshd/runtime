@@ -68,7 +68,7 @@ export class DeviceController extends TransportController {
     }
 
     public async changePassword(newPassword: string): Promise<void> {
-        const oldPassword: string = (await this.getCredentials()).password;
+        const oldPassword = (await this.getCredentials()).password;
         await this.parent.deviceAuthClient.changeDevicePassword({
             oldPassword: oldPassword,
             newPassword: newPassword
@@ -79,7 +79,7 @@ export class DeviceController extends TransportController {
             if (!credentialContainer) {
                 throw new TransportError("There was an error while accessing the device_credentials secret.");
             }
-            const credentials: DeviceSecretCredentials = credentialContainer.secret as DeviceSecretCredentials;
+            const credentials = credentialContainer.secret as DeviceSecretCredentials;
             credentials.password = newPassword;
 
             await this.secrets.storeSecret(credentials, DeviceSecretType.DeviceCredentials);

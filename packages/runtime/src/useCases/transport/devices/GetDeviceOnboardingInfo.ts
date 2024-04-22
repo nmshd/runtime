@@ -7,6 +7,7 @@ import { DeviceMapper } from "./DeviceMapper";
 
 export interface GetDeviceOnboardingInfoRequest {
     id: GenericIdString;
+    profileName?: string;
 }
 
 class Validator extends SchemaValidator<GetDeviceOnboardingInfoRequest> {
@@ -24,7 +25,7 @@ export class GetDeviceOnboardingInfoUseCase extends UseCase<GetDeviceOnboardingI
     }
 
     protected async executeInternal(request: GetDeviceOnboardingInfoRequest): Promise<Result<DeviceOnboardingInfoDTO>> {
-        const onboardingInfo = await this.devicesController.getSharedSecret(CoreId.from(request.id));
+        const onboardingInfo = await this.devicesController.getSharedSecret(CoreId.from(request.id), request.profileName);
 
         return Result.ok(DeviceMapper.toDeviceOnboardingInfoDTO(onboardingInfo));
     }
