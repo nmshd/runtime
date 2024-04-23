@@ -494,6 +494,41 @@ export async function waitForRecipientToReceiveNotification(
 }
 
 /**
+ * The owner of a RelationshipAttribute receives a Request of a
+ * peer and forwards them the ThirdPartyRelationshipAttribute,
+ * waiting for all communication and event processing to finish.
+ *
+ * Returns the sender's own shared ThirdPartyRelationshipAttribute.
+ */
+export async function executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+    owner: TestRuntimeServices,
+    peer: TestRuntimeServices,
+    request: CreateOutgoingRequestRequest,
+    attributeId: string
+): Promise<LocalAttributeDTO> {
+    const localRequest = (await peer.consumption.outgoingRequests.create(request)).value;
+    await peer.transport.messages.sendMessage({ recipients: [owner.address], content: localRequest.content });
+
+    await syncUntilHasMessageWithRequest(owner.transport, localRequest.id);
+    await owner.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
+        return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
+    });
+    await owner.consumption.incomingRequests.accept({
+        requestId: localRequest.id,
+        items: [{ accept: true, existingAttributeId: attributeId } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON]
+    });
+
+    const responseMessage = await syncUntilHasMessageWithResponse(peer.transport, localRequest.id);
+    const sharedAttributeId = responseMessage.content.response.items[0].attributeId;
+    await peer.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
+        return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
+    });
+
+    const ownSharedThirdPartyRelationshipAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    return ownSharedThirdPartyRelationshipAttribute;
+}
+
+/**
  * Generate all possible combinations of the given arrays.
  *
  * combinations([1, 2], [a, b]) => [[1, a], [1, b], [2, a], [2, b]]

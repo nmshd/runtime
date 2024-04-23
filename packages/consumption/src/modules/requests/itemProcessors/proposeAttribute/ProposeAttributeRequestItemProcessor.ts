@@ -83,7 +83,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         const ownerIsEmpty = attribute!.owner.equals("");
         const ownerIsCurrentIdentity = attribute!.owner.equals(this.currentIdentityAddress);
         if (!ownerIsEmpty && !ownerIsCurrentIdentity) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The given Attribute belongs to someone else. You can only share own Attributes."));
+            return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The given Attribute belongs to someone else. You can only share own Attributes."));
         }
 
         return ValidationResult.success();

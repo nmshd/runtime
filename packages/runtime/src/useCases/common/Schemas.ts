@@ -15802,6 +15802,98 @@ export const CreateRepositoryAttributeRequest: any = {
     }
 }
 
+export const DeleteOwnSharedAttributeAndNotifyPeerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteOwnSharedAttributeAndNotifyPeerRequest",
+    "definitions": {
+        "DeleteOwnSharedAttributeAndNotifyPeerRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const DeletePeerSharedAttributeAndNotifyOwnerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeletePeerSharedAttributeAndNotifyOwnerRequest",
+    "definitions": {
+        "DeletePeerSharedAttributeAndNotifyOwnerRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const DeleteRepositoryAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteRepositoryAttributeRequest",
+    "definitions": {
+        "DeleteRepositoryAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest",
+    "definitions": {
+        "DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const ExecuteIdentityAttributeQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",
@@ -16535,6 +16627,45 @@ export const GetAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -16736,6 +16867,45 @@ export const GetOwnSharedAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -16924,6 +17094,45 @@ export const GetPeerSharedAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -16994,6 +17203,45 @@ export const GetRepositoryAttributesRequest: any = {
                     ]
                 },
                 "content.value.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
