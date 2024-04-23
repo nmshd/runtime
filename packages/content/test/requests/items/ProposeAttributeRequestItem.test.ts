@@ -1,6 +1,6 @@
 import { ValidationError } from "@js-soft/ts-serval";
 import { TestObjectFactory } from "@nmshd/consumption/test/modules/requests/testHelpers/TestObjectFactory";
-import { IdentityAttributeQuery, ProposeAttributeRequestItem, RelationshipAttributeConfidentiality, RelationshipAttributeQuery } from "@nmshd/content";
+import { IdentityAttributeQuery, IQLQuery, ProposeAttributeRequestItem, RelationshipAttributeConfidentiality, RelationshipAttributeQuery } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 
@@ -50,6 +50,27 @@ describe("creation of ProposeAttributeRequestItem", () => {
                 new ValidationError(
                     ProposeAttributeRequestItem.name,
                     `${nameof<ProposeAttributeRequestItem>((x) => x.query)}.${nameof<IdentityAttributeQuery>((x) => x.valueType)}`,
+                    "You cannot propose an Attribute whose type of the value ('GivenName') is different from the value type of the query ('DisplayName')."
+                )
+            );
+        });
+    });
+
+    describe("creation of ProposeAttributeRequestItem with IQLQuery", () => {
+        test("returns an error when trying to create an invalid ProposeAttributeRequestItem with IQLQuery and mismatching IdentityAttribute value type", function () {
+            const invalidProposeAttributeRequestItemCall = () => {
+                ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    attribute: TestObjectFactory.createIdentityAttribute({
+                        owner: CoreAddress.from("")
+                    }),
+                    query: IQLQuery.from({ queryString: "DisplayName", attributeCreationHints: { valueType: "DisplayName" } })
+                });
+            };
+            expect(invalidProposeAttributeRequestItemCall).toThrow(
+                new ValidationError(
+                    ProposeAttributeRequestItem.name,
+                    `${nameof<ProposeAttributeRequestItem>((x) => x.query)}.${nameof<IQLQuery>((x) => x.attributeCreationHints!.valueType)}`,
                     "You cannot propose an Attribute whose type of the value ('GivenName') is different from the value type of the query ('DisplayName')."
                 )
             );

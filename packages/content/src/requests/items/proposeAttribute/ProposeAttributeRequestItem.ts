@@ -77,6 +77,19 @@ export class ProposeAttributeRequestItem extends RequestItem implements IPropose
             }
         }
 
+        if (value.query instanceof IQLQuery && typeof value.query.attributeCreationHints !== "undefined") {
+            const attributeValueType = (value.attribute.value.toJSON() as any)["@type"];
+            const queryValueType = value.query.attributeCreationHints.valueType;
+
+            if (attributeValueType !== queryValueType) {
+                throw new ValidationError(
+                    ProposeAttributeRequestItem.name,
+                    `${nameof<ProposeAttributeRequestItem>((x) => x.query)}.${nameof<IQLQuery>((x) => x.attributeCreationHints!.valueType)}`,
+                    `You cannot propose an Attribute whose type of the value ('${attributeValueType}') is different from the value type of the query ('${queryValueType}').`
+                );
+            }
+        }
+
         if (value.query instanceof RelationshipAttributeQuery) {
             const attributeValueType = (value.attribute.value.toJSON() as any)["@type"];
             const queryValueType = value.query.attributeCreationHints.valueType;
