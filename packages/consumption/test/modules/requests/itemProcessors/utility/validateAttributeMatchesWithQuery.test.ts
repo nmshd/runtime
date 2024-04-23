@@ -694,6 +694,58 @@ describe("validateAttributeMatchesWithQuery", function () {
             });
         });
 
+        test("returns an error when a RelationshipAttribute does not belong to the Recipient, but an empty string was specified for the owner of the query", async function () {
+            const sender = CoreAddress.from("Sender");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: RelationshipAttributeQuery.from({
+                    owner: "",
+                    key: "AKey",
+                    attributeCreationHints: {
+                        valueType: "ProprietaryString",
+                        title: "ATitle",
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "RelationshipAttribute",
+                    key: "AKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: sender.toString(),
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "ATitle",
+                        value: "AStringValue"
+                    }
+                }
+            };
+
+            const result = await readProcessor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.attributeQueryMismatch",
+                message: "You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
+            });
+        });
+
         test("returns an error when a RelationshipAttribute does not have the queried key", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
