@@ -30,7 +30,11 @@ export default function validateAttributeMatchesWithQuery(
         const result = validateAttributeMatchesWithThirdPartyRelationshipAttributeQuery(query, attribute, recipient, sender);
         if (result.isError()) return result;
     } else {
-        return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing("An unknown error occurred during the RequestItem processing."));
+        return ValidationResult.error(
+            CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(
+                "The query is not of a known type. Only the IdentityAttributeQuery, IQLQuery, RelationshipAttributeQuery or ThirdPartyRelationshipAttributeQuery can be used."
+            )
+        );
     }
 
     if (query instanceof IdentityAttributeQuery || query instanceof RelationshipAttributeQuery || query instanceof ThirdPartyRelationshipAttributeQuery) {

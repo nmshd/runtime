@@ -12,6 +12,7 @@ import {
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
 import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { nameof } from "ts-simple-nameof";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
@@ -155,7 +156,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         }
 
         if (typeof attribute === "undefined") {
-            throw new Error("this should never happen");
+            return ValidationResult.error(
+                CoreErrors.requests.invalidAcceptParameters(
+                    `You have to specify either ${nameof<AcceptReadAttributeRequestItemParameters>(
+                        (x) => x.newAttribute
+                    )} or ${nameof<AcceptReadAttributeRequestItemParameters>((x) => x.existingAttributeId)}.`
+                )
+            );
         }
 
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
@@ -192,7 +199,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         }
 
         if (typeof sharedLocalAttribute === "undefined") {
-            throw new Error("this should never happen");
+            throw new Error(
+                `You have to specify either ${nameof<AcceptReadAttributeRequestItemParameters>(
+                    (x) => x.newAttribute
+                )} or ${nameof<AcceptReadAttributeRequestItemParameters>((x) => x.existingAttributeId)}.`
+            );
         }
 
         return ReadAttributeAcceptResponseItem.from({
