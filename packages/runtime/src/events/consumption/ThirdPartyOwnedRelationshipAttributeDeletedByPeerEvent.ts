@@ -1,0 +1,10 @@
+import { LocalAttributeDTO } from "../../types";
+import { DataEvent } from "../DataEvent";
+
+export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent extends DataEvent<LocalAttributeDTO> {
+    public static readonly namespace = "consumption.thirdPartyOwnedRelationshipAttributeDeletedByPeer";
+
+    public constructor(eventTargetAddress: string, data: LocalAttributeDTO) {
+        super(ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent.namespace, eventTargetAddress, data);
+    }
+}
