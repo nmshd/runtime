@@ -56,12 +56,11 @@ describe("validateAttributeMatchesWithQuery", function () {
         await connection.close();
     });
 
-    beforeEach(function () {
-        readProcessor = new ReadAttributeRequestItemProcessor(consumptionController);
-        proposeProcessor = new ProposeAttributeRequestItemProcessor(consumptionController);
-    });
+    describe("ReadAttributeRequestItem with IdentityAttributeQuery", function () {
+        beforeEach(function () {
+            readProcessor = new ReadAttributeRequestItemProcessor(consumptionController);
+        });
 
-    describe("ReadAttributeRequestitem with IdentityAttributeQuery", function () {
         test("returns an error when an IdentityAttribute was queried by an IdentityAttributeQuery and the peer tries to respond with a RelationshipAttribute", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -345,7 +344,11 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
     });
 
-    describe("ReadAttributeRequestitem with IQLQuery", function () {
+    describe("ReadAttributeRequestItem with IQLQuery", function () {
+        beforeEach(function () {
+            readProcessor = new ReadAttributeRequestItemProcessor(consumptionController);
+        });
+
         test("returns an error when an IdentityAttribute was queried by an IQLQuery and the peer tries to respond with a RelationshipAttribute", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -546,7 +549,11 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
     });
 
-    describe("ReadAttributeRequestitem with RelationshipAttributeQuery", function () {
+    describe("ReadAttributeRequestItem with RelationshipAttributeQuery", function () {
+        beforeEach(function () {
+            readProcessor = new ReadAttributeRequestItemProcessor(consumptionController);
+        });
+
         test("returns an error when a RelationshipAttribute was queried and the Recipient tries to respond with an IdentityAttribute", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -1004,7 +1011,11 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
     });
 
-    describe("ReadAttributeRequestitem with ThirdPartyRelationshipAttributeQuery", function () {
+    describe("ReadAttributeRequestItem with ThirdPartyRelationshipAttributeQuery", function () {
+        beforeEach(function () {
+            readProcessor = new ReadAttributeRequestItemProcessor(consumptionController);
+        });
+
         test("returns an error when a RelationshipAttribute was queried using a ThirdPartyRelationshipAttributeQuery and the Recipient tries to respond with an IdentityAttribute", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -1264,7 +1275,11 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
     });
 
-    describe("ProposeAttributeRequestitem with IdentityAttributeQuery", function () {
+    describe("ProposeAttributeRequestItem with IdentityAttributeQuery", function () {
+        beforeEach(function () {
+            proposeProcessor = new ProposeAttributeRequestItemProcessor(consumptionController);
+        });
+
         test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
             const thirdPartyAttributeId = await ConsumptionIds.attribute.generate();
             await consumptionController.attributes.createPeerLocalAttribute({
