@@ -220,7 +220,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."
+                message: "The provided IdentityAttribute is not of the queried IdentityAttribute value type."
             });
         });
 
@@ -462,7 +462,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."
+                message: "The provided IdentityAttribute is not of the queried IdentityAttribute value type."
             });
         });
 
@@ -640,7 +640,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided RelationshipAttribute is not of the queried RelationshipAttribute Value Type."
+                message: "The provided RelationshipAttribute is not of the queried RelationshipAttribute value type."
             });
         });
 

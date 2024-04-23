@@ -3,8 +3,8 @@ import { BirthDate } from "@nmshd/content";
 import { ValidationErrorWithoutProperty } from "@nmshd/content/src/ValidationErrorWithoutProperty";
 import { DateTime } from "luxon";
 
-describe("creation of RepositoryAttributes of Attribute Value Type BirthDate", () => {
-    test("can create a RepositoryAttribute of Attribute Value Type BirthDate", function () {
+describe("creation of RepositoryAttributes of Attribute value type BirthDate", () => {
+    test("can create a RepositoryAttribute of Attribute value type BirthDate", function () {
         const validBirthDate = BirthDate.from({ day: 1, month: 12, year: 1990 });
         expect(validBirthDate.constructor.name).toBe("BirthDate");
         expect(validBirthDate.day.value).toBe(1);

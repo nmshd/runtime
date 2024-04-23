@@ -74,7 +74,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
     }
 
     if (query.valueType !== attribute.value.constructor.name) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
+        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute value type."));
     }
 
     if (typeof query.tags !== "undefined" && query.tags.length !== 0) {
@@ -103,7 +103,7 @@ function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: Identi
 
     if (typeof query.attributeCreationHints !== "undefined") {
         if (query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute Value Type."));
+            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute value type."));
         }
 
         if (typeof query.attributeCreationHints.tags !== "undefined" && query.attributeCreationHints.tags.length !== 0) {
@@ -153,7 +153,7 @@ function validateAttributeMatchesWithRelationshipAttributeQuery(
     }
 
     if (query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute is not of the queried RelationshipAttribute Value Type."));
+        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute is not of the queried RelationshipAttribute value type."));
     }
 
     if (!(attribute.value instanceof Consent)) {
