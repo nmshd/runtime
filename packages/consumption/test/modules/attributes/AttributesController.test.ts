@@ -126,7 +126,7 @@ describe("AttributesController", function () {
                 "@type": "StreetAddress",
                 recipient: "ARecipient",
                 street: "AStreet",
-                houseNo: "6No",
+                houseNo: "6N",
                 zipCode: "AZipCode",
                 city: "ACity",
                 country: "DE"
@@ -165,7 +165,7 @@ describe("AttributesController", function () {
                 "@type": "StreetAddress",
                 recipient: "ARecipient",
                 street: "AStreet",
-                houseNo: "6No",
+                houseNo: "6N",
                 zipCode: "AZipCode",
                 city: "ACity",
                 country: "DE"
@@ -1027,7 +1027,7 @@ describe("AttributesController", function () {
                 let repoVersion0: LocalAttribute;
                 let repoVersion1Params: IAttributeSuccessorParams;
                 beforeEach(async function () {
-                    version0ChildValues = ["AStreet", "6No", "AZipCode", "ACity", "DE"];
+                    version0ChildValues = ["AStreet", "6N", "AZipCode", "ACity", "DE"];
 
                     const identityAttribute = IdentityAttribute.from({
                         value: {
