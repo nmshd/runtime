@@ -13,7 +13,7 @@ export class RelationshipCreationResponseContentCipher extends CoreSerializable 
     @serialize()
     public cipher: CryptoCipher;
 
-    @validate({ nullable: true })
+    @validate()
     @serialize()
     public publicCreationResponseContentCrypto: CryptoRelationshipPublicResponse;
 
