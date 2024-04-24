@@ -26,15 +26,22 @@ export class RelationshipAuditLogEntry extends CoreSerializable implements IRela
     @serialize()
     public createdByDevice: CoreId;
 
-    @validate()
+    @validate({
+        customValidator: (v) => (!Object.values(RelationshipAuditLogEntryReason).includes(v) ? `must be one of: ${Object.values(RelationshipAuditLogEntryReason)}` : undefined)
+    })
     @serialize()
     public reason: RelationshipAuditLogEntryReason;
 
-    @validate({ nullable: true })
+    @validate({
+        nullable: true,
+        customValidator: (v) => (!Object.values(RelationshipStatus).includes(v) ? `must be one of: ${Object.values(RelationshipStatus)}` : undefined)
+    })
     @serialize()
     public oldStatus?: RelationshipStatus;
 
-    @validate()
+    @validate({
+        customValidator: (v) => (!Object.values(RelationshipStatus).includes(v) ? `must be one of: ${Object.values(RelationshipStatus)}` : undefined)
+    })
     @serialize()
     public newStatus: RelationshipStatus;
 
