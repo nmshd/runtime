@@ -1,4 +1,4 @@
-import { ISerializable, JSONWrapper } from "@js-soft/ts-serval";
+import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -376,10 +376,7 @@ export class RelationshipsController extends TransportController {
     private async prepareCreationResponseContent(relationship: Relationship) {
         const publicCreationResponseContentCrypto = await this.secrets.getPublicCreationResponseContentCrypto(relationship.relationshipSecretId);
 
-        const creationResponseContent = RelationshipCreationResponseContentWrapper.from({
-            relationshipId: relationship.id,
-            content: JSONWrapper.from({})
-        });
+        const creationResponseContent = RelationshipCreationResponseContentWrapper.from({ relationshipId: relationship.id });
 
         const serializedCreationResponseContent = creationResponseContent.serialize();
         const buffer = CoreUtil.toBuffer(serializedCreationResponseContent);
