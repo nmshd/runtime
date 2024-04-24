@@ -13,4 +13,11 @@ export class IdentityAuthClient extends RESTClientAuthenticate {
     public async initiateIdentityDeletion(): Promise<ClientResult<IdentityDeletionProcessJSON>> {
         return await this.post<IdentityDeletionProcessJSON>("/api/v1/Identities/Self/DeletionProcesses", {});
     }
+
+    public async getIdentityDeletionProcesses(): Promise<ClientResult<IdentityDeletionProcessJSON[]>> {
+        return await this.get<IdentityDeletionProcessJSON[]>("/api/v1/Identities/Self/DeletionProcesses", {});
+    }
+    public async getIdentityDeletionProcess(identityDeletionProcessId: string): Promise<ClientResult<IdentityDeletionProcessJSON>> {
+        return await this.get<IdentityDeletionProcessJSON>(`/api/v1/Identities/Self/DeletionProcesses/${identityDeletionProcessId}`, {});
+    }
 }

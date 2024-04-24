@@ -82,4 +82,12 @@ export class IdentityController extends TransportController {
 
         return identityDeletionProcess;
     }
+
+    public async getIdentityDeletions(): Promise<IdentityDeletionProcess[]> {
+        return (await this.identityClient.getIdentityDeletionProcesses()).value.map((identityDeletionProcessJSON) => IdentityDeletionProcess.from(identityDeletionProcessJSON));
+    }
+
+    public async getIdentityDeletion(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+        return IdentityDeletionProcess.from((await this.identityClient.getIdentityDeletionProcess(identityDeletionProcessId)).value);
+    }
 }
