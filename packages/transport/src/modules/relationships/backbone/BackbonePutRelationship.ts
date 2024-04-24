@@ -1,17 +1,7 @@
-import { BackboneRelationshipAuditLog } from "../transmission/RelationshipAuditLog";
-import { RelationshipStatus } from "../transmission/RelationshipStatus";
+import { BackboneRelationship } from "./BackboneRelationship";
 
 export interface BackboneAcceptRelationshipsRequest {
-    content: string;
+    creationResponseContent: string;
 }
 
-export interface BackbonePutRelationshipsResponse {
-    id: string;
-    relationshipTemplateId: string;
-    from: string;
-    to: string;
-
-    createdAt: string;
-    status: RelationshipStatus;
-    auditLog: BackboneRelationshipAuditLog;
-}
+export type BackbonePutRelationshipsResponse = Omit<BackboneRelationship, "creationContent" | "creationResponseContent">;

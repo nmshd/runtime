@@ -3,7 +3,7 @@ import { nameof } from "ts-simple-nameof";
 import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
-import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
+import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 import { RelationshipAuditLog } from "./RelationshipAuditLog";
@@ -72,7 +72,7 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     }
 
     public static fromBackboneAndCreationContent(
-        response: BackboneGetRelationshipsResponse,
+        response: BackboneGetRelationshipResponse,
         template: IRelationshipTemplate,
         peer: IIdentity,
         creationContent: ISerializable,

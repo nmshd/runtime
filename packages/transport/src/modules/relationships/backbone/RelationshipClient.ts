@@ -1,19 +1,13 @@
-import { TransportError } from "../../../core";
 import { ClientResult } from "../../../core/backbone/ClientResult";
 import { Paginator } from "../../../core/backbone/Paginator";
 import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
-import { BackboneGetRelationshipsRequest, BackboneGetRelationshipsResponse } from "./BackboneGetRelationships";
-import { BackbonePostRelationshipsRequest } from "./BackbonePostRelationship";
+import { BackboneGetRelationshipResponse, BackboneGetRelationshipsRequest } from "./BackboneGetRelationships";
+import { BackbonePostRelationshipsRequest, BackbonePostRelationshipsResponse } from "./BackbonePostRelationship";
 import { BackboneAcceptRelationshipsRequest, BackbonePutRelationshipsResponse } from "./BackbonePutRelationship";
-import { BackboneRelationship } from "./BackboneRelationship";
 
 export class RelationshipClient extends RESTClientAuthenticate {
-    public async createRelationship(request: BackbonePostRelationshipsRequest): Promise<ClientResult<BackboneRelationship>> {
-        try {
-            return (await this.post<BackboneGetRelationshipsResponse>("/api/v1/Relationships", request)) as ClientResult<BackboneRelationship>;
-        } catch {
-            throw new TransportError("The backbone has returned a relationship with no creation content.");
-        }
+    public async createRelationship(request: BackbonePostRelationshipsRequest): Promise<ClientResult<BackbonePostRelationshipsResponse>> {
+        return await this.post<BackbonePostRelationshipsResponse>("/api/v1/Relationships", request);
     }
 
     public async acceptRelationship(relationshipId: string, request: BackboneAcceptRelationshipsRequest): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
@@ -28,19 +22,11 @@ export class RelationshipClient extends RESTClientAuthenticate {
         return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Revoke`, {});
     }
 
-    public async getRelationships(request?: BackboneGetRelationshipsRequest): Promise<ClientResult<Paginator<BackboneRelationship>>> {
-        try {
-            return (await this.getPaged<BackboneGetRelationshipsResponse>("/api/v1/Relationships", request)) as ClientResult<Paginator<BackboneRelationship>>;
-        } catch {
-            throw new TransportError("The backbone has returned a relationship with no creation content.");
-        }
+    public async getRelationships(request?: BackboneGetRelationshipsRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipResponse>>> {
+        return await this.getPaged<BackboneGetRelationshipResponse>("/api/v1/Relationships", request);
     }
 
-    public async getRelationship(relationshipId: string): Promise<ClientResult<BackboneRelationship>> {
-        try {
-            return (await this.get<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}`)) as ClientResult<BackboneRelationship>;
-        } catch {
-            throw new TransportError("The backbone has returned a relationship with no creation content.");
-        }
+    public async getRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipResponse>> {
+        return await this.get<BackboneGetRelationshipResponse>(`/api/v1/Relationships/${relationshipId}`);
     }
 }

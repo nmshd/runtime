@@ -6,7 +6,16 @@ import {
     DecideRequestItemParametersJSON,
     LocalRequestStatus
 } from "@nmshd/consumption";
-import { INotificationItem, IRelationshipTemplateContent, Notification, RelationshipTemplateContent, RelationshipTemplateContentJSON } from "@nmshd/content";
+import {
+    INotificationItem,
+    IRelationshipCreationContent,
+    IRelationshipTemplateContent,
+    Notification,
+    RelationshipCreationContent,
+    RelationshipCreationContentJSON,
+    RelationshipTemplateContent,
+    RelationshipTemplateContentJSON
+} from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
@@ -297,7 +306,7 @@ export async function establishRelationshipWithContents(
     transportServices1: TransportServices,
     transportServices2: TransportServices,
     templateContent: RelationshipTemplateContentJSON | RelationshipTemplateContent | IRelationshipTemplateContent,
-    creationContent: any
+    creationContent: RelationshipCreationContentJSON | RelationshipCreationContent | IRelationshipCreationContent
 ): Promise<void> {
     const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
 

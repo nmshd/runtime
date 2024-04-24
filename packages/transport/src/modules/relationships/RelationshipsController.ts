@@ -230,6 +230,8 @@ export class RelationshipsController extends TransportController {
     }
 
     private async decryptRelationship(response: BackboneRelationship, relationshipSecretId: CoreId) {
+        if (!response.creationContent) throw new TransportError("Creation content is missing");
+
         const templateId = CoreId.from(response.relationshipTemplateId);
 
         this._log.trace(`Parsing relationship template ${templateId} for ${response.id}...`);
@@ -336,6 +338,7 @@ export class RelationshipsController extends TransportController {
     @log()
     private async createNewRelationshipByIncomingCreation(relationshipId: string): Promise<Relationship> {
         const backboneRelationship = (await this.client.getRelationship(relationshipId)).value;
+        if (!backboneRelationship.creationContent) throw new TransportError("Creation content is missing");
 
         const templateId = CoreId.from(backboneRelationship.relationshipTemplateId);
         const template = await this.parent.relationshipTemplates.getRelationshipTemplate(templateId);
@@ -418,7 +421,7 @@ export class RelationshipsController extends TransportController {
             case RelationshipStatus.Active:
                 const encryptedContent = await this.prepareCreationResponseContent(relationship);
 
-                backboneResponse = (await this.client.acceptRelationship(id.toString(), { content: encryptedContent })).value;
+                backboneResponse = (await this.client.acceptRelationship(id.toString(), { creationResponseContent: encryptedContent })).value;
                 break;
 
             case RelationshipStatus.Rejected:

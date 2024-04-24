@@ -10,6 +10,6 @@ export interface BackboneRelationship {
     createdAt: string;
     status: RelationshipStatus;
     auditLog: BackboneRelationshipAuditLog;
-    creationContent: string;
+    creationContent?: string;
     creationResponseContent?: string;
 }
