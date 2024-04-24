@@ -25,8 +25,8 @@ import { RelationshipCreationContentCipher } from "./transmission/requests/Relat
 import { RelationshipCreationContentSigned } from "./transmission/requests/RelationshipCreationContentSigned";
 import { RelationshipCreationContentWrapper } from "./transmission/requests/RelationshipCreationContentWrapper";
 import { RelationshipCreationResponseContentCipher } from "./transmission/responses/RelationshipCreationResponseContentCipher";
-import { RelationshipCreationResponseSigned } from "./transmission/responses/RelationshipCreationResponseSigned";
-import { RelationshipCreationResponseWrapper } from "./transmission/responses/RelationshipCreationResponseWrapper";
+import { RelationshipCreationResponseContentSigned } from "./transmission/responses/RelationshipCreationResponseContentSigned";
+import { RelationshipCreationResponseContentWrapper } from "./transmission/responses/RelationshipCreationResponseContentWrapper";
 
 export class RelationshipsController extends TransportController {
     private client: RelationshipClient;
@@ -371,7 +371,7 @@ export class RelationshipsController extends TransportController {
     private async prepareCreationResponse(relationship: Relationship) {
         const publicCreationResponseCrypto = await this.secrets.getPublicCreationResponseCrypto(relationship.relationshipSecretId);
 
-        const creationResponse = RelationshipCreationResponseWrapper.from({
+        const creationResponse = RelationshipCreationResponseContentWrapper.from({
             relationshipId: relationship.id,
             content: JSONWrapper.from({})
         });
@@ -381,7 +381,7 @@ export class RelationshipsController extends TransportController {
 
         const [deviceSignature, relationshipSignature] = await Promise.all([this.parent.activeDevice.sign(buffer), this.secrets.sign(relationship.relationshipSecretId, buffer)]);
 
-        const signedCreationResponse = RelationshipCreationResponseSigned.from({
+        const signedCreationResponse = RelationshipCreationResponseContentSigned.from({
             serializedCreationResponse,
             deviceSignature,
             relationshipSignature
