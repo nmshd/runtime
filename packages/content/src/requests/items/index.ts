@@ -12,3 +12,5 @@ export * from "./registerAttributeListener/RegisterAttributeListenerAcceptRespon
 export * from "./registerAttributeListener/RegisterAttributeListenerRequestItem";
 export * from "./shareAttribute/ShareAttributeAcceptResponseItem";
 export * from "./shareAttribute/ShareAttributeRequestItem";
+export * from "./requestVerifiableAttribute/RequestVerifiableAttributeRequestItem";
+export * from "./requestVerifiableAttribute/RequestVerifiableAttributeAcceptResponseItem";

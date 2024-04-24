@@ -293,6 +293,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/RequestVerifiableAttributeRequestItemJSON"
                 }
             ]
         },
@@ -401,6 +404,88 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "owner": {
                     "type": "string"
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
                 },
                 "validFrom": {
                     "type": "string"
@@ -1068,6 +1153,88 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "owner": {
                     "type": "string"
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
                 },
                 "validFrom": {
                     "type": "string"
@@ -2918,6 +3085,61 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "RequestVerifiableAttributeRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "RequestVerifiableAttributeRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "attribute": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/IdentityAttributeJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipAttributeJSON"
+                        }
+                    ]
+                },
+                "did": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "did",
+                "mustBeAccepted"
+            ],
+            "additionalProperties": false
+        },
         "AddressString": {
             "type": "string",
             "pattern": "id1[A-Za-z0-9]{32,33}"
@@ -3344,6 +3566,88 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 "owner": {
                     "type": "string"
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
                 },
                 "validFrom": {
                     "type": "string"
@@ -4587,6 +4891,88 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 "owner": {
                     "type": "string"
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
                 },
                 "validFrom": {
                     "type": "string"
@@ -5698,6 +6084,88 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "owner": {
                     "type": "string"
                 },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
+                },
                 "validFrom": {
                     "type": "string"
                 },
@@ -6940,6 +7408,88 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 },
                 "owner": {
                     "type": "string"
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
                 },
                 "validFrom": {
                     "type": "string"
@@ -7891,6 +8441,9 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/RequestVerifiableAttributeRequestItemJSON"
                 }
             ]
         },
@@ -7999,6 +8552,88 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "owner": {
                     "type": "string"
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
                 },
                 "validFrom": {
                     "type": "string"
@@ -8666,6 +9301,88 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "owner": {
                     "type": "string"
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
                 },
                 "validFrom": {
                     "type": "string"
@@ -10513,6 +11230,61 @@ export const CreateOutgoingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "query"
+            ],
+            "additionalProperties": false
+        },
+        "RequestVerifiableAttributeRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "RequestVerifiableAttributeRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "attribute": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/IdentityAttributeJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipAttributeJSON"
+                        }
+                    ]
+                },
+                "did": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "did",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -11154,6 +11926,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/RequestVerifiableAttributeRequestItemJSON"
                 }
             ]
         },
@@ -11262,6 +12037,88 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "owner": {
                     "type": "string"
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
                 },
                 "validFrom": {
                     "type": "string"
@@ -11929,6 +12786,88 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "owner": {
                     "type": "string"
+                },
+                "proof": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "type": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        },
+                        "issuer": {
+                            "type": "string"
+                        },
+                        "issuanceDate": {
+                            "type": "string"
+                        },
+                        "expirationDate": {
+                            "type": "string"
+                        },
+                        "credentialSubject": {},
+                        "proof": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                },
+                                "created": {
+                                    "type": "string"
+                                },
+                                "verificationMethod": {
+                                    "type": "string"
+                                },
+                                "cryptosuite": {
+                                    "type": "string"
+                                },
+                                "proofPurpose": {
+                                    "type": "string"
+                                },
+                                "proofValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "created",
+                                "verificationMethod",
+                                "cryptosuite",
+                                "proofPurpose",
+                                "proofValue"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "@context",
+                        "type",
+                        "issuer",
+                        "issuanceDate",
+                        "credentialSubject",
+                        "proof"
+                    ],
+                    "additionalProperties": false
                 },
                 "validFrom": {
                     "type": "string"
@@ -13776,6 +14715,61 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "query"
+            ],
+            "additionalProperties": false
+        },
+        "RequestVerifiableAttributeRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "RequestVerifiableAttributeRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "attribute": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/IdentityAttributeJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipAttributeJSON"
+                        }
+                    ]
+                },
+                "did": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "did",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -16570,7 +17564,8 @@ export const GetOwnSharedAttributesRequest: any = {
                     "type": "boolean"
                 },
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 }
             },
             "required": [
@@ -16770,7 +17765,8 @@ export const GetPeerSharedAttributesRequest: any = {
                     "type": "boolean"
                 },
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 }
             },
             "required": [
@@ -16945,7 +17941,8 @@ export const GetRepositoryAttributesRequest: any = {
             "type": "object",
             "properties": {
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 },
                 "query": {
                     "$ref": "#/definitions/GetRepositoryAttributesRequestQuery"
@@ -16958,19 +17955,6 @@ export const GetRepositoryAttributesRequest: any = {
             "properties": {
                 "createdAt": {
                     "type": "string"
-                },
-                "content.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
                 },
                 "content.tags": {
                     "anyOf": [
@@ -16999,45 +17983,6 @@ export const GetRepositoryAttributesRequest: any = {
                     ]
                 },
                 "content.validTo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.isTechnical": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.confidentiality": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17086,7 +18031,8 @@ export const GetSharedVersionsOfRepositoryAttributeRequest: any = {
                     }
                 },
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 }
             },
             "required": [
@@ -21171,7 +22117,8 @@ export const GetAttributesForRelationshipRequest: any = {
                     "type": "boolean"
                 },
                 "onlyLatestVersions": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "default: true"
                 }
             },
             "required": [

@@ -11,7 +11,8 @@
         "packages/content",
         "packages/consumption",
         "packages/runtime",
-        "packages/app-runtime"
+        "packages/app-runtime",
+        "packages/vc"
     ],
     "scripts": {
         "build:node": "tsc --build",
