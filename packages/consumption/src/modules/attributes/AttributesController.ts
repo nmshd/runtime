@@ -187,26 +187,26 @@ export class AttributesController extends ConsumptionBaseController {
         let dbQuery = ThirdPartyRelationshipAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.confidentiality"] = { $ne: "private" };
 
-        if (dbQuery["content.owner"] === ThirdPartyRelationshipAttributeQueryOwner.Recipient) {
-            dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
-        }
-
-        if (dbQuery["content.owner"] === ThirdPartyRelationshipAttributeQueryOwner.ThirdParty) {
-            dbQuery["content.owner"] = { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) };
-        }
-
-        if (parsedQuery.owner === ThirdPartyRelationshipAttributeQueryOwner.Empty) {
-            const ownerQuery = {
-                $or: [
-                    {
-                        ["content.owner"]: { $eq: this.identity.address.toString() }
-                    },
-                    {
-                        ["content.owner"]: { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) }
-                    }
-                ]
-            };
-            dbQuery = { $and: [dbQuery, ownerQuery] };
+        switch (parsedQuery.owner) {
+            case ThirdPartyRelationshipAttributeQueryOwner.Recipient:
+                dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
+                break;
+            case ThirdPartyRelationshipAttributeQueryOwner.ThirdParty:
+                dbQuery["content.owner"] = { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) };
+                break;
+            case ThirdPartyRelationshipAttributeQueryOwner.Empty:
+                const recipientOrThirdPartyIsOwnerQuery = {
+                    $or: [
+                        {
+                            ["content.owner"]: { $eq: this.identity.address.toString() }
+                        },
+                        {
+                            ["content.owner"]: { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) }
+                        }
+                    ]
+                };
+                dbQuery = { $and: [dbQuery, recipientOrThirdPartyIsOwnerQuery] };
+                break;
         }
 
         const attributes = await this.attributes.find(dbQuery);

@@ -18,14 +18,14 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
         if (requestItem.attribute instanceof IdentityAttribute) {
+            if (recipientIsAttributeOwner || ownerIsEmptyString) {
+                return ValidationResult.success();
+            }
+
             if (senderIsAttributeOwner) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidRequestItem("Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead.")
                 );
-            }
-
-            if (recipientIsAttributeOwner || ownerIsEmptyString) {
-                return ValidationResult.success();
             }
 
             if (typeof recipient !== "undefined") {
