@@ -292,7 +292,7 @@ export class RelationshipsController extends TransportController {
         if (!(await this.secrets.hasCryptoRelationshipSecrets(relationship.relationshipSecretId)) && backboneRelationship.creationResponseContent) {
             const creationResponseContent = backboneRelationship.creationResponseContent;
             const cipher = RelationshipCreationResponseContentCipher.fromBase64(creationResponseContent);
-            await this.secrets.convertSecrets(relationship.relationshipSecretId, cipher.publicCreationResponseCrypto!);
+            await this.secrets.convertSecrets(relationship.relationshipSecretId, cipher.publicCreationResponseContentCrypto!);
         }
         relationship.cache!.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneRelationship.auditLog);
         relationship.status = backboneRelationship.status;
@@ -369,28 +369,28 @@ export class RelationshipsController extends TransportController {
     }
 
     private async prepareCreationResponse(relationship: Relationship) {
-        const publicCreationResponseCrypto = await this.secrets.getPublicCreationResponseCrypto(relationship.relationshipSecretId);
+        const publicCreationResponseContentCrypto = await this.secrets.getPublicCreationResponseContentCrypto(relationship.relationshipSecretId);
 
-        const creationResponse = RelationshipCreationResponseContentWrapper.from({
+        const creationResponseContent = RelationshipCreationResponseContentWrapper.from({
             relationshipId: relationship.id,
             content: JSONWrapper.from({})
         });
 
-        const serializedCreationResponse = creationResponse.serialize();
-        const buffer = CoreUtil.toBuffer(serializedCreationResponse);
+        const serializedCreationResponseContent = creationResponseContent.serialize();
+        const buffer = CoreUtil.toBuffer(serializedCreationResponseContent);
 
         const [deviceSignature, relationshipSignature] = await Promise.all([this.parent.activeDevice.sign(buffer), this.secrets.sign(relationship.relationshipSecretId, buffer)]);
 
-        const signedCreationResponse = RelationshipCreationResponseContentSigned.from({
-            serializedCreationResponse,
+        const signedCreationResponseContent = RelationshipCreationResponseContentSigned.from({
+            serializedCreationResponse: serializedCreationResponseContent,
             deviceSignature,
             relationshipSignature
         });
 
-        const cipher = await this.secrets.encrypt(relationship.relationshipSecretId, signedCreationResponse);
+        const cipher = await this.secrets.encrypt(relationship.relationshipSecretId, signedCreationResponseContent);
         const creationResponseCipher = RelationshipCreationResponseContentCipher.from({
             cipher,
-            publicCreationResponseCrypto
+            publicCreationResponseContentCrypto
         });
 
         return creationResponseCipher.toBase64();

@@ -4,7 +4,7 @@ import { CoreSerializable, ICoreSerializable } from "../../../../core";
 
 export interface IRelationshipCreationResponseContentCipher extends ICoreSerializable {
     cipher: ICryptoCipher;
-    publicCreationResponseCrypto?: ICryptoRelationshipPublicResponse;
+    publicCreationResponseContentCrypto?: ICryptoRelationshipPublicResponse;
 }
 
 @type("RelationshipCreationResponseContentCipher")
@@ -15,7 +15,7 @@ export class RelationshipCreationResponseContentCipher extends CoreSerializable 
 
     @validate({ nullable: true })
     @serialize()
-    public publicCreationResponseCrypto?: CryptoRelationshipPublicResponse;
+    public publicCreationResponseContentCrypto?: CryptoRelationshipPublicResponse;
 
     public static from(value: IRelationshipCreationResponseContentCipher): RelationshipCreationResponseContentCipher {
         return this.fromAny(value);

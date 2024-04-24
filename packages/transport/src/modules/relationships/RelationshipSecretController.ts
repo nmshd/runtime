@@ -88,7 +88,7 @@ export class RelationshipSecretController extends SecretController {
     }
 
     @log()
-    public async getPublicCreationResponseCrypto(relationshipSecretId: CoreId): Promise<CryptoRelationshipPublicResponse> {
+    public async getPublicCreationResponseContentCrypto(relationshipSecretId: CoreId): Promise<CryptoRelationshipPublicResponse> {
         const secret = await this.loadActiveSecretByName(relationshipSecretId.toString());
         if (!secret) {
             throw CoreErrors.general.recordNotFound(CryptoRelationshipSecrets, relationshipSecretId.toString());
