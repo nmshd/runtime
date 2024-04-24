@@ -294,7 +294,9 @@ export class RelationshipsController extends TransportController {
         if (!(await this.secrets.hasCryptoRelationshipSecrets(relationship.relationshipSecretId)) && backboneRelationship.creationResponseContent) {
             const creationResponseContent = backboneRelationship.creationResponseContent;
             const cipher = RelationshipCreationResponseContentCipher.fromBase64(creationResponseContent);
-            await this.secrets.convertSecrets(relationship.relationshipSecretId, cipher.publicCreationResponseContentCrypto!);
+
+            if (!cipher.publicCreationResponseContentCrypto) throw new TransportError("The response crypto is missing.");
+            await this.secrets.convertSecrets(relationship.relationshipSecretId, cipher.publicCreationResponseContentCrypto);
         }
         relationship.cache!.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneRelationship.auditLog);
         relationship.status = backboneRelationship.status;
