@@ -418,7 +418,7 @@ export class RelationshipsController extends TransportController {
             case RelationshipStatus.Active:
                 const encryptedContent = await this.prepareCreationResponseContent(relationship);
 
-                backboneResponse = (await this.client.acceptRelationship(id.toString(), { creationResponseContent: encryptedContent })).value;
+                backboneResponse = (await this.client.acceptRelationship(id.toString(), { content: encryptedContent })).value;
                 break;
 
             case RelationshipStatus.Rejected:
