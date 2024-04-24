@@ -1,19 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import {
-    AccountController,
-    CachedRelationship,
-    CoreDate,
-    CoreId,
-    Identity,
-    Relationship,
-    RelationshipChangeRequest,
-    RelationshipChangeResponse,
-    RelationshipChangeStatus,
-    RelationshipChangeType,
-    RelationshipStatus,
-    RelationshipTemplate,
-    Transport
-} from "../../../src";
+import { AccountController, CachedRelationship, CoreDate, CoreId, Identity, Relationship, RelationshipStatus, RelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipsController", function () {
@@ -37,29 +23,11 @@ describe("RelationshipsController", function () {
         expect(relationship.peer.address).toStrictEqual(peerAccount.identity.address);
 
         expect(relationship.cache!.template).toBeInstanceOf(RelationshipTemplate);
-        expect(relationship.cache!.changes).toHaveLength(1);
 
         expect(relationship.cache).toBeInstanceOf(CachedRelationship);
         expect(relationship.cachedAt).toBeInstanceOf(CoreDate);
         expect(relationship.cachedAt!.isWithin(TestUtil.tempDateThreshold, TestUtil.tempDateThreshold, creationTime)).toBe(true);
-
-        const creation = relationship.cache!.changes[0];
-        expect(creation.relationshipId.toString()).toBe(relationship.id.toString());
-        expect(creation.status).toStrictEqual(RelationshipChangeStatus.Accepted);
-        expect(creation.type).toStrictEqual(RelationshipChangeType.Creation);
-
-        expect(creation.request).toBeInstanceOf(RelationshipChangeRequest);
-        expect(creation.request.createdAt.isWithin(TestUtil.tempDateThreshold, TestUtil.tempDateThreshold, creationTime)).toBe(true);
-        if (creation.request.createdBy.equals(ownAccount.identity.address)) {
-            expect(creation.request.createdBy.toString()).toBe(ownAccount.identity.address.toString());
-            expect(creation.response?.createdBy.toString()).toBe(peerAccount.identity.address.toString());
-        } else {
-            expect(creation.response?.createdBy.toString()).toBe(ownAccount.identity.address.toString());
-            expect(creation.request.createdBy.toString()).toBe(peerAccount.identity.address.toString());
-        }
-
-        expect(creation.response).toBeInstanceOf(RelationshipChangeResponse);
-        expect(creation.response!.createdAt.isWithin(TestUtil.tempDateThreshold, TestUtil.tempDateThreshold, creationTime)).toBe(true);
+        expect(relationship.cache!.creationContent).toBeDefined();
 
         expect(relationship.cache!.lastMessageReceivedAt).toBeUndefined();
         expect(relationship.cache!.lastMessageSentAt).toBeUndefined();

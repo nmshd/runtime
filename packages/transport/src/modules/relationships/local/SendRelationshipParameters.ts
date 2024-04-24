@@ -3,7 +3,7 @@ import { CoreSerializable, ICoreSerializable } from "../../../core";
 import { IRelationshipTemplate, RelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 
 export interface ISendRelationshipParameters extends ICoreSerializable {
-    content: ISerializable;
+    creationContent: ISerializable;
     template: IRelationshipTemplate;
 }
 
@@ -11,7 +11,7 @@ export interface ISendRelationshipParameters extends ICoreSerializable {
 export class SendRelationshipParameters extends CoreSerializable implements ISendRelationshipParameters {
     @validate()
     @serialize()
-    public content: Serializable;
+    public creationContent: Serializable;
 
     @validate()
     @serialize()

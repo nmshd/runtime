@@ -39,19 +39,16 @@ describe("Create Relationship", () => {
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
-            content: { a: "b" }
+            creationContent: { a: "b" }
         });
         expect(createRelationshipResponse).toBeSuccessful();
 
         const relationships1 = await syncUntilHasRelationships(services1.transport);
         expect(relationships1).toHaveLength(1);
         const relationshipId = relationships1[0].id;
-        const relationshipChangeId = relationships1[0].changes[0].id;
 
-        const acceptRelationshipResponse = await services1.transport.relationships.acceptRelationshipChange({
-            relationshipId: relationshipId,
-            changeId: relationshipChangeId,
-            content: { a: "b" }
+        const acceptRelationshipResponse = await services1.transport.relationships.acceptRelationship({
+            relationshipId
         });
         expect(acceptRelationshipResponse).toBeSuccessful();
 
