@@ -525,7 +525,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.canAccept.invalidAcceptParameters",
+                code: "error.consumption.requests.invalidAcceptParameters",
                 message: "When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided."
             });
         });

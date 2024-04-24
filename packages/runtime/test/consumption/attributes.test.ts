@@ -8,6 +8,7 @@ import {
     RequestItemJSONDerivations,
     StreetJSON,
     ThirdPartyRelationshipAttributeQuery,
+    ThirdPartyRelationshipAttributeQueryOwner,
     ZipCodeJSON
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/transport";
@@ -276,7 +277,7 @@ describe("attribute queries", () => {
                 query: {
                     "@type": "ThirdPartyRelationshipAttributeQuery",
                     key: "website",
-                    owner: "thirdParty",
+                    owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
                     thirdParty: [services1.address]
                 }
             });
@@ -1590,7 +1591,11 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     items: [
                         ReadAttributeRequestItem.from({
-                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "amazing", owner: services1.address, thirdParty: [services3.address] }),
+                            query: ThirdPartyRelationshipAttributeQuery.from({
+                                key: "amazing",
+                                owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                                thirdParty: [services3.address]
+                            }),
                             mustBeAccepted: true
                         }).toJSON()
                     ]
@@ -1694,7 +1699,11 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     items: [
                         ReadAttributeRequestItem.from({
-                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "amazing", owner: services3.address, thirdParty: [services3.address] }),
+                            query: ThirdPartyRelationshipAttributeQuery.from({
+                                key: "amazing",
+                                owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
+                                thirdParty: [services3.address]
+                            }),
                             mustBeAccepted: true
                         }).toJSON()
                     ]
@@ -1785,7 +1794,11 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     items: [
                         ReadAttributeRequestItem.from({
-                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "A key", owner: services3.address, thirdParty: [services3.address] }),
+                            query: ThirdPartyRelationshipAttributeQuery.from({
+                                key: "A key",
+                                owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
+                                thirdParty: [services3.address]
+                            }),
                             mustBeAccepted: true
                         }).toJSON()
                     ]
