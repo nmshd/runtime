@@ -12,7 +12,7 @@ import {
 import { CoreAddress } from "@nmshd/transport";
 import {
     IncomingRequestStatusChangedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     PeerRelationshipTemplateDVO,
     PeerRelationshipTemplateLoadedEvent,
     RelationshipTemplateDTO,
@@ -323,7 +323,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(attributeResult.value).toHaveLength(4);
 
         await syncUntilHasRelationships(templator.transport);
-        await templator.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent);
+        await templator.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent);
         const requestResultTemplator = await templator.consumption.outgoingRequests.getRequests({
             query: {
                 "source.reference": requestorTemplate.id

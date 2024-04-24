@@ -8,12 +8,11 @@ import {
     CoreId,
     IConfigOverwrite,
     ICoreId,
+    IdentityController,
     IMessage,
     IRelationshipTemplate,
-    IdentityController,
     Message,
     Relationship,
-    RelationshipChangeType,
     RelationshipTemplate,
     SynchronizedCollection,
     Transport
@@ -28,10 +27,10 @@ import {
     ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters,
     ICreateOutgoingRequestParameters,
     ILocalRequestSource,
+    IncomingRequestsController,
     IReceivedIncomingRequestParameters,
     IRequireManualDecisionOfIncomingRequestParameters,
     ISentOutgoingRequestParameters,
-    IncomingRequestsController,
     LocalRequest,
     LocalRequestSource,
     LocalRequestStatus,
@@ -580,20 +579,18 @@ export class RequestsWhen {
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.create(params);
     }
 
-    public async iCreateAnOutgoingRequestFromRelationshipCreationChange(): Promise<void> {
-        await this.iCreateAnOutgoingRequestFromRelationshipCreationChangeWith({});
+    public async iCreateAnOutgoingRequestFromRelationshipCreation(): Promise<void> {
+        await this.iCreateAnOutgoingRequestFromRelationshipCreationWith({});
     }
 
-    public async iCreateAnOutgoingRequestFromRelationshipCreationChangeWhenRelationshipExistsWith(
+    public async iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith(
         params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>
     ): Promise<void> {
         this.context.relationshipToReturnFromGetActiveRelationshipToIdentity = TestObjectFactory.createRelationship();
-        await this.iCreateAnOutgoingRequestFromRelationshipCreationChangeWith(params);
+        await this.iCreateAnOutgoingRequestFromRelationshipCreationWith(params);
     }
 
-    public async iCreateAnOutgoingRequestFromRelationshipCreationChangeWith(
-        params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>
-    ): Promise<void> {
+    public async iCreateAnOutgoingRequestFromRelationshipCreationWith(params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>): Promise<void> {
         params.template ??= TestObjectFactory.createOutgoingIRelationshipTemplate(
             this.context.currentIdentity,
             RelationshipTemplateContent.from({
@@ -601,7 +598,7 @@ export class RequestsWhen {
                 onExistingRelationship: TestObjectFactory.createRequestWithTwoItems()
             })
         );
-        params.responseSource ??= TestObjectFactory.createIncomingIRelationshipChange(RelationshipChangeType.Creation);
+        params.responseSource ??= TestObjectFactory.createIRelationship();
         params.response ??= TestObjectFactory.createResponse();
 
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.createAndCompleteFromRelationshipTemplateResponse(

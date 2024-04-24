@@ -8,11 +8,11 @@ import {
 } from "@nmshd/consumption";
 import {
     INotificationItem,
-    IRelationshipCreationChangeRequestContent,
+    IRelationshipCreationContent,
     IRelationshipTemplateContent,
     Notification,
-    RelationshipCreationChangeRequestContent,
-    RelationshipCreationChangeRequestContentJSON,
+    RelationshipCreationContent,
+    RelationshipCreationContentJSON,
     RelationshipTemplateContent,
     RelationshipTemplateContentJSON
 } from "@nmshd/content";
@@ -285,17 +285,15 @@ export async function establishRelationship(transportServices1: TransportService
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
         templateId: template.id,
-        content: { a: "b" }
+        creationContent: { a: "b" }
     });
     expect(createRelationshipResponse).toBeSuccessful();
 
     const relationships = await syncUntilHasRelationships(transportServices1);
     expect(relationships).toHaveLength(1);
 
-    const acceptResponse = await transportServices1.relationships.acceptRelationshipChange({
-        relationshipId: relationships[0].id,
-        changeId: relationships[0].changes[0].id,
-        content: { a: "b" }
+    const acceptResponse = await transportServices1.relationships.acceptRelationship({
+        relationshipId: relationships[0].id
     });
     expect(acceptResponse).toBeSuccessful();
 
@@ -308,23 +306,21 @@ export async function establishRelationshipWithContents(
     transportServices1: TransportServices,
     transportServices2: TransportServices,
     templateContent: RelationshipTemplateContentJSON | RelationshipTemplateContent | IRelationshipTemplateContent,
-    requestContent: RelationshipCreationChangeRequestContentJSON | RelationshipCreationChangeRequestContent | IRelationshipCreationChangeRequestContent
+    creationContent: RelationshipCreationContentJSON | RelationshipCreationContent | IRelationshipCreationContent
 ): Promise<void> {
     const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
         templateId: template.id,
-        content: requestContent
+        creationContent: creationContent
     });
     expect(createRelationshipResponse).toBeSuccessful();
 
     const relationships = await syncUntilHasRelationships(transportServices1);
     expect(relationships).toHaveLength(1);
 
-    const acceptResponse = await transportServices1.relationships.acceptRelationshipChange({
-        relationshipId: relationships[0].id,
-        changeId: relationships[0].changes[0].id,
-        content: { a: "b" }
+    const acceptResponse = await transportServices1.relationships.acceptRelationship({
+        relationshipId: relationships[0].id
     });
     expect(acceptResponse).toBeSuccessful();
 
@@ -339,7 +335,7 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
         await establishRelationship(sTransportServices, rTransportServices);
     } else if (relationships[0].status === RelationshipStatus.Pending) {
         const relationship = relationships[0];
-        await sTransportServices.relationships.acceptRelationshipChange({ relationshipId: relationship.id, changeId: relationship.changes[0].id, content: {} });
+        await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
         await syncUntilHasRelationships(rTransportServices, 1);
     }
 
