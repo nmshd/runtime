@@ -1,4 +1,4 @@
 export * from "./ExternalEventProcessorRegistry";
 export * from "./MessageDeliveredExternalEventProcessor";
 export * from "./MessageReceivedExternalEventProcessor";
-export * from "./RelationshipCreatedOrChangedExternalEventProcessor";
+export * from "./RelationshipStatusChangedExternalEventProcessor";
