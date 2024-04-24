@@ -1,5 +1,11 @@
 import { EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
-import { ConsumptionIds, DecideRequestItemGroupParametersJSON, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import {
+    AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
+    ConsumptionIds,
+    DecideRequestItemGroupParametersJSON,
+    DecideRequestItemParametersJSON,
+    LocalRequestStatus
+} from "@nmshd/consumption";
 import { INotificationItem, IRelationshipTemplateContent, Notification, RelationshipTemplateContent, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
 import fs from "fs";
