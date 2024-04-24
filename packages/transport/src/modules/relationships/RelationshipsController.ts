@@ -368,7 +368,7 @@ export class RelationshipsController extends TransportController {
         return await this.updatePendingRelationshipWithPeerResponse(relationshipDoc);
     }
 
-    private async prepareCreationResponse(relationship: Relationship) {
+    private async prepareCreationResponseContent(relationship: Relationship) {
         const publicCreationResponseContentCrypto = await this.secrets.getPublicCreationResponseContentCrypto(relationship.relationshipSecretId);
 
         const creationResponseContent = RelationshipCreationResponseContentWrapper.from({
@@ -382,18 +382,18 @@ export class RelationshipsController extends TransportController {
         const [deviceSignature, relationshipSignature] = await Promise.all([this.parent.activeDevice.sign(buffer), this.secrets.sign(relationship.relationshipSecretId, buffer)]);
 
         const signedCreationResponseContent = RelationshipCreationResponseContentSigned.from({
-            serializedCreationResponse: serializedCreationResponseContent,
+            serializedCreationResponseContent,
             deviceSignature,
             relationshipSignature
         });
 
         const cipher = await this.secrets.encrypt(relationship.relationshipSecretId, signedCreationResponseContent);
-        const creationResponseCipher = RelationshipCreationResponseContentCipher.from({
+        const creationResponseContentCipher = RelationshipCreationResponseContentCipher.from({
             cipher,
             publicCreationResponseContentCrypto
         });
 
-        return creationResponseCipher.toBase64();
+        return creationResponseContentCipher.toBase64();
     }
 
     @log()
@@ -416,7 +416,7 @@ export class RelationshipsController extends TransportController {
         let backboneResponse: BackbonePutRelationshipsResponse;
         switch (targetStatus) {
             case RelationshipStatus.Active:
-                const encryptedContent = await this.prepareCreationResponse(relationship);
+                const encryptedContent = await this.prepareCreationResponseContent(relationship);
 
                 backboneResponse = (await this.client.acceptRelationship(id.toString(), { creationResponseContent: encryptedContent })).value;
                 break;

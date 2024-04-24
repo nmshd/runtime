@@ -3,7 +3,7 @@ import { CryptoSignature, ICryptoSignature } from "@nmshd/crypto";
 import { CoreSerializable, ICoreSerializable } from "../../../../core";
 
 export interface IRelationshipCreationResponseContentSigned extends ICoreSerializable {
-    serializedCreationResponse: string;
+    serializedCreationResponseContent: string;
     deviceSignature: ICryptoSignature;
     relationshipSignature: ICryptoSignature;
 }
@@ -12,7 +12,7 @@ export interface IRelationshipCreationResponseContentSigned extends ICoreSeriali
 export class RelationshipCreationResponseContentSigned extends CoreSerializable implements IRelationshipCreationResponseContentSigned {
     @validate()
     @serialize()
-    public serializedCreationResponse: string;
+    public serializedCreationResponseContent: string;
 
     @validate()
     @serialize()
