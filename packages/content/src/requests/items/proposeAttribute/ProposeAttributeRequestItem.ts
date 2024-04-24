@@ -40,7 +40,7 @@ export class ProposeAttributeRequestItem extends RequestItem implements IPropose
     @validate()
     public attribute: IdentityAttribute | RelationshipAttribute;
 
-    public static from(value: IProposeAttributeRequestItem | Omit<ProposeAttributeRequestItemJSON, "@type">): ProposeAttributeRequestItem {
+    public static from(value: IProposeAttributeRequestItem | Omit<ProposeAttributeRequestItemJSON, "@type"> | ProposeAttributeRequestItemJSON): ProposeAttributeRequestItem {
         return this.fromAny(value);
     }
 
