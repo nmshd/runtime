@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/runtime",
-    "version": "4.5.1",
+    "version": "4.6.1",
     "description": "The enmeshed client runtime.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -25,7 +25,7 @@
         "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh && npm run bundle",
         "build:node": "npm run build:schemas && tsc -p tsconfig.json",
         "build:notest": "npm run build:node && npm run bundle:notest",
-        "build:schemas": "node scripts/buildSchemas.js",
+        "build:schemas": "node scripts/buildSchemas.mjs",
         "bundle": "npm run bundle:lib && npm run bundle:min",
         "bundle:lib": "webpack --stats-all --config webpack.config.js",
         "bundle:min": "webpack --stats-all --config webpack.min.config.js",
@@ -65,8 +65,8 @@
         "@js-soft/logging-abstractions": "^1.0.1",
         "@js-soft/ts-serval": "2.0.10",
         "@js-soft/ts-utils": "^2.3.3",
-        "@nmshd/consumption": "3.9.8",
-        "@nmshd/content": "2.8.12",
+        "@nmshd/consumption": "3.10.1",
+        "@nmshd/content": "2.9.1",
         "@nmshd/crypto": "2.0.6",
         "@nmshd/transport": "2.5.0",
         "ajv": "^8.12.0",
@@ -88,7 +88,7 @@
         "@types/lodash": "^4.17.0",
         "@types/luxon": "^3.4.2",
         "@types/qrcode": "^1.5.5",
-        "ts-json-schema-generator": "^2.0.1"
+        "ts-json-schema-generator": "^2.1.0"
     },
     "publishConfig": {
         "access": "public",

@@ -1,4 +1,4 @@
-import { LocalAttribute, LocalAttributeShareInfoJSON } from "@nmshd/consumption";
+import { LocalAttribute, LocalAttributeDeletionInfoJSON, LocalAttributeShareInfoJSON } from "@nmshd/consumption";
 import { LocalAttributeDTO } from "../../../types";
 
 export class AttributeMapper {
@@ -10,7 +10,8 @@ export class AttributeMapper {
             createdAt: attribute.createdAt.toString(),
             succeeds: attribute.succeeds?.toString(),
             succeededBy: attribute.succeededBy?.toString(),
-            shareInfo: attribute.shareInfo?.toJSON() as LocalAttributeShareInfoJSON
+            shareInfo: attribute.shareInfo?.toJSON() as LocalAttributeShareInfoJSON,
+            deletionInfo: attribute.deletionInfo?.toJSON() as LocalAttributeDeletionInfoJSON
         };
     }
 
