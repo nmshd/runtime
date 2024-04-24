@@ -34,11 +34,6 @@ export type LocalDraftIdString = string;
 export type LocalSettingIdString = string;
 
 /**
- * @pattern RCH[A-Za-z0-9]{17}
- */
-export type RelationshipChangeIdString = string;
-
-/**
  * @pattern MSG[A-Za-z0-9]{17}
  */
 export type MessageIdString = string;
