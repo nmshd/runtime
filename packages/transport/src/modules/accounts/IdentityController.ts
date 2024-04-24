@@ -83,11 +83,15 @@ export class IdentityController extends TransportController {
         return identityDeletionProcess;
     }
 
+    // TODO: rename getIdentityDeletionProcesses
     public async getIdentityDeletions(): Promise<IdentityDeletionProcess[]> {
         return (await this.identityClient.getIdentityDeletionProcesses()).value.map((identityDeletionProcessJSON) => IdentityDeletionProcess.from(identityDeletionProcessJSON));
     }
 
+    // TODO: rename getIdentityDeletionProcess
     public async getIdentityDeletion(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
         return IdentityDeletionProcess.from((await this.identityClient.getIdentityDeletionProcess(identityDeletionProcessId)).value);
     }
+
+    // TODO: Simon: möchte App alle (z.T. historischen) DeletionProzesse erhalten?
 }

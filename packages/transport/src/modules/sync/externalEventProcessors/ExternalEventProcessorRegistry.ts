@@ -12,6 +12,8 @@ export class ExternalEventProcessorRegistry {
         this.registerProcessor("MessageDelivered", MessageDeliveredExternalEventProcessor);
         this.registerProcessor("RelationshipChangeCreated", RelationshipChangeCreatedExternalEventProcessor);
         this.registerProcessor("RelationshipChangeCompleted", RelationshipChangeCompletedExternalEventProcessor);
+        // TODO: IdentityDeletion relevante external Events implementieren
+        // TODO: Timo bezüglich des Formats der Events fragen
     }
 
     public registerProcessor(externalEventName: string, externalEventProcessor: ExternalEventProcessorConstructor): void {

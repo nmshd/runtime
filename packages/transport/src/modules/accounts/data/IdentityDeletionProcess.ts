@@ -40,6 +40,7 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
     createdByDevice?: CoreId;
 
     // Approval period
+    // TODO: Wozu brauchen wir diese Infos hier?
     approvalReminder1SentAt?: CoreDate;
     approvalReminder2SentAt?: CoreDate;
     approvalReminder3SentAt?: CoreDate;
@@ -55,8 +56,13 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
     gracePeriodReminder3SentAt?: CoreDate;
 
     // Deletion
+    // TODO: was genau bedeutet dieses Feld?
     deletionStartedAt?: CoreDate; // Completion
+
+    // TODO: Kann ich diese Information jemals abrufen?
     completedAt?: CoreDate;
+
+    // TODO: byDevice? Und wozu brauche ich das Feld (in Runtime)?
     completedByDevice?: CoreId;
 
     // Cross Cutting
@@ -138,3 +144,9 @@ export class IdentityDeletionProcess extends CoreSerializable implements IIdenti
         return this.fromAny(value);
     }
 }
+
+/**
+ * Fragen:
+ *
+ * TODO: Wie erhält App Benachrichtigung über ausstehenden DeletionProcess (Admin UI)?
+ */

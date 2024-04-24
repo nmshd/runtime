@@ -8,6 +8,14 @@ export interface IIdentity extends ICoreSerializable {
     address: CoreAddress;
     publicKey: ICryptoSignaturePublicKey;
     realm: Realm;
+
+    // TODO: deletionInfo?: {} verwenden
+    //       - status, deletion* -Felder löschen
+    //
+    // deletionInfo?: {
+    //     status: IdentityStatus;
+    //     gracePedio: CoreDate;
+    // };
     status: IdentityStatus;
     deletionGracePeriodEndsAt?: CoreDate;
     deletionProcesses: IIdentityDeletionProcess[];
