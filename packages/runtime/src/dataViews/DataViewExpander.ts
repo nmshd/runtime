@@ -43,10 +43,10 @@ import {
     ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItemJSON,
     SurnameJSON,
+    ThirdPartyRelationshipAttributeQueryJSON,
     ValueHints,
     ValueHintsJSON
 } from "@nmshd/content";
-import { ThirdPartyRelationshipAttributeQueryJSON } from "@nmshd/content/dist/attributes/ThirdPartyRelationshipAttributeQuery";
 import { CoreAddress, CoreId, IdentityController, Realm, Relationship, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import {
