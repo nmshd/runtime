@@ -11,5 +11,5 @@ export interface BackboneRelationship {
     status: RelationshipStatus;
     auditLog: BackboneRelationshipAuditLog;
     creationContent: string;
-    acceptanceContent?: string;
+    creationResponseContent?: string;
 }

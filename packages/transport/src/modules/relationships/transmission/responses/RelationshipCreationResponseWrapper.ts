@@ -1,13 +1,13 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId, CoreSerializable, ICoreId, ICoreSerializable } from "../../../../core";
 
-export interface IRelationshipAcceptanceContentWrapper extends ICoreSerializable {
+export interface IRelationshipCreationResponseWrapper extends ICoreSerializable {
     content: ISerializable;
     relationshipId: ICoreId;
 }
 
-@type("RelationshipAcceptanceContentWrapper")
-export class RelationshipAcceptanceContentWrapper extends CoreSerializable implements IRelationshipAcceptanceContentWrapper {
+@type("RelationshipCreationResponseWrapper")
+export class RelationshipCreationResponseWrapper extends CoreSerializable implements IRelationshipCreationResponseWrapper {
     @validate()
     @serialize()
     public content: Serializable;
@@ -16,7 +16,7 @@ export class RelationshipAcceptanceContentWrapper extends CoreSerializable imple
     @serialize()
     public relationshipId: CoreId;
 
-    public static from(value: IRelationshipAcceptanceContentWrapper): RelationshipAcceptanceContentWrapper {
+    public static from(value: IRelationshipCreationResponseWrapper): RelationshipCreationResponseWrapper {
         return this.fromAny(value);
     }
 }

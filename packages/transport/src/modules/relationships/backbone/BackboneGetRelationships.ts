@@ -15,7 +15,7 @@ export interface BackboneGetRelationshipsResponse {
     status: RelationshipStatus;
     auditLog: BackboneRelationshipAuditLog;
     creationContent?: string;
-    acceptanceContent?: string;
+    creationResponseContent?: string;
 }
 
 export interface BackboneGetRelationshipsDateRange<T> {

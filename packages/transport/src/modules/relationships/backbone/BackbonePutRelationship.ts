@@ -2,7 +2,7 @@ import { BackboneRelationshipAuditLog } from "../transmission/RelationshipAuditL
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 
 export interface BackboneAcceptRelationshipsRequest {
-    acceptanceContent: string;
+    creationResponseContent: string;
 }
 
 export interface BackbonePutRelationshipsResponse {
