@@ -1648,7 +1648,8 @@ export class DataViewExpander {
             items: expandedAttributes,
             nameMap: stringByType,
             templateId: relationship.template.id,
-            auditLog: relationship.auditLog
+            auditLog: relationship.auditLog,
+            creationContent: relationship.creationContent
         };
     }
 
