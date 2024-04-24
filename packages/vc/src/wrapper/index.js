@@ -4,4 +4,4 @@ module.exports = {
     init: wrapper.init,
     sign: wrapper.sign,
     verify: wrapper.verify
-}
+};

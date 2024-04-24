@@ -1,10 +1,9 @@
-// @ts-expect-error
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { sign, init, verify } = require("./wrapper");
-
 
 export class VerifiableCredentialController {
     private static instance?: VerifiableCredentialController;
-    static async initialize(): Promise<VerifiableCredentialController> {
+    public static async initialize(): Promise<VerifiableCredentialController> {
         if (this.instance) {
             return this.instance;
         }
@@ -13,11 +12,13 @@ export class VerifiableCredentialController {
         return this.instance;
     }
 
-    async sign(data: any, publicKey: string, privateKey: string): Promise<any> {
-        return await sign(data, publicKey, privateKey)
+    public async sign(data: any, publicKey: string, privateKey: string): Promise<any> {
+        // eslint-disable-next-line @typescript-eslint/return-await
+        return await sign(data, publicKey, privateKey);
     }
 
-    async verify(credential: any): Promise<any> {
+    public async verify(credential: any): Promise<any> {
+        // eslint-disable-next-line @typescript-eslint/return-await
         return await verify(credential);
     }
 }

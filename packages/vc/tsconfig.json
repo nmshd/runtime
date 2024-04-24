@@ -1,16 +1,14 @@
 {
     "compilerOptions": {
-        "module": "commonjs",                                
-        "target": "es2021",                                  
+        "module": "commonjs",
+        "target": "es2021",
         "outDir": "dist",
         "allowJs": true,
-        "esModuleInterop": true,                             
-        "forceConsistentCasingInFileNames": true,      
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
         "declaration": true,
-        "strict": true,                                      
-        "skipLibCheck": true                                 
+        "strict": true,
+        "skipLibCheck": true
     },
-    "include": [
-        "src/**/*"
-    ]
+    "include": ["src/**/*"]
 }
