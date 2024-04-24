@@ -72,8 +72,8 @@ export * from "./relationships/transmission/requests/RelationshipCreationContent
 export * from "./relationships/transmission/requests/RelationshipCreationContentSigned";
 export * from "./relationships/transmission/requests/RelationshipCreationContentWrapper";
 export * from "./relationships/transmission/responses/RelationshipCreationResponseContentCipher";
-export * from "./relationships/transmission/responses/RelationshipCreationResponseSigned";
-export * from "./relationships/transmission/responses/RelationshipCreationResponseWrapper";
+export * from "./relationships/transmission/responses/RelationshipCreationResponseContentSigned";
+export * from "./relationships/transmission/responses/RelationshipCreationResponseContentWrapper";
 export * from "./relationshipTemplates/backbone/BackboneGetRelationshipTemplates";
 export * from "./relationshipTemplates/backbone/BackbonePostRelationshipTemplates";
 export * from "./relationshipTemplates/backbone/RelationshipTemplateClient";
