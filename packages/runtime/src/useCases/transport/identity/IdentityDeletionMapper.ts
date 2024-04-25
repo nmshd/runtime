@@ -3,10 +3,10 @@ import { IdentityDeletionProcessAuditLogEntryDTO } from "../../../types/transpor
 import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDeletionProcessDTO";
 
 export class IdentityDeletionMapper {
-    static toIdentityDeletionProcess(process: IdentityDeletionProcessDTO): IdentityDeletionProcess {
+    public static toIdentityDeletionProcess(process: IdentityDeletionProcessDTO): IdentityDeletionProcess {
         return IdentityDeletionProcess.from({
             id: CoreId.from(process.id),
-            createdAt: CoreDate.from(process.createdAt),
+            createdAt: process.createdAt ? CoreDate.from(process.createdAt) : undefined,
             createdByDevice: process.createdByDevice ? CoreId.from(process.createdByDevice) : undefined,
             approvalReminder1SentAt: process.approvalReminder1SentAt ? CoreDate.from(process.approvalReminder1SentAt) : undefined,
             approvalReminder2SentAt: process.approvalReminder2SentAt ? CoreDate.from(process.approvalReminder2SentAt) : undefined,
@@ -20,11 +20,14 @@ export class IdentityDeletionMapper {
             deletionStartedAt: process.deletionStartedAt ? CoreDate.from(process.deletionStartedAt) : undefined,
             completedAt: process.completedAt ? CoreDate.from(process.completedAt) : undefined,
             completedByDevice: process.completedByDevice ? CoreId.from(process.completedByDevice) : undefined,
+            cancelledAt: process.cancelledAt ? CoreDate.from(process.cancelledAt) : undefined,
+            cancelledByDevice: process.cancelledByDevice ? CoreId.from(process.cancelledByDevice) : undefined,
+            rejectedAt: process.rejectedAt ? CoreDate.from(process.rejectedAt) : undefined,
+            rejectedByDevice: process.rejectedByDevice ? CoreId.from(process.rejectedByDevice) : undefined,
             status: process.status
-            // auditLog: process.auditLog?.map((log) => IdentityDeletionMapper.toIdentityDeletionProcessAuditLogEntry(log))
         });
     }
-    static toIdentityDeletionProcessAuditLogEntry(log: IdentityDeletionProcessAuditLogEntryDTO): IdentityDeletionProcessAuditLogEntry {
+    public static toIdentityDeletionProcessAuditLogEntry(log: IdentityDeletionProcessAuditLogEntryDTO): IdentityDeletionProcessAuditLogEntry {
         return IdentityDeletionProcessAuditLogEntry.from({
             id: CoreId.from(log.id),
             processId: CoreId.from(log.processId),
@@ -40,7 +43,7 @@ export class IdentityDeletionMapper {
     public static toIdentityDeletionProcessDTO(identityDeletion: IdentityDeletionProcess): IdentityDeletionProcessDTO {
         return {
             id: identityDeletion.id.toString(),
-            createdAt: identityDeletion.createdAt.toString(),
+            createdAt: identityDeletion.createdAt?.toString(),
             createdByDevice: identityDeletion.createdByDevice?.toString(),
             approvalReminder1SentAt: identityDeletion.approvalReminder1SentAt?.toString(),
             approvalReminder2SentAt: identityDeletion.approvalReminder2SentAt?.toString(),
@@ -54,8 +57,11 @@ export class IdentityDeletionMapper {
             deletionStartedAt: identityDeletion.deletionStartedAt?.toString(),
             completedAt: identityDeletion.completedAt?.toString(),
             completedByDevice: identityDeletion.completedByDevice?.toString(),
-            status: identityDeletion.status
-            // auditLog: identityDeletion.auditLog?.map((log) => IdentityDeletionMapper.toIdentityDeletionProcessAuditLogEntryDTO(log))
+            status: identityDeletion.status,
+            cancelledAt: identityDeletion.cancelledAt?.toString(),
+            cancelledByDevice: identityDeletion.cancelledByDevice?.toString(),
+            rejectedAt: identityDeletion.rejectedAt?.toString(),
+            rejectedByDevice: identityDeletion.rejectedByDevice?.toString()
         };
     }
     public static toIdentityDeletionProcessAuditLogEntryDTO(auditLogEntry: IdentityDeletionProcessAuditLogEntry): IdentityDeletionProcessAuditLogEntryDTO {

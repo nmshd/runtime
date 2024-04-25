@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoSignaturePublicKey, ICryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreAddress, CoreDate, CoreSerializable, ICoreSerializable } from "../../../core";
+import { CoreAddress, CoreSerializable, ICoreSerializable } from "../../../core";
 import { IdentityDeletionProcess, IIdentityDeletionProcess } from "./IdentityDeletionProcess";
 import { Realm } from "./Realm";
 
@@ -8,17 +8,7 @@ export interface IIdentity extends ICoreSerializable {
     address: CoreAddress;
     publicKey: ICryptoSignaturePublicKey;
     realm: Realm;
-
-    // TODO: deletionInfo?: {} verwenden
-    //       - status, deletion* -Felder löschen
-    //
-    // deletionInfo?: {
-    //     status: IdentityStatus;
-    //     gracePedio: CoreDate;
-    // };
-    status: IdentityStatus;
-    deletionGracePeriodEndsAt?: CoreDate;
-    deletionProcesses: IIdentityDeletionProcess[];
+    deletionInfo?: IIdentityDeletionProcess;
 }
 
 export enum IdentityStatus {
@@ -41,17 +31,9 @@ export class Identity extends CoreSerializable implements IIdentity {
     @serialize()
     public realm: Realm;
 
-    @validate()
-    @serialize()
-    public status: IdentityStatus;
-
     @validate({ nullable: true })
     @serialize()
-    public deletionGracePeriodEndsAt?: CoreDate;
-
-    @validate()
-    @serialize()
-    public deletionProcesses: IdentityDeletionProcess[];
+    public deletionInfo?: IdentityDeletionProcess;
 
     public static from(value: IIdentity): Identity {
         return this.fromAny(value);

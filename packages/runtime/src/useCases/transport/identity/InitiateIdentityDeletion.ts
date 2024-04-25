@@ -7,9 +7,7 @@ import { IdentityDeletionMapper } from "./IdentityDeletionMapper";
 
 export interface InitiateIdentityDeletionRequest {}
 
-export interface InitiateIdentityDeletionResponse {
-    identityDeletionProcess: IdentityDeletionProcessDTO;
-}
+export type InitiateIdentityDeletionResponse = IdentityDeletionProcessDTO;
 
 class Validator extends SchemaValidator<InitiateIdentityDeletionRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
@@ -31,6 +29,6 @@ export class InitiateIdentityDeletionUseCase extends UseCase<InitiateIdentityDel
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok({ identityDeletionProcess: IdentityDeletionMapper.toIdentityDeletionProcessDTO(identityDeletionProcess) });
+        return Result.ok(IdentityDeletionMapper.toIdentityDeletionProcessDTO(identityDeletionProcess));
     }
 }
