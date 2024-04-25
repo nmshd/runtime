@@ -11,6 +11,7 @@ export interface IIdentity extends ICoreSerializable {
     deletionInfo?: IIdentityDeletionProcess;
 }
 
+// TODO: remove
 export enum IdentityStatus {
     Active = "Active",
     ToBeDeleted = "ToBeDeleted",

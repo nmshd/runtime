@@ -16,6 +16,7 @@ export class GetIdentityInfoUseCase extends UseCase<void, GetIdentityInfoRespons
     protected executeInternal(): Result<GetIdentityInfoResponse> {
         const identity = this.identityController.identity;
 
+        // TODO: Add deletionInfo (and realm?)
         return Result.ok({
             address: identity.address.toString(),
             publicKey: identity.publicKey.toBase64(false)

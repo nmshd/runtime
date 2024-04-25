@@ -1,4 +1,6 @@
 export enum IdentityDeletionProcessStatus {
+    // TODO: Timo: rename 'WaitingForApproval' zu 'Pending'.
+    //       - wäre konsistent mit Benennung der Usecases.
     WaitingForApproval = "WaitingForApproval",
     Rejected = "Rejected",
     Approved = "Approved",

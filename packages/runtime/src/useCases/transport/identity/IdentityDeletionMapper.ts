@@ -17,6 +17,7 @@ export class IdentityDeletionMapper {
             gracePeriodReminder1SentAt: process.gracePeriodReminder1SentAt ? CoreDate.from(process.gracePeriodReminder1SentAt) : undefined,
             gracePeriodReminder2SentAt: process.gracePeriodReminder2SentAt ? CoreDate.from(process.gracePeriodReminder2SentAt) : undefined,
             gracePeriodReminder3SentAt: process.gracePeriodReminder3SentAt ? CoreDate.from(process.gracePeriodReminder3SentAt) : undefined,
+            // TODO: yeet!!1
             deletionStartedAt: process.deletionStartedAt ? CoreDate.from(process.deletionStartedAt) : undefined,
             completedAt: process.completedAt ? CoreDate.from(process.completedAt) : undefined,
             completedByDevice: process.completedByDevice ? CoreId.from(process.completedByDevice) : undefined,

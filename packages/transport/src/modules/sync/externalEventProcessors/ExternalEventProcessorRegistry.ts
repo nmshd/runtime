@@ -13,7 +13,7 @@ export class ExternalEventProcessorRegistry {
         this.registerProcessor("RelationshipChangeCreated", RelationshipChangeCreatedExternalEventProcessor);
         this.registerProcessor("RelationshipChangeCompleted", RelationshipChangeCompletedExternalEventProcessor);
         // TODO: IdentityDeletion relevante external Events implementieren
-        // TODO: Timo bezüglich des Formats der Events fragen
+        //       - Timo bezüglich des Formats der Events fragen
         // TODO: interne Runtimeevents (auf die App lauscht) können Daten tragen oder nur als Ping dienen?
         //       - existierende Events verwenden eher weniger Daten und dienen eher als Ping
     }

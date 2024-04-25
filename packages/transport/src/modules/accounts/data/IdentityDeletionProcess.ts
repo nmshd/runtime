@@ -43,7 +43,6 @@ export interface IdentityDeletionProcessJSON extends ICoreSerializable {
 export interface IIdentityDeletionProcess extends ICoreSerializable {
     id: CoreId;
 
-    // Cross Cutting
     status: IdentityDeletionProcessStatus;
 
     createdAt?: CoreDate;
@@ -51,9 +50,14 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
 
     // Approval period
     // TODO: Wozu brauchen wir diese Infos hier?
+    //       - mglw. unnötig; löschen
     approvalReminder1SentAt?: CoreDate;
     approvalReminder2SentAt?: CoreDate;
     approvalReminder3SentAt?: CoreDate;
+
+    // Rejected
+    rejectedAt?: CoreDate;
+    rejectedByDevice?: CoreId;
 
     // Approval
     approvedAt?: CoreDate;
@@ -64,24 +68,11 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
     cancelledAt?: CoreDate;
     cancelledByDevice?: CoreId;
 
-    // Rejected
-    rejectedAt?: CoreDate;
-    rejectedByDevice?: CoreId;
-
     // Grace Period
+    // TODO: mglw. unnötig (s.o.)
     gracePeriodReminder1SentAt?: CoreDate;
     gracePeriodReminder2SentAt?: CoreDate;
     gracePeriodReminder3SentAt?: CoreDate;
-
-    // Deletion
-    // TODO: was genau bedeutet dieses Feld?
-    deletionStartedAt?: CoreDate; // Completion
-
-    // TODO: Kann ich diese Information jemals abrufen?
-    completedAt?: CoreDate;
-
-    // TODO: byDevice? Und wozu brauche ich das Feld (in Runtime)?
-    completedByDevice?: CoreId;
 }
 
 @type("IdentityDeletionProcess")
