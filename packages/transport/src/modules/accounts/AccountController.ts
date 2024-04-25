@@ -33,7 +33,7 @@ import { SyncController } from "../sync/SyncController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { TokenController } from "../tokens/TokenController";
 import { IdentityClient } from "./backbone/IdentityClient";
-import { Identity, IdentityStatus } from "./data/Identity";
+import { Identity } from "./data/Identity";
 import { IdentityController } from "./IdentityController";
 import { IdentityUtil } from "./IdentityUtil";
 
@@ -293,8 +293,7 @@ export class AccountController {
             address: CoreAddress.from(deviceResponse.address),
             realm: this._config.realm,
             publicKey: identityKeypair.publicKey,
-            deletionProcesses: [],
-            status: IdentityStatus.Active
+            deletionInfo: undefined
         });
 
         const deviceId = CoreId.from(deviceResponse.device.id);

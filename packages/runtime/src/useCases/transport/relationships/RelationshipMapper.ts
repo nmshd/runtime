@@ -19,9 +19,7 @@ export class RelationshipMapper {
                 address: relationship.peer.address.toString(),
                 publicKey: relationship.peer.publicKey.toBase64(false),
                 realm: relationship.peer.realm,
-                deletionGracePeriodEndsAt: relationship.peer.deletionGracePeriodEndsAt?.toString(),
-                deletionProcesses: relationship.peer.deletionProcesses.map((p) => IdentityDeletionMapper.toIdentityDeletionProcessDTO(p)),
-                status: relationship.peer.status
+                deletionInfo: relationship.peer.deletionInfo ? IdentityDeletionMapper.toIdentityDeletionProcessDTO(relationship.peer.deletionInfo) : undefined
             },
             changes: relationship.cache.changes.map((c) => this.toRelationshipChangeDTO(c))
         };

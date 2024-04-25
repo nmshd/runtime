@@ -38,9 +38,7 @@ export class DeviceMapper {
                 address: deviceSharedSecret.identity.address.toString(),
                 publicKey: deviceSharedSecret.identity.publicKey.toBase64(false),
                 realm: deviceSharedSecret.identity.realm.toString(),
-                deletionProcesses: deviceSharedSecret.identity.deletionProcesses.map((process) => IdentityDeletionMapper.toIdentityDeletionProcessDTO(process)),
-                deletionGracePeriodEndsAt: deviceSharedSecret.identity.deletionGracePeriodEndsAt?.toString(),
-                status: deviceSharedSecret.identity.status
+                deletionInfo: deviceSharedSecret.identity.deletionInfo ? IdentityDeletionMapper.toIdentityDeletionProcessDTO(deviceSharedSecret.identity.deletionInfo) : undefined
             },
             password: deviceSharedSecret.password,
             username: deviceSharedSecret.username,
@@ -63,11 +61,7 @@ export class DeviceMapper {
                 address: CoreAddress.from(deviceOnboardingDTO.identity.address),
                 publicKey: CryptoSignaturePublicKey.fromBase64(deviceOnboardingDTO.identity.publicKey),
                 realm: deviceOnboardingDTO.identity.realm as Realm,
-                deletionGracePeriodEndsAt: deviceOnboardingDTO.identity.deletionGracePeriodEndsAt
-                    ? CoreDate.from(deviceOnboardingDTO.identity.deletionGracePeriodEndsAt)
-                    : undefined,
-                deletionProcesses: deviceOnboardingDTO.identity.deletionProcesses.map((process) => IdentityDeletionMapper.toIdentityDeletionProcess(process)),
-                status: deviceOnboardingDTO.identity.status
+                deletionInfo: deviceOnboardingDTO.identity.deletionInfo ? IdentityDeletionMapper.toIdentityDeletionProcess(deviceOnboardingDTO.identity.deletionInfo) : undefined
             },
             password: deviceOnboardingDTO.password,
             username: deviceOnboardingDTO.username,

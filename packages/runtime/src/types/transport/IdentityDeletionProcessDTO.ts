@@ -3,7 +3,7 @@ import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 export interface IdentityDeletionProcessDTO {
     id: string;
 
-    createdAt: string;
+    createdAt?: string;
     createdByDevice?: string;
 
     // Approval period
@@ -21,6 +21,14 @@ export interface IdentityDeletionProcessDTO {
     gracePeriodReminder2SentAt?: string;
     gracePeriodReminder3SentAt?: string;
 
+    // Cancelled
+    cancelledAt?: string;
+    cancelledByDevice?: string;
+
+    // Rejected
+    rejectedAt?: string;
+    rejectedByDevice?: string;
+
     // Deletion
     deletionStartedAt?: string; // Completion
     completedAt?: string;
@@ -28,5 +36,4 @@ export interface IdentityDeletionProcessDTO {
 
     // Cross Cutting
     status: IdentityDeletionProcessStatus;
-    // auditLog?: IdentityDeletionProcessAuditLogEntryDTO[];
 }

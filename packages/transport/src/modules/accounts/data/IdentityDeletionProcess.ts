@@ -5,7 +5,10 @@ import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
 export interface IdentityDeletionProcessJSON extends ICoreSerializable {
     id: string;
 
-    createdAt: string;
+    // Cross Cutting
+    status: IdentityDeletionProcessStatus;
+
+    createdAt?: string;
     createdByDevice?: string;
 
     // Approval period
@@ -18,6 +21,14 @@ export interface IdentityDeletionProcessJSON extends ICoreSerializable {
     approvedByDevice?: string;
     gracePeriodEndsAt?: string;
 
+    // Cancelled
+    cancelledAt?: string;
+    cancelledByDevice?: string;
+
+    // Rejected
+    rejectedAt?: string;
+    rejectedByDevice?: string;
+
     // Grace Period
     gracePeriodReminder1SentAt?: string;
     gracePeriodReminder2SentAt?: string;
@@ -27,16 +38,15 @@ export interface IdentityDeletionProcessJSON extends ICoreSerializable {
     deletionStartedAt?: string; // Completion
     completedAt?: string;
     completedByDevice?: string;
-
-    // Cross Cutting
-    status: IdentityDeletionProcessStatus;
-    // auditLog?: IdentityDeletionProcessAuditLogEntry[];
 }
 
 export interface IIdentityDeletionProcess extends ICoreSerializable {
     id: CoreId;
 
-    createdAt: CoreDate;
+    // Cross Cutting
+    status: IdentityDeletionProcessStatus;
+
+    createdAt?: CoreDate;
     createdByDevice?: CoreId;
 
     // Approval period
@@ -49,6 +59,14 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
     approvedAt?: CoreDate;
     approvedByDevice?: CoreId;
     gracePeriodEndsAt?: CoreDate;
+
+    // Cancelled
+    cancelledAt?: CoreDate;
+    cancelledByDevice?: CoreId;
+
+    // Rejected
+    rejectedAt?: CoreDate;
+    rejectedByDevice?: CoreId;
 
     // Grace Period
     gracePeriodReminder1SentAt?: CoreDate;
@@ -64,10 +82,6 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
 
     // TODO: byDevice? Und wozu brauche ich das Feld (in Runtime)?
     completedByDevice?: CoreId;
-
-    // Cross Cutting
-    status: IdentityDeletionProcessStatus;
-    // auditLog?: IdentityDeletionProcessAuditLogEntry[];
 }
 
 @type("IdentityDeletionProcess")
@@ -78,7 +92,11 @@ export class IdentityDeletionProcess extends CoreSerializable implements IIdenti
 
     @validate()
     @serialize()
-    public createdAt: CoreDate;
+    public status: IdentityDeletionProcessStatus;
+
+    @validate({ nullable: true })
+    @serialize()
+    public createdAt?: CoreDate;
 
     @validate({ nullable: true })
     @serialize()
@@ -110,6 +128,22 @@ export class IdentityDeletionProcess extends CoreSerializable implements IIdenti
 
     @validate({ nullable: true })
     @serialize()
+    public cancelledAt?: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public cancelledByDevice?: CoreId;
+
+    @validate({ nullable: true })
+    @serialize()
+    public rejectedAt?: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public rejectedByDevice?: CoreId;
+
+    @validate({ nullable: true })
+    @serialize()
     public gracePeriodReminder1SentAt?: CoreDate;
 
     @validate({ nullable: true })
@@ -131,14 +165,6 @@ export class IdentityDeletionProcess extends CoreSerializable implements IIdenti
     @validate({ nullable: true })
     @serialize()
     public completedByDevice?: CoreId;
-
-    @validate()
-    @serialize()
-    public status: IdentityDeletionProcessStatus;
-
-    // @validate()
-    // @serialize()
-    // public auditLog?: IdentityDeletionProcessAuditLogEntry[];
 
     public static from(value: IIdentityDeletionProcess | IdentityDeletionProcessJSON): IdentityDeletionProcess {
         return this.fromAny(value);

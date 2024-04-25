@@ -5,8 +5,9 @@ import { IdentityStatusChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { IdentityAuthClient } from "./backbone/IdentityAuthClient";
-import { Identity, IdentityStatus } from "./data/Identity";
+import { Identity } from "./data/Identity";
 import { IdentityDeletionProcess } from "./data/IdentityDeletionProcess";
+import { IdentityDeletionProcessStatus } from "./data/IdentityDeletionProcessStatus";
 import { Realm } from "./data/Realm";
 
 export class IdentityController extends TransportController {
@@ -22,10 +23,6 @@ export class IdentityController extends TransportController {
 
     public get realm(): Realm {
         return this._identity.realm;
-    }
-
-    public get status(): IdentityStatus {
-        return this._identity.status;
     }
 
     public get identity(): Identity {
@@ -77,21 +74,38 @@ export class IdentityController extends TransportController {
         const initiateIdentityDeletionResponse = await this.identityClient.initiateIdentityDeletion();
         const identityDeletionProcess = IdentityDeletionProcess.from(initiateIdentityDeletionResponse.value);
 
-        this._identity.status = IdentityStatus.ToBeDeleted;
-        this.eventBus.publish(new IdentityStatusChangedEvent(this.parent.identity.address.toString(), this.status));
+        this.identity.deletionInfo = identityDeletionProcess;
+        await this.update();
+        this.eventBus.publish(new IdentityStatusChangedEvent(this.parent.identity.address.toString(), this.identity.deletionInfo));
 
         return identityDeletionProcess;
     }
 
-    // TODO: rename getIdentityDeletionProcesses
-    public async getIdentityDeletions(): Promise<IdentityDeletionProcess[]> {
+    public async getIdentityDeletionProcesses(): Promise<IdentityDeletionProcess[]> {
         return (await this.identityClient.getIdentityDeletionProcesses()).value.map((identityDeletionProcessJSON) => IdentityDeletionProcess.from(identityDeletionProcessJSON));
     }
 
-    // TODO: rename getIdentityDeletionProcess
-    public async getIdentityDeletion(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+    public async getIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
         return IdentityDeletionProcess.from((await this.identityClient.getIdentityDeletionProcess(identityDeletionProcessId)).value);
     }
-
     // TODO: Simon: möchte App alle (z.T. historischen) DeletionProzesse erhalten?
+
+    public async getActiveIdentityDeletionProcess(): Promise<IdentityDeletionProcess | undefined> {
+        const identityDeletionProcesses = await this.getIdentityDeletionProcesses();
+        return identityDeletionProcesses.find(
+            (identityDeletionProcess) =>
+                identityDeletionProcess.status !== IdentityDeletionProcessStatus.Cancelled && identityDeletionProcess.status !== IdentityDeletionProcessStatus.Rejected
+        );
+    }
+
+    public async cancelIdentityDeletion(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+        const identityDeletionProcessResponse = await this.identityClient.cancelIdentityDeletionProcess(identityDeletionProcessId);
+        const identityDeletionProcess = IdentityDeletionProcess.from(identityDeletionProcessResponse.value);
+
+        this.identity.deletionInfo = undefined;
+        await this.update();
+        this.eventBus.publish(new IdentityStatusChangedEvent(this.parent.identity.address.toString(), this.identity.deletionInfo));
+
+        return identityDeletionProcess;
+    }
 }
