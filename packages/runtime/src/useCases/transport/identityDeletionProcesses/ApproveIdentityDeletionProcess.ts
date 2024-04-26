@@ -5,11 +5,11 @@ import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDel
 import { RuntimeErrors, UseCase } from "../../common";
 import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper";
 
-export interface CancelIdentityDeletionResponse {
+export interface ApproveIdentityDeletionProcessResponse {
     identityDeletionProcess: IdentityDeletionProcessDTO;
 }
 
-export class CancelIdentityDeletionUseCase extends UseCase<void, CancelIdentityDeletionResponse> {
+export class ApproveIdentityDeletionProcessUseCase extends UseCase<void, ApproveIdentityDeletionProcessResponse> {
     public constructor(
         @Inject private readonly identityDeletionProcessController: IdentityDeletionProcessController,
         @Inject private readonly accountController: AccountController
@@ -17,18 +17,18 @@ export class CancelIdentityDeletionUseCase extends UseCase<void, CancelIdentityD
         super();
     }
 
-    protected async executeInternal(): Promise<Result<CancelIdentityDeletionResponse>> {
+    protected async executeInternal(): Promise<Result<ApproveIdentityDeletionProcessResponse>> {
         const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getActiveIdentityDeletionProcess();
 
         if (!activeIdentityDeletionProcess) {
             return Result.fail(RuntimeErrors.identity.noActiveIdentityDeletionProcess());
         }
 
-        const approvedIdentityDeletion = await this.identityDeletionProcessController.cancelIdentityDeletion(activeIdentityDeletionProcess.id.toString());
+        const approvedIdentityDeletionProcess = await this.identityDeletionProcessController.approveIdentityDeletion(activeIdentityDeletionProcess.id.toString());
 
         await this.accountController.syncDatawallet();
         return Result.ok({
-            identityDeletionProcess: IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(approvedIdentityDeletion)
+            identityDeletionProcess: IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(approvedIdentityDeletionProcess)
         });
     }
 }

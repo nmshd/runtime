@@ -5,7 +5,7 @@ import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDel
 import { RuntimeErrors, UseCase } from "../../common";
 import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper";
 
-export class InitiateIdentityDeletionUseCase extends UseCase<void, IdentityDeletionProcessDTO> {
+export class InitiateIdentityDeletionProcessUseCase extends UseCase<void, IdentityDeletionProcessDTO> {
     public constructor(
         @Inject private readonly identityDeletionProcessController: IdentityDeletionProcessController,
         @Inject private readonly accountController: AccountController
@@ -19,10 +19,10 @@ export class InitiateIdentityDeletionUseCase extends UseCase<void, IdentityDelet
             return Result.fail(RuntimeErrors.identity.activeIdentityDeletionProcessAlreadyExists());
         }
 
-        const identityDeletionProcess = await this.identityDeletionProcessController.initiateIdentityDeletionProcess();
+        const initiatedIdentityDeletionProcess = await this.identityDeletionProcessController.initiateIdentityDeletionProcess();
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(identityDeletionProcess));
+        return Result.ok(IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(initiatedIdentityDeletionProcess));
     }
 }
