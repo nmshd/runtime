@@ -9,13 +9,6 @@ export interface IIdentity extends ICoreSerializable {
     realm: Realm;
 }
 
-// TODO: remove
-export enum IdentityStatus {
-    Active = "Active",
-    ToBeDeleted = "ToBeDeleted",
-    Deleting = "Deleting"
-}
-
 @type("Identity")
 export class Identity extends CoreSerializable implements IIdentity {
     @validate()
