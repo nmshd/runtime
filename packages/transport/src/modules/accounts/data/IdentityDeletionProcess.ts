@@ -3,17 +3,14 @@ import { nameof } from "ts-simple-nameof";
 import { CoreDate, CoreId, CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
 
-export interface IdentityDeletionProcessJSON extends ICoreSynchronizable {
+export interface IdentityDeletionProcessJSON extends Omit<ICoreSynchronizable, "id"> {
+    id: string;
+
     // Cross Cutting
     status: IdentityDeletionProcessStatus;
 
     createdAt?: string;
     createdByDevice?: string;
-
-    // Approval period
-    approvalReminder1SentAt?: string;
-    approvalReminder2SentAt?: string;
-    approvalReminder3SentAt?: string;
 
     // Approval
     approvedAt?: string;
@@ -27,16 +24,6 @@ export interface IdentityDeletionProcessJSON extends ICoreSynchronizable {
     // Rejected
     rejectedAt?: string;
     rejectedByDevice?: string;
-
-    // Grace Period
-    gracePeriodReminder1SentAt?: string;
-    gracePeriodReminder2SentAt?: string;
-    gracePeriodReminder3SentAt?: string;
-
-    // Deletion
-    deletionStartedAt?: string; // Completion
-    completedAt?: string;
-    completedByDevice?: string;
 }
 
 export interface IIdentityDeletionProcess extends ICoreSynchronizable {
@@ -46,10 +33,6 @@ export interface IIdentityDeletionProcess extends ICoreSynchronizable {
     createdAt?: CoreDate;
     createdByDevice?: CoreId;
 
-    // Rejected
-    rejectedAt?: CoreDate;
-    rejectedByDevice?: CoreId;
-
     // Approval
     approvedAt?: CoreDate;
     approvedByDevice?: CoreId;
@@ -58,6 +41,10 @@ export interface IIdentityDeletionProcess extends ICoreSynchronizable {
     // Cancelled
     cancelledAt?: CoreDate;
     cancelledByDevice?: CoreId;
+
+    // Rejected
+    rejectedAt?: CoreDate;
+    rejectedByDevice?: CoreId;
 }
 
 @type("IdentityDeletionProcess")
@@ -66,22 +53,13 @@ export class IdentityDeletionProcess extends CoreSynchronizable implements IIden
         nameof<IdentityDeletionProcess>((r) => r.status),
         nameof<IdentityDeletionProcess>((r) => r.createdAt),
         nameof<IdentityDeletionProcess>((r) => r.createdByDevice),
-        nameof<IdentityDeletionProcess>((r) => r.approvalReminder1SentAt),
-        nameof<IdentityDeletionProcess>((r) => r.approvalReminder2SentAt),
-        nameof<IdentityDeletionProcess>((r) => r.approvalReminder3SentAt),
         nameof<IdentityDeletionProcess>((r) => r.approvedAt),
         nameof<IdentityDeletionProcess>((r) => r.approvedByDevice),
         nameof<IdentityDeletionProcess>((r) => r.gracePeriodEndsAt),
         nameof<IdentityDeletionProcess>((r) => r.cancelledAt),
         nameof<IdentityDeletionProcess>((r) => r.cancelledByDevice),
         nameof<IdentityDeletionProcess>((r) => r.rejectedAt),
-        nameof<IdentityDeletionProcess>((r) => r.rejectedByDevice),
-        nameof<IdentityDeletionProcess>((r) => r.gracePeriodReminder1SentAt),
-        nameof<IdentityDeletionProcess>((r) => r.gracePeriodReminder2SentAt),
-        nameof<IdentityDeletionProcess>((r) => r.gracePeriodReminder3SentAt),
-        nameof<IdentityDeletionProcess>((r) => r.deletionStartedAt),
-        nameof<IdentityDeletionProcess>((r) => r.completedAt),
-        nameof<IdentityDeletionProcess>((r) => r.completedByDevice)
+        nameof<IdentityDeletionProcess>((r) => r.rejectedByDevice)
     ];
     public override readonly userdataProperties = [];
     public override readonly metadataProperties = [];
@@ -97,18 +75,6 @@ export class IdentityDeletionProcess extends CoreSynchronizable implements IIden
     @validate({ nullable: true })
     @serialize()
     public createdByDevice?: CoreId;
-
-    @validate({ nullable: true })
-    @serialize()
-    public approvalReminder1SentAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public approvalReminder2SentAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public approvalReminder3SentAt?: CoreDate;
 
     @validate({ nullable: true })
     @serialize()
@@ -137,30 +103,6 @@ export class IdentityDeletionProcess extends CoreSynchronizable implements IIden
     @validate({ nullable: true })
     @serialize()
     public rejectedByDevice?: CoreId;
-
-    @validate({ nullable: true })
-    @serialize()
-    public gracePeriodReminder1SentAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public gracePeriodReminder2SentAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public gracePeriodReminder3SentAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public deletionStartedAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public completedAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public completedByDevice?: CoreId;
 
     public static from(value: IIdentityDeletionProcess | IdentityDeletionProcessJSON): IdentityDeletionProcess {
         return this.fromAny(value);
