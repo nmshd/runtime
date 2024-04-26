@@ -1,3 +1,3 @@
 export * from "./CheckIdentity";
-export * from "./IdentityDeletionMapper";
+export * from "./IdentityDeletionProcessMapper";
 export * from "./InitiateIdentityDeletion";

@@ -2,10 +2,10 @@ import { RESTClientAuthenticate, RESTClientLogDirective } from "../../../core";
 import { ClientResult } from "../../../core/backbone/ClientResult";
 import { IdentityDeletionProcessJSON } from "../data/IdentityDeletionProcess";
 
-export class IdentityAuthClient extends RESTClientAuthenticate {
+export class IdentityDeletionProcessClient extends RESTClientAuthenticate {
     protected override _logDirective = RESTClientLogDirective.LogResponse;
 
-    public async initiateIdentityDeletion(): Promise<ClientResult<IdentityDeletionProcessJSON>> {
+    public async initiateIdentityDeletionProcess(): Promise<ClientResult<IdentityDeletionProcessJSON>> {
         return await this.post<IdentityDeletionProcessJSON>("/api/v1/Identities/Self/DeletionProcesses", {});
     }
 
@@ -19,5 +19,13 @@ export class IdentityAuthClient extends RESTClientAuthenticate {
 
     public async cancelIdentityDeletionProcess(identityDeletionProcessId: string): Promise<ClientResult<IdentityDeletionProcessJSON>> {
         return await this.put<IdentityDeletionProcessJSON>(`/api/v1/Identities/Self/DeletionProcesses/${identityDeletionProcessId}/Cancel`, {});
+    }
+
+    public async approveIdentityDeletionProcess(identityDeletionProcessId: string): Promise<ClientResult<IdentityDeletionProcessJSON>> {
+        return await this.put<IdentityDeletionProcessJSON>(`/api/v1/Identities/Self/DeletionProcesses/${identityDeletionProcessId}/Approve`, {});
+    }
+
+    public async rejectIdentityDeletionProcess(identityDeletionProcessId: string): Promise<ClientResult<IdentityDeletionProcessJSON>> {
+        return await this.put<IdentityDeletionProcessJSON>(`/api/v1/Identities/Self/DeletionProcesses/${identityDeletionProcessId}/Reject`, {});
     }
 }

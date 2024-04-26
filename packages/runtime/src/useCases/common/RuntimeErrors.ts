@@ -189,6 +189,19 @@ class Attributes {
     }
 }
 
+class Identity {
+    public noActiveIdentityDeletionProcess() {
+        return new ApplicationError("error.runtime.identity.noActiveIdentityDeletionProcess", "No active identity deletion process found.");
+    }
+
+    public activeIdentityDeletionProcessAlreadyExists() {
+        return new ApplicationError(
+            "error.runtime.identity.activeIdentityDeletionProcessAlreadyExists",
+            "There is already an active identity deletion process. You cannot start another, as there may only be one active identity deletion process per identity."
+        );
+    }
+}
+
 export class RuntimeErrors {
     public static readonly general = new General();
     public static readonly serval = new Serval();
@@ -199,4 +212,5 @@ export class RuntimeErrors {
     public static readonly challenges = new Challenges();
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
+    public static readonly identity = new Identity();
 }
