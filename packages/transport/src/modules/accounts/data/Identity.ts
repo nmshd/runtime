@@ -34,6 +34,8 @@ export class Identity extends CoreSerializable implements IIdentity {
 
     @validate({ nullable: true })
     @serialize()
+    // TODO: alle Prozesse mitnehmen
+    // TODO: eigene synchronisierte Datenstruktur für Prozesse; Identity wird nicht synchronisiert
     public deletionInfo?: IdentityDeletionProcess;
 
     public static from(value: IIdentity): Identity {

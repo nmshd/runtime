@@ -48,13 +48,6 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
     createdAt?: CoreDate;
     createdByDevice?: CoreId;
 
-    // Approval period
-    // TODO: Wozu brauchen wir diese Infos hier?
-    //       - mglw. unnötig; löschen
-    approvalReminder1SentAt?: CoreDate;
-    approvalReminder2SentAt?: CoreDate;
-    approvalReminder3SentAt?: CoreDate;
-
     // Rejected
     rejectedAt?: CoreDate;
     rejectedByDevice?: CoreId;
@@ -67,12 +60,6 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
     // Cancelled
     cancelledAt?: CoreDate;
     cancelledByDevice?: CoreId;
-
-    // Grace Period
-    // TODO: mglw. unnötig (s.o.)
-    gracePeriodReminder1SentAt?: CoreDate;
-    gracePeriodReminder2SentAt?: CoreDate;
-    gracePeriodReminder3SentAt?: CoreDate;
 }
 
 @type("IdentityDeletionProcess")

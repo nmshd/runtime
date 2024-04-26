@@ -16,6 +16,7 @@ export class ExternalEventProcessorRegistry {
         //       - Timo bezüglich des Formats der Events fragen
         // TODO: interne Runtimeevents (auf die App lauscht) können Daten tragen oder nur als Ping dienen?
         //       - existierende Events verwenden eher weniger Daten und dienen eher als Ping
+        //       - Relationshiprelevante Events mit gesamter Relationshipinfo anreichern
     }
 
     public registerProcessor(externalEventName: string, externalEventProcessor: ExternalEventProcessorConstructor): void {
