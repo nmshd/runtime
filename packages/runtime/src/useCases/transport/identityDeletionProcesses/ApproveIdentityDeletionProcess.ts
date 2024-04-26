@@ -5,11 +5,7 @@ import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDel
 import { RuntimeErrors, UseCase } from "../../common";
 import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper";
 
-export interface ApproveIdentityDeletionProcessResponse {
-    identityDeletionProcess: IdentityDeletionProcessDTO;
-}
-
-export class ApproveIdentityDeletionProcessUseCase extends UseCase<void, ApproveIdentityDeletionProcessResponse> {
+export class ApproveIdentityDeletionProcessUseCase extends UseCase<void, IdentityDeletionProcessDTO> {
     public constructor(
         @Inject private readonly identityDeletionProcessController: IdentityDeletionProcessController,
         @Inject private readonly accountController: AccountController
@@ -17,18 +13,16 @@ export class ApproveIdentityDeletionProcessUseCase extends UseCase<void, Approve
         super();
     }
 
-    protected async executeInternal(): Promise<Result<ApproveIdentityDeletionProcessResponse>> {
+    protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
         const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getActiveIdentityDeletionProcess();
 
-        if (!activeIdentityDeletionProcess) {
+        if (typeof activeIdentityDeletionProcess === "undefined") {
             return Result.fail(RuntimeErrors.identity.noActiveIdentityDeletionProcess());
         }
 
         const approvedIdentityDeletionProcess = await this.identityDeletionProcessController.approveIdentityDeletion(activeIdentityDeletionProcess.id.toString());
 
         await this.accountController.syncDatawallet();
-        return Result.ok({
-            identityDeletionProcess: IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(approvedIdentityDeletionProcess)
-        });
+        return Result.ok(IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(approvedIdentityDeletionProcess));
     }
 }
