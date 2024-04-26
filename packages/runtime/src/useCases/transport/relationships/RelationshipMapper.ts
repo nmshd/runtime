@@ -1,7 +1,6 @@
 import { Relationship, RelationshipChange, RelationshipChangeRequest, RelationshipChangeResponse } from "@nmshd/transport";
 import { RelationshipChangeDTO, RelationshipChangeRequestDTO, RelationshipChangeResponseDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
-import { IdentityDeletionMapper } from "../identity";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
 
 export class RelationshipMapper {
@@ -18,8 +17,7 @@ export class RelationshipMapper {
             peerIdentity: {
                 address: relationship.peer.address.toString(),
                 publicKey: relationship.peer.publicKey.toBase64(false),
-                realm: relationship.peer.realm,
-                deletionInfo: relationship.peer.deletionInfo ? IdentityDeletionMapper.toIdentityDeletionProcessDTO(relationship.peer.deletionInfo) : undefined
+                realm: relationship.peer.realm
             },
             changes: relationship.cache.changes.map((c) => this.toRelationshipChangeDTO(c))
         };

@@ -292,8 +292,7 @@ export class AccountController {
         const identity = Identity.from({
             address: CoreAddress.from(deviceResponse.address),
             realm: this._config.realm,
-            publicKey: identityKeypair.publicKey,
-            deletionInfo: undefined
+            publicKey: identityKeypair.publicKey
         });
 
         const deviceId = CoreId.from(deviceResponse.device.id);

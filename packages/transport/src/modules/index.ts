@@ -3,7 +3,6 @@ export * from "./accounts/backbone/IdentityAuthClient";
 export * from "./accounts/backbone/IdentityClient";
 export * from "./accounts/data/Identity";
 export * from "./accounts/data/IdentityDeletionProcess";
-export * from "./accounts/data/IdentityDeletionProcessAuditLogEntry";
 export * from "./accounts/data/IdentityDeletionProcessStatus";
 export * from "./accounts/data/Realm";
 export * from "./accounts/IdentityController";

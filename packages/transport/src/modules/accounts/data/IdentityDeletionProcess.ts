@@ -1,10 +1,9 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreId, CoreSerializable, ICoreSerializable } from "../../../core";
+import { nameof } from "ts-simple-nameof";
+import { CoreDate, CoreId, CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
 
-export interface IdentityDeletionProcessJSON extends ICoreSerializable {
-    id: string;
-
+export interface IdentityDeletionProcessJSON extends ICoreSynchronizable {
     // Cross Cutting
     status: IdentityDeletionProcessStatus;
 
@@ -40,9 +39,8 @@ export interface IdentityDeletionProcessJSON extends ICoreSerializable {
     completedByDevice?: string;
 }
 
-export interface IIdentityDeletionProcess extends ICoreSerializable {
-    id: CoreId;
-
+export interface IIdentityDeletionProcess extends ICoreSynchronizable {
+    // Cross Cutting
     status: IdentityDeletionProcessStatus;
 
     createdAt?: CoreDate;
@@ -63,10 +61,30 @@ export interface IIdentityDeletionProcess extends ICoreSerializable {
 }
 
 @type("IdentityDeletionProcess")
-export class IdentityDeletionProcess extends CoreSerializable implements IIdentityDeletionProcess {
-    @validate()
-    @serialize()
-    public id: CoreId;
+export class IdentityDeletionProcess extends CoreSynchronizable implements IIdentityDeletionProcess {
+    public override readonly technicalProperties = [
+        nameof<IdentityDeletionProcess>((r) => r.status),
+        nameof<IdentityDeletionProcess>((r) => r.createdAt),
+        nameof<IdentityDeletionProcess>((r) => r.createdByDevice),
+        nameof<IdentityDeletionProcess>((r) => r.approvalReminder1SentAt),
+        nameof<IdentityDeletionProcess>((r) => r.approvalReminder2SentAt),
+        nameof<IdentityDeletionProcess>((r) => r.approvalReminder3SentAt),
+        nameof<IdentityDeletionProcess>((r) => r.approvedAt),
+        nameof<IdentityDeletionProcess>((r) => r.approvedByDevice),
+        nameof<IdentityDeletionProcess>((r) => r.gracePeriodEndsAt),
+        nameof<IdentityDeletionProcess>((r) => r.cancelledAt),
+        nameof<IdentityDeletionProcess>((r) => r.cancelledByDevice),
+        nameof<IdentityDeletionProcess>((r) => r.rejectedAt),
+        nameof<IdentityDeletionProcess>((r) => r.rejectedByDevice),
+        nameof<IdentityDeletionProcess>((r) => r.gracePeriodReminder1SentAt),
+        nameof<IdentityDeletionProcess>((r) => r.gracePeriodReminder2SentAt),
+        nameof<IdentityDeletionProcess>((r) => r.gracePeriodReminder3SentAt),
+        nameof<IdentityDeletionProcess>((r) => r.deletionStartedAt),
+        nameof<IdentityDeletionProcess>((r) => r.completedAt),
+        nameof<IdentityDeletionProcess>((r) => r.completedByDevice)
+    ];
+    public override readonly userdataProperties = [];
+    public override readonly metadataProperties = [];
 
     @validate()
     @serialize()

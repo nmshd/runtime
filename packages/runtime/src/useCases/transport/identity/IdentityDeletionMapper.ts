@@ -1,5 +1,4 @@
-import { CoreDate, CoreId, IdentityDeletionProcess, IdentityDeletionProcessAuditLogEntry } from "@nmshd/transport";
-import { IdentityDeletionProcessAuditLogEntryDTO } from "../../../types/transport/IdentityDeletionProcessAuditLogEntryDTO";
+import { CoreDate, CoreId, IdentityDeletionProcess } from "@nmshd/transport";
 import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDeletionProcessDTO";
 
 export class IdentityDeletionMapper {
@@ -28,18 +27,6 @@ export class IdentityDeletionMapper {
             status: process.status
         });
     }
-    public static toIdentityDeletionProcessAuditLogEntry(log: IdentityDeletionProcessAuditLogEntryDTO): IdentityDeletionProcessAuditLogEntry {
-        return IdentityDeletionProcessAuditLogEntry.from({
-            id: CoreId.from(log.id),
-            processId: CoreId.from(log.processId),
-            message: log.message,
-            createdAt: CoreDate.from(log.createdAt),
-            identityAddressHash: log.identityAddressHash,
-            deviceIdHash: log.deviceIdHash,
-            oldStatus: log.oldStatus,
-            newStatus: log.newStatus
-        });
-    }
 
     public static toIdentityDeletionProcessDTO(identityDeletion: IdentityDeletionProcess): IdentityDeletionProcessDTO {
         return {
@@ -63,18 +50,6 @@ export class IdentityDeletionMapper {
             cancelledByDevice: identityDeletion.cancelledByDevice?.toString(),
             rejectedAt: identityDeletion.rejectedAt?.toString(),
             rejectedByDevice: identityDeletion.rejectedByDevice?.toString()
-        };
-    }
-    public static toIdentityDeletionProcessAuditLogEntryDTO(auditLogEntry: IdentityDeletionProcessAuditLogEntry): IdentityDeletionProcessAuditLogEntryDTO {
-        return {
-            id: auditLogEntry.id.toString(),
-            processId: auditLogEntry.processId.toString(),
-            createdAt: auditLogEntry.createdAt.toString(),
-            message: auditLogEntry.message.toString(),
-            identityAddressHash: auditLogEntry.identityAddressHash.toString(),
-            deviceIdHash: auditLogEntry.deviceIdHash?.toString(),
-            oldStatus: auditLogEntry.oldStatus,
-            newStatus: auditLogEntry.newStatus
         };
     }
 }

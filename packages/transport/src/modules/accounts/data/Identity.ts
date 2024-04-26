@@ -1,14 +1,12 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoSignaturePublicKey, ICryptoSignaturePublicKey } from "@nmshd/crypto";
 import { CoreAddress, CoreSerializable, ICoreSerializable } from "../../../core";
-import { IdentityDeletionProcess, IIdentityDeletionProcess } from "./IdentityDeletionProcess";
 import { Realm } from "./Realm";
 
 export interface IIdentity extends ICoreSerializable {
     address: CoreAddress;
     publicKey: ICryptoSignaturePublicKey;
     realm: Realm;
-    deletionInfo?: IIdentityDeletionProcess;
 }
 
 // TODO: remove
@@ -31,12 +29,6 @@ export class Identity extends CoreSerializable implements IIdentity {
     @validate()
     @serialize()
     public realm: Realm;
-
-    @validate({ nullable: true })
-    @serialize()
-    // TODO: alle Prozesse mitnehmen
-    // TODO: eigene synchronisierte Datenstruktur für Prozesse; Identity wird nicht synchronisiert
-    public deletionInfo?: IdentityDeletionProcess;
 
     public static from(value: IIdentity): Identity {
         return this.fromAny(value);

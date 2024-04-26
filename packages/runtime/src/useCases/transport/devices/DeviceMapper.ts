@@ -1,7 +1,6 @@
 import { CryptoSecretKey, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
 import { CoreAddress, CoreDate, CoreId, Device, DeviceSharedSecret, Realm } from "@nmshd/transport";
 import { DeviceDTO, DeviceOnboardingInfoDTO } from "../../../types";
-import { IdentityDeletionMapper } from "../identity";
 
 export class DeviceMapper {
     public static toDeviceDTO(device: Device, isCurrentDevice: boolean): DeviceDTO {
@@ -37,8 +36,7 @@ export class DeviceMapper {
             identity: {
                 address: deviceSharedSecret.identity.address.toString(),
                 publicKey: deviceSharedSecret.identity.publicKey.toBase64(false),
-                realm: deviceSharedSecret.identity.realm.toString(),
-                deletionInfo: deviceSharedSecret.identity.deletionInfo ? IdentityDeletionMapper.toIdentityDeletionProcessDTO(deviceSharedSecret.identity.deletionInfo) : undefined
+                realm: deviceSharedSecret.identity.realm.toString()
             },
             password: deviceSharedSecret.password,
             username: deviceSharedSecret.username,
@@ -60,8 +58,7 @@ export class DeviceMapper {
             identity: {
                 address: CoreAddress.from(deviceOnboardingDTO.identity.address),
                 publicKey: CryptoSignaturePublicKey.fromBase64(deviceOnboardingDTO.identity.publicKey),
-                realm: deviceOnboardingDTO.identity.realm as Realm,
-                deletionInfo: deviceOnboardingDTO.identity.deletionInfo ? IdentityDeletionMapper.toIdentityDeletionProcess(deviceOnboardingDTO.identity.deletionInfo) : undefined
+                realm: deviceOnboardingDTO.identity.realm as Realm
             },
             password: deviceOnboardingDTO.password,
             username: deviceOnboardingDTO.username,
