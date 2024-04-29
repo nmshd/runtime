@@ -20,7 +20,7 @@ export class RejectIdentityDeletionProcessUseCase extends UseCase<void, Identity
             return Result.fail(RuntimeErrors.identity.noActiveIdentityDeletionProcess());
         }
 
-        const rejectedIdentityDeletionProcess = await this.identityDeletionProcessController.rejectIdentityDeletion(activeIdentityDeletionProcess.id.toString());
+        const rejectedIdentityDeletionProcess = await this.identityDeletionProcessController.rejectIdentityDeletionProcess(activeIdentityDeletionProcess.id.toString());
 
         await this.accountController.syncDatawallet();
         return Result.ok(IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(rejectedIdentityDeletionProcess));

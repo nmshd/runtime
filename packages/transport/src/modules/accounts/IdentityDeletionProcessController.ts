@@ -43,23 +43,23 @@ export class IdentityDeletionProcessController extends TransportController {
         return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
     }
 
-    private async updateDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
+    private async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
         const oldIdentityDeletion = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcess.id.toString() });
         await this.identityDeletionProcessCollection.update(oldIdentityDeletion, identityDeletionProcess);
         this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), identityDeletionProcess));
     }
 
-    public async approveIdentityDeletion(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+    public async approveIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
         const identityDeletionProcessResponse = await this.identityDeletionProcessClient.approveIdentityDeletionProcess(identityDeletionProcessId);
         const identityDeletionProcess = IdentityDeletionProcess.from(identityDeletionProcessResponse.value);
-        await this.updateDeletionProcess(identityDeletionProcess);
+        await this.updateIdentityDeletionProcess(identityDeletionProcess);
         return identityDeletionProcess;
     }
 
-    public async rejectIdentityDeletion(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+    public async rejectIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
         const identityDeletionProcessResponse = await this.identityDeletionProcessClient.rejectIdentityDeletionProcess(identityDeletionProcessId);
         const identityDeletionProcess = IdentityDeletionProcess.from(identityDeletionProcessResponse.value);
-        await this.updateDeletionProcess(identityDeletionProcess);
+        await this.updateIdentityDeletionProcess(identityDeletionProcess);
         return identityDeletionProcess;
     }
 
@@ -73,10 +73,10 @@ export class IdentityDeletionProcessController extends TransportController {
         return identityDeletionProcess;
     }
 
-    public async cancelIdentityDeletion(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+    public async cancelIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
         const identityDeletionProcessResponse = await this.identityDeletionProcessClient.cancelIdentityDeletionProcess(identityDeletionProcessId);
         const identityDeletionProcess = IdentityDeletionProcess.from(identityDeletionProcessResponse.value);
-        await this.updateDeletionProcess(identityDeletionProcess);
+        await this.updateIdentityDeletionProcess(identityDeletionProcess);
         return identityDeletionProcess;
     }
 }

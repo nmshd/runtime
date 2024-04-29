@@ -38,14 +38,14 @@ describe("IdentityDeletionProcessController", function () {
 
     test("should cancel an Identity deletion process", async function () {
         const identityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
-        const result = await account.identityDeletionProcess.cancelIdentityDeletion(identityDeletionProcess.id.toString());
+        const result = await account.identityDeletionProcess.cancelIdentityDeletionProcess(identityDeletionProcess.id.toString());
         expect(result).toBeDefined();
         expect(result.status).toBe(IdentityDeletionProcessStatus.Cancelled);
     });
 
     test("should get the active Identity deletion process", async function () {
         const cancelledIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
-        await account.identityDeletionProcess.cancelIdentityDeletion(cancelledIdentityDeletionProcess.id.toString());
+        await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
         const activeIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         const result = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
         expect(activeIdentityDeletionProcess.toBase64()).toBe(result!.toBase64());
@@ -53,7 +53,7 @@ describe("IdentityDeletionProcessController", function () {
 
     test("should get all Identity deletion processes", async function () {
         const cancelledIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
-        await account.identityDeletionProcess.cancelIdentityDeletion(cancelledIdentityDeletionProcess.id.toString());
+        await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
         const activeIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         const result = await account.identityDeletionProcess.getIdentityDeletionProcesses();
         expect(result).toBeDefined();
