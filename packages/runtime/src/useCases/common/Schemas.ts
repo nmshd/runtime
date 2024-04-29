@@ -19988,40 +19988,6 @@ export const UpdateSettingRequest: any = {
     }
 }
 
-export const CheckIdentityRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CheckIdentityRequest",
-    "definitions": {
-        "CheckIdentityRequest": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "$ref": "#/definitions/AddressString"
-                }
-            },
-            "required": [
-                "address"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
-        }
-    }
-}
-
-export const InitiateIdentityDeletionRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/InitiateIdentityDeletionRequest",
-    "definitions": {
-        "InitiateIdentityDeletionRequest": {
-            "type": "object",
-            "additionalProperties": false
-        }
-    }
-}
-
 export const DownloadFileRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DownloadFileRequest",
@@ -20201,6 +20167,29 @@ export const CreateRelationshipChallengeRequest: any = {
     }
 }
 
+export const isCreateRelationshipChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/isCreateRelationshipChallengeRequest",
+    "definitions": {
+        "isCreateRelationshipChallengeRequest": {
+            "$comment": "(value: any) => value is CreateRelationshipChallengeRequest",
+            "type": "object",
+            "properties": {
+                "namedArgs": {
+                    "type": "object",
+                    "properties": {
+                        "value": {}
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}
+
 export const CreateIdentityChallengeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateIdentityChallengeRequest",
@@ -20221,6 +20210,29 @@ export const CreateIdentityChallengeRequest: any = {
     }
 }
 
+export const isCreateIdentityChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/isCreateIdentityChallengeRequest",
+    "definitions": {
+        "isCreateIdentityChallengeRequest": {
+            "$comment": "(value: any) => value is CreateIdentityChallengeRequest",
+            "type": "object",
+            "properties": {
+                "namedArgs": {
+                    "type": "object",
+                    "properties": {
+                        "value": {}
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}
+
 export const CreateDeviceChallengeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateDeviceChallengeRequest",
@@ -20237,6 +20249,29 @@ export const CreateDeviceChallengeRequest: any = {
                 "challengeType"
             ],
             "additionalProperties": false
+        }
+    }
+}
+
+export const isCreateDeviceChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/isCreateDeviceChallengeRequest",
+    "definitions": {
+        "isCreateDeviceChallengeRequest": {
+            "$comment": "(value: any) => value is CreateDeviceChallengeRequest",
+            "type": "object",
+            "properties": {
+                "namedArgs": {
+                    "type": "object",
+                    "properties": {
+                        "value": {}
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
         }
     }
 }
@@ -21008,6 +21043,49 @@ export const UploadOwnFileValidatableRequest: any = {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+    }
+}
+
+export const CheckIdentityRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CheckIdentityRequest",
+    "definitions": {
+        "CheckIdentityRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "$ref": "#/definitions/AddressString"
+                }
+            },
+            "required": [
+                "address"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "id1[A-Za-z0-9]{32,33}"
+        }
+    }
+}
+
+export const GetIdentityDeletionProcessRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetIdentityDeletionProcessRequest",
+    "definitions": {
+        "GetIdentityDeletionProcessRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/IdentityDeletionProcessIdString"
+                }
+            },
+            "additionalProperties": false
+        },
+        "IdentityDeletionProcessIdString": {
+            "type": "string",
+            "pattern": "IDP[A-Za-z0-9]{17}"
         }
     }
 }
