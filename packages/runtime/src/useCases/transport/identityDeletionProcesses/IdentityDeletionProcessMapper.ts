@@ -2,19 +2,23 @@ import { IdentityDeletionProcess } from "@nmshd/transport";
 import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDeletionProcessDTO";
 
 export class IdentityDeletionProcessMapper {
-    public static toIdentityDeletionProcessDTO(identityDeletion: IdentityDeletionProcess): IdentityDeletionProcessDTO {
+    public static toIdentityDeletionProcessDTO(identityDeletionProcess: IdentityDeletionProcess): IdentityDeletionProcessDTO {
         return {
-            id: identityDeletion.id.toString(),
-            createdAt: identityDeletion.createdAt?.toString(),
-            createdByDevice: identityDeletion.createdByDevice?.toString(),
-            approvedAt: identityDeletion.approvedAt?.toString(),
-            approvedByDevice: identityDeletion.approvedByDevice?.toString(),
-            gracePeriodEndsAt: identityDeletion.gracePeriodEndsAt?.toString(),
-            status: identityDeletion.status,
-            cancelledAt: identityDeletion.cancelledAt?.toString(),
-            cancelledByDevice: identityDeletion.cancelledByDevice?.toString(),
-            rejectedAt: identityDeletion.rejectedAt?.toString(),
-            rejectedByDevice: identityDeletion.rejectedByDevice?.toString()
+            id: identityDeletionProcess.id.toString(),
+            createdAt: identityDeletionProcess.createdAt?.toString(),
+            createdByDevice: identityDeletionProcess.createdByDevice?.toString(),
+            approvedAt: identityDeletionProcess.approvedAt?.toString(),
+            approvedByDevice: identityDeletionProcess.approvedByDevice?.toString(),
+            gracePeriodEndsAt: identityDeletionProcess.gracePeriodEndsAt?.toString(),
+            status: identityDeletionProcess.status,
+            cancelledAt: identityDeletionProcess.cancelledAt?.toString(),
+            cancelledByDevice: identityDeletionProcess.cancelledByDevice?.toString(),
+            rejectedAt: identityDeletionProcess.rejectedAt?.toString(),
+            rejectedByDevice: identityDeletionProcess.rejectedByDevice?.toString()
         };
+    }
+
+    public static toIdentityDeletionProcessDTOList(identityDeletionProcesses: IdentityDeletionProcess[]): IdentityDeletionProcessDTO[] {
+        return identityDeletionProcesses.map((identityDeletionProcess) => this.toIdentityDeletionProcessDTO(identityDeletionProcess));
     }
 }
