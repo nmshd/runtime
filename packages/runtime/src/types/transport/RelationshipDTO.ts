@@ -8,14 +8,20 @@ export enum RelationshipStatus {
     Rejected = "Rejected",
     Revoked = "Revoked",
     Terminated = "Terminated",
-    DeletedByPeer = "DeletedByPeer"
+    DeletionProposed = "DeletionProposed"
 }
 
 export enum RelationshipAuditLogEntryReason {
     Creation = "Creation",
     AcceptanceOfCreation = "AcceptanceOfCreation",
     RejectionOfCreation = "RejectionOfCreation",
-    RevocationOfCreation = "RevocationOfCreation"
+    RevocationOfCreation = "RevocationOfCreation",
+    Termination = "Termination",
+    Reactivation = "Reactivation",
+    AcceptanceOfReactivation = "AcceptanceOfReactivation",
+    RejectionOfReactivation = "RejectionOfReactivation",
+    RevocationOfReactivation = "RevocationOfReactivation",
+    Decomposition = "Decomposition"
 }
 
 export interface RelationshipAuditLogEntryDTO {
