@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, CoreId, IdentityDeletionProcessStatus, Transport } from "../../../src";
+import { AccountController, IdentityDeletionProcessStatus, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("IdentityDeletionProcessController", function () {
@@ -64,47 +64,44 @@ describe("IdentityDeletionProcessController", function () {
         expect(result[1].status).toBe(IdentityDeletionProcessStatus.Approved);
     });
 
+    test("should start an Identity deletion process from the Backbone admin API", async function () {
+        const activeIdentityDeletionProcess = await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
+        expect(activeIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.WaitingForApproval);
+    });
+
+    test("should not start a second Identity deletion process from the Backbone admin API", async function () {
+        await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
+        await expect(TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account)).rejects.toThrow("Request failed with status code 400");
+    });
+
+    test("should not start an Identity deletion process from the Backbone admin API if one was already started by the user", async function () {
+        await account.identityDeletionProcess.initiateIdentityDeletionProcess();
+        await expect(TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account)).rejects.toThrow("Request failed with status code 400");
+    });
+
     test("should approve an Identity deletion process", async function () {
-        const adminApiClient = await TestUtil.getBackboneAdminApiClient();
-        const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(
-            `http://localhost:8091/api/v1/Identities/${account.identity.address.toString()}/DeletionProcesses`
-        );
-        await TestUtil.syncUntilHasIdentityDeletionProcess(account, CoreId.from(deletionProcess.data.result.id));
+        const startedIdentityDeletionProcess = await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
 
-        let activeIdentityDeletionProcess = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
-        expect(activeIdentityDeletionProcess).toBeDefined();
-        expect(activeIdentityDeletionProcess!.status).toBe(IdentityDeletionProcessStatus.WaitingForApproval);
-        expect(activeIdentityDeletionProcess!.id.toString()).toBe(deletionProcess.data.result.id);
-
-        const result = await account.identityDeletionProcess.approveIdentityDeletionProcess(activeIdentityDeletionProcess!.id.toString());
+        const result = await account.identityDeletionProcess.approveIdentityDeletionProcess(startedIdentityDeletionProcess.id.toString());
         expect(result).toBeDefined();
-        expect(result.id.toString()).toBe(deletionProcess.data.result.id);
+        expect(result.id.toString()).toBe(startedIdentityDeletionProcess.id.toString());
         expect(result.status).toBe(IdentityDeletionProcessStatus.Approved);
 
-        activeIdentityDeletionProcess = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
-        expect(activeIdentityDeletionProcess).toBeDefined();
-        expect(activeIdentityDeletionProcess!.status).toBe(IdentityDeletionProcessStatus.Approved);
-        expect(activeIdentityDeletionProcess!.id.toString()).toBe(result.id.toString());
+        const approvedIdentityDeletionProcess = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
+        expect(approvedIdentityDeletionProcess).toBeDefined();
+        expect(approvedIdentityDeletionProcess!.status).toBe(IdentityDeletionProcessStatus.Approved);
+        expect(approvedIdentityDeletionProcess!.id.toString()).toBe(result.id.toString());
     });
 
     test("should reject an Identity deletion process", async function () {
-        const adminApiClient = await TestUtil.getBackboneAdminApiClient();
-        const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(
-            `http://localhost:8091/api/v1/Identities/${account.identity.address.toString()}/DeletionProcesses`
-        );
-        await TestUtil.syncUntilHasIdentityDeletionProcess(account, CoreId.from(deletionProcess.data.result.id));
+        const startedIdentityDeletionProcess = await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
 
-        let activeIdentityDeletionProcess = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
-        expect(activeIdentityDeletionProcess).toBeDefined();
-        expect(activeIdentityDeletionProcess!.status).toBe(IdentityDeletionProcessStatus.WaitingForApproval);
-        expect(activeIdentityDeletionProcess!.id.toString()).toBe(deletionProcess.data.result.id);
-
-        const result = await account.identityDeletionProcess.rejectIdentityDeletionProcess(activeIdentityDeletionProcess!.id.toString());
+        const result = await account.identityDeletionProcess.rejectIdentityDeletionProcess(startedIdentityDeletionProcess.id.toString());
         expect(result).toBeDefined();
-        expect(result.id.toString()).toBe(deletionProcess.data.result.id);
+        expect(result.id.toString()).toBe(startedIdentityDeletionProcess.id.toString());
         expect(result.status).toBe(IdentityDeletionProcessStatus.Rejected);
 
-        activeIdentityDeletionProcess = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
-        expect(activeIdentityDeletionProcess).toBeUndefined();
+        const rejectedIdentityDeletionProcess = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
+        expect(rejectedIdentityDeletionProcess).toBeUndefined();
     });
 });

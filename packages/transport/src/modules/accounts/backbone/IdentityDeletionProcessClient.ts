@@ -9,12 +9,6 @@ export class IdentityDeletionProcessClient extends RESTClientAuthenticate {
         return await this.post<IdentityDeletionProcessJSON>("/api/v1/Identities/Self/DeletionProcesses", {});
     }
 
-    // TODO: this is never used
-    public async getIdentityDeletionProcesses(): Promise<ClientResult<IdentityDeletionProcessJSON[]>> {
-        return await this.get<IdentityDeletionProcessJSON[]>("/api/v1/Identities/Self/DeletionProcesses");
-    }
-
-    // TODO: this is never used
     public async getIdentityDeletionProcess(identityDeletionProcessId: string): Promise<ClientResult<IdentityDeletionProcessJSON>> {
         return await this.get<IdentityDeletionProcessJSON>(`/api/v1/Identities/Self/DeletionProcesses/${identityDeletionProcessId}`);
     }

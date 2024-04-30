@@ -585,4 +585,19 @@ export class TestUtil {
         });
         return TestUtil.adminClient;
     }
+
+    public static async startIdentityDeletionProcessFromBackboneAdminApi(account: AccountController): Promise<IdentityDeletionProcess> {
+        const adminApiClient = await TestUtil.getBackboneAdminApiClient();
+        const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(
+            `http://localhost:8091/api/v1/Identities/${account.identity.address.toString()}/DeletionProcesses`
+        );
+        await TestUtil.syncUntilHasIdentityDeletionProcess(account, CoreId.from(deletionProcess.data.result.id));
+
+        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
+        if (typeof activeIdentityDeletionProcess === "undefined") {
+            throw new Error("Identity deletion process not found.");
+        }
+
+        return activeIdentityDeletionProcess;
+    }
 }
