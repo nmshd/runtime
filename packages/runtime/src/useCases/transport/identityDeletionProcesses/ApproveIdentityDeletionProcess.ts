@@ -14,7 +14,7 @@ export class ApproveIdentityDeletionProcessUseCase extends UseCase<void, Identit
     }
 
     protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
-        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getActiveIdentityDeletionProcess();
+        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getWaitingIdentityDeletionProcess();
 
         if (typeof activeIdentityDeletionProcess === "undefined") {
             return Result.fail(RuntimeErrors.identity.noActiveIdentityDeletionProcess());

@@ -43,6 +43,13 @@ export class IdentityDeletionProcessController extends TransportController {
         return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
     }
 
+    public async getWaitingIdentityDeletionProcess(): Promise<IdentityDeletionProcess | undefined> {
+        const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({
+            status: IdentityDeletionProcessStatus.WaitingForApproval
+        });
+        return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
+    }
+
     private async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
         const oldIdentityDeletion = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcess.id.toString() });
         await this.identityDeletionProcessCollection.update(oldIdentityDeletion, identityDeletionProcess);
