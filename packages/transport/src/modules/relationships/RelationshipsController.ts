@@ -20,6 +20,7 @@ import { Relationship } from "./local/Relationship";
 import { RelationshipAuditLog } from "./local/RelationshipAuditLog";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
 import { RelationshipSecretController } from "./RelationshipSecretController";
+import { RelationshipAuditLogEntryReason as RelationshipOperation } from "./transmission/RelationshipAuditLog";
 import { RelationshipStatus } from "./transmission/RelationshipStatus";
 import { RelationshipCreationContentCipher } from "./transmission/requests/RelationshipCreationContentCipher";
 import { RelationshipCreationContentSigned } from "./transmission/requests/RelationshipCreationContentSigned";
@@ -194,7 +195,7 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Pending) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.completeStateTransition(RelationshipStatus.Active, relationshipId);
+        return await this.executeNonDeletingOperation(RelationshipOperation.AcceptanceOfCreation, relationshipId);
     }
 
     public async reject(relationshipId: CoreId): Promise<Relationship> {
@@ -205,7 +206,7 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Pending) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.completeStateTransition(RelationshipStatus.Rejected, relationshipId);
+        return await this.executeNonDeletingOperation(RelationshipOperation.RejectionOfCreation, relationshipId);
     }
 
     public async revoke(relationshipId: CoreId): Promise<Relationship> {
@@ -216,7 +217,62 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Pending) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.completeStateTransition(RelationshipStatus.Revoked, relationshipId);
+        return await this.executeNonDeletingOperation(RelationshipOperation.RevocationOfCreation, relationshipId);
+    }
+
+    public async terminate(relationshipId: CoreId): Promise<Relationship> {
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Active) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
+        }
+        return await this.executeNonDeletingOperation(RelationshipOperation.Termination, relationshipId);
+    }
+
+    public async reactivate(relationshipId: CoreId): Promise<Relationship> {
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Terminated) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
+        }
+        return await this.executeNonDeletingOperation(RelationshipOperation.Reactivation, relationshipId);
+    }
+
+    public async rejectReactivation(relationshipId: CoreId): Promise<Relationship> {
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Terminated) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
+        }
+        return await this.executeNonDeletingOperation(RelationshipOperation.RejectionOfReactivation, relationshipId);
+    }
+
+    public async revokeReactivation(relationshipId: CoreId): Promise<Relationship> {
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Terminated) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
+        }
+        return await this.executeNonDeletingOperation(RelationshipOperation.RevocationOfReactivation, relationshipId);
+    }
+
+    public async acceptReactivation(relationshipId: CoreId): Promise<Relationship> {
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Terminated) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
+        }
+        return await this.executeNonDeletingOperation(RelationshipOperation.AcceptanceOfReactivation, relationshipId);
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
@@ -398,7 +454,7 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async completeStateTransition(targetStatus: RelationshipStatus, id: CoreId) {
+    private async executeNonDeletingOperation(operation: RelationshipOperation, id: CoreId) {
         const relationshipDoc = await this.relationships.read(id.toString());
         if (!relationshipDoc) {
             throw CoreErrors.general.recordNotFound(Relationship, id.toString());
@@ -415,23 +471,41 @@ export class RelationshipsController extends TransportController {
         }
 
         let backboneResponse: BackbonePutRelationshipsResponse;
-        switch (targetStatus) {
-            case RelationshipStatus.Active:
+        switch (operation) {
+            case RelationshipOperation.AcceptanceOfCreation:
                 const encryptedContent = await this.prepareCreationResponseContent(relationship);
 
                 backboneResponse = (await this.client.acceptRelationship(id.toString(), { creationResponseContent: encryptedContent })).value;
                 break;
 
-            case RelationshipStatus.Rejected:
+            case RelationshipOperation.RejectionOfCreation:
                 backboneResponse = (await this.client.rejectRelationship(id.toString())).value;
                 break;
 
-            case RelationshipStatus.Revoked:
+            case RelationshipOperation.RevocationOfCreation:
                 backboneResponse = (await this.client.revokeRelationship(id.toString())).value;
                 break;
 
+            case RelationshipOperation.Reactivation:
+                backboneResponse = (await this.client.reactivateRelationship(id.toString())).value;
+                break;
+
+            case RelationshipOperation.RejectionOfReactivation:
+                if (relationship.cache.auditLog[relationship.cache.auditLog.length - 1].reason !== RelationshipOperation.Reactivation) {
+                    throw CoreErrors.relationships.reactivationNotRequested();
+                }
+                backboneResponse = (await this.client.rejectRelationshipActivation(id.toString())).value;
+                break;
+
+            case RelationshipOperation.RevocationOfReactivation:
+                if (relationship.cache.auditLog[relationship.cache.auditLog.length - 1].reason !== RelationshipOperation.Reactivation) {
+                    throw CoreErrors.relationships.reactivationNotRequested();
+                }
+                backboneResponse = (await this.client.revokeRelationshipActivation(id.toString())).value;
+                break;
+
             default:
-                throw new TransportError("target change status not supported");
+                throw new TransportError("relationship operation not supported");
         }
         relationship.status = backboneResponse.status;
         relationship.cache.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneResponse.auditLog);
