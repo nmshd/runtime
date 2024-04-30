@@ -7,7 +7,7 @@ import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { TransportIds } from "../../core/TransportIds";
-import { RelationshipChangedEvent } from "../../events";
+import { RelationshipChangedEvent, RelationshipDeletedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
@@ -273,6 +273,21 @@ export class RelationshipsController extends TransportController {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
         return await this.executeNonDeletingOperation(RelationshipOperation.AcceptanceOfReactivation, relationshipId);
+    }
+
+    public async delete(relationshipId: CoreId): Promise<void> {
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Terminated) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
+        }
+        await this.secrets.deleteSecretForRelationship(relationship.relationshipSecretId);
+        await this.relationships.delete({ id: relationshipId });
+        await this.client.decomposeRelationship(relationshipId.toString());
+
+        this.eventBus.publish(new RelationshipDeletedEvent(this.parent.identity.address.toString(), relationshipId));
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
