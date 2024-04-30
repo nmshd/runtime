@@ -45,7 +45,7 @@
         "test:performance:kube:stop": "kubectl delete -f ./test/performance/k8s.yaml"
     },
     "jest": {
-        "maxWorkers": 5,
+        "maxWorkers": 1,
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",

@@ -1,10 +1,12 @@
 import { EventBus } from "@js-soft/ts-utils";
+import { CoreSerializable } from "../../../core";
 import { AccountController } from "../../accounts/AccountController";
 import { Message } from "../../messages/local/Message";
 import { Relationship } from "../../relationships/local/Relationship";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 
 export type ExternalEventProcessorConstructor = new (eventBus: EventBus, accountController: AccountController) => ExternalEventProcessor;
+export type ExternalEventProcessorDataConstructor = new (...any: any[]) => CoreSerializable;
 
 export abstract class ExternalEventProcessor {
     public constructor(

@@ -4,6 +4,7 @@ import { ControllerName, CoreDate, CoreError, CoreErrors, CoreId, RequestError, 
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { AccountController } from "../accounts/AccountController";
 import { BackboneDatawalletModification } from "./backbone/BackboneDatawalletModification";
+import { BackboneExternalEvent } from "./backbone/BackboneExternalEvent";
 import { BackboneSyncRun } from "./backbone/BackboneSyncRun";
 import { CreateDatawalletModificationsRequestItem } from "./backbone/CreateDatawalletModifications";
 import { FinalizeSyncRunRequestExternalEventResult } from "./backbone/FinalizeSyncRun";
@@ -410,14 +411,15 @@ export class SyncController extends TransportController {
         const changedItems = new ChangedItems();
 
         for (const externalEvent of externalEvents) {
+            const externalEventObject = BackboneExternalEvent.fromAny(externalEvent);
             try {
-                const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEvent.type);
-                const item = await new externalEventProcessorConstructor(this.eventBus, this.parent).execute(externalEvent);
+                const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEventObject.type);
+                const item = await new externalEventProcessorConstructor(this.eventBus, this.parent).execute(externalEventObject);
 
                 if (item) changedItems.addItem(item);
 
                 results.push({
-                    externalEventId: externalEvent.id
+                    externalEventId: externalEventObject.id
                 });
             } catch (e: any) {
                 this.log.error("There was an error while trying to apply an external event: ", e);
@@ -432,7 +434,7 @@ export class SyncController extends TransportController {
                 }
 
                 results.push({
-                    externalEventId: externalEvent.id,
+                    externalEventId: externalEventObject.id,
                     errorCode: errorCode
                 });
             } finally {
