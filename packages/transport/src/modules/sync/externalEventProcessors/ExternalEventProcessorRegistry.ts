@@ -1,5 +1,6 @@
 import { TransportError } from "../../../core";
 import { ExternalEventProcessorConstructor } from "./ExternalEventProcessor";
+import { IdentityDeletionProcessStartedEventProcessor } from "./IdentityDeletionProcessStartedEventProcessor";
 import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor";
 import { MessageReceivedExternalEventProcessor } from "./MessageReceivedExternalEventProcessor";
 import { RelationshipChangeCompletedExternalEventProcessor } from "./RelationshipChangeCompletedExternalEventProcessor";
@@ -12,11 +13,7 @@ export class ExternalEventProcessorRegistry {
         this.registerProcessor("MessageDelivered", MessageDeliveredExternalEventProcessor);
         this.registerProcessor("RelationshipChangeCreated", RelationshipChangeCreatedExternalEventProcessor);
         this.registerProcessor("RelationshipChangeCompleted", RelationshipChangeCompletedExternalEventProcessor);
-        // TODO: IdentityDeletion relevante external Events implementieren
-        //       - Timo bezüglich des Formats der Events fragen
-        // TODO: interne Runtimeevents (auf die App lauscht) können Daten tragen oder nur als Ping dienen?
-        //       - existierende Events verwenden eher weniger Daten und dienen eher als Ping
-        //       - Relationshiprelevante Events mit gesamter Relationshipinfo anreichern
+        this.registerProcessor("IdentityDeletionProcessStarted", IdentityDeletionProcessStartedEventProcessor);
     }
 
     public registerProcessor(externalEventName: string, externalEventProcessor: ExternalEventProcessorConstructor): void {

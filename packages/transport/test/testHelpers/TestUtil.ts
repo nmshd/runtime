@@ -8,6 +8,7 @@ import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreBuffer } from "@nmshd/crypto";
+import axios, { Axios } from "axios";
 import { DurationLike } from "luxon";
 import { LogLevel } from "typescript-logging";
 import {
@@ -19,7 +20,9 @@ import {
     DependencyOverrides,
     DeviceSharedSecret,
     File,
+    IChangedItems,
     IConfigOverwrite,
+    IdentityDeletionProcess,
     ISendFileParameters,
     Message,
     Relationship,
@@ -385,17 +388,18 @@ export class TestUtil {
      * the `until` callback is met.
      */
     public static async syncUntil(accountController: AccountController, until: (syncResult: ChangedItems) => boolean): Promise<ChangedItems> {
-        const { messages, relationships } = await accountController.syncEverything();
-        const syncResult = new ChangedItems([...relationships], [...messages]);
-
+        const syncResult = new ChangedItems();
         let iterationNumber = 0;
-        while (!until(syncResult) && iterationNumber < 20) {
+        do {
             await sleep(150 * iterationNumber);
             const newSyncResult = await accountController.syncEverything();
-            syncResult.messages.push(...newSyncResult.messages);
-            syncResult.relationships.push(...newSyncResult.relationships);
+
+            for (const key of Object.keys(newSyncResult)) {
+                // @ts-expect-error
+                syncResult[key].push(...newSyncResult[key]);
+            }
             iterationNumber++;
-        }
+        } while (!until(syncResult) && iterationNumber < 20);
 
         if (!until(syncResult)) {
             throw new Error("syncUntil condition was not met");
@@ -404,24 +408,36 @@ export class TestUtil {
         return syncResult;
     }
 
+    public static async syncUntilHas<T extends keyof IChangedItems>(accountController: AccountController, id: CoreId, key: T): Promise<ChangedItems[T]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].some((r) => r.id.equals(id)));
+        return syncResult[key];
+    }
+    public static async syncUntilHasMany<T extends keyof IChangedItems>(accountController: AccountController, key: T, expectedNumberOfMessages = 1): Promise<ChangedItems[T]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].length >= expectedNumberOfMessages);
+        return syncResult[key];
+    }
+
+    public static async syncUntilHasIdentityDeletionProcess(accountController: AccountController, id: CoreId): Promise<IdentityDeletionProcess[]> {
+        return await TestUtil.syncUntilHas(accountController, id, "identityDeletionProcesses");
+    }
+    public static async syncUntilHasIdentityDeletionProcesses(accountController: AccountController): Promise<IdentityDeletionProcess[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "identityDeletionProcesses");
+    }
+
     public static async syncUntilHasRelationships(accountController: AccountController): Promise<Relationship[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.relationships.length > 0);
-        return syncResult.relationships;
+        return await TestUtil.syncUntilHasMany(accountController, "relationships");
     }
 
     public static async syncUntilHasRelationship(accountController: AccountController, id: CoreId): Promise<Relationship[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.relationships.some((r) => r.id.equals(id)));
-        return syncResult.relationships;
+        return await TestUtil.syncUntilHas(accountController, id, "relationships");
     }
 
     public static async syncUntilHasMessages(accountController: AccountController, expectedNumberOfMessages = 1): Promise<Message[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.messages.length >= expectedNumberOfMessages);
-        return syncResult.messages;
+        return await TestUtil.syncUntilHasMany(accountController, "messages", expectedNumberOfMessages);
     }
 
     public static async syncUntilHasMessage(accountController: AccountController, id: CoreId): Promise<Message[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.messages.some((m) => m.id.equals(id)));
-        return syncResult.messages;
+        return await TestUtil.syncUntilHas(accountController, id, "messages");
     }
 
     public static async syncUntilHasError(accountController: AccountController): Promise<any> {
@@ -546,5 +562,27 @@ export class TestUtil {
                 resolve();
             }, ms);
         });
+    }
+
+    private static adminClient: Axios | undefined;
+
+    public static async getBackboneAdminApiClient(): Promise<Axios> {
+        if (TestUtil.adminClient) {
+            return TestUtil.adminClient;
+        }
+        const adminAPIBaseUrl = process.env.NMSHD_TEST_BASEURL_ADMIN_API!;
+        if (!adminAPIBaseUrl) throw new Error("Missing environment variable NMSHD_TEST_BASEURL_ADMIN_API");
+        const csrf = await axios.get(`${adminAPIBaseUrl}/api/v1/xsrf`);
+        TestUtil.adminClient = axios.create({
+            baseURL: adminAPIBaseUrl,
+            headers: {
+                /* eslint-disable @typescript-eslint/naming-convention */
+                cookie: csrf.headers["set-cookie"],
+                "x-xsrf-token": csrf.data,
+                "x-api-key": process.env.NMSHD_TEST_ADMIN_API_KEY!
+                /* eslint-enable @typescript-eslint/naming-convention */
+            }
+        });
+        return TestUtil.adminClient;
     }
 }
