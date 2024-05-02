@@ -411,8 +411,8 @@ export class SyncController extends TransportController {
         const changedItems = new ChangedItems();
 
         for (const externalEvent of externalEvents) {
-            const externalEventObject = ExternalEvent.fromAny(externalEvent);
             try {
+                const externalEventObject = ExternalEvent.fromAny(externalEvent);
                 const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEventObject.type);
                 const item = await new externalEventProcessorConstructor(this.eventBus, this.parent).execute(externalEventObject);
 
@@ -432,9 +432,8 @@ export class SyncController extends TransportController {
                 } else {
                     errorCode = JSON.stringify(e);
                 }
-
                 results.push({
-                    externalEventId: externalEventObject.id,
+                    externalEventId: externalEvent.id,
                     errorCode: errorCode
                 });
             } finally {
