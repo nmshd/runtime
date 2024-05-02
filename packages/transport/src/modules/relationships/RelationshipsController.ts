@@ -280,7 +280,7 @@ export class RelationshipsController extends TransportController {
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
         }
-        if (relationship.status !== RelationshipStatus.Terminated) {
+        if (relationship.status !== RelationshipStatus.Terminated && relationship.status !== RelationshipStatus.DeletionProposed) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
         await this.secrets.deleteSecretForRelationship(relationship.relationshipSecretId);
