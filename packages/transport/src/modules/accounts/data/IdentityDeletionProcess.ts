@@ -108,9 +108,3 @@ export class IdentityDeletionProcess extends CoreSynchronizable implements IIden
         return this.fromAny(value);
     }
 }
-
-/**
- * Fragen:
- *
- * TODO: Wie erhält App Benachrichtigung über ausstehenden DeletionProcess (Admin UI)?
- */

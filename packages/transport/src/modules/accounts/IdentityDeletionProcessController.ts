@@ -27,7 +27,7 @@ export class IdentityDeletionProcessController extends TransportController {
 
     public async getIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess | undefined> {
         const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcessId });
-        return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
+        return identityDeletionProcess ?? IdentityDeletionProcess.from(identityDeletionProcess);
     }
 
     public async getIdentityDeletionProcesses(): Promise<IdentityDeletionProcess[]> {
@@ -40,14 +40,15 @@ export class IdentityDeletionProcessController extends TransportController {
         const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({
             status: IdentityDeletionProcessStatus.Approved
         });
-        return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
+        return identityDeletionProcess ?? IdentityDeletionProcess.from(identityDeletionProcess);
     }
 
     public async getWaitingIdentityDeletionProcess(): Promise<IdentityDeletionProcess | undefined> {
         const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({
             status: IdentityDeletionProcessStatus.WaitingForApproval
         });
-        return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
+
+        return identityDeletionProcess ?? IdentityDeletionProcess.from(identityDeletionProcess);
     }
 
     private async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
