@@ -7,7 +7,7 @@ import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { TransportIds } from "../../core/TransportIds";
-import { RelationshipChangedEvent, RelationshipDeletedEvent } from "../../events";
+import { RelationshipChangedEvent, RelationshipDeletedBySelfEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
@@ -231,7 +231,7 @@ export class RelationshipsController extends TransportController {
         await this.relationships.delete({ id: relationshipId });
         await this.client.decomposeRelationship(relationshipId.toString());
 
-        this.eventBus.publish(new RelationshipDeletedEvent(this.parent.identity.address.toString(), relationshipId));
+        this.eventBus.publish(new RelationshipDeletedBySelfEvent(this.parent.identity.address.toString(), relationshipId));
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
