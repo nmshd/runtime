@@ -2,17 +2,17 @@ import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreId, CoreSerializable } from "../../../core";
 import { MessageReceivedEvent } from "../../../events";
 import { Message } from "../../messages/local/Message";
-import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
+import { ExternalEvent } from "../data/ExternalEvent";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
-export class MessageReceivedExternalEventData extends CoreSerializable {
+class MessageReceivedExternalEventData extends CoreSerializable {
     @serialize()
     @validate()
     public id: string;
 }
 
 export class MessageReceivedExternalEventProcessor extends ExternalEventProcessor {
-    public override async execute(externalEvent: BackboneExternalEvent): Promise<Message> {
+    public override async execute(externalEvent: ExternalEvent): Promise<Message> {
         const newMessagePayload = MessageReceivedExternalEventData.fromAny(externalEvent.payload);
         const newMessage = await this.accountController.messages.loadPeerMessage(CoreId.from(newMessagePayload.id));
 

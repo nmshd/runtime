@@ -4,13 +4,13 @@ import { ControllerName, CoreDate, CoreError, CoreErrors, CoreId, RequestError, 
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { AccountController } from "../accounts/AccountController";
 import { BackboneDatawalletModification } from "./backbone/BackboneDatawalletModification";
-import { BackboneExternalEvent } from "./backbone/BackboneExternalEvent";
 import { BackboneSyncRun } from "./backbone/BackboneSyncRun";
 import { CreateDatawalletModificationsRequestItem } from "./backbone/CreateDatawalletModifications";
 import { FinalizeSyncRunRequestExternalEventResult } from "./backbone/FinalizeSyncRun";
 import { StartSyncRunStatus, SyncRunType } from "./backbone/StartSyncRun";
 import { ISyncClient, SyncClient } from "./backbone/SyncClient";
 import { ChangedItems } from "./ChangedItems";
+import { ExternalEvent } from "./data/ExternalEvent";
 import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
 import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
 import { ExternalEventProcessorRegistry } from "./externalEventProcessors";
@@ -411,7 +411,7 @@ export class SyncController extends TransportController {
         const changedItems = new ChangedItems();
 
         for (const externalEvent of externalEvents) {
-            const externalEventObject = BackboneExternalEvent.fromAny(externalEvent);
+            const externalEventObject = ExternalEvent.fromAny(externalEvent);
             try {
                 const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEventObject.type);
                 const item = await new externalEventProcessorConstructor(this.eventBus, this.parent).execute(externalEventObject);

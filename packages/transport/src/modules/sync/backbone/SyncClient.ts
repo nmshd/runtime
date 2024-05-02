@@ -2,6 +2,7 @@ import { IRESTClientConfig, Paginator, PaginatorPercentageCallback, RESTClientAu
 import { AbstractAuthenticator } from "../../../core/backbone/Authenticator";
 import { ClientResult } from "../../../core/backbone/ClientResult";
 import { BackboneDatawalletModification } from "./BackboneDatawalletModification";
+import { BackboneExternalEvent } from "./BackboneExternalEvent";
 import { CreateDatawalletModificationsRequest, CreateDatawalletModificationsResponse } from "./CreateDatawalletModifications";
 import {
     FinalizeDatawalletVersionUpgradeRequest,
@@ -22,7 +23,7 @@ export interface ISyncClient {
 
     finalizeDatawalletVersionUpgrade(id: string, request: FinalizeDatawalletVersionUpgradeRequest): Promise<ClientResult<FinalizeDatawalletVersionUpgradeResponse>>;
 
-    getExternalEventsOfSyncRun(syncRunId: string, progessCallback?: PaginatorPercentageCallback): Promise<ClientResult<Paginator<object>>>;
+    getExternalEventsOfSyncRun(syncRunId: string, progessCallback?: PaginatorPercentageCallback): Promise<ClientResult<Paginator<BackboneExternalEvent>>>;
 
     getDatawallet(): Promise<ClientResult<GetDatawalletResponse>>;
 
@@ -55,8 +56,8 @@ export class SyncClient extends RESTClientAuthenticate implements ISyncClient {
         return await this.put<FinalizeDatawalletVersionUpgradeResponse>(`/api/v1/SyncRuns/${id}/FinalizeDatawalletVersionUpgrade`, request);
     }
 
-    public async getExternalEventsOfSyncRun(syncRunId: string, progessCallback?: PaginatorPercentageCallback): Promise<ClientResult<Paginator<object>>> {
-        return await this.getPaged<object>(`/api/v1/SyncRuns/${syncRunId}/ExternalEvents`, {}, undefined, progessCallback);
+    public async getExternalEventsOfSyncRun(syncRunId: string, progessCallback?: PaginatorPercentageCallback): Promise<ClientResult<Paginator<BackboneExternalEvent>>> {
+        return await this.getPaged<BackboneExternalEvent>(`/api/v1/SyncRuns/${syncRunId}/ExternalEvents`, {}, undefined, progessCallback);
     }
 
     public async getDatawallet(): Promise<ClientResult<GetDatawalletResponse>> {
