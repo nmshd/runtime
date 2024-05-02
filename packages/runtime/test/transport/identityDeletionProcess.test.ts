@@ -1,19 +1,23 @@
 import { CoreId, IdentityDeletionProcessStatus } from "@nmshd/transport";
 import {
+    ApproveIdentityDeletionProcessUseCase,
     CancelIdentityDeletionProcessUseCase,
     GetIdentityDeletionProcessesUseCase,
     GetIdentityDeletionProcessUseCase,
     InitiateIdentityDeletionProcessUseCase,
+    RejectIdentityDeletionProcessUseCase,
     TransportServices
 } from "../../src";
-import { RuntimeServiceProvider } from "../lib";
+import { RuntimeServiceProvider, startIdentityDeletionProcessFromBackboneAdminApi } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportService: TransportServices;
+let accountAddress: string;
 
 beforeEach(async () => {
     const runtimeServices = await serviceProvider.launch(1);
     transportService = runtimeServices[0].transport;
+    accountAddress = runtimeServices[0].address;
 }, 30000);
 afterEach(async () => await serviceProvider.stop());
 
@@ -72,22 +76,6 @@ describe("IdentityDeletionProcess", () => {
         });
     });
 
-    describe(CancelIdentityDeletionProcessUseCase.name, () => {
-        test("should cancel an Identity deletion process", async function () {
-            await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
-            const result = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            expect(result).toBeSuccessful();
-
-            const cancelledIdentityDeletionProcess = result.value;
-            expect(cancelledIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.Cancelled);
-        });
-
-        test("should return an error trying to cancel an Identity deletion process if there is none active", async function () {
-            const result = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            expect(result).toBeAnError("No active identity deletion process found.", "error.runtime.identity.noActiveIdentityDeletionProcess");
-        });
-    });
-
     describe(GetIdentityDeletionProcessesUseCase.name, () => {
         test("should get all Identity deletion processes", async function () {
             const cancelledIdentityDeletionProcess = (await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess()).value;
@@ -111,6 +99,54 @@ describe("IdentityDeletionProcess", () => {
 
             const identityDeletionProcesses = result.value;
             expect(identityDeletionProcesses).toHaveLength(0);
+        });
+    });
+
+    describe(CancelIdentityDeletionProcessUseCase.name, () => {
+        test("should cancel an Identity deletion process", async function () {
+            await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            const result = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
+            expect(result).toBeSuccessful();
+
+            const cancelledIdentityDeletionProcess = result.value;
+            expect(cancelledIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.Cancelled);
+        });
+
+        test("should return an error trying to cancel an Identity deletion process if there is none active", async function () {
+            const result = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
+            expect(result).toBeAnError("No active identity deletion process found.", "error.runtime.identity.noActiveIdentityDeletionProcess");
+        });
+    });
+
+    describe(ApproveIdentityDeletionProcessUseCase.name, () => {
+        test("should approve an waiting Identity deletion process", async function () {
+            await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
+            const result = await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
+            expect(result).toBeSuccessful();
+
+            const approvedIdentityDeletionProcess = result.value;
+            expect(approvedIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.Approved);
+        });
+
+        test("should return an error trying to approve an Identity deletion process if there is none active", async function () {
+            const result = await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
+            expect(result).toBeAnError("No active identity deletion process found.", "error.runtime.identity.noActiveIdentityDeletionProcess");
+        });
+    });
+
+    describe(RejectIdentityDeletionProcessUseCase.name, () => {
+        test("should reject an waiting Identity deletion process", async function () {
+            await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
+            const result = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
+            expect(result).toBeSuccessful();
+
+            const approvedIdentityDeletionProcess = result.value;
+            expect(approvedIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.Rejected);
+        });
+
+        test("should return an error trying to approve an Identity deletion process if there is none active", async function () {
+            const result = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
+            expect(result).toBeAnError("No active identity deletion process found.", "error.runtime.identity.noActiveIdentityDeletionProcess");
         });
     });
 });

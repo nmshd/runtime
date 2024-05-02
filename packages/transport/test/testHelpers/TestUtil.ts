@@ -388,15 +388,16 @@ export class TestUtil {
      * the `until` callback is met.
      */
     public static async syncUntil(accountController: AccountController, until: (syncResult: ChangedItems) => boolean): Promise<ChangedItems> {
-        const syncResult = new ChangedItems();
+        const syncResult: any = new ChangedItems();
         let iterationNumber = 0;
         do {
             await sleep(150 * iterationNumber);
             const newSyncResult = await accountController.syncEverything();
 
             for (const key of Object.keys(newSyncResult)) {
-                // @ts-expect-error
-                syncResult[key].push(...newSyncResult[key]);
+                const typedKey = key as keyof IChangedItems;
+                const items = newSyncResult[typedKey];
+                syncResult[key].push(...items);
             }
             iterationNumber++;
         } while (!until(syncResult) && iterationNumber < 20);

@@ -17,6 +17,7 @@ import {
     RelationshipTemplateContentJSON
 } from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
+import axios, { Axios } from "axios";
 import fs from "fs";
 import { DateTime } from "luxon";
 import {
@@ -27,6 +28,7 @@ import {
     CreateTokenForFileRequest,
     CreateTokenQRCodeForFileRequest,
     FileDTO,
+    IdentityDeletionProcessDTO,
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
@@ -52,7 +54,7 @@ import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [] };
+    const finalSyncResult: any = {};
 
     let iterationNumber = 0;
     let criteriaMet: boolean;
@@ -62,8 +64,12 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
 
         const currentIterationSyncResult = (await transportServices.account.syncEverything()).value;
 
-        finalSyncResult.messages.push(...currentIterationSyncResult.messages);
-        finalSyncResult.relationships.push(...currentIterationSyncResult.relationships);
+        for (const key of Object.keys(currentIterationSyncResult)) {
+            const typedKey = key as keyof SyncEverythingResponse;
+            if (!finalSyncResult[key]) finalSyncResult[key] = [];
+            const newItems = currentIterationSyncResult[typedKey];
+            finalSyncResult[key].push(...newItems);
+        }
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
@@ -74,46 +80,50 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
     return finalSyncResult;
 }
 
+async function syncUntilHas<T extends keyof SyncEverythingResponse>(
+    transportServices: TransportServices,
+    key: T,
+    // [0] is to infer the type of one element of the generic array
+    filter: (r: SyncEverythingResponse[T][0]) => boolean
+): Promise<SyncEverythingResponse[T][0]> {
+    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult[key].some((r) => filter(r)));
+    return syncResult[key][0];
+}
+
+async function syncUntilHasMany<T extends keyof SyncEverythingResponse>(
+    transportServices: TransportServices,
+    key: T,
+    expectedNumberOfMessages = 1
+): Promise<SyncEverythingResponse[T]> {
+    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult[key].length >= expectedNumberOfMessages);
+    return syncResult[key];
+}
+
 export async function syncUntilHasRelationships(transportServices: TransportServices, expectedNumberOfRelationships = 1): Promise<RelationshipDTO[]> {
-    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult.relationships.length >= expectedNumberOfRelationships);
-    return syncResult.relationships;
+    return await syncUntilHasMany(transportServices, "relationships", expectedNumberOfRelationships);
 }
 
 export async function syncUntilHasMessages(transportServices: TransportServices, expectedNumberOfMessages = 1): Promise<MessageDTO[]> {
-    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult.messages.length >= expectedNumberOfMessages);
-    return syncResult.messages;
+    return await syncUntilHasMany(transportServices, "messages", expectedNumberOfMessages);
 }
 
 export async function syncUntilHasMessage(transportServices: TransportServices, messageId: string | CoreId): Promise<MessageDTO> {
-    const filterMessagesByMessageId = (syncResult: SyncEverythingResponse) => {
-        return syncResult.messages.filter((m) => m.id === messageId.toString());
-    };
-    const syncResult = await syncUntil(transportServices, (syncResult) => filterMessagesByMessageId(syncResult).length !== 0);
-    return filterMessagesByMessageId(syncResult)[0];
+    return await syncUntilHas(transportServices, "messages", (m) => m.id === messageId.toString());
 }
 
 export async function syncUntilHasMessageWithRequest(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
-    const filterRequestMessagesByRequestId = (syncResult: SyncEverythingResponse) => {
-        return syncResult.messages.filter((m) => m.content["@type"] === "Request" && m.content.id === requestId.toString());
-    };
-    const syncResult = await syncUntil(transportServices, (syncResult) => filterRequestMessagesByRequestId(syncResult).length !== 0);
-    return filterRequestMessagesByRequestId(syncResult)[0];
+    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "Request" && m.content.id === requestId.toString());
 }
 
 export async function syncUntilHasMessageWithResponse(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
-    const filterResponseMessagesByRequestId = (syncResult: SyncEverythingResponse) => {
-        return syncResult.messages.filter((m) => m.content["@type"] === "ResponseWrapper" && m.content.requestId === requestId.toString());
-    };
-    const syncResult = await syncUntil(transportServices, (syncResult) => filterResponseMessagesByRequestId(syncResult).length !== 0);
-    return filterResponseMessagesByRequestId(syncResult)[0];
+    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "ResponseWrapper" && m.content.requestId === requestId.toString());
 }
 
 export async function syncUntilHasMessageWithNotification(transportServices: TransportServices, notificationId: string | CoreId): Promise<MessageDTO> {
-    const filterResponseMessagesByNotificationId = (syncResult: SyncEverythingResponse) => {
-        return syncResult.messages.filter((m) => m.content["@type"] === "Notification" && m.content.id === notificationId.toString());
-    };
-    const syncResult = await syncUntil(transportServices, (syncResult) => filterResponseMessagesByNotificationId(syncResult).length !== 0);
-    return filterResponseMessagesByNotificationId(syncResult)[0];
+    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "Notification" && m.content.id === notificationId.toString());
+}
+export async function syncUntilHasIdentityDeletionProcess(transportServices: TransportServices, identityDeletionProcessId: string | CoreId): Promise<IdentityDeletionProcessDTO> {
+    return await syncUntilHas(transportServices, "identityDeletions", (m) => m.id === identityDeletionProcessId.toString());
 }
 
 export async function uploadOwnToken(transportServices: TransportServices): Promise<TokenDTO> {
@@ -614,4 +624,37 @@ export async function waitForEvent<TEvent>(
         eventBus.unsubscribe(subscriptionId);
         clearTimeout(timeoutId);
     });
+}
+
+let adminClient: Axios | undefined;
+
+export async function getBackboneAdminApiClient(): Promise<Axios> {
+    if (adminClient) {
+        return adminClient;
+    }
+    const adminAPIBaseUrl = process.env.NMSHD_TEST_BASEURL_ADMIN_API!;
+    if (!adminAPIBaseUrl) throw new Error("Missing environment variable NMSHD_TEST_BASEURL_ADMIN_API");
+    const csrf = await axios.get(`${adminAPIBaseUrl}/api/v1/xsrf`);
+    adminClient = axios.create({
+        baseURL: adminAPIBaseUrl,
+        headers: {
+            /* eslint-disable @typescript-eslint/naming-convention */
+            cookie: csrf.headers["set-cookie"],
+            "x-xsrf-token": csrf.data,
+            "x-api-key": process.env.NMSHD_TEST_ADMIN_API_KEY!
+            /* eslint-enable @typescript-eslint/naming-convention */
+        }
+    });
+    return adminClient;
+}
+
+export async function startIdentityDeletionProcessFromBackboneAdminApi(transportService: TransportServices, accountAddress: string): Promise<IdentityDeletionProcessDTO> {
+    const adminApiClient = await getBackboneAdminApiClient();
+    const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(`http://localhost:8091/api/v1/Identities/${accountAddress}/DeletionProcesses`);
+
+    await syncUntilHasIdentityDeletionProcess(transportService, deletionProcess.data.result.id);
+
+    const activeIdentityDeletionProcess = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({});
+
+    return activeIdentityDeletionProcess.value;
 }

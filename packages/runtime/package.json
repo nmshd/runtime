@@ -88,6 +88,7 @@
         "@types/lodash": "^4.17.0",
         "@types/luxon": "^3.4.2",
         "@types/qrcode": "^1.5.5",
+        "axios": "^1.6.8",
         "ts-json-schema-generator": "^2.1.1"
     },
     "publishConfig": {

@@ -3,14 +3,16 @@ import { Result } from "@js-soft/ts-utils";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RuntimeLoggerFactory } from "../../../RuntimeLoggerFactory";
-import { MessageDTO, RelationshipDTO } from "../../../types";
+import { IdentityDeletionProcessDTO, MessageDTO, RelationshipDTO } from "../../../types";
 import { UseCase } from "../../common";
+import { IdentityDeletionProcessMapper } from "../identityDeletionProcesses";
 import { MessageMapper } from "../messages/MessageMapper";
 import { RelationshipMapper } from "../relationships/RelationshipMapper";
 
 export interface SyncEverythingResponse {
     relationships: RelationshipDTO[];
     messages: MessageDTO[];
+    identityDeletions: IdentityDeletionProcessDTO[];
 }
 
 export interface SyncEverythingRequest {
@@ -47,12 +49,14 @@ export class SyncEverythingUseCase extends UseCase<SyncEverythingRequest, SyncEv
     private async _executeInternal(request: SyncEverythingRequest) {
         const changedItems = await this.accountController.syncEverything(request.callback);
 
-        const messageDTOs = changedItems.messages.map((m) => MessageMapper.toMessageDTO(m));
-        const relationshipDTOs = changedItems.relationships.map((r) => RelationshipMapper.toRelationshipDTO(r));
+        const messageDTOs = MessageMapper.toMessageDTOList(changedItems.messages);
+        const relationshipDTOs = RelationshipMapper.toRelationshipDTOList(changedItems.relationships);
+        const identityDeletionsProcessesDTOs = IdentityDeletionProcessMapper.toIdentityDeletionProcessDTOList(changedItems.identityDeletionProcesses);
 
         return Result.ok({
             messages: messageDTOs,
-            relationships: relationshipDTOs
+            relationships: relationshipDTOs,
+            identityDeletions: identityDeletionsProcessesDTOs
         });
     }
 }
