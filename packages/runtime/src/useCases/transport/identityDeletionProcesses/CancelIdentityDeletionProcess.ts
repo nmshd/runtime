@@ -14,8 +14,7 @@ export class CancelIdentityDeletionProcessUseCase extends UseCase<void, Identity
     }
 
     protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
-        // TODO: should this only work in status Approved or also Waiting for Approval?
-        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getActiveIdentityDeletionProcess();
+        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getApprovedIdentityDeletionProcess();
 
         if (typeof activeIdentityDeletionProcess === "undefined") {
             return Result.fail(RuntimeErrors.identity.noActiveIdentityDeletionProcess());

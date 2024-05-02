@@ -47,7 +47,7 @@ describe("IdentityDeletionProcessController", function () {
         const cancelledIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
         const activeIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
-        const result = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
+        const result = await account.identityDeletionProcess.getApprovedIdentityDeletionProcess();
         expect(activeIdentityDeletionProcess.toBase64()).toBe(result!.toBase64());
     });
 
@@ -79,12 +79,9 @@ describe("IdentityDeletionProcessController", function () {
         await expect(TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account)).rejects.toThrow("Request failed with status code 400");
     });
 
-    test.only("should get the waiting Identity deletion process", async function () {
-        // TODO: adding the commented code let's the test fail
-
-        // const cancelledIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
-        // await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
-
+    test("should get the waiting Identity deletion process", async function () {
+        const cancelledIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
+        await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
         const waitingIdentityDeletionProcess = await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
         const result = await account.identityDeletionProcess.getWaitingIdentityDeletionProcess();
         expect(waitingIdentityDeletionProcess.toBase64()).toBe(result!.toBase64());
@@ -99,7 +96,7 @@ describe("IdentityDeletionProcessController", function () {
         expect(result.id.toString()).toBe(startedIdentityDeletionProcess.id.toString());
         expect(result.status).toBe(IdentityDeletionProcessStatus.Approved);
 
-        const approvedIdentityDeletionProcess = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
+        const approvedIdentityDeletionProcess = await account.identityDeletionProcess.getApprovedIdentityDeletionProcess();
         expect(approvedIdentityDeletionProcess).toBeDefined();
         expect(approvedIdentityDeletionProcess!.status).toBe(IdentityDeletionProcessStatus.Approved);
         expect(approvedIdentityDeletionProcess!.id.toString()).toBe(result.id.toString());
@@ -113,7 +110,7 @@ describe("IdentityDeletionProcessController", function () {
         expect(result.id.toString()).toBe(startedIdentityDeletionProcess.id.toString());
         expect(result.status).toBe(IdentityDeletionProcessStatus.Rejected);
 
-        const rejectedIdentityDeletionProcess = await account.identityDeletionProcess.getActiveIdentityDeletionProcess();
+        const rejectedIdentityDeletionProcess = await account.identityDeletionProcess.getApprovedIdentityDeletionProcess();
         expect(rejectedIdentityDeletionProcess).toBeUndefined();
     });
 });

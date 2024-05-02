@@ -36,9 +36,9 @@ export class IdentityDeletionProcessController extends TransportController {
             .filter((identityDeletionProcess) => !!identityDeletionProcess) as IdentityDeletionProcess[];
     }
 
-    public async getActiveIdentityDeletionProcess(): Promise<IdentityDeletionProcess | undefined> {
+    public async getApprovedIdentityDeletionProcess(): Promise<IdentityDeletionProcess | undefined> {
         const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({
-            $and: [{ status: { $ne: IdentityDeletionProcessStatus.Cancelled } }, { status: { $ne: IdentityDeletionProcessStatus.Rejected } }]
+            status: IdentityDeletionProcessStatus.Approved
         });
         return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
     }

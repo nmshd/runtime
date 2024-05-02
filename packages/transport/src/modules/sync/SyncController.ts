@@ -411,6 +411,10 @@ export class SyncController extends TransportController {
 
         for (const externalEvent of externalEvents) {
             try {
+                // TODO: remove once backbone dose not fire this event anymore
+                if (externalEvent.type === "IdentityDeletionProcessStatusChanged") {
+                    continue;
+                }
                 const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEvent.type);
                 const item = await new externalEventProcessorConstructor(this.eventBus, this.parent).execute(externalEvent);
 
