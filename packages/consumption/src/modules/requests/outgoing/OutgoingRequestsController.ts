@@ -1,17 +1,6 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
-import {
-    CoreAddress,
-    CoreDate,
-    CoreId,
-    ICoreAddress,
-    ICoreId,
-    Message,
-    Relationship,
-    RelationshipTemplate,
-    SynchronizedCollection,
-    CoreErrors as TransportCoreErrors
-} from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreId, Message, Relationship, RelationshipTemplate, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
@@ -40,7 +29,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         private readonly eventBus: EventBus,
         private readonly identity: { address: CoreAddress },
         private readonly relationshipResolver: {
-            getActiveRelationshipToIdentity(id: ICoreAddress): Promise<Relationship | undefined>;
+            getActiveRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
         }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
@@ -92,6 +81,10 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     public async create(params: ICreateOutgoingRequestParameters): Promise<LocalRequest> {
         const parsedParams = CreateOutgoingRequestParameters.from(params);
+        const relationship = await this.relationshipResolver.getActiveRelationshipToIdentity(parsedParams.peer);
+        if (!relationship) {
+            throw TransportCoreErrors.general.recordNotFound(Relationship, parsedParams.peer.toString());
+        }
 
         const id = await ConsumptionIds.request.generate();
         parsedParams.content.id = id;
