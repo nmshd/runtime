@@ -5,7 +5,7 @@ import { nameof } from "ts-simple-nameof";
 import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId, ICoreAddress, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
-import { MessageSentEvent, MessageWasReadAtChangedEvent } from "../../events";
+import { MessageDeletedEvent, MessageRecipientDeletedEvent, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { File } from "../files/local/File";
 import { FileReference } from "../files/transmission/FileReference";
@@ -60,6 +60,37 @@ export class MessageController extends TransportController {
                 $contains: id.toString()
             }
         });
+    }
+
+    public async deleteMessage(message: Message): Promise<void> {
+        await this.messages.delete({ id: message.id });
+
+        this.eventBus.publish(new MessageDeletedEvent(this.parent.identity.address.toString(), message));
+    }
+
+    public async deleteMessageRecipient(messageId: CoreId, relationship: Relationship): Promise<void> {
+        const messageDoc = await this.messages.read(messageId.toString());
+        const message = Message.from(messageDoc);
+
+        message.relationshipIds = message.relationshipIds.filter((id) => id !== relationship.id);
+        if (message.relationshipIds.length === 0) {
+            await this.deleteMessage(message);
+            return;
+        }
+
+        const messageCache = message.cache;
+        if (messageCache) {
+            messageCache.recipients = messageCache.recipients.filter((recipient) => recipient.address !== relationship.peer.address);
+            message.setCache(messageCache);
+        }
+
+        await this.messages.update(messageDoc, message);
+        this.eventBus.publish(new MessageRecipientDeletedEvent(this.parent.identity.address.toString(), message));
+    }
+
+    public async deleteMessagesOfRelationship(relationship: Relationship): Promise<void> {
+        const messages = await this.getMessagesByRelationshipId(relationship.id);
+        messages.forEach((message) => this.deleteMessageRecipient(message.id, relationship));
     }
 
     @log()
