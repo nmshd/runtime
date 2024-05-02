@@ -92,6 +92,7 @@ export * from "./secrets/data/SecretContainerCipher";
 export * from "./secrets/data/SecretContainerPlain";
 export * from "./secrets/SecretController";
 export * from "./sync/backbone/BackboneDatawalletModification";
+export * from "./sync/backbone/BackboneExternalEvent";
 export * from "./sync/backbone/CreateDatawalletModifications";
 export * from "./sync/backbone/FinalizeSyncRun";
 export * from "./sync/backbone/GetDatawallet";
