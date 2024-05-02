@@ -1,11 +1,10 @@
-import { serialize, validate } from "@js-soft/ts-serval";
-import { CoreSerializable } from "../../../core/CoreSerializable";
+import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { MessageDeliveredEvent } from "../../../events";
 import { Message } from "../../messages/local/Message";
 import { ExternalEvent } from "../data/ExternalEvent";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
-class MessageDeliveredExternalEventData extends CoreSerializable {
+class MessageDeliveredExternalEventData extends Serializable {
     @serialize()
     @validate()
     public id: string;
