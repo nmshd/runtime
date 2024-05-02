@@ -130,7 +130,7 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to approve an Identity deletion process if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
-            expect(result).toBeAnError("No active identity deletion process found.", "error.runtime.identity.noActiveIdentityDeletionProcess");
+            expect(result).toBeAnError("No identity deletion process waiting for approval found.", "error.runtime.identity.noWaitingIdentityDeletionProcess");
         });
     });
 
@@ -146,7 +146,7 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to approve an Identity deletion process if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
-            expect(result).toBeAnError("No active identity deletion process found.", "error.runtime.identity.noActiveIdentityDeletionProcess");
+            expect(result).toBeAnError("No identity deletion process waiting for approval found.", "error.runtime.identity.noWaitingIdentityDeletionProcess");
         });
     });
 });

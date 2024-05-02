@@ -17,7 +17,7 @@ export class RejectIdentityDeletionProcessUseCase extends UseCase<void, Identity
         const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getWaitingIdentityDeletionProcess();
 
         if (typeof activeIdentityDeletionProcess === "undefined") {
-            return Result.fail(RuntimeErrors.identity.noActiveIdentityDeletionProcess());
+            return Result.fail(RuntimeErrors.identity.noWaitingIdentityDeletionProcess());
         }
 
         const rejectedIdentityDeletionProcess = await this.identityDeletionProcessController.rejectIdentityDeletionProcess(activeIdentityDeletionProcess.id.toString());
