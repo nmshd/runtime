@@ -310,6 +310,7 @@ export class TestUtil {
             for (const key of Object.keys(newSyncResult)) {
                 const typedKey = key as keyof SyncEverythingResponse;
                 const items = newSyncResult[typedKey];
+                if (!syncResponse[key]) syncResponse[key] = [];
                 syncResponse[key].push(...items);
             }
             iterationNumber++;
