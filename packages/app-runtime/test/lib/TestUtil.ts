@@ -300,19 +300,20 @@ export class TestUtil {
      * specified in the `until` callback is met.
      */
     public static async syncUntil(session: LocalAccountSession, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-        const syncResult = await session.transportServices.account.syncEverything();
-
-        const { messages, relationships } = syncResult.value;
-        const syncResponse = { relationships: [...relationships], messages: [...messages] };
+        const syncResponse: any = {};
 
         let iterationNumber = 0;
-        while (!until(syncResponse) && iterationNumber < 15) {
+        do {
             await sleep(iterationNumber * 25);
-            const newSyncResult = await session.transportServices.account.syncEverything();
-            syncResponse.messages.push(...newSyncResult.value.messages);
-            syncResponse.relationships.push(...newSyncResult.value.relationships);
+            const newSyncResult = (await session.transportServices.account.syncEverything()).value;
+
+            for (const key of Object.keys(newSyncResult)) {
+                const typedKey = key as keyof SyncEverythingResponse;
+                const items = newSyncResult[typedKey];
+                syncResponse[key].push(...items);
+            }
             iterationNumber++;
-        }
+        } while (!until(syncResponse) && iterationNumber < 15);
         return syncResponse;
     }
 
