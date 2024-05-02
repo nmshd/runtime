@@ -4,5 +4,5 @@ export * from "./MessageSentEvent";
 export * from "./MessageWasReadAtChangedEvent";
 export * from "./PeerRelationshipTemplateLoadedEvent";
 export * from "./RelationshipChangedEvent";
-export * from "./RelationshipDeletedEvent";
+export * from "./RelationshipDeletedBySelfEvent";
 export * from "./TransportDataEvent";
