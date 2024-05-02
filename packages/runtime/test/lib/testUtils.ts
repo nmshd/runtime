@@ -87,7 +87,7 @@ async function syncUntilHas<T extends keyof SyncEverythingResponse>(
     filter: (r: SyncEverythingResponse[T][0]) => boolean
 ): Promise<SyncEverythingResponse[T][0]> {
     const syncResult = await syncUntil(transportServices, (syncResult) => syncResult[key].some((r) => filter(r)));
-    return syncResult[key][0];
+    return syncResult[key].filter(filter)[0];
 }
 
 async function syncUntilHasMany<T extends keyof SyncEverythingResponse>(
