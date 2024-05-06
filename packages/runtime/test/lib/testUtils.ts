@@ -17,7 +17,6 @@ import {
     RelationshipTemplateContentJSON
 } from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
-import axios, { Axios } from "axios";
 import fs from "fs";
 import { DateTime } from "luxon";
 import {
@@ -93,9 +92,9 @@ async function syncUntilHas<T extends keyof SyncEverythingResponse>(
 async function syncUntilHasMany<T extends keyof SyncEverythingResponse>(
     transportServices: TransportServices,
     key: T,
-    expectedNumberOfMessages = 1
+    expectedNumberOfItems = 1
 ): Promise<SyncEverythingResponse[T]> {
-    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult[key].length >= expectedNumberOfMessages);
+    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult[key].length >= expectedNumberOfItems);
     return syncResult[key];
 }
 
@@ -624,37 +623,4 @@ export async function waitForEvent<TEvent>(
         eventBus.unsubscribe(subscriptionId);
         clearTimeout(timeoutId);
     });
-}
-
-let adminClient: Axios | undefined;
-
-export async function getBackboneAdminApiClient(): Promise<Axios> {
-    if (adminClient) {
-        return adminClient;
-    }
-    const adminAPIBaseUrl = process.env.NMSHD_TEST_BASEURL_ADMIN_API!;
-    if (!adminAPIBaseUrl) throw new Error("Missing environment variable NMSHD_TEST_BASEURL_ADMIN_API");
-    const csrf = await axios.get(`${adminAPIBaseUrl}/api/v1/xsrf`);
-    adminClient = axios.create({
-        baseURL: adminAPIBaseUrl,
-        headers: {
-            /* eslint-disable @typescript-eslint/naming-convention */
-            cookie: csrf.headers["set-cookie"],
-            "x-xsrf-token": csrf.data,
-            "x-api-key": process.env.NMSHD_TEST_ADMIN_API_KEY!
-            /* eslint-enable @typescript-eslint/naming-convention */
-        }
-    });
-    return adminClient;
-}
-
-export async function startIdentityDeletionProcessFromBackboneAdminApi(transportService: TransportServices, accountAddress: string): Promise<IdentityDeletionProcessDTO> {
-    const adminApiClient = await getBackboneAdminApiClient();
-    const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(`http://localhost:8091/api/v1/Identities/${accountAddress}/DeletionProcesses`);
-
-    await syncUntilHasIdentityDeletionProcess(transportService, deletionProcess.data.result.id);
-
-    const activeIdentityDeletionProcess = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({});
-
-    return activeIdentityDeletionProcess.value;
 }

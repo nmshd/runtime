@@ -8,18 +8,34 @@ import {
     RejectIdentityDeletionProcessUseCase,
     TransportServices
 } from "../../src";
-import { RuntimeServiceProvider, startIdentityDeletionProcessFromBackboneAdminApi } from "../lib";
+import { RuntimeServiceProvider } from "../lib";
+import { startIdentityDeletionProcessFromBackboneAdminApi } from "../lib/AdminApiClient";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportService: TransportServices;
 let accountAddress: string;
 
-beforeEach(async () => {
+beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(1);
     transportService = runtimeServices[0].transport;
     accountAddress = runtimeServices[0].address;
 }, 30000);
-afterEach(async () => await serviceProvider.stop());
+
+afterAll(async () => {
+    return await serviceProvider.stop();
+});
+afterEach(async () => {
+    const activeIdentityDeletionProcess = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({});
+    if (!activeIdentityDeletionProcess.isSuccess) {
+        return;
+    }
+    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+        await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
+    }
+    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
+        await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
+    }
+});
 
 describe("IdentityDeletionProcess", () => {
     describe(InitiateIdentityDeletionProcessUseCase.name, () => {

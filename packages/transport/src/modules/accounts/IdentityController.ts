@@ -3,13 +3,10 @@ import { CoreBuffer, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignature
 import { ControllerName, CoreAddress, CoreCrypto, CoreErrors, TransportController } from "../../core";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
-import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { Identity } from "./data/Identity";
 import { Realm } from "./data/Realm";
 
 export class IdentityController extends TransportController {
-    public identityDeletionProcessCollection: SynchronizedCollection;
-
     public get address(): CoreAddress {
         return this._identity.address;
     }
