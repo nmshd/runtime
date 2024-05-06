@@ -1,91 +1,44 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { CoreDate, CoreId, CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
+import { CoreDate, CoreId, CoreSynchronizable } from "../../../core";
+import { CachedIdentityDeletionProcess, CachedIdentityDeletionProcessJSON } from "./CachedIdentityDeletionProcess";
 
-export interface IdentityDeletionProcessJSON extends Omit<ICoreSynchronizable, "id"> {
+export interface IdentityDeletionProcessJSON {
     id: string;
-    status: IdentityDeletionProcessStatus;
-    createdAt?: string;
-    createdByDevice?: string;
-    rejectedAt?: string;
-    rejectedByDevice?: string;
-    approvedAt?: string;
-    approvedByDevice?: string;
-    gracePeriodEndsAt?: string;
-    cancelledAt?: string;
-    cancelledByDevice?: string;
+    cache?: CachedIdentityDeletionProcessJSON;
+    // TODO: Do we need the following fields?
+    cachedAt?: string;
+    metadata?: any;
+    metadataModifiedAt?: string;
 }
 
-export interface IIdentityDeletionProcess extends ICoreSynchronizable {
-    status: IdentityDeletionProcessStatus;
-    createdAt?: CoreDate;
-    createdByDevice?: CoreId;
-    rejectedAt?: CoreDate;
-    rejectedByDevice?: CoreId;
-    approvedAt?: CoreDate;
-    approvedByDevice?: CoreId;
-    gracePeriodEndsAt?: CoreDate;
-    cancelledAt?: CoreDate;
-    cancelledByDevice?: CoreId;
+export interface IIdentityDeletionProcess {
+    id: CoreId;
+    cache?: CachedIdentityDeletionProcess;
+    cachedAt?: CoreDate;
+    metadata?: any;
+    metadataModifiedAt?: CoreDate;
 }
 
 @type("IdentityDeletionProcess")
 export class IdentityDeletionProcess extends CoreSynchronizable implements IIdentityDeletionProcess {
-    public override readonly technicalProperties = [
-        nameof<IdentityDeletionProcess>((r) => r.status),
-        nameof<IdentityDeletionProcess>((r) => r.createdAt),
-        nameof<IdentityDeletionProcess>((r) => r.createdByDevice),
-        nameof<IdentityDeletionProcess>((r) => r.approvedAt),
-        nameof<IdentityDeletionProcess>((r) => r.approvedByDevice),
-        nameof<IdentityDeletionProcess>((r) => r.gracePeriodEndsAt),
-        nameof<IdentityDeletionProcess>((r) => r.cancelledAt),
-        nameof<IdentityDeletionProcess>((r) => r.cancelledByDevice),
-        nameof<IdentityDeletionProcess>((r) => r.rejectedAt),
-        nameof<IdentityDeletionProcess>((r) => r.rejectedByDevice)
-    ];
-    public override readonly userdataProperties = [];
-    public override readonly metadataProperties = [];
-
-    @validate()
-    @serialize()
-    public status: IdentityDeletionProcessStatus;
+    public override readonly metadataProperties = [nameof<IdentityDeletionProcess>((r) => r.metadata), nameof<IdentityDeletionProcess>((r) => r.metadataModifiedAt)];
 
     @validate({ nullable: true })
     @serialize()
-    public createdAt?: CoreDate;
+    public cache?: CachedIdentityDeletionProcess;
 
     @validate({ nullable: true })
     @serialize()
-    public createdByDevice?: CoreId;
+    public cachedAt?: CoreDate;
 
     @validate({ nullable: true })
     @serialize()
-    public approvedAt?: CoreDate;
+    public metadata?: any;
 
     @validate({ nullable: true })
     @serialize()
-    public approvedByDevice?: CoreId;
-
-    @validate({ nullable: true })
-    @serialize()
-    public gracePeriodEndsAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public cancelledAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public cancelledByDevice?: CoreId;
-
-    @validate({ nullable: true })
-    @serialize()
-    public rejectedAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public rejectedByDevice?: CoreId;
+    public metadataModifiedAt?: CoreDate;
 
     public static from(value: IIdentityDeletionProcess | IdentityDeletionProcessJSON): IdentityDeletionProcess {
         return this.fromAny(value);
