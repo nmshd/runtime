@@ -14,10 +14,10 @@ export class RejectIdentityDeletionProcessUseCase extends UseCase<void, Identity
     }
 
     protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
-        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getWaitingIdentityDeletionProcess();
+        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getWaitingForApprovalIdentityDeletionProcess();
 
         if (typeof activeIdentityDeletionProcess === "undefined") {
-            return Result.fail(RuntimeErrors.identity.noWaitingIdentityDeletionProcess());
+            return Result.fail(RuntimeErrors.identity.noWaitingForApprovalIdentityDeletionProcess());
         }
 
         const rejectedIdentityDeletionProcess = await this.identityDeletionProcessController.rejectIdentityDeletionProcess(activeIdentityDeletionProcess.id.toString());

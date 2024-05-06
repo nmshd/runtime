@@ -594,7 +594,7 @@ export class TestUtil {
         );
         await TestUtil.syncUntilHasIdentityDeletionProcess(account, CoreId.from(deletionProcess.data.result.id));
 
-        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getWaitingIdentityDeletionProcess();
+        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getWaitingForApprovalIdentityDeletionProcess();
         if (typeof activeIdentityDeletionProcess === "undefined") {
             throw new Error("Identity deletion process not found.");
         }

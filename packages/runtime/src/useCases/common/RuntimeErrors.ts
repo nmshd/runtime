@@ -194,8 +194,8 @@ class Identity {
         return new ApplicationError("error.runtime.identity.noActiveIdentityDeletionProcess", "No active identity deletion process found.");
     }
 
-    public noWaitingIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identity.noWaitingIdentityDeletionProcess", "No identity deletion process waiting for approval found.");
+    public noWaitingForApprovalIdentityDeletionProcess() {
+        return new ApplicationError("error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess", "No identity deletion process waiting for decision found.");
     }
 
     public activeIdentityDeletionProcessAlreadyExists() {

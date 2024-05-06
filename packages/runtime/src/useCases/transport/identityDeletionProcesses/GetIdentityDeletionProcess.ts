@@ -27,7 +27,7 @@ export class GetIdentityDeletionProcessUseCase extends UseCase<GetIdentityDeleti
         if (typeof request.id === "undefined") {
             const activeIdentityDeletionProcess =
                 (await this.identityDeletionProcessController.getApprovedIdentityDeletionProcess()) ??
-                (await this.identityDeletionProcessController.getWaitingIdentityDeletionProcess());
+                (await this.identityDeletionProcessController.getWaitingForApprovalIdentityDeletionProcess());
             if (typeof activeIdentityDeletionProcess === "undefined") {
                 return Result.fail(RuntimeErrors.identity.noActiveIdentityDeletionProcess());
             }

@@ -83,7 +83,7 @@ describe("IdentityDeletionProcessController", function () {
         const cancelledIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
         const waitingIdentityDeletionProcess = await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
-        const result = await account.identityDeletionProcess.getWaitingIdentityDeletionProcess();
+        const result = await account.identityDeletionProcess.getWaitingForApprovalIdentityDeletionProcess();
         expect(waitingIdentityDeletionProcess.toBase64()).toBe(result!.toBase64());
         expect(waitingIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.WaitingForApproval);
     });

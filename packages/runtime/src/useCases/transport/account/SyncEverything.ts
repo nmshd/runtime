@@ -12,7 +12,7 @@ import { RelationshipMapper } from "../relationships/RelationshipMapper";
 export interface SyncEverythingResponse {
     relationships: RelationshipDTO[];
     messages: MessageDTO[];
-    identityDeletions: IdentityDeletionProcessDTO[];
+    identityDeletionProcesses: IdentityDeletionProcessDTO[];
 }
 
 export interface SyncEverythingRequest {
@@ -51,12 +51,12 @@ export class SyncEverythingUseCase extends UseCase<SyncEverythingRequest, SyncEv
 
         const messageDTOs = MessageMapper.toMessageDTOList(changedItems.messages);
         const relationshipDTOs = RelationshipMapper.toRelationshipDTOList(changedItems.relationships);
-        const identityDeletionsProcessesDTOs = IdentityDeletionProcessMapper.toIdentityDeletionProcessDTOList(changedItems.identityDeletionProcesses);
+        const identityDeletionsProcessDTOs = IdentityDeletionProcessMapper.toIdentityDeletionProcessDTOList(changedItems.identityDeletionProcesses);
 
         return Result.ok({
             messages: messageDTOs,
             relationships: relationshipDTOs,
-            identityDeletions: identityDeletionsProcessesDTOs
+            identityDeletionProcesses: identityDeletionsProcessDTOs
         });
     }
 }
