@@ -1,6 +1,6 @@
 import { IChallengeSignedSerialized } from "../../challenges/data/ChallengeSigned";
 
-export interface BackboneIdentityPostRequest {
+export interface BackbonePostIdentityRequest {
     identityPublicKey: string;
     devicePassword: string;
     signedChallenge: IChallengeSignedSerialized;
@@ -9,7 +9,7 @@ export interface BackboneIdentityPostRequest {
     identityVersion: number;
 }
 
-export interface BackboneIdentityPostResponse {
+export interface BackbonePostIdentityResponse {
     address: string;
     device: BackboneIdentityDevice;
     createdAt: string;

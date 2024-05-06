@@ -24,6 +24,7 @@ beforeAll(async () => {
 afterAll(async () => {
     return await serviceProvider.stop();
 });
+
 afterEach(async () => {
     const activeIdentityDeletionProcess = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({});
     if (!activeIdentityDeletionProcess.isSuccess) {

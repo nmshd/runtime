@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController, IdentityDeletionProcessStatus, Transport } from "../../../src";
+import { AdminApiClient } from "../../testHelpers/AdminApiClient";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("IdentityDeletionProcessController", function () {
@@ -65,31 +66,31 @@ describe("IdentityDeletionProcessController", function () {
     });
 
     test("should start an Identity deletion process from the Backbone admin API", async function () {
-        const activeIdentityDeletionProcess = await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
+        const activeIdentityDeletionProcess = await AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account);
         expect(activeIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.WaitingForApproval);
     });
 
     test("should not start a second Identity deletion process from the Backbone admin API", async function () {
-        await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
-        await expect(TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account)).rejects.toThrow("Request failed with status code 400");
+        await AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account);
+        await expect(AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account)).rejects.toThrow("Request failed with status code 400");
     });
 
     test("should not start an Identity deletion process from the Backbone admin API if one was already started by the user", async function () {
         await account.identityDeletionProcess.initiateIdentityDeletionProcess();
-        await expect(TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account)).rejects.toThrow("Request failed with status code 400");
+        await expect(AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account)).rejects.toThrow("Request failed with status code 400");
     });
 
     test("should get the waiting Identity deletion process", async function () {
         const cancelledIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
-        const waitingIdentityDeletionProcess = await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
+        const waitingIdentityDeletionProcess = await AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account);
         const result = await account.identityDeletionProcess.getWaitingForApprovalIdentityDeletionProcess();
         expect(waitingIdentityDeletionProcess.toBase64()).toBe(result!.toBase64());
         expect(waitingIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.WaitingForApproval);
     });
 
     test("should approve an Identity deletion process that was started from the Backbone admin API", async function () {
-        const startedIdentityDeletionProcess = await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
+        const startedIdentityDeletionProcess = await AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account);
 
         const result = await account.identityDeletionProcess.approveIdentityDeletionProcess(startedIdentityDeletionProcess.id.toString());
         expect(result).toBeDefined();
@@ -103,7 +104,7 @@ describe("IdentityDeletionProcessController", function () {
     });
 
     test("should reject an Identity deletion proces that was started from the Backbone admin APIs", async function () {
-        const startedIdentityDeletionProcess = await TestUtil.startIdentityDeletionProcessFromBackboneAdminApi(account);
+        const startedIdentityDeletionProcess = await AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account);
 
         const result = await account.identityDeletionProcess.rejectIdentityDeletionProcess(startedIdentityDeletionProcess.id.toString());
         expect(result).toBeDefined();

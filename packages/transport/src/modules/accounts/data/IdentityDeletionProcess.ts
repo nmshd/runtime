@@ -5,23 +5,14 @@ import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
 
 export interface IdentityDeletionProcessJSON extends Omit<ICoreSynchronizable, "id"> {
     id: string;
-
-    // Cross Cutting
     status: IdentityDeletionProcessStatus;
-
     createdAt?: string;
     createdByDevice?: string;
-
-    // Approval
     approvedAt?: string;
     approvedByDevice?: string;
     gracePeriodEndsAt?: string;
-
-    // Cancelled
     cancelledAt?: string;
     cancelledByDevice?: string;
-
-    // Rejected
     rejectedAt?: string;
     rejectedByDevice?: string;
 }

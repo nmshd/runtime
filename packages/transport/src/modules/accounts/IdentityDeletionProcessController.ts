@@ -25,6 +25,12 @@ export class IdentityDeletionProcessController extends TransportController {
         return this;
     }
 
+    private async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
+        const oldIdentityDeletion = await this.getIdentityDeletionProcess(identityDeletionProcess.id.toString());
+        await this.identityDeletionProcessCollection.update(oldIdentityDeletion, identityDeletionProcess);
+        this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), identityDeletionProcess));
+    }
+
     public async getIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess | undefined> {
         const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcessId });
         return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
@@ -49,12 +55,6 @@ export class IdentityDeletionProcessController extends TransportController {
         });
 
         return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
-    }
-
-    private async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
-        const oldIdentityDeletion = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcess.id.toString() });
-        await this.identityDeletionProcessCollection.update(oldIdentityDeletion, identityDeletionProcess);
-        this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), identityDeletionProcess));
     }
 
     public async approveIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {

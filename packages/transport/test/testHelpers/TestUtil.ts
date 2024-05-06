@@ -8,7 +8,6 @@ import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreBuffer } from "@nmshd/crypto";
-import axios, { Axios } from "axios";
 import { DurationLike } from "luxon";
 import { LogLevel } from "typescript-logging";
 import {
@@ -411,10 +410,12 @@ export class TestUtil {
 
     public static async syncUntilHas<T extends keyof IChangedItems>(accountController: AccountController, id: CoreId, key: T): Promise<ChangedItems[T]> {
         const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].some((r) => r.id.equals(id)));
+
         return syncResult[key];
     }
     public static async syncUntilHasMany<T extends keyof IChangedItems>(accountController: AccountController, key: T, expectedNumberOfMessages = 1): Promise<ChangedItems[T]> {
         const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].length >= expectedNumberOfMessages);
+
         return syncResult[key];
     }
 
@@ -563,42 +564,5 @@ export class TestUtil {
                 resolve();
             }, ms);
         });
-    }
-
-    private static adminClient: Axios | undefined;
-
-    public static async getBackboneAdminApiClient(): Promise<Axios> {
-        if (TestUtil.adminClient) {
-            return TestUtil.adminClient;
-        }
-        const adminAPIBaseUrl = process.env.NMSHD_TEST_BASEURL_ADMIN_API!;
-        if (!adminAPIBaseUrl) throw new Error("Missing environment variable NMSHD_TEST_BASEURL_ADMIN_API");
-        const csrf = await axios.get(`${adminAPIBaseUrl}/api/v1/xsrf`);
-        TestUtil.adminClient = axios.create({
-            baseURL: adminAPIBaseUrl,
-            headers: {
-                /* eslint-disable @typescript-eslint/naming-convention */
-                cookie: csrf.headers["set-cookie"],
-                "x-xsrf-token": csrf.data,
-                "x-api-key": process.env.NMSHD_TEST_ADMIN_API_KEY!
-                /* eslint-enable @typescript-eslint/naming-convention */
-            }
-        });
-        return TestUtil.adminClient;
-    }
-
-    public static async startIdentityDeletionProcessFromBackboneAdminApi(account: AccountController): Promise<IdentityDeletionProcess> {
-        const adminApiClient = await TestUtil.getBackboneAdminApiClient();
-        const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(
-            `http://localhost:8091/api/v1/Identities/${account.identity.address.toString()}/DeletionProcesses`
-        );
-        await TestUtil.syncUntilHasIdentityDeletionProcess(account, CoreId.from(deletionProcess.data.result.id));
-
-        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getWaitingForApprovalIdentityDeletionProcess();
-        if (typeof activeIdentityDeletionProcess === "undefined") {
-            throw new Error("Identity deletion process not found.");
-        }
-
-        return activeIdentityDeletionProcess;
     }
 }

@@ -20,7 +20,6 @@ export class IdentityDeletionProcessStartedEventProcessor extends ExternalEventP
         const identityDeletionProcess = IdentityDeletionProcess.from(identityDeletionProcessJSONResponse.value);
         await this.accountController.identityDeletionProcess.identityDeletionProcessCollection.create(identityDeletionProcess);
 
-        // TODO: is it intended that we publish an Identity...ChangedEvent, even though we receive an Identity...StartedEvent?
         this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.accountController.identity.address.toString(), identityDeletionProcess));
 
         return identityDeletionProcess;
