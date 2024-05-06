@@ -53,29 +53,23 @@ import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-    const finalSyncResult: any = {};
+    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [] };
 
     let iterationNumber = 0;
     let criteriaMet: boolean;
-
     do {
         await sleep(iterationNumber * 25);
 
         const currentIterationSyncResult = (await transportServices.account.syncEverything()).value;
 
-        for (const key of Object.keys(currentIterationSyncResult)) {
-            const typedKey = key as keyof SyncEverythingResponse;
-            if (!finalSyncResult[key]) finalSyncResult[key] = [];
-            const newItems = currentIterationSyncResult[typedKey];
-            finalSyncResult[key].push(...newItems);
-        }
+        finalSyncResult.messages.push(...currentIterationSyncResult.messages);
+        finalSyncResult.relationships.push(...currentIterationSyncResult.relationships);
+        finalSyncResult.identityDeletionProcesses.push(...currentIterationSyncResult.identityDeletionProcesses);
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
     } while (!criteriaMet && iterationNumber < 15);
-
     if (!criteriaMet) throw new Error("syncUntil timed out.");
-
     return finalSyncResult;
 }
 
