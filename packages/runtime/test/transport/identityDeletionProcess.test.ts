@@ -39,6 +39,15 @@ describe("IdentityDeletionProcess", () => {
                 "error.runtime.identity.activeIdentityDeletionProcessAlreadyExists"
             );
         });
+        test("should return an error trying to initiate an Identity deletion process if there already is one waiting for approval", async function () {
+            await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
+            await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            const result = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            expect(result).toBeAnError(
+                "There is already an active identity deletion process. You cannot start another, as there may only be one active identity deletion process per identity.",
+                "error.runtime.identity.activeIdentityDeletionProcessAlreadyExists"
+            );
+        });
     });
 
     describe(GetIdentityDeletionProcessUseCase.name, () => {
@@ -130,7 +139,7 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to approve an Identity deletion process if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
-            expect(result).toBeAnError("No identity deletion process waiting for approval found.", "error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess");
+            expect(result).toBeAnError("No identity deletion process waiting for decision found.", "error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess");
         });
     });
 
@@ -146,7 +155,7 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to approve an Identity deletion process if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
-            expect(result).toBeAnError("No identity deletion process waiting for approval found.", "error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess");
+            expect(result).toBeAnError("No identity deletion process waiting for decision found.", "error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess");
         });
     });
 });
