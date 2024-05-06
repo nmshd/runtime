@@ -8,34 +8,26 @@ export interface IdentityDeletionProcessJSON extends Omit<ICoreSynchronizable, "
     status: IdentityDeletionProcessStatus;
     createdAt?: string;
     createdByDevice?: string;
+    rejectedAt?: string;
+    rejectedByDevice?: string;
     approvedAt?: string;
     approvedByDevice?: string;
     gracePeriodEndsAt?: string;
     cancelledAt?: string;
     cancelledByDevice?: string;
-    rejectedAt?: string;
-    rejectedByDevice?: string;
 }
 
 export interface IIdentityDeletionProcess extends ICoreSynchronizable {
-    // Cross Cutting
     status: IdentityDeletionProcessStatus;
-
     createdAt?: CoreDate;
     createdByDevice?: CoreId;
-
-    // Approval
+    rejectedAt?: CoreDate;
+    rejectedByDevice?: CoreId;
     approvedAt?: CoreDate;
     approvedByDevice?: CoreId;
     gracePeriodEndsAt?: CoreDate;
-
-    // Cancelled
     cancelledAt?: CoreDate;
     cancelledByDevice?: CoreId;
-
-    // Rejected
-    rejectedAt?: CoreDate;
-    rejectedByDevice?: CoreId;
 }
 
 @type("IdentityDeletionProcess")

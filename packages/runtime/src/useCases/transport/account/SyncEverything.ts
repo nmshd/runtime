@@ -51,12 +51,12 @@ export class SyncEverythingUseCase extends UseCase<SyncEverythingRequest, SyncEv
 
         const messageDTOs = MessageMapper.toMessageDTOList(changedItems.messages);
         const relationshipDTOs = RelationshipMapper.toRelationshipDTOList(changedItems.relationships);
-        const identityDeletionsProcessDTOs = IdentityDeletionProcessMapper.toIdentityDeletionProcessDTOList(changedItems.identityDeletionProcesses);
+        const identityDeletionProcessDTOs = IdentityDeletionProcessMapper.toIdentityDeletionProcessDTOList(changedItems.identityDeletionProcesses);
 
         return Result.ok({
             messages: messageDTOs,
             relationships: relationshipDTOs,
-            identityDeletionProcesses: identityDeletionsProcessDTOs
+            identityDeletionProcesses: identityDeletionProcessDTOs
         });
     }
 }

@@ -1,5 +1,5 @@
 import axios, { Axios } from "axios";
-import { AccountController, CoreId, IdentityDeletionProcess } from "../../src";
+import { AccountController, CoreId, IdentityDeletionProcess, IdentityDeletionProcessStatus } from "../../src";
 import { TestUtil } from "./TestUtil";
 
 export class AdminApiClient {
@@ -9,7 +9,7 @@ export class AdminApiClient {
         if (AdminApiClient.adminClient) {
             return AdminApiClient.adminClient;
         }
-        const adminAPIBaseUrl = process.env.NMSHD_TEST_BASEURL_ADMIN_API!;
+        const adminAPIBaseUrl = process.env.NMSHD_TEST_BASEURL_ADMIN_API;
         if (!adminAPIBaseUrl) throw new Error("Missing environment variable NMSHD_TEST_BASEURL_ADMIN_API");
         const csrf = await axios.get(`${adminAPIBaseUrl}/api/v1/xsrf`);
         AdminApiClient.adminClient = axios.create({
@@ -30,7 +30,7 @@ export class AdminApiClient {
         const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(`/api/v1/Identities/${account.identity.address.toString()}/DeletionProcesses`);
         await TestUtil.syncUntilHasIdentityDeletionProcess(account, CoreId.from(deletionProcess.data.result.id));
 
-        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getWaitingForApprovalIdentityDeletionProcess();
+        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
         if (typeof activeIdentityDeletionProcess === "undefined") {
             throw new Error("Identity deletion process not found.");
         }

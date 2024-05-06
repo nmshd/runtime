@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, IdentityDeletionProcessController } from "@nmshd/transport";
+import { AccountController, IdentityDeletionProcessController, IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDeletionProcessDTO";
 import { RuntimeErrors, UseCase } from "../../common";
@@ -14,9 +14,10 @@ export class InitiateIdentityDeletionProcessUseCase extends UseCase<void, Identi
     }
 
     protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
-        const activeIdentityDeletionProcess =
-            (await this.identityDeletionProcessController.getApprovedIdentityDeletionProcess()) ??
-            (await this.identityDeletionProcessController.getWaitingForApprovalIdentityDeletionProcess());
+        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus([
+            IdentityDeletionProcessStatus.Approved,
+            IdentityDeletionProcessStatus.WaitingForApproval
+        ]);
         if (typeof activeIdentityDeletionProcess !== "undefined") {
             return Result.fail(RuntimeErrors.identity.activeIdentityDeletionProcessAlreadyExists());
         }

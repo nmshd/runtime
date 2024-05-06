@@ -10,6 +10,7 @@ import {
     InitiateIdentityDeletionProcessUseCase,
     RejectIdentityDeletionProcessUseCase
 } from "../../../useCases";
+import { GetActiveIdentityDeletionProcessUseCase } from "../../../useCases/transport/identityDeletionProcesses/GetActiveIdentityDeletionProcess";
 
 export class IdentityDeletionProcessesFacade {
     public constructor(
@@ -18,7 +19,8 @@ export class IdentityDeletionProcessesFacade {
         @Inject private readonly initiateIdentityDeletionProcessUseCase: InitiateIdentityDeletionProcessUseCase,
         @Inject private readonly cancelIdentityDeletionProcessUseCase: CancelIdentityDeletionProcessUseCase,
         @Inject private readonly getIdentityDeletionProcessUseCase: GetIdentityDeletionProcessUseCase,
-        @Inject private readonly getIdentityDeletionProcessesUseCase: GetIdentityDeletionProcessesUseCase
+        @Inject private readonly getIdentityDeletionProcessesUseCase: GetIdentityDeletionProcessesUseCase,
+        @Inject private readonly getActiveIdentityDeletionProcessUseCase: GetActiveIdentityDeletionProcessUseCase
     ) {}
 
     public async approveIdentityDeletionProcess(): Promise<Result<IdentityDeletionProcessDTO>> {
@@ -39,6 +41,10 @@ export class IdentityDeletionProcessesFacade {
 
     public async getIdentityDeletionProcess(request: GetIdentityDeletionProcessRequest): Promise<Result<IdentityDeletionProcessDTO>> {
         return await this.getIdentityDeletionProcessUseCase.execute(request);
+    }
+
+    public async getActiveIdentityDeletionProcess(): Promise<Result<IdentityDeletionProcessDTO>> {
+        return await this.getActiveIdentityDeletionProcessUseCase.execute();
     }
 
     public async getIdentityDeletionProcesses(): Promise<Result<IdentityDeletionProcessDTO[]>> {

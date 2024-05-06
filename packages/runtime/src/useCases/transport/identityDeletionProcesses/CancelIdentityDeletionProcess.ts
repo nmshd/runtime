@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, IdentityDeletionProcessController } from "@nmshd/transport";
+import { AccountController, IdentityDeletionProcessController, IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDeletionProcessDTO";
 import { RuntimeErrors, UseCase } from "../../common";
@@ -14,10 +14,10 @@ export class CancelIdentityDeletionProcessUseCase extends UseCase<void, Identity
     }
 
     protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
-        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getApprovedIdentityDeletionProcess();
+        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
 
         if (typeof activeIdentityDeletionProcess === "undefined") {
-            return Result.fail(RuntimeErrors.identity.noActiveIdentityDeletionProcess());
+            return Result.fail(RuntimeErrors.identity.noApprovedIdentityDeletionProcess());
         }
 
         const cancelledIdentityDeletionProcess = await this.identityDeletionProcessController.cancelIdentityDeletionProcess(activeIdentityDeletionProcess.id.toString());

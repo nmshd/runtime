@@ -2,6 +2,7 @@ import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 
 export interface IdentityDeletionProcessDTO {
     id: string;
+    status: IdentityDeletionProcessStatus;
     createdAt?: string;
     createdByDevice?: string;
     approvedAt?: string;
@@ -11,5 +12,4 @@ export interface IdentityDeletionProcessDTO {
     cancelledByDevice?: string;
     rejectedAt?: string;
     rejectedByDevice?: string;
-    status: IdentityDeletionProcessStatus;
 }

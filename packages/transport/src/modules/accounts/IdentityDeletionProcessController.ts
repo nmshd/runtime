@@ -26,7 +26,7 @@ export class IdentityDeletionProcessController extends TransportController {
     }
 
     private async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
-        const oldIdentityDeletion = await this.getIdentityDeletionProcess(identityDeletionProcess.id.toString());
+        const oldIdentityDeletion = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcess.id.toString() });
         await this.identityDeletionProcessCollection.update(oldIdentityDeletion, identityDeletionProcess);
         this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), identityDeletionProcess));
     }
@@ -42,18 +42,17 @@ export class IdentityDeletionProcessController extends TransportController {
             .filter((identityDeletionProcess) => !!identityDeletionProcess) as IdentityDeletionProcess[];
     }
 
-    public async getApprovedIdentityDeletionProcess(): Promise<IdentityDeletionProcess | undefined> {
+    public async getIdentityDeletionProcessByStatus(
+        identityDeletionProcessStatus: IdentityDeletionProcessStatus | IdentityDeletionProcessStatus[]
+    ): Promise<IdentityDeletionProcess | undefined> {
+        if (!Array.isArray(identityDeletionProcessStatus)) {
+            identityDeletionProcessStatus = [identityDeletionProcessStatus];
+        }
         const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({
-            status: IdentityDeletionProcessStatus.Approved
+            $or: identityDeletionProcessStatus.map((status) => {
+                return { status };
+            })
         });
-        return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
-    }
-
-    public async getWaitingForApprovalIdentityDeletionProcess(): Promise<IdentityDeletionProcess | undefined> {
-        const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({
-            status: IdentityDeletionProcessStatus.WaitingForApproval
-        });
-
         return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
     }
 

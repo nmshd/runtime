@@ -26,11 +26,21 @@ export async function getBackboneAdminApiClient(): Promise<Axios> {
 
 export async function startIdentityDeletionProcessFromBackboneAdminApi(transportService: TransportServices, accountAddress: string): Promise<IdentityDeletionProcessDTO> {
     const adminApiClient = await getBackboneAdminApiClient();
-    const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(`http://localhost:8091/api/v1/Identities/${accountAddress}/DeletionProcesses`);
+    const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(`/api/v1/Identities/${accountAddress}/DeletionProcesses`);
 
     await syncUntilHasIdentityDeletionProcess(transportService, deletionProcess.data.result.id);
 
-    const activeIdentityDeletionProcess = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({});
+    const activeIdentityDeletionProcess = await transportService.identityDeletionProcesses.getActiveIdentityDeletionProcess();
 
     return activeIdentityDeletionProcess.value;
+}
+export async function cancelIdentityDeletionProcessFromBackboneAdminApi(
+    transportService: TransportServices,
+    accountAddress: string,
+    identityDeletionProcessId: string
+): Promise<void> {
+    const adminApiClient = await getBackboneAdminApiClient();
+    const deletionProcess = await adminApiClient.put<{ result: { id: string } }>(`/api/v1/Identities/${accountAddress}/DeletionProcesses/${identityDeletionProcessId}/Cancel`);
+
+    await syncUntilHasIdentityDeletionProcess(transportService, deletionProcess.data.result.id);
 }

@@ -6,7 +6,7 @@ import { IdentityDeletionProcessIdString, RuntimeErrors, SchemaRepository, Schem
 import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper";
 
 export interface GetIdentityDeletionProcessRequest {
-    id?: IdentityDeletionProcessIdString;
+    id: IdentityDeletionProcessIdString;
 }
 
 class Validator extends SchemaValidator<GetIdentityDeletionProcessRequest> {
@@ -24,17 +24,6 @@ export class GetIdentityDeletionProcessUseCase extends UseCase<GetIdentityDeleti
     }
 
     protected async executeInternal(request: GetIdentityDeletionProcessRequest): Promise<Result<IdentityDeletionProcessDTO>> {
-        if (typeof request.id === "undefined") {
-            const activeIdentityDeletionProcess =
-                (await this.identityDeletionProcessController.getApprovedIdentityDeletionProcess()) ??
-                (await this.identityDeletionProcessController.getWaitingForApprovalIdentityDeletionProcess());
-            if (typeof activeIdentityDeletionProcess === "undefined") {
-                return Result.fail(RuntimeErrors.identity.noActiveIdentityDeletionProcess());
-            }
-
-            return Result.ok(IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(activeIdentityDeletionProcess));
-        }
-
         const identityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcess(request.id);
         if (typeof identityDeletionProcess === "undefined") {
             return Result.fail(RuntimeErrors.general.recordNotFound(IdentityDeletionProcess));

@@ -8,8 +8,9 @@ import {
     RejectIdentityDeletionProcessUseCase,
     TransportServices
 } from "../../src";
+import { GetActiveIdentityDeletionProcessUseCase } from "../../src/useCases/transport/identityDeletionProcesses/GetActiveIdentityDeletionProcess";
 import { RuntimeServiceProvider } from "../lib";
-import { startIdentityDeletionProcessFromBackboneAdminApi } from "../lib/AdminApiClient";
+import { cancelIdentityDeletionProcessFromBackboneAdminApi, startIdentityDeletionProcessFromBackboneAdminApi } from "../lib/AdminApiClient";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportService: TransportServices;
@@ -26,15 +27,18 @@ afterAll(async () => {
 });
 
 afterEach(async () => {
-    const activeIdentityDeletionProcess = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({});
+    const activeIdentityDeletionProcess = await transportService.identityDeletionProcesses.getActiveIdentityDeletionProcess();
     if (!activeIdentityDeletionProcess.isSuccess) {
         return;
     }
+    let abortResult;
     if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
-        await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
+        abortResult = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
+    } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
+        abortResult = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
     }
-    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-        await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
+    if (abortResult?.isError) {
+        throw abortResult.error;
     }
 });
 
@@ -67,18 +71,25 @@ describe("IdentityDeletionProcess", () => {
         });
     });
 
-    describe(GetIdentityDeletionProcessUseCase.name, () => {
+    describe(GetActiveIdentityDeletionProcessUseCase.name, () => {
         test("should get the active Identity deletion process without specifying an ID", async function () {
             const initiateResult = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             const initiatedIdentityDeletionProcess = initiateResult.value;
 
-            const result = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({});
+            const result = await transportService.identityDeletionProcesses.getActiveIdentityDeletionProcess();
             expect(result).toBeSuccessful();
 
             const identityDeletionProcess = result.value;
             expect(identityDeletionProcess).toStrictEqual(initiatedIdentityDeletionProcess);
         });
 
+        test("should return an error trying to get an Identity deletion process without specifying an ID if there is none active", async function () {
+            const result = await transportService.identityDeletionProcesses.getActiveIdentityDeletionProcess();
+            expect(result).toBeAnError("No active identity deletion process found.", "error.runtime.identity.noActiveIdentityDeletionProcess");
+        });
+    });
+
+    describe.only(GetIdentityDeletionProcessUseCase.name, () => {
         test("should get an Identity deletion process specifying an ID", async function () {
             const initiateResult = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             const initiatedIdentityDeletionProcess = initiateResult.value;
@@ -90,9 +101,17 @@ describe("IdentityDeletionProcess", () => {
             expect(identityDeletionProcess).toStrictEqual(initiatedIdentityDeletionProcess);
         });
 
-        test("should return an error trying to get an Identity deletion process without specifying an ID if there is none active", async function () {
-            const result = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({});
-            expect(result).toBeAnError("No active identity deletion process found.", "error.runtime.identity.noActiveIdentityDeletionProcess");
+        test.only("should get an Identity deletion process after it got updated by the Backbone", async function () {
+            const initiatedIdentityDeletionProcess = await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
+            await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
+            await cancelIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress, initiatedIdentityDeletionProcess.id.toString());
+
+            const result = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({ id: initiatedIdentityDeletionProcess.id });
+
+            expect(result).toBeSuccessful();
+
+            const identityDeletionProcess = result.value;
+            expect(identityDeletionProcess.status).toStrictEqual(initiatedIdentityDeletionProcess);
         });
 
         test("should return an error trying to get an Identity deletion process specifying an unknown ID", async function () {
@@ -104,6 +123,12 @@ describe("IdentityDeletionProcess", () => {
 
     describe(GetIdentityDeletionProcessesUseCase.name, () => {
         test("should get all Identity deletion processes", async function () {
+            // Initialize new identities for these tests as otherwise they would be depending on the other tests
+            await serviceProvider.stop();
+            const runtimeServices = await serviceProvider.launch(1);
+            transportService = runtimeServices[0].transport;
+            accountAddress = runtimeServices[0].address;
+
             const cancelledIdentityDeletionProcess = (await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess()).value;
             await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
             const activeIdentityDeletionProcess = (await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess()).value;
@@ -120,6 +145,12 @@ describe("IdentityDeletionProcess", () => {
         });
 
         test("should return an empty list trying to get all Identity deletion processes if there are none", async function () {
+            // Initialize new identities for these tests as otherwise they would be depending on the other tests
+            await serviceProvider.stop();
+            const runtimeServices = await serviceProvider.launch(1);
+            transportService = runtimeServices[0].transport;
+            accountAddress = runtimeServices[0].address;
+
             const result = await transportService.identityDeletionProcesses.getIdentityDeletionProcesses();
             expect(result).toBeSuccessful();
 
@@ -145,7 +176,7 @@ describe("IdentityDeletionProcess", () => {
     });
 
     describe(ApproveIdentityDeletionProcessUseCase.name, () => {
-        test("should approve an waiting Identity deletion process", async function () {
+        test("should approve an waiting for approval identity deletion process", async function () {
             await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
             const result = await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
             expect(result).toBeSuccessful();
@@ -161,7 +192,7 @@ describe("IdentityDeletionProcess", () => {
     });
 
     describe(RejectIdentityDeletionProcessUseCase.name, () => {
-        test("should reject an waiting Identity deletion process", async function () {
+        test("should reject an waiting for approval identity deletion process", async function () {
             await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
             const result = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
             expect(result).toBeSuccessful();

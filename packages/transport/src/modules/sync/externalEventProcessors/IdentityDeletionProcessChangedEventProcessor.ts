@@ -1,0 +1,3 @@
+import { IdentityDeletionProcessStartedEventProcessor } from "./IdentityDeletionProcessStartedEventProcessor";
+
+export class IdentityDeletionProcessChangedEventProcessor extends IdentityDeletionProcessStartedEventProcessor {}

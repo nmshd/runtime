@@ -191,17 +191,21 @@ class Attributes {
 
 class Identity {
     public noActiveIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identity.noActiveIdentityDeletionProcess", "No active identity deletion process found.");
+        return new ApplicationError("error.runtime.identity.noActiveIdentityDeletionProcess", "No active IdentityDeletionProcess found.");
     }
 
     public noWaitingForApprovalIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess", "No identity deletion process waiting for decision found.");
+        return new ApplicationError("error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess", "No IdentityDeletionProcess waiting for decision found.");
+    }
+
+    public noApprovedIdentityDeletionProcess() {
+        return new ApplicationError("error.runtime.identity.noApprovedIdentityDeletionProcess", "No approved IdentityDeletionProcess found.");
     }
 
     public activeIdentityDeletionProcessAlreadyExists() {
         return new ApplicationError(
             "error.runtime.identity.activeIdentityDeletionProcessAlreadyExists",
-            "There is already an active identity deletion process. You cannot start another, as there may only be one active identity deletion process per identity."
+            "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per identity."
         );
     }
 }
