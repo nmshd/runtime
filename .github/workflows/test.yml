@@ -25,7 +25,6 @@ jobs:
       - run: npm run test:ci --workspace=@nmshd/app-runtime
         env:
           NMSHD_TEST_BASEURL: http://localhost:8090
-          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
@@ -46,7 +45,6 @@ jobs:
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
           NMSHD_TEST_BASEURL: http://localhost:8090
-          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
@@ -69,7 +67,6 @@ jobs:
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
           NMSHD_TEST_BASEURL: http://localhost:8090
-          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
@@ -87,7 +84,6 @@ jobs:
       - run: npm run test:ci:lokijs --workspace=@nmshd/consumption
         env:
           NMSHD_TEST_BASEURL: http://localhost:8090
-          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
