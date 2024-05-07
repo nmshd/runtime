@@ -16,7 +16,6 @@
         "dist"
     ],
     "scripts": {
-        "bt": "npm run test:node && npm run build:node",
         "build": "npm run build:node",
         "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
         "build:node": "tsc -p tsconfig.json && madge --circular dist",
