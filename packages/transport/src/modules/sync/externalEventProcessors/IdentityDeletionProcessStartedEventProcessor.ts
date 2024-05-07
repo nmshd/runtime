@@ -17,9 +17,8 @@ export class IdentityDeletionProcessStartedEventProcessor extends ExternalEventP
             messageReceivedPayload.deletionProcessId
         );
 
-        const identityDeletionProcess = IdentityDeletionProcess.from(identityDeletionProcessJSONResponse.value);
+        const identityDeletionProcess = this.accountController.identityDeletionProcess.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessJSONResponse);
         await this.accountController.identityDeletionProcess.identityDeletionProcessCollection.create(identityDeletionProcess);
-
         this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.accountController.identity.address.toString(), identityDeletionProcess));
 
         return identityDeletionProcess;

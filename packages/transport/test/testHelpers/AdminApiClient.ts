@@ -37,4 +37,13 @@ export class AdminApiClient {
 
         return activeIdentityDeletionProcess;
     }
+
+    public static async cancelIdentityDeletionProcessFromBackboneAdminApi(account: AccountController, identityDeletionProcessId: CoreId): Promise<IdentityDeletionProcess> {
+        const adminApiClient = await AdminApiClient.getBackboneAdminApiClient();
+        await adminApiClient.put<void>(`/api/v1/Identities/${account.identity.address.toString()}/DeletionProcesses/${identityDeletionProcessId}/Cancel`);
+
+        await TestUtil.syncUntilHasIdentityDeletionProcess(account, identityDeletionProcessId);
+
+        return (await account.identityDeletionProcess.getIdentityDeletionProcess(identityDeletionProcessId.toString()))!;
+    }
 }

@@ -1,9 +1,11 @@
 import { log } from "@js-soft/ts-utils";
-import { ControllerName, TransportController } from "../../core";
+import { ClientResult, ControllerName, CoreId, DbCollectionName, TransportController } from "../../core";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
+import { BackboneIdentityDeletionProcess } from "./backbone/BackboneIdentityDeletionProcess";
 import { IdentityDeletionProcessClient } from "./backbone/IdentityDeletionProcessClient";
+import { CachedIdentityDeletionProcess } from "./data/CachedIdentityDeletionProcess";
 import { IdentityDeletionProcess } from "./data/IdentityDeletionProcess";
 import { IdentityDeletionProcessStatus } from "./data/IdentityDeletionProcessStatus";
 
@@ -21,14 +23,59 @@ export class IdentityDeletionProcessController extends TransportController {
     public override async init(): Promise<IdentityDeletionProcessController> {
         await super.init();
 
-        this.identityDeletionProcessCollection = await this.parent.getSynchronizedCollection("IdentityDeletionProcesses");
+        this.identityDeletionProcessCollection = await this.parent.getSynchronizedCollection(DbCollectionName.IdentityDeletionProcess);
         return this;
     }
 
-    private async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
-        const oldIdentityDeletion = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcess.id.toString() });
-        await this.identityDeletionProcessCollection.update(oldIdentityDeletion, identityDeletionProcess);
+    public async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess, syncDataWallet = true): Promise<void> {
+        const oldIdentityDeletionProcess = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcess.id.toString() });
+        await this.identityDeletionProcessCollection.update(oldIdentityDeletionProcess, identityDeletionProcess);
+        if (syncDataWallet) {
+            await this.parent.syncDatawallet();
+        }
         this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), identityDeletionProcess));
+    }
+
+    public createIdentityDeletionProcessFromBackboneResponse(response: ClientResult<BackboneIdentityDeletionProcess>): IdentityDeletionProcess {
+        const { id, ...cache } = response.value;
+
+        const identityDeletionProcess = IdentityDeletionProcess.from({ id: id });
+        const cachedIdentityDeletionProcess = CachedIdentityDeletionProcess.from(cache);
+        identityDeletionProcess.setCache(cachedIdentityDeletionProcess);
+        return identityDeletionProcess;
+    }
+
+    public async approveIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+        const identityDeletionProcessResponse = await this.identityDeletionProcessClient.approveIdentityDeletionProcess(identityDeletionProcessId);
+        const identityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessResponse);
+        await this.updateIdentityDeletionProcess(identityDeletionProcess);
+        return identityDeletionProcess;
+    }
+
+    public async rejectIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+        const identityDeletionProcessResponse = await this.identityDeletionProcessClient.rejectIdentityDeletionProcess(identityDeletionProcessId);
+        const identityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessResponse);
+        await this.updateIdentityDeletionProcess(identityDeletionProcess);
+        return identityDeletionProcess;
+    }
+
+    public async initiateIdentityDeletionProcess(): Promise<IdentityDeletionProcess> {
+        const identityDeletionProcessResponse = await this.identityDeletionProcessClient.initiateIdentityDeletionProcess();
+
+        const identityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessResponse);
+
+        await this.identityDeletionProcessCollection.create(identityDeletionProcess);
+        await this.parent.syncDatawallet();
+        this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), identityDeletionProcess));
+
+        return identityDeletionProcess;
+    }
+
+    public async cancelIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+        const identityDeletionProcessResponse = await this.identityDeletionProcessClient.cancelIdentityDeletionProcess(identityDeletionProcessId);
+        const identityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessResponse);
+        await this.updateIdentityDeletionProcess(identityDeletionProcess);
+        return identityDeletionProcess;
     }
 
     public async getIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess | undefined> {
@@ -50,40 +97,22 @@ export class IdentityDeletionProcessController extends TransportController {
         }
         const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({
             $or: identityDeletionProcessStatus.map((status) => {
-                return { status };
+                return { "cache.status": status };
             })
         });
         return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
     }
 
-    public async approveIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
-        const identityDeletionProcessResponse = await this.identityDeletionProcessClient.approveIdentityDeletionProcess(identityDeletionProcessId);
-        const identityDeletionProcess = IdentityDeletionProcess.from(identityDeletionProcessResponse.value);
-        await this.updateIdentityDeletionProcess(identityDeletionProcess);
-        return identityDeletionProcess;
-    }
+    public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedIdentityDeletionProcess }[]> {
+        if (ids.length === 0) return [];
+        const getIdentityDeletionPromises = ids.map((id) => this.identityDeletionProcessClient.getIdentityDeletionProcess(id.toString()));
+        const backboneTokens: { id: CoreId; cache: CachedIdentityDeletionProcess }[] = [];
 
-    public async rejectIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
-        const identityDeletionProcessResponse = await this.identityDeletionProcessClient.rejectIdentityDeletionProcess(identityDeletionProcessId);
-        const identityDeletionProcess = IdentityDeletionProcess.from(identityDeletionProcessResponse.value);
-        await this.updateIdentityDeletionProcess(identityDeletionProcess);
-        return identityDeletionProcess;
-    }
+        for await (const identityDeletionProcess of getIdentityDeletionPromises) {
+            const { id, ...cache } = identityDeletionProcess.value;
+            backboneTokens.push({ id: CoreId.from(id), cache: CachedIdentityDeletionProcess.from(cache) });
+        }
 
-    public async initiateIdentityDeletionProcess(): Promise<IdentityDeletionProcess> {
-        const initiateIdentityDeletionResponse = await this.identityDeletionProcessClient.initiateIdentityDeletionProcess();
-        const identityDeletionProcess = IdentityDeletionProcess.from(initiateIdentityDeletionResponse.value);
-
-        await this.identityDeletionProcessCollection.create(identityDeletionProcess);
-        this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), identityDeletionProcess));
-
-        return identityDeletionProcess;
-    }
-
-    public async cancelIdentityDeletionProcess(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
-        const identityDeletionProcessResponse = await this.identityDeletionProcessClient.cancelIdentityDeletionProcess(identityDeletionProcessId);
-        const identityDeletionProcess = IdentityDeletionProcess.from(identityDeletionProcessResponse.value);
-        await this.updateIdentityDeletionProcess(identityDeletionProcess);
-        return identityDeletionProcess;
+        return backboneTokens;
     }
 }

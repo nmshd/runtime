@@ -1,20 +1,25 @@
 import { IdentityDeletionProcess } from "@nmshd/transport";
 import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDeletionProcessDTO";
+import { RuntimeErrors } from "../../common";
 
 export class IdentityDeletionProcessMapper {
     public static toIdentityDeletionProcessDTO(identityDeletionProcess: IdentityDeletionProcess): IdentityDeletionProcessDTO {
+        if (!identityDeletionProcess.cache) {
+            throw RuntimeErrors.general.cacheEmpty(IdentityDeletionProcess, identityDeletionProcess.id.toString());
+        }
+
         return {
             id: identityDeletionProcess.id.toString(),
-            createdAt: identityDeletionProcess.createdAt?.toString(),
-            createdByDevice: identityDeletionProcess.createdByDevice?.toString(),
-            approvedAt: identityDeletionProcess.approvedAt?.toString(),
-            approvedByDevice: identityDeletionProcess.approvedByDevice?.toString(),
-            gracePeriodEndsAt: identityDeletionProcess.gracePeriodEndsAt?.toString(),
-            status: identityDeletionProcess.status,
-            cancelledAt: identityDeletionProcess.cancelledAt?.toString(),
-            cancelledByDevice: identityDeletionProcess.cancelledByDevice?.toString(),
-            rejectedAt: identityDeletionProcess.rejectedAt?.toString(),
-            rejectedByDevice: identityDeletionProcess.rejectedByDevice?.toString()
+            createdAt: identityDeletionProcess.cache.createdAt?.toString(),
+            createdByDevice: identityDeletionProcess.cache.createdByDevice?.toString(),
+            approvedAt: identityDeletionProcess.cache.approvedAt?.toString(),
+            approvedByDevice: identityDeletionProcess.cache.approvedByDevice?.toString(),
+            gracePeriodEndsAt: identityDeletionProcess.cache.gracePeriodEndsAt?.toString(),
+            status: identityDeletionProcess.cache.status,
+            cancelledAt: identityDeletionProcess.cache.cancelledAt?.toString(),
+            cancelledByDevice: identityDeletionProcess.cache.cancelledByDevice?.toString(),
+            rejectedAt: identityDeletionProcess.cache.rejectedAt?.toString(),
+            rejectedByDevice: identityDeletionProcess.cache.rejectedByDevice?.toString()
         };
     }
 

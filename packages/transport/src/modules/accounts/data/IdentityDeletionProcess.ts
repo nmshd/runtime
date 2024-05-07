@@ -6,23 +6,18 @@ import { CachedIdentityDeletionProcess, CachedIdentityDeletionProcessJSON } from
 export interface IdentityDeletionProcessJSON {
     id: string;
     cache?: CachedIdentityDeletionProcessJSON;
-    // TODO: Do we need the following fields?
     cachedAt?: string;
-    metadata?: any;
-    metadataModifiedAt?: string;
 }
 
 export interface IIdentityDeletionProcess {
     id: CoreId;
     cache?: CachedIdentityDeletionProcess;
     cachedAt?: CoreDate;
-    metadata?: any;
-    metadataModifiedAt?: CoreDate;
 }
 
 @type("IdentityDeletionProcess")
 export class IdentityDeletionProcess extends CoreSynchronizable implements IIdentityDeletionProcess {
-    public override readonly metadataProperties = [nameof<IdentityDeletionProcess>((r) => r.metadata), nameof<IdentityDeletionProcess>((r) => r.metadataModifiedAt)];
+    public override readonly technicalProperties = [nameof<IdentityDeletionProcess>((r) => r.id)];
 
     @validate({ nullable: true })
     @serialize()
@@ -32,15 +27,13 @@ export class IdentityDeletionProcess extends CoreSynchronizable implements IIden
     @serialize()
     public cachedAt?: CoreDate;
 
-    @validate({ nullable: true })
-    @serialize()
-    public metadata?: any;
-
-    @validate({ nullable: true })
-    @serialize()
-    public metadataModifiedAt?: CoreDate;
-
     public static from(value: IIdentityDeletionProcess | IdentityDeletionProcessJSON): IdentityDeletionProcess {
         return this.fromAny(value);
+    }
+
+    public setCache(cache: CachedIdentityDeletionProcess): this {
+        this.cache = cache;
+        this.cachedAt = CoreDate.utc();
+        return this;
     }
 }

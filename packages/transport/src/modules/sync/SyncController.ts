@@ -30,7 +30,14 @@ export class SyncController extends TransportController {
     private _cacheFetcher?: CacheFetcher;
     private get cacheFetcher() {
         if (!this._cacheFetcher) {
-            this._cacheFetcher = new CacheFetcher(this.parent.files, this.parent.messages, this.parent.relationshipTemplates, this.parent.relationships, this.parent.tokens);
+            this._cacheFetcher = new CacheFetcher(
+                this.parent.files,
+                this.parent.messages,
+                this.parent.relationshipTemplates,
+                this.parent.relationships,
+                this.parent.tokens,
+                this.parent.identityDeletionProcess
+            );
         }
         return this._cacheFetcher;
     }
@@ -412,9 +419,6 @@ export class SyncController extends TransportController {
 
         for (const externalEvent of externalEvents) {
             try {
-                if (externalEvent.type === "IdentityDeletionProcessStatusChanged") {
-                    debugger;
-                }
                 const externalEventObject = ExternalEvent.fromAny(externalEvent);
                 const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEventObject.type);
                 const item = await new externalEventProcessorConstructor(this.eventBus, this.parent).execute(externalEventObject);

@@ -1,3 +1,4 @@
+import { ApplicationError, Result } from "@js-soft/ts-utils";
 import axios, { Axios } from "axios";
 import { IdentityDeletionProcessDTO, TransportServices } from "../../src";
 import { syncUntilHasIdentityDeletionProcess } from "./testUtils";
@@ -38,9 +39,11 @@ export async function cancelIdentityDeletionProcessFromBackboneAdminApi(
     transportService: TransportServices,
     accountAddress: string,
     identityDeletionProcessId: string
-): Promise<void> {
+): Promise<Result<IdentityDeletionProcessDTO, ApplicationError>> {
     const adminApiClient = await getBackboneAdminApiClient();
-    const deletionProcess = await adminApiClient.put<{ result: { id: string } }>(`/api/v1/Identities/${accountAddress}/DeletionProcesses/${identityDeletionProcessId}/Cancel`);
+    await adminApiClient.put<void>(`/api/v1/Identities/${accountAddress}/DeletionProcesses/${identityDeletionProcessId}/Cancel`);
 
-    await syncUntilHasIdentityDeletionProcess(transportService, deletionProcess.data.result.id);
+    await syncUntilHasIdentityDeletionProcess(transportService, identityDeletionProcessId);
+
+    return await transportService.identityDeletionProcesses.getIdentityDeletionProcess({ id: identityDeletionProcessId });
 }
