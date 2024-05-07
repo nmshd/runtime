@@ -39,7 +39,7 @@ export async function cancelIdentityDeletionProcessFromBackboneAdminApi(
     transportService: TransportServices,
     accountAddress: string,
     identityDeletionProcessId: string
-): Promise<Result<IdentityDeletionProcessDTO, ApplicationError>> {
+): Promise<Result<IdentityDeletionProcessDTO>> {
     const adminApiClient = await getBackboneAdminApiClient();
     await adminApiClient.put<void>(`/api/v1/Identities/${accountAddress}/DeletionProcesses/${identityDeletionProcessId}/Cancel`);
 
