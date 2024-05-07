@@ -19,14 +19,10 @@
         "ui5.yaml"
     ],
     "scripts": {
-        "build": "npm run build:node && npm run bundle",
-        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh && npm run bundle",
+        "build": "npm run build:node",
+        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
         "build:node": "tsc -p tsconfig.json",
-        "build:notest": "npm run build:node && npm run bundle:notest",
-        "bundle": "npm run bundle:lib && npm run bundle:min",
-        "bundle:lib": "webpack --stats-all --config webpack.config.js",
-        "bundle:min": "webpack --stats-all --config webpack.min.config.js",
-        "bundle:notest": "npm run bundle:lib && npm run bundle:min",
+        "build:notest": "npm run build:node",
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest --forceExit",
