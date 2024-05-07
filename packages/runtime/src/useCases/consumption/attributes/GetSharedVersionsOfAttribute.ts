@@ -31,15 +31,11 @@ export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersio
     }
 
     protected async executeInternal(request: GetSharedVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
-        const repositoryAttributeId = CoreId.from(request.attributeId);
-        const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
+        const sourceAttributeId = CoreId.from(request.attributeId);
+        const sourceAttribute = await this.attributeController.getLocalAttribute(sourceAttributeId);
 
-        if (typeof repositoryAttribute === "undefined") {
+        if (typeof sourceAttribute === "undefined") {
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
-        }
-
-        if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
-            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
         }
 
         if (request.peers?.length === 0) {
@@ -47,7 +43,7 @@ export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersio
         }
 
         const peers = request.peers?.map((address) => CoreAddress.from(address));
-        const sharedVersions = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeId, peers, request.onlyLatestVersions);
+        const sharedVersions = await this.attributeController.getSharedVersionsOfAttribute(sourceAttributeId, peers, request.onlyLatestVersions);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(sharedVersions));
     }

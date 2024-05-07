@@ -973,7 +973,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": attribute.id.toString() });
-        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(attribute);
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
         const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
         await this.detachAttributeCopies(attributeCopiesToDetach);
 
@@ -988,7 +988,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": attribute.id.toString() });
-        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(attribute);
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
         const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
 
         const validateSharedAttributesResult = this.validateSharedAttributes(attributeCopiesToDetach);
@@ -1105,7 +1105,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getSharedVersionsOfAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
-        let sourceAttribute = await this.getLocalAttribute(id);
+        const sourceAttribute = await this.getLocalAttribute(id);
         if (typeof sourceAttribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
@@ -1118,16 +1118,16 @@ export class AttributesController extends ConsumptionBaseController {
             query["succeededBy"] = { $exists: false };
         }
 
-        const ownSharedIdentityAttributes = await this.getLocalAttributes(query);
-        const ownSharedIdentityAttributePredecessors = await this.getSharedPredecessorsOfRepositoryAttribute(sourceAttribute, query);
-        const ownSharedIdentityAttributeSuccessors = await this.getSharedSuccessorsOfRepositoryAttribute(sourceAttribute, query);
+        const ownSharedAttributes = await this.getLocalAttributes(query);
+        const ownSharedAttributePredecessors = await this.getSharedPredecessorsOfAttribute(sourceAttribute, query);
+        const ownSharedAttributeSuccessors = await this.getSharedSuccessorsOfAttribute(sourceAttribute, query);
 
-        const ownSharedIdentityAttributeVersions = [...ownSharedIdentityAttributeSuccessors.reverse(), ...ownSharedIdentityAttributes, ...ownSharedIdentityAttributePredecessors];
-        return ownSharedIdentityAttributeVersions;
+        const ownSharedAttributeVersions = [...ownSharedAttributeSuccessors.reverse(), ...ownSharedAttributes, ...ownSharedAttributePredecessors];
+        return ownSharedAttributeVersions;
     }
 
-    public async getSharedPredecessorsOfRepositoryAttribute(sourceAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
-        const ownSharedIdentityAttributePredecessors: LocalAttribute[] = [];
+    public async getSharedPredecessorsOfAttribute(sourceAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
+        const ownSharedAttributePredecessors: LocalAttribute[] = [];
         while (typeof sourceAttribute.succeeds !== "undefined") {
             const predecessor = await this.getLocalAttribute(sourceAttribute.succeeds);
             if (typeof predecessor === "undefined") {
@@ -1139,14 +1139,14 @@ export class AttributesController extends ConsumptionBaseController {
             query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
             const sharedCopies = await this.getLocalAttributes(query);
 
-            ownSharedIdentityAttributePredecessors.push(...sharedCopies);
+            ownSharedAttributePredecessors.push(...sharedCopies);
         }
 
-        return ownSharedIdentityAttributePredecessors;
+        return ownSharedAttributePredecessors;
     }
 
-    public async getSharedSuccessorsOfRepositoryAttribute(sourceAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
-        const ownSharedIdentityAttributeSuccessors: LocalAttribute[] = [];
+    public async getSharedSuccessorsOfAttribute(sourceAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
+        const ownSharedAttributeSuccessors: LocalAttribute[] = [];
         while (typeof sourceAttribute.succeededBy !== "undefined") {
             const successor = await this.getLocalAttribute(sourceAttribute.succeededBy);
             if (typeof successor === "undefined") {
@@ -1158,9 +1158,9 @@ export class AttributesController extends ConsumptionBaseController {
             query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
             const sharedCopies = await this.getLocalAttributes(query);
 
-            ownSharedIdentityAttributeSuccessors.push(...sharedCopies);
+            ownSharedAttributeSuccessors.push(...sharedCopies);
         }
 
-        return ownSharedIdentityAttributeSuccessors;
+        return ownSharedAttributeSuccessors;
     }
 }

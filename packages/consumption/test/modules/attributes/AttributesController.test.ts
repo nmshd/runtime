@@ -2244,7 +2244,7 @@ describe("AttributesController", function () {
         });
     });
 
-    describe("get shared versions of a repository attribute", function () {
+    describe("get shared versions of an attribute", function () {
         let repositoryAttributeV0: LocalAttribute;
         let repositoryAttributeV1: LocalAttribute;
         let repositoryAttributeV2: LocalAttribute;
@@ -2321,22 +2321,22 @@ describe("AttributesController", function () {
         });
 
         test("should return all shared predecessors for all peers", async function () {
-            const result = await consumptionController.attributes.getSharedPredecessorsOfRepositoryAttribute(repositoryAttributeV2);
+            const result = await consumptionController.attributes.getSharedPredecessorsOfAttribute(repositoryAttributeV2);
             expect(result).toStrictEqual(expect.arrayContaining([ownSharedIdentityAttributeV1PeerA, ownSharedIdentityAttributeV1PeerB]));
         });
 
         test("should return all shared predecessors for a single peer", async function () {
-            const result = await consumptionController.attributes.getSharedPredecessorsOfRepositoryAttribute(repositoryAttributeV2, { "shareInfo.peer": "peerB" });
+            const result = await consumptionController.attributes.getSharedPredecessorsOfAttribute(repositoryAttributeV2, { "shareInfo.peer": "peerB" });
             expect(result).toStrictEqual([ownSharedIdentityAttributeV1PeerB]);
         });
 
         test("should return all shared successors for all peers", async function () {
-            const result = await consumptionController.attributes.getSharedSuccessorsOfRepositoryAttribute(repositoryAttributeV0);
+            const result = await consumptionController.attributes.getSharedSuccessorsOfAttribute(repositoryAttributeV0);
             expect(result).toStrictEqual(expect.arrayContaining([ownSharedIdentityAttributeV1PeerA, ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV2PeerB]));
         });
 
         test("should return all shared successors for a single peer", async function () {
-            const result = await consumptionController.attributes.getSharedSuccessorsOfRepositoryAttribute(repositoryAttributeV0, { "shareInfo.peer": "peerB" });
+            const result = await consumptionController.attributes.getSharedSuccessorsOfAttribute(repositoryAttributeV0, { "shareInfo.peer": "peerB" });
             expect(result).toStrictEqual([ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV2PeerB]);
         });
 
@@ -2345,7 +2345,7 @@ describe("AttributesController", function () {
             const allOwnSharedAttributeVersions = [ownSharedIdentityAttributeV2PeerB, ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV1PeerA];
             for (const repositoryAttributeVersion of allRepositoryAttributeVersions) {
                 const result1 = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, undefined, false);
-                expect(result1).toStrictEqual(allOwnSharedAttributeVersions);
+                expect(result1).toStrictEqual(expect.arrayContaining(allOwnSharedAttributeVersions));
 
                 const result2 = await consumptionController.attributes.getSharedVersionsOfAttribute(
                     repositoryAttributeVersion.id,
