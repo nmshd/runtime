@@ -12,9 +12,12 @@ import {
     OutgoingRequestCreatedEvent,
     OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
+    OwnSharedAttributeDeletedByOwnerEvent,
     OwnSharedAttributeSucceededEvent,
+    PeerSharedAttributeDeletedByPeerEvent,
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
+    ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent,
     ThirdPartyOwnedRelationshipAttributeSucceededEvent
 } from "./consumption";
 import {
@@ -75,6 +78,18 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(consumption.AttributeDeletedEvent, (event) => {
             this.targetEventBus.publish(new AttributeDeletedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(consumption.OwnSharedAttributeDeletedByOwnerEvent, (event) => {
+            this.targetEventBus.publish(new OwnSharedAttributeDeletedByOwnerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(consumption.PeerSharedAttributeDeletedByPeerEvent, (event) => {
+            this.targetEventBus.publish(new PeerSharedAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(consumption.ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent, (event) => {
+            this.targetEventBus.publish(new ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.OwnSharedAttributeSucceededEvent, (event) => {

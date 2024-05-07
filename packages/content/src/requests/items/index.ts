@@ -4,6 +4,8 @@ export * from "./common/AttributeSuccessionAcceptResponseItem";
 export * from "./consent/ConsentRequestItem";
 export * from "./createAttribute/CreateAttributeAcceptResponseItem";
 export * from "./createAttribute/CreateAttributeRequestItem";
+export * from "./deleteAttribute/DeleteAttributeAcceptResponseItem";
+export * from "./deleteAttribute/DeleteAttributeRequestItem";
 export * from "./freeText/FreeTextAcceptResponseItem";
 export * from "./freeText/FreeTextRequestItem";
 export * from "./proposeAttribute/ProposeAttributeAcceptResponseItem";

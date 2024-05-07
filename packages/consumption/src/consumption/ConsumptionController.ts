@@ -2,18 +2,23 @@ import {
     AuthenticationRequestItem,
     ConsentRequestItem,
     CreateAttributeRequestItem,
+    DeleteAttributeRequestItem,
     FreeTextRequestItem,
+    OwnSharedAttributeDeletedByOwnerNotificationItem,
+    PeerSharedAttributeDeletedByPeerNotificationItem,
     PeerSharedAttributeSucceededNotificationItem,
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
     RegisterAttributeListenerRequestItem,
-    ShareAttributeRequestItem
+    ShareAttributeRequestItem,
+    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem
 } from "@nmshd/content";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
     AttributeListenersController,
     AttributesController,
     CreateAttributeRequestItemProcessor,
+    DeleteAttributeRequestItemProcessor,
     DraftsController,
     FreeTextRequestItemProcessor,
     GenericRequestItemProcessor,
@@ -23,6 +28,8 @@ import {
     NotificationItemProcessorRegistry,
     NotificationsController,
     OutgoingRequestsController,
+    OwnSharedAttributeDeletedByOwnerNotificationItemProcessor,
+    PeerSharedAttributeDeletedByPeerNotificationItemProcessor,
     PeerSharedAttributeSucceededNotificationItemProcessor,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
@@ -31,7 +38,8 @@ import {
     RequestItemProcessorConstructor,
     RequestItemProcessorRegistry,
     SettingsController,
-    ShareAttributeRequestItemProcessor
+    ShareAttributeRequestItemProcessor,
+    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor
 } from "../modules";
 
 export class ConsumptionController {
@@ -127,6 +135,7 @@ export class ConsumptionController {
         return new Map<RequestItemConstructor, RequestItemProcessorConstructor>([
             [ShareAttributeRequestItem, ShareAttributeRequestItemProcessor],
             [CreateAttributeRequestItem, CreateAttributeRequestItemProcessor],
+            [DeleteAttributeRequestItem, DeleteAttributeRequestItemProcessor],
             [ReadAttributeRequestItem, ReadAttributeRequestItemProcessor],
             [ProposeAttributeRequestItem, ProposeAttributeRequestItemProcessor],
             [ConsentRequestItem, GenericRequestItemProcessor],
@@ -138,7 +147,10 @@ export class ConsumptionController {
 
     private getDefaultNotificationItemProcessors() {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
-            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor]
+            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
+            [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor],
+            [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
+            [ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor]
         ]);
     }
 }

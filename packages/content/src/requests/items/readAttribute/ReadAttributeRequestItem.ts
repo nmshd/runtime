@@ -1,13 +1,13 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import {
-    IIQLQuery,
+    IdentityAttributeQuery,
+    IdentityAttributeQueryJSON,
     IIdentityAttributeQuery,
+    IIQLQuery,
     IQLQuery,
     IQLQueryJSON,
     IRelationshipAttributeQuery,
     IThirdPartyRelationshipAttributeQuery,
-    IdentityAttributeQuery,
-    IdentityAttributeQueryJSON,
     RelationshipAttributeQuery,
     RelationshipAttributeQueryJSON,
     ThirdPartyRelationshipAttributeQuery,
@@ -32,7 +32,7 @@ export class ReadAttributeRequestItem extends RequestItem implements IReadAttrib
     @validate()
     public query: IdentityAttributeQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery | IQLQuery;
 
-    public static from(value: IReadAttributeRequestItem | Omit<ReadAttributeRequestItemJSON, "@type">): ReadAttributeRequestItem {
+    public static from(value: IReadAttributeRequestItem | Omit<ReadAttributeRequestItemJSON, "@type"> | ReadAttributeRequestItemJSON): ReadAttributeRequestItem {
         return this.fromAny(value);
     }
 }

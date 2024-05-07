@@ -7,6 +7,8 @@ import {
     ConsentRequestItemJSON,
     CreateAttributeAcceptResponseItemJSON,
     CreateAttributeRequestItemJSON,
+    DeleteAttributeAcceptResponseItemJSON,
+    DeleteAttributeRequestItemJSON,
     DisplayNameJSON,
     ErrorResponseItemJSON,
     FreeTextRequestItemJSON,
@@ -43,10 +45,10 @@ import {
     ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItemJSON,
     SurnameJSON,
+    ThirdPartyRelationshipAttributeQueryJSON,
     ValueHints,
     ValueHintsJSON
 } from "@nmshd/content";
-import { ThirdPartyRelationshipAttributeQueryJSON } from "@nmshd/content/dist/attributes/ThirdPartyRelationshipAttributeQuery";
 import { CoreAddress, CoreId, IdentityController, Realm, Relationship, RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
@@ -54,6 +56,7 @@ import {
     AuthenticationRequestItemDVO,
     ConsentRequestItemDVO,
     CreateAttributeRequestItemDVO,
+    DeleteAttributeRequestItemDVO,
     DVOError,
     FileDVO,
     FreeTextRequestItemDVO,
@@ -105,6 +108,7 @@ import {
     DecidableAuthenticationRequestItemDVO,
     DecidableConsentRequestItemDVO,
     DecidableCreateAttributeRequestItemDVO,
+    DecidableDeleteAttributeRequestItemDVO,
     DecidableFreeTextRequestItemDVO,
     DecidableProposeAttributeRequestItemDVO,
     DecidableReadAttributeRequestItemDVO,
@@ -127,6 +131,7 @@ import {
     AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeSuccessionAcceptResponseItemDVO,
     CreateAttributeAcceptResponseItemDVO,
+    DeleteAttributeAcceptResponseItemDVO,
     ErrorResponseItemDVO,
     ProposeAttributeAcceptResponseItemDVO,
     ReadAttributeAcceptResponseItemDVO,
@@ -567,6 +572,32 @@ export class DataViewExpander {
                     response: responseItemDVO
                 } as CreateAttributeRequestItemDVO;
 
+            case "DeleteAttributeRequestItem":
+                const deleteAttributeRequestItem = requestItem as DeleteAttributeRequestItemJSON;
+                const localAttributeResultForDelete = await this.consumption.attributes.getAttribute({ id: deleteAttributeRequestItem.attributeId });
+                const localAttributeDVOForDelete = await this.expandLocalAttributeDTO(localAttributeResultForDelete.value);
+
+                if (isDecidable) {
+                    return {
+                        ...deleteAttributeRequestItem,
+                        type: "DecidableDeleteAttributeRequestItemDVO",
+                        id: "",
+                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableDeleteAttributeRequestItem.name",
+                        isDecidable,
+                        response: responseItemDVO,
+                        attribute: localAttributeDVOForDelete
+                    } as DecidableDeleteAttributeRequestItemDVO;
+                }
+                return {
+                    ...deleteAttributeRequestItem,
+                    type: "DeleteAttributeRequestItemDVO",
+                    id: "",
+                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DeleteAttributeRequestItem.name",
+                    isDecidable,
+                    response: responseItemDVO,
+                    attribute: localAttributeDVOForDelete
+                } as DeleteAttributeRequestItemDVO;
+
             case "ProposeAttributeRequestItem":
                 const proposeAttributeRequestItem = requestItem as ProposeAttributeRequestItemJSON;
                 if (localRequestDTO) {
@@ -808,6 +839,16 @@ export class DataViewExpander {
                         attribute: localAttributeDVOForCreate
                     } as CreateAttributeAcceptResponseItemDVO;
 
+                case "DeleteAttributeAcceptResponseItem":
+                    const deleteAttributeResponseItem = responseItem as DeleteAttributeAcceptResponseItemJSON;
+
+                    return {
+                        ...deleteAttributeResponseItem,
+                        type: "DeleteAttributeAcceptResponseItemDVO",
+                        id: "",
+                        name: name
+                    } as DeleteAttributeAcceptResponseItemDVO;
+
                 case "ProposeAttributeAcceptResponseItem":
                     const proposeAttributeResponseItem = responseItem as ProposeAttributeAcceptResponseItemJSON;
                     const localAttributeResultForPropose = await this.consumption.attributes.getAttribute({ id: proposeAttributeResponseItem.attributeId });
@@ -1047,7 +1088,9 @@ export class DataViewExpander {
                         requestReference: localAttribute.shareInfo.requestReference?.toString(),
                         notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                         valueType,
-                        isTechnical: relationshipAttribute.isTechnical
+                        isTechnical: relationshipAttribute.isTechnical,
+                        deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                        deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                     };
                 }
                 // Own Relationship Attribute
@@ -1072,7 +1115,9 @@ export class DataViewExpander {
                     requestReference: localAttribute.shareInfo.requestReference?.toString(),
                     notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                     valueType,
-                    isTechnical: relationshipAttribute.isTechnical
+                    isTechnical: relationshipAttribute.isTechnical,
+                    deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                 };
             }
             const identityAttribute = localAttribute.content;
@@ -1099,7 +1144,9 @@ export class DataViewExpander {
                     notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                     sourceAttribute: localAttribute.shareInfo.sourceAttribute.toString(),
                     tags: identityAttribute.tags ? identityAttribute.tags : [],
-                    valueType
+                    valueType,
+                    deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                 };
             }
 
@@ -1123,7 +1170,9 @@ export class DataViewExpander {
                 requestReference: localAttribute.shareInfo.requestReference?.toString(),
                 notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                 tags: identityAttribute.tags ? identityAttribute.tags : [],
-                valueType
+                valueType,
+                deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
             };
         }
         const identityAttribute = localAttribute.content as IdentityAttribute;
