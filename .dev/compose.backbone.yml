@@ -32,6 +32,24 @@ services:
       - source: Config
         target: app/appsettings.override.json
 
+  admin-ui:
+    image: ghcr.io/nmshd/backbone-admin-ui:${BACKBONE_VERSION}
+    container_name: admin-ui
+    hostname: admin-ui
+    ports:
+      - "8091:8080"
+    depends_on:
+      database:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      consumer-api:
+        condition: service_healthy
+    configs:
+      - source: Config
+        target: app/appsettings.override.json
+    profiles: [debug]
+
   ### infrastructure ###
 
   database:
