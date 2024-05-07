@@ -1,4 +1,4 @@
-import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { Result } from "@js-soft/ts-utils";
 import axios, { Axios } from "axios";
 import { IdentityDeletionProcessDTO, TransportServices } from "../../src";
 import { syncUntilHasIdentityDeletionProcess } from "./testUtils";
