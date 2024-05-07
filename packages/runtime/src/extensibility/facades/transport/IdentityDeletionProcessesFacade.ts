@@ -4,13 +4,13 @@ import { IdentityDeletionProcessDTO } from "../../../types";
 import {
     ApproveIdentityDeletionProcessUseCase,
     CancelIdentityDeletionProcessUseCase,
+    GetActiveIdentityDeletionProcessUseCase,
     GetIdentityDeletionProcessesUseCase,
     GetIdentityDeletionProcessRequest,
     GetIdentityDeletionProcessUseCase,
     InitiateIdentityDeletionProcessUseCase,
     RejectIdentityDeletionProcessUseCase
 } from "../../../useCases";
-import { GetActiveIdentityDeletionProcessUseCase } from "../../../useCases/transport/identityDeletionProcesses/GetActiveIdentityDeletionProcess";
 
 export class IdentityDeletionProcessesFacade {
     public constructor(
