@@ -1,4 +1,4 @@
-const iql = require("../dist/src");
+const iql = require("../dist");
 const { attributes } = require("./attributes.js");
 
 /* Fetch element ids */
