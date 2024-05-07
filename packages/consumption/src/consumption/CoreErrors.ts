@@ -1,5 +1,5 @@
 import { ApplicationError } from "@js-soft/ts-utils";
-import { CoreError, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreError, CoreId } from "@nmshd/transport";
 
 class Attributes {
     public successorIsNotAValidAttribute(error: any) {
@@ -38,10 +38,17 @@ class Attributes {
         );
     }
 
-    public sourceContentIsNotEqualToCopyContent() {
+    public predecessorSourceContentIsNotEqualToCopyContent() {
         return new CoreError(
-            "error.consumption.attributes.sourceContentIsNotEqualToCopyContent",
-            "Successor source attribute contents don't match successor shared attribute copy."
+            "error.consumption.attributes.predecessorSourceContentIsNotEqualToCopyContent",
+            "Predecessor source attribute content doesn't match predecessor shared attribute copy."
+        );
+    }
+
+    public successorSourceContentIsNotEqualToCopyContent() {
+        return new CoreError(
+            "error.consumption.attributes.successorSourceContentIsNotEqualToCopyContent",
+            "Successor source attribute content doesn't match successor shared attribute copy."
         );
     }
 
@@ -124,6 +131,18 @@ class Attributes {
         return new CoreError("error.consumption.attributes.predecessorDoesNotExist", "The predecessor does not exist.");
     }
 
+    public successorDoesNotExist() {
+        return new CoreError("error.consumption.attributes.successorDoesNotExist", "The successor does not exist.");
+    }
+
+    public successorSourceAttributeIsNotSpecified() {
+        return new CoreError("error.consumption.attributes.successorSourceAttributeIsNotSpecified", "You must specify the source attribute of the successor.");
+    }
+
+    public successorSourceAttributeDoesNotExist() {
+        return new CoreError("error.consumption.attributes.successorSourceAttributeDoesNotExist", "The successor source Attribute does not exist.");
+    }
+
     public successionMustNotChangeOwner() {
         return new CoreError(
             "error.consumption.attributes.successionMustNotChangeOwner",
@@ -162,8 +181,69 @@ class Attributes {
         return new CoreError("error.consumption.attributes.invalidParentSuccessor", `The complex parent successor (id: ${parentSuccessorId}) does not exist.`);
     }
 
+    public cannotSucceedAttributesWithDeletionInfo() {
+        return new CoreError(
+            "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo",
+            "You cannot succeed attributes with a deletionInfo, since the peer may have already deleted it or marked it for deletion."
+        );
+    }
+
+    public cannotSetDeletionInfoOfRepositoryAttributes() {
+        return new CoreError(
+            "error.consumption.attributes.cannotSetDeletionInfoOfRepositoryAttributes",
+            "RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly."
+        );
+    }
+
+    public invalidDeletionInfoOfOwnSharedAttribute() {
+        return new CoreError(
+            "error.consumption.attributes.invalidDeletionInfoOfOwnSharedAttribute",
+            "The only valid deletionStatuses for own shared Attributes are 'DeletedByPeer' or 'ToBeDeletedByPeer'."
+        );
+    }
+
+    public invalidDeletionInfoOfPeerSharedAttribute() {
+        return new CoreError(
+            "error.consumption.attributes.invalidDeletionInfoOfPeerSharedAttribute",
+            "The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'."
+        );
+    }
+
+    public invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute() {
+        return new CoreError(
+            "error.consumption.attributes.invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute",
+            "The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'."
+        );
+    }
+
     public invalidPropertyValue(message: string) {
         return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
+    }
+
+    public isNotSharedAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotSharedAttribute", `The attribute (id: ${attributeId}) is not a shared attribute.`);
+    }
+
+    public isNotOwnSharedAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotOwnSharedAttribute", `The attribute (id: ${attributeId}) is not an own shared attribute.`);
+    }
+
+    public isNotPeerSharedAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotPeerSharedAttribute", `The attribute (id: ${attributeId}) is not a peer shared attribute.`);
+    }
+
+    public isNotThirdPartyOwnedRelationshipAttribute(attributeId: string | CoreId) {
+        return new CoreError(
+            "error.consumption.attributes.isNotThirdPartyOwnedRelationshipAttribute",
+            `The attribute (id: ${attributeId}) is not a third party owned RelationshipAttribute.`
+        );
+    }
+
+    public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {
+        return new CoreError(
+            "error.consumption.attributes.senderIsNotPeerOfSharedAttribute",
+            `The sender (id: ${senderId}) is not the peer you shared the attribute (id: ${attributeId}) with.`
+        );
     }
 }
 
@@ -189,7 +269,7 @@ class Requests {
     }
 
     public invalidAcceptParameters(message: string): ApplicationError {
-        return new ApplicationError("error.consumption.requests.canAccept.invalidAcceptParameters", message);
+        return new ApplicationError("error.consumption.requests.invalidAcceptParameters", message);
     }
 
     public invalidRequestItem(message: string) {
