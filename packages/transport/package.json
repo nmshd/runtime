@@ -13,12 +13,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
-        "dist",
-        "lib-web/nmshd.transport.js",
-        "lib-web/nmshd.transport.min.js",
-        "lib-web/nmshd.transport.js.map",
-        "lib-web/nmshd.transport.min.js.map",
-        "ui5.yaml"
+        "dist"
     ],
     "scripts": {
         "build": "npm run build:node",

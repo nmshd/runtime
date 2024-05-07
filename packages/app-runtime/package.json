@@ -13,10 +13,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
-        "dist",
-        "lib-web/nmshd.app-runtime.js",
-        "lib-web/nmshd.app-runtime.min.js",
-        "ui5.yaml"
+        "dist"
     ],
     "scripts": {
         "build": "npm run build:node",

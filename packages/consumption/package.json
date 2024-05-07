@@ -13,12 +13,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
-        "dist",
-        "lib-web/nmshd.consumption.js",
-        "lib-web/nmshd.consumption.min.js",
-        "lib-web/nmshd.consumption.js.map",
-        "lib-web/nmshd.consumption.min.js.map",
-        "ui5.yaml"
+        "dist"
     ],
     "scripts": {
         "build": "npm run build:node",
