@@ -20,7 +20,7 @@ describe("IdentityDeletionProcessSync", function () {
         });
 
         const identityDeletionProcess = await account1.identityDeletionProcess.initiateIdentityDeletionProcess();
-
+        await account1.syncDatawallet();
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
         expect(result).toBeDefined();
@@ -34,7 +34,7 @@ describe("IdentityDeletionProcessSync", function () {
 
         let identityDeletionProcess = await account1.identityDeletionProcess.initiateIdentityDeletionProcess();
         identityDeletionProcess = await account1.identityDeletionProcess.cancelIdentityDeletionProcess(identityDeletionProcess.id.toString());
-
+        await account1.syncDatawallet();
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Cancelled);
         expect(result).toBeDefined();
@@ -47,7 +47,7 @@ describe("IdentityDeletionProcessSync", function () {
         });
 
         const identityDeletionProcess = await AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account1);
-
+        await account1.syncDatawallet();
         await account2.syncDatawallet();
 
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
@@ -62,7 +62,7 @@ describe("IdentityDeletionProcessSync", function () {
 
         let identityDeletionProcess = await AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account1);
         identityDeletionProcess = await account1.identityDeletionProcess.rejectIdentityDeletionProcess(identityDeletionProcess.id.toString());
-
+        await account1.syncDatawallet();
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Rejected);
         expect(result).toBeDefined();
@@ -76,7 +76,7 @@ describe("IdentityDeletionProcessSync", function () {
 
         let identityDeletionProcess = await AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account1);
         identityDeletionProcess = await account1.identityDeletionProcess.approveIdentityDeletionProcess(identityDeletionProcess.id.toString());
-
+        await account1.syncDatawallet();
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
         expect(result).toBeDefined();
@@ -90,7 +90,7 @@ describe("IdentityDeletionProcessSync", function () {
 
         let identityDeletionProcess = await account1.identityDeletionProcess.initiateIdentityDeletionProcess();
         identityDeletionProcess = await AdminApiClient.cancelIdentityDeletionProcessFromBackboneAdminApi(account1, identityDeletionProcess.id);
-
+        await account1.syncDatawallet();
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Cancelled);
         expect(result).toBeDefined();

@@ -23,7 +23,7 @@ export class InitiateIdentityDeletionProcessUseCase extends UseCase<void, Identi
         }
 
         const initiatedIdentityDeletionProcess = await this.identityDeletionProcessController.initiateIdentityDeletionProcess();
-
+        await this.accountController.syncDatawallet();
         return Result.ok(IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(initiatedIdentityDeletionProcess));
     }
 }

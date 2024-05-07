@@ -18,7 +18,7 @@ export class IdentityDeletionProcessChangedEventProcessor extends ExternalEventP
         );
         const newIdentityDeletionProcess = this.accountController.identityDeletionProcess.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessJSONResponse);
 
-        await this.accountController.identityDeletionProcess.updateIdentityDeletionProcess(newIdentityDeletionProcess, false);
+        await this.accountController.identityDeletionProcess.updateIdentityDeletionProcess(newIdentityDeletionProcess);
 
         return newIdentityDeletionProcess;
     }

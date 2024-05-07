@@ -27,12 +27,9 @@ export class IdentityDeletionProcessController extends TransportController {
         return this;
     }
 
-    public async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess, syncDataWallet = true): Promise<void> {
+    public async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
         const oldIdentityDeletionProcess = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcess.id.toString() });
         await this.identityDeletionProcessCollection.update(oldIdentityDeletionProcess, identityDeletionProcess);
-        if (syncDataWallet) {
-            await this.parent.syncDatawallet();
-        }
         this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), identityDeletionProcess));
     }
 
@@ -65,7 +62,6 @@ export class IdentityDeletionProcessController extends TransportController {
         const identityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessResponse);
 
         await this.identityDeletionProcessCollection.create(identityDeletionProcess);
-        await this.parent.syncDatawallet();
         this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), identityDeletionProcess));
 
         return identityDeletionProcess;

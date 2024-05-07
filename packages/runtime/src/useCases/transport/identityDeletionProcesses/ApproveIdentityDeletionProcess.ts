@@ -21,7 +21,7 @@ export class ApproveIdentityDeletionProcessUseCase extends UseCase<void, Identit
         }
 
         const approvedIdentityDeletionProcess = await this.identityDeletionProcessController.approveIdentityDeletionProcess(activeIdentityDeletionProcess.id.toString());
-
+        await this.accountController.syncDatawallet();
         return Result.ok(IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(approvedIdentityDeletionProcess));
     }
 }
