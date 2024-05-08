@@ -66,7 +66,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         params: AcceptProposeAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
-        const parsedParams: AcceptProposeAttributeRequestItemParameters = AcceptProposeAttributeRequestItemParameters.from(params);
+        const parsedParams = AcceptProposeAttributeRequestItemParameters.from(params);
 
         let attribute = parsedParams.attribute;
 
@@ -83,7 +83,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         const ownerIsEmpty = attribute!.owner.equals("");
         const ownerIsCurrentIdentity = attribute!.owner.equals(this.currentIdentityAddress);
         if (!ownerIsEmpty && !ownerIsCurrentIdentity) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The given Attribute belongs to someone else. You can only share own Attributes."));
+            return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The given Attribute belongs to someone else. You can only share own Attributes."));
         }
 
         return ValidationResult.success();
@@ -94,7 +94,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         params: AcceptProposeAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<ProposeAttributeAcceptResponseItem> {
-        const parsedParams: AcceptProposeAttributeRequestItemParameters = AcceptProposeAttributeRequestItemParameters.from(params);
+        const parsedParams = AcceptProposeAttributeRequestItemParameters.from(params);
 
         let sharedLocalAttribute: LocalAttribute;
         if (parsedParams.isWithExistingAttribute()) {

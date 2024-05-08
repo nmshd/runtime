@@ -1,5 +1,5 @@
 /* eslint-disable jest/no-standalone-expect */
-import { IDatabaseCollectionProvider, IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { ILoggerFactory } from "@js-soft/logging-abstractions";
@@ -202,9 +202,9 @@ export class TestUtil {
 
     public static async createAccount(transport: Transport, dependencyOverrides?: DependencyOverrides): Promise<AccountController> {
         const randomAccountName = Math.random().toString(36).substring(7);
-        const db: IDatabaseCollectionProvider = await transport.createDatabase(`acc-${randomAccountName}`);
+        const db = await transport.createDatabase(`acc-${randomAccountName}`);
 
-        const accountController: AccountController = new AccountController(transport, db, transport.config, dependencyOverrides);
+        const accountController = new AccountController(transport, db, transport.config, dependencyOverrides);
 
         await accountController.init();
 
@@ -534,7 +534,7 @@ export class TestUtil {
             expiresAt: CoreDate.utc().add({ minutes: 5 })
         };
 
-        const file: File = await from.files.sendFile(params);
+        const file = await from.files.sendFile(params);
         return file;
     }
 

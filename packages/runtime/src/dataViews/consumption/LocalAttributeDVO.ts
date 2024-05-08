@@ -47,6 +47,8 @@ export interface SharedToPeerAttributeDVO extends LocalAttributeDVO {
     sourceAttribute: string;
     isOwn: true;
     tags: string[];
+    deletionDate?: string;
+    deletionStatus?: string;
 }
 
 /**
@@ -59,6 +61,8 @@ export interface PeerAttributeDVO extends LocalAttributeDVO {
     notificationReference?: string;
     isOwn: false;
     tags: string[];
+    deletionDate?: string;
+    deletionStatus?: string;
 }
 
 /**
@@ -73,6 +77,8 @@ export interface OwnRelationshipAttributeDVO extends LocalAttributeDVO {
     isOwn: true;
     confidentiality: string;
     isTechnical: boolean;
+    deletionDate?: string;
+    deletionStatus?: string;
 }
 
 /**
@@ -87,6 +93,8 @@ export interface PeerRelationshipAttributeDVO extends LocalAttributeDVO {
     isOwn: false;
     confidentiality: string;
     isTechnical: boolean;
+    deletionDate?: string;
+    deletionStatus?: string;
 }
 
 /**

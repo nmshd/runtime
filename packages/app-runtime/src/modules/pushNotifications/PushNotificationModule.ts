@@ -1,4 +1,4 @@
-import { INativePushNotification, RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "@js-soft/native-abstractions";
+import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "@js-soft/native-abstractions";
 import { Result } from "@js-soft/ts-utils";
 import { AppRuntimeErrors } from "../../AppRuntimeErrors";
 import { AccountSelectedEvent, DatawalletSynchronizedEvent, ExternalEventReceivedEvent } from "../../events";
@@ -20,8 +20,8 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
 
     private async handleRemoteNotification(event: RemoteNotificationEvent) {
         this.logger.trace("PushNotificationModule.handleRemoteNotification", event);
-        const notification: INativePushNotification = event.notification;
-        const content: IBackboneEventContent = notification.content as IBackboneEventContent;
+        const notification = event.notification;
+        const content = notification.content as IBackboneEventContent;
 
         try {
             const services = await this.runtime.getServices(content.accRef);

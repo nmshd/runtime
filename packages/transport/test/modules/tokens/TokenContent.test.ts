@@ -37,7 +37,7 @@ describe("TokenContent", function () {
 
     describe("Any Content", function () {
         test("should send the token", async function () {
-            const value: any = Serializable.fromAny({ any: "content", submitted: true });
+            const value = Serializable.fromAny({ any: "content", submitted: true });
             expect(value).toBeInstanceOf(JSONWrapper);
 
             await account.tokens.sendToken({

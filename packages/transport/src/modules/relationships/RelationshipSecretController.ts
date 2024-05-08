@@ -20,8 +20,8 @@ import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
 import { RelationshipTemplatePublicKey } from "../relationshipTemplates/transmission/RelationshipTemplatePublicKey";
-import { SecretController } from "../secrets/SecretController";
 import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
+import { SecretController } from "../secrets/SecretController";
 
 export class RelationshipSecretController extends SecretController {
     private readonly cache: Map<CoreId, CryptoRelationshipRequestSecrets | CryptoRelationshipSecrets> = new Map<
@@ -35,7 +35,7 @@ export class RelationshipSecretController extends SecretController {
 
     @log()
     private async getSecret(relationshipSecretId: CoreId): Promise<CryptoRelationshipRequestSecrets | CryptoRelationshipSecrets> {
-        const secretIdAsString: string = relationshipSecretId.toString();
+        const secretIdAsString = relationshipSecretId.toString();
         const cachedSecrets = this.cache.get(relationshipSecretId);
         if (cachedSecrets) {
             return cachedSecrets;
@@ -125,7 +125,7 @@ export class RelationshipSecretController extends SecretController {
     }
 
     public async decryptTemplate(cipher: CryptoCipher, secretKey: CryptoSecretKey): Promise<CoreBuffer> {
-        const decrypted: CoreBuffer = await CoreCrypto.decrypt(cipher, secretKey);
+        const decrypted = await CoreCrypto.decrypt(cipher, secretKey);
         return decrypted;
     }
 

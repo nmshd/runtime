@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import { CoreBuffer, CryptoCipher, CryptoSecretKey, CryptoSignature } from "@nmshd/crypto";
+import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
@@ -47,18 +47,18 @@ export class RelationshipTemplateController extends TransportController {
             templateKey: templateKey
         });
 
-        const secretKey: CryptoSecretKey = await CoreCrypto.generateSecretKey();
-        const serializedTemplate: string = templateContent.serialize();
-        const serializedTemplateBuffer: CoreBuffer = CoreBuffer.fromUtf8(serializedTemplate);
+        const secretKey = await CoreCrypto.generateSecretKey();
+        const serializedTemplate = templateContent.serialize();
+        const serializedTemplateBuffer = CoreBuffer.fromUtf8(serializedTemplate);
 
-        const signature: CryptoSignature = await this.parent.identity.sign(serializedTemplateBuffer);
+        const signature = await this.parent.identity.sign(serializedTemplateBuffer);
         const signedTemplate = RelationshipTemplateSigned.from({
             deviceSignature: signature,
             serializedTemplate: serializedTemplate
         });
         const signedTemplateBuffer = CoreBuffer.fromUtf8(signedTemplate.serialize());
 
-        const cipher: CryptoCipher = await CoreCrypto.encrypt(signedTemplateBuffer, secretKey);
+        const cipher = await CoreCrypto.encrypt(signedTemplateBuffer, secretKey);
 
         const backboneResponse = (
             await this.client.createRelationshipTemplate({
@@ -159,8 +159,8 @@ export class RelationshipTemplateController extends TransportController {
 
     @log()
     private async decryptRelationshipTemplate(response: BackboneGetRelationshipTemplatesResponse, secretKey: CryptoSecretKey) {
-        const cipher: CryptoCipher = CryptoCipher.fromBase64(response.content);
-        const signedTemplateBuffer: CoreBuffer = await this.secrets.decryptTemplate(cipher, secretKey);
+        const cipher = CryptoCipher.fromBase64(response.content);
+        const signedTemplateBuffer = await this.secrets.decryptTemplate(cipher, secretKey);
 
         const signedTemplate = RelationshipTemplateSigned.deserialize(signedTemplateBuffer.toUtf8());
         const templateContent = RelationshipTemplateContentWrapper.deserialize(signedTemplate.serializedTemplate);

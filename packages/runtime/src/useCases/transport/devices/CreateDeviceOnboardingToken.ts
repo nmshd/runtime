@@ -8,6 +8,7 @@ import { TokenMapper } from "../tokens/TokenMapper";
 export interface CreateDeviceOnboardingTokenRequest {
     id: DeviceIdString;
     expiresAt?: ISO8601DateTimeString;
+    profileName?: string;
 }
 
 class Validator extends SchemaValidator<CreateDeviceOnboardingTokenRequest> {
@@ -26,7 +27,7 @@ export class CreateDeviceOnboardingTokenUseCase extends UseCase<CreateDeviceOnbo
     }
 
     protected async executeInternal(request: CreateDeviceOnboardingTokenRequest): Promise<Result<TokenDTO>> {
-        const sharedSecret = await this.devicesController.getSharedSecret(CoreId.from(request.id));
+        const sharedSecret = await this.devicesController.getSharedSecret(CoreId.from(request.id), request.profileName);
         const expiresAt = request.expiresAt ? CoreDate.from(request.expiresAt) : CoreDate.utc().add({ minutes: 5 });
 
         const tokenContent = TokenContentDeviceSharedSecret.from({ sharedSecret });

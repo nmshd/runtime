@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import { CoreBuffer, CryptoCipher, CryptoSecretKey, ICryptoSignature } from "@nmshd/crypto";
+import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId, ICoreAddress, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
@@ -243,8 +243,8 @@ export class MessageController extends TransportController {
         const parsedParams = SendMessageParameters.from(parameters);
         if (!parsedParams.attachments) parsedParams.attachments = [];
 
-        const secret: CryptoSecretKey = await CoreCrypto.generateSecretKey();
-        const serializedSecret: string = secret.serialize(false);
+        const secret = await CoreCrypto.generateSecretKey();
+        const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
         for (const recipient of parsedParams.recipients) {
@@ -253,7 +253,7 @@ export class MessageController extends TransportController {
                 throw CoreErrors.general.recordNotFound(Relationship, recipient.toString());
             }
 
-            const cipherForRecipient: CryptoCipher = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
+            const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
             envelopeRecipients.push(
                 MessageEnvelopeRecipient.from({
                     address: recipient,
@@ -271,15 +271,15 @@ export class MessageController extends TransportController {
             publicAttachmentArray.push(file.id);
         }
 
-        const plaintext: MessageContentWrapper = MessageContentWrapper.from({
+        const plaintext = MessageContentWrapper.from({
             content: parsedParams.content,
             recipients: addressArray,
             createdAt: CoreDate.utc(),
             attachments: fileReferences
         });
-        const serializedPlaintext: string = plaintext.serialize();
+        const serializedPlaintext = plaintext.serialize();
 
-        const plaintextBuffer: CoreBuffer = CoreBuffer.fromUtf8(serializedPlaintext);
+        const plaintextBuffer = CoreBuffer.fromUtf8(serializedPlaintext);
 
         const messageSignatures: MessageSignature[] = [];
         const relationshipIds = [];
@@ -289,8 +289,8 @@ export class MessageController extends TransportController {
                 throw CoreErrors.general.recordNotFound(Relationship, recipient.toString());
             }
 
-            const signature: ICryptoSignature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
-            const messageSignature: MessageSignature = MessageSignature.from({
+            const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
+            const messageSignature = MessageSignature.from({
                 recipient: recipient,
                 signature: signature
             });
@@ -298,12 +298,12 @@ export class MessageController extends TransportController {
             relationshipIds.push(relationship.id);
         }
 
-        const signed: MessageSigned = MessageSigned.from({
+        const signed = MessageSigned.from({
             message: serializedPlaintext,
             signatures: messageSignatures
         });
-        const serializedSigned: string = signed.serialize();
-        const cipher: CryptoCipher = await CoreCrypto.encrypt(CoreBuffer.fromUtf8(serializedSigned), secret);
+        const serializedSigned = signed.serialize();
+        const cipher = await CoreCrypto.encrypt(CoreBuffer.fromUtf8(serializedSigned), secret);
 
         const platformRecipients: BackbonePostMessagesRecipientRequest[] = envelopeRecipients.map((recipient) => {
             return {
@@ -326,7 +326,7 @@ export class MessageController extends TransportController {
             })
         ).value;
 
-        const cachedMessage: CachedMessage = CachedMessage.from({
+        const cachedMessage = CachedMessage.from({
             content: parsedParams.content,
             createdAt: CoreDate.from(response.createdAt),
             createdBy: this.parent.identity.identity.address,
@@ -336,7 +336,7 @@ export class MessageController extends TransportController {
             receivedByEveryone: false
         });
 
-        const message: Message = Message.from({
+        const message = Message.from({
             id: CoreId.from(response.id),
             secretKey: secret,
             cache: cachedMessage,
@@ -355,8 +355,8 @@ export class MessageController extends TransportController {
     private async decryptOwnEnvelope(envelope: MessageEnvelope, secretKey: CryptoSecretKey): Promise<MessageContentWrapper> {
         this.log.trace(`Decrypting own envelope with id ${envelope.id.toString()}...`);
 
-        const plaintextMessageBuffer: CoreBuffer = await CoreCrypto.decrypt(envelope.cipher, secretKey);
-        const signedMessage: MessageSigned = MessageSigned.deserialize(plaintextMessageBuffer.toUtf8());
+        const plaintextMessageBuffer = await CoreCrypto.decrypt(envelope.cipher, secretKey);
+        const signedMessage = MessageSigned.deserialize(plaintextMessageBuffer.toUtf8());
         const messagePlain = MessageContentWrapper.from(JSON.parse(signedMessage.message));
 
         return messagePlain;
@@ -371,10 +371,10 @@ export class MessageController extends TransportController {
         }
 
         const plaintextKeyBuffer = await this.secrets.decryptPeer(relationship.relationshipSecretId, ownKeyCipher, true);
-        const plaintextKey: CryptoSecretKey = CryptoSecretKey.deserialize(plaintextKeyBuffer.toUtf8());
-        const plaintextMessageBuffer: CoreBuffer = await CoreCrypto.decrypt(envelope.cipher, plaintextKey);
+        const plaintextKey = CryptoSecretKey.deserialize(plaintextKeyBuffer.toUtf8());
+        const plaintextMessageBuffer = await CoreCrypto.decrypt(envelope.cipher, plaintextKey);
 
-        const signedMessage: MessageSigned = MessageSigned.deserialize(plaintextMessageBuffer.toUtf8());
+        const signedMessage = MessageSigned.deserialize(plaintextMessageBuffer.toUtf8());
 
         const signature = signedMessage.signatures.find((s) => this.parent.identity.isMe(s.recipient))?.signature;
 
@@ -387,8 +387,8 @@ export class MessageController extends TransportController {
             this.log.debug(`Number of signatures does not match number of recipients from envelope ${envelope.id}.`);
         }
 
-        const plainMessageBuffer: CoreBuffer = CoreBuffer.fromUtf8(signedMessage.message);
-        const validSignature: boolean = await this.secrets.verifyPeer(relationship.relationshipSecretId, plainMessageBuffer, signature);
+        const plainMessageBuffer = CoreBuffer.fromUtf8(signedMessage.message);
+        const validSignature = await this.secrets.verifyPeer(relationship.relationshipSecretId, plainMessageBuffer, signature);
         if (!validSignature) {
             throw CoreErrors.messages.signatureNotValid();
         }
@@ -401,7 +401,7 @@ export class MessageController extends TransportController {
             this.log.debug(`Number of signed recipients within the message does not match number of signatures from envelope ${envelope.id}.`);
         }
 
-        const recipientFound: boolean = messagePlain.recipients.some((r) => this.parent.identity.isMe(r));
+        const recipientFound = messagePlain.recipients.some((r) => this.parent.identity.isMe(r));
 
         if (!recipientFound) {
             throw CoreErrors.messages.plaintextMismatch(envelope.id.toString());
@@ -446,7 +446,7 @@ export class MessageController extends TransportController {
 
         this.log.trace("Attachments fetched. Creating message...");
 
-        const cachedMessage: CachedMessage = CachedMessage.from({
+        const cachedMessage = CachedMessage.from({
             createdBy: envelope.createdBy,
             createdByDevice: envelope.createdByDevice,
             recipients: envelope.recipients,

@@ -83,7 +83,7 @@ export class DevicesController extends TransportController {
         return device;
     }
 
-    public async getSharedSecret(id: CoreId): Promise<DeviceSharedSecret> {
+    public async getSharedSecret(id: CoreId, profileName?: string): Promise<DeviceSharedSecret> {
         const deviceDoc = await this.devices.read(id.toString());
         if (!deviceDoc) {
             throw CoreErrors.general.recordNotFound(Device, id.toString());
@@ -98,7 +98,7 @@ export class DevicesController extends TransportController {
 
         const isAdmin = device.isAdmin === true;
 
-        const secret = await this.parent.activeDevice.secrets.createDeviceSharedSecret(device, count, isAdmin);
+        const secret = await this.parent.activeDevice.secrets.createDeviceSharedSecret(device, count, isAdmin, profileName);
         return secret;
     }
 

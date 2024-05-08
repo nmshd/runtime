@@ -99,7 +99,7 @@ describe("MessageContent", function () {
             expect(messages).toHaveLength(2);
             const message = messages[1];
             expect(message.cache!.content).toBeInstanceOf(Mail);
-            const content: Mail = message.cache!.content as Mail;
+            const content = message.cache!.content as Mail;
             expect(content.body).toBe("Test");
             expect(content.subject).toBe("Test Subject");
             expect(content.to).toBeInstanceOf(Array);
@@ -113,7 +113,7 @@ describe("MessageContent", function () {
             const messages = await recipient1.messages.getMessagesByAddress(sender.identity.address);
             expect(messages).toHaveLength(2);
             const message = messages[1];
-            const content: Mail = message.cache!.content as Mail;
+            const content = message.cache!.content as Mail;
             expect(content.body).toBe("Test");
             expect(content.subject).toBe("Test Subject");
             expect(content.to).toBeInstanceOf(Array);

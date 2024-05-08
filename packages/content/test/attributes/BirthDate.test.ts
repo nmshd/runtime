@@ -1,6 +1,4 @@
-import { UserfriendlyApplicationError } from "@nmshd/app-runtime/src/UserfriendlyApplicationError";
-import { BirthDate } from "@nmshd/content";
-import { ValidationErrorWithoutProperty } from "@nmshd/content/src/ValidationErrorWithoutProperty";
+import { BirthDate, ValidationErrorWithoutProperty } from "@nmshd/content";
 import { DateTime } from "luxon";
 
 describe("creation of RepositoryAttributes of Attribute Value Type BirthDate", () => {
@@ -16,9 +14,7 @@ describe("creation of RepositoryAttributes of Attribute Value Type BirthDate", (
         const invalidBirthDateCall = () => {
             BirthDate.from({ day: 1, month: 13, year: 1990 });
         };
-        expect(invalidBirthDateCall).toThrow(
-            new UserfriendlyApplicationError("error.runtime.requestDeserialization", "BirthMonth.value:Number :: must be an integer value between 1 and 12")
-        );
+        expect(invalidBirthDateCall).toThrow("BirthMonth.value:Number :: must be an integer value between 1 and 12");
     });
 
     test("returns an error when trying to create an invalid BirthDate with cross-component violated validation criteria for June", function () {

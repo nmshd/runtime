@@ -53,8 +53,8 @@ export class MessageEnvelope extends CoreSerializable implements IMessageEnvelop
     public static mapToJSON(value: Map<CoreAddress, CryptoCipher>): Object {
         const obj: any = {};
         for (const [key, cipher] of value.entries()) {
-            const serializedKey: string = key.serialize();
-            const serializedValue: string = cipher.serialize();
+            const serializedKey = key.serialize();
+            const serializedValue = cipher.serialize();
             obj[serializedKey] = serializedValue;
         }
         return obj;
@@ -64,8 +64,8 @@ export class MessageEnvelope extends CoreSerializable implements IMessageEnvelop
         const obj: Map<CoreAddress, CryptoCipher> = new Map<CoreAddress, CryptoCipher>();
         for (const key in value) {
             const cipher: any = value[key];
-            const serializedKey: CoreAddress = CoreAddress.deserialize(key);
-            const serializedValue: CryptoCipher = CryptoCipher.deserialize(cipher);
+            const serializedKey = CoreAddress.deserialize(key);
+            const serializedValue = CryptoCipher.deserialize(cipher);
             obj.set(serializedKey, serializedValue);
         }
         return obj;

@@ -1,6 +1,6 @@
 import { CoreDate } from "@nmshd/transport";
 import { DateTime } from "luxon";
-import { TransportServices } from "../../src";
+import { DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
 import { RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -148,17 +148,30 @@ describe("LoadItemFromTruncatedReference", () => {
     });
 
     describe("DeviceOnboardingInfo", () => {
-        let deviceOnboardingInfoReference: string;
+        let device: DeviceDTO;
 
         beforeAll(async () => {
-            const device = (await sTransportServices.devices.createDevice({})).value;
-            deviceOnboardingInfoReference = (await sTransportServices.devices.getDeviceOnboardingToken({ id: device.id })).value.truncatedReference;
+            device = (await sTransportServices.devices.createDevice({})).value;
         });
 
         test("loads the DeviceOnboardingInfo with the truncated reference", async () => {
+            const deviceOnboardingInfoReference = (await sTransportServices.devices.getDeviceOnboardingToken({ id: device.id })).value.truncatedReference;
+
             const result = await sTransportServices.account.loadItemFromTruncatedReference({ reference: deviceOnboardingInfoReference });
+
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("DeviceOnboardingInfo");
+        });
+
+        test("loads the DeviceOnboardingInfo with the truncated reference including a profile name", async () => {
+            const profileName = "aProfileName";
+            const deviceOnboardingInfoReference = (await sTransportServices.devices.getDeviceOnboardingToken({ id: device.id, profileName })).value.truncatedReference;
+
+            const result = await sTransportServices.account.loadItemFromTruncatedReference({ reference: deviceOnboardingInfoReference });
+
+            expect(result).toBeSuccessful();
+            expect(result.value.type).toBe("DeviceOnboardingInfo");
+            expect((result.value.value as DeviceOnboardingInfoDTO).profileName).toBe(profileName);
         });
     });
 });

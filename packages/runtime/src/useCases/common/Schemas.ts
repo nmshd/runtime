@@ -16804,6 +16804,98 @@ export const CreateRepositoryAttributeRequest: any = {
     }
 }
 
+export const DeleteOwnSharedAttributeAndNotifyPeerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteOwnSharedAttributeAndNotifyPeerRequest",
+    "definitions": {
+        "DeleteOwnSharedAttributeAndNotifyPeerRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const DeletePeerSharedAttributeAndNotifyOwnerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeletePeerSharedAttributeAndNotifyOwnerRequest",
+    "definitions": {
+        "DeletePeerSharedAttributeAndNotifyOwnerRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const DeleteRepositoryAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteRepositoryAttributeRequest",
+    "definitions": {
+        "DeleteRepositoryAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest",
+    "definitions": {
+        "DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const ExecuteIdentityAttributeQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",
@@ -17537,6 +17629,45 @@ export const GetAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -17738,6 +17869,45 @@ export const GetOwnSharedAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -17926,6 +18096,45 @@ export const GetPeerSharedAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -17996,6 +18205,45 @@ export const GetRepositoryAttributesRequest: any = {
                     ]
                 },
                 "content.value.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -20913,6 +21161,29 @@ export const CreateRelationshipChallengeRequest: any = {
     }
 }
 
+export const isCreateRelationshipChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/isCreateRelationshipChallengeRequest",
+    "definitions": {
+        "isCreateRelationshipChallengeRequest": {
+            "$comment": "(value: any) => value is CreateRelationshipChallengeRequest",
+            "type": "object",
+            "properties": {
+                "namedArgs": {
+                    "type": "object",
+                    "properties": {
+                        "value": {}
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}
+
 export const CreateIdentityChallengeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateIdentityChallengeRequest",
@@ -20933,6 +21204,29 @@ export const CreateIdentityChallengeRequest: any = {
     }
 }
 
+export const isCreateIdentityChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/isCreateIdentityChallengeRequest",
+    "definitions": {
+        "isCreateIdentityChallengeRequest": {
+            "$comment": "(value: any) => value is CreateIdentityChallengeRequest",
+            "type": "object",
+            "properties": {
+                "namedArgs": {
+                    "type": "object",
+                    "properties": {
+                        "value": {}
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}
+
 export const CreateDeviceChallengeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateDeviceChallengeRequest",
@@ -20949,6 +21243,29 @@ export const CreateDeviceChallengeRequest: any = {
                 "challengeType"
             ],
             "additionalProperties": false
+        }
+    }
+}
+
+export const isCreateDeviceChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/isCreateDeviceChallengeRequest",
+    "definitions": {
+        "isCreateDeviceChallengeRequest": {
+            "$comment": "(value: any) => value is CreateDeviceChallengeRequest",
+            "type": "object",
+            "properties": {
+                "namedArgs": {
+                    "type": "object",
+                    "properties": {
+                        "value": {}
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
         }
     }
 }
@@ -21077,6 +21394,9 @@ export const CreateDeviceOnboardingTokenRequest: any = {
                 },
                 "expiresAt": {
                     "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "profileName": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -21151,6 +21471,9 @@ export const GetDeviceOnboardingInfoRequest: any = {
             "properties": {
                 "id": {
                     "$ref": "#/definitions/GenericIdString"
+                },
+                "profileName": {
+                    "type": "string"
                 }
             },
             "required": [

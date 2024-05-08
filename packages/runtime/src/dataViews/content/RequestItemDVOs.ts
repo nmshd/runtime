@@ -1,3 +1,4 @@
+import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 import { AttributeQueryDVO, DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "./AttributeDVOs";
 import { ResponseItemDVO, ResponseItemGroupDVO } from "./ResponseItemDVOs";
@@ -35,6 +36,12 @@ export interface CreateAttributeRequestItemDVO extends RequestItemDVO {
     type: "CreateAttributeRequestItemDVO";
     attribute: DraftIdentityAttributeDVO | DraftRelationshipAttributeDVO;
     sourceAttributeId?: string;
+}
+
+export interface DeleteAttributeRequestItemDVO extends RequestItemDVO {
+    type: "DeleteAttributeRequestItemDVO";
+    attributeId: string;
+    attribute: LocalAttributeDVO;
 }
 
 export interface ShareAttributeRequestItemDVO extends RequestItemDVO {

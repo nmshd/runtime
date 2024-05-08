@@ -45,7 +45,7 @@ describe("SecretController", function () {
 
         expect(secretContainerLoaded.secret).toBeInstanceOf(CryptoSignatureKeypair);
 
-        const loadedSecret: CryptoSignatureKeypair = secretContainerLoaded.secret as unknown as CryptoSignatureKeypair;
+        const loadedSecret = secretContainerLoaded.secret as unknown as CryptoSignatureKeypair;
         expect(loadedSecret.privateKey.toBase64()).toStrictEqual(keypair.privateKey.toBase64());
         expect(loadedSecret.publicKey.toBase64()).toStrictEqual(keypair.publicKey.toBase64());
     });
@@ -62,7 +62,7 @@ describe("SecretController", function () {
         if (!secretContainerLoaded) return;
 
         expect(secretContainerLoaded.secret).toBeInstanceOf(CryptoExchangeKeypair);
-        const loadedSecret: CryptoExchangeKeypair = secretContainerLoaded.secret as unknown as CryptoExchangeKeypair;
+        const loadedSecret = secretContainerLoaded.secret as unknown as CryptoExchangeKeypair;
         expect(loadedSecret.privateKey.toBase64()).toStrictEqual(keypair.privateKey.toBase64());
         expect(loadedSecret.publicKey.toBase64()).toStrictEqual(keypair.publicKey.toBase64());
     });
@@ -79,7 +79,7 @@ describe("SecretController", function () {
         if (!secretContainerLoaded) return;
 
         expect(secretContainerLoaded.secret).toBeInstanceOf(CryptoSecretKey);
-        const loadedSecret: CryptoSecretKey = secretContainerLoaded.secret as unknown as CryptoSecretKey;
+        const loadedSecret = secretContainerLoaded.secret as unknown as CryptoSecretKey;
         expect(loadedSecret.secretKey.toBase64()).toStrictEqual(key.secretKey.toBase64());
     });
 
@@ -90,19 +90,19 @@ describe("SecretController", function () {
             expect(secret.secret).toBeDefined();
 
             if (secret.secret instanceof CryptoSignatureKeypair) {
-                const loadedSecret: CryptoSignatureKeypair = secret.secret;
+                const loadedSecret = secret.secret;
                 // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.privateKey.toBase64()).toStrictEqual(signatureKeypair.privateKey.toBase64());
                 // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.publicKey.toBase64()).toStrictEqual(signatureKeypair.publicKey.toBase64());
             } else if (secret.secret instanceof CryptoExchangeKeypair) {
-                const loadedSecret: CryptoExchangeKeypair = secret.secret;
+                const loadedSecret = secret.secret;
                 // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.privateKey.toBase64()).toStrictEqual(exchangeKeypair.privateKey.toBase64());
                 // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.publicKey.toBase64()).toStrictEqual(exchangeKeypair.publicKey.toBase64());
             } else if (secret.secret instanceof CryptoSecretKey) {
-                const loadedSecret: CryptoSecretKey = secret.secret;
+                const loadedSecret = secret.secret;
                 // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.secretKey.toBase64()).toStrictEqual(secretKey.secretKey.toBase64());
             } else {

@@ -63,7 +63,7 @@ describe("FreeTextRequestItemProcessor", function () {
             });
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.canAccept.invalidAcceptParameters"
+                code: "error.consumption.requests.invalidAcceptParameters"
             });
         });
     });

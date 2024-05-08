@@ -1,9 +1,8 @@
-const tsj = require("ts-json-schema-generator");
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import * as tsj from "ts-json-schema-generator";
 
 const config = {
-    tsconfig: path.join(__dirname, "../tsconfig.json"),
+    tsconfig: new URL("../tsconfig.json", import.meta.url).pathname,
     type: "*",
     extraTags: ["errorMessage"]
 };
@@ -27,8 +26,7 @@ const schemaDeclarations = requestTypes
     .filter((s) => s)
     .join("\n\n");
 
-const output_path = path.join(__dirname, "../src/useCases/common/Schemas.ts");
-
-fs.writeFile(output_path, schemaDeclarations, (err) => {
+const outputPath = new URL("../src/useCases/common/Schemas.ts", import.meta.url).pathname;
+fs.writeFile(outputPath, schemaDeclarations, (err) => {
     if (err) throw err;
 });

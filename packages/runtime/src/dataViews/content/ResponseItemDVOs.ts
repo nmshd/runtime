@@ -31,6 +31,7 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "ReadAttributeAcceptResponseItemDVO"
         | "ProposeAttributeAcceptResponseItemDVO"
         | "CreateAttributeAcceptResponseItemDVO"
+        | "DeleteAttributeAcceptResponseItemDVO"
         | "ShareAttributeAcceptResponseItemDVO"
         | "RegisterAttributeListenerAcceptResponseItemDVO";
     result: ResponseItemResult.Accepted;
@@ -52,6 +53,11 @@ export interface CreateAttributeAcceptResponseItemDVO extends AcceptResponseItem
     type: "CreateAttributeAcceptResponseItemDVO";
     attributeId: string;
     attribute: LocalAttributeDVO;
+}
+
+export interface DeleteAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "DeleteAttributeAcceptResponseItemDVO";
+    deletionDate: string;
 }
 
 export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
