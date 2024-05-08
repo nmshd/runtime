@@ -37,6 +37,8 @@ import {
     GetRepositoryAttributesUseCase,
     GetSharedVersionsOfAttributeRequest,
     GetSharedVersionsOfAttributeUseCase,
+    GetSharedVersionsOfRepositoryAttributeRequest,
+    GetSharedVersionsOfRepositoryAttributeUseCase,
     GetVersionsOfAttributeRequest,
     GetVersionsOfAttributeUseCase,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
@@ -66,6 +68,7 @@ export class AttributesFacade {
         @Inject private readonly getAttributesUseCase: GetAttributesUseCase,
         @Inject private readonly getVersionsOfAttributeUseCase: GetVersionsOfAttributeUseCase,
         @Inject private readonly getSharedVersionsOfAttributeUseCase: GetSharedVersionsOfAttributeUseCase,
+        @Inject private readonly getSharedVersionsOfRepositoryAttributeUseCase: GetSharedVersionsOfRepositoryAttributeUseCase,
         @Inject private readonly succeedRepositoryAttributeUseCase: SucceedRepositoryAttributeUseCase,
         @Inject private readonly executeIdentityAttributeQueryUseCase: ExecuteIdentityAttributeQueryUseCase,
         @Inject private readonly executeRelationshipAttributeQueryUseCase: ExecuteRelationshipAttributeQueryUseCase,
@@ -111,6 +114,13 @@ export class AttributesFacade {
 
     public async getSharedVersionsOfAttribute(request: GetSharedVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
         return await this.getSharedVersionsOfAttributeUseCase.execute(request);
+    }
+
+    /**
+     * @deprecated getSharedVersionsOfRepositoryAttribute won't be available in version 5 anymore. Use getSharedVersionsOfAttribute instead.
+     */
+    public async getSharedVersionsOfRepositoryAttribute(request: GetSharedVersionsOfRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
+        return await this.getSharedVersionsOfRepositoryAttributeUseCase.execute(request);
     }
 
     public async executeIdentityAttributeQuery(request: ExecuteIdentityAttributeQueryRequest): Promise<Result<LocalAttributeDTO[]>> {
