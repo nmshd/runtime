@@ -973,7 +973,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": attribute.id.toString() });
-        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(attribute);
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
         const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
         await this.detachAttributeCopies(attributeCopiesToDetach);
 
@@ -988,7 +988,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": attribute.id.toString() });
-        const attributePredecessorCopies = await this.getSharedPredecessorsOfRepositoryAttribute(attribute);
+        const attributePredecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
         const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
 
         const validateSharedAttributesResult = this.validateSharedAttributes(attributeCopiesToDetach);
@@ -1104,14 +1104,13 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
-    // TODO: rename this and the respective runtime use case
-    public async getSharedVersionsOfRepositoryAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
-        const repositoryAttribute = await this.getLocalAttribute(id);
-        if (typeof repositoryAttribute === "undefined") {
+    public async getSharedVersionsOfAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
+        const sourceAttribute = await this.getLocalAttribute(id);
+        if (typeof sourceAttribute === "undefined") {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
-        const query: any = { "shareInfo.sourceAttribute": repositoryAttribute.id.toString() };
+        const query: any = { "shareInfo.sourceAttribute": sourceAttribute.id.toString() };
         if (typeof peers !== "undefined") {
             query["shareInfo.peer"] = { $in: peers.map((address) => address.toString()) };
         }
@@ -1119,49 +1118,49 @@ export class AttributesController extends ConsumptionBaseController {
             query["succeededBy"] = { $exists: false };
         }
 
-        const ownSharedIdentityAttributes = await this.getLocalAttributes(query);
-        const ownSharedIdentityAttributePredecessors = await this.getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute, query);
-        const ownSharedIdentityAttributeSuccessors = await this.getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute, query);
+        const ownSharedAttributes = await this.getLocalAttributes(query);
+        const ownSharedAttributePredecessors = await this.getSharedPredecessorsOfAttribute(sourceAttribute, query);
+        const ownSharedAttributeSuccessors = await this.getSharedSuccessorsOfAttribute(sourceAttribute, query);
 
-        const ownSharedIdentityAttributeVersions = [...ownSharedIdentityAttributeSuccessors.reverse(), ...ownSharedIdentityAttributes, ...ownSharedIdentityAttributePredecessors];
-        return ownSharedIdentityAttributeVersions;
+        const ownSharedAttributeVersions = [...ownSharedAttributeSuccessors.reverse(), ...ownSharedAttributes, ...ownSharedAttributePredecessors];
+        return ownSharedAttributeVersions;
     }
 
-    public async getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
-        const ownSharedIdentityAttributePredecessors: LocalAttribute[] = [];
-        while (typeof repositoryAttribute.succeeds !== "undefined") {
-            const predecessor = await this.getLocalAttribute(repositoryAttribute.succeeds);
+    public async getSharedPredecessorsOfAttribute(sourceAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
+        const ownSharedAttributePredecessors: LocalAttribute[] = [];
+        while (typeof sourceAttribute.succeeds !== "undefined") {
+            const predecessor = await this.getLocalAttribute(sourceAttribute.succeeds);
             if (typeof predecessor === "undefined") {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeeds.toString());
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, sourceAttribute.succeeds.toString());
             }
 
-            repositoryAttribute = predecessor;
+            sourceAttribute = predecessor;
 
-            query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
+            query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
             const sharedCopies = await this.getLocalAttributes(query);
 
-            ownSharedIdentityAttributePredecessors.push(...sharedCopies);
+            ownSharedAttributePredecessors.push(...sharedCopies);
         }
 
-        return ownSharedIdentityAttributePredecessors;
+        return ownSharedAttributePredecessors;
     }
 
-    public async getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
-        const ownSharedIdentityAttributeSuccessors: LocalAttribute[] = [];
-        while (typeof repositoryAttribute.succeededBy !== "undefined") {
-            const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
+    public async getSharedSuccessorsOfAttribute(sourceAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
+        const ownSharedAttributeSuccessors: LocalAttribute[] = [];
+        while (typeof sourceAttribute.succeededBy !== "undefined") {
+            const successor = await this.getLocalAttribute(sourceAttribute.succeededBy);
             if (typeof successor === "undefined") {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
+                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, sourceAttribute.succeededBy.toString());
             }
 
-            repositoryAttribute = successor;
+            sourceAttribute = successor;
 
-            query["shareInfo.sourceAttribute"] = repositoryAttribute.id.toString();
+            query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
             const sharedCopies = await this.getLocalAttributes(query);
 
-            ownSharedIdentityAttributeSuccessors.push(...sharedCopies);
+            ownSharedAttributeSuccessors.push(...sharedCopies);
         }
 
-        return ownSharedIdentityAttributeSuccessors;
+        return ownSharedAttributeSuccessors;
     }
 }

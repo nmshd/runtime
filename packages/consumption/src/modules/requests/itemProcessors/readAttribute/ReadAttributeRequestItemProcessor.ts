@@ -48,11 +48,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The given Attribute belongs to someone else. You can only share own Attributes."));
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
-                parsedParams.existingAttributeId,
-                [requestInfo.peer],
-                true
-            );
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.existingAttributeId, [requestInfo.peer], true);
             if (latestSharedVersion.length > 0) {
                 if (typeof latestSharedVersion[0].shareInfo?.sourceAttribute === "undefined") {
                     throw new Error(
@@ -88,11 +84,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
-                parsedParams.existingAttributeId,
-                [requestInfo.peer],
-                true
-            );
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.existingAttributeId, [requestInfo.peer], true);
 
             if (latestSharedVersion.length === 0) {
                 sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({

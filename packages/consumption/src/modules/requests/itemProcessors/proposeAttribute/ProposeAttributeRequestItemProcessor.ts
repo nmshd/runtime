@@ -80,7 +80,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(parsedParams.attributeId, [requestInfo.peer], true);
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.attributeId, [requestInfo.peer], true);
             if (latestSharedVersion.length > 0) {
                 if (typeof latestSharedVersion[0].shareInfo?.sourceAttribute === "undefined") {
                     throw new Error(
@@ -124,7 +124,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(parsedParams.attributeId, [requestInfo.peer], true);
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.attributeId, [requestInfo.peer], true);
 
             if (latestSharedVersion.length === 0) {
                 sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
