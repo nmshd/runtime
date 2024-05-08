@@ -10,6 +10,7 @@ import { FinalizeSyncRunRequestExternalEventResult } from "./backbone/FinalizeSy
 import { StartSyncRunStatus, SyncRunType } from "./backbone/StartSyncRun";
 import { ISyncClient, SyncClient } from "./backbone/SyncClient";
 import { ChangedItems } from "./ChangedItems";
+import { ExternalEvent } from "./data/ExternalEvent";
 import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
 import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
 import { ExternalEventProcessorRegistry } from "./externalEventProcessors";
@@ -411,13 +412,14 @@ export class SyncController extends TransportController {
 
         for (const externalEvent of externalEvents) {
             try {
-                const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEvent.type);
-                const item = await new externalEventProcessorConstructor(this.eventBus, this.parent).execute(externalEvent);
+                const externalEventObject = ExternalEvent.fromAny(externalEvent);
+                const externalEventProcessorConstructor = this.externalEventRegistry.getProcessorForItem(externalEventObject.type);
+                const item = await new externalEventProcessorConstructor(this.eventBus, this.parent).execute(externalEventObject);
 
                 if (item) changedItems.addItem(item);
 
                 results.push({
-                    externalEventId: externalEvent.id
+                    externalEventId: externalEventObject.id
                 });
             } catch (e: any) {
                 this.log.error("There was an error while trying to apply an external event: ", e);
@@ -430,7 +432,6 @@ export class SyncController extends TransportController {
                 } else {
                     errorCode = JSON.stringify(e);
                 }
-
                 results.push({
                     externalEventId: externalEvent.id,
                     errorCode: errorCode
