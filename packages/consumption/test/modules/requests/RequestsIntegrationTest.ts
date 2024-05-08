@@ -53,7 +53,7 @@ export class RequestsTestsContext {
     public outgoingRequestsController: OutgoingRequestsController;
     public currentIdentity: CoreAddress;
     public mockEventBus = new MockEventBus();
-    public relationshipToReturnFromGetActiveRelationshipToIdentity: Relationship | undefined;
+    public relationshipToReturnFromGetRelationshipToIdentity: Relationship | undefined;
 
     private constructor() {
         // hide constructor
@@ -89,13 +89,22 @@ export class RequestsTestsContext {
             context.mockEventBus,
             { address: CoreAddress.from("anAddress") },
             {
-                getActiveRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetActiveRelationshipToIdentity)
+                getActiveRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
             }
         );
 
-        context.incomingRequestsController = new IncomingRequestsController(collection, processorRegistry, undefined!, context.mockEventBus, {
-            address: CoreAddress.from("anAddress")
-        });
+        context.incomingRequestsController = new IncomingRequestsController(
+            collection,
+            processorRegistry,
+            undefined!,
+            context.mockEventBus,
+            {
+                address: CoreAddress.from("anAddress")
+            },
+            {
+                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
+            }
+        );
         context.requestsCollection = context.incomingRequestsController["localRequests"];
 
         const originalCanCreate = context.outgoingRequestsController.canCreate;
@@ -113,7 +122,7 @@ export class RequestsTestsContext {
         this.localRequestAfterAction = undefined;
         this.validationResult = undefined;
         this.actionToTry = undefined;
-        this.relationshipToReturnFromGetActiveRelationshipToIdentity = undefined;
+        this.relationshipToReturnFromGetRelationshipToIdentity = undefined;
 
         TestRequestItemProcessor.numberOfApplyIncomingResponseItemCalls = 0;
 
@@ -137,7 +146,7 @@ export class RequestsGiven {
     }
 
     public anActiveRelationshipToIdentity(): Promise<void> {
-        this.context.relationshipToReturnFromGetActiveRelationshipToIdentity = TestObjectFactory.createRelationship();
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationship();
 
         return Promise.resolve();
     }
@@ -586,7 +595,7 @@ export class RequestsWhen {
     public async iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith(
         params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>
     ): Promise<void> {
-        this.context.relationshipToReturnFromGetActiveRelationshipToIdentity = TestObjectFactory.createRelationship();
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationship();
         await this.iCreateAnOutgoingRequestFromRelationshipCreationWith(params);
     }
 
