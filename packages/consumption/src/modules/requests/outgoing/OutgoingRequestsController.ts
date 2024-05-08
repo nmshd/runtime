@@ -81,10 +81,6 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     public async create(params: ICreateOutgoingRequestParameters): Promise<LocalRequest> {
         const parsedParams = CreateOutgoingRequestParameters.from(params);
-        const relationship = await this.relationshipResolver.getActiveRelationshipToIdentity(parsedParams.peer);
-        if (!relationship) {
-            throw TransportCoreErrors.general.recordNotFound(Relationship, parsedParams.peer.toString());
-        }
 
         const id = await ConsumptionIds.request.generate();
         parsedParams.content.id = id;
