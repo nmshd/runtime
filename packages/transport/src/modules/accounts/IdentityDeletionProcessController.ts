@@ -36,7 +36,7 @@ export class IdentityDeletionProcessController extends TransportController {
         return newIdentityDeletionProcess;
     }
 
-    public async updateIdentityDeletionProcessById(identityDeletionProcess: string): Promise<IdentityDeletionProcess> {
+    public async updateCacheOfExistingIdentityDeletionProcess(identityDeletionProcess: string): Promise<IdentityDeletionProcess> {
         const identityDeletionProcessJSONResponse = await this.identityDeletionProcessClient.getIdentityDeletionProcess(identityDeletionProcess);
         const newIdentityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessJSONResponse);
 
