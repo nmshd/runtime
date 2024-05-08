@@ -1,9 +1,0 @@
----
-specVersion: "2.0"
-type: module
-resources:
-  configuration:
-    paths:
-      /resources/nmshd.content/: ./lib-web/
-metadata:
-  name: nmshd.content
