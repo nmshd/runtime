@@ -759,8 +759,8 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         expect(dvo.date).toBe(dto.createdAt);
         expect(dvo.request).toBeDefined();
         expect(dvo.request.isOwn).toBe(false);
-        expect(["DecisionRequired", "ManualDecisionRequired"]).toContain(dvo.request.status);
-        expect(["i18n://dvo.localRequest.status.DecisionRequired", "i18n://dvo.localRequest.status.ManualDecisionRequired"]).toContain(dvo.request.statusText);
+        expect(["Decided", "ManualDecisionRequired"]).toContain(dvo.request.status);
+        expect(["i18n://dvo.localRequest.status.Decided", "i18n://dvo.localRequest.status.ManualDecisionRequired"]).toContain(dvo.request.statusText);
         expect(dvo.request.type).toBe("LocalRequestDVO");
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
