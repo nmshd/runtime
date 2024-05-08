@@ -2,6 +2,12 @@ import { ParsingError } from "@js-soft/ts-serval";
 import { Website } from "../../src";
 
 describe("creation of RepositoryAttributes of Attribute Value Type Website", function () {
+    test("can create a RepositoryAttribute of Attribute Value Type Website with the beginning www.", function () {
+        const validWebsite = Website.from({
+            value: "www.inwind.it"
+        });
+        expect(validWebsite.value.toString()).toBe("www.inwind.it");
+    });
     test("can create a RepositoryAttribute of Attribute Value Type Website", function () {
         const validWebsite = Website.from({
             value: "https://inwind.it"
@@ -28,7 +34,7 @@ describe("creation of RepositoryAttributes of Attribute Value Type Website", fun
             "https://enmeshed.de/blog/meilenstein-enmeshed-als-komponente-ablage-in-mein-bildungsraum-geht-in-die-testphase-der-beta-version/"
         );
     });
-    test("returns an error when trying to create an Attribute Value Type Website with a blank in the value for Website", function () {
+    test("returns an error when trying to create an Attribute Value Type Website wich contains more than only the address of the website", function () {
         const invalidWebsiteCall = () => {
             Website.from({
                 value: "Hugo https://inwind.it"
