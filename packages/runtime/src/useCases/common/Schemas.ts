@@ -3071,6 +3071,10 @@ export const CompleteIncomingRequestRequest: any = {
         "MessageIdString": {
             "type": "string",
             "pattern": "MSG[A-Za-z0-9]{17}"
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
         }
     }
 }
@@ -5439,6 +5443,10 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "RelationshipTemplateIdString": {
             "type": "string",
             "pattern": "RLT[A-Za-z0-9]{17}"
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
         },
         "MessageIdString": {
             "type": "string",
@@ -21412,7 +21420,7 @@ export const AcceptRelationshipRequest: any = {
             "properties": {
                 "relationshipId": {
                     "$ref": "#/definitions/RelationshipIdString"
-                },
+                }
             },
             "required": [
                 "relationshipId"
@@ -21422,7 +21430,7 @@ export const AcceptRelationshipRequest: any = {
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
-        },
+        }
     }
 }
 
