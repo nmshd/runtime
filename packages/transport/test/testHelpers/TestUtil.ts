@@ -63,6 +63,7 @@ export class TestUtil {
         this.oldLogger = (TransportLoggerFactory as any).instance;
         TransportLoggerFactory.init(this.fatalLogger);
     }
+
     public static useTestLoggerFactory(): void {
         TransportLoggerFactory.init(this.oldLogger);
     }
@@ -410,6 +411,7 @@ export class TestUtil {
 
         return syncResult[key];
     }
+
     public static async syncUntilHasMany<T extends keyof IChangedItems>(accountController: AccountController, key: T, expectedNumberOfMessages = 1): Promise<ChangedItems[T]> {
         const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].length >= expectedNumberOfMessages);
 
@@ -419,6 +421,7 @@ export class TestUtil {
     public static async syncUntilHasIdentityDeletionProcess(accountController: AccountController, id: CoreId): Promise<IdentityDeletionProcess[]> {
         return await TestUtil.syncUntilHas(accountController, id, "identityDeletionProcesses");
     }
+
     public static async syncUntilHasIdentityDeletionProcesses(accountController: AccountController): Promise<IdentityDeletionProcess[]> {
         return await TestUtil.syncUntilHasMany(accountController, "identityDeletionProcesses");
     }

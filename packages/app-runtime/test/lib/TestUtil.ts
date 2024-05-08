@@ -66,6 +66,7 @@ export class TestUtil {
         this.oldLogger = (TransportLoggerFactory as any).instance;
         TransportLoggerFactory.init(this.fatalLogger);
     }
+
     public static useTestLoggerFactory(): void {
         TransportLoggerFactory.init(this.oldLogger);
     }

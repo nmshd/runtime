@@ -6,9 +6,8 @@ import { syncUntilHasIdentityDeletionProcess } from "./testUtils";
 let adminClient: Axios | undefined;
 
 export async function getBackboneAdminApiClient(): Promise<Axios> {
-    if (adminClient) {
-        return adminClient;
-    }
+    if (adminClient) return adminClient;
+
     const adminAPIBaseUrl = process.env.NMSHD_TEST_BASEURL_ADMIN_API!;
     if (!adminAPIBaseUrl) throw new Error("Missing environment variable NMSHD_TEST_BASEURL_ADMIN_API");
     const csrf = await axios.get(`${adminAPIBaseUrl}/api/v1/xsrf`);
@@ -35,6 +34,7 @@ export async function startIdentityDeletionProcessFromBackboneAdminApi(transport
 
     return activeIdentityDeletionProcess.value;
 }
+
 export async function cancelIdentityDeletionProcessFromBackboneAdminApi(
     transportService: TransportServices,
     accountAddress: string,
