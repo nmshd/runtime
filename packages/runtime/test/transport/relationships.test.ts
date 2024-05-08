@@ -1,8 +1,9 @@
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { GetRelationshipsQuery, LocalAttributeDTO, OwnSharedAttributeSucceededEvent, PeerSharedAttributeSucceededEvent } from "../../src";
+import { GetRelationshipsQuery, IncomingRequestReceivedEvent, LocalAttributeDTO, OwnSharedAttributeSucceededEvent, PeerSharedAttributeSucceededEvent } from "../../src";
 import {
     createTemplate,
     ensureActiveRelationship,
+    exchangeMessageWithRequest,
     exchangeTemplate,
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
@@ -279,5 +280,56 @@ describe("Attributes for the relationship", () => {
                 peerSharedRelationshipAttributeV1.id
             ].sort()
         );
+    });
+});
+
+describe("RelationshipTermination", () => {
+    let relationshipId: string;
+    beforeAll(async () => {
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            },
+            peer: services2.address
+        };
+        await exchangeMessageWithRequest(services1, services2, requestContent);
+        relationshipId = (await services1.transport.relationships.getRelationships({})).value[0].id;
+        await services1.transport.relationships.terminateRelationship({ relationshipId });
+    });
+    test("should not send a message", async () => {
+        const result = await services1.transport.messages.sendMessage({
+            recipients: [services2.address],
+            content: {
+                "@type": "Mail",
+                body: "b",
+                cc: [],
+                subject: "a",
+                to: [services2.address]
+            }
+        });
+        expect(result).toBeAnError(/.*/, "error.transport.recordNotFound");
+    });
+
+    test("should not decide a request", async () => {
+        const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
+
+        const acceptResult = await services2.consumption.incomingRequests.accept({ requestId: incomingRequest.id, items: [{ accept: true }] });
+        expect(acceptResult).toBeAnError(/.*/, "error.transport.recordNotFound");
+
+        const rejectResult = await services2.consumption.incomingRequests.reject({ requestId: incomingRequest.id, items: [{ accept: false }] });
+        expect(rejectResult).toBeAnError(/.*/, "error.transport.recordNotFound");
+    });
+
+    test("should not create a challenge for the relationship", async () => {
+        const result = await services1.transport.challenges.createChallenge({
+            challengeType: "Relationship",
+            relationship: relationshipId
+        });
+        expect(result).toBeAnError(/.*/, "error.transport.challenges.challengeTypeRequiresActiveRelationship");
     });
 });
