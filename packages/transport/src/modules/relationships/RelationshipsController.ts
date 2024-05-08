@@ -501,8 +501,16 @@ export class RelationshipsController extends TransportController {
                 backboneResponse = (await this.client.revokeRelationship(id.toString())).value;
                 break;
 
+            case RelationshipOperation.Termination:
+                backboneResponse = (await this.client.terminateRelationship(id.toString())).value;
+                break;
+
             case RelationshipOperation.Reactivation:
                 backboneResponse = (await this.client.reactivateRelationship(id.toString())).value;
+                break;
+
+            case RelationshipOperation.AcceptanceOfReactivation:
+                backboneResponse = (await this.client.acceptRelationshipActivation(id.toString())).value;
                 break;
 
             case RelationshipOperation.RejectionOfReactivation:
