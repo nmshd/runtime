@@ -1,7 +1,19 @@
 import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
 import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId, Message, RelationshipTemplate, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import {
+    CoreAddress,
+    CoreDate,
+    CoreId,
+    ICoreAddress,
+    ICoreId,
+    Message,
+    Relationship,
+    RelationshipStatus,
+    RelationshipTemplate,
+    SynchronizedCollection,
+    CoreErrors as TransportCoreErrors
+} from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
@@ -35,7 +47,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         private readonly processorRegistry: RequestItemProcessorRegistry,
         parent: ConsumptionController,
         private readonly eventBus: EventBus,
-        private readonly identity: { address: CoreAddress }
+        private readonly identity: { address: CoreAddress },
+        private readonly relationshipResolver: {
+            getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+        }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
     }
@@ -168,6 +183,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const request = await this.getOrThrow(params.requestId);
 
+        await this.checkRelationshipStatus(request.peer);
         this.assertRequestStatus(request, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired);
 
         const validationResult = this.decideRequestParamsValidator.validate(params, request);
@@ -398,6 +414,14 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     private assertRequestStatus(request: LocalRequest, ...status: LocalRequestStatus[]) {
         if (!status.includes(request.status)) {
             throw new ConsumptionError(`Local Request has to be in status '${status.join("/")}'.`);
+        }
+    }
+
+    private async checkRelationshipStatus(peer: CoreAddress) {
+        const relationship = await this.relationshipResolver.getRelationshipToIdentity(peer);
+        // no relationship is for a template request on new relationship
+        if (relationship && relationship.status !== RelationshipStatus.Active) {
+            throw TransportCoreErrors.general.recordNotFound(Relationship, peer.toString());
         }
     }
 

@@ -109,7 +109,8 @@ export class ConsumptionController {
             requestItemProcessorRegistry,
             this,
             this.transport.eventBus,
-            this.accountController.identity
+            this.accountController.identity,
+            this.accountController.relationships
         ).init();
 
         const notificationItemProcessorRegistry = new NotificationItemProcessorRegistry(this, this.getDefaultNotificationItemProcessors());
