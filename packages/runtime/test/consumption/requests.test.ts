@@ -1,12 +1,11 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipCreationChangeRequestContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
     OutgoingRequestCreatedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     TransportServices
 } from "../../src";
@@ -556,7 +555,7 @@ describe("Requests", () => {
 
             const result = await rConsumptionServices.incomingRequests.complete({
                 requestId: request.id,
-                responseSourceId: action === "Accept" ? relationship?.changes[0].id : undefined
+                responseSourceId: action === "Accept" ? relationship?.id : undefined
             });
 
             expect(result).toBeSuccessful();
@@ -577,17 +576,17 @@ describe("Requests", () => {
 
             expect(syncResult).toHaveLength(1);
 
-            const sRelationshipChange = syncResult[0].changes[0];
+            const sRelationship = syncResult[0];
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            let triggeredCompletionEvent: OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent | undefined;
-            sEventBus.subscribeOnce(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, (event) => {
+            let triggeredCompletionEvent: OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent | undefined;
+            sEventBus.subscribeOnce(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent, (event) => {
                 triggeredCompletionEvent = event;
             });
 
             const completionResult = await sConsumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
-                responseSourceId: sRelationshipChange.id,
-                response: (sRelationshipChange.request.content as RelationshipCreationChangeRequestContentJSON).response,
+                responseSourceId: sRelationship.id,
+                response: sRelationship.creationContent.response,
                 templateId: relationship!.template.id
             });
 

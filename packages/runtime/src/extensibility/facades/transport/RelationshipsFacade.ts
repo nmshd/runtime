@@ -2,8 +2,8 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import {
-    AcceptRelationshipChangeRequest,
-    AcceptRelationshipChangeUseCase,
+    AcceptRelationshipRequest,
+    AcceptRelationshipUseCase,
     CreateRelationshipRequest,
     CreateRelationshipUseCase,
     GetAttributesForRelationshipRequest,
@@ -12,13 +12,13 @@ import {
     GetRelationshipByAddressRequest,
     GetRelationshipByAddressUseCase,
     GetRelationshipRequest,
-    GetRelationshipUseCase,
     GetRelationshipsRequest,
     GetRelationshipsUseCase,
-    RejectRelationshipChangeRequest,
-    RejectRelationshipChangeUseCase,
-    RevokeRelationshipChangeRequest,
-    RevokeRelationshipChangeUseCase
+    GetRelationshipUseCase,
+    RejectRelationshipRequest,
+    RejectRelationshipUseCase,
+    RevokeRelationshipRequest,
+    RevokeRelationshipUseCase
 } from "../../../useCases";
 
 export class RelationshipsFacade {
@@ -27,9 +27,9 @@ export class RelationshipsFacade {
         @Inject private readonly getRelationshipUseCase: GetRelationshipUseCase,
         @Inject private readonly getRelationshipByAddressUseCase: GetRelationshipByAddressUseCase,
         @Inject private readonly createRelationshipUseCase: CreateRelationshipUseCase,
-        @Inject private readonly acceptRelationshipChangeUseCase: AcceptRelationshipChangeUseCase,
-        @Inject private readonly rejectRelationshipChangeUseCase: RejectRelationshipChangeUseCase,
-        @Inject private readonly revokeRelationshipChangeUseCase: RevokeRelationshipChangeUseCase,
+        @Inject private readonly acceptRelationshipUseCase: AcceptRelationshipUseCase,
+        @Inject private readonly rejectRelationshipUseCase: RejectRelationshipUseCase,
+        @Inject private readonly revokeRelationshipUseCase: RevokeRelationshipUseCase,
         @Inject private readonly getAttributesForRelationshipUseCase: GetAttributesForRelationshipUseCase
     ) {}
 
@@ -49,16 +49,16 @@ export class RelationshipsFacade {
         return await this.createRelationshipUseCase.execute(request);
     }
 
-    public async acceptRelationshipChange(request: AcceptRelationshipChangeRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
-        return await this.acceptRelationshipChangeUseCase.execute(request);
+    public async acceptRelationship(request: AcceptRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+        return await this.acceptRelationshipUseCase.execute(request);
     }
 
-    public async rejectRelationshipChange(request: RejectRelationshipChangeRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
-        return await this.rejectRelationshipChangeUseCase.execute(request);
+    public async rejectRelationship(request: RejectRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+        return await this.rejectRelationshipUseCase.execute(request);
     }
 
-    public async revokeRelationshipChange(request: RevokeRelationshipChangeRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
-        return await this.revokeRelationshipChangeUseCase.execute(request);
+    public async revokeRelationship(request: RevokeRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+        return await this.revokeRelationshipUseCase.execute(request);
     }
 
     public async getAttributesForRelationship(request: GetAttributesForRelationshipRequest): Promise<Result<GetAttributesForRelationshipResponse, ApplicationError>> {

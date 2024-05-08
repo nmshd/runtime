@@ -1,10 +1,10 @@
 import stringify from "json-stringify-safe";
-import { RelationshipChangeStatus } from "../modules/relationships/transmission/changes/RelationshipChangeStatus";
+import { RelationshipStatus } from "../modules";
 import { CoreError } from "./CoreError";
 
 class Relationships {
-    public wrongChangeStatus(status: RelationshipChangeStatus) {
-        return new CoreError("error.transport.relationships.wrongChangeStatus", `The relationship change has the wrong status (${status}) to run this operation`);
+    public wrongRelationshipStatus(status: RelationshipStatus) {
+        return new CoreError("error.transport.relationships.wrongRelationshipStatus", `The relationship has the wrong status (${status}) to run this operation`);
     }
 }
 
