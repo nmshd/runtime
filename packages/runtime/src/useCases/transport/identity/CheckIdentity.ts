@@ -16,6 +16,7 @@ export interface CheckIdentityResponse {
     relationshipPending?: boolean;
     relationshipActive?: boolean;
     relationshipTerminated?: boolean;
+    relationshipDeletedByPeer?: boolean;
     relationship?: RelationshipDTO;
 }
 
@@ -47,25 +48,37 @@ export class CheckIdentityUseCase extends UseCase<CheckIdentityRequest, CheckIde
         const relationship = await this.relationshipsController.getRelationshipToIdentity(address);
         if (relationship) {
             const relationshipDTO = RelationshipMapper.toRelationshipDTO(relationship);
-            if (relationship.status === RelationshipStatus.Pending) {
-                return Result.ok({
-                    peer: true,
-                    relationshipPending: true,
-                    relationship: relationshipDTO
-                });
-            } else if (relationship.status === RelationshipStatus.Active || relationship.status === RelationshipStatus.Terminating) {
-                return Result.ok({
-                    peer: true,
-                    relationshipActive: true,
-                    relationship: relationshipDTO
-                });
+            switch (relationship.status) {
+                case RelationshipStatus.Pending:
+                    return Result.ok({
+                        peer: true,
+                        relationshipPending: true,
+                        relationship: relationshipDTO
+                    });
+                case RelationshipStatus.Active:
+                    return Result.ok({
+                        peer: true,
+                        relationshipActive: true,
+                        relationship: relationshipDTO
+                    });
+                case RelationshipStatus.Terminated:
+                    return Result.ok({
+                        peer: true,
+                        relationshipTerminated: true,
+                        relationship: relationshipDTO
+                    });
+                case RelationshipStatus.DeletionProposed:
+                    return Result.ok({
+                        peer: true,
+                        relationshipTerminated: true,
+                        relationshipDeletedByPeer: true,
+                        relationship: relationshipDTO
+                    });
+                default:
+                    return Result.ok({
+                        unknown: true
+                    });
             }
-
-            return Result.ok({
-                peer: true,
-                relationshipTerminated: true,
-                relationship: relationshipDTO
-            });
         }
 
         return Result.ok({
