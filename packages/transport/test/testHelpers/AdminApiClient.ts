@@ -32,7 +32,7 @@ export class AdminApiClient {
 
         const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
         if (typeof activeIdentityDeletionProcess === "undefined") {
-            throw new Error("Identity deletion process not found.");
+            throw new Error("IdentityDeletionProcess not found.");
         }
 
         return activeIdentityDeletionProcess;
