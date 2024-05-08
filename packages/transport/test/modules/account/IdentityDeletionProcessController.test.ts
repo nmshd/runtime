@@ -25,10 +25,10 @@ describe("IdentityDeletionProcessController", function () {
     });
 
     afterEach(async function () {
-        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus([
+        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(
             IdentityDeletionProcessStatus.Approved,
             IdentityDeletionProcessStatus.WaitingForApproval
-        ]);
+        );
         if (!activeIdentityDeletionProcess) {
             return;
         }

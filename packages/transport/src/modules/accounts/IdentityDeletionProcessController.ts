@@ -27,6 +27,23 @@ export class IdentityDeletionProcessController extends TransportController {
         return this;
     }
 
+    public async loadNewIdentityDeletionProcessFromBackbone(identityDeletionProcessId: string): Promise<IdentityDeletionProcess> {
+        const identityDeletionProcessJSONResponse = await this.identityDeletionProcessClient.getIdentityDeletionProcess(identityDeletionProcessId);
+
+        const newIdentityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessJSONResponse);
+        await this.identityDeletionProcessCollection.create(newIdentityDeletionProcess);
+        this.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.parent.identity.address.toString(), newIdentityDeletionProcess));
+        return newIdentityDeletionProcess;
+    }
+
+    public async updateIdentityDeletionProcessById(identityDeletionProcess: string): Promise<IdentityDeletionProcess> {
+        const identityDeletionProcessJSONResponse = await this.identityDeletionProcessClient.getIdentityDeletionProcess(identityDeletionProcess);
+        const newIdentityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessJSONResponse);
+
+        await this.updateIdentityDeletionProcess(newIdentityDeletionProcess);
+        return newIdentityDeletionProcess;
+    }
+
     public async updateIdentityDeletionProcess(identityDeletionProcess: IdentityDeletionProcess): Promise<void> {
         const oldIdentityDeletionProcess = await this.identityDeletionProcessCollection.findOne({ id: identityDeletionProcess.id.toString() });
         await this.identityDeletionProcessCollection.update(oldIdentityDeletionProcess, identityDeletionProcess);
@@ -85,12 +102,7 @@ export class IdentityDeletionProcessController extends TransportController {
             .filter((identityDeletionProcess) => !!identityDeletionProcess) as IdentityDeletionProcess[];
     }
 
-    public async getIdentityDeletionProcessByStatus(
-        identityDeletionProcessStatus: IdentityDeletionProcessStatus | IdentityDeletionProcessStatus[]
-    ): Promise<IdentityDeletionProcess | undefined> {
-        if (!Array.isArray(identityDeletionProcessStatus)) {
-            identityDeletionProcessStatus = [identityDeletionProcessStatus];
-        }
+    public async getIdentityDeletionProcessByStatus(...identityDeletionProcessStatus: IdentityDeletionProcessStatus[]): Promise<IdentityDeletionProcess | undefined> {
         const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({
             $or: identityDeletionProcessStatus.map((status) => {
                 return { "cache.status": status };

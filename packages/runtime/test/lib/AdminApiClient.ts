@@ -45,5 +45,5 @@ export async function cancelIdentityDeletionProcessFromBackboneAdminApi(
 
     await syncUntilHasIdentityDeletionProcess(transportService, identityDeletionProcessId);
 
-    return transportService.identityDeletionProcesses.getIdentityDeletionProcess({ id: identityDeletionProcessId });
+    return await transportService.identityDeletionProcesses.getIdentityDeletionProcess({ id: identityDeletionProcessId });
 }

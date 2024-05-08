@@ -14,13 +14,13 @@ export class RejectIdentityDeletionProcessUseCase extends UseCase<void, Identity
     }
 
     protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
-        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
+        const identityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
 
-        if (typeof activeIdentityDeletionProcess === "undefined") {
-            return Result.fail(RuntimeErrors.identity.noWaitingForApprovalIdentityDeletionProcess());
+        if (typeof identityDeletionProcess === "undefined") {
+            return Result.fail(RuntimeErrors.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess());
         }
 
-        const rejectedIdentityDeletionProcess = await this.identityDeletionProcessController.rejectIdentityDeletionProcess(activeIdentityDeletionProcess.id.toString());
+        const rejectedIdentityDeletionProcess = await this.identityDeletionProcessController.rejectIdentityDeletionProcess(identityDeletionProcess.id.toString());
         await this.accountController.syncDatawallet();
         return Result.ok(IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(rejectedIdentityDeletionProcess));
     }

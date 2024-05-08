@@ -189,7 +189,7 @@ class Attributes {
     }
 }
 
-class Identity {
+class IdentityDeletionProcess {
     public noActiveIdentityDeletionProcess() {
         return new ApplicationError("error.runtime.identity.noActiveIdentityDeletionProcess", "No active IdentityDeletionProcess found.");
     }
@@ -220,5 +220,5 @@ export class RuntimeErrors {
     public static readonly challenges = new Challenges();
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
-    public static readonly identity = new Identity();
+    public static readonly identityDeletionProcess = new IdentityDeletionProcess();
 }
