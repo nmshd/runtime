@@ -301,19 +301,19 @@ export class TestUtil {
      * specified in the `until` callback is met.
      */
     public static async syncUntil(session: LocalAccountSession, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-        const syncResponse: any = {};
+        const syncResponse: SyncEverythingResponse = {
+            relationships: [],
+            messages: [],
+            identityDeletionProcesses: []
+        };
 
         let iterationNumber = 0;
         do {
             await sleep(iterationNumber * 25);
-            const newSyncResult = (await session.transportServices.account.syncEverything()).value;
-
-            for (const key of Object.keys(newSyncResult)) {
-                const typedKey = key as keyof SyncEverythingResponse;
-                const items = newSyncResult[typedKey];
-                if (!syncResponse[key]) syncResponse[key] = [];
-                syncResponse[key].push(...items);
-            }
+            const newSyncResult = await session.transportServices.account.syncEverything();
+            syncResponse.messages.push(...newSyncResult.value.messages);
+            syncResponse.relationships.push(...newSyncResult.value.relationships);
+            syncResponse.identityDeletionProcesses.push(...newSyncResult.value.identityDeletionProcesses);
             iterationNumber++;
         } while (!until(syncResponse) && iterationNumber < 15);
         return syncResponse;
