@@ -37,7 +37,7 @@ class Messages {
     public signatureNotValid() {
         return new CoreError(
             "error.transport.messages.signatureNotValid",
-            "The digital signature on this message for peer key is invalid. An impersonination attack might be the cause of this."
+            "The digital signature on this message for peer key is invalid. An impersonation attack might be the cause of this."
         );
     }
 
@@ -49,7 +49,7 @@ class Messages {
     }
 
     public noMatchingRelationship(address: string) {
-        return new CoreError("error.transport.messages.noMatchingRelationship", `A Relationship with the given address '${address}' does not exist.`);
+        return new CoreError("error.transport.messages.noMatchingRelationship", `An active Relationship with the given address '${address}' does not exist.`);
     }
 }
 

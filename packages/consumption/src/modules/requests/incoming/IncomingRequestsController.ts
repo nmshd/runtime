@@ -421,7 +421,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         const relationship = await this.relationshipResolver.getRelationshipToIdentity(peer);
         // no relationship is for a template request on new relationship
         if (relationship && relationship.status !== RelationshipStatus.Active) {
-            throw TransportCoreErrors.general.recordNotFound(Relationship, peer.toString());
+            throw CoreErrors.requests.noMatchingRelationship(peer.toString());
         }
     }
 

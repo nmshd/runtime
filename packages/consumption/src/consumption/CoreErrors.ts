@@ -268,6 +268,10 @@ class Requests {
         return new CoreError("error.consumption.requests.invalidRequestItem", message);
     }
 
+    public noMatchingRelationship(address: string) {
+        return new CoreError("error.consumption.requests.noMatchingRelationship", `An active or pending Relationship with the given address '${address}' does not exist.`);
+    }
+
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);

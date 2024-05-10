@@ -17,6 +17,7 @@ import { ConsumptionController } from "../../../consumption/ConsumptionControlle
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
+import { CoreErrors } from "../../../consumption/CoreErrors";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -51,7 +52,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         if (parsedParams.peer) {
             const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
             if (!relationship || !(relationship.status === RelationshipStatus.Pending || relationship.status === RelationshipStatus.Active)) {
-                return ValidationResult.error(TransportCoreErrors.general.recordNotFound("Pending or active relationship to peer", parsedParams.peer.toString()));
+                return ValidationResult.error(CoreErrors.requests.noMatchingRelationship(parsedParams.peer.toString()));
             }
         }
 

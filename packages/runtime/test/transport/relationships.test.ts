@@ -319,10 +319,10 @@ describe("RelationshipTermination", () => {
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
         const acceptResult = await services2.consumption.incomingRequests.accept({ requestId: incomingRequest.id, items: [{ accept: true }] });
-        expect(acceptResult).toBeAnError(/.*/, "error.transport.recordNotFound");
+        expect(acceptResult).toBeAnError(/.*/, "error.consumption.requests.noMatchingRelationship");
 
         const rejectResult = await services2.consumption.incomingRequests.reject({ requestId: incomingRequest.id, items: [{ accept: false }] });
-        expect(rejectResult).toBeAnError(/.*/, "error.transport.recordNotFound");
+        expect(rejectResult).toBeAnError(/.*/, "error.consumption.requests.noMatchingRelationship");
     });
 
     test("should not create a challenge for the relationship", async () => {

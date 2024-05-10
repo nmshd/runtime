@@ -250,7 +250,7 @@ export class MessageController extends TransportController {
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
             if (!relationship) {
-                throw CoreErrors.general.recordNotFound(Relationship, recipient.toString());
+                throw CoreErrors.messages.noMatchingRelationship(recipient.toString());
             }
 
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
@@ -286,7 +286,7 @@ export class MessageController extends TransportController {
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
             if (!relationship) {
-                throw CoreErrors.general.recordNotFound(Relationship, recipient.toString());
+                throw CoreErrors.messages.noMatchingRelationship(recipient.toString());
             }
 
             const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
