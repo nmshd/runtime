@@ -79,10 +79,19 @@ export class MessageController extends TransportController {
         }
 
         const messageCache = message.cache;
-        if (messageCache) {
-            messageCache.recipients = messageCache.recipients.filter((recipient) => recipient.address !== relationship.peer.address);
-            message.setCache(messageCache);
+        if (!messageCache) {
+            await this.updateCacheOfMessage(message);
         }
+        if (!messageCache) {
+            throw this.newCacheEmptyError(Message, message.id.toString());
+        }
+
+        messageCache.recipients = messageCache.recipients.filter((recipient) => recipient.address !== relationship.peer.address);
+        messageCache.recipients
+            .push
+            // TODO: add anonymization
+            ();
+        message.setCache(messageCache);
 
         await this.messages.update(messageDoc, message);
         this.eventBus.publish(new MessageRecipientDeletedEvent(this.parent.identity.address.toString(), message));
@@ -90,7 +99,7 @@ export class MessageController extends TransportController {
 
     public async deleteMessagesOfRelationship(relationship: Relationship): Promise<void> {
         const messages = await this.getMessagesByRelationshipId(relationship.id);
-        messages.forEach((message) => this.deleteMessageRecipient(message.id, relationship));
+        await Promise.all(messages.map((message) => this.deleteMessageRecipient(message.id, relationship)));
     }
 
     @log()
