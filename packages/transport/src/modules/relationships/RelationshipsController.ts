@@ -283,9 +283,9 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Terminated) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
+        await this.client.decomposeRelationship(relationshipId.toString());
         await this.secrets.deleteSecretForRelationship(relationship.relationshipSecretId);
         await this.relationships.delete({ id: relationshipId });
-        await this.client.decomposeRelationship(relationshipId.toString());
 
         this.eventBus.publish(new RelationshipDeletedBySelfEvent(this.parent.identity.address.toString(), relationshipId));
     }
