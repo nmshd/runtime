@@ -1,6 +1,6 @@
 import { Event, EventBus } from "@js-soft/ts-utils";
 import { Notification, NotificationItem } from "@nmshd/content";
-import { CoreId, Message, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreId, Message, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -155,5 +155,19 @@ export class NotificationsController extends ConsumptionBaseController {
         for (const event of events) this.eventBus.publish(event);
 
         return notification;
+    }
+
+    private async deleteNotification(notification: LocalNotification): Promise<void> {
+        await this.localNotifications.delete(notification);
+
+        this.eventBus
+            .publish
+            // TODO: add event
+            ();
+    }
+
+    public async deleteNotificationsWithPeer(peer: CoreAddress): Promise<void> {
+        const requests = await this.getNotifications({ peer });
+        await Promise.all(requests.map((request) => this.deleteNotification(request)));
     }
 }

@@ -177,6 +177,20 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
+    private async deleteRequest(request: LocalRequest): Promise<void> {
+        await this.localRequests.delete(request);
+
+        this.eventBus
+            .publish
+            // TODO: add event
+            ();
+    }
+
+    public async deleteRequestsToPeer(peer: CoreAddress): Promise<void> {
+        const requests = await this.getOutgoingRequests({ peer });
+        await Promise.all(requests.map((request) => this.deleteRequest(request)));
+    }
+
     private async _sent(requestId: CoreId, requestSourceObject: Message | RelationshipTemplate): Promise<LocalRequest> {
         const request = await this.getOrThrow(requestId);
 
