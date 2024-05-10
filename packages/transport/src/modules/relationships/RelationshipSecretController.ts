@@ -17,6 +17,7 @@ import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { TransportIds } from "../../core/TransportIds";
 import { AccountController } from "../accounts/AccountController";
+import { Identity } from "../accounts/data/Identity";
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
 import { RelationshipTemplatePublicKey } from "../relationshipTemplates/transmission/RelationshipTemplatePublicKey";
 import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
@@ -115,8 +116,8 @@ export class RelationshipSecretController extends SecretController {
         return container;
     }
 
-    public async deleteSecretForRelationship(relationshipSecretId: CoreId): Promise<boolean> {
-        const secret = await this.loadActiveSecretByName(relationshipSecretId.toString());
+    public async deleteSecretForRequest(peerIdentity: Identity): Promise<boolean> {
+        const secret = await this.loadActiveSecretByName(`request_to_${peerIdentity.address}`);
         if (!secret) {
             return false;
         }
