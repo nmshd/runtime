@@ -1,6 +1,7 @@
 export * from "./AcceptRelationship";
 export * from "./AcceptRelationshipReactivation";
 export * from "./CreateRelationship";
+export * from "./DecomposeRelationship";
 export * from "./GetAttributesForRelationship";
 export * from "./GetRelationship";
 export * from "./GetRelationshipByAddress";
