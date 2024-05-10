@@ -1,6 +1,17 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, ICoreId, Message, Relationship, RelationshipTemplate, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import {
+    CoreAddress,
+    CoreDate,
+    CoreId,
+    ICoreId,
+    Message,
+    Relationship,
+    RelationshipStatus,
+    RelationshipTemplate,
+    SynchronizedCollection,
+    CoreErrors as TransportCoreErrors
+} from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
@@ -29,7 +40,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         private readonly eventBus: EventBus,
         private readonly identity: { address: CoreAddress },
         private readonly relationshipResolver: {
-            getActiveRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+            getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
         }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
@@ -37,6 +48,12 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     public async canCreate(params: ICanCreateOutgoingRequestParameters): Promise<ValidationResult> {
         const parsedParams = CanCreateOutgoingRequestParameters.from(params);
+        if (parsedParams.peer) {
+            const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
+            if (!relationship || !(relationship.status === RelationshipStatus.Pending || relationship.status === RelationshipStatus.Active)) {
+                return ValidationResult.error(TransportCoreErrors.general.recordNotFound("Pending or active relationship to peer", parsedParams.peer.toString()));
+            }
+        }
 
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
 
