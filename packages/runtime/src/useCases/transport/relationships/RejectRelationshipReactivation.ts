@@ -11,7 +11,7 @@ export interface RejectRelationshipReactivationRequest {
 
 class Validator extends SchemaValidator<RejectRelationshipReactivationRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("AcceptRelationshipRequest"));
+        super(schemaRepository.getSchema("RejectRelationshipReactivationRequest"));
     }
 }
 

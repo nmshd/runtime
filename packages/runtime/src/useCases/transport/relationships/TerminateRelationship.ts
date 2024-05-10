@@ -11,7 +11,7 @@ export interface TerminateRelationshipRequest {
 
 class Validator extends SchemaValidator<TerminateRelationshipRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("AcceptRelationshipRequest"));
+        super(schemaRepository.getSchema("TerminateRelationshipRequest"));
     }
 }
 
