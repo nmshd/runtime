@@ -21070,6 +21070,26 @@ export const CheckIdentityRequest: any = {
     }
 }
 
+export const GetIdentityDeletionProcessRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetIdentityDeletionProcessRequest",
+    "definitions": {
+        "GetIdentityDeletionProcessRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/IdentityDeletionProcessIdString"
+                }
+            },
+            "additionalProperties": false
+        },
+        "IdentityDeletionProcessIdString": {
+            "type": "string",
+            "pattern": "IDP[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const GetAttachmentMetadataRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetAttachmentMetadataRequest",
