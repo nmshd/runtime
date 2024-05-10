@@ -325,6 +325,22 @@ describe("RelationshipTermination", () => {
         expect(rejectResult).toBeAnError(/.*/, "error.consumption.requests.noMatchingRelationship");
     });
 
+    test("should not create a request", async () => {
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            },
+            peer: services2.address
+        };
+        const result = await services1.consumption.outgoingRequests.create(requestContent);
+        expect(result).toBeAnError(/.*/, "error.consumption.requests.noMatchingRelationship");
+    });
+
     test("should not create a challenge for the relationship", async () => {
         const result = await services1.transport.challenges.createChallenge({
             challengeType: "Relationship",
