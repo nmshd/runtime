@@ -312,7 +312,7 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.transport.recordNotFound");
+        expect(result).toBeAnError(/.*/, "error.platform.validation.message.relationshipToRecipientNotActive");
     });
 
     test("should not decide a request", async () => {
