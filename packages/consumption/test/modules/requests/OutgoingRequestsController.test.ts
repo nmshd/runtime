@@ -258,8 +258,6 @@ describe("OutgoingRequestsController", function () {
             });
 
             test("create an outgoing request from relationship creation with an active relationship", async function () {
-                await Given.anActiveRelationshipToIdentity();
-
                 await When.iCreateAnOutgoingRequestFromRelationshipCreationWith({
                     template: TestObjectFactory.createOutgoingIRelationshipTemplate(
                         context.currentIdentity,
@@ -346,7 +344,6 @@ describe("OutgoingRequestsController", function () {
 
         test("sets the source property depending on the given source", async function () {
             const source = TestObjectFactory.createOutgoingIMessage(context.currentIdentity);
-
             await Given.anOutgoingRequestInStatus(LocalRequestStatus.Draft);
             await When.iCallSentWith({ requestSourceObject: source });
             await Then.theRequestHasItsSourcePropertySetTo({
@@ -365,7 +362,6 @@ describe("OutgoingRequestsController", function () {
 
         test("throws when passing an incoming Message", async function () {
             const invalidSource = TestObjectFactory.createIncomingIMessage(context.currentIdentity);
-
             await Given.anOutgoingRequestInStatus(LocalRequestStatus.Draft);
             await When.iTryToCallSentWith({ requestSourceObject: invalidSource });
             await Then.itThrowsAnErrorWithTheErrorMessage("Cannot create outgoing Request from a peer*");
@@ -573,7 +569,6 @@ describe("OutgoingRequestsController", function () {
 
         test("allows completing an expired Request with a Message that was created before the expiry date", async function () {
             const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity, CoreDate.utc().subtract({ days: 2 }));
-
             await Given.anOutgoingRequestWith({
                 status: LocalRequestStatus.Expired,
                 content: {
@@ -588,7 +583,6 @@ describe("OutgoingRequestsController", function () {
 
         test("throws when trying to complete an expired Request with a Message that was created after the expiry date", async function () {
             const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity);
-
             await Given.anOutgoingRequestWith({
                 status: LocalRequestStatus.Expired,
                 content: {
