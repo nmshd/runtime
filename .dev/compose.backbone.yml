@@ -16,6 +16,8 @@ services:
         condition: service_completed_successfully
       azure-storage-emulator:
         condition: service_started
+      database-migrator:
+        condition: service_completed_successfully
     configs:
       - source: Config
         target: app/appsettings.override.json
@@ -28,6 +30,8 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_started
+      database-migrator:
+        condition: service_completed_successfully
     configs:
       - source: Config
         target: app/appsettings.override.json
@@ -45,10 +49,25 @@ services:
         condition: service_started
       consumer-api:
         condition: service_healthy
+      database-migrator:
+        condition: service_completed_successfully
     configs:
       - source: Config
         target: app/appsettings.override.json
-    profiles: [debug]
+
+  database-migrator:
+    container_name: database-migrator-test
+    image: ghcr.io/nmshd/backbone-database-migrator:${BACKBONE_VERSION}
+    depends_on:
+      seed-database:
+        condition: service_completed_successfully
+    environment:
+      Infrastructure__SqlDatabase__Provider: Postgres
+      Infrastructure__SqlDatabase__ConnectionString: "Server=postgres;Database=enmeshed;User Id=postgres;Password=Passw0rd;Port=5432"
+      ASPNETCORE_ENVIRONMENT: Development
+    configs:
+      - source: Config
+        target: app/appsettings.override.json
 
   ### infrastructure ###
 

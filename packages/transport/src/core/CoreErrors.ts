@@ -170,10 +170,6 @@ class General {
         return new CoreError("error.transport.notSupported", "The method is not yet supported.");
     }
 
-    public realmLength() {
-        return new CoreError("error.transport.identity.realmLength", "Realm must be of length 3.");
-    }
-
     public invalidTruncatedReference() {
         return new CoreError("error.transport.files.invalidTruncatedReference", "invalid truncated reference");
     }
