@@ -113,6 +113,7 @@ export class RequestsTestsContext {
             return originalCanCreate.call(context.outgoingRequestsController, params);
         };
 
+        context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationship();
         return context;
     }
 
@@ -143,12 +144,6 @@ export class RequestsGiven {
 
     public async anIncomingRequest(): Promise<LocalRequest> {
         return await this.anIncomingRequestWith({});
-    }
-
-    public anActiveRelationshipToIdentity(): Promise<void> {
-        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationship();
-
-        return Promise.resolve();
     }
 
     public async anIncomingRequestWithAnItemAndAGroupInStatus(status: LocalRequestStatus): Promise<void> {
