@@ -1,3 +1,4 @@
+import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { GetRelationshipsQuery, IncomingRequestReceivedEvent, LocalAttributeDTO, OwnSharedAttributeSucceededEvent, PeerSharedAttributeSucceededEvent } from "../../src";
 import {
@@ -347,5 +348,36 @@ describe("RelationshipTermination", () => {
             relationship: relationshipId
         });
         expect(result).toBeAnError(/.*/, "error.transport.challenges.challengeTypeRequiresActiveRelationship");
+    });
+});
+
+describe("RelationshipDecomposition", () => {
+    let relationshipId: string;
+    let decompositionResult: Result<null, ApplicationError>;
+    beforeAll(async () => {
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            },
+            peer: services2.address
+        };
+        await exchangeMessageWithRequest(services1, services2, requestContent);
+        relationshipId = (await services1.transport.relationships.getRelationships({})).value[0].id;
+        await services1.transport.relationships.terminateRelationship({ relationshipId });
+        await services1.transport.relationships.decomposeRelationship({ relationshipId });
+    });
+
+    test("relationship should be decomposed", async () => {
+        expect(decompositionResult).toBeSuccessful();
+        const relationship1 = await services1.transport.relationships.getRelationship({ id: relationshipId });
+        expect(relationship1).toBeAnError(/.*/, "error.runtime.recordNotFound");
+
+        const relationship2 = (await syncUntilHasRelationships(services2.transport))[0];
+        expect(relationship2).toBe();
     });
 });
