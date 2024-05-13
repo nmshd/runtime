@@ -38,7 +38,7 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
         }
         const peer = relationship.peer;
 
-        await this.relationshipsController.delete(relationship.id);
+        await this.relationshipsController.decompose(relationship.id);
         await this.messageController.deleteMessagesOfRelationship(relationship);
         await this.incomingRequestsController.deleteRequestsFromPeer(peer.address);
         await this.outgoingRequestsController.deleteRequestsToPeer(peer.address);

@@ -275,7 +275,7 @@ export class RelationshipsController extends TransportController {
         return await this.executeNonDeletingOperation(RelationshipOperation.AcceptanceOfReactivation, relationshipId);
     }
 
-    public async delete(relationshipId: CoreId): Promise<void> {
+    public async decompose(relationshipId: CoreId): Promise<void> {
         const relationship = await this.getRelationship(relationshipId);
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
