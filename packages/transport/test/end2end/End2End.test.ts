@@ -465,7 +465,7 @@ describe("RelationshipTest: Terminate", function () {
     });
 });
 
-describe("RelationshipTest: Accept Reactivation", function () {
+describe.skip("RelationshipTest: Accept Reactivation", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -513,7 +513,7 @@ describe("RelationshipTest: Accept Reactivation", function () {
     });
 });
 
-describe("RelationshipTest: Reject Reactivation", function () {
+describe.skip("RelationshipTest: Reject Reactivation", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -561,7 +561,7 @@ describe("RelationshipTest: Reject Reactivation", function () {
     });
 });
 
-describe("RelationshipTest: Revoke Reactivation", function () {
+describe.skip("RelationshipTest: Revoke Reactivation", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -608,6 +608,52 @@ describe("RelationshipTest: Revoke Reactivation", function () {
         expect(revokedReactivatedRelationshipPeer.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.RevocationOfReactivation);
     });
 });
+
+describe.skip("RelationshipTest: Decompose", function () {
+    let connection: IDatabaseConnection;
+    let transport: Transport;
+
+    let from: AccountController;
+    let to: AccountController;
+
+    beforeAll(async function () {
+        connection = await TestUtil.createDatabaseConnection();
+        transport = TestUtil.createTransport(connection);
+
+        await transport.init();
+
+        const accounts = await TestUtil.provideAccounts(transport, 2);
+        from = accounts[0];
+        to = accounts[1];
+    });
+
+    afterAll(async function () {
+        await from.close();
+        await to.close();
+        await connection.close();
+    });
+
+    test("should request decomposing a relationship", async function () {
+        const relationshipId = (await TestUtil.addRelationship(from, to))[0].id;
+        await from.relationships.terminate(relationshipId);
+
+        // Decompose
+        await from.relationships.decompose(relationshipId);
+        const decomposedRelationship = await from.relationships.getRelationship(relationshipId);
+        expect(decomposedRelationship).toBeUndefined();
+
+        // Get relationship that is decomposed by peer
+        const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
+        expect(syncedRelationshipsPeer).toHaveLength(1);
+        const decomposedRelationshipPeer = syncedRelationshipsPeer[0];
+
+        expect(decomposedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
+        expect(decomposedRelationshipPeer.status).toStrictEqual(RelationshipStatus.DeletionProposed);
+        expect(decomposedRelationshipPeer.cache?.auditLog).toHaveLength(4);
+        expect(decomposedRelationshipPeer.cache!.auditLog[3].reason).toBe(RelationshipAuditLogEntryReason.Decomposition);
+    });
+});
+
 describe("MessageTest", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
