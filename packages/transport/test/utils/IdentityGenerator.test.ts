@@ -1,5 +1,5 @@
 import { CoreBuffer, CryptoSignatureAlgorithm, CryptoSignatureKeypair, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreCrypto, IdentityUtil } from "../../src";
+import { CoreCrypto, enmeshedPrefix, IdentityUtil, Realm } from "../../src";
 
 describe("IdentityGeneratorTest", function () {
     describe("From", function () {
@@ -9,10 +9,10 @@ describe("IdentityGeneratorTest", function () {
         });
 
         test("should create a correct address object", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "id1");
+            const address = await IdentityUtil.createAddress(kp.publicKey, Realm.Prod);
             expect(address).toBeDefined();
             expect(address.address).toBeDefined();
-            expect(address.address.substr(0, 3)).toBe("id1");
+            expect(address.address.startsWith(enmeshedPrefix + Realm.Prod)).toBe(true);
         });
 
         test("should create a correct address object (test 0)", async function () {
@@ -22,63 +22,63 @@ describe("IdentityGeneratorTest", function () {
                 publicKey: buf,
                 algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519
             });
-            const address = await IdentityUtil.createAddress(pk, "id1");
+            const address = await IdentityUtil.createAddress(pk, Realm.Prod);
             expect(address).toBeDefined();
             expect(address.address).toBeDefined();
-            expect(address.address).toBe("id18uSgVGTSNqECvt1DJM3bZg6U8p6RSjott");
+            expect(address.address).toBe("did:e:prod.enmeshed.eu:dids:56b3f2a0c202e27229aa87");
         });
 
         test("should create a correct address object (testcases)", async function () {
             const addresses = [
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "fj0o9eOiPRswTZL6j9lE9TRvpDDnPRMF0gJeahz/W2c=",
-                    address: "id1QF24Gk2DfqCywRS7NpeH5iu7D4xvu6qv1"
+                    address: "did:e:prod.enmeshed.eu:dids:fef1992c5e529adc413288"
                 },
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "jRxGfZtQ8a90TmKCGk+dhuX1CBjgoXuldhNPwrjpWsw=",
-                    address: "id1HwY1TuyVBp3CmY3h18yTt1CKyu5qwB9wj"
+                    address: "did:e:prod.enmeshed.eu:dids:b9d25bd0a2bbd3aa48437c"
                 },
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "PEODpwvi7KxIVa4qeUXia9apMFvPMktdDHiDitlfbjE=",
-                    address: "id1LMp4k1XwxZ3WFXdAn9y12tv1ofe5so4kM"
+                    address: "did:e:prod.enmeshed.eu:dids:d459ff2144f0eac7aff554"
                 },
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "mJGmNbxiVZAPToRuk9O3NvdfsWl6V+7wzIc+/57bU08=",
-                    address: "id1McegXycvRoiJppS2LG25phn3jNveckFUL"
+                    address: "did:e:prod.enmeshed.eu:dids:e2208784ee2769c5d9684d"
                 },
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "l68K/zdNp1VLoswcHAqN6QUFwCMU6Yvzf7XiW2m1hRY=",
-                    address: "id193k6K5cJr94WJEWYb6Kei8zp5CGPyrQLS"
+                    address: "did:e:prod.enmeshed.eu:dids:5845cf29fbda2897892a9a"
                 },
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "Gl8XTo8qFuUM+ksXixwp4g/jf3H/hU1F8ETuYaHCM5I=",
-                    address: "id1BLrHAgDpimtLcGJGssMSm7bJHsvVe7CN"
+                    address: "did:e:prod.enmeshed.eu:dids:01f4bab09d757578bb4994"
                 },
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "rIS4kAzHXT7GgCA6Qm1ANlwM3x12QMSkeprHb6tjPyc=",
-                    address: "id1NjGvLfWPrQ34PXWRBNiTfXv9DFiDQHExx"
+                    address: "did:e:prod.enmeshed.eu:dids:ee5966a158f1dc4de5bd5c"
                 },
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "hg/cbeBvfNrMiJ0dW1AtWC4IQwG4gkuhzG2+z6bAoRU=",
-                    address: "id1Gda4aTXiBX9Pyc8UnmLaG44cX46umjnea"
+                    address: "did:e:prod.enmeshed.eu:dids:ab7475ba4070f29ce286fd"
                 },
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "kId+qWen/lKeTdyxcIQhkzvvvTU8wIJECfWUWbmRQRY=",
-                    address: "id17RDEphijMPFGLbhqLWWgJfatBANMruC8f"
+                    address: "did:e:prod.enmeshed.eu:dids:4664f42d7ca6480db07fdb"
                 },
                 {
-                    realm: "id1",
+                    realm: Realm.Prod,
                     publicKey: "NcqlzTEpSlKX9gmNBv41EjPRHpaNYwt0bxqh1bgyJzA=",
-                    address: "id19meHs4Di7JYNXoRPx9bFD6FUcpHFo3mBi"
+                    address: "did:e:prod.enmeshed.eu:dids:60326ff5075e0d7378990c"
                 }
             ];
 
@@ -95,31 +95,31 @@ describe("IdentityGeneratorTest", function () {
         });
 
         test("should positively check a correct address object (without giving public key and realm)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "id1");
+            const address = await IdentityUtil.createAddress(kp.publicKey, Realm.Prod);
             const valid = await IdentityUtil.checkAddress(address);
             expect(valid).toBe(true);
         });
 
         test("should positively check a correct address object (giving public key)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "id1");
+            const address = await IdentityUtil.createAddress(kp.publicKey, Realm.Prod);
             const valid = await IdentityUtil.checkAddress(address, kp.publicKey);
             expect(valid).toBe(true);
         });
 
         test("should positively check a correct address object (giving public key and realm)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "id1");
-            const valid = await IdentityUtil.checkAddress(address, kp.publicKey, "id1");
+            const address = await IdentityUtil.createAddress(kp.publicKey, Realm.Prod);
+            const valid = await IdentityUtil.checkAddress(address, kp.publicKey, Realm.Prod);
             expect(valid).toBe(true);
         });
 
         test("should negatively check an incorrect address object (wrong realm)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "id1");
-            const valid = await IdentityUtil.checkAddress(address, kp.publicKey, "id2");
+            const address = await IdentityUtil.createAddress(kp.publicKey, Realm.Prod);
+            const valid = await IdentityUtil.checkAddress(address, kp.publicKey, Realm.Dev);
             expect(valid).toBe(false);
         });
 
         test("should negatively check an incorrect address object (wrong checksum)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "id1");
+            const address = await IdentityUtil.createAddress(kp.publicKey, Realm.Prod);
             const index = 5;
             let replaceWith = "b";
             const currentString = address.address.substr(index, replaceWith.length);
@@ -128,14 +128,14 @@ describe("IdentityGeneratorTest", function () {
             }
             const wrongaddress = address.address.substr(0, index) + replaceWith + address.address.substr(index + replaceWith.length);
             address.address = wrongaddress;
-            const valid = await IdentityUtil.checkAddress(address, kp.publicKey, "id1");
+            const valid = await IdentityUtil.checkAddress(address, kp.publicKey, Realm.Prod);
             expect(valid).toBe(false);
         });
 
         test("should negatively check an incorrect address object (wrong publicKey)", async function () {
             const kp2 = await CoreCrypto.generateSignatureKeypair();
-            const address = await IdentityUtil.createAddress(kp.publicKey, "id1");
-            const valid = await IdentityUtil.checkAddress(address, kp2.publicKey, "id1");
+            const address = await IdentityUtil.createAddress(kp.publicKey, Realm.Prod);
+            const valid = await IdentityUtil.checkAddress(address, kp2.publicKey, Realm.Prod);
             expect(valid).toBe(false);
         });
         // eslint-disable-next-line jest/no-commented-out-tests
