@@ -26,7 +26,7 @@ describe("creation of RepositoryAttributes of Attribute Value Type Website", fun
         });
         expect(validWebsite.value.toString()).toBe("//google.it");
     });
-    test("can create a RepositoryAttribute of Attribute Value Type Website with a enhanced path", function () {
+    test("can create a RepositoryAttribute of Attribute Value Type Website with an enhanced path", function () {
         const validWebsite = Website.from({
             value: "https://enmeshed.de/blog/meilenstein-enmeshed-als-komponente-ablage-in-mein-bildungsraum-geht-in-die-testphase-der-beta-version/"
         });
@@ -34,10 +34,10 @@ describe("creation of RepositoryAttributes of Attribute Value Type Website", fun
             "https://enmeshed.de/blog/meilenstein-enmeshed-als-komponente-ablage-in-mein-bildungsraum-geht-in-die-testphase-der-beta-version/"
         );
     });
-    test("returns an error when trying to create an Attribute Value Type Website wich contains more than only the address of the website", function () {
+    test("returns an error when trying to create an Attribute Value Type EMailAddress with a blank in the value for EMailAddress", function () {
         const invalidWebsiteCall = () => {
             Website.from({
-                value: "Hugo https://inwind.it"
+                value: "https://inwind.test it"
             });
         };
         expect(invalidWebsiteCall).toThrow(
