@@ -8,6 +8,8 @@ import {
     AcceptRelationshipUseCase,
     CreateRelationshipRequest,
     CreateRelationshipUseCase,
+    DecomposeRelationshipRequest,
+    DecomposeRelationshipUseCase,
     GetAttributesForRelationshipRequest,
     GetAttributesForRelationshipResponse,
     GetAttributesForRelationshipUseCase,
@@ -45,6 +47,7 @@ export class RelationshipsFacade {
         @Inject private readonly acceptRelationshipReactivationUseCase: AcceptRelationshipReactivationUseCase,
         @Inject private readonly rejectRelationshipReactivationUseCase: RejectRelationshipReactivationUseCase,
         @Inject private readonly revokeRelationshipReactivationUseCase: RevokeRelationshipReactivationUseCase,
+        @Inject private readonly decomposeRelationshipUseCase: DecomposeRelationshipUseCase,
         @Inject private readonly getAttributesForRelationshipUseCase: GetAttributesForRelationshipUseCase
     ) {}
 
@@ -96,9 +99,9 @@ export class RelationshipsFacade {
         return await this.revokeRelationshipReactivationUseCase.execute(request);
     }
 
-    // public async deleteRelationship(request: DeleteRelationshipRequest): Promise<Result<RelationshipDTO>> {
-    //     return await this.deleteRelationshipUseCase.execute(request);
-    // }
+    public async decomposeRelationship(request: DecomposeRelationshipRequest): Promise<Result<null>> {
+        return await this.decomposeRelationshipUseCase.execute(request);
+    }
 
     public async getAttributesForRelationship(request: GetAttributesForRelationshipRequest): Promise<Result<GetAttributesForRelationshipResponse>> {
         return await this.getAttributesForRelationshipUseCase.execute(request);
