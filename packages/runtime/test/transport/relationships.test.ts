@@ -1,6 +1,14 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { GetRelationshipsQuery, IncomingRequestReceivedEvent, LocalAttributeDTO, OwnSharedAttributeSucceededEvent, PeerSharedAttributeSucceededEvent } from "../../src";
+import {
+    GetRelationshipsQuery,
+    IncomingRequestReceivedEvent,
+    LocalAttributeDTO,
+    OwnSharedAttributeSucceededEvent,
+    PeerSharedAttributeSucceededEvent,
+    RelationshipDTO,
+    RelationshipStatus
+} from "../../src";
 import {
     createTemplate,
     ensureActiveRelationship,
@@ -286,6 +294,7 @@ describe("Attributes for the relationship", () => {
 
 describe("RelationshipTermination", () => {
     let relationshipId: string;
+    let terminationResult: Result<RelationshipDTO, ApplicationError>;
     beforeAll(async () => {
         const requestContent = {
             content: {
@@ -300,8 +309,15 @@ describe("RelationshipTermination", () => {
         };
         await exchangeMessageWithRequest(services1, services2, requestContent);
         relationshipId = (await services1.transport.relationships.getRelationships({})).value[0].id;
-        await services1.transport.relationships.terminateRelationship({ relationshipId });
+        terminationResult = await services1.transport.relationships.terminateRelationship({ relationshipId });
     });
+
+    test("relationship status is terminated", async () => {
+        expect(terminationResult).toBeSuccessful();
+        const result = (await services1.transport.relationships.getRelationship({ id: relationshipId })).value;
+        expect(result.status).toBe(RelationshipStatus.Terminated);
+    });
+
     test("should not send a message", async () => {
         const result = await services1.transport.messages.sendMessage({
             recipients: [services2.address],

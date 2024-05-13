@@ -110,10 +110,6 @@ export class Transport {
         if (this._config.supportedIdentityVersion < 1) {
             throw new TransportError("The given supported identity version is invalid. The value must be 1 or higher.");
         }
-
-        if (this._config.realm.length !== 3) {
-            throw CoreErrors.general.realmLength();
-        }
     }
 
     public async init(): Promise<Transport> {
