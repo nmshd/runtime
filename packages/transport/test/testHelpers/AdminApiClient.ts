@@ -13,7 +13,9 @@ export class AdminApiClient {
         if (!adminAPIBaseUrl) throw new Error("Missing environment variable NMSHD_TEST_BASEURL_ADMIN_API");
         const csrf = await axios.get(`${adminAPIBaseUrl}/api/v1/xsrf`, {
             headers: {
+                /* eslint-disable @typescript-eslint/naming-convention */
                 "x-api-key": process.env.NMSHD_TEST_ADMIN_API_KEY!
+                /* eslint-enable @typescript-eslint/naming-convention */
             }
         });
 
