@@ -2,7 +2,6 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
     IdentityAttributeQuery,
     IQLQuery,
-    ProposeAttributeRequestItem,
     ProprietaryString,
     ReadAttributeRequestItem,
     RelationshipAttribute,
@@ -14,14 +13,12 @@ import {
 } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, Transport } from "@nmshd/transport";
 import {
-    AcceptProposeAttributeRequestItemParametersJSON,
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionController,
     ConsumptionIds,
     LocalRequest,
     LocalRequestStatus,
-    ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -35,7 +32,6 @@ describe("validateAttributeMatchesWithQuery", function () {
     let accountController: AccountController;
 
     let readProcessor: ReadAttributeRequestItemProcessor;
-    let proposeProcessor: ProposeAttributeRequestItemProcessor;
 
     let recipient: CoreAddress;
     const sender = CoreAddress.from("Sender");
@@ -56,7 +52,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         await connection.close();
     });
 
-    describe("ReadAttributeRequestItem with IdentityAttributeQuery", function () {
+    describe("IdentityAttributeQuery", function () {
         beforeEach(function () {
             readProcessor = new ReadAttributeRequestItemProcessor(consumptionController);
         });
@@ -344,7 +340,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
     });
 
-    describe("ReadAttributeRequestItem with IQLQuery", function () {
+    describe("IQLQuery", function () {
         beforeEach(function () {
             readProcessor = new ReadAttributeRequestItemProcessor(consumptionController);
         });
@@ -549,7 +545,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
     });
 
-    describe("ReadAttributeRequestItem with RelationshipAttributeQuery", function () {
+    describe("RelationshipAttributeQuery", function () {
         beforeEach(function () {
             readProcessor = new ReadAttributeRequestItemProcessor(consumptionController);
         });
@@ -1011,7 +1007,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
     });
 
-    describe("ReadAttributeRequestItem with ThirdPartyRelationshipAttributeQuery", function () {
+    describe("ThirdPartyRelationshipAttributeQuery", function () {
         beforeEach(function () {
             readProcessor = new ReadAttributeRequestItemProcessor(consumptionController);
         });
@@ -1271,88 +1267,6 @@ describe("validateAttributeMatchesWithQuery", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The provided Attribute is not valid in the queried time frame."
-            });
-        });
-    });
-
-    describe("ProposeAttributeRequestItem with IdentityAttributeQuery", function () {
-        beforeEach(function () {
-            proposeProcessor = new ProposeAttributeRequestItemProcessor(consumptionController);
-        });
-
-        test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const thirdPartyAttributeId = await ConsumptionIds.attribute.generate();
-            await consumptionController.attributes.createPeerLocalAttribute({
-                id: thirdPartyAttributeId,
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: aThirdParty
-                }),
-                peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
-            });
-
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: TestObjectFactory.createIdentityAttribute()
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
-                accept: true,
-                attributeId: thirdPartyAttributeId.toString()
-            };
-
-            const result = await proposeProcessor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
-            });
-        });
-
-        test("returns an error when the given Attribute's owner is not the current identity", async function () {
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: TestObjectFactory.createIdentityAttribute()
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
-                accept: true,
-                attribute: TestObjectFactory.createIdentityAttribute({ owner: aThirdParty }).toJSON()
-            };
-
-            const result = await proposeProcessor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
             });
         });
     });
