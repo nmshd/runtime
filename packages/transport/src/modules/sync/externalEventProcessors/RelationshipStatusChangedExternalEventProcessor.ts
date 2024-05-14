@@ -20,7 +20,7 @@ export class RelationshipStatusChangedExternalEventProcessor extends ExternalEve
             this.eventBus.publish(new RelationshipChangedEvent(this.ownAddress, relationship));
             return relationship;
         }
-      
+
         return;
     }
 }
