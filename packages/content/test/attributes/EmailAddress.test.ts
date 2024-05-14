@@ -24,7 +24,7 @@ describe("creation of RepositoryAttributes of Attribute value type EMailAddress"
             new ParsingError(
                 "EMailAddress",
                 "value",
-                "Value does not match regular expression /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][a-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[a-z0-9ÄäÖöÜüß](?:[a-zÄäÖöÜüß0-9-]{0,61}[a-zÄäÖöÜüß0-9]){0,1}[.])+[a-zÄäÖöÜüß0-9](?:[a-zÄäÖöÜüß0-9-]{0,61}[a-zÄäÖöÜüß0-9])$/i"
+                "Value does not match regular expression /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])+[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])$/"
             )
         );
     });
@@ -38,7 +38,7 @@ describe("creation of RepositoryAttributes of Attribute value type EMailAddress"
             new ParsingError(
                 "EMailAddress",
                 "value",
-                "Value does not match regular expression /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][a-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[a-z0-9ÄäÖöÜüß](?:[a-zÄäÖöÜüß0-9-]{0,61}[a-zÄäÖöÜüß0-9]){0,1}[.])+[a-zÄäÖöÜüß0-9](?:[a-zÄäÖöÜüß0-9-]{0,61}[a-zÄäÖöÜüß0-9])$/i"
+                "Value does not match regular expression /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])+[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])$/"
             )
         );
     });
@@ -52,7 +52,7 @@ describe("creation of RepositoryAttributes of Attribute value type EMailAddress"
             new ParsingError(
                 "EMailAddress",
                 "value",
-                "Value does not match regular expression /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][a-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[a-z0-9ÄäÖöÜüß](?:[a-zÄäÖöÜüß0-9-]{0,61}[a-zÄäÖöÜüß0-9]){0,1}[.])+[a-zÄäÖöÜüß0-9](?:[a-zÄäÖöÜüß0-9-]{0,61}[a-zÄäÖöÜüß0-9])$/i"
+                "Value does not match regular expression /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])+[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])$/"
             )
         );
     });
@@ -66,7 +66,7 @@ describe("creation of RepositoryAttributes of Attribute value type EMailAddress"
             new ParsingError(
                 "EMailAddress",
                 "value",
-                "Value does not match regular expression /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][a-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[a-z0-9ÄäÖöÜüß](?:[a-zÄäÖöÜüß0-9-]{0,61}[a-zÄäÖöÜüß0-9]){0,1}[.])+[a-zÄäÖöÜüß0-9](?:[a-zÄäÖöÜüß0-9-]{0,61}[a-zÄäÖöÜüß0-9])$/i"
+                "Value does not match regular expression /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])+[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])$/"
             )
         );
     });

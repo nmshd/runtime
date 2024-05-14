@@ -9,8 +9,7 @@ export abstract class AbstractEMailAddress extends AbstractString {
         min: 3,
         max: 254,
         regExp: new RegExp(
-            "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][a-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[a-z0-9\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df](?:[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9]){0,1}[.])+[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9](?:[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9])$",
-            "i"
+            /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[A-Za-z0-9\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df](?:[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9]){0,1}[.])+[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9](?:[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9])$/
         )
     })
     public override value: string;
@@ -20,7 +19,7 @@ export abstract class AbstractEMailAddress extends AbstractString {
             min: 3,
             max: 254,
             pattern:
-                "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][a-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[a-z0-9\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df](?:[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9]){0,1}[.])+[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9](?:[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[a-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9])$/i"
+                "/^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[A-Za-z0-9\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df](?:[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9]){0,1}[.])+[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9](?:[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9])$/"
         });
     }
 
