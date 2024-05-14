@@ -8,10 +8,9 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/transport";
 import _ from "lodash";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -48,55 +47,38 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             }
 
             if (typeof recipient !== "undefined") {
-                const ownSharedIdentityAttributeVersions = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
-                    requestItem.sourceAttributeId,
-                    [recipient],
-                    false
-                );
-                const sourceAttributeIdsOfOwnSharedIdentityAttributeVersions = ownSharedIdentityAttributeVersions.map((ownSharedIdentityAttribute) =>
-                    ownSharedIdentityAttribute.shareInfo?.sourceAttribute?.toString()
-                );
+                const query: any = { "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(), "shareInfo.peer": recipient.toString() };
 
-                let repositoryAttribute = foundAttribute;
-                if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(repositoryAttribute.id.toString())) {
+                if ((await this.consumptionController.attributes.getLocalAttributes(query)).length > 0) {
                     return ValidationResult.error(
                         CoreErrors.requests.invalidRequestItem(
                             `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has already been shared with the peer.`
                         )
                     );
                 }
-                let i = 0;
-                while (typeof repositoryAttribute.succeededBy !== "undefined" && i < 1000) {
-                    const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
-                    if (typeof successor === "undefined") {
-                        throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
-                    }
-                    if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
-                        return ValidationResult.error(
-                            CoreErrors.requests.invalidRequestItem(
-                                `The provided IdentityAttribute is outdated. You have already shared the successor '${successor.id.toString()}' of it.`
-                            )
-                        );
-                    }
-                    repositoryAttribute = successor;
-                    i++;
+
+                const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfRepositoryAttribute(foundAttribute, {
+                    "shareInfo.peer": recipient.toString()
+                });
+
+                if (ownSharedIdentityAttributeSuccessors.length > 0) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidRequestItem(
+                            `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute}' of it.`
+                        )
+                    );
                 }
 
-                let j = 0;
-                while (typeof repositoryAttribute.succeeds !== "undefined" && j < 1000) {
-                    const predecessor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeeds);
-                    if (typeof predecessor === "undefined") {
-                        throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeeds.toString());
-                    }
-                    if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(predecessor.id.toString())) {
-                        return ValidationResult.error(
-                            CoreErrors.requests.invalidRequestItem(
-                                `You have already shared the predecessor '${predecessor.id.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
-                            )
-                        );
-                    }
-                    repositoryAttribute = predecessor;
-                    j++;
+                const ownSharedIdentityAttributePredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfRepositoryAttribute(foundAttribute, {
+                    "shareInfo.peer": recipient.toString()
+                });
+
+                if (ownSharedIdentityAttributePredecessors.length > 0) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidRequestItem(
+                            `You have already shared the predecessor '${ownSharedIdentityAttributePredecessors[0].shareInfo?.sourceAttribute}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                        )
+                    );
                 }
             }
         }

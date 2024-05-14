@@ -1578,10 +1578,10 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "ProprietaryString",
-                        value: "My amazing string",
-                        title: "Nothing is this amazing"
+                        value: "AStringValue",
+                        title: "ATitle"
                     },
-                    key: "amazing",
+                    key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             });
@@ -1592,7 +1592,7 @@ describe("DeleteAttributeUseCases", () => {
                     items: [
                         ReadAttributeRequestItem.from({
                             query: ThirdPartyRelationshipAttributeQuery.from({
-                                key: "amazing",
+                                key: "AKey",
                                 owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                                 thirdParty: [services3.address]
                             }),
@@ -1686,10 +1686,10 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "ProprietaryString",
-                        value: "My amazing string",
-                        title: "Nothing is this amazing"
+                        value: "AStringValue",
+                        title: "ATitle"
                     },
-                    key: "amazing",
+                    key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             });
@@ -1700,7 +1700,7 @@ describe("DeleteAttributeUseCases", () => {
                     items: [
                         ReadAttributeRequestItem.from({
                             query: ThirdPartyRelationshipAttributeQuery.from({
-                                key: "amazing",
+                                key: "AKey",
                                 owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
                                 thirdParty: [services3.address]
                             }),

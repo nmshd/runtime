@@ -106,32 +106,16 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     );
                 }
 
-                const ownSharedIdentityAttributeVersions = await this.consumptionController.attributes.getSharedVersionsOfRepositoryAttribute(
-                    foundLocalAttribute.id,
-                    [requestInfo.peer],
-                    false
-                );
-                const sourceAttributeIdsOfOwnSharedIdentityAttributeVersions = ownSharedIdentityAttributeVersions.map((ownSharedIdentityAttribute) =>
-                    ownSharedIdentityAttribute.shareInfo?.sourceAttribute?.toString()
-                );
+                const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfRepositoryAttribute(foundLocalAttribute, {
+                    "shareInfo.peer": requestInfo.peer.toString()
+                });
 
-                let repositoryAttribute = foundLocalAttribute;
-                let i = 0;
-                const iterationLimit = 1000;
-                while (typeof repositoryAttribute.succeededBy !== "undefined" && i < iterationLimit) {
-                    const successor = await this.consumptionController.attributes.getLocalAttribute(repositoryAttribute.succeededBy);
-                    if (typeof successor === "undefined") {
-                        throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
-                    }
-                    if (sourceAttributeIdsOfOwnSharedIdentityAttributeVersions.includes(successor.id.toString())) {
-                        return ValidationResult.error(
-                            CoreErrors.requests.attributeQueryMismatch(
-                                `The provided IdentityAttribute is outdated. You have already shared the successor '${successor.id.toString()}' of it.`
-                            )
-                        );
-                    }
-                    repositoryAttribute = successor;
-                    i++;
+                if (ownSharedIdentityAttributeSuccessors.length > 0) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.attributeQueryMismatch(
+                            `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute}' of it.`
+                        )
+                    );
                 }
             }
         } else if (parsedParams.isWithNewAttribute()) {
