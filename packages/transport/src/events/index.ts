@@ -1,4 +1,3 @@
-export * from "./MessageDeletedEvent";
 export * from "./MessageDeliveredEvent";
 export * from "./MessageReceivedEvent";
 export * from "./MessageRecipientDeletedEvent";

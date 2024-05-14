@@ -291,7 +291,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async deleteAttributesSharedWithPeer(peer: ICoreAddress): Promise<void> {
         const attributes = await this.getLocalAttributes({ shareInfo: { peer: peer.toString() } });
-        await Promise.all(attributes.map((attribute) => this.deleteAttribute(attribute)));
+        await Promise.all(attributes.map((attribute) => this.deleteAttributeUnsafe(attribute.id)));
     }
 
     private async deleteChildAttributesOfComplexAttribute(complexAttribute: LocalAttribute): Promise<void> {
