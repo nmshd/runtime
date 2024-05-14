@@ -191,21 +191,21 @@ class Attributes {
 
 class IdentityDeletionProcess {
     public noActiveIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identity.noActiveIdentityDeletionProcess", "No active IdentityDeletionProcess found.");
+        return new ApplicationError("error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess", "No active IdentityDeletionProcess found.");
     }
 
     public noWaitingForApprovalIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess", "No IdentityDeletionProcess waiting for decision found.");
+        return new ApplicationError("error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess", "No IdentityDeletionProcess waiting for decision found.");
     }
 
     public noApprovedIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identity.noApprovedIdentityDeletionProcess", "No approved IdentityDeletionProcess found.");
+        return new ApplicationError("error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess", "No approved IdentityDeletionProcess found.");
     }
 
     public activeIdentityDeletionProcessAlreadyExists() {
         return new ApplicationError(
-            "error.runtime.identity.activeIdentityDeletionProcessAlreadyExists",
-            "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per identity."
+            "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists",
+            "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per Identity."
         );
     }
 }
