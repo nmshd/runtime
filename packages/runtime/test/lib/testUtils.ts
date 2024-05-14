@@ -236,6 +236,23 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
+export async function sendMessageToMultipleRecipients(transportServices: TransportServices, recipients: string[], content?: any, attachments?: string[]): Promise<MessageDTO> {
+    const response = await transportServices.messages.sendMessage({
+        recipients,
+        content: content ?? {
+            "@type": "Mail",
+            subject: "This is the mail subject",
+            body: "This is the mail body",
+            cc: [],
+            to: recipients
+        },
+        attachments
+    });
+    expect(response).toBeSuccessful();
+
+    return response.value;
+}
+
 export async function sendMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
     const createRequestResult = await sender.consumption.outgoingRequests.create(request);
     expect(createRequestResult).toBeSuccessful();
