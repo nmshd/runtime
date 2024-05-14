@@ -56,8 +56,8 @@ describe("IdentityDeletionProcess", () => {
             await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             const result = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(result).toBeAnError(
-                "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per identity.",
-                "error.runtime.identity.activeIdentityDeletionProcessAlreadyExists"
+                "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per Identity.",
+                "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists"
             );
         });
         test("should return an error trying to initiate an IdentityDeletionProcess if there already is one waiting for approval", async function () {
@@ -65,14 +65,14 @@ describe("IdentityDeletionProcess", () => {
             await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             const result = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(result).toBeAnError(
-                "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per identity.",
-                "error.runtime.identity.activeIdentityDeletionProcessAlreadyExists"
+                "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per Identity.",
+                "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists"
             );
         });
     });
 
     describe(GetActiveIdentityDeletionProcessUseCase.name, () => {
-        test("should get the active IdentityDeletionProcess without specifying an ID", async function () {
+        test("should get the active IdentityDeletionProcess", async function () {
             const initiateResult = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             const initiatedIdentityDeletionProcess = initiateResult.value;
 
@@ -83,9 +83,9 @@ describe("IdentityDeletionProcess", () => {
             expect(identityDeletionProcess).toStrictEqual(initiatedIdentityDeletionProcess);
         });
 
-        test("should return an error trying to get an IdentityDeletionProcess without specifying an ID if there is none active", async function () {
+        test("should return an error trying to get the active IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.getActiveIdentityDeletionProcess();
-            expect(result).toBeAnError("No active IdentityDeletionProcess found.", "error.runtime.identity.noActiveIdentityDeletionProcess");
+            expect(result).toBeAnError("No active IdentityDeletionProcess found.", "error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess");
         });
     });
 
@@ -169,7 +169,7 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to cancel an IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            expect(result).toBeAnError("No approved IdentityDeletionProcess found.", "error.runtime.identity.noApprovedIdentityDeletionProcess");
+            expect(result).toBeAnError("No approved IdentityDeletionProcess found.", "error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess");
         });
     });
 
@@ -185,7 +185,10 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to approve an IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
-            expect(result).toBeAnError("No IdentityDeletionProcess waiting for decision found.", "error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess");
+            expect(result).toBeAnError(
+                "No IdentityDeletionProcess waiting for decision found.",
+                "error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess"
+            );
         });
     });
 
@@ -201,7 +204,10 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to approve an IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
-            expect(result).toBeAnError("No IdentityDeletionProcess waiting for decision found.", "error.runtime.identity.noWaitingForApprovalIdentityDeletionProcess");
+            expect(result).toBeAnError(
+                "No IdentityDeletionProcess waiting for decision found.",
+                "error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess"
+            );
         });
     });
 });
