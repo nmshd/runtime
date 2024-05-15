@@ -457,7 +457,7 @@ describe("RelationshipDecomposition", () => {
         expect(anonymizedMessage.recipients).toBe([services3.address, addressPseudonym]);
 
         await services1.transport.relationships.decomposeRelationship({ relationshipId: relationshipId2 });
-        const anonymizedMessages2 = (await services1.transport.messages.getMessages({ query: { "recipients.address": addressPseudonym } })).value;
+        const anonymizedMessages2 = (await services1.transport.messages.getMessages({})).value;
         expect(anonymizedMessages2).toHaveLength(0);
     });
 
