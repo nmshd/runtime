@@ -386,6 +386,100 @@ describe("RelationshipDecomposition", () => {
 
     let decompositionResult: Result<null, ApplicationError>;
     beforeAll(async () => {
+        relationshipId = (await services1.transport.relationships.getRelationships({})).value[0].id;
+
+        await createRelationshipData(services1, services2);
+
+        const runtimeServices = await serviceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+        services3 = runtimeServices[0];
+        relationshipId2 = (await establishRelationship(services1.transport, services3.transport)).id;
+
+        await createRelationshipData(services1, services3);
+        multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).id;
+
+        await services1.transport.relationships.terminateRelationship({ relationshipId });
+        decompositionResult = await services1.transport.relationships.decomposeRelationship({ relationshipId });
+        await services2.eventBus.waitForEvent(RelationshipChangedEvent);
+
+        await services1.transport.relationships.terminateRelationship({ relationshipId: relationshipId2 });
+    });
+
+    test("relationship should be decomposed", async () => {
+        expect(decompositionResult).toBeSuccessful();
+        const ownRelationship = await services1.transport.relationships.getRelationship({ id: relationshipId });
+        expect(ownRelationship).toBeAnError(/.*/, "error.runtime.recordNotFound");
+
+        const peerRelationship = (await syncUntilHasRelationships(services2.transport))[0];
+        expect(peerRelationship.status).toBe(RelationshipStatus.DeletionProposed);
+    });
+
+    test("requests should be deleted", async () => {
+        const outgoingRequests = (await services1.consumption.outgoingRequests.getRequests({ query: { peer: services2.address } })).value;
+        expect(outgoingRequests).toHaveLength(0);
+
+        const incomingRequests = (await services1.consumption.incomingRequests.getRequests({ query: { peer: services2.address } })).value;
+        expect(incomingRequests).toHaveLength(0);
+
+        const outgoingRequestsControl = (await services1.consumption.outgoingRequests.getRequests({ query: { peer: services3.address } })).value;
+        expect(outgoingRequestsControl).not.toHaveLength(0);
+
+        const incomingRequestsControl = (await services1.consumption.incomingRequests.getRequests({ query: { peer: services3.address } })).value;
+        expect(incomingRequestsControl).not.toHaveLength(0);
+    });
+
+    test("attributes should be deleted", async () => {
+        const ownSharedAttributes = (await services1.consumption.attributes.getOwnSharedAttributes({ peer: services2.address })).value;
+        expect(ownSharedAttributes).toHaveLength(0);
+
+        const peerSharedAttributes = (await services1.consumption.attributes.getPeerSharedAttributes({ peer: services2.address })).value;
+        expect(peerSharedAttributes).toHaveLength(0);
+
+        const ownSharedAttributesControl = (await services1.consumption.attributes.getOwnSharedAttributes({ peer: services3.address })).value;
+        expect(ownSharedAttributesControl).not.toHaveLength(0);
+
+        const peerSharedAttributesControl = (await services1.consumption.attributes.getPeerSharedAttributes({ peer: services3.address })).value;
+        expect(peerSharedAttributesControl).not.toHaveLength(0);
+    });
+
+    test("notifications should be deleted", async () => {
+        const notifications = (await services1.consumption.notifications.getNotifications({ query: { peer: services2.address } })).value;
+        expect(notifications).toHaveLength(0);
+
+        const notificationsControl = (await services1.consumption.notifications.getNotifications({ query: { peer: services3.address } })).value;
+        expect(notificationsControl).not.toHaveLength(0);
+    });
+
+    test("messages should be deleted/anonymized", async () => {
+        const messagesToPeer = (await services1.transport.messages.getMessages({ query: { "recipients.address": services2.address } })).value;
+        expect(messagesToPeer).toHaveLength(0);
+
+        const messagesFromPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services2.address } })).value;
+        expect(messagesFromPeer).toHaveLength(0);
+
+        const messagesToPeerControl = (await services1.transport.messages.getMessages({ query: { "recipients.address": services3.address } })).value;
+        expect(messagesToPeerControl).not.toHaveLength(0);
+
+        const messagesFromPeerControl = (await services1.transport.messages.getMessages({ query: { createdBy: services3.address } })).value;
+        expect(messagesFromPeerControl).not.toHaveLength(0);
+
+        const addressPseudonym = (await getAddressPseudonym()).toString();
+        const anonymizedMessages = (await services1.transport.messages.getMessages({ query: { "recipients.address": addressPseudonym } })).value;
+        expect(anonymizedMessages).toHaveLength(1);
+        const anonymizedMessage = anonymizedMessages[0];
+        expect(anonymizedMessage.id).toBe(multipleRecipientsMessageId);
+        expect(anonymizedMessage.recipients).toBe([services3.address, addressPseudonym]);
+
+        await services1.transport.relationships.decomposeRelationship({ relationshipId: relationshipId2 });
+        const anonymizedMessages2 = (await services1.transport.messages.getMessages({})).value;
+        expect(anonymizedMessages2).toHaveLength(0);
+    });
+
+    async function getAddressPseudonym() {
+        const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
+        return await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, Realm.Prod);
+    }
+
+    async function createRelationshipData(services1: TestRuntimeServices, services2: TestRuntimeServices) {
         const requestContent = {
             content: {
                 items: [
@@ -410,6 +504,7 @@ describe("RelationshipDecomposition", () => {
                 }
             }
         });
+
         await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
             content: {
                 value: {
@@ -418,72 +513,5 @@ describe("RelationshipDecomposition", () => {
                 }
             }
         });
-
-        const runtimeServices = await serviceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
-        services3 = runtimeServices[0];
-        relationshipId2 = (await establishRelationship(services1.transport, services3.transport)).id;
-        multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).id;
-
-        relationshipId = (await services1.transport.relationships.getRelationships({})).value[0].id;
-        await services1.transport.relationships.terminateRelationship({ relationshipId });
-        decompositionResult = await services1.transport.relationships.decomposeRelationship({ relationshipId });
-        await services2.eventBus.waitForEvent(RelationshipChangedEvent);
-
-        await services1.transport.relationships.terminateRelationship({ relationshipId: relationshipId2 });
-        decompositionResult = await services1.transport.relationships.decomposeRelationship({ relationshipId: relationshipId2 });
-    });
-
-    test("relationship should be decomposed", async () => {
-        expect(decompositionResult).toBeSuccessful();
-        const ownRelationship = await services1.transport.relationships.getRelationship({ id: relationshipId });
-        expect(ownRelationship).toBeAnError(/.*/, "error.runtime.recordNotFound");
-
-        const peerRelationship = (await syncUntilHasRelationships(services2.transport))[0];
-        expect(peerRelationship.status).toBe(RelationshipStatus.DeletionProposed);
-    });
-
-    test("messages should be deleted/anonymized", async () => {
-        const messagesToPeer = (await services1.transport.messages.getMessages({ query: { "recipients.address": services2.address } })).value;
-        expect(messagesToPeer).toHaveLength(0);
-
-        const messagesFromPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services2.address } })).value;
-        expect(messagesFromPeer).toHaveLength(0);
-
-        const addressPseudonym = (await getAddressPseudonym()).toString();
-        const anonymizedMessages = (await services1.transport.messages.getMessages({ query: { "recipients.address": addressPseudonym } })).value;
-        expect(anonymizedMessages).toHaveLength(1);
-        const anonymizedMessage = anonymizedMessages[0];
-        expect(anonymizedMessage.id).toBe(multipleRecipientsMessageId);
-        expect(anonymizedMessage.recipients).toBe([services3.address, addressPseudonym]);
-
-        await services1.transport.relationships.decomposeRelationship({ relationshipId: relationshipId2 });
-        const anonymizedMessages2 = (await services1.transport.messages.getMessages({})).value;
-        expect(anonymizedMessages2).toHaveLength(0);
-    });
-
-    test("requests should be deleted", async () => {
-        const outgoingRequests = (await services1.consumption.outgoingRequests.getRequests({ query: { peer: services2.address } })).value;
-        expect(outgoingRequests).toHaveLength(0);
-
-        const incomingRequests = (await services1.consumption.incomingRequests.getRequests({ query: { peer: services2.address } })).value;
-        expect(incomingRequests).toHaveLength(0);
-    });
-
-    test("attributes should be deleted", async () => {
-        const ownSharedAttributes = (await services1.consumption.attributes.getOwnSharedAttributes({ peer: services2.address })).value;
-        expect(ownSharedAttributes).toHaveLength(0);
-
-        const peerSharedAttributes = (await services1.consumption.attributes.getPeerSharedAttributes({ peer: services2.address })).value;
-        expect(peerSharedAttributes).toHaveLength(0);
-    });
-
-    test("notifications should be deleted", async () => {
-        const notifications = (await services1.consumption.notifications.getNotifications({ query: { peer: services2.address } })).value;
-        expect(notifications).toHaveLength(0);
-    });
-
-    async function getAddressPseudonym() {
-        const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
-        return await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, Realm.Prod);
     }
 });
