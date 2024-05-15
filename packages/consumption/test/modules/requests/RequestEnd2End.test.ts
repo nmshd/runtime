@@ -1,6 +1,6 @@
 /* eslint-disable jest/expect-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AcceptResponseItem, RelationshipCreationContent, RelationshipTemplateContent, Request, Response, ResponseWrapper } from "@nmshd/content";
+import { AcceptResponseItem, RelationshipCreationChangeRequestContent, RelationshipTemplateContent, Request, Response, ResponseWrapper } from "@nmshd/content";
 import { AccountController, CoreDate, Message, Relationship, RelationshipTemplate, Transport } from "@nmshd/transport";
 import { ConsumptionController, LocalRequest, LocalRequestStatus } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
@@ -10,7 +10,7 @@ import { TestRequestItemProcessor } from "./testHelpers/TestRequestItemProcessor
 let connection: IDatabaseConnection;
 let transport: Transport;
 
-describe("End2End Request/Response via Relationship Template", function () {
+describe("End2End Request/Response via Relationship Template/ChangeRequest", function () {
     let sAccountController: AccountController;
     let sConsumptionController: ConsumptionController;
     let rAccountController: AccountController;
@@ -22,9 +22,6 @@ describe("End2End Request/Response via Relationship Template", function () {
     let rRelationship: Relationship;
     let sRelationship: Relationship;
     let sLocalRequest: LocalRequest;
-
-    let sCreationContent: RelationshipCreationContent;
-    let rCreationContent: RelationshipCreationContent;
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
@@ -88,18 +85,19 @@ describe("End2End Request/Response via Relationship Template", function () {
         });
     });
 
-    test("recipient: create Relationship with Response in Relationship Creation Content", async function () {
+    test("recipient: create Relationship with Response in Relationship Change", async function () {
         rRelationship = await rAccountController.relationships.sendRelationship({
             template: rTemplate,
-            creationContent: RelationshipCreationContent.from({ response: rLocalRequest.response!.content })
+            content: RelationshipCreationChangeRequestContent.from({
+                response: rLocalRequest.response!.content
+            })
         });
-        rCreationContent = rRelationship.cache?.creationContent as RelationshipCreationContent;
     });
 
     test("recipient: complete Local Request", async function () {
         rLocalRequest = await rConsumptionController.incomingRequests.complete({
             requestId: rLocalRequest.id,
-            responseSourceObject: rRelationship
+            responseSourceObject: rRelationship.cache!.changes[0]
         });
     });
 
@@ -109,12 +107,11 @@ describe("End2End Request/Response via Relationship Template", function () {
     });
 
     test("sender: create Local Request and Response from Relationship Change", async function () {
-        sCreationContent = sRelationship.cache!.creationContent! as RelationshipCreationContent;
-        const response = sCreationContent.response;
+        const response = (sRelationship.cache!.changes[0].request.content as RelationshipCreationChangeRequestContent).response;
 
         sLocalRequest = await sConsumptionController.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             template: sTemplate,
-            responseSource: sRelationship,
+            responseSource: sRelationship.cache!.changes[0],
             response
         });
     });
@@ -137,8 +134,8 @@ describe("End2End Request/Response via Relationship Template", function () {
         expect(sLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
         expect(rLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
 
-        expect(sCreationContent.response).toBeInstanceOf(Response);
-        expect(rCreationContent.response).toBeInstanceOf(Response);
+        expect((sRelationship.cache!.changes[0].request.content as RelationshipCreationChangeRequestContent).response).toBeInstanceOf(Response);
+        expect((rRelationship.cache!.changes[0].request.content as RelationshipCreationChangeRequestContent).response).toBeInstanceOf(Response);
 
         expect(sLocalRequest.response!.content.items[0]).toBeInstanceOf(AcceptResponseItem);
         expect(rLocalRequest.response!.content.items[0]).toBeInstanceOf(AcceptResponseItem);

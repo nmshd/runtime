@@ -18,7 +18,7 @@ export interface LocalRequestSourceDTO {
 }
 
 export interface LocalResponseSourceDTO {
-    type: "Message" | "Relationship";
+    type: "Message" | "RelationshipChange";
     reference: string;
 }
 

@@ -10,7 +10,7 @@ import {
     IncomingRequestStatusChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestCreatedEvent,
-    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeDeletedByOwnerEvent,
     OwnSharedAttributeSucceededEvent,
@@ -158,8 +158,8 @@ export class EventProxy {
 
             this.targetEventBus.publish(new OutgoingRequestCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
 
-            if (event.data.response?.source?.type === "Relationship") {
-                this.targetEventBus.publish(new OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
+            if (event.data.response?.source?.type === "RelationshipChange") {
+                this.targetEventBus.publish(new OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
             }
         });
 

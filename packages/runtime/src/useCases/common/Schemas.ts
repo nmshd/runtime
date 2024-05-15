@@ -3054,7 +3054,7 @@ export const CompleteIncomingRequestRequest: any = {
                             "$ref": "#/definitions/MessageIdString"
                         },
                         {
-                            "$ref": "#/definitions/RelationshipIdString"
+                            "$ref": "#/definitions/RelationshipChangeIdString"
                         }
                     ]
                 }
@@ -3072,9 +3072,9 @@ export const CompleteIncomingRequestRequest: any = {
             "type": "string",
             "pattern": "MSG[A-Za-z0-9]{17}"
         },
-        "RelationshipIdString": {
+        "RelationshipChangeIdString": {
             "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
+            "pattern": "RCH[A-Za-z0-9]{17}"
         }
     }
 }
@@ -5422,7 +5422,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "responseSourceId": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/RelationshipIdString"
+                            "$ref": "#/definitions/RelationshipChangeIdString"
                         },
                         {
                             "$ref": "#/definitions/MessageIdString"
@@ -5444,9 +5444,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "type": "string",
             "pattern": "RLT[A-Za-z0-9]{17}"
         },
-        "RelationshipIdString": {
+        "RelationshipChangeIdString": {
             "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
+            "pattern": "RCH[A-Za-z0-9]{17}"
         },
         "MessageIdString": {
             "type": "string",
@@ -21434,25 +21434,35 @@ export const SendMessageRequest: any = {
     }
 }
 
-export const AcceptRelationshipRequest: any = {
+export const AcceptRelationshipChangeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptRelationshipRequest",
+    "$ref": "#/definitions/AcceptRelationshipChangeRequest",
     "definitions": {
-        "AcceptRelationshipRequest": {
+        "AcceptRelationshipChangeRequest": {
             "type": "object",
             "properties": {
                 "relationshipId": {
                     "$ref": "#/definitions/RelationshipIdString"
-                }
+                },
+                "changeId": {
+                    "$ref": "#/definitions/RelationshipChangeIdString"
+                },
+                "content": {}
             },
             "required": [
-                "relationshipId"
+                "relationshipId",
+                "changeId",
+                "content"
             ],
             "additionalProperties": false
         },
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
+        },
+        "RelationshipChangeIdString": {
+            "type": "string",
+            "pattern": "RCH[A-Za-z0-9]{17}"
         }
     }
 }
@@ -21467,11 +21477,11 @@ export const CreateRelationshipRequest: any = {
                 "templateId": {
                     "$ref": "#/definitions/RelationshipTemplateIdString"
                 },
-                "creationContent": {}
+                "content": {}
             },
             "required": [
                 "templateId",
-                "creationContent"
+                "content"
             ],
             "additionalProperties": false
         },
@@ -21619,48 +21629,68 @@ export const GetRelationshipsRequest: any = {
     }
 }
 
-export const RejectRelationshipRequest: any = {
+export const RejectRelationshipChangeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RejectRelationshipRequest",
+    "$ref": "#/definitions/RejectRelationshipChangeRequest",
     "definitions": {
-        "RejectRelationshipRequest": {
+        "RejectRelationshipChangeRequest": {
             "type": "object",
             "properties": {
                 "relationshipId": {
                     "$ref": "#/definitions/RelationshipIdString"
-                }
+                },
+                "changeId": {
+                    "$ref": "#/definitions/RelationshipChangeIdString"
+                },
+                "content": {}
             },
             "required": [
-                "relationshipId"
+                "relationshipId",
+                "changeId",
+                "content"
             ],
             "additionalProperties": false
         },
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
+        },
+        "RelationshipChangeIdString": {
+            "type": "string",
+            "pattern": "RCH[A-Za-z0-9]{17}"
         }
     }
 }
 
-export const RevokeRelationshipRequest: any = {
+export const RevokeRelationshipChangeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RevokeRelationshipRequest",
+    "$ref": "#/definitions/RevokeRelationshipChangeRequest",
     "definitions": {
-        "RevokeRelationshipRequest": {
+        "RevokeRelationshipChangeRequest": {
             "type": "object",
             "properties": {
                 "relationshipId": {
                     "$ref": "#/definitions/RelationshipIdString"
-                }
+                },
+                "changeId": {
+                    "$ref": "#/definitions/RelationshipChangeIdString"
+                },
+                "content": {}
             },
             "required": [
-                "relationshipId"
+                "relationshipId",
+                "changeId",
+                "content"
             ],
             "additionalProperties": false
         },
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
+        },
+        "RelationshipChangeIdString": {
+            "type": "string",
+            "pattern": "RCH[A-Za-z0-9]{17}"
         }
     }
 }

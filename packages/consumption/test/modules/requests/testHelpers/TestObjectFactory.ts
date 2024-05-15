@@ -5,6 +5,7 @@ import {
     IdentityAttribute,
     IIdentityAttribute,
     IRelationshipAttribute,
+    IRelationshipCreationChangeRequestContent,
     IRelationshipTemplateContent,
     IRequest,
     IResponse,
@@ -27,11 +28,13 @@ import {
     Identity,
     IMessage,
     IRelationship,
+    IRelationshipChange,
     IRelationshipTemplate,
     Message,
     Realm,
     Relationship,
-    RelationshipAuditLogEntryReason,
+    RelationshipChangeStatus,
+    RelationshipChangeType,
     RelationshipStatus,
     RelationshipTemplate,
     RelationshipTemplatePublicKey
@@ -55,26 +58,21 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
-                    auditLog: [
+                    changes: [
                         {
-                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("id2"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: RelationshipStatus.Pending
-                        },
-
-                        {
-                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("id1"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
-                            oldStatus: RelationshipStatus.Pending,
-                            newStatus: RelationshipStatus.Active
+                            id: CoreId.from("RELCH1"),
+                            type: RelationshipChangeType.Creation,
+                            status: RelationshipChangeStatus.Accepted,
+                            relationshipId: CoreId.from("REL1"),
+                            request: {
+                                createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                                content: {},
+                                createdBy: CoreAddress.from("id1"),
+                                createdByDevice: CoreId.from("DEV1")
+                            }
                         }
                     ],
                     template: this.createIncomingRelationshipTemplate()
@@ -280,32 +278,49 @@ export class TestObjectFactory {
         return RelationshipTemplate.from(this.createIncomingIRelationshipTemplate());
     }
 
-    public static createIRelationship(): IRelationship {
+    public static createIncomingIRelationshipChange(type: RelationshipChangeType, requestId?: string): IRelationshipChange {
         return {
             // @ts-expect-error
-            "@type": "Relationship",
-            id: CoreId.from("REL1"),
-            status: RelationshipStatus.Pending,
-            relationshipSecretId: CoreId.from("REL1"),
-            peer: {
-                address: CoreAddress.from("id2"),
-                publicKey: CryptoSignaturePublicKey.from({
-                    algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
-                    publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
-                }),
-                realm: Realm.Prod
-            },
-            cache: {
-                template: this.createIncomingIRelationshipTemplate(),
-                auditLog: [
-                    {
-                        createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                        createdBy: CoreAddress.from("id2"),
-                        createdByDevice: CoreId.from("DVC1"),
-                        reason: RelationshipAuditLogEntryReason.Creation,
-                        newStatus: RelationshipStatus.Active
-                    }
-                ]
+            "@type": "RelationshipChange",
+            id: CoreId.from("RCH1"),
+            relationshipId: CoreId.from("REL1"),
+            type: type,
+            status: RelationshipChangeStatus.Pending,
+            request: {
+                createdAt: CoreDate.utc(),
+                createdBy: CoreAddress.from("id1"),
+                createdByDevice: CoreId.from("DVC1"),
+                content: {
+                    "@type": "RelationshipCreationChangeRequestContent",
+                    response: {
+                        "@type": "Response",
+                        result: ResponseResult.Accepted,
+                        items: [
+                            {
+                                // @ts-expect-error
+                                "@type": "AcceptResponseItem",
+                                result: ResponseItemResult.Accepted
+                            }
+                        ],
+                        requestId: CoreId.from(requestId ?? "REQ1")
+                    } as IResponse
+                } as IRelationshipCreationChangeRequestContent
+            }
+        };
+    }
+
+    public static createOutgoingIRelationshipChange(type: RelationshipChangeType, sender: CoreAddress): IRelationshipChange {
+        return {
+            // @ts-expect-error
+            "@type": "RelationshipChange",
+            id: CoreId.from("RCH1"),
+            relationshipId: CoreId.from("REL1"),
+            type: type,
+            status: RelationshipChangeStatus.Pending,
+            request: {
+                createdAt: CoreDate.utc(),
+                createdBy: sender,
+                createdByDevice: CoreId.from("DVC1")
             }
         };
     }

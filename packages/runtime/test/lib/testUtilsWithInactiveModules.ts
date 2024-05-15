@@ -1,4 +1,4 @@
-import { IResponse, RelationshipCreationContent } from "@nmshd/content";
+import { IResponse, RelationshipCreationChangeRequestContent } from "@nmshd/content";
 import { CreateOutgoingRequestRequest, LocalRequestDTO, MessageDTO, RelationshipDTO } from "src";
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { exchangeMessageWithRequest, exchangeTemplate, syncUntilHasMessageWithResponse } from "./testUtils";
@@ -121,16 +121,16 @@ export async function exchangeTemplateAndReceiverSendsResponse(
 
     let relationship;
     if (actionLowerCase === "accept") {
-        const creationContent = RelationshipCreationContent.from({ response: decidedRequest.response!.content as unknown as IResponse });
-        const result = await rRuntimeServices.transport.relationships.createRelationship({ creationContent, templateId });
+        const content = RelationshipCreationChangeRequestContent.from({ response: decidedRequest.response!.content as unknown as IResponse });
+        const result = await rRuntimeServices.transport.relationships.createRelationship({ content, templateId });
 
         expect(result).toBeSuccessful();
 
         relationship = result.value;
+
         const rRelationshipChange = result.value.changes[0];
 
         expect(rRelationshipChange.request.content["@type"]).toBe("RelationshipCreationChangeRequestContent");
-        expect(relationship.creationContent["@type"]).toBe("RelationshipCreationContent");
     }
     return { request, relationship };
 }

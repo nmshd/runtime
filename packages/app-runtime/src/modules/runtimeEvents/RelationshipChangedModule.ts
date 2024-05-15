@@ -1,4 +1,4 @@
-import { RelationshipAuditLogEntryReason, RelationshipChangedEvent } from "@nmshd/runtime";
+import { RelationshipChangedEvent } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { OnboardingChangeReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
@@ -18,28 +18,20 @@ export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChan
 
     private async handleRelationshipChanged(event: RelationshipChangedEvent) {
         const relationship = event.data;
+        // Only listen for the creation change (the first one)
+        if (relationship.changes.length !== 1) return;
 
-        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
+        const change = relationship.changes[0];
 
-        // Do not process changes that were created by the current user
-        if (lastAuditLogEntry.createdBy === event.eventTargetAddress) return;
+        // response doest not exist and request created by the current identity
+        if (!change.response && change.request.createdBy === event.eventTargetAddress) return;
 
-        switch (lastAuditLogEntry.reason) {
-            case RelationshipAuditLogEntryReason.Creation:
-            case RelationshipAuditLogEntryReason.AcceptanceOfCreation:
-            case RelationshipAuditLogEntryReason.RevocationOfCreation:
-            case RelationshipAuditLogEntryReason.RejectionOfCreation:
-                break;
-
-            default:
-                return;
-        }
+        // response exists and created by the current identity
+        if (change.response && change.response.createdBy === event.eventTargetAddress) return;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const relationshipDVO = await services.dataViewExpander.expandRelationshipDTO(relationship);
-
-        const eventToPublish = new OnboardingChangeReceivedEvent(event.eventTargetAddress, relationship, lastAuditLogEntry, relationshipDVO);
-        this.runtime.eventBus.publish(eventToPublish);
+        this.runtime.eventBus.publish(new OnboardingChangeReceivedEvent(event.eventTargetAddress, change, relationship, relationshipDVO));
     }
 
     public stop(): void {

@@ -3,7 +3,6 @@ import {
     GivenName,
     IdentityAttribute,
     RelationshipCreationChangeRequestContentJSON,
-    RelationshipCreationContentJSON,
     RelationshipTemplateContentJSON,
     ResponseItemJSON,
     ResponseItemResult,
@@ -18,7 +17,7 @@ import {
     MessageProcessedEvent,
     MessageSentEvent,
     OutgoingRequestCreatedAndCompletedEvent,
-    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     RelationshipStatus,
     RelationshipTemplateDTO,
@@ -100,8 +99,10 @@ describe("RequestModule", () => {
                 const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
                 await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
                 const relationship = (await syncUntilHasRelationships(sTransportServices, 1))[0];
-                await sTransportServices.relationships.acceptRelationship({
-                    relationshipId: relationship.id
+                await sTransportServices.relationships.acceptRelationshipChange({
+                    relationshipId: relationship.id,
+                    changeId: relationship.changes[0].id,
+                    content: {}
                 });
             }
         }
@@ -182,13 +183,10 @@ describe("RequestModule", () => {
 
             const relationship = relationships[0];
 
-            const creationContent = relationship.creationContent as RelationshipCreationContentJSON;
-            expect(creationContent["@type"]).toBe("RelationshipCreationContent");
-
             const creationChangeRequestContent = relationship.changes[0].request.content as RelationshipCreationChangeRequestContentJSON;
             expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationChangeRequestContent");
 
-            const response = creationContent.response;
+            const response = creationChangeRequestContent.response;
             const responseItems = response.items;
             expect(responseItems).toHaveLength(1);
 
@@ -196,12 +194,12 @@ describe("RequestModule", () => {
             expect(responseItem["@type"]).toBe("AcceptResponseItem");
             expect(responseItem.result).toBe(ResponseItemResult.Accepted);
 
-            await expect(sEventBus).toHavePublished(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent, (e) => e.data.id === response.requestId);
+            await expect(sEventBus).toHavePublished(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, (e) => e.data.id === response.requestId);
 
             const requestsResult = await sConsumptionServices.outgoingRequests.getRequest({ id: response.requestId });
             expect(requestsResult).toBeSuccessful();
 
-            await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
+            await sTransportServices.relationships.acceptRelationshipChange({ relationshipId: relationship.id, changeId: relationship.changes[0].id, content: {} });
             await syncUntilHasRelationships(rTransportServices, 1);
         });
 

@@ -8,7 +8,7 @@ export * from "./MailReceivedEvent";
 export * from "./MessageProcessedEvent";
 export * from "./OutgoingRequestCreatedAndCompletedEvent";
 export * from "./OutgoingRequestCreatedEvent";
-export * from "./OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent";
+export * from "./OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent";
 export * from "./OutgoingRequestStatusChangedEvent";
 export * from "./OwnSharedAttributeDeletedByOwnerEvent";
 export * from "./OwnSharedAttributeSucceededEvent";

@@ -1,4 +1,4 @@
-import { Event, EventBus } from "@js-soft/ts-utils";
+import { EventBus } from "@js-soft/ts-utils";
 import { RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
 import {
     CoreAddress,
@@ -8,6 +8,7 @@ import {
     ICoreId,
     Message,
     Relationship,
+    RelationshipChange,
     RelationshipTemplate,
     SynchronizedCollection,
     CoreErrors as TransportCoreErrors
@@ -126,7 +127,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     public async createAndCompleteFromRelationshipTemplateResponse(params: ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters): Promise<LocalRequest> {
         const parsedParams = CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters.from(params);
 
-        const peer = parsedParams.responseSource instanceof Relationship ? parsedParams.responseSource.peer.address : parsedParams.responseSource.cache!.createdBy;
+        const peer = parsedParams.responseSource instanceof RelationshipChange ? parsedParams.responseSource.request.createdBy : parsedParams.responseSource.cache!.createdBy;
         const response = parsedParams.response;
         const requestId = response.requestId;
 
@@ -136,7 +137,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         }
 
         // checking for an active relationship is not secure as in the meantime the relationship could have been accepted
-        const isFromNewRelationship = parsedParams.responseSource instanceof Relationship && parsedParams.responseSource.cache!.auditLog.length === 1;
+        const isFromNewRelationship = parsedParams.responseSource instanceof RelationshipChange && parsedParams.responseSource.type === "Creation";
 
         const requestContent = isFromNewRelationship ? templateContent.onNewRelationship : templateContent.onExistingRelationship;
 
@@ -219,13 +220,12 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    private async _complete(requestId: CoreId, responseSourceObject: Message | Relationship, receivedResponse: Response): Promise<LocalRequest> {
+    private async _complete(requestId: CoreId, responseSourceObject: Message | RelationshipChange, receivedResponse: Response): Promise<LocalRequest> {
         const request = await this.getOrThrow(requestId);
 
         this.assertRequestStatus(request, LocalRequestStatus.Open, LocalRequestStatus.Expired);
 
-        const responseSourceObjectCreationDate =
-            responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.cache!.auditLog[0].createdAt;
+        const responseSourceObjectCreationDate = responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.request.createdAt;
         if (request.status === LocalRequestStatus.Expired && request.isExpired(responseSourceObjectCreationDate)) {
             throw new ConsumptionError("Cannot complete an expired request with a response that was created before the expiration date");
         }
@@ -238,12 +238,12 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
         await this.applyItems(request.content.items, receivedResponse.items, request);
 
-        let responseSource: "Message" | "Relationship";
+        let responseSource: "Message" | "RelationshipChange";
 
         if (responseSourceObject instanceof Message) {
             responseSource = "Message";
-        } else if (responseSourceObject instanceof Relationship) {
-            responseSource = "Relationship";
+        } else if (responseSourceObject instanceof RelationshipChange) {
+            responseSource = "RelationshipChange";
         } else {
             throw new ConsumptionError("Invalid responseSourceObject");
         }
@@ -308,10 +308,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     private async applyItem(requestItem: RequestItem, responseItem: ResponseItem, request: LocalRequest) {
         const processor = this.processorRegistry.getProcessorForItem(requestItem);
-        const event = await processor.applyIncomingResponseItem(responseItem, requestItem, request);
-        if (event instanceof Event) {
-            this.eventBus.publish(event);
-        }
+        await processor.applyIncomingResponseItem(responseItem, requestItem, request);
     }
 
     public async getOutgoingRequests(query?: any): Promise<LocalRequest[]> {

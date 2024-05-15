@@ -245,7 +245,7 @@ export class TestUtil {
 
         const relRequest = await to.relationships.sendRelationship({
             template: templateTo,
-            creationContent: requestContent ?? {
+            content: requestContent ?? {
                 metadata: { mycontent: "request" }
             }
         });
@@ -256,7 +256,7 @@ export class TestUtil {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
+        const acceptedRelationshipFromSelf = await from.relationships.acceptChange(pendingRelationship.cache!.creationChange, {});
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         // Get accepted relationship
@@ -351,7 +351,7 @@ export class TestUtil {
             content: "request"
         };
 
-        return await account.relationships.sendRelationship({ template, creationContent: content });
+        return await account.relationships.sendRelationship({ template, content });
     }
 
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {

@@ -11,7 +11,7 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, RelationshipChangeType, TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,
     ErrorValidationResult,
@@ -232,23 +232,23 @@ describe("OutgoingRequestsController", function () {
     });
 
     describe("CreateFromRelationshipTemplateResponse", function () {
-        describe("with a RelationshipCreation", function () {
+        describe("with a RelationshipCreationChange", function () {
             test("combines calls to create, sent and complete", async function () {
-                await When.iCreateAnOutgoingRequestFromRelationshipCreation();
+                await When.iCreateAnOutgoingRequestFromRelationshipCreationChange();
                 await Then.theCreatedOutgoingRequestHasAllProperties();
                 await Then.theRequestIsInStatus(LocalRequestStatus.Completed);
                 await Then.theRequestHasItsSourcePropertySet();
                 await Then.theRequestHasItsResponsePropertySetCorrectly(ResponseItemResult.Accepted);
                 await Then.theResponseHasItsSourcePropertySetCorrectly({
-                    responseSourceType: "Relationship"
+                    responseSourceType: "RelationshipChange"
                 });
                 await Then.theNewRequestIsPersistedInTheDatabase();
                 await Then.eventsHaveBeenPublished(OutgoingRequestCreatedAndCompletedEvent);
             });
 
             test("uses the id from the response for the created Local Request", async function () {
-                await When.iCreateAnOutgoingRequestFromRelationshipCreationWith({
-                    responseSource: TestObjectFactory.createIRelationship(),
+                await When.iCreateAnOutgoingRequestFromRelationshipCreationChangeWith({
+                    responseSource: TestObjectFactory.createIncomingIRelationshipChange(RelationshipChangeType.Creation, "requestIdReceivedFromPeer"),
                     response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
 
@@ -260,14 +260,14 @@ describe("OutgoingRequestsController", function () {
             test("create an outgoing request from relationship creation with an active relationship", async function () {
                 await Given.anActiveRelationshipToIdentity();
 
-                await When.iCreateAnOutgoingRequestFromRelationshipCreationWith({
+                await When.iCreateAnOutgoingRequestFromRelationshipCreationChangeWith({
                     template: TestObjectFactory.createOutgoingIRelationshipTemplate(
                         context.currentIdentity,
                         RelationshipTemplateContent.from({
                             onNewRelationship: TestObjectFactory.createRequestWithOneItem()
                         })
                     ),
-                    responseSource: TestObjectFactory.createIRelationship(),
+                    responseSource: TestObjectFactory.createIncomingIRelationshipChange(RelationshipChangeType.Creation, "requestIdReceivedFromPeer"),
                     response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
 
@@ -282,7 +282,7 @@ describe("OutgoingRequestsController", function () {
             });
 
             test("uses the content from onExistingRelationship when the relationship exists", async function () {
-                await When.iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith({
+                await When.iCreateAnOutgoingRequestFromRelationshipCreationChangeWhenRelationshipExistsWith({
                     responseSource: TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("id1"), "requestIdReceivedFromPeer"),
                     response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });

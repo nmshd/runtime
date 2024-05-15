@@ -339,7 +339,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         if (parsedParams.responseSourceObject) {
             request.response!.source = LocalResponseSource.from({
-                type: parsedParams.responseSourceObject instanceof Message ? "Message" : "Relationship",
+                type: parsedParams.responseSourceObject instanceof Message ? "Message" : "RelationshipChange",
                 reference: parsedParams.responseSourceObject.id
             });
         } else if (!requestIsRejected || !requestIsFromTemplate) {

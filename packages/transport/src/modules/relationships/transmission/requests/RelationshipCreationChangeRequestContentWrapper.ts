@@ -2,14 +2,14 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { CoreId, CoreSerializable, ICoreId, ICoreSerializable } from "../../../../core";
 import { Identity, IIdentity } from "../../../accounts/data/Identity";
 
-export interface IRelationshipCreationContentWrapper extends ICoreSerializable {
+export interface IRelationshipCreationChangeRequestContentWrapper extends ICoreSerializable {
     identity: IIdentity;
     content: ISerializable;
     templateId: ICoreId;
 }
 
-@type("RelationshipCreationContentWrapper")
-export class RelationshipCreationContentWrapper extends CoreSerializable implements IRelationshipCreationContentWrapper {
+@type("RelationshipCreationChangeRequestContentWrapper")
+export class RelationshipCreationChangeRequestContentWrapper extends CoreSerializable implements IRelationshipCreationChangeRequestContentWrapper {
     @validate()
     @serialize()
     public identity: Identity;
@@ -22,7 +22,7 @@ export class RelationshipCreationContentWrapper extends CoreSerializable impleme
     @serialize()
     public templateId: CoreId;
 
-    public static from(value: IRelationshipCreationContentWrapper): RelationshipCreationContentWrapper {
+    public static from(value: IRelationshipCreationChangeRequestContentWrapper): RelationshipCreationChangeRequestContentWrapper {
         return this.fromAny(value);
     }
 }

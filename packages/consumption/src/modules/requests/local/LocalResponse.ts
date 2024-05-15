@@ -3,7 +3,7 @@ import { IResponse, Response } from "@nmshd/content";
 import { CoreDate, CoreId, CoreSerializable, ICoreDate, ICoreId, ICoreSerializable } from "@nmshd/transport";
 
 export interface ILocalResponseSource extends ICoreSerializable {
-    type: "Message" | "Relationship";
+    type: "Message" | "RelationshipChange";
     reference: ICoreId;
 }
 
@@ -11,7 +11,7 @@ export interface ILocalResponseSource extends ICoreSerializable {
 export class LocalResponseSource extends CoreSerializable implements ILocalResponseSource {
     @serialize()
     @validate()
-    public type: "Message" | "Relationship";
+    public type: "Message" | "RelationshipChange";
 
     @serialize()
     @validate()

@@ -1,12 +1,12 @@
 import {
-    AcceptRelationshipRequest,
+    AcceptRelationshipChangeRequest,
     CreateRelationshipRequest,
     GetRelationshipByAddressRequest,
     GetRelationshipRequest,
     GetRelationshipsRequest,
     IdentityDVO,
-    RejectRelationshipRequest,
-    RevokeRelationshipRequest
+    RejectRelationshipChangeRequest,
+    RevokeRelationshipChangeRequest
 } from "@nmshd/runtime";
 import { UserfriendlyApplicationError } from "../../UserfriendlyApplicationError";
 import { UserfriendlyResult } from "../../UserfriendlyResult";
@@ -43,24 +43,34 @@ export class AppRelationshipFacade extends AppRuntimeFacade {
         return UserfriendlyResult.ok<RelationshipItemsDVO, UserfriendlyApplicationError>(dvo);
     }
 
-    public async createRelationship(request: CreateRelationshipRequest): Promise<UserfriendlyResult<IdentityDVO>> {
-        const result = await this.transportServices.relationships.createRelationship(request);
-        return await this.handleResult(result, (v) => this.expander.expandRelationshipDTO(v));
+    public async acceptRelationshipCreationChange(relationshipId: string, content: any): Promise<UserfriendlyResult<IdentityDVO>> {
+        const result = await this.transportServices.relationships.getRelationship({ id: relationshipId });
+        if (result.isError) {
+            return await this.parseErrorResult<IdentityDVO>(result);
+        }
+
+        const changeId = result.value.changes[0].id;
+        return await this.acceptRelationshipChange({ relationshipId, changeId, content });
     }
 
-    public async acceptRelationship(request: AcceptRelationshipRequest): Promise<UserfriendlyResult<IdentityDVO>> {
-        const result = await this.transportServices.relationships.acceptRelationship(request);
-        return await this.handleResult(result, (v) => this.expander.expandRelationshipDTO(v));
+    public async rejectRelationshipCreationChange(relationshipId: string, content: any): Promise<UserfriendlyResult<IdentityDVO>> {
+        const result = await this.transportServices.relationships.getRelationship({ id: relationshipId });
+        if (result.isError) {
+            return await this.parseErrorResult<IdentityDVO>(result);
+        }
+
+        const changeId = result.value.changes[0].id;
+        return await this.rejectRelationshipChange({ relationshipId, changeId, content });
     }
 
-    public async rejectRelationship(request: RejectRelationshipRequest): Promise<UserfriendlyResult<IdentityDVO>> {
-        const result = await this.transportServices.relationships.rejectRelationship(request);
-        return await this.handleResult(result, (v) => this.expander.expandRelationshipDTO(v));
-    }
+    public async revokeRelationshipCreationChange(relationshipId: string, content: any): Promise<UserfriendlyResult<IdentityDVO>> {
+        const result = await this.transportServices.relationships.getRelationship({ id: relationshipId });
+        if (result.isError) {
+            return await this.parseErrorResult<IdentityDVO>(result);
+        }
 
-    public async revokeRelationship(request: RevokeRelationshipRequest): Promise<UserfriendlyResult<IdentityDVO>> {
-        const result = await this.transportServices.relationships.revokeRelationship(request);
-        return await this.handleResult(result, (v) => this.expander.expandRelationshipDTO(v));
+        const changeId = result.value.changes[0].id;
+        return await this.revokeRelationshipChange({ relationshipId, changeId, content });
     }
 
     public async getRelationships(request: GetRelationshipsRequest): Promise<UserfriendlyResult<IdentityDVO[]>> {
@@ -75,6 +85,26 @@ export class AppRelationshipFacade extends AppRuntimeFacade {
 
     public async getRelationshipByAddress(request: GetRelationshipByAddressRequest): Promise<UserfriendlyResult<IdentityDVO>> {
         const result = await this.transportServices.relationships.getRelationshipByAddress(request);
+        return await this.handleResult(result, (v) => this.expander.expandRelationshipDTO(v));
+    }
+
+    public async createRelationship(request: CreateRelationshipRequest): Promise<UserfriendlyResult<IdentityDVO>> {
+        const result = await this.transportServices.relationships.createRelationship(request);
+        return await this.handleResult(result, (v) => this.expander.expandRelationshipDTO(v));
+    }
+
+    public async acceptRelationshipChange(request: AcceptRelationshipChangeRequest): Promise<UserfriendlyResult<IdentityDVO>> {
+        const result = await this.transportServices.relationships.acceptRelationshipChange(request);
+        return await this.handleResult(result, (v) => this.expander.expandRelationshipDTO(v));
+    }
+
+    public async rejectRelationshipChange(request: RejectRelationshipChangeRequest): Promise<UserfriendlyResult<IdentityDVO>> {
+        const result = await this.transportServices.relationships.rejectRelationshipChange(request);
+        return await this.handleResult(result, (v) => this.expander.expandRelationshipDTO(v));
+    }
+
+    public async revokeRelationshipChange(request: RevokeRelationshipChangeRequest): Promise<UserfriendlyResult<IdentityDVO>> {
+        const result = await this.transportServices.relationships.revokeRelationshipChange(request);
         return await this.handleResult(result, (v) => this.expander.expandRelationshipDTO(v));
     }
 }

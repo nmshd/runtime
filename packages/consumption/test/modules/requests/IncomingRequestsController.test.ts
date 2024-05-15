@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { IRequest, IRequestItemGroup, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
-import { CoreDate, CoreId, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate, CoreId, RelationshipChangeType, TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
@@ -10,7 +10,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus
 } from "../../../src";
-import { TestUtil, loggerFactory } from "../../core/TestUtil";
+import { loggerFactory, TestUtil } from "../../core/TestUtil";
 import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
@@ -794,14 +794,14 @@ describe("IncomingRequestsController", function () {
             });
         });
 
-        test("can handle valid input with a Relationship as responseSource", async function () {
+        test("can handle valid input with a RelationshipChange as responseSource", async function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.Decided);
-            const outgoingRelationship = TestObjectFactory.createIRelationship();
+            const outgoingRelationshipCreationChange = TestObjectFactory.createOutgoingIRelationshipChange(RelationshipChangeType.Creation, context.currentIdentity);
             await When.iCompleteTheIncomingRequestWith({
-                responseSourceObject: outgoingRelationship
+                responseSourceObject: outgoingRelationshipCreationChange
             });
             await Then.theRequestMovesToStatus(LocalRequestStatus.Completed);
-            await Then.theResponseHasItsSourcePropertySetCorrectly({ responseSourceType: "Relationship" });
+            await Then.theResponseHasItsSourcePropertySetCorrectly({ responseSourceType: "RelationshipChange" });
             await Then.theChangesArePersistedInTheDatabase();
             await Then.eventHasBeenPublished(IncomingRequestStatusChangedEvent, {
                 newStatus: LocalRequestStatus.Completed
@@ -981,11 +981,11 @@ describe("IncomingRequestsController", function () {
                 ]
             });
 
-            const relationship = TestObjectFactory.createIRelationship();
+            const relationshipChange = TestObjectFactory.createOutgoingIRelationshipChange(RelationshipChangeType.Creation, context.currentIdentity);
 
             cnsRequest = await context.incomingRequestsController.complete({
                 requestId: cnsRequest.id,
-                responseSourceObject: relationship
+                responseSourceObject: relationshipChange
             });
 
             expect(cnsRequest).toBeDefined();

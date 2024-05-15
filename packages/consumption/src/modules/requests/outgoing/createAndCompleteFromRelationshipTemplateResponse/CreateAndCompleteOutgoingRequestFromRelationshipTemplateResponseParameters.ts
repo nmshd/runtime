@@ -1,14 +1,14 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { IResponse, Response } from "@nmshd/content";
-import { CoreDate, IMessage, IRelationship, IRelationshipTemplate, Message, Relationship, RelationshipTemplate } from "@nmshd/transport";
+import { IMessage, IRelationshipChange, IRelationshipTemplate, Message, RelationshipChange, RelationshipTemplate } from "@nmshd/transport";
 
 export interface ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters extends ISerializable {
     template: IRelationshipTemplate;
-    responseSource: IRelationship | IMessage;
+    responseSource: IRelationshipChange | IMessage;
     response: IResponse;
 }
 
-@type("CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters")
+@type("CreateAndCompleteOutgoingRequestFromRelationshipCreationChangeParameters")
 export class CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters
     extends Serializable
     implements ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters
@@ -17,17 +17,13 @@ export class CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponsePar
     @validate()
     public template: RelationshipTemplate;
 
-    @serialize({ unionTypes: [Relationship, Message] })
+    @serialize({ unionTypes: [RelationshipChange, Message] })
     @validate()
-    public responseSource: Relationship | Message;
+    public responseSource: RelationshipChange | Message;
 
     @serialize()
     @validate()
     public response: Response;
-
-    @serialize()
-    @validate({ nullable: true })
-    public responseCreationDate?: CoreDate;
 
     public static from(
         value: ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters
