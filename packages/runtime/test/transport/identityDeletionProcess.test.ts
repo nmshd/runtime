@@ -58,6 +58,7 @@ describe("IdentityDeletionProcess", () => {
         await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data.status === IdentityDeletionProcessStatus.WaitingForApproval);
 
         await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
+        eventBus.reset();
 
         const result = await cancelIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress, initiatedIdentityDeletionProcess.id.toString());
         expect(result).toBeSuccessful();
