@@ -8,9 +8,9 @@ import {
     CoreId,
     IConfigOverwrite,
     ICoreId,
+    IdentityController,
     IMessage,
     IRelationshipTemplate,
-    IdentityController,
     Message,
     Relationship,
     RelationshipChangeType,
@@ -28,10 +28,10 @@ import {
     ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters,
     ICreateOutgoingRequestParameters,
     ILocalRequestSource,
+    IncomingRequestsController,
     IReceivedIncomingRequestParameters,
     IRequireManualDecisionOfIncomingRequestParameters,
     ISentOutgoingRequestParameters,
-    IncomingRequestsController,
     LocalRequest,
     LocalRequestSource,
     LocalRequestStatus,
@@ -563,6 +563,7 @@ export class RequestsWhen {
 
         return this.context.validationResult;
     }
+
     public constructor(private readonly context: RequestsTestsContext) {}
 
     public async iCreateAnOutgoingRequest(): Promise<void> {
@@ -861,6 +862,7 @@ export class RequestsThen {
         expect(TestRequestItemProcessor.numberOfApplyIncomingResponseItemCalls).toStrictEqual(numberOfCalls);
         return Promise.resolve();
     }
+
     public constructor(private readonly context: RequestsTestsContext) {}
 
     public canCreateIsBeingCalled(): Promise<void> {

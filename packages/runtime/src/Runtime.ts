@@ -21,6 +21,7 @@ import {
     IConfigOverwrite,
     ICoreAddress,
     IdentityController,
+    IdentityDeletionProcessController,
     MessageController,
     RelationshipsController,
     RelationshipTemplateController,
@@ -225,6 +226,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(IdentityController)
             .factory(() => this.getAccountController().identity)
+            .scope(Scope.Request);
+
+        Container.bind(IdentityDeletionProcessController)
+            .factory(() => this.getAccountController().identityDeletionProcess)
             .scope(Scope.Request);
 
         Container.bind(MessageController)

@@ -1,15 +1,9 @@
-import { DataEvent, MessageDTO, RelationshipDTO } from "@nmshd/runtime";
+import { DataEvent, SyncEverythingResponse } from "@nmshd/runtime";
 
-export class ExternalEventReceivedEvent extends DataEvent<{
-    messages: MessageDTO[];
-    relationships: RelationshipDTO[];
-}> {
+export class ExternalEventReceivedEvent extends DataEvent<SyncEverythingResponse> {
     public static readonly namespace: string = "app.externalEventReceived";
 
-    public constructor(address: string, messages: MessageDTO[], relationships: RelationshipDTO[]) {
-        super(ExternalEventReceivedEvent.namespace, address, {
-            messages,
-            relationships
-        });
+    public constructor(address: string, syncEverythingResponse: SyncEverythingResponse) {
+        super(ExternalEventReceivedEvent.namespace, address, syncEverythingResponse);
     }
 }

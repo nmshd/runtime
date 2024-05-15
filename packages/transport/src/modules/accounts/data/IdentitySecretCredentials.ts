@@ -1,7 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoSecretKey, CryptoSignaturePrivateKey, CryptoSignaturePublicKey, ICryptoSecretKey, ICryptoSignaturePrivateKey, ICryptoSignaturePublicKey } from "@nmshd/crypto";
 import { CoreSerializable, ICoreSerializable } from "../../../core";
-import { Realm } from "./Identity";
+import { Realm } from "./Realm";
 
 export interface IIdentitySecretCredentials extends ICoreSerializable {
     publicKey?: ICryptoSignaturePublicKey;

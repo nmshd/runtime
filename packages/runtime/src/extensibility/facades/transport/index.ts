@@ -2,6 +2,7 @@ export * from "./AccountFacade";
 export * from "./ChallengesFacade";
 export * from "./DevicesFacade";
 export * from "./FilesFacade";
+export * from "./IdentityDeletionProcessesFacade";
 export * from "./IdentityFacade";
 export * from "./MessagesFacade";
 export * from "./RelationshipsFacade";

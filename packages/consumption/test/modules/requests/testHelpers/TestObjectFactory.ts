@@ -223,6 +223,7 @@ export class TestObjectFactory {
             }
         };
     }
+
     public static createIncomingIMessageWithResponse(recipient: CoreAddress, requestId: string | ICoreId): IMessage {
         return this.createIncomingIMessage(recipient, CoreDate.utc(), {
             "@type": "Response",

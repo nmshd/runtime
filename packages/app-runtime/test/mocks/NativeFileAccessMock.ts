@@ -15,22 +15,28 @@ export class NativeFileAccessMock implements INativeFileAccess {
             })
         );
     }
+
     public readFileAsText(path: string, storage?: NativeFileStorage): Promise<Result<string>> {
         return Promise.resolve(Result.ok(`MockFileContent for ${path} within ${storage}`));
     }
+
     public readFileAsBinary(path: string, storage?: NativeFileStorage): Promise<Result<Uint8Array>> {
         const buffer = CoreBuffer.fromUtf8(`MockFileContent for ${path} within ${storage}`);
         return Promise.resolve(Result.ok(buffer.buffer));
     }
+
     public writeFile(/* path: string, data: Uint8Array | string, storage?: NativeFileStorage*/): Promise<Result<void>> {
         return Promise.resolve(Result.ok(undefined));
     }
+
     public deleteFile(/* path: string, storage?: NativeFileStorage */): Promise<Result<void>> {
         return Promise.resolve(Result.ok(undefined));
     }
+
     public existsFile(/* path: string, storage?: NativeFileStorage */): Promise<Result<boolean>> {
         return Promise.resolve(Result.ok(true));
     }
+
     public infoDirectory(path: string, storage?: NativeFileStorage): Promise<Result<INativeDirectory>> {
         return Promise.resolve(
             Result.ok({
@@ -44,27 +50,34 @@ export class NativeFileAccessMock implements INativeFileAccess {
             })
         );
     }
+
     public createDirectory(/* path: string, storage?: NativeFileStorage */): Promise<Result<void>> {
         return Promise.resolve(Result.ok(undefined));
     }
+
     public deleteDirectory(/* path: string, storage?: NativeFileStorage */): Promise<Result<void>> {
         return Promise.resolve(Result.ok(undefined));
     }
+
     public existsDirectory(/* path: string, storage?: NativeFileStorage */): Promise<Result<boolean>> {
         return Promise.resolve(Result.ok(true));
     }
+
     public async select(): Promise<Result<INativeFile>> {
         return Result.ok({
             data: "Mock data of text selection",
             metadata: (await this.infoFile("/mock.txt")).value
         });
     }
+
     public openFile(/* path: string, storage?: NativeFileStorage */): Promise<Result<void>> {
         return Promise.resolve(Result.ok(undefined));
     }
+
     public openFileContent(/* content: Uint8Array, metadata: INativeFileMetadata */): Promise<Result<void>> {
         return Promise.resolve(Result.ok(undefined));
     }
+
     public init(): Promise<Result<void>> {
         return Promise.resolve(Result.ok(undefined));
     }

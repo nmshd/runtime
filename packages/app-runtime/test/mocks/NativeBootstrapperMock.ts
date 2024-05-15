@@ -17,6 +17,7 @@ export class NativeBootstrapperMock implements INativeBootstrapper {
     public get nativeEnvironment(): INativeEnvironment {
         return this._nativeEnvironment;
     }
+
     public get isInitialized(): boolean {
         return true;
     }

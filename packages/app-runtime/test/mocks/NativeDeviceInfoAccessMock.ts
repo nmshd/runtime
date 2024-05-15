@@ -14,6 +14,7 @@ export class NativeDeviceInfoAccessMock implements INativeDeviceInfoAccess {
             pushService: PushServices.fcm
         };
     }
+
     public init(): Promise<Result<INativeDeviceInfo>> {
         return Promise.resolve(Result.ok(this.deviceInfo));
     }

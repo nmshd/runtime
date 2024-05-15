@@ -3,7 +3,8 @@ import { CoreBuffer, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignature
 import { ControllerName, CoreAddress, CoreCrypto, CoreErrors, TransportController } from "../../core";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
-import { Identity, Realm } from "./data/Identity";
+import { Identity } from "./data/Identity";
+import { Realm } from "./data/Realm";
 
 export class IdentityController extends TransportController {
     public get address(): CoreAddress {

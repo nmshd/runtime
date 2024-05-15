@@ -189,6 +189,27 @@ class Attributes {
     }
 }
 
+class IdentityDeletionProcess {
+    public noActiveIdentityDeletionProcess() {
+        return new ApplicationError("error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess", "No active IdentityDeletionProcess found.");
+    }
+
+    public noWaitingForApprovalIdentityDeletionProcess() {
+        return new ApplicationError("error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess", "No IdentityDeletionProcess waiting for decision found.");
+    }
+
+    public noApprovedIdentityDeletionProcess() {
+        return new ApplicationError("error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess", "No approved IdentityDeletionProcess found.");
+    }
+
+    public activeIdentityDeletionProcessAlreadyExists() {
+        return new ApplicationError(
+            "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists",
+            "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per Identity."
+        );
+    }
+}
+
 export class RuntimeErrors {
     public static readonly general = new General();
     public static readonly serval = new Serval();
@@ -199,4 +220,5 @@ export class RuntimeErrors {
     public static readonly challenges = new Challenges();
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
+    public static readonly identityDeletionProcess = new IdentityDeletionProcess();
 }

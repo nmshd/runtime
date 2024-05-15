@@ -7,5 +7,6 @@ export enum DbCollectionName {
     CertificatesIssued = "CertificatesIssued",
     UnpushedDatawalletModifications = "UnpushedDatawalletModifications",
     Devices = "Devices",
-    Secrets = "Secrets"
+    Secrets = "Secrets",
+    IdentityDeletionProcess = "IdentityDeletionProcess"
 }
