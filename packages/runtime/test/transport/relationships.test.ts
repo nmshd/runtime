@@ -296,6 +296,8 @@ describe("RelationshipTermination", () => {
     let relationshipId: string;
     let terminationResult: Result<RelationshipDTO, ApplicationError>;
     beforeAll(async () => {
+        relationshipId = (await ensureActiveRelationship(services1.transport, services2.transport)).id;
+
         const requestContent = {
             content: {
                 items: [
@@ -308,7 +310,7 @@ describe("RelationshipTermination", () => {
             peer: services2.address
         };
         await exchangeMessageWithRequest(services1, services2, requestContent);
-        relationshipId = (await services1.transport.relationships.getRelationships({})).value[0].id;
+
         terminationResult = await services1.transport.relationships.terminateRelationship({ relationshipId });
     });
 
@@ -329,10 +331,11 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.platform.validation.message.relationshipToRecipientNotActive");
+        expect(result).toBeAnError(/.*/, "error.transport.messages.noMatchingRelationship");
     });
 
     test("should not decide a request", async () => {
+        await syncUntilHasRelationships(services2.transport);
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
         const acceptResult = await services2.consumption.incomingRequests.accept({ requestId: incomingRequest.id, items: [{ accept: true }] });
