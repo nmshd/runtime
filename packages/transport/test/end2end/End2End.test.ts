@@ -495,6 +495,7 @@ describe.skip("RelationshipTest: Accept Reactivation", function () {
         await from.relationships.reactivate(relationshipId);
 
         // Accept the reactivation
+        await TestUtil.syncUntilHasRelationships(to);
         const acceptedReactivatedRelationshipPeer = await to.relationships.acceptReactivation(relationshipId);
         expect(acceptedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
         expect(acceptedReactivatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
@@ -543,6 +544,7 @@ describe.skip("RelationshipTest: Reject Reactivation", function () {
         await from.relationships.reactivate(relationshipId);
 
         // Reject the reactivation
+        await TestUtil.syncUntilHasRelationships(to);
         const rejectedReactivatedRelationshipPeer = await to.relationships.rejectReactivation(relationshipId);
         expect(rejectedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
         expect(rejectedReactivatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Terminated);
