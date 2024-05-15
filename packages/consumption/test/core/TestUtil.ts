@@ -164,7 +164,8 @@ export class TestUtil {
             platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
             debug: true,
-            supportedIdentityVersion: 1
+            supportedIdentityVersion: 1,
+            allowIdentityCreation: true
         };
     }
 
