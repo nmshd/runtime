@@ -239,7 +239,7 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Terminated) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.executeNonDeletingOperation(RelationshipOperation.Reactivation, relationshipId);
+        return await this.executeNonDeletingOperation(RelationshipOperation.ReactivationRequested, relationshipId);
     }
 
     public async rejectReactivation(relationshipId: CoreId): Promise<Relationship> {
@@ -490,7 +490,7 @@ export class RelationshipsController extends TransportController {
                 backboneResponse = (await this.client.terminateRelationship(id.toString())).value;
                 break;
 
-            case RelationshipOperation.Reactivation:
+            case RelationshipOperation.ReactivationRequested:
                 backboneResponse = (await this.client.reactivateRelationship(id.toString())).value;
                 break;
 
@@ -499,14 +499,14 @@ export class RelationshipsController extends TransportController {
                 break;
 
             case RelationshipOperation.RejectionOfReactivation:
-                if (relationship.cache.auditLog[relationship.cache.auditLog.length - 1].reason !== RelationshipOperation.Reactivation) {
+                if (relationship.cache.auditLog[relationship.cache.auditLog.length - 1].reason !== RelationshipOperation.ReactivationRequested) {
                     throw CoreErrors.relationships.reactivationNotRequested();
                 }
                 backboneResponse = (await this.client.rejectRelationshipActivation(id.toString())).value;
                 break;
 
             case RelationshipOperation.RevocationOfReactivation:
-                if (relationship.cache.auditLog[relationship.cache.auditLog.length - 1].reason !== RelationshipOperation.Reactivation) {
+                if (relationship.cache.auditLog[relationship.cache.auditLog.length - 1].reason !== RelationshipOperation.ReactivationRequested) {
                     throw CoreErrors.relationships.reactivationNotRequested();
                 }
                 backboneResponse = (await this.client.revokeRelationshipActivation(id.toString())).value;

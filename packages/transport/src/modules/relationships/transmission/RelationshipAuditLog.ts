@@ -17,7 +17,7 @@ export enum RelationshipAuditLogEntryReason {
     RejectionOfCreation = "RejectionOfCreation",
     RevocationOfCreation = "RevocationOfCreation",
     Termination = "Termination",
-    Reactivation = "Reactivation",
+    ReactivationRequested = "ReactivationRequested",
     AcceptanceOfReactivation = "AcceptanceOfReactivation",
     RejectionOfReactivation = "RejectionOfReactivation",
     RevocationOfReactivation = "RevocationOfReactivation",
