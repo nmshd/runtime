@@ -1,7 +1,7 @@
 import { EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import * as consumption from "@nmshd/consumption";
 import * as transport from "@nmshd/transport";
-import { AttributeListenerMapper, AttributeMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
+import { AttributeListenerMapper, AttributeMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
@@ -21,6 +21,7 @@ import {
     ThirdPartyOwnedRelationshipAttributeSucceededEvent
 } from "./consumption";
 import {
+    IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
     MessageSentEvent,
@@ -68,6 +69,12 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(transport.RelationshipChangedEvent, (event) => {
             this.targetEventBus.publish(new RelationshipChangedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {
+            this.targetEventBus.publish(
+                new IdentityDeletionProcessStatusChangedEvent(event.eventTargetAddress, IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(event.data))
+            );
         });
     }
 

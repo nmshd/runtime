@@ -1,20 +1,19 @@
-import { serialize, validate } from "@js-soft/ts-serval";
-import { CoreSerializable } from "../../../core/CoreSerializable";
+import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { RelationshipChangedEvent } from "../../../events";
 import { Relationship } from "../../relationships/local/Relationship";
 import { ExternalEvent } from "../data/ExternalEvent";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
-class RelationshipStatusChangedExternalEventData extends CoreSerializable {
+class RelationshipChangeCompletedExternalEventData extends Serializable {
     @serialize()
     @validate()
-    public relationshipId: string;
+    public changeId: string;
 }
 
-export class RelationshipStatusChangedExternalEventProcessor extends ExternalEventProcessor {
+export class RelationshipChangeCompletedExternalEventProcessor extends ExternalEventProcessor {
     public override async execute(externalEvent: ExternalEvent): Promise<Relationship | undefined> {
-        const payload = RelationshipStatusChangedExternalEventData.fromAny(externalEvent.payload);
-        const relationship = await this.accountController.relationships.applyRelationshipStatusChangedEvent(payload.relationshipId);
+        const payload = RelationshipChangeCompletedExternalEventData.fromAny(externalEvent.payload);
+        const relationship = await this.accountController.relationships.applyChangeById(payload.changeId);
 
         if (relationship) {
             this.eventBus.publish(new RelationshipChangedEvent(this.ownAddress, relationship));

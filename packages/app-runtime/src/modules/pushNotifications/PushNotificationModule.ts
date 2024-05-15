@@ -42,7 +42,7 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
                         return;
                     }
 
-                    this.runtime.eventBus.publish(new ExternalEventReceivedEvent(content.accRef, syncResult.value.messages, syncResult.value.relationships));
+                    this.runtime.eventBus.publish(new ExternalEventReceivedEvent(content.accRef, syncResult.value));
 
                     break;
                 default:
