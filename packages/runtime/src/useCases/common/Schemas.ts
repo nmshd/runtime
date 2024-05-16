@@ -2920,7 +2920,7 @@ export const CanCreateOutgoingRequestRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -3071,6 +3071,10 @@ export const CompleteIncomingRequestRequest: any = {
         "MessageIdString": {
             "type": "string",
             "pattern": "MSG[A-Za-z0-9]{17}"
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
         }
     }
 }
@@ -5439,6 +5443,10 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "RelationshipTemplateIdString": {
             "type": "string",
             "pattern": "RLT[A-Za-z0-9]{17}"
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
         },
         "MessageIdString": {
             "type": "string",
@@ -10510,7 +10518,7 @@ export const CreateOutgoingRequestRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -14548,7 +14556,7 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -16704,7 +16712,7 @@ export const GetOwnSharedAttributesRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         },
         "GetOwnSharedAttributeRequestQuery": {
             "type": "object",
@@ -16944,7 +16952,7 @@ export const GetPeerSharedAttributesRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         },
         "GetPeerSharedAttributesRequestQuery": {
             "type": "object",
@@ -17292,7 +17300,7 @@ export const GetSharedVersionsOfRepositoryAttributeRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -17346,7 +17354,7 @@ export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -17413,7 +17421,7 @@ export const ShareRepositoryAttributeRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         },
         "ISO8601DateTimeString": {
             "type": "string",
@@ -21080,7 +21088,7 @@ export const CheckIdentityRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -21380,7 +21388,7 @@ export const SendMessageRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         },
         "FileIdString": {
             "type": "string",
@@ -21398,7 +21406,7 @@ export const AcceptRelationshipRequest: any = {
             "properties": {
                 "relationshipId": {
                     "$ref": "#/definitions/RelationshipIdString"
-                },
+                }
             },
             "required": [
                 "relationshipId"
@@ -21408,7 +21416,7 @@ export const AcceptRelationshipRequest: any = {
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
-        },
+        }
     }
 }
 
@@ -21508,7 +21516,7 @@ export const GetRelationshipByAddressRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:.*:[0-9a-f]{22}"
+            "pattern": "did:e:[a-zA-Z\\.]*:dids:[0-9a-f]{22}"
         }
     }
 }
