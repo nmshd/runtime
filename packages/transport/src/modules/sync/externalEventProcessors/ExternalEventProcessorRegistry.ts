@@ -1,5 +1,7 @@
 import { TransportError } from "../../../core";
 import { ExternalEventProcessorConstructor } from "./ExternalEventProcessor";
+import { IdentityDeletionProcessChangedEventProcessor } from "./IdentityDeletionProcessChangedEventProcessor";
+import { IdentityDeletionProcessStartedEventProcessor } from "./IdentityDeletionProcessStartedEventProcessor";
 import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor";
 import { MessageReceivedExternalEventProcessor } from "./MessageReceivedExternalEventProcessor";
 import { RelationshipStatusChangedExternalEventProcessor } from "./RelationshipStatusChangedExternalEventProcessor";
@@ -10,6 +12,8 @@ export class ExternalEventProcessorRegistry {
         this.registerProcessor("MessageReceived", MessageReceivedExternalEventProcessor);
         this.registerProcessor("MessageDelivered", MessageDeliveredExternalEventProcessor);
         this.registerProcessor("RelationshipStatusChanged", RelationshipStatusChangedExternalEventProcessor);
+        this.registerProcessor("IdentityDeletionProcessStarted", IdentityDeletionProcessStartedEventProcessor);
+        this.registerProcessor("IdentityDeletionProcessStatusChanged", IdentityDeletionProcessChangedEventProcessor);
     }
 
     public registerProcessor(externalEventName: string, externalEventProcessor: ExternalEventProcessorConstructor): void {

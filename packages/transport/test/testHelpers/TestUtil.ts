@@ -19,7 +19,9 @@ import {
     DependencyOverrides,
     DeviceSharedSecret,
     File,
+    IChangedItems,
     IConfigOverwrite,
+    IdentityDeletionProcess,
     ISendFileParameters,
     Message,
     Relationship,
@@ -61,6 +63,7 @@ export class TestUtil {
         this.oldLogger = (TransportLoggerFactory as any).instance;
         TransportLoggerFactory.init(this.fatalLogger);
     }
+
     public static useTestLoggerFactory(): void {
         TransportLoggerFactory.init(this.oldLogger);
     }
@@ -385,43 +388,58 @@ export class TestUtil {
      * the `until` callback is met.
      */
     public static async syncUntil(accountController: AccountController, until: (syncResult: ChangedItems) => boolean): Promise<ChangedItems> {
-        const { messages, relationships } = await accountController.syncEverything();
-        const syncResult = new ChangedItems([...relationships], [...messages]);
+        const syncResult = new ChangedItems();
 
         let iterationNumber = 0;
-        while (!until(syncResult) && iterationNumber < 20) {
+        do {
             await sleep(150 * iterationNumber);
             const newSyncResult = await accountController.syncEverything();
             syncResult.messages.push(...newSyncResult.messages);
             syncResult.relationships.push(...newSyncResult.relationships);
+            syncResult.identityDeletionProcesses.push(...newSyncResult.identityDeletionProcesses);
             iterationNumber++;
-        }
+        } while (!until(syncResult) && iterationNumber < 20);
 
         if (!until(syncResult)) {
             throw new Error("syncUntil condition was not met");
         }
-
         return syncResult;
     }
 
-    public static async syncUntilHasRelationships(accountController: AccountController, numberOfRelationships = 1): Promise<Relationship[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.relationships.length > numberOfRelationships - 1);
-        return syncResult.relationships;
+    public static async syncUntilHas<T extends keyof IChangedItems>(accountController: AccountController, id: CoreId, key: T): Promise<ChangedItems[T]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].some((r) => r.id.equals(id)));
+
+        return syncResult[key];
+    }
+
+    public static async syncUntilHasMany<T extends keyof IChangedItems>(accountController: AccountController, key: T, expectedNumberOfItems = 1): Promise<ChangedItems[T]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].length >= expectedNumberOfItems);
+
+        return syncResult[key];
+    }
+
+    public static async syncUntilHasIdentityDeletionProcess(accountController: AccountController, id: CoreId): Promise<IdentityDeletionProcess[]> {
+        return await TestUtil.syncUntilHas(accountController, id, "identityDeletionProcesses");
+    }
+
+    public static async syncUntilHasIdentityDeletionProcesses(accountController: AccountController): Promise<IdentityDeletionProcess[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "identityDeletionProcesses");
+    }
+
+    public static async syncUntilHasRelationships(accountController: AccountController, expectedNumberOfRelationships?: number): Promise<Relationship[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "relationships", expectedNumberOfRelationships);
     }
 
     public static async syncUntilHasRelationship(accountController: AccountController, id: CoreId): Promise<Relationship[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.relationships.some((r) => r.id.equals(id)));
-        return syncResult.relationships;
+        return await TestUtil.syncUntilHas(accountController, id, "relationships");
     }
 
     public static async syncUntilHasMessages(accountController: AccountController, expectedNumberOfMessages = 1): Promise<Message[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.messages.length >= expectedNumberOfMessages);
-        return syncResult.messages;
+        return await TestUtil.syncUntilHasMany(accountController, "messages", expectedNumberOfMessages);
     }
 
     public static async syncUntilHasMessage(accountController: AccountController, id: CoreId): Promise<Message[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.messages.some((m) => m.id.equals(id)));
-        return syncResult.messages;
+        return await TestUtil.syncUntilHas(accountController, id, "messages");
     }
 
     public static async syncUntilHasError(accountController: AccountController): Promise<any> {

@@ -35,6 +35,7 @@ import { TokenController } from "../tokens/TokenController";
 import { IdentityClient } from "./backbone/IdentityClient";
 import { Identity } from "./data/Identity";
 import { IdentityController } from "./IdentityController";
+import { IdentityDeletionProcessController } from "./IdentityDeletionProcessController";
 import { IdentityUtil } from "./IdentityUtil";
 
 export class AccountController {
@@ -99,6 +100,11 @@ export class AccountController {
         return this._identity;
     }
 
+    protected _identityDeletionProcess: IdentityDeletionProcessController;
+    public get identityDeletionProcess(): IdentityDeletionProcessController {
+        return this._identityDeletionProcess;
+    }
+
     public constructor(
         private readonly _transport: Transport,
         private readonly _db: IDatabaseCollectionProvider,
@@ -118,6 +124,7 @@ export class AccountController {
         this.identityClient = new IdentityClient(this.config);
 
         this._identity = new IdentityController(this);
+        this._identityDeletionProcess = new IdentityDeletionProcessController(this);
         this._activeDevice = new DeviceController(this);
         this.challenges = await new ChallengeController(this).init();
 
@@ -152,6 +159,7 @@ export class AccountController {
             const availableBaseKey = CryptoSecretKey.fromJSON(availableBaseKeyDoc);
 
             await this.identity.init(availableIdentity);
+            await this.identityDeletionProcess.init();
             await this.activeDevice.init(availableBaseKey, availableDevice);
 
             this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator);
@@ -313,6 +321,7 @@ export class AccountController {
 
         // Initialize required controllers
         await this.identity.init(identity);
+        await this.identityDeletionProcess.init();
         await this.activeDevice.init(privBaseDevice, device);
 
         const deviceCredentials = DeviceSecretCredentials.from({
@@ -364,6 +373,7 @@ export class AccountController {
 
         // Initialize required controllers
         await this.identity.init(deviceSharedSecret.identity);
+        await this.identityDeletionProcess.init();
         await this.activeDevice.init(privBaseDevice, device);
 
         const deviceCredentials = DeviceSecretCredentials.from({

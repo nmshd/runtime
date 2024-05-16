@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/transport",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "description": "The transport library handles backbone communication and content encryption.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -13,22 +13,13 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
-        "dist",
-        "lib-web/nmshd.transport.js",
-        "lib-web/nmshd.transport.min.js",
-        "lib-web/nmshd.transport.js.map",
-        "lib-web/nmshd.transport.min.js.map",
-        "ui5.yaml"
+        "dist"
     ],
     "scripts": {
-        "build": "npm run build:node  && npm run bundle",
-        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh && npm run bundle",
+        "build": "npm run build:node",
+        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
         "build:node": "tsc -p tsconfig.json && madge --circular dist",
-        "build:notest": "npm run build:node  && npm run bundle:notest",
-        "bundle": "npm run bundle:lib && npm run bundle:min",
-        "bundle:lib": "webpack --stats-all --config webpack.config.js",
-        "bundle:min": "webpack --stats-all --config webpack.min.config.js",
-        "bundle:notest": "npm run bundle:lib && npm run bundle:min",
+        "build:notest": "npm run build:node",
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci": "npm run test:ci:lokijs && npm run test:ci:mongodb",
@@ -90,7 +81,7 @@
         "@js-soft/web-logger": "^1.0.4",
         "@nmshd/crypto": "2.0.6",
         "@types/json-stringify-safe": "^5.0.3",
-        "@types/lodash": "^4.17.0",
+        "@types/lodash": "^4.17.1",
         "@types/luxon": "^3.4.2",
         "@types/qs": "^6.9.15",
         "@types/uuid": "^9.0.8",
