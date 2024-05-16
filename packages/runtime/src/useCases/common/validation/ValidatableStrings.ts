@@ -69,6 +69,11 @@ export type AttributeListenerIdString = string;
 export type NotificationIdString = string;
 
 /**
+ * @pattern IDP[A-Za-z0-9]{17}
+ */
+export type IdentityDeletionProcessIdString = string;
+
+/**
  * @pattern VE9L.{84}
  */
 export type TokenReferenceString = string;

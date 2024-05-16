@@ -1,20 +1,12 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoSignaturePublicKey, ICryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreSerializable, ICoreSerializable } from "../../../core/CoreSerializable";
-import { CoreAddress } from "../../../core/types/CoreAddress";
+import { CoreAddress, CoreSerializable, ICoreSerializable } from "../../../core";
+import { Realm } from "./Realm";
 
 export interface IIdentity extends ICoreSerializable {
     address: CoreAddress;
     publicKey: ICryptoSignaturePublicKey;
     realm: Realm;
-}
-
-export const enmeshedPrefix = "did:e:";
-
-export enum Realm {
-    Dev = "dev.enmeshed.eu:dids:",
-    Stage = "stage.enmeshed.eu:dids:",
-    Prod = "prod.enmeshed.eu:dids:"
 }
 
 @type("Identity")

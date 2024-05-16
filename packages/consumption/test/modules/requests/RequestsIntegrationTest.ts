@@ -566,6 +566,7 @@ export class RequestsWhen {
 
         return this.context.validationResult;
     }
+
     public constructor(private readonly context: RequestsTestsContext) {}
 
     public async iCreateAnOutgoingRequest(): Promise<void> {
@@ -862,6 +863,7 @@ export class RequestsThen {
         expect(TestRequestItemProcessor.numberOfApplyIncomingResponseItemCalls).toStrictEqual(numberOfCalls);
         return Promise.resolve();
     }
+
     public constructor(private readonly context: RequestsTestsContext) {}
 
     public canCreateIsBeingCalled(): Promise<void> {
