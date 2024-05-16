@@ -1,6 +1,7 @@
 import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding, ICryptoSignaturePublicKey } from "@nmshd/crypto";
 import { CoreAddress } from "../../core";
-import { enmeshedPrefix } from "./data/enmeshedPrefix";
+
+const enmeshedPrefix = "did:e:";
 
 export class IdentityUtil {
     public static async createAddress(publicKey: ICryptoSignaturePublicKey, backboneHostname: string): Promise<CoreAddress> {

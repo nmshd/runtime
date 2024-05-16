@@ -7,7 +7,6 @@ export * from "./accounts/backbone/IdentityDeletionProcessClient";
 export * from "./accounts/data/Identity";
 export * from "./accounts/data/IdentityDeletionProcess";
 export * from "./accounts/data/IdentityDeletionProcessStatus";
-export * from "./accounts/data/enmeshedPrefix";
 export * from "./certificates/CertificateController";
 export * from "./certificates/CertificateIssuer";
 export * from "./certificates/CertificateValidator";

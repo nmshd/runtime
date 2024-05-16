@@ -1,5 +1,5 @@
 import { CoreBuffer, CryptoSignatureAlgorithm, CryptoSignatureKeypair, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreCrypto, IdentityUtil, enmeshedPrefix } from "../../src";
+import { CoreCrypto, IdentityUtil } from "../../src";
 
 describe("IdentityGeneratorTest", function () {
     describe("From", function () {
@@ -12,7 +12,7 @@ describe("IdentityGeneratorTest", function () {
             const address = await IdentityUtil.createAddress(kp.publicKey, "prod.enmeshed.eu");
             expect(address).toBeDefined();
             expect(address.address).toBeDefined();
-            expect(address.address.startsWith(`${enmeshedPrefix}prod.enmeshed.eu`)).toBe(true);
+            expect(address.address.startsWith("did:e:prod.enmeshed.eu")).toBe(true);
         });
 
         test("should create a correct address object (test 0)", async function () {
