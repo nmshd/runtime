@@ -40,6 +40,12 @@ describe("creation of RepositoryAttributes of Attribute value type Website", fun
         });
         expect(validWebsite.value.toString()).toBe("https://inwind.test/%20it/");
     });
+    test("can create a RepositoryAttribute of Attribute value type Website with a port ", function () {
+        const validWebsite = Website.from({
+            value: "https://example.org:8080/mein/ordner/bericht"
+        });
+        expect(validWebsite.value.toString()).toBe("https://example.org:8080/mein/ordner/bericht");
+    });
     test("returns an error when trying to create an Attribute value type Website with a blank in the value for Website", function () {
         const invalidWebsiteCall = () => {
             Website.from({
@@ -50,7 +56,7 @@ describe("creation of RepositoryAttributes of Attribute value type Website", fun
             new ParsingError(
                 "Website",
                 "value",
-                "Value does not match regular expression /^(?:|[A-Za-z]{3,9}:(?:\\/\\/)?|[:](?:\\/\\/)?|(?:\\/\\/))(?:(www[.])(?:[a-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])|((?!www.)(?:[a-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])))[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])(\\:[0-9]+){0,}(?:[/][\\w\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df\\-_?#@!\\$&'\\(\\)\\*\\+,;=%]{0,}){0,}$/"
+                "Value does not match regular expression /^(?:|[A-Za-z]{3,9}:(?:[/][/])?|[:](?:[/][/])?|(?:[/][/]))(?:(www[.])(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])|((?!www[.])(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])))[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])(?:[:][0-9]+){0,}(?:[/][A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9?#@!$&'()*+/,;=%-]{0,}){0,}$/"
             )
         );
     });
@@ -64,7 +70,7 @@ describe("creation of RepositoryAttributes of Attribute value type Website", fun
             new ParsingError(
                 "Website",
                 "value",
-                "Value does not match regular expression /^(?:|[A-Za-z]{3,9}:(?:\\/\\/)?|[:](?:\\/\\/)?|(?:\\/\\/))(?:(www[.])(?:[a-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])|((?!www.)(?:[a-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])))[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])(\\:[0-9]+){0,}(?:[/][\\w\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df\\-_?#@!\\$&'\\(\\)\\*\\+,;=%]{0,}){0,}$/"
+                "Value does not match regular expression /^(?:|[A-Za-z]{3,9}:(?:[/][/])?|[:](?:[/][/])?|(?:[/][/]))(?:(www[.])(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])|((?!www[.])(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])))[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])(?:[:][0-9]+){0,}(?:[/][A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9?#@!$&'()*+/,;=%-]{0,}){0,}$/"
             )
         );
     });
@@ -78,7 +84,7 @@ describe("creation of RepositoryAttributes of Attribute value type Website", fun
             new ParsingError(
                 "Website",
                 "value",
-                "Value does not match regular expression /^(?:|[A-Za-z]{3,9}:(?:\\/\\/)?|[:](?:\\/\\/)?|(?:\\/\\/))(?:(www[.])(?:[a-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])|((?!www.)(?:[a-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])))[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])(\\:[0-9]+){0,}(?:[/][\\w\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df\\-_?#@!\\$&'\\(\\)\\*\\+,;=%]{0,}){0,}$/"
+                "Value does not match regular expression /^(?:|[A-Za-z]{3,9}:(?:[/][/])?|[:](?:[/][/])?|(?:[/][/]))(?:(www[.])(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])|((?!www[.])(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])))[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])(?:[:][0-9]+){0,}(?:[/][A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9?#@!$&'()*+/,;=%-]{0,}){0,}$/"
             )
         );
     });
@@ -92,7 +98,7 @@ describe("creation of RepositoryAttributes of Attribute value type Website", fun
             new ParsingError(
                 "Website",
                 "value",
-                "Value does not match regular expression /^(?:|[A-Za-z]{3,9}:(?:\\/\\/)?|[:](?:\\/\\/)?|(?:\\/\\/))(?:(www[.])(?:[a-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])|((?!www.)(?:[a-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])))[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])(\\:[0-9]+){0,}(?:[/][\\w\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df\\-_?#@!\\$&'\\(\\)\\*\\+,;=%]{0,}){0,}$/"
+                "Value does not match regular expression /^(?:|[A-Za-z]{3,9}:(?:[/][/])?|[:](?:[/][/])?|(?:[/][/]))(?:(www[.])(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])|((?!www[.])(?:[A-Za-z0-9\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9]){0,1}[.])))[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9](?:[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9-]{0,61}[A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9])(?:[:][0-9]+){0,}(?:[/][A-Za-z\\u00c4\\u00e4\\u00d6\\u00f6\\u00dc\\u00fc\\u00df0-9?#@!$&'()*+/,;=%-]{0,}){0,}$/"
             )
         );
     });
