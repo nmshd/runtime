@@ -1,6 +1,7 @@
 export * from "./accounts/AccountController";
 export * from "./accounts/backbone/IdentityClient";
 export * from "./accounts/backbone/IdentityDeletionProcessClient";
+export * from "./accounts/data/enmeshedPrefix";
 export * from "./accounts/data/Identity";
 export * from "./accounts/data/IdentityDeletionProcess";
 export * from "./accounts/data/IdentityDeletionProcessStatus";
