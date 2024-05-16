@@ -1198,6 +1198,7 @@ describe("Get (shared) versions of attribute", () => {
         await succeedVersion1();
         sRAVersions = [sRAVersion2, sRAVersion1, sRAVersion0];
     }
+
     async function setUpIdentityAttributeVersions() {
         await createAndShareVersion0();
         await succeedVersion0();
@@ -1242,6 +1243,7 @@ describe("Get (shared) versions of attribute", () => {
             sOSIAVersion2FurtherPeer = await acceptIncomingShareAttributeRequest(services1, services3, shareRequestId);
         }
     }
+
     async function createAndShareRelationshipAttributeVersion0(): Promise<void> {
         sOSRAVersion0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
@@ -1255,6 +1257,7 @@ describe("Get (shared) versions of attribute", () => {
             }
         });
     }
+
     async function setUpRelationshipAttributeVersions() {
         await createAndShareRelationshipAttributeVersion0();
         await succeedVersion0();

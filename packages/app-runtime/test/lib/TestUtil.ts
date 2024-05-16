@@ -66,6 +66,7 @@ export class TestUtil {
         this.oldLogger = (TransportLoggerFactory as any).instance;
         TransportLoggerFactory.init(this.fatalLogger);
     }
+
     public static useTestLoggerFactory(): void {
         TransportLoggerFactory.init(this.oldLogger);
     }
@@ -246,19 +247,21 @@ export class TestUtil {
      * specified in the `until` callback is met.
      */
     public static async syncUntil(session: LocalAccountSession, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-        const syncResult = await session.transportServices.account.syncEverything();
-
-        const { messages, relationships } = syncResult.value;
-        const syncResponse = { relationships: [...relationships], messages: [...messages] };
+        const syncResponse: SyncEverythingResponse = {
+            relationships: [],
+            messages: [],
+            identityDeletionProcesses: []
+        };
 
         let iterationNumber = 0;
-        while (!until(syncResponse) && iterationNumber < 15) {
+        do {
             await sleep(iterationNumber * 25);
             const newSyncResult = await session.transportServices.account.syncEverything();
             syncResponse.messages.push(...newSyncResult.value.messages);
             syncResponse.relationships.push(...newSyncResult.value.relationships);
+            syncResponse.identityDeletionProcesses.push(...newSyncResult.value.identityDeletionProcesses);
             iterationNumber++;
-        }
+        } while (!until(syncResponse) && iterationNumber < 15);
         return syncResponse;
     }
 
