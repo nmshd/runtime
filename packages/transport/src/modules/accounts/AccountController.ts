@@ -3,40 +3,40 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { log } from "@js-soft/ts-utils";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
-import { AbstractAuthenticator, Authenticator } from "../../core/backbone/Authenticator";
 import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
+import { AbstractAuthenticator, Authenticator } from "../../core/backbone/Authenticator";
 import { PasswordGenerator } from "../../util";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
 import { CertificateValidator } from "../certificates/CertificateValidator";
 import { ChallengeController } from "../challenges/ChallengeController";
+import { DeviceController } from "../devices/DeviceController";
+import { DeviceSecretType } from "../devices/DeviceSecretController";
+import { DevicesController } from "../devices/DevicesController";
 import { BackbonePutDevicesPushNotificationRequest, DeviceAuthClient } from "../devices/backbone/DeviceAuthClient";
 import { DeviceClient } from "../devices/backbone/DeviceClient";
-import { DeviceController } from "../devices/DeviceController";
-import { DevicesController } from "../devices/DevicesController";
-import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { Device, DeviceInfo, DeviceType } from "../devices/local/Device";
 import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredentials";
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
-import { RelationshipsController } from "../relationships/RelationshipsController";
-import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
+import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
+import { RelationshipsController } from "../relationships/RelationshipsController";
 import { SecretController } from "../secrets/SecretController";
 import { ChangedItems } from "../sync/ChangedItems";
 import { SyncProgressCallback, SyncProgressReporter } from "../sync/SyncCallback";
 import { SyncController } from "../sync/SyncController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { TokenController } from "../tokens/TokenController";
-import { IdentityClient } from "./backbone/IdentityClient";
-import { Identity } from "./data/Identity";
 import { IdentityController } from "./IdentityController";
 import { IdentityDeletionProcessController } from "./IdentityDeletionProcessController";
 import { IdentityUtil } from "./IdentityUtil";
+import { IdentityClient } from "./backbone/IdentityClient";
+import { Identity } from "./data/Identity";
 
 export class AccountController {
     private readonly _authenticator: AbstractAuthenticator;
@@ -278,7 +278,7 @@ export class AccountController {
             CoreCrypto.generateSecretKey(),
 
             // Generate address locally
-            IdentityUtil.createAddress(identityKeypair.publicKey, this._config.realm),
+            IdentityUtil.createAddress(identityKeypair.publicKey, this._config.baseUrl.replace("https://", "").replace("http://", "")),
             this.fetchDeviceInfo()
         ]);
 
@@ -294,12 +294,11 @@ export class AccountController {
         this._log.trace(`Registered identity with address ${deviceResponse.address}, device id is ${deviceResponse.device.id}.`);
 
         if (!localAddress.equals(deviceResponse.address)) {
-            // throw new TransportError("The backbone address does not match the local address.");
+            throw new TransportError("The backbone address does not match the local address.");
         }
 
         const identity = Identity.from({
             address: CoreAddress.from(deviceResponse.address),
-            realm: this._config.realm,
             publicKey: identityKeypair.publicKey
         });
 
