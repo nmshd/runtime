@@ -1,11 +1,10 @@
-import { serialize, validate } from "@js-soft/ts-serval";
-import { CoreSerializable } from "../../../core";
+import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { RelationshipChangedEvent } from "../../../events";
 import { Relationship } from "../../relationships/local/Relationship";
 import { ExternalEvent } from "../data/ExternalEvent";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
-class RelationshipChangeCompletedExternalEventData extends CoreSerializable {
+class RelationshipChangeCompletedExternalEventData extends Serializable {
     @serialize()
     @validate()
     public changeId: string;
