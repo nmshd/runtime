@@ -278,7 +278,7 @@ export class AccountController {
             CoreCrypto.generateSecretKey(),
 
             // Generate address locally
-            IdentityUtil.createAddress(identityKeypair.publicKey, this._config.baseUrl.replace("https://", "").replace("http://", "")),
+            IdentityUtil.createAddress(identityKeypair.publicKey, new URL(this._config.baseUrl).hostname),
             this.fetchDeviceInfo()
         ]);
 
