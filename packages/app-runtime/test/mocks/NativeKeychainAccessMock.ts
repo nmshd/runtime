@@ -7,14 +7,17 @@ export class NativeKeychainAccessMock implements INativeKeychainAccess {
     public get(name: string): Promise<Result<INativeKeychainEntry>> {
         return Promise.resolve(Result.ok(this.keys[name]));
     }
+
     public set(key: string, value: any): Promise<Result<void>> {
         this.keys[key] = { key, value };
         return Promise.resolve(Result.ok(undefined));
     }
+
     public delete(key: string /* , value: any */): Promise<Result<void>> {
         delete this.keys[key];
         return Promise.resolve(Result.ok(undefined));
     }
+
     public list(): Promise<Result<INativeKeychainEntry[]>> {
         const ar = [];
         for (const key in this.keys) {
@@ -22,6 +25,7 @@ export class NativeKeychainAccessMock implements INativeKeychainAccess {
         }
         return Promise.resolve(Result.ok(ar));
     }
+
     public init(): Promise<Result<void>> {
         return Promise.resolve(Result.ok(undefined));
     }

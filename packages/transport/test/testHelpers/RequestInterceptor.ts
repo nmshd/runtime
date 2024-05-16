@@ -6,18 +6,22 @@ export class RequestInterceptor {
     public get measuringRequests(): boolean {
         return this._measuringRequests;
     }
+
     protected _requests: AxiosRequestConfig[] = [];
     public get requests(): AxiosRequestConfig[] {
         return this._requests;
     }
+
     protected _responses: AxiosResponse[] = [];
     public get responses(): AxiosResponse[] {
         return this._responses;
     }
+
     protected _client: RESTClient;
     public get controller(): RESTClient {
         return this._client;
     }
+
     private oldCreateAxios: any;
 
     public constructor(client: RESTClient) {
