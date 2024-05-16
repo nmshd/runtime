@@ -1,7 +1,7 @@
 import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding, ICryptoSignaturePublicKey } from "@nmshd/crypto";
 import { CoreAddress } from "../../core";
 
-const enmeshedPrefix = "did:e:";
+const enmeshedAddressDIDPrefix = "did:e:";
 
 export class IdentityUtil {
     public static async createAddress(publicKey: ICryptoSignaturePublicKey, backboneHostname: string): Promise<CoreAddress> {
@@ -10,11 +10,11 @@ export class IdentityUtil {
         const hashedPublicKey = new CoreBuffer(hash.buffer.slice(0, 10));
         const identityPart = hashedPublicKey.toString(Encoding.Hex);
 
-        const checksumSource = CoreBuffer.fromUtf8(`${enmeshedPrefix}${backboneHostname}:dids:${hashedPublicKey.toString(Encoding.Hex)}`);
+        const checksumSource = CoreBuffer.fromUtf8(`${enmeshedAddressDIDPrefix}${backboneHostname}:dids:${hashedPublicKey.toString(Encoding.Hex)}`);
         const checksumHash = await CryptoHash.hash(checksumSource, CryptoHashAlgorithm.SHA256);
         const checksum = new CoreBuffer(checksumHash.buffer.slice(0, 1));
 
-        const addressString = `${enmeshedPrefix}${backboneHostname}:dids:${identityPart}${checksum.toString(Encoding.Hex)}`;
+        const addressString = `${enmeshedAddressDIDPrefix}${backboneHostname}:dids:${identityPart}${checksum.toString(Encoding.Hex)}`;
         const addressObj = CoreAddress.from({ address: addressString });
         return addressObj;
     }
@@ -22,7 +22,7 @@ export class IdentityUtil {
     public static async checkAddress(address: CoreAddress, backboneHostname: string, publicKey?: ICryptoSignaturePublicKey): Promise<boolean> {
         const str = address.toString();
 
-        const prefixLength = enmeshedPrefix.length;
+        const prefixLength = enmeshedAddressDIDPrefix.length;
         const strWithoutPrefix = str.substring(prefixLength);
         if (!strWithoutPrefix.startsWith(backboneHostname)) {
             return false;
