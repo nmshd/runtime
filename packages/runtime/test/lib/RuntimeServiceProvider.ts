@@ -27,8 +27,7 @@ export class RuntimeServiceProvider {
             baseUrl: process.env.NMSHD_TEST_BASEURL!,
             platformClientId: process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: process.env.NMSHD_TEST_CLIENTSECRET!,
-            debug: true,
-            allowIdentityCreation: true
+            debug: true
         },
         modules: {
             decider: {

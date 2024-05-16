@@ -24,8 +24,7 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
         accountsDbName: "accounts",
         transportLibrary: {
             realm: Realm.Prod,
-            datawalletEnabled: true,
-            allowIdentityCreation: true
+            datawalletEnabled: true
         },
         modules: {
             appLaunch: {

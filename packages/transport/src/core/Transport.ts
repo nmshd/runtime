@@ -58,7 +58,7 @@ export class Transport {
     }
 
     private static readonly defaultConfig: IConfig = {
-        allowIdentityCreation: false,
+        allowIdentityCreation: true,
         supportedDatawalletVersion: 1,
         supportedIdentityVersion: -1,
         debug: false,
