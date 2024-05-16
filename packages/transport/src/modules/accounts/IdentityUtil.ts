@@ -1,30 +1,30 @@
 import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding, ICryptoSignaturePublicKey } from "@nmshd/crypto";
 import { CoreAddress } from "../../core";
-import { enmeshedPrefix } from "./data/enmeshedPrefix";
-import { Realm } from "./data/Realm";
+
+const enmeshedAddressDIDPrefix = "did:e:";
 
 export class IdentityUtil {
-    public static async createAddress(publicKey: ICryptoSignaturePublicKey, realm: string): Promise<CoreAddress> {
+    public static async createAddress(publicKey: ICryptoSignaturePublicKey, backboneHostname: string): Promise<CoreAddress> {
         const sha512buffer = await CryptoHash.hash(publicKey.publicKey, CryptoHashAlgorithm.SHA512);
         const hash = await CryptoHash.hash(sha512buffer, CryptoHashAlgorithm.SHA256);
         const hashedPublicKey = new CoreBuffer(hash.buffer.slice(0, 10));
         const identityPart = hashedPublicKey.toString(Encoding.Hex);
 
-        const checksumSource = CoreBuffer.fromUtf8(enmeshedPrefix + realm + hashedPublicKey.toString(Encoding.Hex));
+        const checksumSource = CoreBuffer.fromUtf8(`${enmeshedAddressDIDPrefix}${backboneHostname}:dids:${hashedPublicKey.toString(Encoding.Hex)}`);
         const checksumHash = await CryptoHash.hash(checksumSource, CryptoHashAlgorithm.SHA256);
         const checksum = new CoreBuffer(checksumHash.buffer.slice(0, 1));
 
-        const addressString = enmeshedPrefix + realm + identityPart + checksum.toString(Encoding.Hex);
+        const addressString = `${enmeshedAddressDIDPrefix}${backboneHostname}:dids:${identityPart}${checksum.toString(Encoding.Hex)}`;
         const addressObj = CoreAddress.from({ address: addressString });
         return addressObj;
     }
 
-    public static async checkAddress(address: CoreAddress, publicKey?: ICryptoSignaturePublicKey, realm = Realm.Prod): Promise<boolean> {
+    public static async checkAddress(address: CoreAddress, backboneHostname: string, publicKey?: ICryptoSignaturePublicKey): Promise<boolean> {
         const str = address.toString();
 
-        const prefixLength = enmeshedPrefix.length;
+        const prefixLength = enmeshedAddressDIDPrefix.length;
         const strWithoutPrefix = str.substring(prefixLength);
-        if (!strWithoutPrefix.startsWith(realm)) {
+        if (!strWithoutPrefix.startsWith(backboneHostname)) {
             return false;
         }
 

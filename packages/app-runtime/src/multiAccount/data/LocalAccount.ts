@@ -1,11 +1,10 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId, CoreSerializable, ICoreDate, ICoreSerializable, Realm } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, CoreSerializable, ICoreDate, ICoreSerializable } from "@nmshd/transport";
 
 export interface ILocalAccount extends ICoreSerializable {
     id: CoreId;
     address?: CoreAddress;
     name: string;
-    realm: Realm;
     directory: string;
     order: number;
     lastAccessedAt?: ICoreDate;
@@ -24,10 +23,6 @@ export class LocalAccount extends CoreSerializable implements ILocalAccount {
     @validate()
     @serialize()
     public name: string;
-
-    @validate()
-    @serialize()
-    public realm: Realm;
 
     @validate()
     @serialize()

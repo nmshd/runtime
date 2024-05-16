@@ -29,7 +29,6 @@ import {
     IRelationship,
     IRelationshipTemplate,
     Message,
-    Realm,
     Relationship,
     RelationshipAuditLogEntryReason,
     RelationshipStatus,
@@ -50,8 +49,7 @@ export class TestObjectFactory {
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
-                    }),
-                    realm: Realm.Prod
+                    })
                 }),
             status: properties?.status ?? RelationshipStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
@@ -292,8 +290,7 @@ export class TestObjectFactory {
                 publicKey: CryptoSignaturePublicKey.from({
                     algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                     publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
-                }),
-                realm: Realm.Prod
+                })
             },
             cache: {
                 template: this.createIncomingIRelationshipTemplate(),
@@ -331,8 +328,7 @@ export class TestObjectFactory {
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
-                    }),
-                    realm: Realm.Prod
+                    })
                 },
                 templateKey: RelationshipTemplatePublicKey.from({
                     id: CoreId.from("b9uMR7u7lsKLzRfVJNYb"),
@@ -368,8 +364,7 @@ export class TestObjectFactory {
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
-                    }),
-                    realm: Realm.Prod
+                    })
                 },
                 templateKey: RelationshipTemplatePublicKey.from({
                     id: CoreId.from("b9uMR7u7lsKLzRfVJNYb"),
