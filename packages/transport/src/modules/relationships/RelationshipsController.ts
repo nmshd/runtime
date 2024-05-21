@@ -12,6 +12,7 @@ import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
+import { RelationshipSecretController } from "./RelationshipSecretController";
 import { BackbonePutRelationshipsResponse } from "./backbone/BackbonePutRelationship";
 import { BackboneRelationship } from "./backbone/BackboneRelationship";
 import { RelationshipClient } from "./backbone/RelationshipClient";
@@ -19,8 +20,6 @@ import { CachedRelationship } from "./local/CachedRelationship";
 import { Relationship } from "./local/Relationship";
 import { RelationshipAuditLog } from "./local/RelationshipAuditLog";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
-import { RelationshipSecretController } from "./RelationshipSecretController";
-import { RelationshipAuditLogEntryReason as RelationshipOperation } from "./transmission/RelationshipAuditLog";
 import { RelationshipStatus } from "./transmission/RelationshipStatus";
 import { RelationshipCreationContentCipher } from "./transmission/requests/RelationshipCreationContentCipher";
 import { RelationshipCreationContentSigned } from "./transmission/requests/RelationshipCreationContentSigned";
@@ -195,7 +194,7 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Pending) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.executeNonDeletingOperation(RelationshipOperation.AcceptanceOfCreation, relationshipId);
+        return await this.completeStateTransition(RelationshipStatus.Active, relationshipId);
     }
 
     public async reject(relationshipId: CoreId): Promise<Relationship> {
@@ -206,7 +205,7 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Pending) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.executeNonDeletingOperation(RelationshipOperation.RejectionOfCreation, relationshipId);
+        return await this.completeStateTransition(RelationshipStatus.Rejected, relationshipId);
     }
 
     public async revoke(relationshipId: CoreId): Promise<Relationship> {
@@ -217,7 +216,7 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Pending) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.executeNonDeletingOperation(RelationshipOperation.RevocationOfCreation, relationshipId);
+        return await this.completeStateTransition(RelationshipStatus.Revoked, relationshipId);
     }
 
     public async terminate(relationshipId: CoreId): Promise<Relationship> {
@@ -228,7 +227,7 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Active) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.executeNonDeletingOperation(RelationshipOperation.Termination, relationshipId);
+        return await this.completeStateTransition(RelationshipStatus.Terminated, relationshipId);
     }
 
     public async reactivate(relationshipId: CoreId): Promise<Relationship> {
@@ -342,7 +341,7 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async updatePendingRelationshipWithPeerOperation(relationshipDoc: any): Promise<Relationship | undefined> {
+    private async updatePendingRelationshipWithPeerResponse(relationshipDoc: any): Promise<Relationship | undefined> {
         const relationship = Relationship.from(relationshipDoc);
 
         const backboneRelationship = (await this.client.getRelationship(relationship.id.toString())).value;
@@ -425,7 +424,7 @@ export class RelationshipsController extends TransportController {
             relationshipDoc = await this.relationships.read(relationshipId);
         }
 
-        return await this.updatePendingRelationshipWithPeerOperation(relationshipDoc);
+        return await this.updatePendingRelationshipWithPeerResponse(relationshipDoc);
     }
 
     private async prepareCreationResponseContent(relationship: Relationship) {
@@ -454,7 +453,7 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async executeNonDeletingOperation(operation: RelationshipOperation, id: CoreId) {
+    private async completeStateTransition(targetStatus: RelationshipStatus, id: CoreId) {
         const relationshipDoc = await this.relationships.read(id.toString());
         if (!relationshipDoc) {
             throw CoreErrors.general.recordNotFound(Relationship, id.toString());
@@ -471,22 +470,22 @@ export class RelationshipsController extends TransportController {
         }
 
         let backboneResponse: BackbonePutRelationshipsResponse;
-        switch (operation) {
-            case RelationshipOperation.AcceptanceOfCreation:
+        switch (targetStatus) {
+            case RelationshipStatus.Active:
                 const encryptedContent = await this.prepareCreationResponseContent(relationship);
 
                 backboneResponse = (await this.client.acceptRelationship(id.toString(), { creationResponseContent: encryptedContent })).value;
                 break;
 
-            case RelationshipOperation.RejectionOfCreation:
+            case RelationshipStatus.Rejected:
                 backboneResponse = (await this.client.rejectRelationship(id.toString())).value;
                 break;
 
-            case RelationshipOperation.RevocationOfCreation:
+            case RelationshipStatus.Revoked:
                 backboneResponse = (await this.client.revokeRelationship(id.toString())).value;
                 break;
 
-            case RelationshipOperation.Termination:
+            case RelationshipStatus.Terminated:
                 backboneResponse = (await this.client.terminateRelationship(id.toString())).value;
                 break;
 
@@ -513,7 +512,7 @@ export class RelationshipsController extends TransportController {
                 break;
 
             default:
-                throw new TransportError("relationship operation not supported");
+                throw new TransportError("target change status not supported");
         }
         relationship.status = backboneResponse.status;
         relationship.cache.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneResponse.auditLog);

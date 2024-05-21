@@ -23,8 +23,8 @@ import {
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryUseCase,
-    GetAttributesUseCase,
     GetAttributeUseCase,
+    GetAttributesUseCase,
     GetOwnSharedAttributesUseCase,
     GetPeerSharedAttributesUseCase,
     GetRepositoryAttributesUseCase,
@@ -43,6 +43,8 @@ import {
     ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent
 } from "../../src";
 import {
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     acceptIncomingShareAttributeRequest,
     establishRelationship,
     executeFullCreateAndShareRelationshipAttributeFlow,
@@ -51,9 +53,7 @@ import {
     executeFullRequestAndShareThirdPartyRelationshipAttributeFlow,
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
-    RuntimeServiceProvider,
     syncUntilHasMessageWithNotification,
-    TestRuntimeServices,
     waitForRecipientToReceiveNotification
 } from "../lib";
 
@@ -1196,6 +1196,7 @@ describe("Get (shared) versions of attribute", () => {
         await succeedVersion1();
         sRAVersions = [sRAVersion2, sRAVersion1, sRAVersion0];
     }
+
     async function setUpIdentityAttributeVersions() {
         await createAndShareVersion0();
         await succeedVersion0();
@@ -1240,6 +1241,7 @@ describe("Get (shared) versions of attribute", () => {
             sOSIAVersion2FurtherPeer = await acceptIncomingShareAttributeRequest(services1, services3, shareRequestId);
         }
     }
+
     async function createAndShareRelationshipAttributeVersion0(): Promise<void> {
         sOSRAVersion0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
@@ -1253,6 +1255,7 @@ describe("Get (shared) versions of attribute", () => {
             }
         });
     }
+
     async function setUpRelationshipAttributeVersions() {
         await createAndShareRelationshipAttributeVersion0();
         await succeedVersion0();
@@ -1431,7 +1434,7 @@ describe("Get (shared) versions of attribute", () => {
         test("should return an empty list calling getSharedVersionsOfRepositoryAttribute with a nonexistent peer", async () => {
             const result = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({
                 attributeId: sRAVersion2.id,
-                peers: ["did:e:a:0000000000000000000000"]
+                peers: ["did:e:a:dids:00000000000000000000000"]
             });
             expect(result.isSuccess).toBe(true);
             const returnedVersions = result.value;

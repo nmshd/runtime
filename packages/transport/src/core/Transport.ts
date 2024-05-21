@@ -6,7 +6,6 @@ import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { Realm } from "../modules/accounts/data/Identity";
 import { CoreErrors } from "./CoreErrors";
 import { TransportContext } from "./TransportContext";
 import { TransportError } from "./TransportError";
@@ -25,7 +24,6 @@ export interface IConfig {
     platformMaxUnencryptedFileSize: number;
     platformAdditionalHeaders?: Record<string, string>;
     baseUrl: string;
-    realm: Realm;
     datawalletEnabled: boolean;
     httpAgent: AgentOptions;
     httpsAgent: HTTPSAgentOptions;
@@ -41,7 +39,6 @@ export interface IConfigOverwrite {
     platformMaxUnencryptedFileSize?: number;
     platformAdditionalHeaders?: Record<string, string>;
     baseUrl: string;
-    realm?: Realm;
     datawalletEnabled?: boolean;
     httpAgent?: AgentOptions;
     httpsAgent?: HTTPSAgentOptions;
@@ -65,7 +62,6 @@ export class Transport {
         platformMaxRedirects: 10,
         platformMaxUnencryptedFileSize: 10 * 1024 * 1024,
         baseUrl: "",
-        realm: Realm.Prod,
         datawalletEnabled: false,
         httpAgent: {
             keepAlive: true,

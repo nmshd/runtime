@@ -16,8 +16,7 @@ export class RelationshipMapper {
             peer: relationship.peer.address.toString(),
             peerIdentity: {
                 address: relationship.peer.address.toString(),
-                publicKey: relationship.peer.publicKey.toBase64(false),
-                realm: relationship.peer.realm
+                publicKey: relationship.peer.publicKey.toBase64(false)
             },
             auditLog: relationship.cache.auditLog.map((entry) => this.toAuditLogEntryDTO(entry)),
             creationContent: relationship.cache.creationContent?.toJSON(),

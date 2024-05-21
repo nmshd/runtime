@@ -10,7 +10,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus
 } from "../../../src";
-import { loggerFactory, TestUtil } from "../../core/TestUtil";
+import { TestUtil, loggerFactory } from "../../core/TestUtil";
 import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
@@ -383,6 +383,15 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
         });
+
+        test("throws on terminated relationship", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.noMatchingRelationship"
+            });
+        });
     });
 
     describe("CanReject", function () {
@@ -561,6 +570,15 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[0].isError()).toBe(true);
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
+        });
+
+        test("throws on terminated relationship", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.noMatchingRelationship"
+            });
         });
     });
 
@@ -847,6 +865,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("returns undefined when the given id belongs to an outgoing Request", async function () {
+            await Given.anActiveRelationshipToIdentity();
             const outgoingRequest = await Given.anOutgoingRequest();
             await When.iGetTheIncomingRequestWith(outgoingRequest.id);
             await Then.iExpectUndefinedToBeReturned();
@@ -900,6 +919,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("does not return outgoing Requests", async function () {
+            await Given.anActiveRelationshipToIdentity();
             await Given.anIncomingRequest();
             await Given.anOutgoingRequest();
             await When.iGetIncomingRequestsWithTheQuery({});

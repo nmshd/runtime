@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/app-runtime",
-    "version": "3.2.0",
+    "version": "3.2.1",
     "description": "The App Runtime",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -49,7 +49,7 @@
     },
     "devDependencies": {
         "@js-soft/web-logger": "^1.0.4",
-        "@types/lodash": "^4.17.1",
+        "@types/lodash": "^4.17.4",
         "@types/lokijs": "^1.5.14",
         "@types/luxon": "^3.4.2"
     },
