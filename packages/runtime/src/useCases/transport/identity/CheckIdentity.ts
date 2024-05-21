@@ -16,6 +16,7 @@ export interface CheckIdentityResponse {
     relationshipPending?: boolean;
     relationshipActive?: boolean;
     relationshipTerminated?: boolean;
+    relationshipDeletedByPeer?: boolean;
     relationship?: RelationshipDTO;
 }
 
@@ -64,6 +65,13 @@ export class CheckIdentityUseCase extends UseCase<CheckIdentityRequest, CheckIde
                     return Result.ok({
                         peer: true,
                         relationshipTerminated: true,
+                        relationship: relationshipDTO
+                    });
+                case RelationshipStatus.DeletionProposed:
+                    return Result.ok({
+                        peer: true,
+                        relationshipTerminated: true,
+                        relationshipDeletedByPeer: true,
                         relationship: relationshipDTO
                     });
                 default:
