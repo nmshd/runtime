@@ -179,4 +179,9 @@ describe("MessageController", function () {
         const unreadMessage = await recipient.messages.markMessageAsUnread(readMessage.id);
         expect(unreadMessage.wasReadAt).toBeUndefined();
     });
+
+    test("should not send a message on a terminated relationship", async function () {
+        await TestUtil.terminateRelationship(sender, recipient, relationshipId);
+        await expect(TestUtil.sendMessage(sender, recipient)).rejects.toThrow("error.transport.messages.noMatchingRelationship");
+    });
 });

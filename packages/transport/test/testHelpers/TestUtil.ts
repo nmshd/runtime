@@ -21,8 +21,8 @@ import {
     File,
     IChangedItems,
     IConfigOverwrite,
-    IdentityDeletionProcess,
     ISendFileParameters,
+    IdentityDeletionProcess,
     Message,
     Relationship,
     RelationshipStatus,
@@ -379,6 +379,11 @@ export class TestUtil {
         expect(relRequest.id.toString()).toBe(acceptedRelationshipPeer.id.toString());
 
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
+    }
+
+    public static async terminateRelationship(from: AccountController, to: AccountController, relationshipId: CoreId): Promise<void> {
+        await from.relationships.terminate(relationshipId);
+        await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
     }
 
     /**
