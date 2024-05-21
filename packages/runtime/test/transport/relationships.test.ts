@@ -331,7 +331,7 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.transport.messages.noMatchingRelationship");
+        expect(result).toBeAnError(/.*/, "error.transport.messages.missingOrInactiveRelationship");
     });
 
     test("should not decide a request", async () => {
