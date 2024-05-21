@@ -381,7 +381,8 @@ export class TestUtil {
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
     }
 
-    public static async terminateRelationship(from: AccountController, to: AccountController, relationshipId: CoreId): Promise<void> {
+    public static async terminateRelationship(from: AccountController, to: AccountController): Promise<void> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         await from.relationships.terminate(relationshipId);
         await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
     }
