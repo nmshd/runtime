@@ -381,10 +381,12 @@ export class TestUtil {
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
     }
 
-    public static async terminateRelationship(from: AccountController, to: AccountController): Promise<void> {
+    public static async terminateRelationship(from: AccountController, to: AccountController): Promise<Relationship[]> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
-        await from.relationships.terminate(relationshipId);
-        await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
+        const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
+        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return [terminatedRelationshipFromSelf, terminatedRelationshipPeer];
     }
 
     /**
