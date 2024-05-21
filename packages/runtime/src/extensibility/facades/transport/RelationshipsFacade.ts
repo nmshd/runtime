@@ -2,6 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import {
+    AcceptRelationshipReactivationRequest,
+    AcceptRelationshipReactivationUseCase,
     AcceptRelationshipRequest,
     AcceptRelationshipUseCase,
     CreateRelationshipRequest,
@@ -15,8 +17,14 @@ import {
     GetRelationshipsRequest,
     GetRelationshipsUseCase,
     GetRelationshipUseCase,
+    ReactivateRelationshipRequest,
+    ReactivateRelationshipUseCase,
+    RejectRelationshipReactivationRequest,
+    RejectRelationshipReactivationUseCase,
     RejectRelationshipRequest,
     RejectRelationshipUseCase,
+    RevokeRelationshipReactivationRequest,
+    RevokeRelationshipReactivationUseCase,
     RevokeRelationshipRequest,
     RevokeRelationshipUseCase,
     TerminateRelationshipRequest,
@@ -33,6 +41,10 @@ export class RelationshipsFacade {
         @Inject private readonly rejectRelationshipUseCase: RejectRelationshipUseCase,
         @Inject private readonly revokeRelationshipUseCase: RevokeRelationshipUseCase,
         @Inject private readonly terminateRelationshipUseCase: TerminateRelationshipUseCase,
+        @Inject private readonly reactivateRelationshipUseCase: ReactivateRelationshipUseCase,
+        @Inject private readonly acceptRelationshipReactivationUseCase: AcceptRelationshipReactivationUseCase,
+        @Inject private readonly rejectRelationshipReactivationUseCase: RejectRelationshipReactivationUseCase,
+        @Inject private readonly revokeRelationshipReactivationUseCase: RevokeRelationshipReactivationUseCase,
         @Inject private readonly getAttributesForRelationshipUseCase: GetAttributesForRelationshipUseCase
     ) {}
 
@@ -67,6 +79,26 @@ export class RelationshipsFacade {
     public async terminateRelationship(request: TerminateRelationshipRequest): Promise<Result<RelationshipDTO>> {
         return await this.terminateRelationshipUseCase.execute(request);
     }
+
+    public async reactivateRelationship(request: ReactivateRelationshipRequest): Promise<Result<RelationshipDTO>> {
+        return await this.reactivateRelationshipUseCase.execute(request);
+    }
+
+    public async acceptRelationshipReactivation(request: AcceptRelationshipReactivationRequest): Promise<Result<RelationshipDTO>> {
+        return await this.acceptRelationshipReactivationUseCase.execute(request);
+    }
+
+    public async rejectRelationshipReactivation(request: RejectRelationshipReactivationRequest): Promise<Result<RelationshipDTO>> {
+        return await this.rejectRelationshipReactivationUseCase.execute(request);
+    }
+
+    public async revokeRelationshipReactivation(request: RevokeRelationshipReactivationRequest): Promise<Result<RelationshipDTO>> {
+        return await this.revokeRelationshipReactivationUseCase.execute(request);
+    }
+
+    // public async deleteRelationship(request: DeleteRelationshipRequest): Promise<Result<RelationshipDTO>> {
+    //     return await this.deleteRelationshipUseCase.execute(request);
+    // }
 
     public async getAttributesForRelationship(request: GetAttributesForRelationshipRequest): Promise<Result<GetAttributesForRelationshipResponse>> {
         return await this.getAttributesForRelationshipUseCase.execute(request);
