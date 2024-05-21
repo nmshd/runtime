@@ -10,6 +10,9 @@ import {
     RelationshipStatus
 } from "../../src";
 import {
+    QueryParamConditions,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     createTemplate,
     ensureActiveRelationship,
     exchangeMessageWithRequest,
@@ -18,11 +21,8 @@ import {
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     getRelationship,
-    QueryParamConditions,
-    RuntimeServiceProvider,
     syncUntilHasMessageWithNotification,
-    syncUntilHasRelationships,
-    TestRuntimeServices
+    syncUntilHasRelationships
 } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -338,11 +338,13 @@ describe("RelationshipTermination", () => {
         await syncUntilHasRelationships(services2.transport);
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
-        const acceptResult = await services2.consumption.incomingRequests.accept({ requestId: incomingRequest.id, items: [{ accept: true }] });
-        expect(acceptResult).toBeAnError(/.*/, "error.consumption.requests.noMatchingRelationship");
+        const canAcceptResult = (await services2.consumption.incomingRequests.canAccept({ requestId: incomingRequest.id, items: [{ accept: true }] })).value;
+        expect(canAcceptResult.isSuccess).toBe(false);
+        expect(canAcceptResult.code).toBe("error.consumption.requests.noMatchingRelationship");
 
-        const rejectResult = await services2.consumption.incomingRequests.reject({ requestId: incomingRequest.id, items: [{ accept: false }] });
-        expect(rejectResult).toBeAnError(/.*/, "error.consumption.requests.noMatchingRelationship");
+        const canRejectResult = (await services2.consumption.incomingRequests.canReject({ requestId: incomingRequest.id, items: [{ accept: false }] })).value;
+        expect(canRejectResult.isSuccess).toBe(false);
+        expect(canRejectResult.code).toBe("error.consumption.requests.noMatchingRelationship");
     });
 
     test("should not create a request", async () => {
