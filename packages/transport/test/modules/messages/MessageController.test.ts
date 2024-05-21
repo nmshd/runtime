@@ -45,7 +45,7 @@ describe("MessageController", function () {
         sender = accounts[0];
         recipient = accounts[1];
         const rels = await TestUtil.addRelationship(sender, recipient);
-        relationshipId = rels[0].id;
+        relationshipId = rels.acceptedRelationshipFromSelf.id;
     });
 
     afterAll(async function () {
