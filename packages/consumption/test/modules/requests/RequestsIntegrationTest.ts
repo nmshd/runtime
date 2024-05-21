@@ -304,8 +304,8 @@ export class RequestsGiven {
 }
 
 export class RequestsWhen {
-    public async iCallCanAccept(): Promise<void> {
-        await this.iCallCanAcceptWith({});
+    public async iCallCanAccept(): Promise<ValidationResult> {
+        return await this.iCallCanAcceptWith({});
     }
 
     public async iTryToCallCanAccept(): Promise<void> {
@@ -339,8 +339,8 @@ export class RequestsWhen {
         return this.context.validationResult;
     }
 
-    public async iCallCanReject(): Promise<void> {
-        await this.iCallCanRejectWith({});
+    public async iCallCanReject(): Promise<ValidationResult> {
+        return await this.iCallCanRejectWith({});
     }
 
     public async iTryToCallCanReject(): Promise<void> {
