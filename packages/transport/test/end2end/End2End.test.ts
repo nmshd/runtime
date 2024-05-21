@@ -445,7 +445,7 @@ describe("RelationshipTest: Terminate", function () {
     });
 
     test("should terminate a relationship between two accounts", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to))[0].id;
+        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
 
         const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
         expect(terminatedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
