@@ -53,13 +53,13 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
             if (!relationship) {
                 return ValidationResult.error(
-                    CoreErrors.requests.missingRelationship(`You cannot create a request to ${parsedParams.peer.toString()} since you are not in a relationship.`)
+                    CoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
                 );
             }
             if (!(relationship.status === RelationshipStatus.Pending || relationship.status === RelationshipStatus.Active)) {
                 return ValidationResult.error(
                     CoreErrors.requests.wrongRelationshipStatus(
-                        `You cannot create a request to ${parsedParams.peer.toString()} since the relationship is in status ${relationship.status}.`
+                        `You cannot create a request to '${parsedParams.peer.toString()}' since the relationship is in status '${relationship.status}'.`
                     )
                 );
             }
