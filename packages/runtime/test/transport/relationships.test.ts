@@ -338,10 +338,9 @@ describe("RelationshipTermination", () => {
         await syncUntilHasRelationships(services2.transport);
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
-        const canAcceptResult = await services2.consumption.incomingRequests.canAccept({ requestId: incomingRequest.id, items: [{ accept: true }] });
-        expect(canAcceptResult).toBeAnError(/.*/, "error.consumption.requests.noMatchingRelationship");
-        // expect(canAcceptResult.isSuccess).toBe(false);
-        // expect(canAcceptResult.code).toBe("error.consumption.requests.noMatchingRelationship");
+        const canAcceptResult = (await services2.consumption.incomingRequests.canAccept({ requestId: incomingRequest.id, items: [{ accept: true }] })).value;
+        expect(canAcceptResult.isSuccess).toBe(false);
+        expect(canAcceptResult.code).toBe("error.consumption.requests.noMatchingRelationship");
 
         const canRejectResult = (await services2.consumption.incomingRequests.canReject({ requestId: incomingRequest.id, items: [{ accept: false }] })).value;
         expect(canRejectResult.isSuccess).toBe(false);
