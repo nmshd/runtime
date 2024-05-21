@@ -27,6 +27,7 @@ import {
     CreateTokenForFileRequest,
     CreateTokenQRCodeForFileRequest,
     FileDTO,
+    IdentityDeletionProcessDTO,
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
@@ -52,11 +53,10 @@ import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [] };
+    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [] };
 
     let iterationNumber = 0;
     let criteriaMet: boolean;
-
     do {
         await sleep(iterationNumber * 25);
 
@@ -64,56 +64,60 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
 
         finalSyncResult.messages.push(...currentIterationSyncResult.messages);
         finalSyncResult.relationships.push(...currentIterationSyncResult.relationships);
+        finalSyncResult.identityDeletionProcesses.push(...currentIterationSyncResult.identityDeletionProcesses);
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
     } while (!criteriaMet && iterationNumber < 15);
-
     if (!criteriaMet) throw new Error("syncUntil timed out.");
-
     return finalSyncResult;
 }
 
+async function syncUntilHas<T extends keyof SyncEverythingResponse>(
+    transportServices: TransportServices,
+    key: T,
+    // [0] is to infer the type of one element of the generic array
+    filter: (r: SyncEverythingResponse[T][0]) => boolean
+): Promise<SyncEverythingResponse[T][0]> {
+    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult[key].some((r) => filter(r)));
+    return syncResult[key].filter(filter)[0];
+}
+
+async function syncUntilHasMany<T extends keyof SyncEverythingResponse>(
+    transportServices: TransportServices,
+    key: T,
+    expectedNumberOfItems = 1
+): Promise<SyncEverythingResponse[T]> {
+    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult[key].length >= expectedNumberOfItems);
+    return syncResult[key];
+}
+
 export async function syncUntilHasRelationships(transportServices: TransportServices, expectedNumberOfRelationships = 1): Promise<RelationshipDTO[]> {
-    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult.relationships.length >= expectedNumberOfRelationships);
-    return syncResult.relationships;
+    return await syncUntilHasMany(transportServices, "relationships", expectedNumberOfRelationships);
 }
 
 export async function syncUntilHasMessages(transportServices: TransportServices, expectedNumberOfMessages = 1): Promise<MessageDTO[]> {
-    const syncResult = await syncUntil(transportServices, (syncResult) => syncResult.messages.length >= expectedNumberOfMessages);
-    return syncResult.messages;
+    return await syncUntilHasMany(transportServices, "messages", expectedNumberOfMessages);
 }
 
 export async function syncUntilHasMessage(transportServices: TransportServices, messageId: string | CoreId): Promise<MessageDTO> {
-    const filterMessagesByMessageId = (syncResult: SyncEverythingResponse) => {
-        return syncResult.messages.filter((m) => m.id === messageId.toString());
-    };
-    const syncResult = await syncUntil(transportServices, (syncResult) => filterMessagesByMessageId(syncResult).length !== 0);
-    return filterMessagesByMessageId(syncResult)[0];
+    return await syncUntilHas(transportServices, "messages", (m) => m.id === messageId.toString());
 }
 
 export async function syncUntilHasMessageWithRequest(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
-    const filterRequestMessagesByRequestId = (syncResult: SyncEverythingResponse) => {
-        return syncResult.messages.filter((m) => m.content["@type"] === "Request" && m.content.id === requestId.toString());
-    };
-    const syncResult = await syncUntil(transportServices, (syncResult) => filterRequestMessagesByRequestId(syncResult).length !== 0);
-    return filterRequestMessagesByRequestId(syncResult)[0];
+    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "Request" && m.content.id === requestId.toString());
 }
 
 export async function syncUntilHasMessageWithResponse(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
-    const filterResponseMessagesByRequestId = (syncResult: SyncEverythingResponse) => {
-        return syncResult.messages.filter((m) => m.content["@type"] === "ResponseWrapper" && m.content.requestId === requestId.toString());
-    };
-    const syncResult = await syncUntil(transportServices, (syncResult) => filterResponseMessagesByRequestId(syncResult).length !== 0);
-    return filterResponseMessagesByRequestId(syncResult)[0];
+    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "ResponseWrapper" && m.content.requestId === requestId.toString());
 }
 
 export async function syncUntilHasMessageWithNotification(transportServices: TransportServices, notificationId: string | CoreId): Promise<MessageDTO> {
-    const filterResponseMessagesByNotificationId = (syncResult: SyncEverythingResponse) => {
-        return syncResult.messages.filter((m) => m.content["@type"] === "Notification" && m.content.id === notificationId.toString());
-    };
-    const syncResult = await syncUntil(transportServices, (syncResult) => filterResponseMessagesByNotificationId(syncResult).length !== 0);
-    return filterResponseMessagesByNotificationId(syncResult)[0];
+    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "Notification" && m.content.id === notificationId.toString());
+}
+
+export async function syncUntilHasIdentityDeletionProcess(transportServices: TransportServices, identityDeletionProcessId: string | CoreId): Promise<IdentityDeletionProcessDTO> {
+    return await syncUntilHas(transportServices, "identityDeletionProcesses", (m) => m.id === identityDeletionProcessId.toString());
 }
 
 export async function uploadOwnToken(transportServices: TransportServices): Promise<TokenDTO> {

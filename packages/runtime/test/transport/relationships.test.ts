@@ -13,6 +13,9 @@ import {
     RelationshipStatus
 } from "../../src";
 import {
+    QueryParamConditions,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     createTemplate,
     ensureActiveRelationship,
     establishRelationship,
@@ -22,13 +25,10 @@ import {
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     getRelationship,
-    QueryParamConditions,
-    RuntimeServiceProvider,
     sendAndReceiveNotification,
     sendMessageToMultipleRecipients,
     syncUntilHasMessageWithNotification,
-    syncUntilHasRelationships,
-    TestRuntimeServices
+    syncUntilHasRelationships
 } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -302,6 +302,8 @@ describe("RelationshipTermination", () => {
     let relationshipId: string;
     let terminationResult: Result<RelationshipDTO, ApplicationError>;
     beforeAll(async () => {
+        relationshipId = (await ensureActiveRelationship(services1.transport, services2.transport)).id;
+
         const requestContent = {
             content: {
                 items: [
@@ -314,7 +316,7 @@ describe("RelationshipTermination", () => {
             peer: services2.address
         };
         await exchangeMessageWithRequest(services1, services2, requestContent);
-        relationshipId = (await services1.transport.relationships.getRelationships({})).value[0].id;
+
         terminationResult = await services1.transport.relationships.terminateRelationship({ relationshipId });
     });
 
@@ -339,18 +341,20 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.platform.validation.message.relationshipToRecipientNotActive");
+        expect(result).toBeAnError(/.*/, "error.transport.messages.noMatchingRelationship");
     });
 
     test("should not decide a request", async () => {
-        await services2.eventBus.waitForEvent(RelationshipChangedEvent);
+        await syncUntilHasRelationships(services2.transport);
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
-        const acceptResult = await services2.consumption.incomingRequests.accept({ requestId: incomingRequest.id, items: [{ accept: true }] });
-        expect(acceptResult).toBeAnError(/.*/, "error.consumption.requests.noMatchingRelationship");
+        const canAcceptResult = (await services2.consumption.incomingRequests.canAccept({ requestId: incomingRequest.id, items: [{ accept: true }] })).value;
+        expect(canAcceptResult.isSuccess).toBe(false);
+        expect(canAcceptResult.code).toBe("error.consumption.requests.noMatchingRelationship");
 
-        const rejectResult = await services2.consumption.incomingRequests.reject({ requestId: incomingRequest.id, items: [{ accept: false }] });
-        expect(rejectResult).toBeAnError(/.*/, "error.consumption.requests.noMatchingRelationship");
+        const canRejectResult = (await services2.consumption.incomingRequests.canReject({ requestId: incomingRequest.id, items: [{ accept: false }] })).value;
+        expect(canRejectResult.isSuccess).toBe(false);
+        expect(canRejectResult.code).toBe("error.consumption.requests.noMatchingRelationship");
     });
 
     test("should not create a request", async () => {

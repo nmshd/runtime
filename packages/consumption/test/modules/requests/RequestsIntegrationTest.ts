@@ -8,9 +8,9 @@ import {
     CoreId,
     IConfigOverwrite,
     ICoreId,
-    IdentityController,
     IMessage,
     IRelationshipTemplate,
+    IdentityController,
     Message,
     Relationship,
     RelationshipTemplate,
@@ -27,10 +27,10 @@ import {
     ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters,
     ICreateOutgoingRequestParameters,
     ILocalRequestSource,
-    IncomingRequestsController,
     IReceivedIncomingRequestParameters,
     IRequireManualDecisionOfIncomingRequestParameters,
     ISentOutgoingRequestParameters,
+    IncomingRequestsController,
     LocalRequest,
     LocalRequestSource,
     LocalRequestStatus,
@@ -113,7 +113,6 @@ export class RequestsTestsContext {
             return originalCanCreate.call(context.outgoingRequestsController, params);
         };
 
-        context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationship();
         return context;
     }
 
@@ -144,6 +143,24 @@ export class RequestsGiven {
 
     public async anIncomingRequest(): Promise<LocalRequest> {
         return await this.anIncomingRequestWith({});
+    }
+
+    public anActiveRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createActiveRelationship();
+
+        return Promise.resolve();
+    }
+
+    public aPendingRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createPendingRelationship();
+
+        return Promise.resolve();
+    }
+
+    public aTerminatedRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createTerminatedRelationship();
+
+        return Promise.resolve();
     }
 
     public async anIncomingRequestWithAnItemAndAGroupInStatus(status: LocalRequestStatus): Promise<void> {
@@ -287,8 +304,8 @@ export class RequestsGiven {
 }
 
 export class RequestsWhen {
-    public async iCallCanAccept(): Promise<void> {
-        await this.iCallCanAcceptWith({});
+    public async iCallCanAccept(): Promise<ValidationResult> {
+        return await this.iCallCanAcceptWith({});
     }
 
     public async iTryToCallCanAccept(): Promise<void> {
@@ -322,8 +339,8 @@ export class RequestsWhen {
         return this.context.validationResult;
     }
 
-    public async iCallCanReject(): Promise<void> {
-        await this.iCallCanRejectWith({});
+    public async iCallCanReject(): Promise<ValidationResult> {
+        return await this.iCallCanRejectWith({});
     }
 
     public async iTryToCallCanReject(): Promise<void> {
@@ -566,6 +583,7 @@ export class RequestsWhen {
 
         return this.context.validationResult;
     }
+
     public constructor(private readonly context: RequestsTestsContext) {}
 
     public async iCreateAnOutgoingRequest(): Promise<void> {
@@ -590,7 +608,7 @@ export class RequestsWhen {
     public async iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith(
         params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>
     ): Promise<void> {
-        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationship();
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createActiveRelationship();
         await this.iCreateAnOutgoingRequestFromRelationshipCreationWith(params);
     }
 
@@ -862,6 +880,7 @@ export class RequestsThen {
         expect(TestRequestItemProcessor.numberOfApplyIncomingResponseItemCalls).toStrictEqual(numberOfCalls);
         return Promise.resolve();
     }
+
     public constructor(private readonly context: RequestsTestsContext) {}
 
     public canCreateIsBeingCalled(): Promise<void> {

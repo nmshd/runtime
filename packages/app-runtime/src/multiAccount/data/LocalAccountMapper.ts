@@ -7,7 +7,6 @@ export class LocalAccountMapper {
             id: localAccount.id.toString(),
             address: localAccount.address?.toString(),
             name: localAccount.name,
-            realm: localAccount.realm,
             directory: localAccount.directory.toString(),
             order: localAccount.order,
             lastAccessedAt: localAccount.lastAccessedAt?.toString()

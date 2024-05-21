@@ -1,5 +1,5 @@
 /**
- * @pattern did:e:.*:[0-9a-f]{22}
+ * @pattern did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}
  */
 export type AddressString = string;
 
@@ -67,6 +67,11 @@ export type AttributeListenerIdString = string;
  * @pattern NOT[A-Za-z0-9]{17}
  */
 export type NotificationIdString = string;
+
+/**
+ * @pattern IDP[A-Za-z0-9]{17}
+ */
+export type IdentityDeletionProcessIdString = string;
 
 /**
  * @pattern VE9L.{84}

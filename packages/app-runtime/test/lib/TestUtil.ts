@@ -4,7 +4,7 @@ import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { Serializable } from "@js-soft/ts-serval";
 import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import { FileDTO, MessageDTO, RelationshipDTO, RelationshipTemplateDTO, SyncEverythingResponse } from "@nmshd/runtime";
-import { CoreDate, IConfigOverwrite, Realm, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate, IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { NativeBootstrapperMock } from "../mocks/NativeBootstrapperMock";
@@ -55,7 +55,7 @@ export class TestUtil {
     }
 
     public static async createSession(runtime: AppRuntime): Promise<LocalAccountSession> {
-        const localAccount1 = await runtime.accountServices.createAccount(Realm.Prod, "Profil 1");
+        const localAccount1 = await runtime.accountServices.createAccount("Profil 1");
         return await runtime.selectAccount(localAccount1.id);
     }
 
@@ -66,6 +66,7 @@ export class TestUtil {
         this.oldLogger = (TransportLoggerFactory as any).instance;
         TransportLoggerFactory.init(this.fatalLogger);
     }
+
     public static useTestLoggerFactory(): void {
         TransportLoggerFactory.init(this.oldLogger);
     }
@@ -156,7 +157,7 @@ export class TestUtil {
         const accounts: LocalAccountDTO[] = [];
 
         for (let i = 0; i < count; i++) {
-            accounts.push(await runtime.accountServices.createAccount(Realm.Prod, `Account ${i}`));
+            accounts.push(await runtime.accountServices.createAccount(`Account ${i}`));
         }
 
         return accounts;
@@ -246,19 +247,21 @@ export class TestUtil {
      * specified in the `until` callback is met.
      */
     public static async syncUntil(session: LocalAccountSession, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-        const syncResult = await session.transportServices.account.syncEverything();
-
-        const { messages, relationships } = syncResult.value;
-        const syncResponse = { relationships: [...relationships], messages: [...messages] };
+        const syncResponse: SyncEverythingResponse = {
+            relationships: [],
+            messages: [],
+            identityDeletionProcesses: []
+        };
 
         let iterationNumber = 0;
-        while (!until(syncResponse) && iterationNumber < 15) {
+        do {
             await sleep(iterationNumber * 25);
             const newSyncResult = await session.transportServices.account.syncEverything();
             syncResponse.messages.push(...newSyncResult.value.messages);
             syncResponse.relationships.push(...newSyncResult.value.relationships);
+            syncResponse.identityDeletionProcesses.push(...newSyncResult.value.identityDeletionProcesses);
             iterationNumber++;
-        }
+        } while (!until(syncResponse) && iterationNumber < 15);
         return syncResponse;
     }
 

@@ -26,13 +26,13 @@ import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProce
 import { ILocalRequestSource, LocalRequest } from "../local/LocalRequest";
 import { LocalRequestStatus } from "../local/LocalRequestStatus";
 import { LocalResponse, LocalResponseSource } from "../local/LocalResponse";
+import { DecideRequestParametersValidator } from "./DecideRequestParametersValidator";
 import { CheckPrerequisitesOfIncomingRequestParameters, ICheckPrerequisitesOfIncomingRequestParameters } from "./checkPrerequisites/CheckPrerequisitesOfIncomingRequestParameters";
 import { CompleteIncomingRequestParameters, ICompleteIncomingRequestParameters } from "./complete/CompleteIncomingRequestParameters";
 import { DecideRequestItemGroupParametersJSON } from "./decide/DecideRequestItemGroupParameters";
 import { DecideRequestItemParametersJSON } from "./decide/DecideRequestItemParameters";
 import { DecideRequestParametersJSON } from "./decide/DecideRequestParameters";
 import { InternalDecideRequestParameters, InternalDecideRequestParametersJSON } from "./decide/InternalDecideRequestParameters";
-import { DecideRequestParametersValidator } from "./DecideRequestParametersValidator";
 import { IReceivedIncomingRequestParameters, ReceivedIncomingRequestParameters } from "./received/ReceivedIncomingRequestParameters";
 import {
     IRequireManualDecisionOfIncomingRequestParameters,
@@ -183,7 +183,9 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const request = await this.getOrThrow(params.requestId);
 
-        await this.checkRelationshipStatus(request.peer);
+        const relationshipCheckResult = await this.checkRelationshipStatus(request.peer);
+        if (relationshipCheckResult.isError()) return relationshipCheckResult;
+
         this.assertRequestStatus(request, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired);
 
         const validationResult = this.decideRequestParamsValidator.validate(params, request);
@@ -422,12 +424,13 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
     }
 
-    private async checkRelationshipStatus(peer: CoreAddress) {
+    private async checkRelationshipStatus(peer: CoreAddress): Promise<ValidationResult> {
         const relationship = await this.relationshipResolver.getRelationshipToIdentity(peer);
         // no relationship is for a template request on new relationship
         if (relationship && relationship.status !== RelationshipStatus.Active) {
-            throw CoreErrors.requests.noMatchingRelationship(peer.toString());
+            return ValidationResult.error(CoreErrors.requests.noMatchingRelationship(peer.toString()));
         }
+        return ValidationResult.success();
     }
 
     private async updateRequestExpiry(request: LocalRequest) {
