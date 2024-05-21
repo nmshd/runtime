@@ -783,7 +783,7 @@ describe("OutgoingRequestsController", function () {
                 }
             });
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.noMatchingRelationship"
+                code: "error.consumption.requests.wrongRelationshipStatus"
             });
         });
     });

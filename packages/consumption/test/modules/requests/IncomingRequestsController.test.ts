@@ -389,7 +389,7 @@ describe("IncomingRequestsController", function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanAccept();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.noMatchingRelationship"
+                code: "error.consumption.requests.wrongRelationshipStatus"
             });
         });
     });
@@ -577,7 +577,7 @@ describe("IncomingRequestsController", function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.noMatchingRelationship"
+                code: "error.consumption.requests.wrongRelationshipStatus"
             });
         });
     });

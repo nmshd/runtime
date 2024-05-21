@@ -423,7 +423,9 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         const relationship = await this.relationshipResolver.getRelationshipToIdentity(peer);
         // no relationship is for a template request on new relationship
         if (relationship && relationship.status !== RelationshipStatus.Active) {
-            return ValidationResult.error(CoreErrors.requests.noMatchingRelationship(peer.toString()));
+            return ValidationResult.error(
+                CoreErrors.requests.wrongRelationshipStatus(`You cannot decide a request from ${peer.toString()} since the relationship is in status ${relationship.status}.`)
+            );
         }
         return ValidationResult.success();
     }
