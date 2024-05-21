@@ -45,7 +45,7 @@ describe("MessageController", function () {
         sender = accounts[0];
         recipient = accounts[1];
         const rels = await TestUtil.addRelationship(sender, recipient);
-        relationshipId = rels[0].id;
+        relationshipId = rels.acceptedRelationshipFromSelf.id;
     });
 
     afterAll(async function () {
@@ -182,6 +182,6 @@ describe("MessageController", function () {
 
     test("should not send a message on a terminated relationship", async function () {
         await TestUtil.terminateRelationship(sender, recipient);
-        await expect(TestUtil.sendMessage(sender, recipient)).rejects.toThrow("error.transport.messages.noMatchingRelationship");
+        await expect(TestUtil.sendMessage(sender, recipient)).rejects.toThrow("error.transport.messages.missingOrInactiveRelationship");
     });
 });

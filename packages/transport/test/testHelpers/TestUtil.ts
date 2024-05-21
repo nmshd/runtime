@@ -21,8 +21,8 @@ import {
     File,
     IChangedItems,
     IConfigOverwrite,
-    ISendFileParameters,
     IdentityDeletionProcess,
+    ISendFileParameters,
     Message,
     Relationship,
     RelationshipStatus,
@@ -339,7 +339,10 @@ export class TestUtil {
         expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
     }
 
-    public static async addRelationship(from: AccountController, to: AccountController): Promise<Relationship[]> {
+    public static async addRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
         const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
             content: {
                 mycontent: "template"
@@ -378,15 +381,18 @@ export class TestUtil {
         expect(relRequest.id.toString()).toBe(acceptedRelationshipFromSelf.id.toString());
         expect(relRequest.id.toString()).toBe(acceptedRelationshipPeer.id.toString());
 
-        return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
+        return { acceptedRelationshipFromSelf, acceptedRelationshipPeer };
     }
 
-    public static async terminateRelationship(from: AccountController, to: AccountController): Promise<Relationship[]> {
+    public static async terminateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
         const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
 
-        return [terminatedRelationshipFromSelf, terminatedRelationshipPeer];
+        return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
     }
 
     /**

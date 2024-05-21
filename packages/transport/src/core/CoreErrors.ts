@@ -48,8 +48,8 @@ class Messages {
         );
     }
 
-    public noMatchingRelationship(address: string) {
-        return new CoreError("error.transport.messages.noMatchingRelationship", `An active Relationship with the given address '${address}' does not exist.`);
+    public missingOrInactiveRelationship(address: string) {
+        return new CoreError("error.transport.messages.missingOrInactiveRelationship", `An active Relationship with the given address '${address}' does not exist.`);
     }
 }
 

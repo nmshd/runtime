@@ -389,7 +389,7 @@ describe("IncomingRequestsController", function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanAccept();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.noMatchingRelationship"
+                code: "error.consumption.requests.wrongRelationshipStatus"
             });
         });
     });
@@ -577,7 +577,7 @@ describe("IncomingRequestsController", function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.noMatchingRelationship"
+                code: "error.consumption.requests.wrongRelationshipStatus"
             });
         });
     });
@@ -814,7 +814,7 @@ describe("IncomingRequestsController", function () {
 
         test("can handle valid input with a Relationship as responseSource", async function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.Decided);
-            const outgoingRelationship = TestObjectFactory.createIRelationship();
+            const outgoingRelationship = TestObjectFactory.createPendingRelationship();
             await When.iCompleteTheIncomingRequestWith({
                 responseSourceObject: outgoingRelationship
             });
@@ -1001,7 +1001,7 @@ describe("IncomingRequestsController", function () {
                 ]
             });
 
-            const relationship = TestObjectFactory.createIRelationship();
+            const relationship = TestObjectFactory.createPendingRelationship();
 
             cnsRequest = await context.incomingRequestsController.complete({
                 requestId: cnsRequest.id,

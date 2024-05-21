@@ -239,11 +239,7 @@ describe("OutgoingRequestsController", function () {
         });
     });
 
-    describe("CreateFromRelationshipTemplateResponse (on pending relationship)", function () {
-        beforeEach(async function () {
-            await Given.aPendingRelationshipToIdentity();
-        });
-
+    describe("CreateFromRelationshipTemplateResponse", function () {
         describe("with a RelationshipCreation", function () {
             test("combines calls to create, sent and complete", async function () {
                 await When.iCreateAnOutgoingRequestFromRelationshipCreation();
@@ -260,7 +256,7 @@ describe("OutgoingRequestsController", function () {
 
             test("uses the id from the response for the created Local Request", async function () {
                 await When.iCreateAnOutgoingRequestFromRelationshipCreationWith({
-                    responseSource: TestObjectFactory.createIRelationship(),
+                    responseSource: TestObjectFactory.createPendingRelationship(),
                     response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
 
@@ -277,7 +273,7 @@ describe("OutgoingRequestsController", function () {
                             onNewRelationship: TestObjectFactory.createRequestWithOneItem()
                         })
                     ),
-                    responseSource: TestObjectFactory.createIRelationship(),
+                    responseSource: TestObjectFactory.createPendingRelationship(),
                     response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
 
@@ -290,19 +286,23 @@ describe("OutgoingRequestsController", function () {
                 await When.iTryToCreateAnOutgoingRequestFromRelationshipTemplateResponseWithoutResponseSource();
                 await Then.itThrowsAnErrorWithTheErrorMessage("*responseSource*Value is not defined*");
             });
-
-            test("uses the content from onExistingRelationship when the relationship exists", async function () {
-                await When.iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith({
-                    responseSource: TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("id1"), "requestIdReceivedFromPeer"),
-                    response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
-                });
-                await Then.theRequestHasTheId("requestIdReceivedFromPeer");
-                await Then.eventsHaveBeenPublished(OutgoingRequestCreatedAndCompletedEvent);
-                await Then.theRequestHasCorrectItemCount(2);
-            });
         });
 
-        describe("with a Message", function () {
+        test("uses the content from onExistingRelationship when the relationship exists", async function () {
+            await When.iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith({
+                responseSource: TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("id1"), "requestIdReceivedFromPeer"),
+                response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
+            });
+            await Then.theRequestHasTheId("requestIdReceivedFromPeer");
+            await Then.eventsHaveBeenPublished(OutgoingRequestCreatedAndCompletedEvent);
+            await Then.theRequestHasCorrectItemCount(2);
+        });
+
+        describe("with a Message (on active relationship)", function () {
+            beforeEach(async function () {
+                await Given.anActiveRelationshipToIdentity();
+            });
+
             test("combines calls to create, sent and complete", async function () {
                 await When.iCreateAnOutgoingRequestFromMessage();
                 await Then.theCreatedOutgoingRequestHasAllProperties();
@@ -783,7 +783,7 @@ describe("OutgoingRequestsController", function () {
                 }
             });
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.noMatchingRelationship"
+                code: "error.consumption.requests.wrongRelationshipStatus"
             });
         });
     });

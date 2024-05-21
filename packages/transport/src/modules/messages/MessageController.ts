@@ -9,9 +9,9 @@ import { MessageSentEvent, MessageWasReadAtChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { File } from "../files/local/File";
 import { FileReference } from "../files/transmission/FileReference";
-import { Relationship } from "../relationships/local/Relationship";
-import { RelationshipsController } from "../relationships/RelationshipsController";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
+import { RelationshipsController } from "../relationships/RelationshipsController";
+import { Relationship } from "../relationships/local/Relationship";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetMessagesResponse } from "./backbone/BackboneGetMessages";
 import { BackbonePostMessagesRecipientRequest } from "./backbone/BackbonePostMessages";
@@ -99,7 +99,7 @@ export class MessageController extends TransportController {
     public async getMessagesByAddress(address: CoreAddress): Promise<Message[]> {
         const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(address);
         if (!relationship) {
-            throw CoreErrors.messages.noMatchingRelationship(address.toString());
+            throw CoreErrors.messages.missingOrInactiveRelationship(address.toString());
         }
         return await this.getMessagesByRelationshipId(relationship.id);
     }
@@ -283,7 +283,7 @@ export class MessageController extends TransportController {
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
             if (!relationship) {
-                throw CoreErrors.messages.noMatchingRelationship(recipient.toString());
+                throw CoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
             }
 
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
@@ -319,7 +319,7 @@ export class MessageController extends TransportController {
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
             if (!relationship) {
-                throw CoreErrors.messages.noMatchingRelationship(recipient.toString());
+                throw CoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
             }
 
             const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
@@ -460,7 +460,7 @@ export class MessageController extends TransportController {
             relationship = await this.relationships.getActiveRelationshipToIdentity(envelope.createdBy);
 
             if (!relationship) {
-                throw CoreErrors.messages.noMatchingRelationship(envelope.createdBy.toString());
+                throw CoreErrors.messages.missingOrInactiveRelationship(envelope.createdBy.toString());
             }
 
             const [peerMessage, peerKey] = await this.decryptPeerEnvelope(envelope, relationship);
