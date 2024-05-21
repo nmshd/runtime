@@ -8,9 +8,9 @@ import {
     CoreId,
     IConfigOverwrite,
     ICoreId,
-    IdentityController,
     IMessage,
     IRelationshipTemplate,
+    IdentityController,
     Message,
     Relationship,
     RelationshipTemplate,
@@ -27,10 +27,10 @@ import {
     ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters,
     ICreateOutgoingRequestParameters,
     ILocalRequestSource,
-    IncomingRequestsController,
     IReceivedIncomingRequestParameters,
     IRequireManualDecisionOfIncomingRequestParameters,
     ISentOutgoingRequestParameters,
+    IncomingRequestsController,
     LocalRequest,
     LocalRequestSource,
     LocalRequestStatus,
@@ -113,7 +113,6 @@ export class RequestsTestsContext {
             return originalCanCreate.call(context.outgoingRequestsController, params);
         };
 
-        context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationship();
         return context;
     }
 
@@ -144,6 +143,24 @@ export class RequestsGiven {
 
     public async anIncomingRequest(): Promise<LocalRequest> {
         return await this.anIncomingRequestWith({});
+    }
+
+    public anActiveRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createActiveRelationship();
+
+        return Promise.resolve();
+    }
+
+    public aPendingRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createPendingRelationship();
+
+        return Promise.resolve();
+    }
+
+    public aTerminatedRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createTerminatedRelationship();
+
+        return Promise.resolve();
     }
 
     public async anIncomingRequestWithAnItemAndAGroupInStatus(status: LocalRequestStatus): Promise<void> {
@@ -591,7 +608,7 @@ export class RequestsWhen {
     public async iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith(
         params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>
     ): Promise<void> {
-        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationship();
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createActiveRelationship();
         await this.iCreateAnOutgoingRequestFromRelationshipCreationWith(params);
     }
 
