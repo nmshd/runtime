@@ -814,7 +814,7 @@ describe("IncomingRequestsController", function () {
 
         test("can handle valid input with a Relationship as responseSource", async function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.Decided);
-            const outgoingRelationship = TestObjectFactory.createIRelationship();
+            const outgoingRelationship = TestObjectFactory.createPendingRelationship();
             await When.iCompleteTheIncomingRequestWith({
                 responseSourceObject: outgoingRelationship
             });
@@ -1001,7 +1001,7 @@ describe("IncomingRequestsController", function () {
                 ]
             });
 
-            const relationship = TestObjectFactory.createIRelationship();
+            const relationship = TestObjectFactory.createPendingRelationship();
 
             cnsRequest = await context.incomingRequestsController.complete({
                 requestId: cnsRequest.id,
