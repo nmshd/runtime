@@ -23,7 +23,7 @@ import {
     OutgoingRequestStatusChangedEvent,
     ValidationResult
 } from "../../../src";
-import { loggerFactory, TestUtil } from "../../core/TestUtil";
+import { TestUtil, loggerFactory } from "../../core/TestUtil";
 import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
@@ -59,7 +59,11 @@ describe("OutgoingRequestsController", function () {
         context.reset();
     });
 
-    describe("CanCreate", function () {
+    describe("CanCreate (on active relationship)", function () {
+        beforeEach(async function () {
+            await Given.anActiveRelationshipToIdentity();
+        });
+
         test("returns 'success' on valid parameters", async function () {
             await When.iCallCanCreateForAnOutgoingRequest();
             await Then.itReturnsASuccessfulValidationResult();
@@ -197,7 +201,11 @@ describe("OutgoingRequestsController", function () {
         });
     });
 
-    describe("Create", function () {
+    describe("Create (on active relationship)", function () {
+        beforeEach(async function () {
+            await Given.anActiveRelationshipToIdentity();
+        });
+
         test("can handle valid input", async function () {
             await When.iCreateAnOutgoingRequest();
             await Then.theCreatedOutgoingRequestHasAllProperties();
@@ -231,7 +239,11 @@ describe("OutgoingRequestsController", function () {
         });
     });
 
-    describe("CreateFromRelationshipTemplateResponse", function () {
+    describe("CreateFromRelationshipTemplateResponse (on pending relationship)", function () {
+        beforeEach(async function () {
+            await Given.aPendingRelationshipToIdentity();
+        });
+
         describe("with a RelationshipCreation", function () {
             test("combines calls to create, sent and complete", async function () {
                 await When.iCreateAnOutgoingRequestFromRelationshipCreation();
@@ -318,7 +330,11 @@ describe("OutgoingRequestsController", function () {
         });
     });
 
-    describe("Sent", function () {
+    describe("Sent (on active relationship)", function () {
+        beforeEach(async function () {
+            await Given.anActiveRelationshipToIdentity();
+        });
+
         test("can handle valid input", async function () {
             await Given.anOutgoingRequestInStatus(LocalRequestStatus.Draft);
             await When.iCallSent();
@@ -368,7 +384,11 @@ describe("OutgoingRequestsController", function () {
         });
     });
 
-    describe("Complete", function () {
+    describe("Complete (on active relationship)", function () {
+        beforeEach(async function () {
+            await Given.anActiveRelationshipToIdentity();
+        });
+
         test("can handle valid input with a Message as responseSourceObject", async function () {
             await Given.anOutgoingRequestInStatus(LocalRequestStatus.Open);
             const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity);
@@ -596,7 +616,11 @@ describe("OutgoingRequestsController", function () {
         });
     });
 
-    describe("Get", function () {
+    describe("Get (on active relationship)", function () {
+        beforeEach(async function () {
+            await Given.anActiveRelationshipToIdentity();
+        });
+
         test("returns the Request with the given id if it exists", async function () {
             const outgoingRequest = await Given.anOutgoingRequest();
             await When.iGetTheOutgoingRequest();
@@ -655,7 +679,11 @@ describe("OutgoingRequestsController", function () {
         });
     });
 
-    describe("GetOutgoingRequests", function () {
+    describe("GetOutgoingRequests (on active relationship)", function () {
+        beforeEach(async function () {
+            await Given.anActiveRelationshipToIdentity();
+        });
+
         test("returns all outgoing Requests when invoked with no query", async function () {
             await Given.anOutgoingRequest();
             await Given.anOutgoingRequest();
@@ -717,7 +745,11 @@ describe("OutgoingRequestsController", function () {
         });
     });
 
-    describe("Discard", function () {
+    describe("Discard (on active relationship)", function () {
+        beforeEach(async function () {
+            await Given.anActiveRelationshipToIdentity();
+        });
+
         test("discards a Request in status Draft", async function () {
             await Given.anOutgoingRequestInStatus(LocalRequestStatus.Draft);
             await When.iDiscardTheOutgoingRequest();
