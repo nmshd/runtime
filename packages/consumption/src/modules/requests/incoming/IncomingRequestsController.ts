@@ -180,11 +180,17 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     private async canDecide(params: InternalDecideRequestParametersJSON): Promise<ValidationResult> {
         // syntactic validation
         InternalDecideRequestParameters.from(params);
-
         const request = await this.getOrThrow(params.requestId);
 
-        const relationshipCheckResult = await this.checkRelationshipStatusForDecide(request.peer);
-        if (relationshipCheckResult.isError()) return relationshipCheckResult;
+        const relationship = await this.relationshipResolver.getRelationshipToIdentity(request.peer);
+        // no relationship is for a template request on new relationship
+        if (relationship && relationship.status !== RelationshipStatus.Active) {
+            return ValidationResult.error(
+                CoreErrors.requests.wrongRelationshipStatus(
+                    `You cannot decide a request from '${request.peer.toString()}' since the relationship is in status '${relationship.status}'.`
+                )
+            );
+        }
 
         this.assertRequestStatus(request, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired);
 
@@ -422,17 +428,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         if (!status.includes(request.status)) {
             throw new ConsumptionError(`Local Request has to be in status '${status.join("/")}'.`);
         }
-    }
-
-    private async checkRelationshipStatusForDecide(peer: CoreAddress): Promise<ValidationResult> {
-        const relationship = await this.relationshipResolver.getRelationshipToIdentity(peer);
-        // no relationship is for a template request on new relationship
-        if (relationship && relationship.status !== RelationshipStatus.Active) {
-            return ValidationResult.error(
-                CoreErrors.requests.wrongRelationshipStatus(`You cannot decide a request from '${peer.toString()}' since the relationship is in status '${relationship.status}'.`)
-            );
-        }
-        return ValidationResult.success();
     }
 
     private async updateRequestExpiry(request: LocalRequest) {
