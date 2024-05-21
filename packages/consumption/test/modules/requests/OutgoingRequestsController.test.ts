@@ -768,4 +768,23 @@ describe("OutgoingRequestsController", function () {
             await Then.itThrowsAnErrorWithTheErrorMessage("*Local Request has to be in status 'Draft'*");
         });
     });
+
+    describe("CanCreate (on terminated relationship)", function () {
+        test("errors when the relationship is terminated", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
+                content: {
+                    items: [
+                        TestRequestItem.from({
+                            mustBeAccepted: false,
+                            shouldFailAtCanCreateOutgoingRequestItem: true
+                        })
+                    ]
+                }
+            });
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.noMatchingRelationship"
+            });
+        });
+    });
 });
