@@ -588,15 +588,15 @@ export class RelationshipsController extends TransportController {
                 break;
 
             case RelationshipAuditLogEntryReason.AcceptanceOfReactivation:
-                backboneResponse = (await this.client.acceptRelationshipActivation(id.toString())).value;
+                backboneResponse = (await this.client.acceptRelationshipReactivation(id.toString())).value;
                 break;
 
             case RelationshipAuditLogEntryReason.RejectionOfReactivation:
-                backboneResponse = (await this.client.rejectRelationshipActivation(id.toString())).value;
+                backboneResponse = (await this.client.rejectRelationshipReactivation(id.toString())).value;
                 break;
 
             case RelationshipAuditLogEntryReason.RevocationOfReactivation:
-                backboneResponse = (await this.client.revokeRelationshipActivation(id.toString())).value;
+                backboneResponse = (await this.client.revokeRelationshipReactivation(id.toString())).value;
                 break;
 
             default:
