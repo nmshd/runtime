@@ -435,7 +435,7 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async updateRelationshipWithPeerResponse(relationshipDoc: any): Promise<Relationship | undefined> {
+    private async updateRelationshipWithPeerResponse(relationshipDoc: any): Promise<Relationship> {
         const relationship = Relationship.from(relationshipDoc);
 
         const backboneRelationship = (await this.client.getRelationship(relationship.id.toString())).value;
@@ -507,7 +507,7 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async applyRelationshipChangedEvent(relationshipId: string): Promise<Relationship | undefined> {
+    public async applyRelationshipChangedEvent(relationshipId: string): Promise<Relationship> {
         let relationshipDoc = await this.relationships.read(relationshipId);
         if (!relationshipDoc) {
             const newRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
