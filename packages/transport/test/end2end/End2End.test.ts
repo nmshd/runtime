@@ -490,7 +490,7 @@ describe("RelationshipTest: Accept Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts and accept the reactivation", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to))[0].id;
+        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
 
@@ -539,7 +539,7 @@ describe("RelationshipTest: Reject Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts and reject the reactivation", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to))[0].id;
+        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
 
@@ -588,7 +588,7 @@ describe("RelationshipTest: Revoke Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts and revoke the reactivation", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to))[0].id;
+        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
 
