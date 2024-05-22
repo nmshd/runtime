@@ -41,9 +41,6 @@ export class RelationshipClient extends RESTClientAuthenticate {
     public async revokeRelationshipActivation(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
         return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reactivate/Revoke`, {});
     }
-    public async decomposeRelationship(relationshipId: string): Promise<ClientResult<void>> {
-        return await this.put<void>(`/api/v1/Relationships/${relationshipId}/Decompose`, {});
-    }
 
     public async getRelationships(request?: BackboneGetRelationshipsRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipResponse>>> {
         return await this.getPaged<BackboneGetRelationshipResponse>("/api/v1/Relationships", request);

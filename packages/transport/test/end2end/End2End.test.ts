@@ -83,7 +83,6 @@ describe("RelationshipTest: Accept", function () {
         expect(templateContent.value).toHaveProperty("mycontent");
         expect(templateContent.value.mycontent).toBe("template");
 
-        // Send Request
         const request = await to.relationships.sendRelationship({
             template: templateTo,
             creationContent: {
@@ -103,7 +102,6 @@ describe("RelationshipTest: Accept", function () {
         expect(request.cache?.auditLog).toHaveLength(1);
         expect(request.cache!.auditLog[0].newStatus).toBe(RelationshipStatus.Pending);
 
-        // Accept relationship
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
@@ -126,7 +124,6 @@ describe("RelationshipTest: Accept", function () {
 
         expect(acceptedRelationshipFromSelf.peer).toBeDefined();
 
-        // Get accepted relationship
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
@@ -216,7 +213,6 @@ describe("RelationshipTest: Reject", function () {
         expect(request.cache!.template.isOwn).toBe(false);
         expect(request.status).toStrictEqual(RelationshipStatus.Pending);
 
-        // Reject relationship
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
@@ -237,7 +233,6 @@ describe("RelationshipTest: Reject", function () {
 
         expect(rejectedRelationshipFromSelf.peer).toBeDefined();
 
-        // Get rejected relationship
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const rejectedRelationshipPeer = syncedRelationshipsPeer[0];
@@ -331,7 +326,6 @@ describe("RelationshipTest: Revoke", function () {
         expect(request.cache!.template.isOwn).toBe(false);
         expect(request.status).toStrictEqual(RelationshipStatus.Pending);
 
-        // Revoke relationship
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(templator);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
@@ -355,7 +349,6 @@ describe("RelationshipTest: Revoke", function () {
         expect(revokedRelationshipSelf.peer).toBeDefined();
         expect(revokedRelationshipSelf.peer.address.toString()).toStrictEqual(revokedRelationshipSelf.cache!.template.cache?.identity.address.toString());
 
-        // Get revoked relationship
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(templator);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const revokedRelationshipPeer = syncedRelationshipsPeer[0];
@@ -407,11 +400,9 @@ describe("RelationshipTest: Revoke", function () {
             }
         });
 
-        // Revoke relationship
         const revokedRelationshipSelf = await requestor.relationships.revoke(pendingRelationship.id);
         expect(revokedRelationshipSelf.status).toStrictEqual(RelationshipStatus.Revoked);
 
-        // Get revoked relationship
         await TestUtil.syncUntilHasRelationships(templator, 2); // wait for pending and revoked
         const relationshipsPeer = await templator.relationships.getRelationships({});
         expect(relationshipsPeer).toHaveLength(1);
@@ -453,7 +444,6 @@ describe("RelationshipTest: Terminate", function () {
         expect(terminatedRelationshipFromSelf.cache?.auditLog).toHaveLength(3);
         expect(terminatedRelationshipFromSelf.cache!.auditLog[2].newStatus).toBe(RelationshipStatus.Terminated);
 
-        // Get terminated relationship
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const terminatedRelationshipPeer = syncedRelationshipsPeer[0];
@@ -490,11 +480,10 @@ describe.skip("RelationshipTest: Accept Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts and accept the reactivation", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to))[0].id;
+        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
 
-        // Accept the reactivation
         await TestUtil.syncUntilHasRelationships(to);
         const acceptedReactivatedRelationshipPeer = await to.relationships.acceptReactivation(relationshipId);
         expect(acceptedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
@@ -502,7 +491,6 @@ describe.skip("RelationshipTest: Accept Reactivation", function () {
         expect(acceptedReactivatedRelationshipPeer.cache?.auditLog).toHaveLength(5);
         expect(acceptedReactivatedRelationshipPeer.cache!.auditLog[4].newStatus).toBe(RelationshipStatus.Active);
 
-        // Get relationship with accepted reactivation
         const syncedRelationshipsFromSelf = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationshipsFromSelf).toHaveLength(1);
         const acceptedReactivatedRelationshipFromSelf = syncedRelationshipsFromSelf[0];
@@ -539,11 +527,10 @@ describe.skip("RelationshipTest: Reject Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts and reject the reactivation", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to))[0].id;
+        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
 
-        // Reject the reactivation
         await TestUtil.syncUntilHasRelationships(to);
         const rejectedReactivatedRelationshipPeer = await to.relationships.rejectReactivation(relationshipId);
         expect(rejectedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
@@ -551,7 +538,6 @@ describe.skip("RelationshipTest: Reject Reactivation", function () {
         expect(rejectedReactivatedRelationshipPeer.cache?.auditLog).toHaveLength(5);
         expect(rejectedReactivatedRelationshipPeer.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.RejectionOfReactivation);
 
-        // Get relationship with rejected reactivation
         const syncedRelationshipsFromSelf = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationshipsFromSelf).toHaveLength(1);
         const rejectedReactivatedRelationshipFromSelf = syncedRelationshipsFromSelf[0];
@@ -588,18 +574,16 @@ describe.skip("RelationshipTest: Revoke Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts and revoke the reactivation", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to))[0].id;
+        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
 
-        // Revoke the reactivation
         const revokedReactivatedRelationshipFromSelf = await from.relationships.revokeReactivation(relationshipId);
         expect(revokedReactivatedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
         expect(revokedReactivatedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(revokedReactivatedRelationshipFromSelf.cache?.auditLog).toHaveLength(5);
         expect(revokedReactivatedRelationshipFromSelf.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.RevocationOfReactivation);
 
-        // Get relationship with revoked reactivation
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const revokedReactivatedRelationshipPeer = syncedRelationshipsPeer[0];
