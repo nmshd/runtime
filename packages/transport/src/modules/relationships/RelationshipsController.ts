@@ -435,7 +435,7 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async updatePendingRelationshipWithPeerResponse(relationshipDoc: any): Promise<Relationship | undefined> {
+    private async updateRelationshipWithPeerResponse(relationshipDoc: any): Promise<Relationship | undefined> {
         const relationship = Relationship.from(relationshipDoc);
 
         const backboneRelationship = (await this.client.getRelationship(relationship.id.toString())).value;
@@ -518,7 +518,7 @@ export class RelationshipsController extends TransportController {
             relationshipDoc = await this.relationships.read(relationshipId);
         }
 
-        return await this.updatePendingRelationshipWithPeerResponse(relationshipDoc);
+        return await this.updateRelationshipWithPeerResponse(relationshipDoc);
     }
 
     private async prepareCreationResponseContent(relationship: Relationship) {
