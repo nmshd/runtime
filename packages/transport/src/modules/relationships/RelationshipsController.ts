@@ -20,6 +20,7 @@ import { CachedRelationship } from "./local/CachedRelationship";
 import { Relationship } from "./local/Relationship";
 import { RelationshipAuditLog } from "./local/RelationshipAuditLog";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
+import { RelationshipAuditLogEntryReason } from "./transmission/RelationshipAuditLog";
 import { RelationshipStatus } from "./transmission/RelationshipStatus";
 import { RelationshipCreationContentCipher } from "./transmission/requests/RelationshipCreationContentCipher";
 import { RelationshipCreationContentSigned } from "./transmission/requests/RelationshipCreationContentSigned";
@@ -191,10 +192,21 @@ export class RelationshipsController extends TransportController {
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
         }
+        if (!relationship.cache) {
+            await this.updateCacheOfRelationship(relationship);
+        }
+        if (!relationship.cache) {
+            throw this.newCacheEmptyError(Relationship, relationshipId.toString());
+        }
+
         if (relationship.status !== RelationshipStatus.Pending) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.completeStateTransition(RelationshipStatus.Active, relationshipId);
+        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
+            throw CoreErrors.relationships.operationOnlyAllowedForPeer(`Only your peer can accept the relationship ${relationshipId.toString()}`);
+        }
+        return await this.completeOperation(RelationshipAuditLogEntryReason.AcceptanceOfCreation, relationshipId);
     }
 
     public async reject(relationshipId: CoreId): Promise<Relationship> {
@@ -202,10 +214,20 @@ export class RelationshipsController extends TransportController {
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
         }
+        if (!relationship.cache) {
+            await this.updateCacheOfRelationship(relationship);
+        }
+        if (!relationship.cache) {
+            throw this.newCacheEmptyError(Relationship, relationshipId.toString());
+        }
         if (relationship.status !== RelationshipStatus.Pending) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.completeStateTransition(RelationshipStatus.Rejected, relationshipId);
+        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
+            throw CoreErrors.relationships.operationOnlyAllowedForPeer(`Only your peer can reject the relationship ${relationshipId.toString()}. Revoke the relationship instead.`);
+        }
+        return await this.completeOperation(RelationshipAuditLogEntryReason.RejectionOfCreation, relationshipId);
     }
 
     public async revoke(relationshipId: CoreId): Promise<Relationship> {
@@ -213,10 +235,20 @@ export class RelationshipsController extends TransportController {
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
         }
+        if (!relationship.cache) {
+            await this.updateCacheOfRelationship(relationship);
+        }
+        if (!relationship.cache) {
+            throw this.newCacheEmptyError(Relationship, relationshipId.toString());
+        }
         if (relationship.status !== RelationshipStatus.Pending) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.completeStateTransition(RelationshipStatus.Revoked, relationshipId);
+        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        if (lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
+            throw CoreErrors.relationships.operationOnlyAllowedForPeer(`Only your peer can revoke the relationship ${relationshipId.toString()}. Reject the relationship instead.`);
+        }
+        return await this.completeOperation(RelationshipAuditLogEntryReason.RevocationOfCreation, relationshipId);
     }
 
     public async terminate(relationshipId: CoreId): Promise<Relationship> {
@@ -227,7 +259,7 @@ export class RelationshipsController extends TransportController {
         if (relationship.status !== RelationshipStatus.Active) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.completeStateTransition(RelationshipStatus.Terminated, relationshipId);
+        return await this.completeOperation(RelationshipAuditLogEntryReason.Termination, relationshipId);
     }
 
     public async reactivate(relationshipId: CoreId): Promise<Relationship> {
@@ -235,10 +267,26 @@ export class RelationshipsController extends TransportController {
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
         }
+        if (!relationship.cache) {
+            await this.updateCacheOfRelationship(relationship);
+        }
+        if (!relationship.cache) {
+            throw this.newCacheEmptyError(Relationship, relationshipId.toString());
+        }
         if (relationship.status !== RelationshipStatus.Terminated) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.executeNonDeletingOperation(RelationshipOperation.ReactivationRequested, relationshipId);
+        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        if (lastAuditLogEntry.reason === RelationshipAuditLogEntryReason.ReactivationRequested) {
+            if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
+                throw CoreErrors.relationships.reactivationAlreadyRequested(
+                    `Your peer has already requested the reactivation of the relationship ${relationshipId.toString()}. You can accept the reactivation instead.`
+                );
+            }
+            throw CoreErrors.relationships.reactivationAlreadyRequested(`You have already requested the reactivation of the relationship ${relationshipId.toString()}.`);
+        }
+
+        return await this.completeOperation(RelationshipAuditLogEntryReason.ReactivationRequested, relationshipId);
     }
 
     public async rejectReactivation(relationshipId: CoreId): Promise<Relationship> {
@@ -246,10 +294,26 @@ export class RelationshipsController extends TransportController {
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
         }
+        if (!relationship.cache) {
+            await this.updateCacheOfRelationship(relationship);
+        }
+        if (!relationship.cache) {
+            throw this.newCacheEmptyError(Relationship, relationshipId.toString());
+        }
         if (relationship.status !== RelationshipStatus.Terminated) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.executeNonDeletingOperation(RelationshipOperation.RejectionOfReactivation, relationshipId);
+        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
+            throw CoreErrors.relationships.reactivationNotRequested();
+        }
+
+        if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
+            throw CoreErrors.relationships.operationOnlyAllowedForPeer(
+                `Only your peer can reject the reactivation of the relationship ${relationshipId.toString()}. Revoke the relationship reactivation instead.`
+            );
+        }
+        return await this.completeOperation(RelationshipAuditLogEntryReason.RejectionOfReactivation, relationshipId);
     }
 
     public async revokeReactivation(relationshipId: CoreId): Promise<Relationship> {
@@ -257,10 +321,25 @@ export class RelationshipsController extends TransportController {
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
         }
+        if (!relationship.cache) {
+            await this.updateCacheOfRelationship(relationship);
+        }
+        if (!relationship.cache) {
+            throw this.newCacheEmptyError(Relationship, relationshipId.toString());
+        }
         if (relationship.status !== RelationshipStatus.Terminated) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.executeNonDeletingOperation(RelationshipOperation.RevocationOfReactivation, relationshipId);
+        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
+            throw CoreErrors.relationships.reactivationNotRequested();
+        }
+        if (lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
+            throw CoreErrors.relationships.operationOnlyAllowedForPeer(
+                `Only your peer can revoke the reactivation of the relationship ${relationshipId.toString()}. Reject the relationship reactivation instead.`
+            );
+        }
+        return await this.completeOperation(RelationshipAuditLogEntryReason.RevocationOfReactivation, relationshipId);
     }
 
     public async acceptReactivation(relationshipId: CoreId): Promise<Relationship> {
@@ -268,10 +347,25 @@ export class RelationshipsController extends TransportController {
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
         }
+        if (!relationship.cache) {
+            await this.updateCacheOfRelationship(relationship);
+        }
+
+        if (!relationship.cache) {
+            throw this.newCacheEmptyError(Relationship, relationshipId.toString());
+        }
         if (relationship.status !== RelationshipStatus.Terminated) {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
-        return await this.executeNonDeletingOperation(RelationshipOperation.AcceptanceOfReactivation, relationshipId);
+        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
+            throw CoreErrors.relationships.reactivationNotRequested();
+        }
+        if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
+            throw CoreErrors.relationships.operationOnlyAllowedForPeer(`Only your peer can accept the reactivation of the relationship ${relationshipId.toString()}.`);
+        }
+
+        return await this.completeOperation(RelationshipAuditLogEntryReason.AcceptanceOfReactivation, relationshipId);
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
@@ -453,7 +547,7 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async completeStateTransition(targetStatus: RelationshipStatus, id: CoreId) {
+    private async completeOperation(operation: RelationshipAuditLogEntryReason, id: CoreId) {
         const relationshipDoc = await this.relationships.read(id.toString());
         if (!relationshipDoc) {
             throw CoreErrors.general.recordNotFound(Relationship, id.toString());
@@ -470,49 +564,43 @@ export class RelationshipsController extends TransportController {
         }
 
         let backboneResponse: BackbonePutRelationshipsResponse;
-        switch (targetStatus) {
-            case RelationshipStatus.Active:
+        switch (operation) {
+            case RelationshipAuditLogEntryReason.AcceptanceOfCreation:
                 const encryptedContent = await this.prepareCreationResponseContent(relationship);
 
                 backboneResponse = (await this.client.acceptRelationship(id.toString(), { creationResponseContent: encryptedContent })).value;
                 break;
 
-            case RelationshipStatus.Rejected:
+            case RelationshipAuditLogEntryReason.RejectionOfCreation:
                 backboneResponse = (await this.client.rejectRelationship(id.toString())).value;
                 break;
 
-            case RelationshipStatus.Revoked:
+            case RelationshipAuditLogEntryReason.RevocationOfCreation:
                 backboneResponse = (await this.client.revokeRelationship(id.toString())).value;
                 break;
 
-            case RelationshipStatus.Terminated:
+            case RelationshipAuditLogEntryReason.Termination:
                 backboneResponse = (await this.client.terminateRelationship(id.toString())).value;
                 break;
 
-            case RelationshipOperation.ReactivationRequested:
+            case RelationshipAuditLogEntryReason.ReactivationRequested:
                 backboneResponse = (await this.client.reactivateRelationship(id.toString())).value;
                 break;
 
-            case RelationshipOperation.AcceptanceOfReactivation:
+            case RelationshipAuditLogEntryReason.AcceptanceOfReactivation:
                 backboneResponse = (await this.client.acceptRelationshipActivation(id.toString())).value;
                 break;
 
-            case RelationshipOperation.RejectionOfReactivation:
-                if (relationship.cache.auditLog[relationship.cache.auditLog.length - 1].reason !== RelationshipOperation.ReactivationRequested) {
-                    throw CoreErrors.relationships.reactivationNotRequested();
-                }
+            case RelationshipAuditLogEntryReason.RejectionOfReactivation:
                 backboneResponse = (await this.client.rejectRelationshipActivation(id.toString())).value;
                 break;
 
-            case RelationshipOperation.RevocationOfReactivation:
-                if (relationship.cache.auditLog[relationship.cache.auditLog.length - 1].reason !== RelationshipOperation.ReactivationRequested) {
-                    throw CoreErrors.relationships.reactivationNotRequested();
-                }
+            case RelationshipAuditLogEntryReason.RevocationOfReactivation:
                 backboneResponse = (await this.client.revokeRelationshipActivation(id.toString())).value;
                 break;
 
             default:
-                throw new TransportError("target change status not supported");
+                throw new TransportError("operation not supported");
         }
         relationship.status = backboneResponse.status;
         relationship.cache.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneResponse.auditLog);

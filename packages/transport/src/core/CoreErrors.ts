@@ -3,12 +3,20 @@ import { RelationshipStatus } from "../modules";
 import { CoreError } from "./CoreError";
 
 class Relationships {
+    public operationOnlyAllowedForPeer(message: string) {
+        return new CoreError("error.transport.relationships.operationOnlyAllowedForPeer", message);
+    }
+
     public wrongRelationshipStatus(status: RelationshipStatus) {
         return new CoreError("error.transport.relationships.wrongRelationshipStatus", `The relationship has the wrong status (${status}) to run this operation`);
     }
 
     public reactivationNotRequested() {
         return new CoreError("error.transport.relationships.reactivationNotRequested", "There is no reactivation request to respond to.");
+    }
+
+    public reactivationAlreadyRequested(message: string) {
+        return new CoreError("error.transport.relationships.reactivationAlreadyRequested", message);
     }
 }
 
