@@ -15,10 +15,7 @@ export class RelationshipReactivationCompletedExternalEventProcessor extends Ext
         const payload = RelationshipReactivationCompletedExternalEventData.fromAny(externalEvent.payload);
         const relationship = await this.accountController.relationships.applyRelationshipChangedEvent(payload.relationshipId);
 
-        if (relationship) {
-            this.eventBus.publish(new RelationshipChangedEvent(this.ownAddress, relationship));
-            return relationship;
-        }
-        return;
+        this.eventBus.publish(new RelationshipChangedEvent(this.ownAddress, relationship));
+        return relationship;
     }
 }
