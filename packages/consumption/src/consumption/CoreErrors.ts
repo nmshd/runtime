@@ -268,6 +268,14 @@ class Requests {
         return new CoreError("error.consumption.requests.invalidRequestItem", message);
     }
 
+    public wrongRelationshipStatus(message: string) {
+        return new CoreError("error.consumption.requests.wrongRelationshipStatus", message);
+    }
+
+    public missingRelationship(message: string) {
+        return new CoreError("error.consumption.requests.missingRelationship", message);
+    }
+
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);

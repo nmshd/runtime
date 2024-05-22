@@ -21397,29 +21397,6 @@ export const SendMessageRequest: any = {
     }
 }
 
-export const AcceptRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptRelationshipRequest",
-    "definitions": {
-        "AcceptRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
 export const CreateRelationshipRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateRelationshipRequest",
@@ -21582,6 +21559,29 @@ export const GetRelationshipsRequest: any = {
     }
 }
 
+export const AcceptRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptRelationshipRequest",
+    "definitions": {
+        "AcceptRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                },
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        },
+    }
+}
+
 export const RejectRelationshipRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/RejectRelationshipRequest",
@@ -21625,6 +21625,29 @@ export const RevokeRelationshipRequest: any = {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
         }
+    }
+}
+
+export const TerminateRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/TerminateRelationshipRequest",
+    "definitions": {
+        "TerminateRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                },
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        },
     }
 }
 

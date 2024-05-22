@@ -1,4 +1,4 @@
-import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { Result } from "@js-soft/ts-utils";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import {
@@ -18,7 +18,9 @@ import {
     RejectRelationshipRequest,
     RejectRelationshipUseCase,
     RevokeRelationshipRequest,
-    RevokeRelationshipUseCase
+    RevokeRelationshipUseCase,
+    TerminateRelationshipRequest,
+    TerminateRelationshipUseCase
 } from "../../../useCases";
 
 export class RelationshipsFacade {
@@ -30,38 +32,43 @@ export class RelationshipsFacade {
         @Inject private readonly acceptRelationshipUseCase: AcceptRelationshipUseCase,
         @Inject private readonly rejectRelationshipUseCase: RejectRelationshipUseCase,
         @Inject private readonly revokeRelationshipUseCase: RevokeRelationshipUseCase,
+        @Inject private readonly terminateRelationshipUseCase: TerminateRelationshipUseCase,
         @Inject private readonly getAttributesForRelationshipUseCase: GetAttributesForRelationshipUseCase
     ) {}
 
-    public async getRelationships(request: GetRelationshipsRequest): Promise<Result<RelationshipDTO[], ApplicationError>> {
+    public async getRelationships(request: GetRelationshipsRequest): Promise<Result<RelationshipDTO[]>> {
         return await this.getRelationshipsUseCase.execute(request);
     }
 
-    public async getRelationship(request: GetRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+    public async getRelationship(request: GetRelationshipRequest): Promise<Result<RelationshipDTO>> {
         return await this.getRelationshipUseCase.execute(request);
     }
 
-    public async getRelationshipByAddress(request: GetRelationshipByAddressRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+    public async getRelationshipByAddress(request: GetRelationshipByAddressRequest): Promise<Result<RelationshipDTO>> {
         return await this.getRelationshipByAddressUseCase.execute(request);
     }
 
-    public async createRelationship(request: CreateRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+    public async createRelationship(request: CreateRelationshipRequest): Promise<Result<RelationshipDTO>> {
         return await this.createRelationshipUseCase.execute(request);
     }
 
-    public async acceptRelationship(request: AcceptRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+    public async acceptRelationship(request: AcceptRelationshipRequest): Promise<Result<RelationshipDTO>> {
         return await this.acceptRelationshipUseCase.execute(request);
     }
 
-    public async rejectRelationship(request: RejectRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+    public async rejectRelationship(request: RejectRelationshipRequest): Promise<Result<RelationshipDTO>> {
         return await this.rejectRelationshipUseCase.execute(request);
     }
 
-    public async revokeRelationship(request: RevokeRelationshipRequest): Promise<Result<RelationshipDTO, ApplicationError>> {
+    public async revokeRelationship(request: RevokeRelationshipRequest): Promise<Result<RelationshipDTO>> {
         return await this.revokeRelationshipUseCase.execute(request);
     }
 
-    public async getAttributesForRelationship(request: GetAttributesForRelationshipRequest): Promise<Result<GetAttributesForRelationshipResponse, ApplicationError>> {
+    public async terminateRelationship(request: TerminateRelationshipRequest): Promise<Result<RelationshipDTO>> {
+        return await this.terminateRelationshipUseCase.execute(request);
+    }
+
+    public async getAttributesForRelationship(request: GetAttributesForRelationshipRequest): Promise<Result<GetAttributesForRelationshipResponse>> {
         return await this.getAttributesForRelationshipUseCase.execute(request);
     }
 }

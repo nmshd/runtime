@@ -12,6 +12,7 @@ import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
+import { RelationshipSecretController } from "./RelationshipSecretController";
 import { BackbonePutRelationshipsResponse } from "./backbone/BackbonePutRelationship";
 import { BackboneRelationship } from "./backbone/BackboneRelationship";
 import { RelationshipClient } from "./backbone/RelationshipClient";
@@ -19,7 +20,6 @@ import { CachedRelationship } from "./local/CachedRelationship";
 import { Relationship } from "./local/Relationship";
 import { RelationshipAuditLog } from "./local/RelationshipAuditLog";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
-import { RelationshipSecretController } from "./RelationshipSecretController";
 import { RelationshipStatus } from "./transmission/RelationshipStatus";
 import { RelationshipCreationContentCipher } from "./transmission/requests/RelationshipCreationContentCipher";
 import { RelationshipCreationContentSigned } from "./transmission/requests/RelationshipCreationContentSigned";
@@ -217,6 +217,17 @@ export class RelationshipsController extends TransportController {
             throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
         }
         return await this.completeStateTransition(RelationshipStatus.Revoked, relationshipId);
+    }
+
+    public async terminate(relationshipId: CoreId): Promise<Relationship> {
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) {
+            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
+        }
+        if (relationship.status !== RelationshipStatus.Active) {
+            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
+        }
+        return await this.completeStateTransition(RelationshipStatus.Terminated, relationshipId);
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
@@ -428,6 +439,10 @@ export class RelationshipsController extends TransportController {
 
             case RelationshipStatus.Revoked:
                 backboneResponse = (await this.client.revokeRelationship(id.toString())).value;
+                break;
+
+            case RelationshipStatus.Terminated:
+                backboneResponse = (await this.client.terminateRelationship(id.toString())).value;
                 break;
 
             default:

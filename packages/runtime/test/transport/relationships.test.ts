@@ -1,8 +1,18 @@
+import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { GetRelationshipsQuery, LocalAttributeDTO, OwnSharedAttributeSucceededEvent, PeerSharedAttributeSucceededEvent } from "../../src";
+import {
+    GetRelationshipsQuery,
+    IncomingRequestReceivedEvent,
+    LocalAttributeDTO,
+    OwnSharedAttributeSucceededEvent,
+    PeerSharedAttributeSucceededEvent,
+    RelationshipDTO,
+    RelationshipStatus
+} from "../../src";
 import {
     createTemplate,
     ensureActiveRelationship,
+    exchangeMessageWithRequest,
     exchangeTemplate,
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
@@ -279,5 +289,85 @@ describe("Attributes for the relationship", () => {
                 peerSharedRelationshipAttributeV1.id
             ].sort()
         );
+    });
+});
+
+describe("RelationshipTermination", () => {
+    let relationshipId: string;
+    let terminationResult: Result<RelationshipDTO, ApplicationError>;
+    beforeAll(async () => {
+        relationshipId = (await ensureActiveRelationship(services1.transport, services2.transport)).id;
+
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            },
+            peer: services2.address
+        };
+        await exchangeMessageWithRequest(services1, services2, requestContent);
+
+        terminationResult = await services1.transport.relationships.terminateRelationship({ relationshipId });
+    });
+
+    test("relationship status is terminated", async () => {
+        expect(terminationResult).toBeSuccessful();
+        const result = (await services1.transport.relationships.getRelationship({ id: relationshipId })).value;
+        expect(result.status).toBe(RelationshipStatus.Terminated);
+    });
+
+    test("should not send a message", async () => {
+        const result = await services1.transport.messages.sendMessage({
+            recipients: [services2.address],
+            content: {
+                "@type": "Mail",
+                body: "b",
+                cc: [],
+                subject: "a",
+                to: [services2.address]
+            }
+        });
+        expect(result).toBeAnError(/.*/, "error.transport.messages.missingOrInactiveRelationship");
+    });
+
+    test("should not decide a request", async () => {
+        await syncUntilHasRelationships(services2.transport);
+        const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
+
+        const canAcceptResult = (await services2.consumption.incomingRequests.canAccept({ requestId: incomingRequest.id, items: [{ accept: true }] })).value;
+        expect(canAcceptResult.isSuccess).toBe(false);
+        expect(canAcceptResult.code).toBe("error.consumption.requests.wrongRelationshipStatus");
+
+        const canRejectResult = (await services2.consumption.incomingRequests.canReject({ requestId: incomingRequest.id, items: [{ accept: false }] })).value;
+        expect(canRejectResult.isSuccess).toBe(false);
+        expect(canRejectResult.code).toBe("error.consumption.requests.wrongRelationshipStatus");
+    });
+
+    test("should not create a request", async () => {
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            },
+            peer: services2.address
+        };
+        const result = await services1.consumption.outgoingRequests.create(requestContent);
+        expect(result).toBeAnError(/.*/, "error.consumption.requests.wrongRelationshipStatus");
+    });
+
+    test("should not create a challenge for the relationship", async () => {
+        const result = await services1.transport.challenges.createChallenge({
+            challengeType: "Relationship",
+            relationship: relationshipId
+        });
+        expect(result).toBeAnError(/.*/, "error.transport.challenges.challengeTypeRequiresActiveRelationship");
     });
 });
