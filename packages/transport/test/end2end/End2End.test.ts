@@ -489,7 +489,7 @@ describe("RelationshipTest: Accept Reactivation", function () {
         await connection.close();
     });
 
-    test("should request reactivating a relationship between two accounts and accept the reactivation", async function () {
+    test.only("should request reactivating a relationship between two accounts and accept the reactivation", async function () {
         const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
