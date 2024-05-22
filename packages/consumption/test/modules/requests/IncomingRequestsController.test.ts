@@ -384,7 +384,7 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[2].isError()).toBe(true);
         });
 
-        test("throws on terminated relationship", async function () {
+        test("returns 'error' on terminated relationship", async function () {
             await Given.aTerminatedRelationshipToIdentity();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanAccept();
@@ -572,7 +572,7 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[2].isError()).toBe(true);
         });
 
-        test("throws on terminated relationship", async function () {
+        test("returns 'error' on terminated relationship", async function () {
             await Given.aTerminatedRelationshipToIdentity();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanReject();

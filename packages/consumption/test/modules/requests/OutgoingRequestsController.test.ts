@@ -770,7 +770,7 @@ describe("OutgoingRequestsController", function () {
     });
 
     describe("CanCreate (on terminated relationship)", function () {
-        test("errors when the relationship is terminated", async function () {
+        test("returns 'error' when the relationship is terminated", async function () {
             await Given.aTerminatedRelationshipToIdentity();
             const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
                 content: {
