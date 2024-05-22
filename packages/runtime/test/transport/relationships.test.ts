@@ -6,6 +6,8 @@ import {
     LocalAttributeDTO,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
+    RelationshipAuditLogEntryReason,
+    RelationshipChangedEvent,
     RelationshipDTO,
     RelationshipStatus
 } from "../../src";
@@ -316,6 +318,10 @@ describe("RelationshipTermination", () => {
 
     test("relationship status is terminated", async () => {
         expect(terminationResult).toBeSuccessful();
+        await expect(services1.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Termination
+        );
         const result = (await services1.transport.relationships.getRelationship({ id: relationshipId })).value;
         expect(result.status).toBe(RelationshipStatus.Terminated);
     });
@@ -336,6 +342,8 @@ describe("RelationshipTermination", () => {
 
     test("should not decide a request", async () => {
         await syncUntilHasRelationships(services2.transport);
+        await expect(services2.eventBus).toHavePublished(RelationshipChangedEvent, (e) => e.data.id === relationshipId);
+
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
         const canAcceptResult = (await services2.consumption.incomingRequests.canAccept({ requestId: incomingRequest.id, items: [{ accept: true }] })).value;
@@ -373,11 +381,24 @@ describe("RelationshipTermination", () => {
 
     test("should revoke the relationship reactivation", async () => {
         await services1.transport.relationships.reactivateRelationship({ relationshipId });
+        await expect(services1.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.ReactivationRequested
+        );
+
         const revocationResult = (await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId })).value;
         expect(revocationResult.status).toBe(RelationshipStatus.Terminated);
+        await expect(services1.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RevocationOfReactivation
+        );
 
         const relationship2 = (await syncUntilHasRelationships(services2.transport))[0];
         expect(relationship2.status).toBe(RelationshipStatus.Terminated);
+        await expect(services1.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RevocationOfReactivation
+        );
 
         const reactivationResult = await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId });
         expect(reactivationResult).toBeAnError(/.*/, "error.transport.relationships.reactivationNotRequested");
@@ -387,11 +408,23 @@ describe("RelationshipTermination", () => {
         await services1.transport.relationships.reactivateRelationship({ relationshipId });
 
         await syncUntilHasRelationships(services2.transport);
+        await expect(services2.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.ReactivationRequested
+        );
         const rejectionResult = (await services2.transport.relationships.rejectRelationshipReactivation({ relationshipId })).value;
         expect(rejectionResult.status).toBe(RelationshipStatus.Terminated);
+        await expect(services2.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RejectionOfReactivation
+        );
 
         const relationship1 = (await syncUntilHasRelationships(services1.transport))[0];
         expect(relationship1.status).toBe(RelationshipStatus.Terminated);
+        await expect(services1.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RejectionOfReactivation
+        );
 
         const revocationResult = await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId });
         expect(revocationResult).toBeAnError(/.*/, "error.transport.relationships.reactivationNotRequested");
@@ -401,10 +434,22 @@ describe("RelationshipTermination", () => {
         await services1.transport.relationships.reactivateRelationship({ relationshipId });
 
         await syncUntilHasRelationships(services2.transport);
+        await expect(services2.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.ReactivationRequested
+        );
         const rejectionResult = (await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId })).value;
         expect(rejectionResult.status).toBe(RelationshipStatus.Active);
+        await expect(services2.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.AcceptanceOfReactivation
+        );
 
         const relationship1 = (await syncUntilHasRelationships(services1.transport))[0];
         expect(relationship1.status).toBe(RelationshipStatus.Active);
+        await expect(services1.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.AcceptanceOfReactivation
+        );
     });
 });

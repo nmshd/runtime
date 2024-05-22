@@ -96,10 +96,6 @@ export class RelationshipsFacade {
         return await this.revokeRelationshipReactivationUseCase.execute(request);
     }
 
-    // public async deleteRelationship(request: DeleteRelationshipRequest): Promise<Result<RelationshipDTO>> {
-    //     return await this.deleteRelationshipUseCase.execute(request);
-    // }
-
     public async getAttributesForRelationship(request: GetAttributesForRelationshipRequest): Promise<Result<GetAttributesForRelationshipResponse>> {
         return await this.getAttributesForRelationshipUseCase.execute(request);
     }
