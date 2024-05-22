@@ -507,7 +507,7 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async applyRelationshipStatusChangedEvent(relationshipId: string): Promise<Relationship | undefined> {
+    public async applyRelationshipChangedEvent(relationshipId: string): Promise<Relationship | undefined> {
         let relationshipDoc = await this.relationships.read(relationshipId);
         if (!relationshipDoc) {
             const newRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
