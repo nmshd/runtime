@@ -183,7 +183,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         const request = await this.getOrThrow(params.requestId);
 
         const relationship = await this.relationshipResolver.getRelationshipToIdentity(request.peer);
-        // no relationship is for a template request on new relationship
+        // It is safe to decide an incoming Request when no Relationship is found as this is the case when the Request origins from onNewRelationship of the RelationshipTemplateContent
         if (relationship && relationship.status !== RelationshipStatus.Active) {
             return ValidationResult.error(
                 CoreErrors.requests.wrongRelationshipStatus(
