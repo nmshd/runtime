@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CoreBuffer } from "@nmshd/crypto";
-import { AccountController, CoreDate, FileReference, RelationshipAuditLogEntryReason, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "../../src";
+import { AccountController, CoreDate, CoreId, FileReference, RelationshipAuditLogEntryReason, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "../../src";
 import { TestUtil } from "../testHelpers/TestUtil";
 
 describe("AccountTest", function () {
@@ -461,6 +461,7 @@ describe.skip("RelationshipTest: Accept Reactivation", function () {
 
     let from: AccountController;
     let to: AccountController;
+    let relationshipId: CoreId;
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
@@ -471,6 +472,9 @@ describe.skip("RelationshipTest: Accept Reactivation", function () {
         const accounts = await TestUtil.provideAccounts(transport, 2);
         from = accounts[0];
         to = accounts[1];
+        relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
+        await from.relationships.terminate(relationshipId);
+        await TestUtil.syncUntilHasRelationships(to);
     });
 
     afterAll(async function () {
@@ -480,8 +484,6 @@ describe.skip("RelationshipTest: Accept Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts and accept the reactivation", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
-        await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
 
         await TestUtil.syncUntilHasRelationships(to);
@@ -508,6 +510,7 @@ describe.skip("RelationshipTest: Reject Reactivation", function () {
 
     let from: AccountController;
     let to: AccountController;
+    let relationshipId: CoreId;
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
@@ -518,6 +521,9 @@ describe.skip("RelationshipTest: Reject Reactivation", function () {
         const accounts = await TestUtil.provideAccounts(transport, 2);
         from = accounts[0];
         to = accounts[1];
+        relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
+        await from.relationships.terminate(relationshipId);
+        await TestUtil.syncUntilHasRelationships(to);
     });
 
     afterAll(async function () {
@@ -527,8 +533,6 @@ describe.skip("RelationshipTest: Reject Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts and reject the reactivation", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
-        await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
 
         await TestUtil.syncUntilHasRelationships(to);
@@ -555,6 +559,7 @@ describe.skip("RelationshipTest: Revoke Reactivation", function () {
 
     let from: AccountController;
     let to: AccountController;
+    let relationshipId: CoreId;
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
@@ -565,6 +570,9 @@ describe.skip("RelationshipTest: Revoke Reactivation", function () {
         const accounts = await TestUtil.provideAccounts(transport, 2);
         from = accounts[0];
         to = accounts[1];
+        relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
+        await from.relationships.terminate(relationshipId);
+        await TestUtil.syncUntilHasRelationships(to);
     });
 
     afterAll(async function () {
@@ -574,8 +582,6 @@ describe.skip("RelationshipTest: Revoke Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts and revoke the reactivation", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
-        await from.relationships.terminate(relationshipId);
         await from.relationships.reactivate(relationshipId);
 
         const revokedReactivatedRelationshipFromSelf = await from.relationships.revokeReactivation(relationshipId);
@@ -637,6 +643,201 @@ describe.skip("RelationshipTest: Decompose", function () {
         expect(decomposedRelationshipPeer.status).toStrictEqual(RelationshipStatus.DeletionProposed);
         expect(decomposedRelationshipPeer.cache?.auditLog).toHaveLength(4);
         expect(decomposedRelationshipPeer.cache!.auditLog[3].reason).toBe(RelationshipAuditLogEntryReason.Decomposition);
+    });
+});
+
+describe("RelationshipTest: validations (on terminated relationship", function () {
+    let connection: IDatabaseConnection;
+    let transport: Transport;
+
+    let from: AccountController;
+    let to: AccountController;
+    let relationshipId: CoreId;
+
+    beforeAll(async function () {
+        connection = await TestUtil.createDatabaseConnection();
+        transport = TestUtil.createTransport(connection);
+
+        await transport.init();
+
+        const accounts = await TestUtil.provideAccounts(transport, 2);
+        from = accounts[0];
+        to = accounts[1];
+        relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
+        await from.relationships.terminate(relationshipId);
+        await TestUtil.syncUntilHasRelationships(to);
+    });
+
+    afterAll(async function () {
+        await from.close();
+        await to.close();
+        await connection.close();
+    });
+
+    test("should not terminate a relationship in status terminated again", async function () {
+        await expect(from.relationships.terminate(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("reactivation revocation should fail without reactivation request", async function () {
+        await expect(from.relationships.rejectReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.reactivationNotRequested");
+    });
+
+    test("reactivation revocation should fail when the wrong side revokes it", async function () {
+        await from.relationships.reactivate(relationshipId);
+        await expect(to.relationships.rejectReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.operationOnlyAllowedForPeer");
+    });
+
+    test("reactivation acceptance should fail without reactivation request", async function () {
+        await expect(from.relationships.acceptReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.reactivationNotRequested");
+    });
+
+    test("reactivation acceptance should fail when the wrong side accepts it", async function () {
+        await from.relationships.reactivate(relationshipId);
+        await expect(from.relationships.acceptReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.operationOnlyAllowedForPeer");
+    });
+
+    test("reactivation rejection should fail without reactivation request", async function () {
+        await expect(from.relationships.rejectReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.reactivationNotRequested");
+    });
+
+    test("reactivation rejection should fail when the wrong side rejects it", async function () {
+        await from.relationships.reactivate(relationshipId);
+        await expect(from.relationships.rejectReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.operationOnlyAllowedForPeer");
+    });
+
+    test("requesting reactivation twice should fail", async function () {
+        await from.relationships.reactivate(relationshipId);
+        await expect(from.relationships.reactivate(relationshipId)).rejects.toThrow("error.transport.relationships.reactivationAlreadyRequested");
+    });
+});
+
+describe("RelationshipTest: operation executioner validation (on pending relationship)", function () {
+    let connection: IDatabaseConnection;
+    let transport: Transport;
+    let from: AccountController;
+    let to: AccountController;
+    let relationshipId: CoreId;
+
+    beforeAll(async function () {
+        connection = await TestUtil.createDatabaseConnection();
+        transport = TestUtil.createTransport(connection);
+
+        await transport.init();
+
+        const accounts = await TestUtil.provideAccounts(transport, 2);
+        from = accounts[0];
+        to = accounts[1];
+
+        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
+            content: {
+                mycontent: "template"
+            },
+            expiresAt: CoreDate.utc().add({ minutes: 5 }),
+            maxNumberOfAllocations: 1
+        });
+
+        const templateToken = TokenContentRelationshipTemplate.from({
+            templateId: templateFrom.id,
+            secretKey: templateFrom.secretKey
+        });
+
+        const token = await from.tokens.sendToken({
+            content: templateToken,
+            expiresAt: CoreDate.utc().add({ hours: 12 }),
+            ephemeral: false
+        });
+
+        const tokenRef = token.truncate();
+
+        const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
+
+        if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
+            throw new Error("token content not instanceof TokenContentRelationshipTemplate");
+        }
+
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
+        const request = await to.relationships.sendRelationship({
+            template: templateTo,
+            creationContent: {
+                mycontent: "request"
+            }
+        });
+        relationshipId = request.id;
+        await TestUtil.syncUntilHasRelationships(from);
+    });
+
+    afterAll(async function () {
+        await from.close();
+        await to.close();
+
+        await connection.close();
+    });
+
+    test("you should not accept your own relationship", async function () {
+        await expect(to.relationships.accept(relationshipId)).rejects.toThrow("error.transport.relationships.operationOnlyAllowedForPeer");
+    });
+
+    test("you should not reject your own relationship", async function () {
+        await expect(to.relationships.reject(relationshipId)).rejects.toThrow("error.transport.relationships.operationOnlyAllowedForPeer");
+    });
+
+    test("you should not revoke your peer's relationship", async function () {
+        await expect(from.relationships.revoke(relationshipId)).rejects.toThrow("error.transport.relationships.operationOnlyAllowedForPeer");
+    });
+});
+
+describe("RelationshipTest: relationship status validation (on active relationship)", function () {
+    let connection: IDatabaseConnection;
+    let transport: Transport;
+
+    let from: AccountController;
+    let to: AccountController;
+    let relationshipId: CoreId;
+
+    beforeAll(async function () {
+        connection = await TestUtil.createDatabaseConnection();
+        transport = TestUtil.createTransport(connection);
+
+        await transport.init();
+
+        const accounts = await TestUtil.provideAccounts(transport, 2);
+        from = accounts[0];
+        to = accounts[1];
+        relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
+    });
+
+    afterAll(async function () {
+        await from.close();
+        await to.close();
+        await connection.close();
+    });
+
+    test("should not reactivate a relationship", async function () {
+        await expect(from.relationships.reactivate(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not accept a relationship reactivation", async function () {
+        await expect(from.relationships.acceptReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not reject a relationship reactivation", async function () {
+        await expect(from.relationships.rejectReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not revoke a relationship reactivation", async function () {
+        await expect(from.relationships.revokeReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not accept a relationship", async function () {
+        await expect(from.relationships.accept(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not reject a relationship", async function () {
+        await expect(from.relationships.reject(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not revoke a relationship", async function () {
+        await expect(from.relationships.revoke(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
     });
 });
 
