@@ -7,3 +7,4 @@ export * from "./GetRelationships";
 export * from "./RejectRelationship";
 export * from "./RelationshipMapper";
 export * from "./RevokeRelationship";
+export * from "./TerminateRelationship";

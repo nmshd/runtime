@@ -4,10 +4,10 @@ import {
     CoreAddress,
     CoreDate,
     CoreId,
-    ICoreAddress,
     ICoreId,
     Message,
     Relationship,
+    RelationshipStatus,
     RelationshipTemplate,
     SynchronizedCollection,
     CoreErrors as TransportCoreErrors
@@ -17,6 +17,7 @@ import { ConsumptionController } from "../../../consumption/ConsumptionControlle
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
+import { CoreErrors } from "../../../consumption/CoreErrors";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -40,7 +41,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         private readonly eventBus: EventBus,
         private readonly identity: { address: CoreAddress },
         private readonly relationshipResolver: {
-            getActiveRelationshipToIdentity(id: ICoreAddress): Promise<Relationship | undefined>;
+            getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
         }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
@@ -48,6 +49,21 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     public async canCreate(params: ICanCreateOutgoingRequestParameters): Promise<ValidationResult> {
         const parsedParams = CanCreateOutgoingRequestParameters.from(params);
+        if (parsedParams.peer) {
+            const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
+            if (!relationship) {
+                return ValidationResult.error(
+                    CoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
+                );
+            }
+            if (!(relationship.status === RelationshipStatus.Pending || relationship.status === RelationshipStatus.Active)) {
+                return ValidationResult.error(
+                    CoreErrors.requests.wrongRelationshipStatus(
+                        `You cannot create a request to '${parsedParams.peer.toString()}' since the relationship is in status '${relationship.status}'.`
+                    )
+                );
+            }
+        }
 
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
 

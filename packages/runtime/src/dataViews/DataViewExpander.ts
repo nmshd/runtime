@@ -11,10 +11,10 @@ import {
     ErrorResponseItemJSON,
     FreeTextRequestItemJSON,
     GivenNameJSON,
+    IQLQueryJSON,
     IdentityAttribute,
     IdentityAttributeJSON,
     IdentityAttributeQueryJSON,
-    IQLQueryJSON,
     MailJSON,
     MiddleNameJSON,
     ProposeAttributeAcceptResponseItemJSON,
@@ -47,14 +47,14 @@ import {
     ValueHints,
     ValueHintsJSON
 } from "@nmshd/content";
-import { CoreAddress, CoreId, IdentityController, Realm, Relationship, RelationshipStatus } from "@nmshd/transport";
+import { CoreAddress, CoreId, IdentityController, Relationship, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import {
     AuthenticationRequestItemDVO,
     ConsentRequestItemDVO,
     CreateAttributeRequestItemDVO,
-    DeleteAttributeRequestItemDVO,
     DVOError,
+    DeleteAttributeRequestItemDVO,
     FileDVO,
     FreeTextRequestItemDVO,
     IdentityDVO,
@@ -83,6 +83,8 @@ import {
     RelationshipTemplateDTO
 } from "../types";
 import { RuntimeErrors } from "../useCases";
+import { DataViewObject } from "./DataViewObject";
+import { DataViewTranslateable } from "./DataViewTranslateable";
 import {
     LocalAttributeDVO,
     LocalAttributeListenerDVO,
@@ -92,8 +94,8 @@ import {
     PeerAttributeDVO,
     PeerRelationshipAttributeDVO,
     ProcessedAttributeQueryDVO,
-    ProcessedIdentityAttributeQueryDVO,
     ProcessedIQLQueryDVO,
+    ProcessedIdentityAttributeQueryDVO,
     ProcessedRelationshipAttributeQueryDVO,
     ProcessedThirdPartyRelationshipAttributeQueryDVO,
     RelationshipSettingDVO,
@@ -116,8 +118,8 @@ import {
     AttributeQueryDVO,
     DraftIdentityAttributeDVO,
     DraftRelationshipAttributeDVO,
-    IdentityAttributeQueryDVO,
     IQLQueryDVO,
+    IdentityAttributeQueryDVO,
     RelationshipAttributeQueryDVO,
     ThirdPartyRelationshipAttributeQueryDVO
 } from "./content/AttributeDVOs";
@@ -135,10 +137,8 @@ import {
     ResponseItemGroupDVO,
     ShareAttributeAcceptResponseItemDVO
 } from "./content/ResponseItemDVOs";
-import { DataViewObject } from "./DataViewObject";
-import { DataViewTranslateable } from "./DataViewTranslateable";
 import { MessageDVO, MessageStatus, RecipientDVO } from "./transport/MessageDVO";
-import { RelationshipDirection, RelationshipDVO } from "./transport/RelationshipDVO";
+import { RelationshipDVO, RelationshipDirection } from "./transport/RelationshipDVO";
 
 export class DataViewExpander {
     public constructor(
@@ -1506,7 +1506,6 @@ export class DataViewExpander {
             type: "IdentityDVO",
             name: name,
             initials: initials,
-            realm: Realm.Prod,
             description: "i18n://dvo.identity.self.description",
             isSelf: true,
             hasRelationship: false
@@ -1522,7 +1521,6 @@ export class DataViewExpander {
             type: "IdentityDVO",
             name: name,
             initials: initials,
-            realm: Realm.Prod,
             description: "i18n://dvo.identity.unknown.description",
             isSelf: false,
             hasRelationship: false
@@ -1664,7 +1662,6 @@ export class DataViewExpander {
             date: relationshipDVO.date,
             description: relationshipDVO.description,
             publicKey: relationship.peerIdentity.publicKey,
-            realm: relationship.peerIdentity.realm,
             initials,
             isSelf: false,
             hasRelationship: true,
@@ -1698,7 +1695,6 @@ export class DataViewExpander {
             name: name,
             initials: initials,
             publicKey: "i18n://dvo.identity.publicKey.unknown",
-            realm: this.identityController.realm.toString(),
             description: "i18n://dvo.identity.unknown",
             isSelf: false,
             hasRelationship: false

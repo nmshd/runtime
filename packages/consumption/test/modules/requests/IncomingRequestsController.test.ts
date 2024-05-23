@@ -383,6 +383,15 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
         });
+
+        test("returns 'error' on terminated relationship", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus"
+            });
+        });
     });
 
     describe("CanReject", function () {
@@ -561,6 +570,15 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[0].isError()).toBe(true);
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
+        });
+
+        test("returns 'error' on terminated relationship", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus"
+            });
         });
     });
 
@@ -796,7 +814,7 @@ describe("IncomingRequestsController", function () {
 
         test("can handle valid input with a Relationship as responseSource", async function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.Decided);
-            const outgoingRelationship = TestObjectFactory.createIRelationship();
+            const outgoingRelationship = TestObjectFactory.createPendingRelationship();
             await When.iCompleteTheIncomingRequestWith({
                 responseSourceObject: outgoingRelationship
             });
@@ -847,6 +865,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("returns undefined when the given id belongs to an outgoing Request", async function () {
+            await Given.anActiveRelationshipToIdentity();
             const outgoingRequest = await Given.anOutgoingRequest();
             await When.iGetTheIncomingRequestWith(outgoingRequest.id);
             await Then.iExpectUndefinedToBeReturned();
@@ -900,6 +919,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("does not return outgoing Requests", async function () {
+            await Given.anActiveRelationshipToIdentity();
             await Given.anIncomingRequest();
             await Given.anOutgoingRequest();
             await When.iGetIncomingRequestsWithTheQuery({});
@@ -981,7 +1001,7 @@ describe("IncomingRequestsController", function () {
                 ]
             });
 
-            const relationship = TestObjectFactory.createIRelationship();
+            const relationship = TestObjectFactory.createPendingRelationship();
 
             cnsRequest = await context.incomingRequestsController.complete({
                 requestId: cnsRequest.id,

@@ -1,5 +1,5 @@
 /**
- * @pattern id1[A-Za-z0-9]{32,33}
+ * @pattern did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}
  */
 export type AddressString = string;
 

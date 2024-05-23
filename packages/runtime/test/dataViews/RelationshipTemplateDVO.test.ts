@@ -14,16 +14,16 @@ import {
     IncomingRequestStatusChangedEvent,
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     PeerRelationshipTemplateDVO,
-    PeerRelationshipTemplateLoadedEvent,
     RelationshipTemplateDTO,
     RequestItemGroupDVO
 } from "../../src";
-import { createTemplate, RuntimeServiceProvider, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
+import { RuntimeServiceProvider, TestRuntimeServices, createTemplate, syncUntilHasRelationships } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
 let requestor: TestRuntimeServices;
 let templatorTemplate: RelationshipTemplateDTO;
+let templateId: string;
 let responseItems: DecideRequestItemGroupParametersJSON[];
 
 beforeAll(async () => {
@@ -141,6 +141,7 @@ describe("RelationshipTemplateDVO", () => {
             }
         ];
         templatorTemplate = await createTemplate(templator.transport, templateContent);
+        templateId = templatorTemplate.id;
     });
 
     test("TemplateDVO for templator", async () => {
@@ -175,6 +176,7 @@ describe("RelationshipTemplateDVO", () => {
 
     test("TemplateDVO for requestor", async () => {
         const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
         const dto = requestorTemplate;
         const dvo = (await requestor.expander.expandRelationshipTemplateDTO(dto)) as PeerRelationshipTemplateDVO;
@@ -206,13 +208,21 @@ describe("RelationshipTemplateDVO", () => {
     });
 
     test("RequestDVO for requestor", async () => {
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
-        await requestor.eventBus.waitForEvent(PeerRelationshipTemplateLoadedEvent);
-        const requestResult = await requestor.consumption.incomingRequests.getRequests({
+        let requestResult;
+        requestResult = await requestor.consumption.incomingRequests.getRequests({
             query: {
-                "source.reference": requestorTemplate.id
+                "source.reference": templateId
             }
         });
+        await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference });
+        if (requestResult.value.length === 0) {
+            await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            requestResult = await requestor.consumption.incomingRequests.getRequests({
+                query: {
+                    "source.reference": templateId
+                }
+            });
+        }
         expect(requestResult).toBeSuccessful();
         expect(requestResult.value).toHaveLength(1);
 
@@ -232,17 +242,17 @@ describe("RelationshipTemplateDVO", () => {
         let dto;
         let dvo;
         let requestResult;
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
         requestResult = await requestor.consumption.incomingRequests.getRequests({
             query: {
-                "source.reference": requestorTemplate.id
+                "source.reference": templateId
             }
         });
+        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
         if (requestResult.value.length === 0) {
             await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             requestResult = await requestor.consumption.incomingRequests.getRequests({
                 query: {
-                    "source.reference": requestorTemplate.id
+                    "source.reference": templateId
                 }
             });
         }
@@ -253,7 +263,7 @@ describe("RelationshipTemplateDVO", () => {
 
         const requestResultAfterAcceptance = await requestor.consumption.incomingRequests.getRequests({
             query: {
-                "source.reference": requestorTemplate.id
+                "source.reference": templateId
             }
         });
         expect(acceptResult).toBeSuccessful();
@@ -326,7 +336,7 @@ describe("RelationshipTemplateDVO", () => {
         await templator.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent);
         const requestResultTemplator = await templator.consumption.outgoingRequests.getRequests({
             query: {
-                "source.reference": requestorTemplate.id
+                "source.reference": templateId
             }
         });
         expect(requestResultTemplator).toBeSuccessful();

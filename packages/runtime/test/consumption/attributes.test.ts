@@ -25,8 +25,8 @@ import {
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryUseCase,
     ExecuteThirdPartyRelationshipAttributeQueryUseCase,
-    GetAttributesUseCase,
     GetAttributeUseCase,
+    GetAttributesUseCase,
     GetOwnSharedAttributesUseCase,
     GetPeerSharedAttributesUseCase,
     GetRepositoryAttributesUseCase,
@@ -45,6 +45,8 @@ import {
     ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent
 } from "../../src";
 import {
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     acceptIncomingShareAttributeRequest,
     establishRelationship,
     executeFullCreateAndShareRelationshipAttributeFlow,
@@ -53,9 +55,7 @@ import {
     executeFullRequestAndShareThirdPartyRelationshipAttributeFlow,
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
-    RuntimeServiceProvider,
     syncUntilHasMessageWithNotification,
-    TestRuntimeServices,
     waitForRecipientToReceiveNotification
 } from "../lib";
 
@@ -1436,7 +1436,7 @@ describe("Get (shared) versions of attribute", () => {
         test("should return an empty list calling getSharedVersionsOfRepositoryAttribute with a nonexistent peer", async () => {
             const result = await services1.consumption.attributes.getSharedVersionsOfRepositoryAttribute({
                 attributeId: sRAVersion2.id,
-                peers: ["id1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"]
+                peers: ["did:e:a:dids:00000000000000000000000"]
             });
             expect(result.isSuccess).toBe(true);
             const returnedVersions = result.value;

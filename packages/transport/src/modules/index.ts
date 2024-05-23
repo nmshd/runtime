@@ -4,7 +4,6 @@ export * from "./accounts/backbone/IdentityDeletionProcessClient";
 export * from "./accounts/data/Identity";
 export * from "./accounts/data/IdentityDeletionProcess";
 export * from "./accounts/data/IdentityDeletionProcessStatus";
-export * from "./accounts/data/Realm";
 export * from "./accounts/IdentityController";
 export * from "./accounts/IdentityDeletionProcessController";
 export * from "./accounts/IdentityUtil";

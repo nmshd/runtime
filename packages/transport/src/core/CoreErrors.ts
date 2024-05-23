@@ -33,7 +33,7 @@ class Messages {
     public signatureNotValid() {
         return new CoreError(
             "error.transport.messages.signatureNotValid",
-            "The digital signature on this message for peer key is invalid. An impersonination attack might be the cause of this."
+            "The digital signature on this message for peer key is invalid. An impersonation attack might be the cause of this."
         );
     }
 
@@ -44,8 +44,8 @@ class Messages {
         );
     }
 
-    public noMatchingRelationship(address: string) {
-        return new CoreError("error.transport.messages.noMatchingRelationship", `A Relationship with the given address '${address}' does not exist.`);
+    public missingOrInactiveRelationship(address: string) {
+        return new CoreError("error.transport.messages.missingOrInactiveRelationship", `An active Relationship with the given address '${address}' does not exist.`);
     }
 }
 
@@ -62,8 +62,8 @@ class Secrets {
 }
 
 class Challenges {
-    public challengeTypeRequiresRelationship() {
-        return new CoreError("error.transport.challenges.challengeTypeRequiresRelationship", "The challenge type 'Relationship' requires a relationship.");
+    public challengeTypeRequiresActiveRelationship() {
+        return new CoreError("error.transport.challenges.challengeTypeRequiresActiveRelationship", "The challenge type 'Relationship' requires an active relationship.");
     }
 }
 
@@ -164,10 +164,6 @@ class General {
 
     public notSupported() {
         return new CoreError("error.transport.notSupported", "The method is not yet supported.");
-    }
-
-    public realmLength() {
-        return new CoreError("error.transport.identity.realmLength", "Realm must be of length 3.");
     }
 
     public invalidTruncatedReference() {
