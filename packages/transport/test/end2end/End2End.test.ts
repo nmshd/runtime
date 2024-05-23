@@ -455,7 +455,7 @@ describe("RelationshipTest: Terminate", function () {
     });
 });
 
-describe.skip("RelationshipTest: Accept Reactivation", function () {
+describe("RelationshipTest: Accept Reactivation", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -504,7 +504,7 @@ describe.skip("RelationshipTest: Accept Reactivation", function () {
     });
 });
 
-describe.skip("RelationshipTest: Reject Reactivation", function () {
+describe("RelationshipTest: Reject Reactivation", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -553,7 +553,7 @@ describe.skip("RelationshipTest: Reject Reactivation", function () {
     });
 });
 
-describe.skip("RelationshipTest: Revoke Reactivation", function () {
+describe("RelationshipTest: Revoke Reactivation", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -601,7 +601,7 @@ describe.skip("RelationshipTest: Revoke Reactivation", function () {
     });
 });
 
-describe.skip("RelationshipTest: Decompose", function () {
+describe("RelationshipTest: Decompose", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -626,7 +626,7 @@ describe.skip("RelationshipTest: Decompose", function () {
     });
 
     test("should request decomposing a relationship", async function () {
-        const relationshipId = (await TestUtil.addRelationship(from, to))[0].id;
+        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
 
         // Decompose
@@ -826,6 +826,10 @@ describe("RelationshipTest: relationship status validation (on active relationsh
 
     test("should not revoke a relationship reactivation", async function () {
         await expect(from.relationships.revokeReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not decompose a relationship", async function () {
+        await expect(from.relationships.decompose(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
     });
 
     test("should not accept a relationship", async function () {
