@@ -27,7 +27,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             return queryValidationResult;
         }
 
-        const attributeValidationResult = this.validateAttribute(requestItem.attribute);
+        const attributeValidationResult = ProposeAttributeRequestItemProcessor.validateAttribute(requestItem.attribute);
         if (attributeValidationResult.isError()) {
             return attributeValidationResult;
         }
@@ -45,7 +45,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         return ValidationResult.success();
     }
 
-    private validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
+    private static validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
         if (attribute.owner.toString() !== "") {
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(

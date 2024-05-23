@@ -105,7 +105,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return this.canCreateWithIdentityAttribute(requestItem);
         }
 
-        return this.canCreateWithRelationshipAttribute(requestItem.attribute, recipient);
+        return ShareAttributeRequestItemProcessor.canCreateWithRelationshipAttribute(requestItem.attribute, recipient);
     }
 
     private canCreateWithIdentityAttribute(requestItem: ShareAttributeRequestItem) {
@@ -119,7 +119,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         return ValidationResult.success();
     }
 
-    private canCreateWithRelationshipAttribute(attribute: RelationshipAttribute, recipient?: CoreAddress) {
+    private static canCreateWithRelationshipAttribute(attribute: RelationshipAttribute, recipient?: CoreAddress) {
         if (attribute.owner.equals(recipient)) {
             return ValidationResult.error(CoreErrors.requests.invalidRequestItem("It doesn't make sense to share a RelationshipAttribute with its owner."));
         }
