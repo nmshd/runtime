@@ -342,7 +342,10 @@ describe("RelationshipTermination", () => {
 
     test("should not decide a request", async () => {
         await syncUntilHasRelationships(services2.transport);
-        await expect(services2.eventBus).toHavePublished(RelationshipChangedEvent, (e) => e.data.id === relationshipId);
+        await expect(services2.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Termination
+        );
 
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
