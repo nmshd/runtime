@@ -1,7 +1,7 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
-import { IdentityUtil, Realm } from "@nmshd/transport";
+import { IdentityUtil } from "@nmshd/transport";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
@@ -28,8 +28,6 @@ import {
     getRelationship,
     sendAndReceiveNotification,
     sendMessageToMultipleRecipients,
-    QueryParamConditions,
-    RuntimeServiceProvider,
     syncUntilHasMessageWithNotification,
     syncUntilHasRelationships
 } from "../lib";
@@ -563,7 +561,7 @@ describe("RelationshipDecomposition", () => {
 
     async function getAddressPseudonym() {
         const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
-        return await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, Realm.Prod);
+        return await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, "prod.enmeshed.eu");
     }
 
     async function createRelationshipData(services1: TestRuntimeServices, services2: TestRuntimeServices) {
