@@ -268,7 +268,6 @@ class Requests {
         return new CoreError("error.consumption.requests.invalidRequestItem", message);
     }
 
-
     public attributeQueryMismatch(message: string) {
         return new CoreError("error.consumption.requests.attributeQueryMismatch", message);
     }
