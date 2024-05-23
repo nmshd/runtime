@@ -278,7 +278,7 @@ export class RelationshipsController extends TransportController {
         }
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (lastAuditLogEntry.reason === RelationshipAuditLogEntryReason.ReactivationRequested) {
-            if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
+            if (lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
                 throw CoreErrors.relationships.reactivationAlreadyRequested(
                     `Your peer has already requested the reactivation of the relationship ${relationshipId.toString()}. You can accept the reactivation instead.`
                 );

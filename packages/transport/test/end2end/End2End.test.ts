@@ -485,8 +485,8 @@ describe("RelationshipTest: Accept Reactivation", function () {
 
     test("should request reactivating a relationship between two accounts and accept the reactivation", async function () {
         await from.relationships.reactivate(relationshipId);
-
         await TestUtil.syncUntilHasRelationships(to);
+
         const acceptedReactivatedRelationshipPeer = await to.relationships.acceptReactivation(relationshipId);
         expect(acceptedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
         expect(acceptedReactivatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
@@ -534,8 +534,8 @@ describe("RelationshipTest: Reject Reactivation", function () {
 
     test("should request reactivating a relationship between two accounts and reject the reactivation", async function () {
         await from.relationships.reactivate(relationshipId);
-
         await TestUtil.syncUntilHasRelationships(to);
+
         const rejectedReactivatedRelationshipPeer = await to.relationships.rejectReactivation(relationshipId);
         expect(rejectedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
         expect(rejectedReactivatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Terminated);
@@ -665,7 +665,13 @@ describe("RelationshipTest: validations (on terminated relationship", function (
         });
 
         test("requesting reactivation twice should fail", async function () {
-            await expect(from.relationships.reactivate(relationshipId)).rejects.toThrow("error.transport.relationships.reactivationAlreadyRequested");
+            await expect(from.relationships.reactivate(relationshipId)).rejects.toThrow(
+                "error.transport.relationships.reactivationAlreadyRequested: 'You have already requested the reactivation"
+            );
+
+            await expect(to.relationships.reactivate(relationshipId)).rejects.toThrow(
+                "error.transport.relationships.reactivationAlreadyRequested: 'Your peer has already requested the reactivation"
+            );
         });
     });
 });
