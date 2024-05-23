@@ -1082,10 +1082,10 @@ export class DataViewExpander {
             }
             const identityAttribute = localAttribute.content;
 
-            if (localAttribute.shareInfo.sourceAttribute) {
-                // Own Shared Attribute
+            if (identityAttribute.owner === localAttribute.shareInfo.peer) {
+                // Peer Attribute
                 return {
-                    type: "SharedToPeerAttributeDVO",
+                    type: "PeerAttributeDVO",
                     id: attribute.id,
                     name,
                     description,
@@ -1097,22 +1097,20 @@ export class DataViewExpander {
                     valueHints,
                     isValid: true,
                     createdAt: attribute.createdAt,
-                    isOwn: true,
+                    isOwn: false,
                     peer: peer,
                     isDraft: false,
                     requestReference: localAttribute.shareInfo.requestReference?.toString(),
                     notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                    sourceAttribute: localAttribute.shareInfo.sourceAttribute.toString(),
                     tags: identityAttribute.tags ? identityAttribute.tags : [],
                     valueType,
                     deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                     deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                 };
             }
-
-            // Peer Attribute
+            // Own Shared Attribute
             return {
-                type: "PeerAttributeDVO",
+                type: "SharedToPeerAttributeDVO",
                 id: attribute.id,
                 name,
                 description,
@@ -1124,11 +1122,12 @@ export class DataViewExpander {
                 valueHints,
                 isValid: true,
                 createdAt: attribute.createdAt,
-                isOwn: false,
+                isOwn: true,
                 peer: peer,
                 isDraft: false,
                 requestReference: localAttribute.shareInfo.requestReference?.toString(),
                 notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
+                sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
                 tags: identityAttribute.tags ? identityAttribute.tags : [],
                 valueType,
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
