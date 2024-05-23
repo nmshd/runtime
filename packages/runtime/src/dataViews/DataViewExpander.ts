@@ -1026,7 +1026,7 @@ export class DataViewExpander {
                 }
 
                 // Peer Relationship Attribute
-                if (relationshipAttribute.owner === localAttribute.shareInfo.peer) {
+                if (relationshipAttribute.owner.toString() === peer) {
                     return {
                         type: "PeerRelationshipAttributeDVO",
                         id: attribute.id,
@@ -1082,7 +1082,7 @@ export class DataViewExpander {
             }
             const identityAttribute = localAttribute.content;
 
-            if (identityAttribute.owner === localAttribute.shareInfo.peer) {
+            if (identityAttribute.owner.toString() === peer) {
                 // Peer Attribute
                 return {
                     type: "PeerAttributeDVO",
