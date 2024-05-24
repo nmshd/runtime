@@ -23,9 +23,7 @@ export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemPr
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
 
-        if (typeof attribute === "undefined") {
-            return ValidationResult.success();
-        }
+        if (!attribute) return ValidationResult.success();
 
         if (!attribute.isThirdPartyOwnedRelationshipAttribute(this.currentIdentityAddress)) {
             return ValidationResult.error(CoreErrors.attributes.isNotThirdPartyOwnedRelationshipAttribute(notificationItem.attributeId));
@@ -43,7 +41,7 @@ export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemPr
         _notification: LocalNotification
     ): Promise<ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent | void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         const deletionDate = CoreDate.utc();
         const deletionInfo = LocalAttributeDeletionInfo.from({
@@ -63,7 +61,7 @@ export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemPr
 
     public override async rollback(notificationItem: ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
 

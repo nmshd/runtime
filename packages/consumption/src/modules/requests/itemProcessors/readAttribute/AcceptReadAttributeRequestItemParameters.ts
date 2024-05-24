@@ -28,11 +28,11 @@ export class AcceptReadAttributeRequestItemParameters extends Serializable {
     public newAttribute?: IdentityAttribute | RelationshipAttribute;
 
     public isWithExistingAttribute(): this is { existingAttributeId: CoreId } {
-        return typeof this.existingAttributeId !== "undefined";
+        return !!this.existingAttributeId;
     }
 
     public isWithNewAttribute(): this is { newAttributeValue: IdentityAttribute | RelationshipAttribute } {
-        return typeof this.newAttribute !== "undefined";
+        return !!this.newAttribute;
     }
 
     public static from(value: AcceptReadAttributeRequestItemParametersJSON): AcceptReadAttributeRequestItemParameters {

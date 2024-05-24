@@ -451,9 +451,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     private async succeedChildrenOfComplexAttribute(parentSuccessorId: CoreId) {
         const parentSuccessor = await this.getLocalAttribute(parentSuccessorId);
-        if (typeof parentSuccessor === "undefined") {
-            throw CoreErrors.attributes.invalidParentSuccessor;
-        }
+        if (!parentSuccessor) throw CoreErrors.attributes.invalidParentSuccessor(parentSuccessorId);
 
         const childAttributeValues: AbstractAttributeValue[] = Object.values(parentSuccessor.content.value).filter((elem) => elem instanceof AbstractAttributeValue);
 
@@ -461,14 +459,14 @@ export class AttributesController extends ConsumptionBaseController {
             let currentParent = await this.getLocalAttribute(parentSuccessorId);
 
             let child;
-            while (typeof child === "undefined" && currentParent?.succeeds) {
+            while (child && currentParent?.succeeds) {
                 const currentPredecessor = (await this.getLocalAttribute(currentParent.succeeds))!;
                 currentParent = currentPredecessor;
                 child = await this.getChildAttributesByValueType(currentParent.id, childAttributeValue.constructor);
             }
 
             const childPredecessorId = child?.id;
-            if (typeof childPredecessorId !== "undefined") {
+            if (childPredecessorId) {
                 await this._succeedAttributeUnsafe(childPredecessorId, {
                     content: IdentityAttribute.from({
                         value: childAttributeValue.toJSON() as AttributeValues.Identity.Json,
@@ -505,9 +503,7 @@ export class AttributesController extends ConsumptionBaseController {
         successorParams: Parameters<typeof this.createAttributeUnsafe>[0]
     ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
         const predecessor = await this.getLocalAttribute(predecessorId);
-        if (typeof predecessor === "undefined") {
-            throw CoreErrors.attributes.predecessorDoesNotExist;
-        }
+        if (!predecessor) throw CoreErrors.attributes.predecessorDoesNotExist();
 
         const successor = await this.createAttributeUnsafe({
             id: successorParams.id,
@@ -599,12 +595,12 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(CoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (typeof successor.shareInfo.sourceAttribute === "undefined") {
+        if (!successor.shareInfo.sourceAttribute) {
             return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeIsNotSpecified());
         }
 
         const successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
-        if (typeof successorSource === "undefined") {
+        if (!successorSource) {
             return ValidationResult.error(CoreErrors.attributes.successorSourceAttributeDoesNotExist());
         }
 
@@ -617,17 +613,15 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         let predecessorSource: any = undefined;
-        if (typeof predecessor.shareInfo.sourceAttribute !== "undefined") {
-            predecessorSource = await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute);
-        }
+        if (predecessor.shareInfo.sourceAttribute) predecessorSource = await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute);
 
-        if (typeof predecessorSource !== "undefined") {
+        if (predecessorSource) {
             if (!predecessorSource.isRepositoryAttribute(this.identity.address)) {
                 return ValidationResult.error(CoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
             }
 
             const successorSourceVersionIds = (await this.getVersionsOfAttribute(successorSource.id)).map((x) => x.id.toString());
-            if (typeof predecessorSource.succeededBy === "undefined" || !successorSourceVersionIds.some((id) => id === predecessorSource.succeededBy?.toString())) {
+            if (!predecessorSource.succeededBy || !successorSourceVersionIds.some((id) => id === predecessorSource.succeededBy?.toString())) {
                 return ValidationResult.error(CoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
             }
 
@@ -785,35 +779,33 @@ export class AttributesController extends ConsumptionBaseController {
             parentId: parsedSuccessorParams.parentId
         });
 
-        if (typeof parsedSuccessorParams.id !== "undefined") {
+        if (parsedSuccessorParams.id) {
             const successor = await this.getLocalAttribute(CoreId.from(parsedSuccessorParams.id));
-            if (typeof successor !== "undefined") {
-                return ValidationResult.error(CoreErrors.attributes.successorMustNotYetExist());
-            }
+            if (successor) return ValidationResult.error(CoreErrors.attributes.successorMustNotYetExist());
         }
 
-        if (typeof successor.succeeds !== "undefined" && !predecessorId.equals(successor.succeeds.toString())) {
+        if (successor.succeeds && !predecessorId.equals(successor.succeeds.toString())) {
             return ValidationResult.error(CoreErrors.attributes.setPredecessorIdDoesNotMatchActualPredecessorId());
         }
 
-        if (typeof successor.succeededBy !== "undefined") {
+        if (successor.succeededBy) {
             return ValidationResult.error(CoreErrors.attributes.successorMustNotHaveASuccessor());
         }
 
-        if (typeof successor.parentId !== "undefined") {
+        if (successor.parentId) {
             return ValidationResult.error(CoreErrors.attributes.cannotSucceedChildOfComplexAttribute(predecessorId.toString()));
         }
 
         const predecessor = await this.getLocalAttribute(predecessorId);
-        if (typeof predecessor === "undefined") {
+        if (!predecessor) {
             return ValidationResult.error(CoreErrors.attributes.predecessorDoesNotExist());
         }
 
-        if (typeof predecessor.succeededBy !== "undefined") {
+        if (predecessor.succeededBy) {
             return ValidationResult.error(CoreErrors.attributes.cannotSucceedAttributesWithASuccessor(predecessor.succeededBy.toString()));
         }
 
-        if (typeof predecessor.parentId !== "undefined") {
+        if (predecessor.parentId) {
             return ValidationResult.error(CoreErrors.attributes.cannotSucceedChildOfComplexAttribute(predecessorId.toString()));
         }
 
@@ -884,9 +876,9 @@ export class AttributesController extends ConsumptionBaseController {
             throw validationResult.error;
         }
 
-        if (typeof attribute.succeededBy !== "undefined") {
+        if (attribute.succeededBy) {
             const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (typeof successor === "undefined") {
+            if (!successor) {
                 throw CoreErrors.attributes.successorDoesNotExist();
             }
             await this.detachSuccessor(successor);
@@ -916,9 +908,9 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async validateSuccessor(predecessor: LocalAttribute): Promise<ValidationResult> {
-        if (typeof predecessor.succeededBy !== "undefined") {
+        if (predecessor.succeededBy) {
             const successor = await this.getLocalAttribute(predecessor.succeededBy);
-            if (typeof successor === "undefined") {
+            if (!successor) {
                 return ValidationResult.error(CoreErrors.attributes.successorDoesNotExist());
             }
         }
@@ -958,7 +950,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
         const attribute = await this.getLocalAttribute(id);
-        if (typeof attribute === "undefined") {
+        if (!attribute) {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
@@ -972,14 +964,14 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getPredecessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
         let attribute = await this.getLocalAttribute(id);
-        if (typeof attribute === "undefined") {
+        if (!attribute) {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
         const predecessors: LocalAttribute[] = [];
-        while (typeof attribute.succeeds !== "undefined") {
+        while (attribute.succeeds) {
             const predecessor = await this.getLocalAttribute(attribute.succeeds);
-            if (typeof predecessor === "undefined") {
+            if (!predecessor) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
             }
 
@@ -992,14 +984,14 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getSuccessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
         let attribute = await this.getLocalAttribute(id);
-        if (typeof attribute === "undefined") {
+        if (!attribute) {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
         const successors: LocalAttribute[] = [];
-        while (typeof attribute.succeededBy !== "undefined") {
+        while (attribute.succeededBy) {
             const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (typeof successor === "undefined") {
+            if (!successor) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
             }
 
@@ -1012,7 +1004,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getSharedVersionsOfRepositoryAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
         const repositoryAttribute = await this.getLocalAttribute(id);
-        if (typeof repositoryAttribute === "undefined") {
+        if (!repositoryAttribute) {
             throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
         }
 
@@ -1021,7 +1013,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const query: any = { "shareInfo.sourceAttribute": repositoryAttribute.id.toString() };
-        if (typeof peers !== "undefined") {
+        if (peers) {
             query["shareInfo.peer"] = { $in: peers.map((address) => address.toString()) };
         }
         if (onlyLatestVersions) {
@@ -1038,9 +1030,9 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getSharedPredecessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
         const ownSharedIdentityAttributePredecessors: LocalAttribute[] = [];
-        while (typeof repositoryAttribute.succeeds !== "undefined") {
+        while (repositoryAttribute.succeeds) {
             const predecessor = await this.getLocalAttribute(repositoryAttribute.succeeds);
-            if (typeof predecessor === "undefined") {
+            if (!predecessor) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeeds.toString());
             }
 
@@ -1057,9 +1049,9 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getSharedSuccessorsOfRepositoryAttribute(repositoryAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
         const ownSharedIdentityAttributeSuccessors: LocalAttribute[] = [];
-        while (typeof repositoryAttribute.succeededBy !== "undefined") {
+        while (repositoryAttribute.succeededBy) {
             const successor = await this.getLocalAttribute(repositoryAttribute.succeededBy);
-            if (typeof successor === "undefined") {
+            if (!successor) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, repositoryAttribute.succeededBy.toString());
             }
 

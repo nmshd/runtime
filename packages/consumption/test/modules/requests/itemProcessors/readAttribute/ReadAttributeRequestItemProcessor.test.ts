@@ -145,9 +145,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
             ];
             test.each(testParams)("${value.description}", function (testParams: TestParams) {
                 function translateTestIdentityToAddress(testIdentity?: TestIdentity) {
-                    if (typeof testIdentity === "undefined") return undefined;
-
                     switch (testIdentity) {
+                        case undefined:
+                            return undefined;
                         case TestIdentity.Self:
                             return accountController.identity.address.toString();
                         case TestIdentity.Recipient:
@@ -164,7 +164,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 }
 
                 let query: RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery;
-                if (typeof testParams.input.thirdParty !== "undefined") {
+                if (testParams.input.thirdParty) {
                     query = ThirdPartyRelationshipAttributeQuery.from({
                         owner: translateTestIdentityToAddress(testParams.input.owner)!,
                         key: "aKey",
