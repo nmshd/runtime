@@ -503,9 +503,7 @@ describe("get repository, own shared and peer shared attributes", () => {
                 const attribute = (await services2.consumption.attributes.getAttribute({ id: attributeId })).value;
                 allReceivedAttributes.push(attribute);
 
-                if (typeof attribute.succeededBy === "undefined") {
-                    onlyLatestReceivedAttributes.push(attribute);
-                }
+                if (!attribute.succeededBy) onlyLatestReceivedAttributes.push(attribute);
 
                 if (attribute.content["@type"] === "IdentityAttribute" || !attribute.content.isTechnical) {
                     notTechnicalReceivedAttributes.push(attribute);

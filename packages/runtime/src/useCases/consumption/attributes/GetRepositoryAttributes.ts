@@ -46,9 +46,7 @@ export class GetRepositoryAttributesUseCase extends UseCase<GetRepositoryAttribu
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
         dbQuery.shareInfo = { $exists: false };
 
-        if (typeof request.onlyLatestVersions === "undefined" || request.onlyLatestVersions) {
-            dbQuery["succeededBy"] = { $exists: false };
-        }
+        if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
         const attributes = await this.attributesController.getLocalAttributes(dbQuery);
 

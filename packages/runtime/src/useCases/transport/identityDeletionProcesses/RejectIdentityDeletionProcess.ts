@@ -15,10 +15,7 @@ export class RejectIdentityDeletionProcessUseCase extends UseCase<void, Identity
 
     protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
         const identityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
-
-        if (typeof identityDeletionProcess === "undefined") {
-            return Result.fail(RuntimeErrors.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess());
-        }
+        if (!identityDeletionProcess) return Result.fail(RuntimeErrors.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess());
 
         const rejectedIdentityDeletionProcess = await this.identityDeletionProcessController.rejectIdentityDeletionProcess(identityDeletionProcess.id.toString());
         await this.accountController.syncDatawallet();
