@@ -26,20 +26,21 @@ export class MessageContentWrapper extends CoreSerializable implements IMessageC
     @validate()
     @serialize({ type: FileReference })
     public attachments: FileReference[] = [];
+
     @validate()
     @serialize()
     public content: Serializable;
+
     @validate()
     @serialize()
     public createdAt: CoreDate;
+
     @validate()
     @serialize({ type: CoreAddress })
     public recipients: CoreAddress[];
 
     protected static override preFrom(value: any): any {
-        if (typeof value.attachments === "undefined") {
-            value.attachments = [];
-        }
+        if (!value.attachments) value.attachments = [];
 
         return value;
     }

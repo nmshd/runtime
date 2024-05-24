@@ -8,7 +8,6 @@ import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
 import { Realm } from "../modules/accounts/data/Realm";
 import { CoreErrors } from "./CoreErrors";
-import { TransportContext } from "./TransportContext";
 import { TransportError } from "./TransportError";
 import { TransportLoggerFactory } from "./TransportLoggerFactory";
 
@@ -131,9 +130,5 @@ export class Transport {
 
     public async createDatabase(name: string): Promise<IDatabaseCollectionProvider> {
         return await this.databaseConnection.getDatabase(name);
-    }
-
-    public static get context(): TransportContext {
-        return TransportContext.currentContext();
     }
 }
