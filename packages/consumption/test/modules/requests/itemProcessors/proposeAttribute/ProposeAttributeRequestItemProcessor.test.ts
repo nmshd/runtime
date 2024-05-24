@@ -257,7 +257,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -298,7 +298,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -328,7 +328,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -350,7 +350,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const someOtherIdentity = CoreAddress.from("id1");
+            const someOtherIdentity = CoreAddress.from("did:e:a-domain:dids:anidentity");
 
             const idOfAttributeOfOtherIdentity = await ConsumptionIds.attribute.generate();
 
@@ -396,7 +396,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when the given Attribute's owner is not the current identity", async function () {
-            const someOtherIdentity = CoreAddress.from("id1");
+            const someOtherIdentity = CoreAddress.from("did:e:a-domain:dids:anidentity");
 
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -449,7 +449,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -486,7 +486,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -519,7 +519,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -729,7 +729,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 attribute: TestObjectFactory.createIdentityAttribute()
             });
             const requestId = await ConsumptionIds.request.generate();
-            const peer = CoreAddress.from("id1");
+            const peer = CoreAddress.from("did:e:a-domain:dids:anidentity");
 
             const incomingRequest = LocalRequest.from({
                 id: requestId,

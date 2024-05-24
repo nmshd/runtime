@@ -353,7 +353,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             sourceAttributeId: sourceAttribute.id
         });
         const requestId = await ConsumptionIds.request.generate();
-        const peer = CoreAddress.from("id1");
+        const peer = CoreAddress.from("did:e:a-domain:dids:anidentity");
         const localRequest = LocalRequest.from({
             id: requestId,
             createdAt: CoreDate.utc(),

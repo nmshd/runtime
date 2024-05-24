@@ -80,7 +80,7 @@ export class RequestsTestsContext {
         } as ConsumptionController;
         const processorRegistry = new RequestItemProcessorRegistry(fakeConsumptionController, new Map([[TestRequestItem, TestRequestItemProcessor]]));
 
-        context.currentIdentity = CoreAddress.from("id12345");
+        context.currentIdentity = CoreAddress.from("did:e:a-domain:dids:anidentity");
 
         context.outgoingRequestsController = new OutgoingRequestsController(
             collection,
@@ -283,7 +283,7 @@ export class RequestsGiven {
 
         this.context.givenLocalRequest = await this.context.outgoingRequestsController.create({
             content: params.content,
-            peer: CoreAddress.from("id1")
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
 
         await this.moveOutgoingRequestToStatus(this.context.givenLocalRequest, params.status);
@@ -576,7 +576,7 @@ export class RequestsWhen {
                     })
                 ]
             },
-            peer: params?.peer ?? CoreAddress.from("id1")
+            peer: params?.peer ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         };
 
         this.context.validationResult = await this.context.outgoingRequestsController.canCreate(realParams);
@@ -595,7 +595,7 @@ export class RequestsWhen {
                     })
                 ]
             },
-            peer: CoreAddress.from("id1")
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
         };
 
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.create(params);
@@ -642,7 +642,7 @@ export class RequestsWhen {
                 onExistingRelationship: TestObjectFactory.createRequestWithOneItem()
             })
         );
-        params.responseSource ??= TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("id1"), CoreId.from("REQ1"));
+        params.responseSource ??= TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("did:e:a-domain:dids:anidentity"), CoreId.from("REQ1"));
         params.response ??= TestObjectFactory.createResponse();
 
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.createAndCompleteFromRelationshipTemplateResponse(
@@ -819,7 +819,7 @@ export class RequestsWhen {
                     })
                 ]
             },
-            peer: CoreAddress.from("id1")
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
         };
 
         this.context.actionToTry = async () => {
@@ -831,7 +831,7 @@ export class RequestsWhen {
 
     public iTryToCreateAnOutgoingRequestWithoutContent(): Promise<void> {
         const paramsWithoutItems: Omit<ICreateOutgoingRequestParameters, "content"> = {
-            peer: CoreAddress.from("id1")
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
         };
 
         this.context.actionToTry = async () => {

@@ -227,7 +227,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -256,7 +256,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -285,7 +285,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
         test("can be called with an existing RelationshipAttribute by a third party", async function () {
             const attribute = await consumptionController.attributes.createLocalAttribute({
                 content: TestObjectFactory.createRelationshipAttribute({
-                    owner: CoreAddress.from("id1")
+                    owner: CoreAddress.from("did:e:a-domain:dids:anidentity")
                 })
             });
 
@@ -293,8 +293,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     key: "aKey",
-                    owner: "id1",
-                    thirdParty: ["id1"]
+                    owner: "did:e:a-domain:dids:anidentity",
+                    thirdParty: ["did:e:a-domain:dids:anidentity"]
                 })
             });
             const requestId = await ConsumptionIds.request.generate();
@@ -302,7 +302,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -331,7 +331,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -353,7 +353,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const peer = CoreAddress.from("id1");
+            const peer = CoreAddress.from("did:e:a-domain:dids:anidentity");
 
             const peerAttributeId = await ConsumptionIds.attribute.generate();
 
@@ -415,7 +415,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -448,7 +448,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: CoreAddress.from("id1"),
+                peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -808,7 +808,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" })
             });
             const requestId = await ConsumptionIds.request.generate();
-            const peer = CoreAddress.from("id1");
+            const peer = CoreAddress.from("did:e:a-domain:dids:anidentity");
 
             const incomingRequest = LocalRequest.from({
                 id: requestId,
