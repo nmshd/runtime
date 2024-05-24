@@ -449,7 +449,7 @@ export class AttributesController extends ConsumptionBaseController {
             let currentParent = await this.getLocalAttribute(parentSuccessorId);
 
             let child;
-            while (child && currentParent?.succeeds) {
+            while (!child && currentParent?.succeeds) {
                 const currentPredecessor = (await this.getLocalAttribute(currentParent.succeeds))!;
                 currentParent = currentPredecessor;
                 child = await this.getChildAttributesByValueType(currentParent.id, childAttributeValue.constructor);
