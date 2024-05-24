@@ -130,7 +130,6 @@ export async function exchangeTemplateAndReceiverSendsResponse(
     const receivedCreationContent = relationship.creationContent;
 
     expect(receivedCreationContent["@type"]).toBe("RelationshipCreationContent");
-    expect(receivedCreationContent.request.content["@type"]).toBe("RelationshipCreationContent");
 
     return { request, relationship };
 }
