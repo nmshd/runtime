@@ -44,7 +44,7 @@ export interface SharedToPeerAttributeDVO extends LocalAttributeDVO {
     peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
     requestReference?: string;
     notificationReference?: string;
-    sourceAttribute: string;
+    sourceAttribute?: string;
     isOwn: true;
     tags: string[];
     deletionDate?: string;

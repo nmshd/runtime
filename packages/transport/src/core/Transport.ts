@@ -14,6 +14,7 @@ import { TransportLoggerFactory } from "./TransportLoggerFactory";
 let log: ILogger;
 
 export interface IConfig {
+    allowIdentityCreation: boolean;
     supportedDatawalletVersion: number;
     supportedIdentityVersion: number;
     debug: boolean;
@@ -30,6 +31,7 @@ export interface IConfig {
 }
 
 export interface IConfigOverwrite {
+    allowIdentityCreation?: boolean;
     debug?: boolean;
     platformClientId: string;
     platformClientSecret: string;
@@ -53,6 +55,7 @@ export class Transport {
     }
 
     private static readonly defaultConfig: IConfig = {
+        allowIdentityCreation: true,
         supportedDatawalletVersion: 1,
         supportedIdentityVersion: -1,
         debug: false,
