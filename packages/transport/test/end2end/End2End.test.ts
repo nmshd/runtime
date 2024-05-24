@@ -602,7 +602,7 @@ describe("RelationshipTest: Revoke Reactivation", function () {
     });
 });
 
-describe("RelationshipTest: validations (on terminated relationship", function () {
+describe("RelationshipTest: validations (on terminated relationship)", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
