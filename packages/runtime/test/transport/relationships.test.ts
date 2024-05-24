@@ -383,7 +383,7 @@ describe("RelationshipTermination", () => {
     });
 
     test("should revoke the relationship reactivation", async () => {
-        const reactivationRequestResult = await services1.transport.relationships.reactivateRelationship({ relationshipId });
+        const reactivationRequestResult = await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
         expect(reactivationRequestResult).toBeSuccessful();
         await expect(services1.eventBus).toHavePublished(
             RelationshipChangedEvent,
@@ -410,7 +410,7 @@ describe("RelationshipTermination", () => {
     });
 
     test("should reject the relationship reactivation", async () => {
-        await services1.transport.relationships.reactivateRelationship({ relationshipId });
+        await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
 
         await syncUntilHasRelationships(services2.transport);
         await expect(services2.eventBus).toHavePublished(
@@ -437,7 +437,7 @@ describe("RelationshipTermination", () => {
     });
 
     test("should accept the relationship reactivation", async () => {
-        await services1.transport.relationships.reactivateRelationship({ relationshipId });
+        await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
 
         await syncUntilHasRelationships(services2.transport);
         await expect(services2.eventBus).toHavePublished(

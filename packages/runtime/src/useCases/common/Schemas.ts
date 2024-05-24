@@ -21651,11 +21651,11 @@ export const TerminateRelationshipRequest: any = {
     }
 }
 
-export const ReactivateRelationshipRequest: any = {
+export const RequestRelationshipReactivationRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ReactivateRelationshipRequest",
+    "$ref": "#/definitions/RequestRelationshipReactivationRequest",
     "definitions": {
-        "ReactivateRelationshipRequest": {
+        "RequestRelationshipReactivationRequest": {
             "type": "object",
             "properties": {
                 "relationshipId": {

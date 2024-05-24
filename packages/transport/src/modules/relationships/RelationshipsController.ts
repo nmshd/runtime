@@ -262,7 +262,7 @@ export class RelationshipsController extends TransportController {
         return await this.completeOperationWithBackboneCall(RelationshipAuditLogEntryReason.Termination, relationshipId);
     }
 
-    public async reactivate(relationshipId: CoreId): Promise<Relationship> {
+    public async requestReactivation(relationshipId: CoreId): Promise<Relationship> {
         const relationship = await this.getRelationship(relationshipId);
         if (!relationship) {
             throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());

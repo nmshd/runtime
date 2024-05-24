@@ -14,15 +14,15 @@ import {
     GetRelationshipByAddressRequest,
     GetRelationshipByAddressUseCase,
     GetRelationshipRequest,
+    GetRelationshipUseCase,
     GetRelationshipsRequest,
     GetRelationshipsUseCase,
-    GetRelationshipUseCase,
-    ReactivateRelationshipRequest,
-    ReactivateRelationshipUseCase,
     RejectRelationshipReactivationRequest,
     RejectRelationshipReactivationUseCase,
     RejectRelationshipRequest,
     RejectRelationshipUseCase,
+    RequestRelationshipReactivationRequest,
+    RequestRelationshipReactivationUseCase,
     RevokeRelationshipReactivationRequest,
     RevokeRelationshipReactivationUseCase,
     RevokeRelationshipRequest,
@@ -41,7 +41,7 @@ export class RelationshipsFacade {
         @Inject private readonly rejectRelationshipUseCase: RejectRelationshipUseCase,
         @Inject private readonly revokeRelationshipUseCase: RevokeRelationshipUseCase,
         @Inject private readonly terminateRelationshipUseCase: TerminateRelationshipUseCase,
-        @Inject private readonly reactivateRelationshipUseCase: ReactivateRelationshipUseCase,
+        @Inject private readonly requestRelationshipReactivationUseCase: RequestRelationshipReactivationUseCase,
         @Inject private readonly acceptRelationshipReactivationUseCase: AcceptRelationshipReactivationUseCase,
         @Inject private readonly rejectRelationshipReactivationUseCase: RejectRelationshipReactivationUseCase,
         @Inject private readonly revokeRelationshipReactivationUseCase: RevokeRelationshipReactivationUseCase,
@@ -80,8 +80,8 @@ export class RelationshipsFacade {
         return await this.terminateRelationshipUseCase.execute(request);
     }
 
-    public async reactivateRelationship(request: ReactivateRelationshipRequest): Promise<Result<RelationshipDTO>> {
-        return await this.reactivateRelationshipUseCase.execute(request);
+    public async requestRelationshipReactivation(request: RequestRelationshipReactivationRequest): Promise<Result<RelationshipDTO>> {
+        return await this.requestRelationshipReactivationUseCase.execute(request);
     }
 
     public async acceptRelationshipReactivation(request: AcceptRelationshipReactivationRequest): Promise<Result<RelationshipDTO>> {

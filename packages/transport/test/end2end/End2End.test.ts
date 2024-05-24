@@ -484,7 +484,7 @@ describe("RelationshipTest: Request Reactivation", function () {
     });
 
     test("should request reactivating a relationship between two accounts", async function () {
-        const reactivationRequestedRelationshipFromSelf = await from.relationships.reactivate(relationshipId);
+        const reactivationRequestedRelationshipFromSelf = await from.relationships.requestReactivation(relationshipId);
 
         expect(reactivationRequestedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
         expect(reactivationRequestedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Terminated);
@@ -522,7 +522,7 @@ describe("RelationshipTest: Accept Reactivation", function () {
         relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await TestUtil.syncUntilHasRelationships(to);
-        await from.relationships.reactivate(relationshipId);
+        await from.relationships.requestReactivation(relationshipId);
         await TestUtil.syncUntilHasRelationships(to);
     });
 
@@ -570,7 +570,7 @@ describe("RelationshipTest: Reject Reactivation", function () {
         relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await TestUtil.syncUntilHasRelationships(to);
-        await from.relationships.reactivate(relationshipId);
+        await from.relationships.requestReactivation(relationshipId);
         await TestUtil.syncUntilHasRelationships(to);
     });
 
@@ -618,7 +618,7 @@ describe("RelationshipTest: Revoke Reactivation", function () {
         relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
         await TestUtil.syncUntilHasRelationships(to);
-        await from.relationships.reactivate(relationshipId);
+        await from.relationships.requestReactivation(relationshipId);
         await TestUtil.syncUntilHasRelationships(to);
     });
 
@@ -692,7 +692,7 @@ describe("RelationshipTest: validations (on terminated relationship)", function 
 
     describe("after reactivation request", function () {
         beforeAll(async function () {
-            await from.relationships.reactivate(relationshipId);
+            await from.relationships.requestReactivation(relationshipId);
             await TestUtil.syncUntilHasRelationships(to);
         });
 
@@ -709,11 +709,11 @@ describe("RelationshipTest: validations (on terminated relationship)", function 
         });
 
         test("requesting reactivation twice should fail", async function () {
-            await expect(from.relationships.reactivate(relationshipId)).rejects.toThrow(
+            await expect(from.relationships.requestReactivation(relationshipId)).rejects.toThrow(
                 "error.transport.relationships.reactivationAlreadyRequested: 'You have already requested the reactivation"
             );
 
-            await expect(to.relationships.reactivate(relationshipId)).rejects.toThrow(
+            await expect(to.relationships.requestReactivation(relationshipId)).rejects.toThrow(
                 "error.transport.relationships.reactivationAlreadyRequested: 'Your peer has already requested the reactivation"
             );
         });
@@ -822,7 +822,7 @@ describe("RelationshipTest: relationship status validation (on active relationsh
     });
 
     test("should not reactivate a relationship", async function () {
-        await expect(from.relationships.reactivate(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+        await expect(from.relationships.requestReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
     });
 
     test("should not accept a relationship reactivation", async function () {
