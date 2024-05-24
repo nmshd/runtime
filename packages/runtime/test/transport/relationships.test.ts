@@ -383,14 +383,16 @@ describe("RelationshipTermination", () => {
     });
 
     test("should revoke the relationship reactivation", async () => {
-        await services1.transport.relationships.reactivateRelationship({ relationshipId });
+        const reactivationRequestResult = await services1.transport.relationships.reactivateRelationship({ relationshipId });
+        expect(reactivationRequestResult).toBeSuccessful();
         await expect(services1.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.ReactivationRequested
         );
 
-        const revocationResult = (await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId })).value;
-        expect(revocationResult.status).toBe(RelationshipStatus.Terminated);
+        const revocationResult = await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId });
+        expect(revocationResult).toBeSuccessful();
+        expect(revocationResult.value.status).toBe(RelationshipStatus.Terminated);
         await expect(services1.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RevocationOfReactivation
@@ -398,7 +400,7 @@ describe("RelationshipTermination", () => {
 
         const relationship2 = (await syncUntilHasRelationships(services2.transport))[0];
         expect(relationship2.status).toBe(RelationshipStatus.Terminated);
-        await expect(services1.eventBus).toHavePublished(
+        await expect(services2.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RevocationOfReactivation
         );
@@ -415,8 +417,9 @@ describe("RelationshipTermination", () => {
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.ReactivationRequested
         );
-        const rejectionResult = (await services2.transport.relationships.rejectRelationshipReactivation({ relationshipId })).value;
-        expect(rejectionResult.status).toBe(RelationshipStatus.Terminated);
+        const rejectionResult = await services2.transport.relationships.rejectRelationshipReactivation({ relationshipId });
+        expect(rejectionResult).toBeSuccessful();
+        expect(rejectionResult.value.status).toBe(RelationshipStatus.Terminated);
         await expect(services2.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RejectionOfReactivation
@@ -441,8 +444,9 @@ describe("RelationshipTermination", () => {
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.ReactivationRequested
         );
-        const rejectionResult = (await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId })).value;
-        expect(rejectionResult.status).toBe(RelationshipStatus.Active);
+        const acceptanceResult = await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId });
+        expect(acceptanceResult).toBeSuccessful();
+        expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
         await expect(services2.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.AcceptanceOfReactivation
