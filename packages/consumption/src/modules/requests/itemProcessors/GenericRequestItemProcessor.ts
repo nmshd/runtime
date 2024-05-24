@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Event } from "@js-soft/ts-utils";
 import { AcceptResponseItem, RejectResponseItem, Request, RequestItem, ResponseItem, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import { ValidationResult } from "../../common/ValidationResult";
@@ -40,7 +41,7 @@ export class GenericRequestItemProcessor<
         return ValidationResult.success();
     }
 
-    public applyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Promise<void> | void {
+    public applyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Event | void | Promise<Event | void> {
         // do nothing
     }
 }

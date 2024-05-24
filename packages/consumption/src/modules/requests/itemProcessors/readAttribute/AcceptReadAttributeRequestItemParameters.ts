@@ -31,7 +31,7 @@ export class AcceptReadAttributeRequestItemParameters extends Serializable {
         return !!this.existingAttributeId;
     }
 
-    public isWithNewAttribute(): this is { newAttributeValue: IdentityAttribute | RelationshipAttribute } {
+    public isWithNewAttribute(): this is { newAttribute: IdentityAttribute | RelationshipAttribute } {
         return !!this.newAttribute;
     }
 

@@ -63,11 +63,7 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             );
         }
 
-        const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfRepositoryAttribute(
-            repositoryAttributeId,
-            [CoreAddress.from(request.peer)],
-            false
-        );
+        const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeId, [CoreAddress.from(request.peer)], false);
         if (sharedVersionsOfRepositoryAttribute.length > 0) {
             return Result.fail(
                 RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
