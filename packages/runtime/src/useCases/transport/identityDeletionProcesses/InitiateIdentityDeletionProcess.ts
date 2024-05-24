@@ -14,13 +14,11 @@ export class InitiateIdentityDeletionProcessUseCase extends UseCase<void, Identi
     }
 
     protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
-        const activeIdentityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus(
+        const identityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus(
             IdentityDeletionProcessStatus.Approved,
             IdentityDeletionProcessStatus.WaitingForApproval
         );
-        if (typeof activeIdentityDeletionProcess !== "undefined") {
-            return Result.fail(RuntimeErrors.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists());
-        }
+        if (identityDeletionProcess) return Result.fail(RuntimeErrors.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists());
 
         const initiatedIdentityDeletionProcess = await this.identityDeletionProcessController.initiateIdentityDeletionProcess();
         await this.accountController.syncDatawallet();

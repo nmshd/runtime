@@ -33,10 +33,7 @@ export class GetSharedVersionsOfRepositoryAttributeUseCase extends UseCase<GetSh
     protected async executeInternal(request: GetSharedVersionsOfRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
         const repositoryAttributeId = CoreId.from(request.attributeId);
         const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
-
-        if (typeof repositoryAttribute === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
-        }
+        if (!repositoryAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));

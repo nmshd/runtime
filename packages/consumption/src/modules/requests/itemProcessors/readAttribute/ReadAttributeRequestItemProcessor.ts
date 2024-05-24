@@ -38,10 +38,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         if (parsedParams.isWithExistingAttribute()) {
             const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
-
-            if (typeof foundAttribute === "undefined") {
-                return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
-            }
+            if (!foundAttribute) return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
 
             const ownerIsCurrentIdentity = this.accountController.identity.isMe(foundAttribute.content.owner);
             if (!ownerIsCurrentIdentity && foundAttribute.content instanceof IdentityAttribute) {
@@ -50,16 +47,14 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.existingAttributeId, [requestInfo.peer], true);
             if (latestSharedVersion.length > 0) {
-                if (typeof latestSharedVersion[0].shareInfo?.sourceAttribute === "undefined") {
+                if (!latestSharedVersion[0].shareInfo?.sourceAttribute) {
                     throw new Error(
                         `The Attribute ${latestSharedVersion[0].id} doesn't have a 'shareInfo.sourceAttribute', even though it was found as shared version of an Attribute.`
                     );
                 }
 
                 const latestSharedVersionSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedVersion[0].shareInfo.sourceAttribute);
-                if (typeof latestSharedVersionSourceAttribute === "undefined") {
-                    throw new Error(`The Attribute ${latestSharedVersion[0].shareInfo.sourceAttribute} was not found.`);
-                }
+                if (!latestSharedVersionSourceAttribute) throw new Error(`The Attribute ${latestSharedVersion[0].shareInfo.sourceAttribute} was not found.`);
 
                 if (await this.consumptionController.attributes.isSubsequentInSuccession(foundAttribute, latestSharedVersionSourceAttribute)) {
                     return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("You cannot share the predecessor of an already shared Attribute version."));
@@ -80,7 +75,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         let sharedLocalAttribute: LocalAttribute;
         if (parsedParams.isWithExistingAttribute()) {
             const existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
-            if (typeof existingSourceAttribute === "undefined") {
+            if (!existingSourceAttribute) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
             }
 
@@ -100,7 +95,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
 
             const latestSharedAttribute = latestSharedVersion[0];
-            if (typeof latestSharedAttribute.shareInfo?.sourceAttribute === "undefined") {
+            if (!latestSharedAttribute.shareInfo?.sourceAttribute) {
                 throw new Error(
                     `The Attribute ${latestSharedAttribute.id} doesn't have a 'shareInfo.sourceAttribute', even though it was found as shared version of an Attribute.`
                 );
@@ -114,9 +109,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
 
             const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedAttribute.shareInfo.sourceAttribute);
-            if (typeof predecessorSourceAttribute === "undefined") {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, latestSharedAttribute.shareInfo.sourceAttribute.toString());
-            }
+            if (!predecessorSourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, latestSharedAttribute.shareInfo.sourceAttribute.toString());
 
             if (await this.consumptionController.attributes.isSubsequentInSuccession(predecessorSourceAttribute, existingSourceAttribute)) {
                 let successorSharedAttribute: LocalAttribute;

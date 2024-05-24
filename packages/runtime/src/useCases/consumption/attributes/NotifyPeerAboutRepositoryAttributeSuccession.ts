@@ -41,9 +41,7 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
         const repositoryAttributeSuccessorId = CoreId.from(request.attributeId);
         const repositoryAttributeSuccessor = await this.attributeController.getLocalAttribute(repositoryAttributeSuccessorId);
 
-        if (typeof repositoryAttributeSuccessor === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
-        }
+        if (!repositoryAttributeSuccessor) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
 
         if (!repositoryAttributeSuccessor.isRepositoryAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeSuccessorId));

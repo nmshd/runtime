@@ -34,9 +34,7 @@ export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersio
         const sourceAttributeId = CoreId.from(request.attributeId);
         const sourceAttribute = await this.attributeController.getLocalAttribute(sourceAttributeId);
 
-        if (typeof sourceAttribute === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
-        }
+        if (!sourceAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (request.peers?.length === 0) {
             return Result.fail(RuntimeErrors.general.invalidPropertyValue("The `peers` property may not be an empty array."));

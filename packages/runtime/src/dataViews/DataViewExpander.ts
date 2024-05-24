@@ -1395,9 +1395,8 @@ export class DataViewExpander {
             query
         });
         if (matchedAttributeDTOResult.isError) {
-            if (matchedAttributeDTOResult.error.code !== "error.runtime.recordNotFound") {
-                throw matchedAttributeDTOResult.error;
-            }
+            if (matchedAttributeDTOResult.error.code !== "error.runtime.recordNotFound") throw matchedAttributeDTOResult.error;
+
             return {
                 ...(await this.expandRelationshipAttributeQuery(query)),
                 type: "ProcessedRelationshipAttributeQueryDVO",
@@ -1767,9 +1766,7 @@ export class DataViewExpander {
             return await this.expandRelationshipDTO(relationshipResult.value);
         }
 
-        if (relationshipResult.error.code !== RuntimeErrors.general.recordNotFound(Relationship).code) {
-            throw relationshipResult.error;
-        }
+        if (relationshipResult.error.code !== RuntimeErrors.general.recordNotFound(Relationship).code) throw relationshipResult.error;
 
         const name = address.substring(3, 9);
         const initials = (name.match(/\b\w/g) ?? []).join("");

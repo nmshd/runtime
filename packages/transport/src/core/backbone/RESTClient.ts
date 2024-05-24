@@ -88,7 +88,7 @@ export class RESTClient {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const httpsAgent = require("https")?.Agent;
 
-            if (typeof agent !== "undefined" && typeof httpsAgent !== "undefined") {
+            if (agent && httpsAgent) {
                 defaults.httpAgent = new agent(this.config.httpAgent);
                 defaults.httpsAgent = new httpsAgent(this.config.httpsAgent);
             }
