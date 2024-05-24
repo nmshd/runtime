@@ -2,8 +2,8 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/transport";
 import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
 import { AttributeValues } from "./AttributeValueTypes";
-import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality";
 import { IValueHints, ValueHints, ValueHintsJSON } from "./hints";
+import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality";
 import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "./types/proprietary/ProprietaryAttributeValue";
 
 export interface RelationshipAttributeCreationHintsJSON {
@@ -55,7 +55,7 @@ export class RelationshipAttributeCreationHints extends Serializable implements 
     public confidentiality: RelationshipAttributeConfidentiality;
 
     protected static override preFrom(value: any): any {
-        if (typeof value.isTechnical === "undefined") value.isTechnical = false;
+        if (value.isTechnical === undefined) value.isTechnical = false;
 
         return value;
     }

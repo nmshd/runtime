@@ -23,9 +23,7 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
 
-        if (typeof attribute === "undefined") {
-            return ValidationResult.success();
-        }
+        if (!attribute) return ValidationResult.success();
 
         if (!attribute.isOwnSharedAttribute(this.currentIdentityAddress)) {
             return ValidationResult.error(CoreErrors.attributes.isNotOwnSharedAttribute(notificationItem.attributeId));
@@ -43,7 +41,7 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         _notification: LocalNotification
     ): Promise<PeerSharedAttributeDeletedByPeerEvent | void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         const deletionDate = CoreDate.utc();
         const deletionInfo = LocalAttributeDeletionInfo.from({
@@ -63,7 +61,7 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
 
     public override async rollback(notificationItem: PeerSharedAttributeDeletedByPeerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
 

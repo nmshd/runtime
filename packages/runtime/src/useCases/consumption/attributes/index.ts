@@ -14,6 +14,7 @@ export * from "./GetAttributes";
 export * from "./GetOwnSharedAttributes";
 export * from "./GetPeerSharedAttributes";
 export * from "./GetRepositoryAttributes";
+export * from "./GetSharedVersionsOfAttribute";
 export * from "./GetSharedVersionsOfRepositoryAttribute";
 export * from "./GetVersionsOfAttribute";
 export * from "./NotifyPeerAboutRepositoryAttributeSuccession";

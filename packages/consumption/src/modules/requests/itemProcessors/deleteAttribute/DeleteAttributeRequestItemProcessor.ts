@@ -10,10 +10,7 @@ import { AcceptDeleteAttributeRequestItemParametersJSON } from "./AcceptDeleteAt
 export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProcessor<DeleteAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: DeleteAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-
-        if (typeof attribute === "undefined") {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem(`The Attribute '${requestItem.attributeId.toString()}' could not be found.`));
-        }
+        if (!attribute) return ValidationResult.error(CoreErrors.requests.invalidRequestItem(`The Attribute '${requestItem.attributeId.toString()}' could not be found.`));
 
         if (!attribute.isOwnSharedAttribute(this.accountController.identity.address)) {
             return ValidationResult.error(
@@ -46,9 +43,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         _requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-        if (typeof attribute === "undefined") {
-            return ValidationResult.success();
-        }
+        if (!attribute) return ValidationResult.success();
 
         const deletionDate = CoreDate.from(params.deletionDate);
 
@@ -69,9 +64,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         _requestInfo: LocalRequestInfo
     ): Promise<DeleteAttributeAcceptResponseItem | AcceptResponseItem> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-        if (typeof attribute === "undefined") {
-            return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
-        }
+        if (!attribute) return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
 
         const deletionDate = CoreDate.from(params.deletionDate);
         const deletionInfo = LocalAttributeDeletionInfo.from({
@@ -101,7 +94,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         if (attribute.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer) return;
 
