@@ -14,13 +14,13 @@ import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProce
 import { ILocalRequestSource, LocalRequest } from "../local/LocalRequest";
 import { LocalRequestStatus } from "../local/LocalRequestStatus";
 import { LocalResponse, LocalResponseSource } from "../local/LocalResponse";
-import { DecideRequestParametersValidator } from "./DecideRequestParametersValidator";
 import { CheckPrerequisitesOfIncomingRequestParameters, ICheckPrerequisitesOfIncomingRequestParameters } from "./checkPrerequisites/CheckPrerequisitesOfIncomingRequestParameters";
 import { CompleteIncomingRequestParameters, ICompleteIncomingRequestParameters } from "./complete/CompleteIncomingRequestParameters";
 import { DecideRequestItemGroupParametersJSON } from "./decide/DecideRequestItemGroupParameters";
 import { DecideRequestItemParametersJSON } from "./decide/DecideRequestItemParameters";
 import { DecideRequestParametersJSON } from "./decide/DecideRequestParameters";
 import { InternalDecideRequestParameters, InternalDecideRequestParametersJSON } from "./decide/InternalDecideRequestParameters";
+import { DecideRequestParametersValidator } from "./DecideRequestParametersValidator";
 import { IReceivedIncomingRequestParameters, ReceivedIncomingRequestParameters } from "./received/ReceivedIncomingRequestParameters";
 import {
     IRequireManualDecisionOfIncomingRequestParameters,
