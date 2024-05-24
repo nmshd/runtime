@@ -442,7 +442,7 @@ describe("RelationshipTest: Terminate", function () {
         expect(terminatedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
         expect(terminatedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(terminatedRelationshipFromSelf.cache?.auditLog).toHaveLength(3);
-        expect(terminatedRelationshipFromSelf.cache!.auditLog[2].newStatus).toBe(RelationshipStatus.Terminated);
+        expect(terminatedRelationshipFromSelf.cache!.auditLog[2].reason).toBe(RelationshipAuditLogEntryReason.Termination);
 
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
@@ -451,7 +451,7 @@ describe("RelationshipTest: Terminate", function () {
         expect(terminatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
         expect(terminatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(terminatedRelationshipPeer.cache?.auditLog).toHaveLength(3);
-        expect(terminatedRelationshipPeer.cache!.auditLog[2].newStatus).toBe(RelationshipStatus.Terminated);
+        expect(terminatedRelationshipPeer.cache!.auditLog[2].reason).toBe(RelationshipAuditLogEntryReason.Termination);
     });
 });
 
@@ -537,7 +537,7 @@ describe("RelationshipTest: Accept Reactivation", function () {
         expect(acceptedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
         expect(acceptedReactivatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
         expect(acceptedReactivatedRelationshipPeer.cache?.auditLog).toHaveLength(5);
-        expect(acceptedReactivatedRelationshipPeer.cache!.auditLog[4].newStatus).toBe(RelationshipStatus.Active);
+        expect(acceptedReactivatedRelationshipPeer.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.AcceptanceOfReactivation);
 
         const syncedRelationshipsFromSelf = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationshipsFromSelf).toHaveLength(1);
@@ -546,7 +546,7 @@ describe("RelationshipTest: Accept Reactivation", function () {
         expect(acceptedReactivatedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
         expect(acceptedReactivatedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
         expect(acceptedReactivatedRelationshipFromSelf.cache?.auditLog).toHaveLength(5);
-        expect(acceptedReactivatedRelationshipFromSelf.cache!.auditLog[4].newStatus).toBe(RelationshipStatus.Active);
+        expect(acceptedReactivatedRelationshipFromSelf.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.AcceptanceOfReactivation);
     });
 });
 
