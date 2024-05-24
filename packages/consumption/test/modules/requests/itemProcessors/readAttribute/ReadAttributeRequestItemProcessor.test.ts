@@ -143,11 +143,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }
                 }
             ];
-            test.each(testParams)("${value.description}", function (testParams: TestParams) {
-                function translateTestIdentityToAddress(testIdentity?: TestIdentity) {
+            test.each(testParams)("$description", function (testParams: TestParams) {
+                function translateTestIdentityToAddress(testIdentity: TestIdentity) {
                     switch (testIdentity) {
-                        case undefined:
-                            return undefined;
                         case TestIdentity.Self:
                             return accountController.identity.address.toString();
                         case TestIdentity.Recipient:
@@ -166,13 +164,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 let query: RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery;
                 if (testParams.input.thirdParty) {
                     query = ThirdPartyRelationshipAttributeQuery.from({
-                        owner: translateTestIdentityToAddress(testParams.input.owner)!,
+                        owner: translateTestIdentityToAddress(testParams.input.owner),
                         key: "aKey",
-                        thirdParty: [translateTestIdentityToAddress(testParams.input.thirdParty)!]
+                        thirdParty: [translateTestIdentityToAddress(testParams.input.thirdParty)]
                     });
                 } else {
                     query = RelationshipAttributeQuery.from({
-                        owner: translateTestIdentityToAddress(testParams.input.owner)!,
+                        owner: translateTestIdentityToAddress(testParams.input.owner),
                         key: "aKey",
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
