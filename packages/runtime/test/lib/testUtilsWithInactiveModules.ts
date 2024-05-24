@@ -119,18 +119,18 @@ export async function exchangeTemplateAndReceiverSendsResponse(
         })
     ).value;
 
-    let relationship;
-    if (actionLowerCase === "accept") {
-        const creationContent = RelationshipCreationContent.from({ response: decidedRequest.response!.content as unknown as IResponse });
-        const result = await rRuntimeServices.transport.relationships.createRelationship({ creationContent, templateId });
+    if (actionLowerCase !== "accept") return { request, relationship: undefined };
 
-        expect(result).toBeSuccessful();
+    const creationContent = RelationshipCreationContent.from({ response: decidedRequest.response!.content as unknown as IResponse });
+    const result = await rRuntimeServices.transport.relationships.createRelationship({ creationContent, templateId });
 
-        relationship = result.value;
-        const rRelationshipChange = result.value.changes[0];
+    expect(result).toBeSuccessful();
 
-        expect(rRelationshipChange.request.content["@type"]).toBe("RelationshipCreationChangeRequestContent");
-        expect(relationship.creationContent["@type"]).toBe("RelationshipCreationContent");
-    }
+    const relationship = result.value;
+    const receivedCreationContent = relationship.creationContent;
+
+    expect(receivedCreationContent["@type"]).toBe("RelationshipCreationContent");
+    expect(receivedCreationContent.request.content["@type"]).toBe("RelationshipCreationContent");
+
     return { request, relationship };
 }
