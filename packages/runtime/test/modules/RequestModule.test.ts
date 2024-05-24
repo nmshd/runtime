@@ -2,7 +2,6 @@ import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/cons
 import {
     GivenName,
     IdentityAttribute,
-    RelationshipCreationChangeRequestContentJSON,
     RelationshipCreationContentJSON,
     RelationshipTemplateContentJSON,
     ResponseItemJSON,
@@ -27,18 +26,18 @@ import {
     TransportServices
 } from "../../src";
 import {
+    MockEventBus,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     ensureActiveRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     exchangeTemplate,
-    MockEventBus,
-    RuntimeServiceProvider,
     sendMessage,
     sendMessageWithRequest,
-    syncUntilHasMessages,
     syncUntilHasMessageWithResponse,
-    syncUntilHasRelationships,
-    TestRuntimeServices
+    syncUntilHasMessages,
+    syncUntilHasRelationships
 } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
@@ -185,8 +184,8 @@ describe("RequestModule", () => {
             const creationContent = relationship.creationContent as RelationshipCreationContentJSON;
             expect(creationContent["@type"]).toBe("RelationshipCreationContent");
 
-            const creationChangeRequestContent = relationship.changes[0].request.content as RelationshipCreationChangeRequestContentJSON;
-            expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationChangeRequestContent");
+            const creationChangeRequestContent = relationship.creationContent as RelationshipCreationContentJSON;
+            expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationContent");
 
             const response = creationContent.response;
             const responseItems = response.items;
