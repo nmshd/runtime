@@ -309,9 +309,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (validate) {
             const validationResult = await this.validateRepositoryAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) {
-                throw validationResult.error;
-            }
+            if (validationResult.isError()) throw validationResult.error;
         }
 
         const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
@@ -342,9 +340,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (validate) {
             const validationResult = await this.validateOwnSharedIdentityAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) {
-                throw validationResult.error;
-            }
+            if (validationResult.isError()) throw validationResult.error;
         }
 
         const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
@@ -371,9 +367,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (validate) {
             const validationResult = await this.validateOwnSharedRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) {
-                throw validationResult.error;
-            }
+            if (validationResult.isError()) throw validationResult.error;
         }
 
         const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
@@ -400,9 +394,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (validate) {
             const validationResult = await this.validatePeerSharedIdentityAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) {
-                throw validationResult.error;
-            }
+            if (validationResult.isError()) throw validationResult.error;
         }
 
         const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
@@ -429,9 +421,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (validate) {
             const validationResult = await this.validatePeerSharedRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) {
-                throw validationResult.error;
-            }
+            if (validationResult.isError()) throw validationResult.error;
         }
 
         const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
@@ -872,9 +862,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async executeFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<void> {
         const validationResult = await this.validateFullAttributeDeletionProcess(attribute);
-        if (validationResult.isError()) {
-            throw validationResult.error;
-        }
+        if (validationResult.isError()) throw validationResult.error;
 
         if (attribute.succeededBy) {
             const successor = await this.getLocalAttribute(attribute.succeededBy);

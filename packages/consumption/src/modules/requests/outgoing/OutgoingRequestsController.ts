@@ -106,9 +106,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     private async _create(id: CoreId, content: Request, peer: CoreAddress) {
         const canCreateResult = await this.canCreate({ content, peer });
 
-        if (canCreateResult.isError()) {
-            throw canCreateResult.error;
-        }
+        if (canCreateResult.isError()) throw canCreateResult.error;
 
         const request = LocalRequest.from({
             id: id,
@@ -232,9 +230,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
         const canComplete = await this.canComplete(request, receivedResponse);
 
-        if (canComplete.isError()) {
-            throw canComplete.error;
-        }
+        if (canComplete.isError()) throw canComplete.error;
 
         await this.applyItems(request.content.items, receivedResponse.items, request);
 
