@@ -2,8 +2,7 @@ import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "
 import { ILogger } from "@js-soft/logging-abstractions";
 import { log } from "@js-soft/ts-utils";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
-import { AbstractAuthenticator, Authenticator } from "../../core/backbone/Authenticator";
+import { AbstractAuthenticator, Authenticator, ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
 import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
@@ -136,6 +135,10 @@ export class AccountController {
 
         if (!availableIdentityDoc && !availableDeviceDoc) {
             if (!deviceSharedSecret) {
+                if (!this.config.allowIdentityCreation) {
+                    throw new TransportError("No Identity found and identity creation is not allowed.");
+                }
+
                 // Identity creation
                 this._log.trace("No account information found. Creating new account...");
                 const result = await this.createIdentityAndDevice();
