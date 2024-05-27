@@ -57,7 +57,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
 
-                const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfRepositoryAttribute(foundAttribute, {
+                const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, {
                     "shareInfo.peer": recipient.toString()
                 });
 
@@ -69,7 +69,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
 
-                const ownSharedIdentityAttributePredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfRepositoryAttribute(foundAttribute, {
+                const ownSharedIdentityAttributePredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfAttribute(foundAttribute, {
                     "shareInfo.peer": recipient.toString()
                 });
 

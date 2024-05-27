@@ -1306,11 +1306,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 content: RelationshipAttribute.from({
                     value: {
                         "@type": "ProprietaryString",
-                        title: "A new title",
-                        value: "A new value"
+                        title: "ANewTitle",
+                        value: "ANewValue"
                     },
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "aKey",
+                    key: "AKey",
                     owner: CoreAddress.from(accountController.identity.address)
                 }),
                 shareInfo: LocalAttributeShareInfo.from({
@@ -1322,8 +1322,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "aKey",
-                    owner: accountController.identity.address.toString(),
+                    key: "AKey",
+                    owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                     thirdParty: [thirdPartyAddress.toString()]
                 })
             });
@@ -1385,11 +1385,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 content: RelationshipAttribute.from({
                     value: {
                         "@type": "ProprietaryString",
-                        title: "A new title",
-                        value: "A new value"
+                        title: "ANewTitle",
+                        value: "ANewValue"
                     },
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "aKey",
+                    key: "AKey",
                     owner: thirdPartyAddress
                 }),
                 shareInfo: LocalAttributeShareInfo.from({
@@ -1401,8 +1401,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "aKey",
-                    owner: accountController.identity.address.toString(),
+                    key: "AKey",
+                    owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                     thirdParty: [thirdPartyAddress.toString()]
                 })
             });
@@ -1553,8 +1553,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "aKey",
-                    owner: thirdPartyAddress.toString(),
+                    key: "AKey",
+                    owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
                     thirdParty: [thirdPartyAddress.toString()]
                 })
             });
