@@ -109,20 +109,24 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     );
                 }
 
-                const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfRepositoryAttribute(foundLocalAttribute, {
+                const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundLocalAttribute, {
                     "shareInfo.peer": requestInfo.peer.toString()
                 });
 
                 if (ownSharedIdentityAttributeSuccessors.length > 0) {
-                  if (!ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute) {
-                      throw new Error(
-                          `The LocalAttribute ${ownSharedIdentityAttributeSuccessors[0].id} does not have a 'shareInfo.sourceAttribute', even though it was found as a shared version of a LocalAttribute.`
-                      );
-                  }
+                    if (!ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute) {
+                        throw new Error(
+                            `The LocalAttribute ${ownSharedIdentityAttributeSuccessors[0].id} does not have a 'shareInfo.sourceAttribute', even though it was found as a shared version of a LocalAttribute.`
+                        );
+                    }
 
-                const successorRepositorySourceAttribute = await this.consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute);
-                if (!successorRepositorySourceAttribute) throw new Error(`The RepositoryAttribute ${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute} was not found.`);
- 
+                    const successorRepositorySourceAttribute = await this.consumptionController.attributes.getLocalAttribute(
+                        ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute
+                    );
+                    if (!successorRepositorySourceAttribute) {
+                        throw new Error(`The RepositoryAttribute ${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute} was not found.`);
+                    }
+
                     return ValidationResult.error(
                         CoreErrors.requests.attributeQueryMismatch(
                             `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute}' of it.`
@@ -223,7 +227,8 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     (x) => x.attribute
                 )} or ${nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.attributeId)}.`
             );
-          
+        }
+
         return ProposeAttributeAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
             attributeId: sharedLocalAttribute.id,

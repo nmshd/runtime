@@ -1323,8 +1323,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     key: "aKey",
-                    owner: accountController.identity.address,
-                    thirdParty: [thirdPartyAddress]
+                    owner: accountController.identity.address.toString(),
+                    thirdParty: [thirdPartyAddress.toString()]
                 })
             });
 
@@ -1402,8 +1402,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     key: "aKey",
-                    owner: accountController.identity.address,
-                    thirdParty: [thirdPartyAddress]
+                    owner: accountController.identity.address.toString(),
+                    thirdParty: [thirdPartyAddress.toString()]
                 })
             });
 
@@ -1554,8 +1554,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     key: "aKey",
-                    owner: thirdPartyAddress,
-                    thirdParty: [thirdPartyAddress]
+                    owner: thirdPartyAddress.toString(),
+                    thirdParty: [thirdPartyAddress.toString()]
                 })
             });
             const requestId = await ConsumptionIds.request.generate();

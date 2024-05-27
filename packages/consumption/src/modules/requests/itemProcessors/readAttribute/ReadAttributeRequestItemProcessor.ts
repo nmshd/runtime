@@ -84,25 +84,29 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     );
                 }
 
-                const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfRepositoryAttribute(foundLocalAttribute, {
+                const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundLocalAttribute, {
                     "shareInfo.peer": requestInfo.peer.toString()
                 });
 
                 if (ownSharedIdentityAttributeSuccessors.length > 0) {
-                  if (!ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute) {
-                      throw new Error(
-                          `The LocalAttribute ${ownSharedIdentityAttributeSuccessors[0].id} does not have a 'shareInfo.sourceAttribute', even though it was found as a shared version of a LocalAttribute.`
-                      );
-                  }
+                    if (!ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute) {
+                        throw new Error(
+                            `The LocalAttribute ${ownSharedIdentityAttributeSuccessors[0].id} does not have a 'shareInfo.sourceAttribute', even though it was found as a shared version of a LocalAttribute.`
+                        );
+                    }
 
-                const successorSourceRepositoryAttribute = await this.consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute);
-                if (!successorSourceRepositoryAttribute) throw new Error(`The RepositoryAttribute ${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute} was not found.`);
+                    const successorSourceRepositoryAttribute = await this.consumptionController.attributes.getLocalAttribute(
+                        ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute
+                    );
+                    if (!successorSourceRepositoryAttribute) {
+                        throw new Error(`The RepositoryAttribute ${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute} was not found.`);
+                    }
 
-                return ValidationResult.error(
-                    CoreErrors.requests.attributeQueryMismatch(
-                      `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute}' of it.`
-                    )
-                  );
+                    return ValidationResult.error(
+                        CoreErrors.requests.attributeQueryMismatch(
+                            `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute}' of it.`
+                        )
+                    );
                 }
             }
 
@@ -134,7 +138,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                         )
                     );
                 }
-            }    
+            }
         } else if (parsedParams.isWithNewAttribute()) {
             if (requestItem.query instanceof ThirdPartyRelationshipAttributeQuery) {
                 return ValidationResult.error(
@@ -240,7 +244,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     successorContent: successorSharedAttribute.content,
                     predecessorId: latestSharedAttribute.id
                 });
-            }         
+            }
         } else if (parsedParams.isWithNewAttribute()) {
             if (parsedParams.newAttribute.owner.equals("")) {
                 parsedParams.newAttribute.owner = this.currentIdentityAddress;
@@ -254,8 +258,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     (x) => x.newAttribute
                 )} or ${nameof<AcceptReadAttributeRequestItemParameters>((x) => x.existingAttributeId)}.`
             );
-        }          
-          
+        }
+
         return ReadAttributeAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
             attributeId: sharedLocalAttribute.id,
