@@ -44,10 +44,7 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
     protected async executeInternal(request: ShareRepositoryAttributeRequest): Promise<Result<LocalRequestDTO>> {
         const repositoryAttributeId = CoreId.from(request.attributeId);
         const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
-
-        if (typeof repositoryAttribute === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
-        }
+        if (!repositoryAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
 
         if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
@@ -66,11 +63,7 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             );
         }
 
-        const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfRepositoryAttribute(
-            repositoryAttributeId,
-            [CoreAddress.from(request.peer)],
-            false
-        );
+        const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeId, [CoreAddress.from(request.peer)], false);
         if (sharedVersionsOfRepositoryAttribute.length > 0) {
             return Result.fail(
                 RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
