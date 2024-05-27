@@ -122,6 +122,14 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
+    private async setDeletionInfo(content: Request) {
+        const requestItemGroups = content.items.filter((item) => item instanceof RequestItemGroup) as RequestItemGroup[];
+        const requestItemsFromGroups = requestItemGroups.map((group) => group.items);
+        const requestItemsFromRequest = 
+        const deleteAttributeItems = content.items.
+        if ()
+    }
+
     public async createAndCompleteFromRelationshipTemplateResponse(params: ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters): Promise<LocalRequest> {
         const parsedParams = CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters.from(params);
 
