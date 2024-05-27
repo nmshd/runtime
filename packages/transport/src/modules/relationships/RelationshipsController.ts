@@ -250,7 +250,7 @@ export class RelationshipsController extends TransportController {
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
-            throw CoreErrors.relationships.reactivationNotRequested();
+            throw CoreErrors.relationships.reactivationNotRequested(relationshipId.toString());
         }
 
         if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
@@ -267,7 +267,7 @@ export class RelationshipsController extends TransportController {
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
-            throw CoreErrors.relationships.reactivationNotRequested();
+            throw CoreErrors.relationships.reactivationNotRequested(relationshipId.toString());
         }
         if (lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
             throw CoreErrors.relationships.operationOnlyAllowedForPeer(
@@ -283,7 +283,7 @@ export class RelationshipsController extends TransportController {
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
-            throw CoreErrors.relationships.reactivationNotRequested();
+            throw CoreErrors.relationships.reactivationNotRequested(relationshipId.toString());
         }
         if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
             throw CoreErrors.relationships.operationOnlyAllowedForPeer(`Only your peer can accept the reactivation of the relationship ${relationshipId.toString()}.`);
@@ -304,7 +304,7 @@ export class RelationshipsController extends TransportController {
     private assertRelationshipStatus(relationship: Relationship, status: RelationshipStatus) {
         if (relationship.status === status) return;
 
-        throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
+        throw CoreErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status);
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {

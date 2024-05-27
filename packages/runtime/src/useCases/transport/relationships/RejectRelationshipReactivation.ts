@@ -35,7 +35,7 @@ export class RejectRelationshipReactivationUseCase extends UseCase<RejectRelatio
         }
 
         if (relationship.status !== RelationshipStatus.Terminated) {
-            return Result.fail(RuntimeErrors.relationships.wrongRelationshipStatus(relationship.status));
+            return Result.fail(RuntimeErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status));
         }
 
         const updatedRelationship = await this.relationshipsController.rejectReactivation(relationship.id);

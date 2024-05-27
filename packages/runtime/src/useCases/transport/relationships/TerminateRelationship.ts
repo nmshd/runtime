@@ -35,7 +35,7 @@ export class TerminateRelationshipUseCase extends UseCase<TerminateRelationshipR
         }
 
         if (relationship.status !== RelationshipStatus.Active) {
-            return Result.fail(RuntimeErrors.relationships.wrongRelationshipStatus(relationship.status));
+            return Result.fail(RuntimeErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status));
         }
 
         const updatedRelationship = await this.relationshipsController.terminate(relationship.id);

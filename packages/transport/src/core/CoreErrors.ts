@@ -7,12 +7,15 @@ class Relationships {
         return new CoreError("error.transport.relationships.operationOnlyAllowedForPeer", message);
     }
 
-    public wrongRelationshipStatus(status: RelationshipStatus) {
-        return new CoreError("error.transport.relationships.wrongRelationshipStatus", `The relationship has the wrong status (${status}) to run this operation`);
+    public wrongRelationshipStatus(relationshipId: string, status: RelationshipStatus) {
+        return new CoreError(
+            "error.transport.relationships.wrongRelationshipStatus",
+            `The relationship '${relationshipId}' has the wrong status (${status}) to run this operation`
+        );
     }
 
-    public reactivationNotRequested() {
-        return new CoreError("error.transport.relationships.reactivationNotRequested", "There is no reactivation request to respond to.");
+    public reactivationNotRequested(relationshipId: string) {
+        return new CoreError("error.transport.relationships.reactivationNotRequested", `The relationship '${relationshipId}' has no reactivation request to respond to.`);
     }
 
     public reactivationAlreadyRequested(message: string) {

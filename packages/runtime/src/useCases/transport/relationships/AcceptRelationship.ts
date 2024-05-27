@@ -35,7 +35,7 @@ export class AcceptRelationshipUseCase extends UseCase<AcceptRelationshipRequest
         }
 
         if (relationship.status !== RelationshipStatus.Pending) {
-            return Result.fail(RuntimeErrors.relationships.wrongRelationshipStatus(relationship.status));
+            return Result.fail(RuntimeErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status));
         }
 
         const updatedRelationship = await this.relationshipsController.accept(relationship.id);
