@@ -1142,7 +1142,7 @@ export class DataViewExpander {
                     isDraft: false,
                     requestReference: localAttribute.shareInfo.requestReference?.toString(),
                     notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                    tags: identityAttribute.tags ? identityAttribute.tags : [],
+                    tags: identityAttribute.tags,
                     valueType,
                     deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                     deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
@@ -1168,7 +1168,7 @@ export class DataViewExpander {
                 requestReference: localAttribute.shareInfo.requestReference?.toString(),
                 notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                 sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
-                tags: identityAttribute.tags ? identityAttribute.tags : [],
+                tags: identityAttribute.tags,
                 valueType,
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
@@ -1196,7 +1196,7 @@ export class DataViewExpander {
             isOwn: true,
             isDraft: false,
             sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
-            tags: identityAttribute.tags ? identityAttribute.tags : [],
+            tags: identityAttribute.tags,
             valueType
         };
     }
