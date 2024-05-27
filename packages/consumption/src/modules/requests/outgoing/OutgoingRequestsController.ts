@@ -1,5 +1,5 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
+import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
 import {
     CoreAddress,
     CoreDate,
@@ -18,6 +18,7 @@ import { ConsumptionController } from "../../../consumption/ConsumptionControlle
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
+import { DeletionStatus, LocalAttributeDeletionInfo } from "../../attributes";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -98,6 +99,8 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         parsedParams.content.id = id;
         const request = await this._create(id, parsedParams.content, parsedParams.peer);
 
+        await this._setDeletionInfo(parsedParams.content);
+
         this.eventBus.publish(new OutgoingRequestCreatedEvent(this.identity.address.toString(), request));
 
         return request;
@@ -122,12 +125,28 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    private async setDeletionInfo(content: Request) {
-        const requestItemGroups = content.items.filter((item) => item instanceof RequestItemGroup) as RequestItemGroup[];
-        const requestItemsFromGroups = requestItemGroups.map((group) => group.items);
-        const requestItemsFromRequest = 
-        const deleteAttributeItems = content.items.
-        if ()
+    private async _setDeletionInfo(content: Request) {
+        const requestItemsFromRequest = content.items.filter((item) => item instanceof RequestItem) as RequestItem[];
+        const requestItemGroupsFromRequest = content.items.filter((item) => item instanceof RequestItemGroup) as RequestItemGroup[];
+        const requestItemsFromGroups = requestItemGroupsFromRequest.map((group) => group.items);
+        const requestItems = [...requestItemsFromRequest, ...requestItemsFromGroups];
+        const deleteAttributeRequestItems = requestItems.filter((item) => item instanceof DeleteAttributeRequestItem) as DeleteAttributeRequestItem[];
+        if (deleteAttributeRequestItems.length === 0) return;
+
+        const ownSharedAttributeIds = deleteAttributeRequestItems.map((item) => item.attributeId);
+        for (const ownSharedAttributeId of ownSharedAttributeIds) {
+            const ownSharedAttribute = await this.parent.attributes.getLocalAttribute(ownSharedAttributeId);
+            if (!ownSharedAttribute) {
+                throw new ConsumptionError(`The own shared Attribute ${ownSharedAttributeId} of a created DeleteAttributeRequestItem was not found.`);
+            }
+
+            const deletionInfo = LocalAttributeDeletionInfo.from({
+                deletionStatus: DeletionStatus.DeletionRequestSent,
+                deletionDate: CoreDate.utc()
+            });
+            ownSharedAttribute.setDeletionInfo(deletionInfo, this.identity.address);
+            await this.parent.attributes.updateAttributeUnsafe(ownSharedAttribute);
+        }
     }
 
     public async createAndCompleteFromRelationshipTemplateResponse(params: ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters): Promise<LocalRequest> {
