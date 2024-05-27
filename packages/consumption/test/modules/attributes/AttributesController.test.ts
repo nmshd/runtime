@@ -2549,7 +2549,7 @@ describe("AttributesController", function () {
         test("should return an empty list if a relationship attribute without associated third party relationship attributes is queried", async function () {
             const relationshipAttribute = await consumptionController.attributes.createLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "Some key",
+                    key: "AKey",
                     value: {
                         "@type": "ProprietaryString",
                         value: "Some value",

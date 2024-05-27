@@ -1246,7 +1246,7 @@ describe("Get (shared) versions of attribute", () => {
     async function createAndShareRelationshipAttributeVersion0(): Promise<void> {
         sOSRAVersion0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
-                key: "Some key",
+                key: "AKey",
                 value: {
                     "@type": "ProprietaryInteger",
                     title: "Version",
