@@ -541,7 +541,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         test("accept with existing RepositoryAttribute", async function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
-          
+
             const attribute = await consumptionController.attributes.createLocalAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
@@ -624,7 +624,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         test("in case of accepting with a new IdentityAttribute, create a new RepositoryAttribute as well as a copy of it for the Recipient", async function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
-          
+
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
