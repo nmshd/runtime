@@ -45,7 +45,7 @@ export class TestObjectFactory {
             peer:
                 properties?.peer ??
                 Identity.from({
-                    address: CoreAddress.from("id1"),
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
@@ -77,7 +77,7 @@ export class TestObjectFactory {
             peer:
                 properties?.peer ??
                 Identity.from({
-                    address: CoreAddress.from("id1"),
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
@@ -100,7 +100,7 @@ export class TestObjectFactory {
 
                         {
                             createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("id1"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
                             oldStatus: RelationshipStatus.Pending,
@@ -118,7 +118,7 @@ export class TestObjectFactory {
             peer:
                 properties?.peer ??
                 Identity.from({
-                    address: CoreAddress.from("id1"),
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
@@ -141,7 +141,7 @@ export class TestObjectFactory {
 
                         {
                             createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("id1"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
                             oldStatus: RelationshipStatus.Pending,
@@ -150,7 +150,7 @@ export class TestObjectFactory {
 
                         {
                             createdAt: CoreDate.from("2020-01-03T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("id1"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.Termination,
                             oldStatus: RelationshipStatus.Active,
@@ -165,7 +165,7 @@ export class TestObjectFactory {
     public static createIdentityAttribute(properties?: Partial<IIdentityAttribute>): IdentityAttribute {
         return IdentityAttribute.from({
             value: properties?.value ?? GivenName.fromAny({ value: "AGivenName" }),
-            owner: properties?.owner ?? CoreAddress.from("id1")
+            owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }
 
@@ -175,7 +175,7 @@ export class TestObjectFactory {
             confidentiality: RelationshipAttributeConfidentiality.Public,
             key: "aKey",
             isTechnical: false,
-            owner: properties?.owner ?? CoreAddress.from("id1")
+            owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }
 
@@ -191,7 +191,7 @@ export class TestObjectFactory {
         const requestJSON: ILocalRequest = {
             id: CoreId.from("REQ1"),
             isOwn: true,
-            peer: CoreAddress.from("id11"),
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
             content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
             source: { type: "Message", reference: CoreId.from("MSG1") },
@@ -289,7 +289,7 @@ export class TestObjectFactory {
             cache: {
                 content: content,
                 createdAt: creationDate,
-                createdBy: CoreAddress.from("id1"),
+                createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 createdByDevice: { id: "senderDeviceId" },
                 receivedByEveryone: false,
                 recipients: [
@@ -344,7 +344,7 @@ export class TestObjectFactory {
                 receivedByEveryone: false,
                 recipients: [
                     {
-                        address: CoreAddress.from("id1"),
+                        address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                         encryptedKey: CryptoCipher.from({
                             cipher: CoreBuffer.fromUtf8("test"),
                             algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
@@ -373,11 +373,11 @@ export class TestObjectFactory {
             cache: {
                 content: {},
                 createdAt: CoreDate.utc(),
-                createdBy: CoreAddress.from("id1"),
+                createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 createdByDevice: { id: "senderDeviceId" },
                 maxNumberOfAllocations: 1,
                 identity: {
-                    address: CoreAddress.from("id1"),
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")

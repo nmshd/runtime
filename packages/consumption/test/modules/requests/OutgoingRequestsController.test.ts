@@ -290,7 +290,7 @@ describe("OutgoingRequestsController", function () {
 
         test("uses the content from onExistingRelationship when the relationship exists", async function () {
             await When.iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith({
-                responseSource: TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("id1"), "requestIdReceivedFromPeer"),
+                responseSource: TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("did:e:a-domain:dids:anidentity"), "requestIdReceivedFromPeer"),
                 response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
             });
             await Then.theRequestHasTheId("requestIdReceivedFromPeer");
@@ -316,7 +316,10 @@ describe("OutgoingRequestsController", function () {
 
             test("uses the id from the Message content for the created Local Request", async function () {
                 await When.iCreateAnOutgoingRequestFromMessageWith({
-                    responseSource: TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("id1"), CoreId.from("requestIdReceivedFromPeer")),
+                    responseSource: TestObjectFactory.createIncomingIMessageWithResponse(
+                        CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                        CoreId.from("requestIdReceivedFromPeer")
+                    ),
                     response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
                 await Then.theRequestHasTheId("requestIdReceivedFromPeer");

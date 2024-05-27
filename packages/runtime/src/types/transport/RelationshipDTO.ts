@@ -1,5 +1,4 @@
 import { IdentityDTO } from "./IdentityDTO";
-import { RelationshipChangeDTO } from "./RelationshipChangeDTO";
 import { RelationshipTemplateDTO } from "./RelationshipTemplateDTO";
 
 export enum RelationshipStatus {
@@ -39,7 +38,6 @@ export interface RelationshipDTO {
     status: RelationshipStatus;
     peer: string;
     peerIdentity: IdentityDTO;
-    changes: RelationshipChangeDTO[];
     creationContent: any;
     auditLog: RelationshipAuditLogDTO;
 }

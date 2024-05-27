@@ -1,5 +1,5 @@
 import { Relationship, RelationshipAuditLogEntry } from "@nmshd/transport";
-import { RelationshipAuditLogEntryDTO, RelationshipAuditLogEntryReason, RelationshipChangeStatus, RelationshipChangeType, RelationshipDTO } from "../../../types";
+import { RelationshipAuditLogEntryDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
 
@@ -19,34 +19,8 @@ export class RelationshipMapper {
                 publicKey: relationship.peer.publicKey.toBase64(false)
             },
             auditLog: relationship.cache.auditLog.map((entry) => this.toAuditLogEntryDTO(entry)),
-            creationContent: relationship.cache.creationContent?.toJSON(),
-            changes: [
-                {
-                    id: "RCH00000000000000001",
-                    request: {
-                        createdAt: relationship.cache.auditLog[0].createdAt.toString(),
-                        createdBy: relationship.cache.auditLog[0].createdBy.toString(),
-                        createdByDevice: relationship.cache.auditLog[0].createdByDevice.toString(),
-                        content: { ...relationship.cache.creationContent?.toJSON(), "@type": "RelationshipCreationChangeRequestContent" }
-                    },
-                    status: this.getStatus(relationship.cache.auditLog),
-                    type: RelationshipChangeType.Creation
-                }
-            ]
+            creationContent: relationship.cache.creationContent?.toJSON()
         };
-    }
-
-    private static getStatus(auditLog: RelationshipAuditLogEntry[]): RelationshipChangeStatus {
-        switch (auditLog[1]?.reason) {
-            case RelationshipAuditLogEntryReason.AcceptanceOfCreation:
-                return RelationshipChangeStatus.Accepted;
-            case RelationshipAuditLogEntryReason.RejectionOfCreation:
-                return RelationshipChangeStatus.Rejected;
-            case RelationshipAuditLogEntryReason.RevocationOfCreation:
-                return RelationshipChangeStatus.Revoked;
-            default:
-                return RelationshipChangeStatus.Pending;
-        }
     }
 
     private static toAuditLogEntryDTO(entry: RelationshipAuditLogEntry): RelationshipAuditLogEntryDTO {
