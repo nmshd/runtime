@@ -131,12 +131,12 @@ describe("get attribute(s)", () => {
 
         const relationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
-                key: "a key",
+                key: "AKey",
                 confidentiality: RelationshipAttributeConfidentiality.Public,
                 value: {
                     "@type": "ProprietaryString",
-                    value: "a String",
-                    title: "a title"
+                    value: "AString",
+                    title: "ATitle"
                 },
                 isTechnical: true
             }
@@ -366,12 +366,12 @@ describe("get repository, own shared and peer shared attributes", () => {
         // own shared succeeded relationship attribute
         services1SharedRelationshipAttributeV0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
-                key: "a key",
+                key: "AKey",
                 confidentiality: RelationshipAttributeConfidentiality.Public,
                 value: {
                     "@type": "ProprietaryString",
-                    value: "a String",
-                    title: "a title"
+                    value: "AString",
+                    title: "ATitle"
                 },
                 isTechnical: false
             }
@@ -746,8 +746,8 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
                 key: "test",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "a String",
-                    title: "a title"
+                    value: "AString",
+                    title: "ATitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             },
@@ -1013,8 +1013,8 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
                 key: "test",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "a String",
-                    title: "a title"
+                    value: "AString",
+                    title: "ATitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             },
@@ -1038,8 +1038,8 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
                 key: "test",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "a String",
-                    title: "a title"
+                    value: "AString",
+                    title: "ATitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             },
@@ -1082,8 +1082,8 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
                 key: "test",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "a String",
-                    title: "a title"
+                    value: "AString",
+                    title: "ATitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }
@@ -1439,7 +1439,11 @@ describe("Get (shared) versions of attribute", () => {
                 content: {
                     items: [
                         ReadAttributeRequestItem.from({
-                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "a key", owner: services1.address, thirdParty: [services2.address] }),
+                            query: ThirdPartyRelationshipAttributeQuery.from({
+                                key: "AKey",
+                                owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                                thirdParty: [services2.address]
+                            }),
                             mustBeAccepted: true
                         }).toJSON()
                     ]
@@ -1897,10 +1901,10 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "ProprietaryString",
-                        value: "A proprietary string",
-                        title: "A title"
+                        value: "AString",
+                        title: "ATitle"
                     },
-                    key: "A key",
+                    key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             });
@@ -1911,7 +1915,7 @@ describe("DeleteAttributeUseCases", () => {
                     items: [
                         ReadAttributeRequestItem.from({
                             query: ThirdPartyRelationshipAttributeQuery.from({
-                                key: "A key",
+                                key: "AKey",
                                 owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
                                 thirdParty: [services3.address]
                             }),
