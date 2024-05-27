@@ -101,22 +101,6 @@ function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: Identi
         );
     }
 
-    if (typeof query.attributeCreationHints !== "undefined") {
-        if (query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute value type."));
-        }
-
-        if (typeof query.attributeCreationHints.tags !== "undefined" && query.attributeCreationHints.tags.length !== 0) {
-            if (
-                typeof attribute.tags === "undefined" ||
-                attribute.tags.length === 0 ||
-                !query.attributeCreationHints.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))
-            ) {
-                return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag."));
-            }
-        }
-    }
-
     return ValidationResult.success();
 }
 
