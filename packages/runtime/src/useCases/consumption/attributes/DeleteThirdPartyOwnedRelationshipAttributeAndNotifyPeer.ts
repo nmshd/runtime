@@ -37,19 +37,14 @@ export class DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase exte
     ): Promise<Result<DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse>> {
         const thirdPartyOwnedRelationshipAttributeId = CoreId.from(request.attributeId);
         const thirdPartyOwnedRelationshipAttribute = await this.attributesController.getLocalAttribute(thirdPartyOwnedRelationshipAttributeId);
-
-        if (typeof thirdPartyOwnedRelationshipAttribute === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
-        }
+        if (!thirdPartyOwnedRelationshipAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!thirdPartyOwnedRelationshipAttribute.isThirdPartyOwnedAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotThirdPartyOwnedRelationshipAttribute(thirdPartyOwnedRelationshipAttributeId));
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(thirdPartyOwnedRelationshipAttribute);
-        if (validationResult.isError()) {
-            return Result.fail(validationResult.error);
-        }
+        if (validationResult.isError()) return Result.fail(validationResult.error);
 
         await this.attributesController.executeFullAttributeDeletionProcess(thirdPartyOwnedRelationshipAttribute);
 

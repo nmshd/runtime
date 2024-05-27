@@ -44,9 +44,8 @@ afterEach(async () => {
     } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
         abortResult = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
     }
-    if (abortResult?.isError) {
-        throw abortResult.error;
-    }
+
+    if (abortResult?.isError) throw abortResult.error;
 });
 
 describe("IdentityDeletionProcess", () => {

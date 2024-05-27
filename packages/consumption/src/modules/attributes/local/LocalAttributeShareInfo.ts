@@ -43,11 +43,9 @@ export class LocalAttributeShareInfo extends CoreSerializable implements ILocalA
     }
 
     protected static override postFrom<T extends Serializable>(value: T): T {
-        if (!(value instanceof LocalAttributeShareInfo)) {
-            throw new ConsumptionError("this should never happen");
-        }
+        if (!(value instanceof LocalAttributeShareInfo)) throw new ConsumptionError("this should never happen");
 
-        if (typeof value.requestReference === "undefined" && typeof value.notificationReference === "undefined") {
+        if (!value.requestReference && !value.notificationReference) {
             throw new ValidationError(
                 LocalAttributeShareInfo.name,
                 nameof<LocalAttributeShareInfo>((x) => x.requestReference),
@@ -55,7 +53,7 @@ export class LocalAttributeShareInfo extends CoreSerializable implements ILocalA
             );
         }
 
-        if (typeof value.requestReference !== "undefined" && typeof value.notificationReference !== "undefined") {
+        if (value.requestReference && value.notificationReference) {
             throw new ValidationError(
                 LocalAttributeShareInfo.name,
                 nameof<LocalAttributeShareInfo>((x) => x.requestReference),

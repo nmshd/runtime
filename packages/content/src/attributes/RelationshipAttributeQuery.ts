@@ -55,7 +55,7 @@ export class RelationshipAttributeCreationHints extends Serializable implements 
     public confidentiality: RelationshipAttributeConfidentiality;
 
     protected static override preFrom(value: any): any {
-        if (typeof value.isTechnical === "undefined") value.isTechnical = false;
+        if (value.isTechnical === undefined) value.isTechnical = false;
 
         return value;
     }

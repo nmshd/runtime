@@ -138,7 +138,7 @@ describe("Validate Challenge", () => {
     });
 
     test("should return an error when the signature is invalid", async () => {
-        const validChallenge = { createdBy: "id1...", createdByDevice: "DVC...", expiresAt: "2022", id: "CHL...", type: "Identity" };
+        const validChallenge = { createdBy: "did:e:a-domain:dids:anidentity", createdByDevice: "DVC...", expiresAt: "2022", id: "CHL...", type: "Identity" };
         const validationResult = await transportServices2.challenges.validateChallenge({
             challengeString: JSON.stringify(validChallenge),
             signature: "invalid-signature"
@@ -147,7 +147,7 @@ describe("Validate Challenge", () => {
     });
 
     test("should return an error when the challenge is an invalid json string", async () => {
-        const validChallenge = { createdBy: "id1...", createdByDevice: "DVC...", expiresAt: "2022", id: "CHL...", type: "Identity" };
+        const validChallenge = { createdBy: "did:e:a-domain:dids:anidentity", createdByDevice: "DVC...", expiresAt: "2022", id: "CHL...", type: "Identity" };
         const validationResult = await transportServices2.challenges.validateChallenge({
             challengeString: `${JSON.stringify(validChallenge)}a`,
             signature: randomValidSignature
