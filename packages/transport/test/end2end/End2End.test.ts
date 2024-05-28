@@ -672,13 +672,12 @@ describe("RelationshipTest: Decompose", function () {
     test("should request decomposing a relationship", async function () {
         const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
         await from.relationships.terminate(relationshipId);
+        await TestUtil.syncUntilHasRelationships(to);
 
-        // Decompose
         await from.relationships.decompose(relationshipId);
         const decomposedRelationship = await from.relationships.getRelationship(relationshipId);
         expect(decomposedRelationship).toBeUndefined();
 
-        // Get relationship that is decomposed by peer
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const decomposedRelationshipPeer = syncedRelationshipsPeer[0];
