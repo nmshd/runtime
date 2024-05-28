@@ -665,6 +665,7 @@ describe("RelationshipTest: validations for non-existent record", function () {
 
     afterAll(async function () {
         await from.close();
+        await connection.close();
     });
 
     test("should not accept a relationship", async function () {
