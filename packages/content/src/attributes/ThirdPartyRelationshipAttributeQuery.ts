@@ -12,10 +12,16 @@ export interface ThirdPartyRelationshipAttributeQueryJSON extends AbstractAttrib
 
 export interface IThirdPartyRelationshipAttributeQuery extends IAbstractAttributeQuery {
     key: string;
-    owner: ICoreAddress;
+    owner: ThirdPartyRelationshipAttributeQueryOwner;
     thirdParty: ICoreAddress[];
     validFrom?: ICoreDate;
     validTo?: ICoreDate;
+}
+
+export enum ThirdPartyRelationshipAttributeQueryOwner {
+    ThirdParty = "thirdParty",
+    Recipient = "recipient",
+    Empty = ""
 }
 
 @type("ThirdPartyRelationshipAttributeQuery")
@@ -25,8 +31,13 @@ export class ThirdPartyRelationshipAttributeQuery extends AbstractAttributeQuery
     public key: string;
 
     @serialize()
-    @validate()
-    public owner: CoreAddress;
+    @validate({
+        customValidator: (v) =>
+            !Object.values(ThirdPartyRelationshipAttributeQueryOwner).includes(v)
+                ? `must be one of: ${Object.values(ThirdPartyRelationshipAttributeQueryOwner).map((o) => `"${o}"`)}`
+                : undefined
+    })
+    public owner: ThirdPartyRelationshipAttributeQueryOwner;
 
     @serialize({ type: CoreAddress })
     @validate({ customValidator: (v) => (v.length < 1 ? "may not be empty" : undefined) })
