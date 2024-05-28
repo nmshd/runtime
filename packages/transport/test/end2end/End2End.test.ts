@@ -652,7 +652,6 @@ describe.skip("RelationshipTest: Decompose", function () {
 
     let from: AccountController;
     let to: AccountController;
-
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
         transport = TestUtil.createTransport(connection);
@@ -688,6 +687,56 @@ describe.skip("RelationshipTest: Decompose", function () {
         expect(decomposedRelationshipPeer.status).toStrictEqual(RelationshipStatus.DeletionProposed);
         expect(decomposedRelationshipPeer.cache?.auditLog).toHaveLength(4);
         expect(decomposedRelationshipPeer.cache!.auditLog[3].reason).toBe(RelationshipAuditLogEntryReason.Decomposition);
+    });
+
+describe("RelationshipTest: validations for non-existent record", function () {
+    const fakeRelationshipId = CoreId.from("REL00000000000000000");
+        
+    beforeAll(async function () {
+        connection = await TestUtil.createDatabaseConnection();
+        transport = TestUtil.createTransport(connection);
+
+        await transport.init();
+
+        const accounts = await TestUtil.provideAccounts(transport, 2);
+        from = accounts[0];
+    }
+              
+    afterAll(async function () {
+        await from.close();
+        await connection.close();
+    });
+  
+    test("should not accept a relationship", async function () {
+        await expect(from.relationships.accept(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should not reject a relationship", async function () {
+        await expect(from.relationships.reject(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should not revoke a relationship", async function () {
+        await expect(from.relationships.revoke(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should not terminate a relationship", async function () {
+        await expect(from.relationships.terminate(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should not request a relationship reactivation", async function () {
+        await expect(from.relationships.requestReactivation(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should not accept a relationship reactivation", async function () {
+        await expect(from.relationships.acceptReactivation(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should not reject a relationship reactivation", async function () {
+        await expect(from.relationships.rejectReactivation(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should not revoke a relationship reactivation", async function () {
+        await expect(from.relationships.revokeReactivation(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
     });
 });
 

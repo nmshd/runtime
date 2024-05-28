@@ -93,8 +93,11 @@ class RelationshipTemplates {
 }
 
 class Relationships {
-    public wrongRelationshipStatus(status: string): ApplicationError {
-        return new ApplicationError("error.runtime.relationships.wrongRelationshipStatus", `The relationship has the wrong status (${status}) to run this operation`);
+    public wrongRelationshipStatus(relationshipId: string, status: string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationships.wrongRelationshipStatus",
+            `The relationship '${relationshipId}' has the wrong status (${status}) to run this operation`
+        );
     }
 }
 
