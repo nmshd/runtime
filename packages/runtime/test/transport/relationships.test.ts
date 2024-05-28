@@ -386,12 +386,14 @@ describe("RelationshipTermination", () => {
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Termination
         );
-        const result = (await services1.transport.relationships.getRelationship({ id: relationshipId })).value;
-        expect(result.status).toBe(RelationshipStatus.Terminated);
+        expect(terminationResult.value.status).toBe(RelationshipStatus.Terminated);
 
-        await services2.eventBus.waitForEvent(RelationshipChangedEvent);
-        const result2 = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
-        expect(result2.status).toBe(RelationshipStatus.Terminated);
+        const syncedRelationship = (await syncUntilHasRelationships(services2.transport))[0];
+        expect(syncedRelationship.status).toBe(RelationshipStatus.Terminated);
+        await expect(services2.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Termination
+        );
     });
 
     test("should not send a message", async () => {
@@ -409,12 +411,6 @@ describe("RelationshipTermination", () => {
     });
 
     test("should not decide a request", async () => {
-        await syncUntilHasRelationships(services2.transport);
-        await expect(services2.eventBus).toHavePublished(
-            RelationshipChangedEvent,
-            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Termination
-        );
-
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
         const canAcceptResult = (await services2.consumption.incomingRequests.canAccept({ requestId: incomingRequest.id, items: [{ accept: true }] })).value;
