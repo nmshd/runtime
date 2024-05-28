@@ -276,6 +276,10 @@ class Requests {
         return new CoreError("error.consumption.requests.invalidRequestItem", message);
     }
 
+    public attributeQueryMismatch(message: string) {
+        return new CoreError("error.consumption.requests.attributeQueryMismatch", message);
+    }
+
     public wrongRelationshipStatus(message: string) {
         return new CoreError("error.consumption.requests.wrongRelationshipStatus", message);
     }

@@ -8,6 +8,7 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
+import { CoreAddress } from "@nmshd/transport";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -331,7 +332,7 @@ describe("RequestModule", () => {
                             "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
                             attribute: IdentityAttribute.from({
-                                owner: (await rTransportServices.account.getIdentityInfo()).value.address,
+                                owner: CoreAddress.from(""),
                                 value: GivenName.from("AGivenName").toJSON()
                             }).toJSON()
                         }
