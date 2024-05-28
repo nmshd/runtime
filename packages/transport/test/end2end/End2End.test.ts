@@ -688,10 +688,14 @@ describe("RelationshipTest: Decompose", function () {
         expect(decomposedRelationshipPeer.cache?.auditLog).toHaveLength(4);
         expect(decomposedRelationshipPeer.cache!.auditLog[3].reason).toBe(RelationshipAuditLogEntryReason.Decomposition);
     });
+});
 
 describe("RelationshipTest: validations for non-existent record", function () {
+    let transport: Transport;
+    let connection: IDatabaseConnection;
+    let from: AccountController;
     const fakeRelationshipId = CoreId.from("REL00000000000000000");
-        
+
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
         transport = TestUtil.createTransport(connection);
@@ -700,13 +704,13 @@ describe("RelationshipTest: validations for non-existent record", function () {
 
         const accounts = await TestUtil.provideAccounts(transport, 2);
         from = accounts[0];
-    }
-              
+    });
+
     afterAll(async function () {
         await from.close();
         await connection.close();
     });
-  
+
     test("should not accept a relationship", async function () {
         await expect(from.relationships.accept(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
     });
