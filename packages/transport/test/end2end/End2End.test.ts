@@ -742,6 +742,10 @@ describe("RelationshipTest: validations for non-existent record", function () {
     test("should not revoke a relationship reactivation", async function () {
         await expect(from.relationships.revokeReactivation(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
     });
+
+    test("should not decompose a relationship", async function () {
+        await expect(from.relationships.decompose(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
+    });
 });
 
 describe("RelationshipTest: validations (on terminated relationship)", function () {

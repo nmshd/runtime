@@ -143,6 +143,10 @@ describe("Relationship status validations on active relationship", () => {
     test("should not revoke a relationship", async () => {
         expect(await services1.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
     });
+
+    test("should not decompose a relationship", async () => {
+        expect(await services1.transport.relationships.decomposeRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
+    });
 });
 
 describe("Relationships query", () => {
@@ -761,5 +765,9 @@ describe("Relationship existence check", () => {
 
     test("should not revoke a relationship reactivation", async function () {
         expect(await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should not decompose a relationship", async function () {
+        expect(await services1.transport.relationships.decomposeRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 });
