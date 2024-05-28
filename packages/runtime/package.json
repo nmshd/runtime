@@ -59,7 +59,7 @@
         "@nmshd/consumption": "3.11.0",
         "@nmshd/content": "2.10.0",
         "@nmshd/crypto": "2.0.6",
-        "@nmshd/transport": "2.7.1",
+        "@nmshd/transport": "2.7.2",
         "ajv": "^8.13.0",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
