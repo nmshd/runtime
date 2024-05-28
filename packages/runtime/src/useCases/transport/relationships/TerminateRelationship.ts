@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AccountController, CoreId, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { RelationshipDTO, RelationshipStatus } from "../../../types";
+import { RelationshipDTO } from "../../../types";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
 
@@ -32,10 +32,6 @@ export class TerminateRelationshipUseCase extends UseCase<TerminateRelationshipR
 
         if (!relationship.cache) {
             return Result.fail(RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString()));
-        }
-
-        if (relationship.status !== RelationshipStatus.Active) {
-            return Result.fail(RuntimeErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status));
         }
 
         const updatedRelationship = await this.relationshipsController.terminate(relationship.id);

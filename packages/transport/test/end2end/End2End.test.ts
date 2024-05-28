@@ -663,6 +663,10 @@ describe("RelationshipTest: validations for non-existent record", function () {
         from = accounts[0];
     });
 
+    afterAll(async function () {
+        await from.close();
+    });
+
     test("should not accept a relationship", async function () {
         await expect(from.relationships.accept(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
     });
