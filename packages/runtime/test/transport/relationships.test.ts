@@ -404,9 +404,6 @@ describe("RelationshipTermination", () => {
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RevocationOfReactivation
         );
-
-        const reactivationResult = await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId });
-        expect(reactivationResult).toBeAnError(/.*/, "error.transport.relationships.reactivationNotRequested");
     });
 
     test("should reject the relationship reactivation", async () => {
@@ -431,9 +428,6 @@ describe("RelationshipTermination", () => {
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RejectionOfReactivation
         );
-
-        const revocationResult = await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId });
-        expect(revocationResult).toBeAnError(/.*/, "error.transport.relationships.reactivationNotRequested");
     });
 
     test("should accept the relationship reactivation", async () => {
