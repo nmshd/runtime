@@ -64,6 +64,12 @@ describe("Create Relationship", () => {
         expect(relationships1).toHaveLength(1);
         const relationshipId = relationships1[0].id;
 
+        expect(await services2.transport.relationships.acceptRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
+
+        expect(await services2.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
+
+        expect(await services1.transport.relationships.revokeRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
+
         const acceptRelationshipResponse = await services1.transport.relationships.acceptRelationship({
             relationshipId
         });
@@ -87,6 +93,55 @@ describe("Create Relationship", () => {
         const relationship2Response = await services2.transport.relationships.getRelationship({ id: relationshipId });
         expect(relationship2Response).toBeSuccessful();
         expect(relationship2Response.value.status).toBe("Active");
+    });
+});
+
+describe("Relationship status validations on active relationship", () => {
+    let relationshipId: string;
+    beforeAll(async () => {
+        await ensureActiveRelationship(services1.transport, services2.transport);
+        const relationship = await getRelationship(services1.transport);
+        relationshipId = relationship.id;
+    });
+
+    test("should not request a relationship reactivation", async () => {
+        expect(await services1.transport.relationships.requestRelationshipReactivation({ relationshipId })).toBeAnError(
+            /.*/,
+            "error.transport.relationships.wrongRelationshipStatus"
+        );
+    });
+
+    test("should not accept a relationship reactivation", async () => {
+        expect(await services1.transport.relationships.acceptRelationshipReactivation({ relationshipId })).toBeAnError(
+            /.*/,
+            "error.transport.relationships.wrongRelationshipStatus"
+        );
+    });
+
+    test("should not reject a relationship reactivation", async () => {
+        expect(await services1.transport.relationships.rejectRelationshipReactivation({ relationshipId })).toBeAnError(
+            /.*/,
+            "error.transport.relationships.wrongRelationshipStatus"
+        );
+    });
+
+    test("should not revoke a relationship reactivation", async () => {
+        expect(await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId })).toBeAnError(
+            /.*/,
+            "error.transport.relationships.wrongRelationshipStatus"
+        );
+    });
+
+    test("should not accept a relationship", async () => {
+        expect(await services1.transport.relationships.acceptRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not reject a relationship", async () => {
+        expect(await services1.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not revoke a relationship", async () => {
+        expect(await services1.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
     });
 });
 
@@ -351,7 +406,10 @@ describe("RelationshipTermination", () => {
 
     test("should not decide a request", async () => {
         await syncUntilHasRelationships(services2.transport);
-        await expect(services2.eventBus).toHavePublished(RelationshipChangedEvent, (e) => e.data.id === relationshipId);
+        await expect(services2.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Termination
+        );
 
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
@@ -388,15 +446,88 @@ describe("RelationshipTermination", () => {
         expect(result).toBeAnError(/.*/, "error.transport.challenges.challengeTypeRequiresActiveRelationship");
     });
 
+    describe("Validating relationship operations on terminated relationship", () => {
+        test("should not terminate a relationship in status terminated again", async () => {
+            expect(await services1.transport.relationships.terminateRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
+        });
+
+        test("reactivation acceptance should fail without reactivation request", async () => {
+            expect(await services1.transport.relationships.acceptRelationshipReactivation({ relationshipId })).toBeAnError(
+                /.*/,
+                "error.transport.relationships.reactivationNotRequested"
+            );
+        });
+
+        test("reactivation revocation should fail without reactivation request", async () => {
+            expect(await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId })).toBeAnError(
+                /.*/,
+                "error.transport.relationships.reactivationNotRequested"
+            );
+        });
+
+        test("reactivation rejection should fail without reactivation request", async () => {
+            expect(await services1.transport.relationships.rejectRelationshipReactivation({ relationshipId })).toBeAnError(
+                /.*/,
+                "error.transport.relationships.reactivationNotRequested"
+            );
+        });
+    });
+
+    describe("Validating relationship operations on terminated relationship with requested reactivation", () => {
+        beforeAll(async () => {
+            await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
+            await syncUntilHasRelationships(services2.transport);
+        });
+
+        afterAll(async () => {
+            await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId });
+            await syncUntilHasRelationships(services2.transport);
+        });
+
+        test("reactivation acceptance should fail when the wrong side accepts it", async () => {
+            expect(await services1.transport.relationships.acceptRelationshipReactivation({ relationshipId })).toBeAnError(
+                /.*/,
+                "error.transport.relationships.operationOnlyAllowedForPeer"
+            );
+        });
+
+        test("reactivation rejection should fail when the wrong side rejects it", async () => {
+            expect(await services1.transport.relationships.rejectRelationshipReactivation({ relationshipId })).toBeAnError(
+                /.*/,
+                "error.transport.relationships.operationOnlyAllowedForPeer"
+            );
+        });
+
+        test("reactivation revocation should fail when the wrong side revokes it", async () => {
+            expect(await services2.transport.relationships.revokeRelationshipReactivation({ relationshipId })).toBeAnError(
+                /.*/,
+                "error.transport.relationships.operationOnlyAllowedForPeer"
+            );
+        });
+
+        test("requesting reactivation twice should fail", async () => {
+            expect(await services1.transport.relationships.requestRelationshipReactivation({ relationshipId })).toBeAnError(
+                "You have already requested the reactivation",
+                "error.transport.relationships.reactivationAlreadyRequested"
+            );
+            expect(await services2.transport.relationships.requestRelationshipReactivation({ relationshipId })).toBeAnError(
+                "Your peer has already requested the reactivation",
+                "error.transport.relationships.reactivationAlreadyRequested"
+            );
+        });
+    });
+
     test("should revoke the relationship reactivation", async () => {
-        await services1.transport.relationships.reactivateRelationship({ relationshipId });
+        const reactivationRequestResult = await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
+        expect(reactivationRequestResult).toBeSuccessful();
         await expect(services1.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.ReactivationRequested
         );
 
-        const revocationResult = (await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId })).value;
-        expect(revocationResult.status).toBe(RelationshipStatus.Terminated);
+        const revocationResult = await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId });
+        expect(revocationResult).toBeSuccessful();
+        expect(revocationResult.value.status).toBe(RelationshipStatus.Terminated);
         await expect(services1.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RevocationOfReactivation
@@ -404,25 +535,23 @@ describe("RelationshipTermination", () => {
 
         const relationship2 = (await syncUntilHasRelationships(services2.transport))[0];
         expect(relationship2.status).toBe(RelationshipStatus.Terminated);
-        await expect(services1.eventBus).toHavePublished(
+        await expect(services2.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RevocationOfReactivation
         );
-
-        const reactivationResult = await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId });
-        expect(reactivationResult).toBeAnError(/.*/, "error.transport.relationships.reactivationNotRequested");
     });
 
     test("should reject the relationship reactivation", async () => {
-        await services1.transport.relationships.reactivateRelationship({ relationshipId });
+        await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
 
         await syncUntilHasRelationships(services2.transport);
         await expect(services2.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.ReactivationRequested
         );
-        const rejectionResult = (await services2.transport.relationships.rejectRelationshipReactivation({ relationshipId })).value;
-        expect(rejectionResult.status).toBe(RelationshipStatus.Terminated);
+        const rejectionResult = await services2.transport.relationships.rejectRelationshipReactivation({ relationshipId });
+        expect(rejectionResult).toBeSuccessful();
+        expect(rejectionResult.value.status).toBe(RelationshipStatus.Terminated);
         await expect(services2.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RejectionOfReactivation
@@ -434,21 +563,19 @@ describe("RelationshipTermination", () => {
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.RejectionOfReactivation
         );
-
-        const revocationResult = await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId });
-        expect(revocationResult).toBeAnError(/.*/, "error.transport.relationships.reactivationNotRequested");
     });
 
     test("should accept the relationship reactivation", async () => {
-        await services1.transport.relationships.reactivateRelationship({ relationshipId });
+        await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
 
         await syncUntilHasRelationships(services2.transport);
         await expect(services2.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.ReactivationRequested
         );
-        const rejectionResult = (await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId })).value;
-        expect(rejectionResult.status).toBe(RelationshipStatus.Active);
+        const acceptanceResult = await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId });
+        expect(acceptanceResult).toBeSuccessful();
+        expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
         await expect(services2.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.AcceptanceOfReactivation
@@ -599,4 +726,40 @@ describe("RelationshipDecomposition", () => {
             }
         });
     }
+});
+
+describe("Relationship existence check", () => {
+    const fakeRelationshipId = "REL00000000000000000";
+
+    test("should not accept a relationship", async function () {
+        expect(await services1.transport.relationships.acceptRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should not reject a relationship", async function () {
+        expect(await services1.transport.relationships.rejectRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should not revoke a relationship", async function () {
+        expect(await services1.transport.relationships.revokeRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should not terminate a relationship", async function () {
+        expect(await services1.transport.relationships.terminateRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should not request a relationship reactivation", async function () {
+        expect(await services1.transport.relationships.requestRelationshipReactivation({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should not accept a relationship reactivation", async function () {
+        expect(await services1.transport.relationships.acceptRelationshipReactivation({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should not reject a relationship reactivation", async function () {
+        expect(await services1.transport.relationships.rejectRelationshipReactivation({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should not revoke a relationship reactivation", async function () {
+        expect(await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
 });

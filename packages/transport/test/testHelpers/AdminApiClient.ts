@@ -37,9 +37,7 @@ export class AdminApiClient {
         await TestUtil.syncUntilHasIdentityDeletionProcess(account, CoreId.from(deletionProcess.data.result.id));
 
         const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
-        if (typeof activeIdentityDeletionProcess === "undefined") {
-            throw new Error("IdentityDeletionProcess not found.");
-        }
+        if (!activeIdentityDeletionProcess) throw new Error("IdentityDeletionProcess not found.");
 
         return activeIdentityDeletionProcess;
     }

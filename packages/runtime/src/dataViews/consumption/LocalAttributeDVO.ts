@@ -33,7 +33,7 @@ export interface RepositoryAttributeDVO extends LocalAttributeDVO {
     type: "RepositoryAttributeDVO";
     sharedWith: SharedToPeerAttributeDVO[];
     isOwn: true;
-    tags: string[];
+    tags?: string[];
 }
 
 /**
@@ -44,9 +44,9 @@ export interface SharedToPeerAttributeDVO extends LocalAttributeDVO {
     peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
     requestReference?: string;
     notificationReference?: string;
-    sourceAttribute: string;
+    sourceAttribute?: string;
     isOwn: true;
-    tags: string[];
+    tags?: string[];
     deletionDate?: string;
     deletionStatus?: string;
 }
@@ -60,7 +60,7 @@ export interface PeerAttributeDVO extends LocalAttributeDVO {
     requestReference?: string;
     notificationReference?: string;
     isOwn: false;
-    tags: string[];
+    tags?: string[];
     deletionDate?: string;
     deletionStatus?: string;
 }

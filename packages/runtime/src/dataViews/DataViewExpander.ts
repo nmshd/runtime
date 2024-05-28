@@ -1,6 +1,8 @@
 import { Serializable, SerializableBase } from "@js-soft/ts-serval";
 import { ConsumptionController, LocalRequestStatus } from "@nmshd/consumption";
 import {
+    AttributeAlreadySharedAcceptResponseItemJSON,
+    AttributeSuccessionAcceptResponseItemJSON,
     AuthenticationRequestItemJSON,
     ConsentRequestItemJSON,
     CreateAttributeAcceptResponseItemJSON,
@@ -48,6 +50,7 @@ import {
     ValueHintsJSON
 } from "@nmshd/content";
 import { CoreAddress, CoreId, IdentityController, Relationship, RelationshipStatus } from "@nmshd/transport";
+import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import {
     AuthenticationRequestItemDVO,
@@ -126,6 +129,8 @@ import {
 import { MailDVO, RequestMessageDVO } from "./content/MailDVOs";
 import { RequestDVO } from "./content/RequestDVO";
 import {
+    AttributeAlreadySharedAcceptResponseItemDVO,
+    AttributeSuccessionAcceptResponseItemDVO,
     CreateAttributeAcceptResponseItemDVO,
     DeleteAttributeAcceptResponseItemDVO,
     ErrorResponseItemDVO,
@@ -600,9 +605,15 @@ export class DataViewExpander {
 
                 let proposedValueOverruled = false;
                 if (responseItemDVO && responseItemDVO.result === ResponseItemResult.Accepted) {
-                    const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
-                    if (JSON.stringify(proposeAttributeResponseItem.attribute.content.value) !== JSON.stringify(proposeAttributeRequestItem.attribute.value)) {
-                        proposedValueOverruled = true;
+                    if (responseItemDVO.type === "AttributeSuccessionAcceptResponseItemDVO") {
+                        const attributeSuccessionResponseItem = responseItemDVO as AttributeSuccessionAcceptResponseItemDVO;
+                        proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor.content.value, proposeAttributeRequestItem.attribute.value);
+                    } else if (responseItemDVO.type === "AttributeAlreadySharedAcceptResponseItemDVO") {
+                        const attributeAlreadySharedResponseItem = responseItemDVO as AttributeAlreadySharedAcceptResponseItemDVO;
+                        proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
+                    } else {
+                        const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
+                        proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
                     }
                 }
 
@@ -876,6 +887,35 @@ export class DataViewExpander {
                         listener: localAttributeListener
                     } as RegisterAttributeListenerAcceptResponseItemDVO;
 
+                case "AttributeSuccessionAcceptResponseItem":
+                    const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;
+                    const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
+                    const localPredecessorDVOResult = await this.expandLocalAttributeDTO(localPredecessorResult.value);
+                    const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
+                    const localSuccessorDVOResult = await this.expandLocalAttributeDTO(localSuccessorResult.value);
+
+                    return {
+                        ...attributeSuccessionResponseItem,
+                        type: "AttributeSuccessionAcceptResponseItemDVO",
+                        id: "",
+                        name: name,
+                        predecessor: localPredecessorDVOResult,
+                        successor: localSuccessorDVOResult
+                    } as AttributeSuccessionAcceptResponseItemDVO;
+
+                case "AttributeAlreadySharedAcceptResponseItem":
+                    const attributeAlreadySharedResponseItem = responseItem as AttributeAlreadySharedAcceptResponseItemJSON;
+                    const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
+                    const localAttributeDVOResult = await this.expandLocalAttributeDTO(localAttributeResult.value);
+
+                    return {
+                        ...attributeAlreadySharedResponseItem,
+                        type: "AttributeAlreadySharedAcceptResponseItemDVO",
+                        id: "",
+                        name: name,
+                        attribute: localAttributeDVOResult
+                    } as AttributeAlreadySharedAcceptResponseItemDVO;
+
                 default:
                     return {
                         ...responseItem,
@@ -1025,7 +1065,7 @@ export class DataViewExpander {
                 }
 
                 // Peer Relationship Attribute
-                if (relationshipAttribute.owner === localAttribute.shareInfo.peer) {
+                if (relationshipAttribute.owner.toString() === peer) {
                     return {
                         type: "PeerRelationshipAttributeDVO",
                         id: attribute.id,
@@ -1081,10 +1121,10 @@ export class DataViewExpander {
             }
             const identityAttribute = localAttribute.content;
 
-            if (localAttribute.shareInfo.sourceAttribute) {
-                // Own Shared Attribute
+            if (identityAttribute.owner.toString() === peer) {
+                // Peer Attribute
                 return {
-                    type: "SharedToPeerAttributeDVO",
+                    type: "PeerAttributeDVO",
                     id: attribute.id,
                     name,
                     description,
@@ -1096,22 +1136,20 @@ export class DataViewExpander {
                     valueHints,
                     isValid: true,
                     createdAt: attribute.createdAt,
-                    isOwn: true,
+                    isOwn: false,
                     peer: peer,
                     isDraft: false,
                     requestReference: localAttribute.shareInfo.requestReference?.toString(),
                     notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                    sourceAttribute: localAttribute.shareInfo.sourceAttribute.toString(),
-                    tags: identityAttribute.tags ? identityAttribute.tags : [],
+                    tags: identityAttribute.tags,
                     valueType,
                     deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                     deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                 };
             }
-
-            // Peer Attribute
+            // Own Shared Attribute
             return {
-                type: "PeerAttributeDVO",
+                type: "SharedToPeerAttributeDVO",
                 id: attribute.id,
                 name,
                 description,
@@ -1123,12 +1161,13 @@ export class DataViewExpander {
                 valueHints,
                 isValid: true,
                 createdAt: attribute.createdAt,
-                isOwn: false,
+                isOwn: true,
                 peer: peer,
                 isDraft: false,
                 requestReference: localAttribute.shareInfo.requestReference?.toString(),
                 notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                tags: identityAttribute.tags ? identityAttribute.tags : [],
+                sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
+                tags: identityAttribute.tags,
                 valueType,
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
@@ -1156,7 +1195,7 @@ export class DataViewExpander {
             isOwn: true,
             isDraft: false,
             sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
-            tags: identityAttribute.tags ? identityAttribute.tags : [],
+            tags: identityAttribute.tags,
             valueType
         };
     }
@@ -1355,9 +1394,8 @@ export class DataViewExpander {
             query
         });
         if (matchedAttributeDTOResult.isError) {
-            if (matchedAttributeDTOResult.error.code !== "error.runtime.recordNotFound") {
-                throw matchedAttributeDTOResult.error;
-            }
+            if (matchedAttributeDTOResult.error.code !== "error.runtime.recordNotFound") throw matchedAttributeDTOResult.error;
+
             return {
                 ...(await this.expandRelationshipAttributeQuery(query)),
                 type: "ProcessedRelationshipAttributeQueryDVO",
@@ -1682,9 +1720,7 @@ export class DataViewExpander {
             return await this.expandRelationshipDTO(relationshipResult.value);
         }
 
-        if (relationshipResult.error.code !== RuntimeErrors.general.recordNotFound(Relationship).code) {
-            throw relationshipResult.error;
-        }
+        if (relationshipResult.error.code !== RuntimeErrors.general.recordNotFound(Relationship).code) throw relationshipResult.error;
 
         const name = address.substring(3, 9);
         const initials = (name.match(/\b\w/g) ?? []).join("");

@@ -323,7 +323,7 @@ describe("DecideRequestParametersValidator", function () {
             content: data.input.request,
             createdAt: CoreDate.utc(),
             isOwn: true,
-            peer: CoreAddress.from("id1"),
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
             source: { reference: await CoreId.generate(), type: "Message" },
             status: LocalRequestStatus.Open,
             statusLog: []

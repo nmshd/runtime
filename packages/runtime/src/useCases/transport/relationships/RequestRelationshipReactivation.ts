@@ -5,17 +5,17 @@ import { RelationshipDTO } from "../../../types";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
 
-export interface ReactivateRelationshipRequest {
+export interface RequestRelationshipReactivationRequest {
     relationshipId: RelationshipIdString;
 }
 
-class Validator extends SchemaValidator<ReactivateRelationshipRequest> {
+class Validator extends SchemaValidator<RequestRelationshipReactivationRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("ReactivateRelationshipRequest"));
+        super(schemaRepository.getSchema("RequestRelationshipReactivationRequest"));
     }
 }
 
-export class ReactivateRelationshipUseCase extends UseCase<ReactivateRelationshipRequest, RelationshipDTO> {
+export class RequestRelationshipReactivationUseCase extends UseCase<RequestRelationshipReactivationRequest, RelationshipDTO> {
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly accountController: AccountController,
@@ -24,7 +24,7 @@ export class ReactivateRelationshipUseCase extends UseCase<ReactivateRelationshi
         super(validator);
     }
 
-    protected async executeInternal(request: ReactivateRelationshipRequest): Promise<Result<RelationshipDTO>> {
+    protected async executeInternal(request: RequestRelationshipReactivationRequest): Promise<Result<RelationshipDTO>> {
         const relationship = await this.relationshipsController.getRelationship(CoreId.from(request.relationshipId));
         if (!relationship) {
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
@@ -34,7 +34,7 @@ export class ReactivateRelationshipUseCase extends UseCase<ReactivateRelationshi
             return Result.fail(RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString()));
         }
 
-        const updatedRelationship = await this.relationshipsController.reactivate(relationship.id);
+        const updatedRelationship = await this.relationshipsController.requestReactivation(relationship.id);
 
         await this.accountController.syncDatawallet();
 

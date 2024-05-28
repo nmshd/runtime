@@ -3,7 +3,7 @@ import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
 import { AgentOptions } from "http";
-import { AgentOptions as HTTPSAgentOptions } from "https";
+import { Agent as HTTPSAgent, AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
 import { CoreId } from "../types";
@@ -39,8 +39,9 @@ export interface IRESTClientConfig {
     platformTimeout: number;
     platformMaxRedirects: number;
     platformAdditionalHeaders?: Record<string, string>;
-    httpAgent: AgentOptions;
-    httpsAgent: HTTPSAgentOptions;
+    httpAgentOptions: AgentOptions;
+    httpsAgentOptions: HTTPSAgentOptions;
+    httpsAgent?: HTTPSAgent;
     debug: boolean;
     baseUrl: string;
 }
@@ -81,17 +82,24 @@ export class RESTClient {
             defaults.headers = _.defaultsDeep({}, defaults.headers, this.config.platformAdditionalHeaders);
         }
 
+        if (config.httpsAgent) {
+            defaults.httpsAgent = config.httpsAgent;
+        } else {
+            try {
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                const httpsAgent = require("https")?.Agent;
+
+                if (httpsAgent) defaults.httpsAgent = new httpsAgent(this.config.httpsAgentOptions);
+            } catch (e) {
+                // ignore
+            }
+        }
+
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const agent = require("http")?.Agent;
 
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const httpsAgent = require("https")?.Agent;
-
-            if (typeof agent !== "undefined" && typeof httpsAgent !== "undefined") {
-                defaults.httpAgent = new agent(this.config.httpAgent);
-                defaults.httpsAgent = new httpsAgent(this.config.httpsAgent);
-            }
+            if (agent) defaults.httpAgent = new agent(this.config.httpAgentOptions);
         } catch (e) {
             // ignore
         }

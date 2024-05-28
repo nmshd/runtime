@@ -1,5 +1,4 @@
 import { IdentityDTO } from "./IdentityDTO";
-import { RelationshipChangeDTO } from "./RelationshipChangeDTO";
 import { RelationshipTemplateDTO } from "./RelationshipTemplateDTO";
 
 export enum RelationshipStatus {
@@ -7,8 +6,7 @@ export enum RelationshipStatus {
     Active = "Active",
     Rejected = "Rejected",
     Revoked = "Revoked",
-    Terminated = "Terminated",
-    DeletionProposed = "DeletionProposed"
+    Terminated = "Terminated"
 }
 
 export enum RelationshipAuditLogEntryReason {
@@ -20,8 +18,7 @@ export enum RelationshipAuditLogEntryReason {
     ReactivationRequested = "ReactivationRequested",
     AcceptanceOfReactivation = "AcceptanceOfReactivation",
     RejectionOfReactivation = "RejectionOfReactivation",
-    RevocationOfReactivation = "RevocationOfReactivation",
-    Decomposition = "Decomposition"
+    RevocationOfReactivation = "RevocationOfReactivation"
 }
 
 export interface RelationshipAuditLogEntryDTO {
@@ -41,7 +38,6 @@ export interface RelationshipDTO {
     status: RelationshipStatus;
     peer: string;
     peerIdentity: IdentityDTO;
-    changes: RelationshipChangeDTO[];
     creationContent: any;
     auditLog: RelationshipAuditLogDTO;
 }

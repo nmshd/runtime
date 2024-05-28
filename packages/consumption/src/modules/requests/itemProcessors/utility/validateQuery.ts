@@ -14,10 +14,6 @@ export default function validateQuery(
             const result = validateThirdParty(thirdParty, sender, recipient);
             if (result.isError()) return result;
         }
-
-        if (query.owner.equals(sender)) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Cannot query own Attributes from a third party."));
-        }
     } else if (query instanceof IQLQuery) {
         const validationResult = iqlValidate(query.queryString);
         if (!validationResult.isValid) {
