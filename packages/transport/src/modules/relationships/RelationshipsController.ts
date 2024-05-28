@@ -293,15 +293,14 @@ export class RelationshipsController extends TransportController {
     }
 
     public async decompose(relationshipId: CoreId): Promise<void> {
-        const relationship = await this.getRelationship(relationshipId);
-        if (!relationship) {
-            throw CoreErrors.general.recordNotFound("Relationship", relationshipId.toString());
-        }
-        if (relationship.status !== RelationshipStatus.Terminated) {
-            throw CoreErrors.relationships.wrongRelationshipStatus(relationship.status);
-        }
+        const relationship = await this.getRelationshipWithCache(relationshipId);
+        this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
+
         await this.client.decomposeRelationship(relationshipId.toString());
-        await this.secrets.deleteSecretForRelationship(relationship.relationshipSecretId);
+        const isSecretDeletionSuccessful = await this.secrets.deleteSecretForRelationship(relationship.relationshipSecretId);
+        if (!isSecretDeletionSuccessful) {
+            throw new TransportError("Decomposition failed to delete secrets");
+        }
         await this.relationships.delete({ id: relationshipId });
 
         this.eventBus.publish(new RelationshipDeletedBySelfEvent(this.parent.identity.address.toString(), relationshipId));
