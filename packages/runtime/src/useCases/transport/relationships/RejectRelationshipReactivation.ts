@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreId, Relationship, RelationshipsController } from "@nmshd/transport";
+import { AccountController, CoreId, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { RelationshipDTO, RelationshipStatus } from "../../../types";
-import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { RelationshipDTO } from "../../../types";
+import { RelationshipIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface RejectRelationshipReactivationRequest {
@@ -25,23 +25,8 @@ export class RejectRelationshipReactivationUseCase extends UseCase<RejectRelatio
     }
 
     protected async executeInternal(request: RejectRelationshipReactivationRequest): Promise<Result<RelationshipDTO>> {
-        const relationship = await this.relationshipsController.getRelationship(CoreId.from(request.relationshipId));
-        if (!relationship) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
-        }
-
-        if (!relationship.cache) {
-            return Result.fail(RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString()));
-        }
-
-        if (relationship.status !== RelationshipStatus.Terminated) {
-            return Result.fail(RuntimeErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status));
-        }
-
-        const updatedRelationship = await this.relationshipsController.rejectReactivation(relationship.id);
-
+        const updatedRelationship = await this.relationshipsController.rejectReactivation(CoreId.from(request.relationshipId));
         await this.accountController.syncDatawallet();
-
         return Result.ok(RelationshipMapper.toRelationshipDTO(updatedRelationship));
     }
 }
