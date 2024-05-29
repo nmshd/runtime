@@ -11,6 +11,7 @@ import {
     DeleteAttributeRequestItemJSON,
     DisplayNameJSON,
     ErrorResponseItemJSON,
+    FreeTextAcceptResponseItemJSON,
     FreeTextRequestItemJSON,
     GivenNameJSON,
     IdentityAttribute,
@@ -133,6 +134,7 @@ import {
     CreateAttributeAcceptResponseItemDVO,
     DeleteAttributeAcceptResponseItemDVO,
     ErrorResponseItemDVO,
+    FreeTextAcceptResponseItemDVO,
     ProposeAttributeAcceptResponseItemDVO,
     ReadAttributeAcceptResponseItemDVO,
     RegisterAttributeListenerAcceptResponseItemDVO,
@@ -874,6 +876,16 @@ export class DataViewExpander {
                         name: name,
                         attribute: localAttributeDVOForShare
                     } as ShareAttributeAcceptResponseItemDVO;
+
+                case "FreeTextAcceptResponseItem":
+                    const freeTextResponseItem = responseItem as FreeTextAcceptResponseItemJSON;
+
+                    return {
+                        ...freeTextResponseItem,
+                        type: "FreeTextAcceptResponseItemDVO",
+                        id: "",
+                        name: name
+                    } as FreeTextAcceptResponseItemDVO;
 
                 case "RegisterAttributeListenerAcceptResponseItem":
                     const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
