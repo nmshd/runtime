@@ -12,6 +12,7 @@ import {
     LoadItemFromTruncatedReferenceResponse,
     LoadItemFromTruncatedReferenceUseCase,
     RegisterPushNotificationTokenRequest,
+    RegisterPushNotificationTokenResponse,
     RegisterPushNotificationTokenUseCase,
     SyncDatawalletRequest,
     SyncDatawalletUseCase,
@@ -44,7 +45,7 @@ export class AccountFacade {
         return await this.getDeviceInfoUseCase.execute();
     }
 
-    public async registerPushNotificationToken(request: RegisterPushNotificationTokenRequest): Promise<Result<void, ApplicationError>> {
+    public async registerPushNotificationToken(request: RegisterPushNotificationTokenRequest): Promise<Result<RegisterPushNotificationTokenResponse, ApplicationError>> {
         return await this.registerPushNotificationTokenUseCase.execute(request);
     }
 
