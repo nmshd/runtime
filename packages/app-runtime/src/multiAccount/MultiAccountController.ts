@@ -253,4 +253,27 @@ export class MultiAccountController {
 
         await this._localAccounts.update(document, localAccount);
     }
+
+    public async updatePushIdentifierForAccount(address: string, devicePushIdentifier: string): Promise<void> {
+        const document = await this._localAccounts.findOne({ address });
+        if (!document) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAccount, address).logWith(this._log);
+        }
+
+        const localAccount = LocalAccount.from(document);
+        localAccount.devicePushIdentifier = devicePushIdentifier;
+
+        await this._localAccounts.update(document, localAccount);
+    }
+
+    public async getAccountReferenceForDevicePushIdentifier(devicePushIdentifier: string): Promise<string> {
+        const document = await this._localAccounts.findOne({ devicePushIdentifier });
+        if (!document) {
+            // TODO: better error to make sure that the identifier could not be resolved
+            throw TransportCoreErrors.general.recordNotFound(LocalAccount, devicePushIdentifier).logWith(this._log);
+        }
+
+        const localAccount = LocalAccount.from(document);
+        return localAccount.id.toString();
+    }
 }
