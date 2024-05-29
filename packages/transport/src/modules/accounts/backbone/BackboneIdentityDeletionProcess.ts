@@ -5,6 +5,7 @@ export interface BackboneIdentityDeletionProcess {
     status: IdentityDeletionProcessStatus;
     createdAt?: string;
     createdByDevice?: string;
+    approvalPeriodEndsAt?: string;
     rejectedAt?: string;
     rejectedByDevice?: string;
     approvedAt?: string;
