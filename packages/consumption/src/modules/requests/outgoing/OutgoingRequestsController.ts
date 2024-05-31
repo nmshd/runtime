@@ -185,7 +185,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     }
 
     public async deleteRequestsToPeer(peer: CoreAddress): Promise<void> {
-        const requests = await this.getOutgoingRequests({ peer });
+        const requests = await this.getOutgoingRequests({ peer: peer.toString() });
         await Promise.all(requests.map((request) => this.localRequests.delete(request)));
     }
 
