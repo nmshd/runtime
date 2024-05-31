@@ -80,6 +80,7 @@ export class EventProxy {
         this.subscribeToSourceEvent(transport.RelationshipReactivationCompletedEvent, (event) => {
             this.targetEventBus.publish(new RelationshipReactivationCompletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
+
         this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {
             this.targetEventBus.publish(
                 new IdentityDeletionProcessStatusChangedEvent(event.eventTargetAddress, IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(event.data))
