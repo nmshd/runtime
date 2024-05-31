@@ -39,6 +39,8 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 describe("Create Relationship", () => {
+    let relationshipId: string;
+
     test("load relationship Template in connector 2", async () => {
         const template = await createTemplate(services1.transport);
 
@@ -46,7 +48,7 @@ describe("Create Relationship", () => {
         expect(response).toBeSuccessful();
     });
 
-    test("execute relationship creation flow", async () => {
+    test("create pending relationship", async () => {
         const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
@@ -57,37 +59,45 @@ describe("Create Relationship", () => {
 
         const relationships1 = await syncUntilHasRelationships(services1.transport);
         expect(relationships1).toHaveLength(1);
-        const relationshipId = relationships1[0].id;
+        relationshipId = relationships1[0].id;
+    });
 
-        expect(await services2.transport.relationships.acceptRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
-
-        expect(await services2.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
-
-        expect(await services1.transport.relationships.revokeRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
-
-        const acceptRelationshipResponse = await services1.transport.relationships.acceptRelationship({
-            relationshipId
+    describe("tests on pending relationship", () => {
+        test("should not accept relationship sent by yourself", async () => {
+            expect(await services2.transport.relationships.acceptRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
         });
-        expect(acceptRelationshipResponse).toBeSuccessful();
+        test("should not reject relationship sent by yourself", async () => {
+            expect(await services2.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
+        });
+        test("should not revoke relationship sent by yourself", async () => {
+            expect(await services1.transport.relationships.revokeRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
+        });
 
-        const relationships1Response = await services1.transport.relationships.getRelationships({});
-        expect(relationships1Response).toBeSuccessful();
-        expect(relationships1Response.value).toHaveLength(1);
+        test("execute further relationship creation flow", async () => {
+            const acceptRelationshipResponse = await services1.transport.relationships.acceptRelationship({
+                relationshipId
+            });
+            expect(acceptRelationshipResponse).toBeSuccessful();
 
-        const relationships2 = await syncUntilHasRelationships(services2.transport);
-        expect(relationships2).toHaveLength(1);
+            const relationships1Response = await services1.transport.relationships.getRelationships({});
+            expect(relationships1Response).toBeSuccessful();
+            expect(relationships1Response.value).toHaveLength(1);
 
-        const relationships2Response = await services2.transport.relationships.getRelationships({});
-        expect(relationships2Response).toBeSuccessful();
-        expect(relationships2Response.value).toHaveLength(1);
+            const relationships2 = await syncUntilHasRelationships(services2.transport);
+            expect(relationships2).toHaveLength(1);
 
-        const relationship1Response = await services1.transport.relationships.getRelationship({ id: relationshipId });
-        expect(relationship1Response).toBeSuccessful();
-        expect(relationship1Response.value.status).toBe("Active");
+            const relationships2Response = await services2.transport.relationships.getRelationships({});
+            expect(relationships2Response).toBeSuccessful();
+            expect(relationships2Response.value).toHaveLength(1);
 
-        const relationship2Response = await services2.transport.relationships.getRelationship({ id: relationshipId });
-        expect(relationship2Response).toBeSuccessful();
-        expect(relationship2Response.value.status).toBe("Active");
+            const relationship1Response = await services1.transport.relationships.getRelationship({ id: relationshipId });
+            expect(relationship1Response).toBeSuccessful();
+            expect(relationship1Response.value.status).toBe("Active");
+
+            const relationship2Response = await services2.transport.relationships.getRelationship({ id: relationshipId });
+            expect(relationship2Response).toBeSuccessful();
+            expect(relationship2Response.value.status).toBe("Active");
+        });
     });
 });
 
