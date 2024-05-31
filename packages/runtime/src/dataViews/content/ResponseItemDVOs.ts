@@ -33,6 +33,7 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "CreateAttributeAcceptResponseItemDVO"
         | "DeleteAttributeAcceptResponseItemDVO"
         | "ShareAttributeAcceptResponseItemDVO"
+        | "FreeTextAcceptResponseItemDVO"
         | "RegisterAttributeListenerAcceptResponseItemDVO"
         | "AttributeSuccessionAcceptResponseItemDVO"
         | "AttributeAlreadySharedAcceptResponseItemDVO";
@@ -66,6 +67,11 @@ export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemD
     type: "ShareAttributeAcceptResponseItemDVO";
     attributeId: string;
     attribute: LocalAttributeDVO;
+}
+
+export interface FreeTextAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "FreeTextAcceptResponseItemDVO";
+    freeText: string;
 }
 
 export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptResponseItemDVO {
