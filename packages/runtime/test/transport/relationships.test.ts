@@ -598,7 +598,7 @@ describe("RelationshipDecomposition", () => {
 
     let decompositionResult: Result<null, ApplicationError>;
     beforeAll(async () => {
-        relationshipId = (await services1.transport.relationships.getRelationships({})).value[0].id;
+        relationshipId = (await ensureActiveRelationship(services1.transport, services2.transport)).id;
 
         await createRelationshipData(services1, services2);
 
@@ -668,11 +668,11 @@ describe("RelationshipDecomposition", () => {
         const messagesFromPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services2.address } })).value;
         expect(messagesFromPeer).toHaveLength(0);
 
-        const messagesToPeerControl = (await services1.transport.messages.getMessages({ query: { "recipients.address": services3.address } })).value;
-        expect(messagesToPeerControl).not.toHaveLength(0);
+        const messagesToControlPeer = (await services1.transport.messages.getMessages({ query: { "recipients.address": services3.address } })).value;
+        expect(messagesToControlPeer).not.toHaveLength(0);
 
-        const messagesFromPeerControl = (await services1.transport.messages.getMessages({ query: { createdBy: services3.address } })).value;
-        expect(messagesFromPeerControl).not.toHaveLength(0);
+        const messagesFromControlPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services3.address } })).value;
+        expect(messagesFromControlPeer).not.toHaveLength(0);
 
         const addressPseudonym = (await getAddressPseudonym()).toString();
         const anonymizedMessages = (await services1.transport.messages.getMessages({ query: { "recipients.address": addressPseudonym } })).value;
@@ -680,10 +680,12 @@ describe("RelationshipDecomposition", () => {
         const anonymizedMessage = anonymizedMessages[0];
         expect(anonymizedMessage.id).toBe(multipleRecipientsMessageId);
         expect(anonymizedMessage.recipients).toBe([services3.address, addressPseudonym]);
+    });
 
+    test("messages with multiple recipients should be deleted if all its relationships are decomposed", async () => {
         await services1.transport.relationships.decomposeRelationship({ relationshipId: relationshipId2 });
-        const anonymizedMessages2 = (await services1.transport.messages.getMessages({})).value;
-        expect(anonymizedMessages2).toHaveLength(0);
+        const messages = (await services1.transport.messages.getMessages({})).value;
+        expect(messages).toHaveLength(0);
     });
 
     async function getAddressPseudonym() {
@@ -700,11 +702,10 @@ describe("RelationshipDecomposition", () => {
                         mustBeAccepted: false
                     }
                 ]
-            },
-            peer: services2.address
+            }
         };
-        await exchangeMessageWithRequest(services1, services2, requestContent);
-        await exchangeMessageWithRequest(services2, services1, requestContent);
+        await exchangeMessageWithRequest(services1, services2, { ...requestContent, peer: services2.address });
+        await exchangeMessageWithRequest(services2, services1, { ...requestContent, peer: services1.address });
 
         await sendAndReceiveNotification(services1.transport, services2.transport, services2.consumption);
 
