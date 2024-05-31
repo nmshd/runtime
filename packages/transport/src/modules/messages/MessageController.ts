@@ -66,31 +66,17 @@ export class MessageController extends TransportController {
         const messageDoc = await this.messages.read(messageId.toString());
         const message = Message.from(messageDoc);
 
-        message.relationshipIds = message.relationshipIds.filter((id) => id !== relationship.id);
+        message.relationshipIds = message.relationshipIds.filter((id) => !id.equals(relationship.id));
         if (message.relationshipIds.length === 0) {
             await this.messages.delete(message);
             return;
         }
-
-        const messageCache = message.cache;
-        if (!messageCache) {
-            await this.updateCacheOfMessage(message);
-        }
-        if (!messageCache) {
-            throw this.newCacheEmptyError(Message, message.id.toString());
-        }
-
-        messageCache.recipients = messageCache.recipients.filter((recipient) => recipient.address !== relationship.peer.address);
-        messageCache.recipients
-            .push
-            // TODO: add anonymization
-            ();
-        message.setCache(messageCache);
+        await this.updateCacheOfMessage(message);
 
         await this.messages.update(messageDoc, message);
     }
 
-    public async deleteMessagesOfRelationship(relationship: Relationship): Promise<void> {
+    public async decomposeMessagesOfRelationship(relationship: Relationship): Promise<void> {
         const messages = await this.getMessagesByRelationshipId(relationship.id);
         await Promise.all(messages.map((message) => this.deleteRecipientInMessage(message.id, relationship)));
     }
