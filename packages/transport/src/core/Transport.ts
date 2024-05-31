@@ -4,7 +4,7 @@ import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { EventBus } from "@js-soft/ts-utils";
 import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
-import { AgentOptions as HTTPSAgentOptions } from "https";
+import { Agent as HTTPSAgent, AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
 import { Realm } from "../modules/accounts/data/Realm";
 import { CoreErrors } from "./CoreErrors";
@@ -27,8 +27,9 @@ export interface IConfig {
     baseUrl: string;
     realm: Realm;
     datawalletEnabled: boolean;
-    httpAgent: AgentOptions;
-    httpsAgent: HTTPSAgentOptions;
+    httpAgentOptions: AgentOptions;
+    httpsAgentOptions: HTTPSAgentOptions;
+    httpsAgent?: HTTPSAgent;
 }
 
 export interface IConfigOverwrite {
@@ -44,8 +45,9 @@ export interface IConfigOverwrite {
     baseUrl: string;
     realm?: Realm;
     datawalletEnabled?: boolean;
-    httpAgent?: AgentOptions;
-    httpsAgent?: HTTPSAgentOptions;
+    httpAgentOptions?: AgentOptions;
+    httpsAgentOptions?: HTTPSAgentOptions;
+    httpsAgent?: HTTPSAgent;
 }
 
 export class Transport {
@@ -69,12 +71,12 @@ export class Transport {
         baseUrl: "",
         realm: Realm.Prod,
         datawalletEnabled: false,
-        httpAgent: {
+        httpAgentOptions: {
             keepAlive: true,
             maxSockets: 5,
             maxFreeSockets: 2
         },
-        httpsAgent: {
+        httpsAgentOptions: {
             keepAlive: true,
             maxSockets: 5,
             maxFreeSockets: 2

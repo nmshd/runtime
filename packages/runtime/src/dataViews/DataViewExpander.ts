@@ -11,6 +11,7 @@ import {
     DeleteAttributeRequestItemJSON,
     DisplayNameJSON,
     ErrorResponseItemJSON,
+    FreeTextAcceptResponseItemJSON,
     FreeTextRequestItemJSON,
     GivenNameJSON,
     IdentityAttribute,
@@ -133,6 +134,7 @@ import {
     CreateAttributeAcceptResponseItemDVO,
     DeleteAttributeAcceptResponseItemDVO,
     ErrorResponseItemDVO,
+    FreeTextAcceptResponseItemDVO,
     ProposeAttributeAcceptResponseItemDVO,
     ReadAttributeAcceptResponseItemDVO,
     RegisterAttributeListenerAcceptResponseItemDVO,
@@ -875,6 +877,16 @@ export class DataViewExpander {
                         attribute: localAttributeDVOForShare
                     } as ShareAttributeAcceptResponseItemDVO;
 
+                case "FreeTextAcceptResponseItem":
+                    const freeTextResponseItem = responseItem as FreeTextAcceptResponseItemJSON;
+
+                    return {
+                        ...freeTextResponseItem,
+                        type: "FreeTextAcceptResponseItemDVO",
+                        id: "",
+                        name: name
+                    } as FreeTextAcceptResponseItemDVO;
+
                 case "RegisterAttributeListenerAcceptResponseItem":
                     const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
                     const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
@@ -1142,7 +1154,7 @@ export class DataViewExpander {
                     isDraft: false,
                     requestReference: localAttribute.shareInfo.requestReference?.toString(),
                     notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                    tags: identityAttribute.tags ? identityAttribute.tags : [],
+                    tags: identityAttribute.tags,
                     valueType,
                     deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                     deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
@@ -1168,7 +1180,7 @@ export class DataViewExpander {
                 requestReference: localAttribute.shareInfo.requestReference?.toString(),
                 notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                 sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
-                tags: identityAttribute.tags ? identityAttribute.tags : [],
+                tags: identityAttribute.tags,
                 valueType,
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
@@ -1196,7 +1208,7 @@ export class DataViewExpander {
             isOwn: true,
             isDraft: false,
             sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
-            tags: identityAttribute.tags ? identityAttribute.tags : [],
+            tags: identityAttribute.tags,
             valueType
         };
     }
