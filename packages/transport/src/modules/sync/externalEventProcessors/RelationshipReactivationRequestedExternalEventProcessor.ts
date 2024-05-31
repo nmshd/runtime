@@ -1,5 +1,5 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { RelationshipChangedEvent } from "../../../events";
+import { RelationshipReactivationRequestedEvent } from "../../../events";
 import { Relationship } from "../../relationships/local/Relationship";
 import { ExternalEvent } from "../data/ExternalEvent";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
@@ -15,7 +15,7 @@ export class RelationshipReactivationRequestedExternalEventProcessor extends Ext
         const payload = RelationshipReactivationRequestedExternalEventData.fromAny(externalEvent.payload);
         const relationship = await this.accountController.relationships.applyRelationshipChangedEvent(payload.relationshipId);
 
-        this.eventBus.publish(new RelationshipChangedEvent(this.ownAddress, relationship));
+        this.eventBus.publish(new RelationshipReactivationRequestedEvent(this.ownAddress, relationship));
         return relationship;
     }
 }
