@@ -363,6 +363,25 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
     return (await sTransportServices.relationships.getRelationships({})).value[0];
 }
 
+export async function ensurePendingRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<RelationshipDTO> {
+    const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+    const relationships = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress } })).value;
+    if (relationships.length === 0) {
+        const template = await exchangeTemplate(sTransportServices, rTransportServices, {});
+
+        const createRelationshipResponse = await rTransportServices.relationships.createRelationship({
+            templateId: template.id,
+            creationContent: { a: "b" }
+        });
+        expect(createRelationshipResponse).toBeSuccessful();
+
+        const relationships = await syncUntilHasRelationships(sTransportServices);
+        expect(relationships).toHaveLength(1);
+    }
+
+    return (await sTransportServices.relationships.getRelationships({})).value[0];
+}
+
 export async function exchangeAndAcceptRequestByMessage(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,

@@ -7,7 +7,7 @@ import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { TransportIds } from "../../core/TransportIds";
-import { RelationshipChangedEvent, RelationshipDeletedBySelfEvent } from "../../events";
+import { RelationshipChangedEvent, RelationshipDeletedBySelfEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
@@ -559,9 +559,22 @@ export class RelationshipsController extends TransportController {
         relationship.cache.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneResponse.auditLog);
 
         await this.relationships.update(relationshipDoc, relationship);
-
-        this.eventBus.publish(new RelationshipChangedEvent(this.parent.identity.address.toString(), relationship));
-
+        this.publishEventAfterCompletedOperation(operation, relationship);
         return relationship;
+    }
+
+    private publishEventAfterCompletedOperation(operation: RelationshipAuditLogEntryReason, relationship: Relationship) {
+        switch (operation) {
+            case RelationshipAuditLogEntryReason.ReactivationRequested:
+                this.eventBus.publish(new RelationshipReactivationRequestedEvent(this.parent.identity.address.toString(), relationship));
+                break;
+            case RelationshipAuditLogEntryReason.RevocationOfReactivation:
+            case RelationshipAuditLogEntryReason.AcceptanceOfReactivation:
+            case RelationshipAuditLogEntryReason.RejectionOfReactivation:
+                this.eventBus.publish(new RelationshipReactivationCompletedEvent(this.parent.identity.address.toString(), relationship));
+                break;
+            default:
+                this.eventBus.publish(new RelationshipChangedEvent(this.parent.identity.address.toString(), relationship));
+        }
     }
 }
