@@ -2,6 +2,7 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
+import { RelationshipDecomposedBySelfEvent } from "src/events/transport/RelationshipDecomposedBySelfEvent";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
@@ -630,11 +631,17 @@ describe("RelationshipDecomposition", () => {
 
     test("relationship should be decomposed", async () => {
         expect(decompositionResult).toBeSuccessful();
+        await expect(services1.eventBus).toHavePublished(RelationshipDecomposedBySelfEvent, (e) => e.data === relationshipId);
+
         const ownRelationship = await services1.transport.relationships.getRelationship({ id: relationshipId });
         expect(ownRelationship).toBeAnError(/.*/, "error.runtime.recordNotFound");
 
         const peerRelationship = (await syncUntilHasRelationships(services2.transport))[0];
         expect(peerRelationship.status).toBe(RelationshipStatus.DeletionProposed);
+        await expect(services2.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Decomposition
+        );
     });
 
     test("requests should be deleted", async () => {

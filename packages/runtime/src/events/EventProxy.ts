@@ -31,6 +31,7 @@ import {
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent
 } from "./transport";
+import { RelationshipDecomposedBySelfEvent } from "./transport/RelationshipDecomposedBySelfEvent";
 
 export class EventProxy {
     private readonly subscriptionIds: number[] = [];
@@ -80,6 +81,11 @@ export class EventProxy {
         this.subscribeToSourceEvent(transport.RelationshipReactivationCompletedEvent, (event) => {
             this.targetEventBus.publish(new RelationshipReactivationCompletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
+
+        this.subscribeToSourceEvent(transport.RelationshipDecomposedBySelfEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipDecomposedBySelfEvent(event.eventTargetAddress, event.data.toString()));
+        });
+
         this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {
             this.targetEventBus.publish(
                 new IdentityDeletionProcessStatusChangedEvent(event.eventTargetAddress, IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(event.data))

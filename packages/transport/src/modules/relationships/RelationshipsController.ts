@@ -7,7 +7,7 @@ import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { TransportIds } from "../../core/TransportIds";
-import { RelationshipChangedEvent, RelationshipDeletedBySelfEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
+import { RelationshipChangedEvent, RelationshipDecomposedBySelfEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
@@ -303,7 +303,7 @@ export class RelationshipsController extends TransportController {
         }
         await this.relationships.delete({ id: relationshipId });
 
-        this.eventBus.publish(new RelationshipDeletedBySelfEvent(this.parent.identity.address.toString(), relationshipId));
+        this.eventBus.publish(new RelationshipDecomposedBySelfEvent(this.parent.identity.address.toString(), relationshipId));
     }
 
     private async getRelationshipWithCache(id: CoreId): Promise<Relationship & { cache: CachedRelationship }> {
