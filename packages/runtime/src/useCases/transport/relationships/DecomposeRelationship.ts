@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { IncomingRequestsController, NotificationsController, OutgoingRequestsController } from "@nmshd/consumption";
+import { AttributesController, IncomingRequestsController, NotificationsController, OutgoingRequestsController } from "@nmshd/consumption";
 import { AccountController, CoreId, MessageController, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -21,6 +21,7 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
         @Inject private readonly outgoingRequestsController: OutgoingRequestsController,
         @Inject private readonly messageController: MessageController,
         @Inject private readonly notificationsController: NotificationsController,
+        @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
@@ -38,11 +39,13 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
         }
         const peer = relationship.peer;
 
+        // backbone call first so nothing is deleted in case it goes wrong
         await this.relationshipsController.decompose(relationship.id);
-        await this.messageController.deleteMessagesOfRelationship(relationship);
+        await this.messageController.decomposeMessagesOfRelationship(relationship);
         await this.incomingRequestsController.deleteRequestsFromPeer(peer.address);
         await this.outgoingRequestsController.deleteRequestsToPeer(peer.address);
         await this.notificationsController.deleteNotificationsWithPeer(peer.address);
+        await this.attributesController.deleteAttributesSharedWithPeer(peer.address);
 
         await this.accountController.syncDatawallet();
 
