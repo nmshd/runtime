@@ -128,7 +128,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     private async _setDeletionInfo(content: Request) {
         const requestItemsFromRequest = content.items.filter((item) => item instanceof RequestItem) as RequestItem[];
         const requestItemGroupsFromRequest = content.items.filter((item) => item instanceof RequestItemGroup) as RequestItemGroup[];
-        const requestItemsFromGroups = requestItemGroupsFromRequest.map((group) => group.items);
+        const requestItemsFromGroups = requestItemGroupsFromRequest.map((group) => group.items).flat();
         const requestItems = [...requestItemsFromRequest, ...requestItemsFromGroups];
         const deleteAttributeRequestItems = requestItems.filter((item) => item instanceof DeleteAttributeRequestItem) as DeleteAttributeRequestItem[];
         if (deleteAttributeRequestItems.length === 0) return;
