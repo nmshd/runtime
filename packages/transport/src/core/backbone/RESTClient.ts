@@ -82,8 +82,8 @@ export class RESTClient {
             defaults.headers = _.defaultsDeep({}, defaults.headers, this.config.platformAdditionalHeaders);
         }
 
-        if (typeof window === "undefined" && process.env.HTTPS_PROXY) {
-            const httpsProxy = process.env.HTTPS_PROXY;
+        if (typeof window === "undefined" && process.env.https_proxy) {
+            const httpsProxy = process.env.https_proxy;
             defaults.httpsAgent = new HttpsProxyAgent(httpsProxy, this.config.httpsAgentOptions);
         } else {
             try {
