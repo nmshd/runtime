@@ -1,6 +1,5 @@
 import { AcceptResponseItem, DeleteAttributeAcceptResponseItem, DeleteAttributeRequestItem, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/transport";
-import { ConsumptionError } from "../../../../consumption/ConsumptionError";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { DeletionStatus, LocalAttributeDeletionInfo } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
@@ -99,33 +98,33 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (attribute.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer) return;
 
-        let deletionInfo;
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+
         if (responseItem instanceof DeleteAttributeAcceptResponseItem) {
-            deletionInfo = LocalAttributeDeletionInfo.from({
+            const deletionInfo = LocalAttributeDeletionInfo.from({
                 deletionStatus: DeletionStatus.ToBeDeletedByPeer,
                 deletionDate: responseItem.deletionDate
             });
+
+            for (const attr of [attribute, ...predecessors]) {
+                if (attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                    attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+                    await this.consumptionController.attributes.updateAttributeUnsafe(attr);
+                }
+            }
         }
 
         if (responseItem instanceof RejectResponseItem) {
-            deletionInfo = LocalAttributeDeletionInfo.from({
+            const deletionInfo = LocalAttributeDeletionInfo.from({
                 deletionStatus: DeletionStatus.DeletionRequestRejected,
                 deletionDate: CoreDate.utc()
             });
-        }
 
-        if (!deletionInfo) {
-            throw new ConsumptionError(
-                "No deletionInfo was configured, even though the ResponseItem must either be a DeleteAttributeAcceptResponseItem or RejectResponseItem and both should lead to configuring a deletionInfo."
-            );
-        }
-
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
-
-        for (const attr of [attribute, ...predecessors]) {
-            if (attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
-                attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-                await this.consumptionController.attributes.updateAttributeUnsafe(attr);
+            for (const attr of [attribute, ...predecessors]) {
+                if (attr.deletionInfo?.deletionStatus !== DeletionStatus.ToBeDeletedByPeer && attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                    attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+                    await this.consumptionController.attributes.updateAttributeUnsafe(attr);
+                }
             }
         }
     }
