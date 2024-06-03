@@ -3,7 +3,8 @@ import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
 import { AgentOptions } from "http";
-import { Agent as HTTPSAgent, AgentOptions as HTTPSAgentOptions } from "https";
+import { AgentOptions as HTTPSAgentOptions } from "https";
+import { HttpsProxyAgent } from "https-proxy-agent";
 import _ from "lodash";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
 import { CoreId } from "../types";
@@ -41,7 +42,6 @@ export interface IRESTClientConfig {
     platformAdditionalHeaders?: Record<string, string>;
     httpAgentOptions: AgentOptions;
     httpsAgentOptions: HTTPSAgentOptions;
-    httpsAgent?: HTTPSAgent;
     debug: boolean;
     baseUrl: string;
 }
@@ -82,8 +82,9 @@ export class RESTClient {
             defaults.headers = _.defaultsDeep({}, defaults.headers, this.config.platformAdditionalHeaders);
         }
 
-        if (config.httpsAgent) {
-            defaults.httpsAgent = config.httpsAgent;
+        if (typeof window === "undefined" && process.env.HTTPS_PROXY) {
+            const httpsProxy = process.env.HTTPS_PROXY;
+            defaults.httpsAgent = new HttpsProxyAgent(httpsProxy, this.config.httpsAgentOptions);
         } else {
             try {
                 // eslint-disable-next-line @typescript-eslint/no-require-imports
