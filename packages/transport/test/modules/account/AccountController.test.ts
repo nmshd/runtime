@@ -7,7 +7,7 @@ describe("AccountController", function () {
 
     let transport: Transport;
 
-    let account: AccountController;
+    let account: AccountController | undefined;
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
@@ -20,13 +20,13 @@ describe("AccountController", function () {
     });
 
     afterAll(async function () {
-        await account.close();
+        await account?.close();
 
         await connection.close();
     });
 
     // eslint-disable-next-line jest/expect-expect
     test("should init a second time", async function () {
-        await account.init();
+        await account!.init();
     });
 });
