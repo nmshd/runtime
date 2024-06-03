@@ -121,8 +121,8 @@ export class RESTClient {
 
     private addAxiosLoggingInterceptors(axiosInstance: AxiosInstance) {
         axiosInstance.interceptors.request.use((config) => {
-            const requestAsAny = config;
-            requestAsAny.meta = config.meta || {};
+            const requestAsAny = config as any;
+            requestAsAny.meta = (config as any).meta || {};
             requestAsAny.meta.startTime = new Date().getTime();
             return config;
         });
