@@ -58,12 +58,12 @@ export class MessageMapper {
         return messages.map((message) => this.toMessageDTO(message));
     }
 
-    private static toRecipient(recipient: MessageEnvelopeRecipient, relationshipId: CoreId): RecipientDTO {
+    private static toRecipient(recipient: MessageEnvelopeRecipient, relationshipId?: CoreId): RecipientDTO {
         return {
             address: recipient.address.toString(),
             receivedAt: recipient.receivedAt?.toString(),
             receivedByDevice: recipient.receivedByDevice?.toString(),
-            relationshipId: relationshipId.toString()
+            relationshipId: relationshipId?.toString()
         };
     }
 }
