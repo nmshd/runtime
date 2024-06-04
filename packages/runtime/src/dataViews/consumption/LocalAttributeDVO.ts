@@ -74,6 +74,7 @@ export interface OwnRelationshipAttributeDVO extends LocalAttributeDVO {
     peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
     requestReference?: string;
     notificationReference?: string;
+    sourceAttribute?: string;
     isOwn: true;
     confidentiality: string;
     isTechnical: boolean;
@@ -90,6 +91,7 @@ export interface PeerRelationshipAttributeDVO extends LocalAttributeDVO {
     peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
     requestReference?: string;
     notificationReference?: string;
+    sourceAttribute?: string;
     isOwn: false;
     confidentiality: string;
     isTechnical: boolean;

@@ -1076,7 +1076,7 @@ export class DataViewExpander {
                     description = value.description;
                 }
 
-                // Peer Relationship Attribute
+                // Peer shared RelationshipAttribute
                 if (relationshipAttribute.owner.toString() === peer) {
                     return {
                         type: "PeerRelationshipAttributeDVO",
@@ -1098,13 +1098,14 @@ export class DataViewExpander {
                         isDraft: false,
                         requestReference: localAttribute.shareInfo.requestReference?.toString(),
                         notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
+                        sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
                         valueType,
                         isTechnical: relationshipAttribute.isTechnical,
                         deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                         deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                     };
                 }
-                // Own Relationship Attribute
+                // Own shared RelationshipAttribute
                 return {
                     type: "OwnRelationshipAttributeDVO",
                     id: attribute.id,
@@ -1125,6 +1126,7 @@ export class DataViewExpander {
                     isDraft: false,
                     requestReference: localAttribute.shareInfo.requestReference?.toString(),
                     notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
+                    sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
                     valueType,
                     isTechnical: relationshipAttribute.isTechnical,
                     deletionStatus: localAttribute.deletionInfo?.deletionStatus,
@@ -1134,7 +1136,7 @@ export class DataViewExpander {
             const identityAttribute = localAttribute.content;
 
             if (identityAttribute.owner.toString() === peer) {
-                // Peer Attribute
+                // Peer shared IdentityAttribute
                 return {
                     type: "PeerAttributeDVO",
                     id: attribute.id,
@@ -1159,7 +1161,7 @@ export class DataViewExpander {
                     deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
                 };
             }
-            // Own Shared Attribute
+            // Own Shared IdentityAttribute
             return {
                 type: "SharedToPeerAttributeDVO",
                 id: attribute.id,
@@ -1190,7 +1192,7 @@ export class DataViewExpander {
         const sharedToPeerAttributes = await this.consumption.attributes.getAttributes({ query: { "shareInfo.sourceAttribute": attribute.id } });
         const sharedToPeerDVOs = await this.expandLocalAttributeDTOs(sharedToPeerAttributes.value);
 
-        // Own Source Attribute
+        // RepositoryAttribute
         return {
             type: "RepositoryAttributeDVO",
             id: attribute.id,

@@ -3,8 +3,8 @@ import qs from "qs";
 import { CoreDate } from "../types";
 import { ClientResult } from "./ClientResult";
 import { PlatformParameters } from "./PlatformParameters";
-import { RESTClient } from "./RESTClient";
 import { RequestError } from "./RequestError";
+import { RESTClient } from "./RESTClient";
 
 export interface IAuthenticationRequest {
     grantType: string;
@@ -25,7 +25,7 @@ export class AuthClient extends RESTClient {
 
         let response;
         try {
-            response = await this.createAxios().post<string, AxiosResponse<any>>(
+            response = await this.axiosInstance.post<string, AxiosResponse<any>>(
                 path,
                 qs.stringify({
                     client_id: params.clientId, // eslint-disable-line @typescript-eslint/naming-convention
