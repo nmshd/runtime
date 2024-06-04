@@ -43,7 +43,7 @@ export class RelationshipAttribute<TValueClass extends AttributeValues.Relations
     public confidentiality: RelationshipAttributeConfidentiality;
 
     protected static override preFrom(value: any): any {
-        if (typeof value.isTechnical === "undefined") value.isTechnical = false;
+        if (value.isTechnical === undefined) value.isTechnical = false;
 
         return value;
     }

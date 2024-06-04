@@ -17268,6 +17268,43 @@ export const GetRepositoryAttributesRequest: any = {
     }
 }
 
+export const GetSharedVersionsOfAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetSharedVersionsOfAttributeRequest",
+    "definitions": {
+        "GetSharedVersionsOfAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                },
+                "peers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AddressString"
+                    }
+                },
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "id1[A-Za-z0-9]{32,33}"
+        }
+    }
+}
+
 export const GetSharedVersionsOfRepositoryAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetSharedVersionsOfRepositoryAttributeRequest",

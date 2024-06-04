@@ -60,9 +60,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         const transformedContent = Serializable.fromUnknown(content);
         if (!(transformedContent instanceof Request)) return;
 
-        if (typeof transformedContent.id === "undefined") {
-            return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
-        }
+        if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
         const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
         if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);

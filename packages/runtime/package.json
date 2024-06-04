@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/runtime",
-    "version": "4.7.1",
+    "version": "4.10.6",
     "description": "The enmeshed client runtime.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -56,10 +56,10 @@
         "@js-soft/logging-abstractions": "^1.0.1",
         "@js-soft/ts-serval": "2.0.10",
         "@js-soft/ts-utils": "^2.3.3",
-        "@nmshd/consumption": "3.10.0",
-        "@nmshd/content": "2.9.1",
+        "@nmshd/consumption": "3.11.0",
+        "@nmshd/content": "2.10.1",
         "@nmshd/crypto": "2.0.6",
-        "@nmshd/transport": "2.6.0",
+        "@nmshd/transport": "2.7.5",
         "ajv": "^8.13.0",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
@@ -76,10 +76,10 @@
         "@js-soft/docdb-access-mongo": "1.1.8",
         "@js-soft/node-logger": "1.1.1",
         "@types/json-stringify-safe": "^5.0.3",
-        "@types/lodash": "^4.17.1",
+        "@types/lodash": "^4.17.4",
         "@types/luxon": "^3.4.2",
         "@types/qrcode": "^1.5.5",
-        "ts-json-schema-generator": "^2.1.1"
+        "ts-json-schema-generator": "2.1.1"
     },
     "publishConfig": {
         "access": "public",

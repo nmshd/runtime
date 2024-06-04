@@ -28,6 +28,7 @@ import {
     GetOwnSharedAttributesUseCase,
     GetPeerSharedAttributesUseCase,
     GetRepositoryAttributesUseCase,
+    GetSharedVersionsOfAttributeUseCase,
     GetSharedVersionsOfRepositoryAttributeUseCase,
     GetVersionsOfAttributeUseCase,
     LocalAttributeDTO,
@@ -503,9 +504,7 @@ describe("get repository, own shared and peer shared attributes", () => {
                 const attribute = (await services2.consumption.attributes.getAttribute({ id: attributeId })).value;
                 allReceivedAttributes.push(attribute);
 
-                if (typeof attribute.succeededBy === "undefined") {
-                    onlyLatestReceivedAttributes.push(attribute);
-                }
+                if (!attribute.succeededBy) onlyLatestReceivedAttributes.push(attribute);
 
                 if (attribute.content["@type"] === "IdentityAttribute" || !attribute.content.isTechnical) {
                     notTechnicalReceivedAttributes.push(attribute);
@@ -1367,6 +1366,120 @@ describe("Get (shared) versions of attribute", () => {
         });
     });
 
+    describe(GetSharedVersionsOfAttributeUseCase.name, () => {
+        beforeAll(async () => {
+            await setUpIdentityAttributeVersions();
+        });
+        test("should get only latest shared version per peer of a repository attribute", async () => {
+            for (const version of sRAVersions) {
+                const result1 = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: version.id });
+                expect(result1.isSuccess).toBe(true);
+                const returnedVersions1 = result1.value;
+                expect(returnedVersions1).toStrictEqual(expect.arrayContaining([sOSIAVersion2, sOSIAVersion2FurtherPeer]));
+
+                const result2 = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: version.id, onlyLatestVersions: true });
+                expect(result2.isSuccess).toBe(true);
+                const returnedVersions2 = result2.value;
+                expect(returnedVersions2).toStrictEqual(expect.arrayContaining([sOSIAVersion2, sOSIAVersion2FurtherPeer]));
+            }
+        });
+
+        test("should get all shared versions of a repository attribute", async () => {
+            for (const version of sRAVersions) {
+                const result = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: version.id, onlyLatestVersions: false });
+                expect(result.isSuccess).toBe(true);
+
+                const returnedVersions = result.value;
+                expect(returnedVersions).toStrictEqual(expect.arrayContaining([sOSIAVersion2, sOSIAVersion2FurtherPeer, sOSIAVersion0]));
+            }
+        });
+
+        test("should get only latest shared version of a repository attribute for a specific peer", async () => {
+            for (const version of sRAVersions) {
+                const result1 = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: version.id, peers: [services2.address] });
+                expect(result1.isSuccess).toBe(true);
+                const returnedVersions1 = result1.value;
+                expect(returnedVersions1).toStrictEqual([sOSIAVersion2]);
+
+                const result2 = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: version.id, peers: [services3.address] });
+                expect(result2.isSuccess).toBe(true);
+                const returnedVersions2 = result2.value;
+                expect(returnedVersions2).toStrictEqual([sOSIAVersion2FurtherPeer]);
+            }
+        });
+
+        test("should get all shared versions of a repository attribute for a specific peer", async () => {
+            for (const version of sRAVersions) {
+                const result1 = await services1.consumption.attributes.getSharedVersionsOfAttribute({
+                    attributeId: version.id,
+                    peers: [services2.address],
+                    onlyLatestVersions: false
+                });
+                expect(result1.isSuccess).toBe(true);
+                const returnedVersions1 = result1.value;
+                expect(returnedVersions1).toStrictEqual([sOSIAVersion2, sOSIAVersion0]);
+
+                const result2 = await services1.consumption.attributes.getSharedVersionsOfAttribute({
+                    attributeId: version.id,
+                    peers: [services3.address],
+                    onlyLatestVersions: false
+                });
+                expect(result2.isSuccess).toBe(true);
+                const returnedVersions2 = result2.value;
+                expect(returnedVersions2).toStrictEqual([sOSIAVersion2FurtherPeer]);
+            }
+        });
+
+        test("should return all shared third party relationship attributes of a source relationship attribute", async () => {
+            await createAndShareRelationshipAttributeVersion0();
+            const requestParams = {
+                peer: services1.address,
+                content: {
+                    items: [
+                        ReadAttributeRequestItem.from({
+                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "a key", owner: services1.address, thirdParty: [services2.address] }),
+                            mustBeAccepted: true
+                        }).toJSON()
+                    ]
+                }
+            };
+            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+                services1,
+                services3,
+                requestParams,
+                sOSRAVersion0.id
+            );
+
+            const result = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: sOSRAVersion0.id });
+            expect(result.isSuccess).toBe(true);
+            const returnedVersions = result.value;
+            expect(returnedVersions).toStrictEqual([ownSharedThirdPartyRelationshipAttribute]);
+        });
+
+        test("should return an empty list if a relationship attribute without associated third party relationship attributes is queried", async () => {
+            await createAndShareRelationshipAttributeVersion0();
+            const result = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: sOSRAVersion0.id });
+            expect(result.isSuccess).toBe(true);
+            const returnedVersions = result.value;
+            expect(returnedVersions).toStrictEqual([]);
+        });
+
+        test("should return an empty list calling getSharedVersionsOfAttribute with a nonexistent peer", async () => {
+            const result = await services1.consumption.attributes.getSharedVersionsOfAttribute({
+                attributeId: sRAVersion2.id,
+                peers: ["id1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"]
+            });
+            expect(result.isSuccess).toBe(true);
+            const returnedVersions = result.value;
+            expect(returnedVersions).toStrictEqual([]);
+        });
+
+        test("should throw trying to call getSharedVersionsOfAttribute with a nonexistent attributeId", async () => {
+            const result2 = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: "ATTxxxxxxxxxxxxxxxxx" });
+            expect(result2).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+    });
+
     describe(GetSharedVersionsOfRepositoryAttributeUseCase.name, () => {
         beforeAll(async () => {
             await setUpIdentityAttributeVersions();
@@ -1579,10 +1692,10 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "ProprietaryString",
-                        value: "My amazing string",
-                        title: "Nothing is this amazing"
+                        value: "a value",
+                        title: "a title"
                     },
-                    key: "amazing",
+                    key: "a key",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             });
@@ -1592,7 +1705,7 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     items: [
                         ReadAttributeRequestItem.from({
-                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "amazing", owner: services1.address, thirdParty: [services3.address] }),
+                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "a key", owner: services1.address, thirdParty: [services3.address] }),
                             mustBeAccepted: true
                         }).toJSON()
                     ]
@@ -1683,10 +1796,10 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "ProprietaryString",
-                        value: "My amazing string",
-                        title: "Nothing is this amazing"
+                        value: "a value",
+                        title: "a title"
                     },
-                    key: "amazing",
+                    key: "a key",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             });
@@ -1696,7 +1809,7 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     items: [
                         ReadAttributeRequestItem.from({
-                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "amazing", owner: services3.address, thirdParty: [services3.address] }),
+                            query: ThirdPartyRelationshipAttributeQuery.from({ key: "a key", owner: services3.address, thirdParty: [services3.address] }),
                             mustBeAccepted: true
                         }).toJSON()
                     ]

@@ -34,11 +34,11 @@ export class AcceptProposeAttributeRequestItemParameters extends Serializable {
     public attribute?: IdentityAttribute | RelationshipAttribute;
 
     public isWithExistingAttribute(): this is { attributeId: CoreId } {
-        return typeof this.attributeId !== "undefined";
+        return !!this.attributeId;
     }
 
     public isWithNewAttribute(): this is { attribute: IdentityAttribute | RelationshipAttribute } {
-        return typeof this.attribute !== "undefined";
+        return !!this.attribute;
     }
 
     public static from(value: AcceptProposeAttributeRequestItemParametersJSON): AcceptProposeAttributeRequestItemParameters {

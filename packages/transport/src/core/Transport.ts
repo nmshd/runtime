@@ -8,13 +8,13 @@ import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
 import { Realm } from "../modules/accounts/data/Realm";
 import { CoreErrors } from "./CoreErrors";
-import { TransportContext } from "./TransportContext";
 import { TransportError } from "./TransportError";
 import { TransportLoggerFactory } from "./TransportLoggerFactory";
 
 let log: ILogger;
 
 export interface IConfig {
+    allowIdentityCreation: boolean;
     supportedDatawalletVersion: number;
     supportedIdentityVersion: number;
     debug: boolean;
@@ -27,11 +27,12 @@ export interface IConfig {
     baseUrl: string;
     realm: Realm;
     datawalletEnabled: boolean;
-    httpAgent: AgentOptions;
-    httpsAgent: HTTPSAgentOptions;
+    httpAgentOptions: AgentOptions;
+    httpsAgentOptions: HTTPSAgentOptions;
 }
 
 export interface IConfigOverwrite {
+    allowIdentityCreation?: boolean;
     debug?: boolean;
     platformClientId: string;
     platformClientSecret: string;
@@ -43,8 +44,8 @@ export interface IConfigOverwrite {
     baseUrl: string;
     realm?: Realm;
     datawalletEnabled?: boolean;
-    httpAgent?: AgentOptions;
-    httpsAgent?: HTTPSAgentOptions;
+    httpAgentOptions?: AgentOptions;
+    httpsAgentOptions?: HTTPSAgentOptions;
 }
 
 export class Transport {
@@ -56,6 +57,7 @@ export class Transport {
     }
 
     private static readonly defaultConfig: IConfig = {
+        allowIdentityCreation: true,
         supportedDatawalletVersion: 1,
         supportedIdentityVersion: -1,
         debug: false,
@@ -67,14 +69,12 @@ export class Transport {
         baseUrl: "",
         realm: Realm.Prod,
         datawalletEnabled: false,
-        httpAgent: {
+        httpAgentOptions: {
             keepAlive: true,
-            maxSockets: 5,
             maxFreeSockets: 2
         },
-        httpsAgent: {
+        httpsAgentOptions: {
             keepAlive: true,
-            maxSockets: 5,
             maxFreeSockets: 2
         }
     };
@@ -128,9 +128,5 @@ export class Transport {
 
     public async createDatabase(name: string): Promise<IDatabaseCollectionProvider> {
         return await this.databaseConnection.getDatabase(name);
-    }
-
-    public static get context(): TransportContext {
-        return TransportContext.currentContext();
     }
 }

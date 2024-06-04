@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/consumption",
-    "version": "3.10.0",
+    "version": "3.11.0",
     "description": "The consumption library extends the transport library.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -63,7 +63,7 @@
         "@js-soft/ts-utils": "2.3.3",
         "@js-soft/web-logger": "^1.0.4",
         "@nmshd/crypto": "2.0.6",
-        "@types/lodash": "^4.17.1",
+        "@types/lodash": "^4.17.4",
         "@types/luxon": "^3.4.2",
         "leaked-handles": "^5.2.0"
     },
