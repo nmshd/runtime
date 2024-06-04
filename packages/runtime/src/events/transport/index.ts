@@ -5,3 +5,5 @@ export * from "./MessageSentEvent";
 export * from "./MessageWasReadAtChangedEvent";
 export * from "./PeerRelationshipTemplateLoadedEvent";
 export * from "./RelationshipChangedEvent";
+export * from "./RelationshipReactivationCompletedEvent";
+export * from "./RelationshipReactivationRequestedEvent";

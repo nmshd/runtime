@@ -26,6 +26,22 @@ export class RelationshipClient extends RESTClientAuthenticate {
         return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Terminate`, {});
     }
 
+    public async reactivateRelationship(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reactivate`, {});
+    }
+
+    public async acceptRelationshipReactivation(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reactivate/Accept`, {});
+    }
+
+    public async rejectRelationshipReactivation(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reactivate/Reject`, {});
+    }
+
+    public async revokeRelationshipReactivation(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reactivate/Revoke`, {});
+    }
+
     public async getRelationships(request?: BackboneGetRelationshipsRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipResponse>>> {
         return await this.getPaged<BackboneGetRelationshipResponse>("/api/v1/Relationships", request);
     }
