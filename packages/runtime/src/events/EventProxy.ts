@@ -27,7 +27,9 @@ import {
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
     PeerRelationshipTemplateLoadedEvent,
-    RelationshipChangedEvent
+    RelationshipChangedEvent,
+    RelationshipReactivationCompletedEvent,
+    RelationshipReactivationRequestedEvent
 } from "./transport";
 
 export class EventProxy {
@@ -69,6 +71,14 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(transport.RelationshipChangedEvent, (event) => {
             this.targetEventBus.publish(new RelationshipChangedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipReactivationRequestedEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipReactivationRequestedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipReactivationCompletedEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipReactivationCompletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {
