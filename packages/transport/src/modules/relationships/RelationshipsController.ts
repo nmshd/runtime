@@ -550,6 +550,7 @@ export class RelationshipsController extends TransportController {
     }
 
     private publishEventAfterCompletedOperation(operation: RelationshipAuditLogEntryReason, relationship: Relationship) {
+        this.eventBus.publish(new RelationshipChangedEvent(this.parent.identity.address.toString(), relationship));
         switch (operation) {
             case RelationshipAuditLogEntryReason.ReactivationRequested:
                 this.eventBus.publish(new RelationshipReactivationRequestedEvent(this.parent.identity.address.toString(), relationship));
@@ -560,7 +561,6 @@ export class RelationshipsController extends TransportController {
                 this.eventBus.publish(new RelationshipReactivationCompletedEvent(this.parent.identity.address.toString(), relationship));
                 break;
             default:
-                this.eventBus.publish(new RelationshipChangedEvent(this.parent.identity.address.toString(), relationship));
         }
     }
 }
