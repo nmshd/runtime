@@ -23,7 +23,7 @@ describe("Test invalid EMailAdresses", () => {
             new ParsingError(
                 "EMailAddress",
                 "value",
-                "Value does not match regular expression /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9ÄäÖöÜüß](?:[A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß])?[.])+[A-Za-z0-9ÄäÖöÜüß](?:[A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß])$/"
+                "Value does not match regular expression /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(\\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@([A-Za-z0-9ÄäÖöÜüß]([A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß])?\\.)+[A-Za-z0-9ÄäÖöÜüß][A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß]$/"
             )
         );
     });

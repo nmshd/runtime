@@ -6,7 +6,6 @@ describe("Test valid URLs", () => {
         "www.google.com",
         "https://döner.cooking",
         "http://inwind.it",
-        "//google.it",
         "https://enmeshed.de/blog/meilenstein-enmeshed-als-komponente-ablage-in-mein-bildungsraum-geht-in-die-testphase-der-beta-version/",
         "www.foo.www.www.enmeshed.eu",
         "https://example.org:8080/mein/ordner/bericht"
@@ -31,7 +30,7 @@ describe("Test invalid URLs", () => {
             new ParsingError(
                 "Website",
                 "value",
-                "Value does not match regular expression /^([A-Za-z]{3,9}[:]([/][/])?|[:]([/][/])?|([/][/]))?((www[.])([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?[.])+|((?!www[.])([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?[.]))([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?[.])*)[A-Za-zÄäÖöÜüß0-9]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])([:][0-9]+)*([/][A-Za-zÄäÖöÜüß0-9?#@!$&'()*+,;=%-]*)*$/"
+                "Value does not match regular expression /^([A-Za-z]+:\\/\\/)?(www\\.([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?\\.)+|((?!www[.])([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?[.]))([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?\\.)*)[A-Za-zÄäÖöÜüß0-9]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])([:][0-9]+)*(\\/[A-Za-zÄäÖöÜüß0-9?#@!$&'()*+,;=%-]*)*$/"
             )
         );
     });

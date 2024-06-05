@@ -4,14 +4,14 @@ import { AbstractString } from "../AbstractString";
 
 export abstract class AbstractEMailAddress extends AbstractString {
     // from https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
-
+    private static regExp = new RegExp(
+        /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@([A-Za-z0-9ÄäÖöÜüß]([A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß])?\.)+[A-Za-z0-9ÄäÖöÜüß][A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß]$/
+    );
     @serialize()
     @validate({
         min: 3,
         max: 254,
-        regExp: new RegExp(
-            /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9ÄäÖöÜüß](?:[A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß])?[.])+[A-Za-z0-9ÄäÖöÜüß](?:[A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß])$/
-        )
+        regExp: AbstractEMailAddress.regExp
     })
     public override value: string;
 
