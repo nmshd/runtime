@@ -213,11 +213,6 @@ describe("OutgoingRequestsController", function () {
             await Then.eventHasBeenPublished(OutgoingRequestCreatedEvent);
         });
 
-        test("sets deletionInfo in case of DeleteAttributeRequestItems", async function () {
-            await When.iCreateAnOutgoingRequestWithDeleteAttributeRequestItems();
-            await Then.theDeletionInfoOfTheAssociatedAttributesIsSet();
-        });
-
         test("throws on syntactically invalid input", async function () {
             await When.iTryToCreateAnOutgoingRequestWithoutContent();
             await Then.itThrowsAnErrorWithTheErrorMessage("*content*Value is not defined*");
@@ -374,6 +369,11 @@ describe("OutgoingRequestsController", function () {
             await Given.anOutgoingRequestInStatus(LocalRequestStatus.Draft);
             await When.iTryToCallSentWith({ requestSourceObject: invalidSource });
             await Then.itThrowsAnErrorWithTheErrorMessage("Cannot create outgoing Request from a peer*");
+        });
+
+        test("sets deletionInfo in case of DeleteAttributeRequestItems", async function () {
+            await When.iSentAnOutgoingRequestWithDeleteAttributeRequestItems();
+            await Then.theDeletionInfoOfTheAssociatedAttributesAndPredecessorsIsSet();
         });
     });
 

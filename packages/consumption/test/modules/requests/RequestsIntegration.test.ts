@@ -649,7 +649,7 @@ export class RequestsWhen {
         );
     }
 
-    public async iCreateAnOutgoingRequestWithDeleteAttributeRequestItems(): Promise<void> {
+    public async iSentAnOutgoingRequestWithDeleteAttributeRequestItems(): Promise<void> {
         const sOwnSharedIdentityAttribute1 = await this.context.consumptionController.attributes.createAttributeUnsafe({
             content: IdentityAttribute.from({
                 value: {
@@ -664,6 +664,7 @@ export class RequestsWhen {
             }
         });
 
+        const predecessorId = await ConsumptionIds.attribute.generate();
         const sOwnSharedIdentityAttribute2 = await this.context.consumptionController.attributes.createAttributeUnsafe({
             content: IdentityAttribute.from({
                 value: {
@@ -674,11 +675,28 @@ export class RequestsWhen {
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("shareRequestReference2")
-            }
+                requestReference: CoreId.from("shareRequestReference2a")
+            },
+            succeeds: predecessorId
         });
 
-        const params: ICreateOutgoingRequestParameters = {
+        await this.context.consumptionController.attributes.createAttributeUnsafe({
+            id: predecessorId,
+            content: IdentityAttribute.from({
+                value: {
+                    "@type": "BirthName",
+                    value: "A second-name"
+                },
+                owner: this.context.currentIdentity
+            }),
+            shareInfo: {
+                peer: CoreAddress.from("peer"),
+                requestReference: CoreId.from("shareRequestReference2b")
+            },
+            succeededBy: sOwnSharedIdentityAttribute2.id
+        });
+
+        const createParams: ICreateOutgoingRequestParameters = {
             content: {
                 items: [
                     RequestItemGroup.from({
@@ -704,8 +722,13 @@ export class RequestsWhen {
             },
             peer: CoreAddress.from("peer")
         };
+        const localRequest = await this.context.outgoingRequestsController.create(createParams);
 
-        this.context.localRequestAfterAction = await this.context.outgoingRequestsController.create(params);
+        const sentParams: ISentOutgoingRequestParameters = {
+            requestId: localRequest.id,
+            requestSourceObject: TestObjectFactory.createOutgoingMessage(this.context.currentIdentity)
+        };
+        this.context.localRequestAfterAction = await this.context.outgoingRequestsController.sent(sentParams);
     }
 
     public async iCreateAnIncomingRequestWithSource(sourceObject: Message | RelationshipTemplate): Promise<void> {
@@ -994,14 +1017,14 @@ export class RequestsThen {
         return Promise.resolve();
     }
 
-    public async theDeletionInfoOfTheAssociatedAttributesIsSet(): Promise<void> {
+    public async theDeletionInfoOfTheAssociatedAttributesAndPredecessorsIsSet(): Promise<void> {
         const sUpdatedOwnSharedIdentityAttributes = await this.context.consumptionController.attributes.getLocalAttributes();
         expect(sUpdatedOwnSharedIdentityAttributes).toBeDefined();
-        expect(sUpdatedOwnSharedIdentityAttributes).toHaveLength(2);
-        expect(sUpdatedOwnSharedIdentityAttributes[0].deletionInfo).toBeDefined();
-        expect(sUpdatedOwnSharedIdentityAttributes[0].deletionInfo!.deletionStatus).toBe(DeletionStatus.DeletionRequestSent);
-        expect(sUpdatedOwnSharedIdentityAttributes[1].deletionInfo).toBeDefined();
-        expect(sUpdatedOwnSharedIdentityAttributes[1].deletionInfo!.deletionStatus).toBe(DeletionStatus.DeletionRequestSent);
+        expect(sUpdatedOwnSharedIdentityAttributes).toHaveLength(3);
+        for (const sUpdatedOwnSharedIdentityAttribute of sUpdatedOwnSharedIdentityAttributes) {
+            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo).toBeDefined();
+            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo!.deletionStatus).toBe(DeletionStatus.DeletionRequestSent);
+        }
     }
 
     public theRequestHasItsResponsePropertySetCorrectly(expectedResult: ResponseItemResult): Promise<void> {
