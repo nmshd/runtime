@@ -4,12 +4,13 @@ import { AbstractString } from "../AbstractString";
 
 export abstract class AbstractEMailAddress extends AbstractString {
     // from https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
+
     @serialize()
     @validate({
         min: 3,
         max: 254,
         regExp: new RegExp(
-            /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[A-Za-z0-9\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df](?:[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9]){0,1}[.])+[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9](?:[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9])$/
+            /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9ÄäÖöÜüß](?:[A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß])?[.])+[A-Za-z0-9ÄäÖöÜüß](?:[A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß])$/
         )
     })
     public override value: string;
@@ -18,8 +19,7 @@ export abstract class AbstractEMailAddress extends AbstractString {
         return super.valueHints.copyWith({
             min: 3,
             max: 254,
-            pattern:
-                "/^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:[.][A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+){0,}@(?:[A-Za-z0-9\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df](?:[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9]){0,1}[.])+[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9](?:[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9-]{0,61}[A-Za-z\u00c4\u00e4\u00d6\u00f6\u00dc\u00fc\u00df0-9])$/"
+            pattern: String(RegExp)
         });
     }
 
