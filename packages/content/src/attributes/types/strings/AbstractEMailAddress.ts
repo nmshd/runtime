@@ -19,7 +19,7 @@ export abstract class AbstractEMailAddress extends AbstractString {
         return super.valueHints.copyWith({
             min: 3,
             max: 254,
-            pattern: String(RegExp)
+            pattern: JSON.stringify(AbstractEMailAddress.regExp, null, 2)
         });
     }
 
