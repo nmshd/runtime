@@ -1,7 +1,7 @@
 import { ParsingError } from "@js-soft/ts-serval";
 import { EMailAddress } from "../../src";
 
-describe("Test valid EMailAdresses", () => {
+describe("Test valid EMailAddresses", () => {
     const validEMailAddresses = ["peter123@inwind.it", "peter123@inwänd.it"];
 
     test.each(validEMailAddresses)("EMail %s is recognized as valid", (email) => {
@@ -10,7 +10,7 @@ describe("Test valid EMailAdresses", () => {
     });
 });
 
-describe("Test invalid EMailAdresses", () => {
+describe("Test invalid EMailAddresses", () => {
     const invalidEMailAddresses = ["Hugo Becker@gmx.de", "Becker@gmx", "Becker@gmx-.de", "Becker@gmx-.de", ".Becker@gmx.de", "test@.address", "test@test..address"];
 
     test.each(invalidEMailAddresses)("EMail %s is recognized as invalid", (email) => {

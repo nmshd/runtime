@@ -4,7 +4,7 @@ import { AbstractString } from "../AbstractString";
 
 export abstract class AbstractEMailAddress extends AbstractString {
     // from https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
-    private static regExp = new RegExp(
+    private static readonly regExp = new RegExp(
         /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@([A-Za-z0-9ÄäÖöÜüß]([A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß])?\.)+[A-Za-z0-9ÄäÖöÜüß][A-Za-z0-9ÄäÖöÜüß-]{0,61}[A-Za-z0-9ÄäÖöÜüß]$/
     );
     @serialize()

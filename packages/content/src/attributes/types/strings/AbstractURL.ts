@@ -3,7 +3,7 @@ import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints } fro
 import { AbstractString } from "../AbstractString";
 
 export abstract class AbstractURL extends AbstractString {
-    private static regExp = new RegExp(
+    private static readonly regExp = new RegExp(
         /^([A-Za-z]+:\/\/)?(www\.([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?\.)+|((?!www[.])([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?[.]))([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?\.)*)[A-Za-zÄäÖöÜüß0-9]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])([:][0-9]+)*(\/[A-Za-zÄäÖöÜüß0-9?#@!$&'()*+,;=%-]*)*$/
     );
 

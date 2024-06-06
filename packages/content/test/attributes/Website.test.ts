@@ -4,14 +4,14 @@ import { Website } from "../../src";
 describe("Test valid URLs", () => {
     const validUrls = [
         "www.google.com",
-        "https://döner.cooking",
+        "https://inwänd.it",
         "http://inwind.it",
         "https://enmeshed.de/blog/meilenstein-enmeshed-als-komponente-ablage-in-mein-bildungsraum-geht-in-die-testphase-der-beta-version/",
         "www.foo.www.www.enmeshed.eu",
         "https://example.org:8080/mein/ordner/bericht"
     ];
 
-    test.each(validUrls)("url %s is recognized as valid", (url) => {
+    test.each(validUrls)("URL %s is recognized as valid", (url) => {
         const validWebsite = Website.from({ value: url });
         expect(validWebsite.value.toString()).toBe(url);
     });
@@ -20,7 +20,7 @@ describe("Test valid URLs", () => {
 describe("Test invalid URLs", () => {
     const invalidUrls = ["google-.de", "www.google", "www.-google", "https://inwind.test it"];
 
-    test.each(invalidUrls)("url %s is recognized as invalid", (url) => {
+    test.each(invalidUrls)("URL %s is recognized as invalid", (url) => {
         const invalidWebsiteCall = () => {
             Website.from({
                 value: url
