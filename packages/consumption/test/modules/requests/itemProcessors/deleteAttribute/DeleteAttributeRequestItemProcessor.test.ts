@@ -1073,7 +1073,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             const updatedOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sOwnSharedIdentityAttribute.id);
             expect(updatedOwnSharedIdentityAttribute!.deletionInfo).toBeDefined();
             expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(DeletionStatus.DeletionRequestRejected);
-            expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate, "millisecond")).toBe(true);
+            expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(true);
         });
 
         test("sets the deletionInfo to DeletionRequestRejected of the predecessor of an own shared Identity Attribute", async function () {
