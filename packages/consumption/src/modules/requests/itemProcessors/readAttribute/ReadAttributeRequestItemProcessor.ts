@@ -101,6 +101,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 );
             }
 
+            // TODO: check that Attribute not DeletedByPeer
             if (latestSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
                 return AttributeAlreadySharedAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
@@ -108,6 +109,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
             }
 
+            // TODO: check that Attribute not DeletedByPeer
             const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedAttribute.shareInfo.sourceAttribute);
             if (!predecessorSourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, latestSharedAttribute.shareInfo.sourceAttribute.toString());
 
