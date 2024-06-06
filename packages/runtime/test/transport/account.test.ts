@@ -190,13 +190,14 @@ describe("Un-/RegisterPushNotificationToken", () => {
 
     test.each(["Development", "Production"])("register with valid enviroment", async (environment: any) => {
         const result = await sTransportServices.account.registerPushNotificationToken({
-            handle: "handle",
-            platform: "platform",
+            handle: "handleLongerThan10Characters",
+            platform: "apns",
             appId: "appId",
             environment: environment
         });
 
         expect(result).toBeSuccessful();
+        expect(result.value.devicePushIdentifier).toMatch(/^DPI[a-zA-Z0-9]{17}$/);
     });
 
     test("unregister", async () => {

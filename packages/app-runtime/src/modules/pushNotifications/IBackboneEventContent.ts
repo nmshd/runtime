@@ -4,7 +4,7 @@ export enum BackboneEventName {
 }
 
 export interface IBackboneEventContent {
-    accRef: string;
+    devicePushIdentifier: string;
     eventName: BackboneEventName;
     sentAt: string;
     payload: any;
