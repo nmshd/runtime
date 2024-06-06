@@ -9,7 +9,8 @@ export class LocalAccountMapper {
             name: localAccount.name,
             directory: localAccount.directory.toString(),
             order: localAccount.order,
-            lastAccessedAt: localAccount.lastAccessedAt?.toString()
+            lastAccessedAt: localAccount.lastAccessedAt?.toString(),
+            devicePushIdentifier: localAccount.devicePushIdentifier
         };
     }
 }

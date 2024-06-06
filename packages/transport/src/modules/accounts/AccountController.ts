@@ -406,8 +406,9 @@ export class AccountController {
         return device;
     }
 
-    public async registerPushNotificationToken(token: BackbonePutDevicesPushNotificationRequest): Promise<void> {
-        await this.deviceAuthClient.registerPushNotificationToken(token);
+    public async registerPushNotificationToken(token: BackbonePutDevicesPushNotificationRequest): Promise<{ devicePushIdentifier: string }> {
+        const result = await this.deviceAuthClient.registerPushNotificationToken(token);
+        return result.value;
     }
 
     public async unregisterPushNotificationToken(): Promise<void> {
