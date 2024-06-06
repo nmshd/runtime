@@ -6,4 +6,5 @@ export interface LocalAccountDTO {
     directory: string;
     order: number;
     lastAccessedAt?: string;
+    devicePushIdentifier?: string;
 }

@@ -23,8 +23,10 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
         const notification = event.notification;
         const content = notification.content as IBackboneEventContent;
 
+        const accRef = await this.runtime.multiAccountController.getAccountReferenceForDevicePushIdentifier(content.devicePushIdentifier);
+
         try {
-            const services = await this.runtime.getServices(content.accRef);
+            const services = await this.runtime.getServices(accRef);
 
             switch (content.eventName) {
                 case BackboneEventName.DatawalletModificationsCreated:
@@ -33,7 +35,7 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
                         this.logger.error(walletResult);
                         return;
                     }
-                    this.runtime.eventBus.publish(new DatawalletSynchronizedEvent(content.accRef));
+                    this.runtime.eventBus.publish(new DatawalletSynchronizedEvent(accRef));
                     break;
                 case BackboneEventName.ExternalEventCreated:
                     const syncResult = await services.transportServices.account.syncEverything();
@@ -42,7 +44,7 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
                         return;
                     }
 
-                    this.runtime.eventBus.publish(new ExternalEventReceivedEvent(content.accRef, syncResult.value));
+                    this.runtime.eventBus.publish(new ExternalEventReceivedEvent(accRef, syncResult.value));
 
                     break;
                 default:
@@ -87,6 +89,7 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
 
         const deviceResult = await services.transportServices.account.getDeviceInfo();
         if (deviceResult.isError) {
+            this.logger.error(deviceResult.error);
             throw AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible("No device for this account found", deviceResult.error).logWith(this.logger);
         }
 
@@ -101,15 +104,25 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
             appId,
             environment: environment
         });
+
         if (result.isError) {
+            this.logger.error(result.error);
             throw AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible(result.error.message, result.error).logWith(this.logger);
-        } else {
-            this.logger.info(
-                `PushNotificationModule.registerPushTokenForLocalAccount: Token ${handle} registered for account ${address} on platform ${platform}${
-                    environment ? ` (${environment})` : ""
-                } and appId ${appId}`
-            );
         }
+
+        this.logger.info(
+            `PushNotificationModule.registerPushTokenForLocalAccount: Token ${handle} registered for account ${address} on platform ${platform}${
+                environment ? ` (${environment})` : ""
+            } and appId ${appId}`
+        );
+
+        await this.registerPushIdentifierForAccount(address, result.value.devicePushIdentifier);
+    }
+
+    private async registerPushIdentifierForAccount(address: string, devicePushIdentifier: string): Promise<void> {
+        this.logger.trace("PushNotificationModule.registerPushIdentifierForAccount", { address, pushIdentifier: devicePushIdentifier });
+
+        await this.runtime.multiAccountController.updatePushIdentifierForAccount(address, devicePushIdentifier);
     }
 
     public getNotificationTokenFromConfig(): Result<string> {

@@ -10,13 +10,17 @@ export interface RegisterPushNotificationTokenRequest {
     environment?: "Development" | "Production";
 }
 
+export interface RegisterPushNotificationTokenResponse {
+    devicePushIdentifier: string;
+}
+
 class Validator extends SchemaValidator<RegisterPushNotificationTokenRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("RegisterPushNotificationTokenRequest"));
     }
 }
 
-export class RegisterPushNotificationTokenUseCase extends UseCase<RegisterPushNotificationTokenRequest, void> {
+export class RegisterPushNotificationTokenUseCase extends UseCase<RegisterPushNotificationTokenRequest, RegisterPushNotificationTokenResponse> {
     public constructor(
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
@@ -24,14 +28,14 @@ export class RegisterPushNotificationTokenUseCase extends UseCase<RegisterPushNo
         super(validator);
     }
 
-    protected async executeInternal(request: RegisterPushNotificationTokenRequest): Promise<Result<void>> {
-        await this.accountController.registerPushNotificationToken({
+    protected async executeInternal(request: RegisterPushNotificationTokenRequest): Promise<Result<RegisterPushNotificationTokenResponse>> {
+        const result = await this.accountController.registerPushNotificationToken({
             handle: request.handle,
             platform: request.platform,
             appId: request.appId,
             environment: request.environment
         });
 
-        return Result.ok(undefined);
+        return Result.ok({ devicePushIdentifier: result.devicePushIdentifier });
     }
 }
