@@ -11,7 +11,7 @@ import {
     LocalRequestStatus
 } from "../../../src";
 import { loggerFactory, TestUtil } from "../../core/TestUtil";
-import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegration.test";
+import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
 
