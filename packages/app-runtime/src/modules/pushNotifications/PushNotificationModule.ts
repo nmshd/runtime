@@ -89,6 +89,7 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
 
         const deviceResult = await services.transportServices.account.getDeviceInfo();
         if (deviceResult.isError) {
+            this.logger.error(deviceResult.error);
             throw AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible("No device for this account found", deviceResult.error).logWith(this.logger);
         }
 
@@ -103,7 +104,9 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
             appId,
             environment: environment
         });
+
         if (result.isError) {
+            this.logger.error(result.error);
             throw AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible(result.error.message, result.error).logWith(this.logger);
         }
 
