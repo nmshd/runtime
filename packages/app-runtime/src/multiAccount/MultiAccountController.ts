@@ -268,10 +268,7 @@ export class MultiAccountController {
 
     public async getAccountReferenceForDevicePushIdentifier(devicePushIdentifier: string): Promise<string> {
         const document = await this._localAccounts.findOne({ devicePushIdentifier });
-        if (!document) {
-            // TODO: better error to make sure that the identifier could not be resolved
-            throw TransportCoreErrors.general.recordNotFound(LocalAccount, devicePushIdentifier).logWith(this._log);
-        }
+        if (!document) throw new Error(`Could not resolve a local account reference for the device push identifier '${devicePushIdentifier}'.`);
 
         const localAccount = LocalAccount.from(document);
         return localAccount.id.toString();
