@@ -198,6 +198,7 @@ describe("Un-/RegisterPushNotificationToken", () => {
         });
 
         expect(result).toBeSuccessful();
+        expect(result.value.devicePushIdentifier).toMatch(/^DPI[a-zA-Z0-9]{17}$/);
     });
 
     test("unregister", async () => {
