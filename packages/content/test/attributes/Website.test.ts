@@ -30,8 +30,16 @@ describe("Test invalid URLs", () => {
             new ParsingError(
                 "Website",
                 "value",
-                "Value does not match regular expression /^([A-Za-z]+:\\/\\/)?(www\\.([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?\\.)+|((?!www[.])([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?[.]))([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?\\.)*)[A-Za-zÄäÖöÜüß0-9]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])([:][0-9]+)*(\\/[A-Za-zÄäÖöÜüß0-9?#@!$&'()*+,;=%-]*)*$/"
+                "Value does not match regular expression /^([A-Za-z]+:\\/\\/)?((www\\.)|(?!www\\.))([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?\\.)+([A-Za-z0-9ÄäÖöÜüß]([A-Za-zÄäÖöÜüß0-9-]{0,61}[A-Za-zÄäÖöÜüß0-9])?)(:[0-9]+)?(\\/[A-Za-zÄäÖöÜüß0-9?#@!$&'()*+,;=%-]*)*$/"
             )
         );
+    });
+    test("returns an error when trying to create an Attribute Value Type Website wich is empty", function () {
+        const invalidWebsiteCall = () => {
+            Website.from({
+                value: ""
+            });
+        };
+        expect(invalidWebsiteCall).toThrow(new ParsingError("Website", "value", "Value is shorter than 3 characters"));
     });
 });

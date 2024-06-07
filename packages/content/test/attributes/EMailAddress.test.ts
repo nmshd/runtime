@@ -27,4 +27,12 @@ describe("Test invalid EMailAddresses", () => {
             )
         );
     });
+    test("returns an error when trying to create an Attribute Value Type EMailAddress wich is empty", function () {
+        const invalidEMailAddressCall = () => {
+            EMailAddress.from({
+                value: ""
+            });
+        };
+        expect(invalidEMailAddressCall).toThrow(new ParsingError("EMailAddress", "value", "Value is shorter than 3 characters"));
+    });
 });
