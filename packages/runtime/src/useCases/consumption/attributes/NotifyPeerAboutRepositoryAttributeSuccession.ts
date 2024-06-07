@@ -47,6 +47,7 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeSuccessorId));
         }
 
+        // TODO: deletionInfo
         const candidatePredecessors = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeSuccessorId, [CoreAddress.from(request.peer)]);
 
         if (candidatePredecessors.length === 0) {
