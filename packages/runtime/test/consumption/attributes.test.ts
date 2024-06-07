@@ -1119,9 +1119,9 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
 });
 
 describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
-    let sOSRA: LocalAttributeDTO;
+    let sOwnSharedRelationshipAttribute: LocalAttributeDTO;
     beforeEach(async () => {
-        sOSRA = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
+        sOwnSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
                 key: "test",
                 value: {
@@ -1136,7 +1136,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
 
     test("should succeed a relationship attribute and notify peer", async () => {
         const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-            predecessorId: sOSRA.id,
+            predecessorId: sOwnSharedRelationshipAttribute.id,
             successorContent: {
                 value: {
                     "@type": "ProprietaryString",
@@ -1168,7 +1168,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
 
     test("should throw changing the value type succeeding a relationship attribute", async () => {
         const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-            predecessorId: sOSRA.id,
+            predecessorId: sOwnSharedRelationshipAttribute.id,
             successorContent: {
                 value: {
                     "@type": "ProprietaryBoolean",
@@ -1179,6 +1179,32 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
         });
 
         expect(result).toBeAnError(/.*/, "error.consumption.attributes.successionMustNotChangeValueType");
+    });
+
+    test("should throw if the predecessor was deleted by peer", async () => {
+        const rPeerSharedRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnSharedRelationshipAttribute.id })).value;
+
+        const deleteResult = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: rPeerSharedRelationshipAttribute.id });
+        const notificationId = deleteResult.value.notificationId;
+
+        await syncUntilHasMessageWithNotification(services1.transport, notificationId);
+        await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
+            return e.data.id === sOwnSharedRelationshipAttribute.id;
+        });
+        const updatedOwnSharedRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnSharedRelationshipAttribute.id })).value;
+        expect(updatedOwnSharedRelationshipAttribute.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
+
+        const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
+            predecessorId: sOwnSharedRelationshipAttribute.id,
+            successorContent: {
+                value: {
+                    "@type": "ProprietaryString",
+                    value: "another String",
+                    title: "another title"
+                }
+            }
+        });
+        expect(result).toBeAnError(/.*/, "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo");
     });
 });
 
