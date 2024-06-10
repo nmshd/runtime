@@ -11,7 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { AttributeSuccessorParams, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSuccessorParams, DeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -80,8 +80,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.existingAttributeId, [requestInfo.peer], true);
+            const wasNotSharedBefore = latestSharedVersion.length === 0;
+            const isLatestSharedVersion = latestSharedVersion[0]?.shareInfo?.sourceAttribute?.toString() === existingSourceAttribute.id.toString();
+            const wasDeletedByPeerOrOwner =
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByOwner;
 
-            if (latestSharedVersion.length === 0) {
+            if (wasNotSharedBefore || (isLatestSharedVersion && wasDeletedByPeerOrOwner)) {
                 sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: CoreId.from(existingSourceAttribute.id),
                     peer: CoreAddress.from(requestInfo.peer),
@@ -94,19 +99,18 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
             }
 
+            if (isLatestSharedVersion) {
+                return AttributeAlreadySharedAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: latestSharedVersion[0].id
+                });
+            }
+
             const latestSharedAttribute = latestSharedVersion[0];
             if (!latestSharedAttribute.shareInfo?.sourceAttribute) {
                 throw new Error(
                     `The Attribute ${latestSharedAttribute.id} doesn't have a 'shareInfo.sourceAttribute', even though it was found as shared version of an Attribute.`
                 );
-            }
-
-            // TODO: check that Attribute not DeletedByPeer
-            if (latestSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
-                return AttributeAlreadySharedAcceptResponseItem.from({
-                    result: ResponseItemResult.Accepted,
-                    attributeId: latestSharedAttribute.id
-                });
             }
 
             // TODO: check that Attribute not DeletedByPeer
@@ -131,7 +135,12 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
             }
         }
-        sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute!, requestInfo);
+
+        if (!parsedParams.newAttribute) {
+            throw new Error("The ReadAttributeRequestItem wasn't answered with a new Attribute, but it wasn't handled as an existing Attribute, either.");
+        }
+
+        sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute, requestInfo);
         return ReadAttributeAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
             attributeId: sharedLocalAttribute.id,
