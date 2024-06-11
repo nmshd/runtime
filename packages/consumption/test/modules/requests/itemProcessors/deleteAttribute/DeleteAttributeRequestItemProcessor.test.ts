@@ -954,7 +954,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
         test("doesn't change the deletionInfo to ToBeDeletedByPeer of a DeletedByPeer predecessor of an own shared Identity Attribute", async function () {
             const sOwnSharedIdentityAttributeId = await ConsumptionIds.attribute.generate();
-            const predecessorDeletionDate = CoreDate.utc().add({ days: 1 });
+            const predecessorDeletionDate = CoreDate.utc().subtract({ days: 1 });
 
             const sPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: IdentityAttribute.from({
