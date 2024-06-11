@@ -685,7 +685,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
     });
 
     describe("applyIncomingResponseItem", function () {
-        test("doesn't change the deletionInfo if a simple AcceptRequestItem is returned", async function () {
+        test("doesn't change the deletionInfo if a simple AcceptResponseItem is returned", async function () {
             const deletionDate = CoreDate.utc().subtract({ days: 1 });
             const deletedByPeerAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: IdentityAttribute.from({
@@ -724,11 +724,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const responseDeletionDate = CoreDate.utc().add({ days: 1 });
-            const responseItem = DeleteAttributeAcceptResponseItem.from({
-                deletionDate: responseDeletionDate,
-                result: ResponseItemResult.Accepted
-            });
+            const responseItem = AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
 
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
@@ -1216,7 +1212,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
         test("doesn't change the deletionInfo to DeletionRequestRejected of a DeletedByPeer predecessor of an own shared Identity Attribute", async function () {
             const sOwnSharedIdentityAttributeId = await ConsumptionIds.attribute.generate();
-            const deletionDate = CoreDate.utc().add({ days: 1 });
+            const deletionDate = CoreDate.utc().subtract({ days: 1 });
 
             const sPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: IdentityAttribute.from({

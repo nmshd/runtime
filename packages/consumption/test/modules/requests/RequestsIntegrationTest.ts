@@ -685,7 +685,7 @@ export class RequestsWhen {
             content: IdentityAttribute.from({
                 value: {
                     "@type": "BirthName",
-                    value: "A second-name"
+                    value: "A former second name"
                 },
                 owner: this.context.currentIdentity
             }),
