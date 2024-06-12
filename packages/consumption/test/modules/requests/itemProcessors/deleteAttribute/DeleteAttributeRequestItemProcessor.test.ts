@@ -59,7 +59,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -113,7 +113,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 })
@@ -137,7 +137,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: peerAddress
                 }),
@@ -196,7 +196,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: peerAddress
                 }),
@@ -224,7 +224,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -253,7 +253,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -286,7 +286,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -366,7 +366,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: peerAddress
                 }),
@@ -411,7 +411,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: peerAddress
                 }),
@@ -459,7 +459,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: peerAddress
                 }),
@@ -509,7 +509,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: peerAddress
                 }),
@@ -557,7 +557,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: peerAddress
                 }),
@@ -691,7 +691,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -740,7 +740,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -792,7 +792,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -892,7 +892,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -908,7 +908,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -960,7 +960,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -980,7 +980,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -1029,7 +1029,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -1078,7 +1078,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -1094,7 +1094,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -1148,7 +1148,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -1168,7 +1168,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -1218,7 +1218,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A birth name"
                     },
                     owner: accountController.identity.address
                 }),
@@ -1238,7 +1238,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
-                        value: "Schenkel"
+                        value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
                 }),
