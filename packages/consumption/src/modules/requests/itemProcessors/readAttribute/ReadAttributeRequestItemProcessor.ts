@@ -38,7 +38,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         if (parsedParams.isWithExistingAttribute()) {
             const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
-            if (!foundAttribute) return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
+            if (!foundAttribute) return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString()));
 
             const ownerIsCurrentIdentity = this.accountController.identity.isMe(foundAttribute.content.owner);
             if (!ownerIsCurrentIdentity && foundAttribute.content instanceof IdentityAttribute) {
@@ -140,7 +140,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         }
 
         if (!parsedParams.newAttribute) {
-            throw new Error("The ReadAttributeRequestItem wasn't answered with a new Attribute, but it wasn't handled as an existing Attribute, either.");
+            throw new Error("The ReadAttributeRequestItem wasn't answered with a new Attribute, but it wasn't handled as having been answered with an existing Attribute, either.");
         }
 
         sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute, requestInfo);

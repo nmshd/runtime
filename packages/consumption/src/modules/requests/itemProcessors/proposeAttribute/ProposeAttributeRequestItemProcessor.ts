@@ -76,7 +76,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         if (parsedParams.isWithExistingAttribute()) {
             const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
 
-            if (!foundAttribute) return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
+            if (!foundAttribute) return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString()));
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.attributeId, [requestInfo.peer], true);
             if (latestSharedVersion.length > 0) {
@@ -173,7 +173,9 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         }
 
         if (!parsedParams.attribute) {
-            throw new Error("The ReadAttributeRequestItem wasn't answered with a new Attribute, but it wasn't handled as an existing Attribute, either.");
+            throw new Error(
+                "The ProposeAttributeRequestItem wasn't answered with a new Attribute, but it wasn't handled as having been answered with an existing Attribute, either."
+            );
         }
 
         sharedLocalAttribute = await this.createNewAttribute(parsedParams.attribute, requestInfo);

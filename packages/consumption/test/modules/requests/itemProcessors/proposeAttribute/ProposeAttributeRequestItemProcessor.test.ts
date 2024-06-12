@@ -15,8 +15,8 @@ import {
 } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
 import {
-    AcceptProposeAttributeRequestItemParametersJSON,
     AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON,
+    AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionController,
     ConsumptionIds,
     DeletionStatus,
@@ -237,7 +237,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
                 accept: true,
                 attributeId: existingLocalAttribute.id.toString()
             };
@@ -267,7 +267,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
                 accept: true,
                 attribute: {
                     "@type": "IdentityAttribute",
@@ -308,7 +308,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
                 accept: true,
                 attribute: requestItem.attribute.toJSON()
             };
@@ -338,7 +338,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
                 accept: true,
                 attributeId: "non-existent-id"
             };
@@ -383,7 +383,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
                 accept: true,
                 attributeId: idOfAttributeOfOtherIdentity.toString()
             };
@@ -418,7 +418,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
                 accept: true,
                 attribute: TestObjectFactory.createIdentityAttribute({ owner: someOtherIdentity }).toJSON()
             };
@@ -428,6 +428,63 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
                 message: /The given Attribute belongs to someone else. You can only share own Attributes./
+            });
+        });
+
+        test("returns an error trying to share the predecessor of an already shared Attribute", async function () {
+            const sender = CoreAddress.from("Sender");
+
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "A new given name"
+                    },
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: successorRepositoryAttribute.id,
+                peer: sender,
+                requestReference: await CoreId.generate()
+            });
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                attribute: TestObjectFactory.createIdentityAttribute()
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                attributeId: predecessorRepositoryAttribute.id.toString()
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: "You cannot share the predecessor of an already shared Attribute version."
             });
         });
     });
@@ -459,7 +516,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
                 accept: true,
                 attributeId: attribute.id.toString()
             };
@@ -496,7 +553,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
                 accept: true,
                 attribute: requestItem.attribute.toJSON()
             };
@@ -529,7 +586,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
                 accept: true,
                 attribute: {
                     "@type": "IdentityAttribute",
@@ -582,7 +639,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersJSON = {
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
                 accept: true,
                 attribute: {
                     "@type": "RelationshipAttribute",

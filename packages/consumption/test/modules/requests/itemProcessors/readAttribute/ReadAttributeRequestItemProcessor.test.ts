@@ -396,6 +396,62 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 message: /The given Attribute belongs to someone else. You can only share own Attributes./
             });
         });
+
+        test("returns an error trying to share the predecessor of an already shared Attribute", async function () {
+            const sender = CoreAddress.from("Sender");
+
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "A new given name"
+                    },
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: successorRepositoryAttribute.id,
+                peer: sender,
+                requestReference: await CoreId.generate()
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: predecessorRepositoryAttribute.id.toString()
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: "You cannot share the predecessor of an already shared Attribute version."
+            });
+        });
     });
 
     describe("accept", function () {
