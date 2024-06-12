@@ -383,6 +383,62 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
         });
+
+        // TODO:
+        test("returns a successful validation result if a mustBeAccepted RequestItem inside a not-mustBeAccepted RequestItemGroup is rejected", async function () {
+            const request = {
+                items: [
+                    RequestItemGroup.from({
+                        mustBeAccepted: false,
+                        items: [
+                            TestRequestItem.from({
+                                mustBeAccepted: true
+                            })
+                            // TestRequestItem.from({
+                            //     mustBeAccepted: true
+                            // }),
+                            // TestRequestItem.from({
+                            //     mustBeAccepted: false
+                            // }),
+                            // TestRequestItem.from({
+                            //     mustBeAccepted: false
+                            // })
+                        ]
+                    })
+                ]
+            } as IRequest;
+
+            const acceptParams = {
+                items: [
+                    {
+                        items: [
+                            {
+                                accept: false
+                            }
+                            // {
+                            //     accept: true
+                            // },
+                            // {
+                            //     accept: true
+                            // },
+                            // {
+                            //     accept: false
+                            // }
+                        ]
+                    }
+                ]
+            } as Omit<DecideRequestParametersJSON, "requestId">;
+
+            await Given.anIncomingRequestWith({
+                content: request,
+                status: LocalRequestStatus.DecisionRequired
+            });
+
+            await When.iCallCanAcceptWith({
+                items: acceptParams.items
+            });
+            await Then.itReturnsASuccessfulValidationResult();
+        });
     });
 
     describe("CanReject", function () {
