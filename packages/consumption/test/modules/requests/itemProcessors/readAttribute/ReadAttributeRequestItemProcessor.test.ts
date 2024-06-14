@@ -352,17 +352,17 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const sender = CoreAddress.from("Sender");
+        test("returns an error when the given Attribute id belongs to a peer shared Attribute", async function () {
+            const peer = CoreAddress.from("Peer");
 
-            const peerAttributeId = await ConsumptionIds.attribute.generate();
+            const peerSharedAttributeId = await ConsumptionIds.attribute.generate();
 
             await consumptionController.attributes.createPeerLocalAttribute({
-                id: peerAttributeId,
+                id: peerSharedAttributeId,
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: sender
+                    owner: peer
                 }),
-                peer: sender,
+                peer: peer,
                 requestReference: await ConsumptionIds.request.generate()
             });
 
@@ -375,7 +375,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
-                peer: sender,
+                peer: peer,
                 status: LocalRequestStatus.DecisionRequired,
                 content: Request.from({
                     id: requestId,
@@ -386,7 +386,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                 accept: true,
-                existingAttributeId: peerAttributeId.toString()
+                existingAttributeId: peerSharedAttributeId.toString()
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
@@ -711,6 +711,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
             expect(createdAttribute!.content).toStrictEqual(successorRepositoryAttribute.content);
             expect(createdAttribute!.deletionInfo).toBeUndefined();
+            expect(createdAttribute!.succeeds).toBeUndefined();
         });
 
         test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
@@ -806,7 +807,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.deletionInfo).toBeUndefined();
         });
 
-        test("accept with existing own shared third party RelationshipAttribute whose predecessor was already shared", async function () {
+        test("accept with existing own shared RelationshipAttribute that exists in the context of a Relationship with a third party whose predecessor was already shared", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const sender = CoreAddress.from("Sender");
 
@@ -885,7 +886,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(updatedPredecessorOwnSharedRelationshipAttribute!.succeededBy).toStrictEqual(successorOwnSharedRelationshipAttribute!.id);
         });
 
-        test("accept with existing third party owned RelationshipAttribute whose predecessor was already shared", async function () {
+        test("accept with existing peer shared RelationshipAttribute that exists in the context of a Relationship with a third party whose predecessor was already shared", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const sender = CoreAddress.from("Sender");
 

@@ -791,6 +791,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
             expect(createdAttribute!.content).toStrictEqual(successorRepositoryAttribute.content);
             expect(createdAttribute!.deletionInfo).toBeUndefined();
+            expect(createdAttribute!.succeeds).toBeUndefined();
         });
 
         test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
