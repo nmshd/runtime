@@ -1,16 +1,26 @@
 /* eslint-disable jest/no-standalone-expect */
 import { IDatabaseCollection, IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { DataEvent, EventEmitter2EventBus } from "@js-soft/ts-utils";
-import { AcceptResponseItem, IRequest, IResponse, RelationshipTemplateContent, Request, RequestItemGroup, Response, ResponseItemResult, ResponseResult } from "@nmshd/content";
 import {
-    AccountController,
+    AcceptResponseItem,
+    DeleteAttributeRequestItem,
+    IRequest,
+    IResponse,
+    IdentityAttribute,
+    RelationshipTemplateContent,
+    Request,
+    RequestItemGroup,
+    Response,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
+import {
     CoreAddress,
     CoreId,
     IConfigOverwrite,
     ICoreId,
     IMessage,
     IRelationshipTemplate,
-    IdentityController,
     Message,
     Relationship,
     RelationshipTemplate,
@@ -21,6 +31,8 @@ import {
     ConsumptionController,
     ConsumptionIds,
     DecideRequestParametersJSON,
+    DeleteAttributeRequestItemProcessor,
+    DeletionStatus,
     ICheckPrerequisitesOfIncomingRequestParameters,
     ICompleteIncomingRequestParameters,
     ICompleteOutgoingRequestParameters,
@@ -37,6 +49,8 @@ import {
     LocalResponse,
     OutgoingRequestsController,
     ReceivedIncomingRequestParameters,
+    RequestItemConstructor,
+    RequestItemProcessorConstructor,
     RequestItemProcessorRegistry,
     ValidationResult
 } from "../../../src";
@@ -54,6 +68,7 @@ export class RequestsTestsContext {
     public currentIdentity: CoreAddress;
     public mockEventBus = new MockEventBus();
     public relationshipToReturnFromGetRelationshipToIdentity: Relationship | undefined;
+    public consumptionController: ConsumptionController;
 
     private constructor() {
         // hide constructor
@@ -72,22 +87,26 @@ export class RequestsTestsContext {
 
         const database = await dbConnection.getDatabase(`x${Math.random().toString(36).substring(7)}`);
         const collection = new SynchronizedCollection(await database.getCollection("Requests"), 0);
-        const fakeConsumptionController = {
-            transport,
-            accountController: {
-                identity: { address: CoreAddress.from("anAddress") } as IdentityController
-            } as AccountController
-        } as ConsumptionController;
-        const processorRegistry = new RequestItemProcessorRegistry(fakeConsumptionController, new Map([[TestRequestItem, TestRequestItemProcessor]]));
 
-        context.currentIdentity = CoreAddress.from("did:e:a-domain:dids:anidentity");
+        const account = (await TestUtil.provideAccounts(transport, 1))[0];
+        context.consumptionController = account.consumptionController;
+
+        const processorRegistry = new RequestItemProcessorRegistry(
+            context.consumptionController,
+            new Map<RequestItemConstructor, RequestItemProcessorConstructor>([
+                [TestRequestItem, TestRequestItemProcessor],
+                [DeleteAttributeRequestItem, DeleteAttributeRequestItemProcessor]
+            ])
+        );
+
+        context.currentIdentity = account.accountController.identity.address;
 
         context.outgoingRequestsController = new OutgoingRequestsController(
             collection,
             processorRegistry,
-            undefined!,
+            context.consumptionController,
             context.mockEventBus,
-            { address: CoreAddress.from("anAddress") },
+            { address: account.accountController.identity.address },
             {
                 getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
             }
@@ -96,15 +115,16 @@ export class RequestsTestsContext {
         context.incomingRequestsController = new IncomingRequestsController(
             collection,
             processorRegistry,
-            undefined!,
+            context.consumptionController,
             context.mockEventBus,
             {
-                address: CoreAddress.from("anAddress")
+                address: account.accountController.identity.address
             },
             {
                 getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
             }
         );
+
         context.requestsCollection = context.incomingRequestsController["localRequests"];
 
         const originalCanCreate = context.outgoingRequestsController.canCreate;
@@ -650,6 +670,88 @@ export class RequestsWhen {
         );
     }
 
+    public async iSentAnOutgoingRequestWithDeleteAttributeRequestItems(): Promise<void> {
+        const sOwnSharedIdentityAttribute1 = await this.context.consumptionController.attributes.createAttributeUnsafe({
+            content: IdentityAttribute.from({
+                value: {
+                    "@type": "BirthName",
+                    value: "A first name"
+                },
+                owner: this.context.currentIdentity
+            }),
+            shareInfo: {
+                peer: CoreAddress.from("peer"),
+                requestReference: CoreId.from("shareRequestReference1")
+            }
+        });
+
+        const predecessorId = await ConsumptionIds.attribute.generate();
+        const sOwnSharedIdentityAttribute2 = await this.context.consumptionController.attributes.createAttributeUnsafe({
+            content: IdentityAttribute.from({
+                value: {
+                    "@type": "BirthName",
+                    value: "A second name"
+                },
+                owner: this.context.currentIdentity
+            }),
+            shareInfo: {
+                peer: CoreAddress.from("peer"),
+                requestReference: CoreId.from("shareRequestReference2a")
+            },
+            succeeds: predecessorId
+        });
+
+        await this.context.consumptionController.attributes.createAttributeUnsafe({
+            id: predecessorId,
+            content: IdentityAttribute.from({
+                value: {
+                    "@type": "BirthName",
+                    value: "A former second name"
+                },
+                owner: this.context.currentIdentity
+            }),
+            shareInfo: {
+                peer: CoreAddress.from("peer"),
+                requestReference: CoreId.from("shareRequestReference2b")
+            },
+            succeededBy: sOwnSharedIdentityAttribute2.id
+        });
+
+        const createParams: ICreateOutgoingRequestParameters = {
+            content: {
+                items: [
+                    RequestItemGroup.from({
+                        mustBeAccepted: false,
+                        items: [
+                            DeleteAttributeRequestItem.from({
+                                attributeId: sOwnSharedIdentityAttribute1.id.toString(),
+                                mustBeAccepted: false
+                            }),
+                            TestRequestItem.from({
+                                mustBeAccepted: false
+                            })
+                        ]
+                    }),
+                    DeleteAttributeRequestItem.from({
+                        attributeId: sOwnSharedIdentityAttribute2.id.toString(),
+                        mustBeAccepted: false
+                    }),
+                    TestRequestItem.from({
+                        mustBeAccepted: false
+                    })
+                ]
+            },
+            peer: CoreAddress.from("peer")
+        };
+        const localRequest = await this.context.outgoingRequestsController.create(createParams);
+
+        const sentParams: ISentOutgoingRequestParameters = {
+            requestId: localRequest.id,
+            requestSourceObject: TestObjectFactory.createOutgoingMessage(this.context.currentIdentity)
+        };
+        this.context.localRequestAfterAction = await this.context.outgoingRequestsController.sent(sentParams);
+    }
+
     public async iCreateAnIncomingRequestWithSource(sourceObject: Message | RelationshipTemplate): Promise<void> {
         const request = TestObjectFactory.createRequestWithOneItem();
 
@@ -934,6 +1036,16 @@ export class RequestsThen {
         expect(this.context.localRequestAfterAction!.isOwn).toBe(true);
 
         return Promise.resolve();
+    }
+
+    public async theDeletionInfoOfTheAssociatedAttributesAndPredecessorsIsSet(): Promise<void> {
+        const sUpdatedOwnSharedIdentityAttributes = await this.context.consumptionController.attributes.getLocalAttributes();
+        expect(sUpdatedOwnSharedIdentityAttributes).toBeDefined();
+        expect(sUpdatedOwnSharedIdentityAttributes).toHaveLength(3);
+        for (const sUpdatedOwnSharedIdentityAttribute of sUpdatedOwnSharedIdentityAttributes) {
+            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo).toBeDefined();
+            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo!.deletionStatus).toBe(DeletionStatus.DeletionRequestSent);
+        }
     }
 
     public theRequestHasItsResponsePropertySetCorrectly(expectedResult: ResponseItemResult): Promise<void> {
