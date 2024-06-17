@@ -355,7 +355,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
-            expect(result.isSuccess).toBe(true);
+            expect(result).successfulValidationResult();
         });
 
         test("returns an error when a successor of the existing IdentityAttribute is already shared", async function () {
