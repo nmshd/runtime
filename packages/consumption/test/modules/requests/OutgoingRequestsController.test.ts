@@ -370,6 +370,11 @@ describe("OutgoingRequestsController", function () {
             await When.iTryToCallSentWith({ requestSourceObject: invalidSource });
             await Then.itThrowsAnErrorWithTheErrorMessage("Cannot create outgoing Request from a peer*");
         });
+
+        test("sets deletionInfo in case of DeleteAttributeRequestItems", async function () {
+            await When.iSentAnOutgoingRequestWithDeleteAttributeRequestItems();
+            await Then.theDeletionInfoOfTheAssociatedAttributesAndPredecessorsIsSet();
+        });
     });
 
     describe("Complete", function () {
