@@ -11,6 +11,7 @@ import {
 import { CoreAddress } from "@nmshd/transport";
 import _ from "lodash";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { DeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -47,7 +48,11 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             }
 
             if (typeof recipient !== "undefined") {
-                const query: any = { "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(), "shareInfo.peer": recipient.toString() };
+                const query: any = {
+                    "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
+                    "shareInfo.peer": recipient.toString(),
+                    "deletionInfo.deletionStatus": { $ne: DeletionStatus.DeletedByPeer } // TODO: not DeletedByPeer
+                };
 
                 if ((await this.consumptionController.attributes.getLocalAttributes(query)).length > 0) {
                     return ValidationResult.error(
