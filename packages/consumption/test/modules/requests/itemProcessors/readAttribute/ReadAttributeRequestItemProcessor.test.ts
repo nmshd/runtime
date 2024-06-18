@@ -1084,7 +1084,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "You cannot share the predecessor of an already shared Attribute version."
+                message: `The provided IdentityAttribute is outdated. You have already shared the successor '${successorRepositoryAttribute.id}' of it.`
             });
         });
     });
