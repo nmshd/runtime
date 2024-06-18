@@ -21,7 +21,14 @@ import {
 import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 import { RuntimeServices } from "../Runtime";
-import { LocalRequestDTO, RelationshipStatus } from "../types";
+import { LocalRequestDTO, RelationshipDTO, RelationshipStatus } from "../types";
+import {
+    DeleteOwnSharedAttributeAndNotifyPeerRequest,
+    DeletePeerSharedAttributeAndNotifyOwnerRequest,
+    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest,
+    GetAttributesRequest
+} from "../useCases/common/Schemas";
+import { GetAttributesRequestQuery } from "../useCases/consumption/attributes/GetAttributes";
 
 export class RequestModule extends RuntimeModule {
     public init(): void {
@@ -280,8 +287,13 @@ export class RequestModule extends RuntimeModule {
     }
 
     private async handleRelationshipChangedEvent(event: RelationshipChangedEvent) {
-        // only trigger for new relationships that were created from an own template
         const createdRelationship = event.data;
+
+        if (createdRelationship.status === RelationshipStatus.Rejected || createdRelationship.status === RelationshipStatus.Revoked) {
+            await this.deleteSharedAttributesForRejectedOrRevokedRelationship(event.eventTargetAddress, createdRelationship);
+        }
+
+        // only trigger for new relationships that were created from an own template
         if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
@@ -306,6 +318,29 @@ export class RequestModule extends RuntimeModule {
             this.logger.error(`Could not create and complete request for templateId '${templateId}' and changeId '${relationshipChangeId}'. Root error:`, result.error);
             return;
         }
+    }
+
+    private async deleteSharedAttributesForRejectedOrRevokedRelationship(eventTargetAddress: string, relationship: RelationshipDTO) {
+        const services = await this.runtime.getServices(eventTargetAddress);
+
+        const query: GetAttributesRequestQuery = {};
+        query["shareInfo.peer"] = relationship.peer;
+        const sharedAttributes = await services.consumptionServices.attributes.getAttributes(GetAttributesRequest.from(query));
+
+        for (const sharedAttribute of sharedAttributes.value) {
+            const sharedAttributeId = sharedAttribute.id;
+            if (sharedAttribute.content.owner === (await services.transportServices.account.getIdentityInfo()).value.address) {
+                await services.consumptionServices.attributes.deleteOwnSharedAttributeAndNotifyPeer(DeleteOwnSharedAttributeAndNotifyPeerRequest.from({ sharedAttributeId }));
+            } else if (sharedAttribute.content.owner === relationship.peer) {
+                await services.consumptionServices.attributes.deletePeerSharedAttributeAndNotifyOwner(DeletePeerSharedAttributeAndNotifyOwnerRequest.from({ sharedAttributeId }));
+            } else {
+                await services.consumptionServices.attributes.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer(
+                    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest.from({ sharedAttributeId })
+                );
+            }
+        }
+
+        return;
     }
 
     public stop(): void {
