@@ -203,7 +203,12 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     }
 
     private isOwnSharedAttributeDeletionInfo(deletionInfo: LocalAttributeDeletionInfo): boolean {
-        return deletionInfo.deletionStatus === DeletionStatus.DeletedByPeer || deletionInfo.deletionStatus === DeletionStatus.ToBeDeletedByPeer;
+        return (
+            deletionInfo.deletionStatus === DeletionStatus.DeletedByPeer ||
+            deletionInfo.deletionStatus === DeletionStatus.ToBeDeletedByPeer ||
+            deletionInfo.deletionStatus === DeletionStatus.DeletionRequestSent ||
+            deletionInfo.deletionStatus === DeletionStatus.DeletionRequestRejected
+        );
     }
 
     private isThirdPartyOwnedRelationshipAttributeDeletionInfo(deletionInfo: LocalAttributeDeletionInfo): boolean {

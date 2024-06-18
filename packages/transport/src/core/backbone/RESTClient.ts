@@ -4,7 +4,6 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
-import { HttpsProxyAgent } from "https-proxy-agent";
 import _ from "lodash";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
 import { CoreId } from "../types";
@@ -84,8 +83,14 @@ export class RESTClient {
         const resultingRequestConfig = _.defaultsDeep(defaults, requestConfig);
 
         if (typeof window === "undefined" && (process.env.https_proxy ?? process.env.HTTPS_PROXY)) {
-            const httpsProxy = (process.env.https_proxy ?? process.env.HTTPS_PROXY)!;
-            resultingRequestConfig.httpsAgent = new HttpsProxyAgent(httpsProxy, this.config.httpsAgentOptions);
+            try {
+                const httpsProxy = (process.env.https_proxy ?? process.env.HTTPS_PROXY)!;
+                // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/naming-convention
+                const HttpsProxyAgent = require("https-proxy-agent").HttpsProxyAgent;
+                resultingRequestConfig.httpsAgent = new HttpsProxyAgent(httpsProxy, this.config.httpsAgentOptions);
+            } catch (e) {
+                // ignore
+            }
         } else {
             try {
                 // eslint-disable-next-line @typescript-eslint/no-require-imports

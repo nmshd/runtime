@@ -198,7 +198,7 @@ class Attributes {
     public invalidDeletionInfoOfOwnSharedAttribute() {
         return new CoreError(
             "error.consumption.attributes.invalidDeletionInfoOfOwnSharedAttribute",
-            "The only valid deletionStatuses for own shared Attributes are 'DeletedByPeer' or 'ToBeDeletedByPeer'."
+            "The only valid deletionStatuses for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'."
         );
     }
 
