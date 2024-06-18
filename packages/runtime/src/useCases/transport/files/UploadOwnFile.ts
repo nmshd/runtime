@@ -12,7 +12,7 @@ export interface UploadOwnFileRequest {
     content: Uint8Array;
     filename: string;
     mimetype: string;
-    expiresAt: ISO8601DateTimeString;
+    expiresAt?: ISO8601DateTimeString;
     title: string;
     description?: string;
 }
@@ -53,13 +53,15 @@ class Validator extends SchemaValidator<UploadOwnFileValidatableRequest> {
             );
         }
 
-        if (DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<UploadOwnFileValidatableRequest>((r) => r.expiresAt)}' must be in the future`),
-                    nameof<UploadOwnFileValidatableRequest>((r) => r.expiresAt)
-                )
-            );
+        if (input.expiresAt) {
+            if (DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
+                validationResult.addFailure(
+                    new ValidationFailure(
+                        RuntimeErrors.general.invalidPropertyValue(`'${nameof<UploadOwnFileValidatableRequest>((r) => r.expiresAt)}' must be in the future`),
+                        nameof<UploadOwnFileValidatableRequest>((r) => r.expiresAt)
+                    )
+                );
+            }
         }
 
         return validationResult;
@@ -77,13 +79,16 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
     }
 
     protected async executeInternal(request: UploadOwnFileRequest): Promise<Result<FileDTO>> {
+        const maxDate = "9999-12-31";
+        const expiresAt = request.expiresAt ?? maxDate;
+
         const file = await this.fileController.sendFile({
             buffer: CoreBuffer.from(request.content),
             title: request.title,
             description: request.description ?? "",
             filename: request.filename,
             mimetype: request.mimetype,
-            expiresAt: CoreDate.from(request.expiresAt)
+            expiresAt: CoreDate.from(expiresAt)
         });
 
         await this.accountController.syncDatawallet();
