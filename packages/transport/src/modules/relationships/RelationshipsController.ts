@@ -154,12 +154,22 @@ export class RelationshipsController extends TransportController {
 
         const { requestCipher, requestContent } = await this.prepareRequest(secretId, template, parameters.content);
 
-        const backboneResponse = (
-            await this.client.createRelationship({
-                content: requestCipher.toBase64(),
-                relationshipTemplateId: template.id.toString()
-            })
-        ).value;
+        let backboneResponse: BackboneGetRelationshipsResponse;
+        try {
+            backboneResponse = (
+                await this.client.createRelationship({
+                    content: requestCipher.toBase64(),
+                    relationshipTemplateId: template.id.toString()
+                })
+            ).value;
+        } catch (error: any) {
+            if (error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
+                throw new Error(
+                    "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
+                );
+            }
+            throw error;
+        }
 
         const newRelationship = Relationship.fromRequestSent(
             CoreId.from(backboneResponse.id),

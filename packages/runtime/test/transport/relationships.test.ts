@@ -74,6 +74,22 @@ describe("Create Relationship", () => {
         expect(relationship2Response).toBeSuccessful();
         expect(relationship2Response.value.status).toBe("Active");
     });
+
+    test("return error if templator has active IdentityDeletionProcess", async () => {
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+
+        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
+            templateId: templateId,
+            content: { a: "b" }
+        });
+        expect(createRelationshipResponse.isSuccess).toBe(false);
+        expect(createRelationshipResponse.error.message).toBe(
+            "An error was thrown in a UseCase: The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
+        );
+
+        await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
+    });
 });
 
 describe("Relationships query", () => {
