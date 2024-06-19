@@ -96,12 +96,12 @@ describe("File upload", () => {
         expect(response).toBeSuccessful();
     });
 
-    test("can upload a file with undefined as expiry date", async () => {
+    test("can upload a file with undefined as expiry date and automatically set expiry date to maximum value", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: undefined as unknown as string }));
         expect(response).toBeSuccessful();
 
         const file = response.value;
-        expect(file.expiresAt).toStrictEqual(CoreDate.from("9999-12-31").toString());
+        expect(file.expiresAt).toStrictEqual(CoreDate.from("9999-12-31T00:00:00.000Z").toString());
     });
 
     test("cannot upload a file with expiry date in the past", async () => {

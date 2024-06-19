@@ -77,7 +77,7 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
     }
 
     protected async executeInternal(request: UploadOwnFileRequest): Promise<Result<FileDTO>> {
-        const maxDate = "9999-12-31";
+        const maxDate = "9999-12-31T00:00:00.000Z";
         const expiresAt = request.expiresAt ?? maxDate;
 
         const file = await this.fileController.sendFile({
