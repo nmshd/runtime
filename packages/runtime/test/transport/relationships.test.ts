@@ -75,7 +75,12 @@ describe("Create Relationship", () => {
         expect(relationship2Response.value.status).toBe("Active");
     });
 
-    test("return error if templator has active IdentityDeletionProcess", async () => {
+    test("returns error if templator has active IdentityDeletionProcess", async () => {
+        // create new services that don't have a relationship yet
+        const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+        services1 = runtimeServices[0];
+        services2 = runtimeServices[1];
+
         const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
