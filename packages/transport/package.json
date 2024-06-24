@@ -85,7 +85,7 @@
         "@types/lodash": "^4.17.5",
         "@types/luxon": "^3.4.2",
         "@types/qs": "^6.9.15",
-        "@types/uuid": "^9.0.8",
+        "@types/uuid": "^10.0.0",
         "expect": "^29.7.0",
         "ts-mockito": "^2.6.1"
     },
