@@ -1,7 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, CoreDate, FileController } from "@nmshd/transport";
-import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
 import { FileDTO } from "../../../types";
@@ -53,7 +52,7 @@ class Validator extends SchemaValidator<UploadOwnFileValidatableRequest> {
             );
         }
 
-        if (input.expiresAt && DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
+        if (input.expiresAt && CoreDate.from(input.expiresAt).isSameOrBefore(new CoreDate())) {
             validationResult.addFailure(
                 new ValidationFailure(
                     RuntimeErrors.general.invalidPropertyValue(`'${nameof<UploadOwnFileValidatableRequest>((r) => r.expiresAt)}' must be in the future`),
