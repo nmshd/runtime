@@ -1,4 +1,5 @@
-import { LocalRequestStatus } from "@nmshd/consumption";
+import { Result } from "@js-soft/ts-utils";
+import { AttributesController, LocalAttribute, LocalRequestStatus } from "@nmshd/consumption";
 import {
     RelationshipCreationChangeRequestContent,
     RelationshipCreationChangeRequestContentJSON,
@@ -9,6 +10,8 @@ import {
     ResponseWrapper,
     ResponseWrapperJSON
 } from "@nmshd/content";
+import { AccountController, CoreId } from "@nmshd/transport";
+import { Inject } from "typescript-ioc";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -22,15 +25,14 @@ import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 import { RuntimeServices } from "../Runtime";
 import { LocalRequestDTO, RelationshipDTO, RelationshipStatus } from "../types";
-import {
-    DeleteOwnSharedAttributeAndNotifyPeerRequest,
-    DeletePeerSharedAttributeAndNotifyOwnerRequest,
-    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest,
-    GetAttributesRequest
-} from "../useCases/common/Schemas";
+import { RuntimeErrors } from "../useCases";
+import { GetAttributesRequest } from "../useCases/common/Schemas";
 import { GetAttributesRequestQuery } from "../useCases/consumption/attributes/GetAttributes";
 
 export class RequestModule extends RuntimeModule {
+    @Inject private readonly attributesController: AttributesController;
+    @Inject private readonly accountController: AccountController;
+
     public init(): void {
         // Nothing to do here
     }
@@ -325,20 +327,21 @@ export class RequestModule extends RuntimeModule {
 
         const query: GetAttributesRequestQuery = {};
         query["shareInfo.peer"] = relationship.peer;
-        const sharedAttributes = await services.consumptionServices.attributes.getAttributes(GetAttributesRequest.from(query));
+        const sharedAttributeDTOs = await services.consumptionServices.attributes.getAttributes(GetAttributesRequest.from(query));
 
-        for (const sharedAttribute of sharedAttributes.value) {
-            const sharedAttributeId = sharedAttribute.id;
-            if (sharedAttribute.content.owner === (await services.transportServices.account.getIdentityInfo()).value.address) {
-                await services.consumptionServices.attributes.deleteOwnSharedAttributeAndNotifyPeer(DeleteOwnSharedAttributeAndNotifyPeerRequest.from({ sharedAttributeId }));
-            } else if (sharedAttribute.content.owner === relationship.peer) {
-                await services.consumptionServices.attributes.deletePeerSharedAttributeAndNotifyOwner(DeletePeerSharedAttributeAndNotifyOwnerRequest.from({ sharedAttributeId }));
-            } else {
-                await services.consumptionServices.attributes.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer(
-                    DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest.from({ sharedAttributeId })
-                );
+        for (const sharedAttributeDTO of sharedAttributeDTOs.value) {
+            const sharedAttribute = await this.attributesController.getLocalAttribute(CoreId.from(sharedAttributeDTO.id));
+            if (!sharedAttribute) throw RuntimeErrors.general.recordNotFound(LocalAttribute);
+
+            const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(sharedAttribute);
+            if (validationResult.isError()) {
+                return Result.fail(validationResult.error);
             }
+
+            await this.attributesController.executeFullAttributeDeletionProcess(sharedAttribute);
         }
+
+        await this.accountController.syncDatawallet();
 
         return;
     }
