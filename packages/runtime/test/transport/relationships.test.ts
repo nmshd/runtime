@@ -2,7 +2,6 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
-import { RelationshipDecomposedBySelfEvent } from "src/events/transport/RelationshipDecomposedBySelfEvent";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
@@ -16,6 +15,7 @@ import {
     RelationshipReactivationRequestedEvent,
     RelationshipStatus
 } from "../../src";
+import { RelationshipDecomposedBySelfEvent } from "../../src/events/transport/RelationshipDecomposedBySelfEvent";
 import {
     QueryParamConditions,
     RuntimeServiceProvider,
