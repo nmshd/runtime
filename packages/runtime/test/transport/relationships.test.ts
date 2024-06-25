@@ -680,6 +680,11 @@ describe("RelationshipDecomposition", () => {
         );
     });
 
+    test("relationship template should be deleted", async () => {
+        const relationshipTemplates = await services1.transport.relationshipTemplates.getRelationshipTemplates({});
+        expect(relationshipTemplates).toHaveLength(1); // relationship to services3 remains
+    });
+
     test("requests should be deleted", async () => {
         const outgoingRequests = (await services1.consumption.outgoingRequests.getRequests({ query: { peer: services2.address } })).value;
         expect(outgoingRequests).toHaveLength(0);

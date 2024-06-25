@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { AttributesController, IncomingRequestsController, NotificationsController, OutgoingRequestsController } from "@nmshd/consumption";
-import { AccountController, CoreId, MessageController, Relationship, RelationshipsController } from "@nmshd/transport";
+import { AccountController, CoreId, MessageController, Relationship, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -17,6 +17,7 @@ class Validator extends SchemaValidator<DecomposeRelationshipRequest> {
 export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipRequest, null> {
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
+        @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
         @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject private readonly outgoingRequestsController: OutgoingRequestsController,
         @Inject private readonly messageController: MessageController,
@@ -41,6 +42,7 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
 
         // backbone call first so nothing is deleted in case it goes wrong
         await this.relationshipsController.decompose(relationship.id);
+        await this.relationshipTemplateController.cleanupDuringRelationshipDecomposition(relationship.cache.template);
         await this.messageController.decomposeMessagesOfRelationship(relationship);
         await this.incomingRequestsController.deleteRequestsFromPeer(peer.address);
         await this.outgoingRequestsController.deleteRequestsToPeer(peer.address);
