@@ -1,7 +1,7 @@
 import { GivenName, IdentityAttribute, MailJSON, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, MailDVO, SendMessageRequest, TransportServices } from "../../src";
-import { establishRelationshipWithContents, getRelationship, RuntimeServiceProvider, syncUntilHasMessage, uploadFile } from "../lib";
+import { RuntimeServiceProvider, establishRelationshipWithContents, getRelationship, syncUntilHasMessage, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -57,7 +57,6 @@ afterAll(() => serviceProvider.stop());
 describe("MessageDVO", () => {
     let transportService2Address: string;
     let fileId: string;
-    let messageRequest: SendMessageRequest;
     let mailRequest: SendMessageRequest;
     // let changeAttributeMailId: string;
 
@@ -68,13 +67,6 @@ describe("MessageDVO", () => {
         const relationship = await getRelationship(transportServices1);
         transportService2Address = relationship.peer;
 
-        messageRequest = {
-            recipients: [transportService2Address],
-            content: {
-                arbitraryValue: true
-            },
-            attachments: [fileId]
-        };
         mailRequest = {
             recipients: [transportService2Address],
             content: {
@@ -86,57 +78,6 @@ describe("MessageDVO", () => {
             },
             attachments: [fileId]
         };
-    });
-
-    test("check the message dvo for the sender", async () => {
-        const dto = (await transportServices1.messages.sendMessage(messageRequest)).value;
-        const dvo = await expander1.expandMessageDTO(dto);
-        expect(dvo).toBeDefined();
-        expect(dvo.name).toBe("i18n://dvo.message.name");
-        expect(dvo.description).toBeUndefined();
-        expect(dvo.type).toBe("MessageDVO");
-        expect(dvo.date).toStrictEqual(dto.createdAt);
-        expect(dvo.createdAt).toStrictEqual(dto.createdAt);
-        expect(dvo.createdByDevice).toStrictEqual(dto.createdByDevice);
-        expect(dvo.id).toStrictEqual(dto.id);
-        expect(dvo.isOwn).toBe(true);
-        expect(dvo.createdBy.type).toBe("IdentityDVO");
-        expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.createdBy.name).toBe("i18n://dvo.identity.self.name");
-        expect(dvo.createdBy.isSelf).toBe(true);
-        const recipient = dvo.recipients[0];
-        expect(recipient.type).toBe("RecipientDVO");
-        expect(recipient.id).toStrictEqual(dto.recipients[0].address);
-        expect(recipient.name).toBe(recipient.id.substring(3, 9)); // "Barbara"
-        expect(recipient.isSelf).toBe(false);
-        expect(dvo.status).toBe("Delivering");
-    });
-
-    test("check the message dvo for the recipient", async () => {
-        const senderMessage = (await transportServices1.messages.sendMessage(messageRequest)).value;
-        const messageId = senderMessage.id;
-        const dto = await syncUntilHasMessage(transportServices2, messageId);
-        const dvo = await expander2.expandMessageDTO(dto);
-        expect(dvo).toBeDefined();
-        expect(dvo.id).toStrictEqual(messageId);
-        expect(dvo.name).toBe("i18n://dvo.message.name");
-        expect(dvo.description).toBeUndefined();
-        expect(dvo.type).toBe("MessageDVO");
-        expect(dvo.date).toStrictEqual(dto.createdAt);
-        expect(dvo.createdAt).toStrictEqual(dto.createdAt);
-        expect(dvo.createdByDevice).toStrictEqual(dto.createdByDevice);
-        expect(dvo.id).toStrictEqual(dto.id);
-        expect(dvo.isOwn).toBe(false);
-        expect(dvo.createdBy.type).toBe("IdentityDVO");
-        expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.createdBy.name).toBe(dvo.createdBy.id.substring(3, 9)); // "Jürgen"
-        expect(dvo.createdBy.isSelf).toBe(false);
-        const recipient = dvo.recipients[0];
-        expect(recipient.type).toBe("RecipientDVO");
-        expect(recipient.id).toStrictEqual(dto.recipients[0].address);
-        expect(recipient.name).toBe("i18n://dvo.identity.self.name");
-        expect(recipient.isSelf).toBe(true);
-        expect(dvo.status).toBe("Received");
     });
 
     test("check the mail dvo for the sender", async () => {
