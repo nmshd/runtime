@@ -1,5 +1,6 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
+import { RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
@@ -11,13 +12,13 @@ import {
 } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import {
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     establishRelationship,
     exchangeMessageWithRequest,
     exchangeTemplate,
-    RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncUntilHasRelationships,
-    TestRuntimeServices
+    syncUntilHasRelationships
 } from "../lib";
 import {
     exchangeMessageWithRequestAndRequireManualDecision,
@@ -356,7 +357,7 @@ describe("Requests", () => {
         let rEventBus: EventBus;
         let sEventBus: EventBus;
 
-        const templateContent = {
+        const templateContent: RelationshipTemplateContentJSON = {
             "@type": "RelationshipTemplateContent",
             onNewRelationship: {
                 "@type": "Request",

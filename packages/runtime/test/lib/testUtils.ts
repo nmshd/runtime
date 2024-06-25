@@ -168,7 +168,7 @@ export async function makeUploadRequest(values: object = {}): Promise<UploadOwnF
     };
 }
 
-export async function createTemplate(transportServices: TransportServices, body: RelationshipTemplateDTO | {} = {}): Promise<RelationshipTemplateDTO> {
+export async function createTemplate(transportServices: TransportServices, body: RelationshipTemplateContentJSON | {} = {}): Promise<RelationshipTemplateDTO> {
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
         expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
@@ -192,7 +192,7 @@ export async function getFileToken(transportServices: TransportServices): Promis
 export async function exchangeTemplate(
     transportServicesCreator: TransportServices,
     transportServicesRecipient: TransportServices,
-    content: RelationshipTemplateContent | {} = {}
+    content: RelationshipTemplateContentJSON | {} = {}
 ): Promise<RelationshipTemplateDTO> {
     const template = await createTemplate(transportServicesCreator, content);
 
@@ -285,7 +285,7 @@ export async function getRelationship(transportServices: TransportServices): Pro
 }
 
 export async function establishRelationship(transportServices1: TransportServices, transportServices2: TransportServices): Promise<RelationshipDTO> {
-    const template = await exchangeTemplate(transportServices1, transportServices2, {});
+    const template = await exchangeTemplate(transportServices1, transportServices2);
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
         templateId: template.id,
@@ -350,7 +350,7 @@ export async function ensurePendingRelationship(sTransportServices: TransportSer
     const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
     const relationships = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress } })).value;
     if (relationships.length === 0) {
-        const template = await exchangeTemplate(sTransportServices, rTransportServices, {});
+        const template = await exchangeTemplate(sTransportServices, rTransportServices);
 
         const createRelationshipResponse = await rTransportServices.relationships.createRelationship({
             templateId: template.id,
