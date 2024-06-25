@@ -301,12 +301,8 @@ export async function getRelationship(transportServices: TransportServices): Pro
     return response.value[0];
 }
 
-export async function establishRelationship(
-    transportServices1: TransportServices,
-    transportServices2: TransportServices,
-    templateContent?: {} | RelationshipTemplateContent
-): Promise<RelationshipDTO> {
-    const template = await exchangeTemplate(transportServices1, transportServices2, templateContent ?? {});
+export async function establishRelationship(transportServices1: TransportServices, transportServices2: TransportServices): Promise<RelationshipDTO> {
+    const template = await exchangeTemplate(transportServices1, transportServices2, {});
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
         templateId: template.id,
