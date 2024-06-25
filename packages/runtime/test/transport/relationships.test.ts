@@ -2,7 +2,6 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
-import { RelationshipDecomposedBySelfEvent } from "src/events/transport/RelationshipDecomposedBySelfEvent";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
@@ -16,6 +15,7 @@ import {
     RelationshipReactivationRequestedEvent,
     RelationshipStatus
 } from "../../src";
+import { RelationshipDecomposedBySelfEvent } from "../../src/events/transport/RelationshipDecomposedBySelfEvent";
 import {
     QueryParamConditions,
     RuntimeServiceProvider,
@@ -747,6 +747,10 @@ describe("RelationshipDecomposition", () => {
         const messages = (await services1.transport.messages.getMessages({})).value;
         expect(messages).toHaveLength(0);
     });
+
+    test("not own relationship template should be deleted", async () => {});
+
+    test("own relationship template without number of allocations should not be deleted", async () => {});
 
     async function getAddressPseudonym() {
         const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
