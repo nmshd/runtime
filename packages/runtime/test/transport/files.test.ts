@@ -1,3 +1,4 @@
+import { CoreDate } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
 import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
@@ -95,6 +96,15 @@ describe("File upload", () => {
         expect(response).toBeSuccessful();
     });
 
+    test("uploading a file without expiry date will use the default", async () => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: undefined as unknown as string }));
+        expect(response).toBeSuccessful();
+
+        const file = response.value;
+        const defaultDate = CoreDate.from("9999-12-31T00:00:00.000Z");
+        expect(CoreDate.from(file.expiresAt).isSame(defaultDate)).toBe(true);
+    });
+
     test("cannot upload a file with expiry date in the past", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: "1970" }));
         expect(response).toBeAnError("'expiresAt' must be in the future", "error.runtime.validation.invalidPropertyValue");
@@ -103,11 +113,6 @@ describe("File upload", () => {
     test("cannot upload a file with empty expiry date", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: "" }));
         expect(response).toBeAnError("expiresAt must match ISO8601 datetime format", "error.runtime.validation.invalidPropertyValue");
-    });
-
-    test("cannot upload a file with undefined as expiry date", async () => {
-        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: undefined as unknown as string }));
-        expect(response).toBeAnError("must have required property 'expiresAt'", "error.runtime.validation.invalidPropertyValue");
     });
 });
 
