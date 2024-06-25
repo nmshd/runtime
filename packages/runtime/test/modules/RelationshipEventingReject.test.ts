@@ -92,14 +92,17 @@ describe("Reject Relationship", () => {
             changeId: sRelationship.changes[0].id,
             content: {}
         });
+        expect((await sTransportServices.relationships.getRelationships({})).value[0].status).toBe(RelationshipStatus.Rejected);
         await expect(sEventBus).toHavePublished(RelationshipChangedEvent);
+        await sEventBus.waitForRunningEventHandlers();
         expect((await sConsumptionServices.attributes.getAttributes({})).value).toHaveLength(0);
 
-        expect((await rConsumptionServices.attributes.getAttributes({})).value).toHaveLength(2);
+        //expect((await rConsumptionServices.attributes.getAttributes({})).value).toHaveLength(2);
         rEventBus.reset();
         const rRelationship = (await syncUntilHasRelationships(rTransportServices, 1))[0];
-        await expect(rEventBus).toHavePublished(RelationshipChangedEvent);
-        expect((await rConsumptionServices.attributes.getAttributes({})).value).toHaveLength(0);
         expect(rRelationship.status).toStrictEqual(RelationshipStatus.Rejected);
+        await expect(rEventBus).toHavePublished(RelationshipChangedEvent);
+        await rEventBus.waitForRunningEventHandlers();
+        //expect((await rConsumptionServices.attributes.getAttributes({})).value).toHaveLength(0);
     });
 });

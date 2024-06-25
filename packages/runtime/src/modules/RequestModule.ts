@@ -26,8 +26,6 @@ import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 import { RuntimeServices } from "../Runtime";
 import { LocalRequestDTO, RelationshipDTO, RelationshipStatus } from "../types";
 import { RuntimeErrors } from "../useCases";
-import { GetAttributesRequest } from "../useCases/common/Schemas";
-import { GetAttributesRequestQuery } from "../useCases/consumption/attributes/GetAttributes";
 
 export class RequestModule extends RuntimeModule {
     @Inject private readonly attributesController: AttributesController;
@@ -325,11 +323,11 @@ export class RequestModule extends RuntimeModule {
     private async deleteSharedAttributesForRejectedOrRevokedRelationship(eventTargetAddress: string, relationship: RelationshipDTO) {
         const services = await this.runtime.getServices(eventTargetAddress);
 
-        const query: GetAttributesRequestQuery = {};
-        query["shareInfo.peer"] = relationship.peer;
-        const sharedAttributeDTOs = await services.consumptionServices.attributes.getAttributes(GetAttributesRequest.from(query));
+        //const query: GetAttributesRequestQuery = {};
+        //query["shareInfo.peer"] = relationship.peer;
+        const sharedAttributeDTOs = (await services.consumptionServices.attributes.getAttributes({ query: { "shareInfo.peer": relationship.peer } })).value;
 
-        for (const sharedAttributeDTO of sharedAttributeDTOs.value) {
+        for (const sharedAttributeDTO of sharedAttributeDTOs) {
             const sharedAttribute = await this.attributesController.getLocalAttribute(CoreId.from(sharedAttributeDTO.id));
             if (!sharedAttribute) throw RuntimeErrors.general.recordNotFound(LocalAttribute);
 
