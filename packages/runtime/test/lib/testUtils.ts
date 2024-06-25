@@ -309,7 +309,7 @@ export async function establishRelationship(transportServices1: TransportService
 export async function establishRelationshipWithContents(
     transportServices1: TransportServices,
     transportServices2: TransportServices,
-    templateContent: RelationshipTemplateContentJSON | RelationshipTemplateContent | IRelationshipTemplateContent,
+    templateContent: RelationshipTemplateContentJSON | RelationshipTemplateContent | IRelationshipTemplateContent | {},
     creationContent: RelationshipCreationContentJSON | RelationshipCreationContent | IRelationshipCreationContent
 ): Promise<void> {
     const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
