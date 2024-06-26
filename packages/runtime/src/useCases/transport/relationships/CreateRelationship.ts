@@ -1,4 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
+import { RelationshipCreationContentJSON } from "@nmshd/content";
 import { AccountController, CoreId, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
@@ -7,7 +8,7 @@ import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface CreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
-    creationContent: any;
+    creationContent?: RelationshipCreationContentJSON;
 }
 
 class Validator extends SchemaValidator<CreateRelationshipRequest> {
@@ -34,7 +35,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
 
         const relationship = await this.relationshipsController.sendRelationship({
             template: template,
-            creationContent: request.creationContent
+            creationContent: request.creationContent ?? {}
         });
 
         await this.accountController.syncDatawallet();
