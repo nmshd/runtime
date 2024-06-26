@@ -11,7 +11,7 @@ import {
     ResponseWrapperJSON
 } from "@nmshd/content";
 import { AccountController, CoreId } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Container } from "typescript-ioc";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -28,11 +28,12 @@ import { LocalRequestDTO, RelationshipDTO, RelationshipStatus } from "../types";
 import { RuntimeErrors } from "../useCases";
 
 export class RequestModule extends RuntimeModule {
-    @Inject private readonly attributesController: AttributesController;
-    @Inject private readonly accountController: AccountController;
+    private attributesController: AttributesController;
+    private accountController: AccountController;
 
     public init(): void {
-        // Nothing to do here
+        this.attributesController = Container.get(AttributesController);
+        this.accountController = Container.get(AccountController);
     }
 
     public start(): void {
@@ -322,9 +323,6 @@ export class RequestModule extends RuntimeModule {
 
     private async deleteSharedAttributesForRejectedOrRevokedRelationship(eventTargetAddress: string, relationship: RelationshipDTO) {
         const services = await this.runtime.getServices(eventTargetAddress);
-
-        //const query: GetAttributesRequestQuery = {};
-        //query["shareInfo.peer"] = relationship.peer;
         const sharedAttributeDTOs = (await services.consumptionServices.attributes.getAttributes({ query: { "shareInfo.peer": relationship.peer } })).value;
 
         for (const sharedAttributeDTO of sharedAttributeDTOs) {
