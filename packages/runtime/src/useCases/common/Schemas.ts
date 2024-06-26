@@ -21307,7 +21307,6 @@ export const UploadOwnFileRequest: any = {
                 "content",
                 "filename",
                 "mimetype",
-                "expiresAt",
                 "title"
             ],
             "additionalProperties": false
@@ -21348,7 +21347,6 @@ export const UploadOwnFileValidatableRequest: any = {
             },
             "required": [
                 "content",
-                "expiresAt",
                 "filename",
                 "mimetype",
                 "title"
