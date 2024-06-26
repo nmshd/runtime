@@ -109,7 +109,6 @@ describe("LoadItemFromTruncatedReference", () => {
         beforeAll(async () => {
             const relationshipTemplate = (
                 await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                    content: {},
                     expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
                 })
             ).value;

@@ -12,7 +12,7 @@ import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
     expiresAt: ISO8601DateTimeString;
-    content: RelationshipTemplateContentJSON | {};
+    content?: RelationshipTemplateContentJSON;
     /**
      * @minimum 1
      */
@@ -56,7 +56,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         if (validationError) return Result.fail(validationError);
 
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
-            content: request.content,
+            content: request.content ?? {},
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations
         });
