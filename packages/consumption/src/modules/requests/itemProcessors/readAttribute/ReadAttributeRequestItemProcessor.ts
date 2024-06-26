@@ -16,7 +16,7 @@ import {
 import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { AttributeSuccessorParams, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSuccessorParams, DeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -70,7 +70,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             const foundLocalAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
 
             if (!foundLocalAttribute) {
-                return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, requestInfo.id.toString()));
+                return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString()));
             }
 
             attribute = foundLocalAttribute.content;
@@ -198,7 +198,14 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.existingAttributeId, [requestInfo.peer], true);
 
-            if (latestSharedVersion.length === 0) {
+            const wasSharedBefore = latestSharedVersion.length > 0;
+            const wasDeletedByPeerOrOwner =
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByOwner;
+            const isLatestSharedVersion = latestSharedVersion[0]?.shareInfo?.sourceAttribute?.toString() === existingSourceAttribute.id.toString();
+            const predecessorWasSharedBefore = wasSharedBefore && !isLatestSharedVersion;
+
+            if (!wasSharedBefore || wasDeletedByPeerOrOwner) {
                 sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: CoreId.from(existingSourceAttribute.id),
                     peer: CoreAddress.from(requestInfo.peer),
@@ -211,39 +218,41 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
             }
 
-            const latestSharedAttribute = latestSharedVersion[0];
-            if (!latestSharedAttribute.shareInfo?.sourceAttribute) {
-                throw new Error(
-                    `The Attribute ${latestSharedAttribute.id} doesn't have a 'shareInfo.sourceAttribute', even though it was found as shared version of an Attribute.`
-                );
-            }
-
-            if (latestSharedAttribute.shareInfo.sourceAttribute.toString() === existingSourceAttribute.id.toString()) {
+            if (isLatestSharedVersion) {
                 return AttributeAlreadySharedAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
-                    attributeId: latestSharedAttribute.id
+                    attributeId: latestSharedVersion[0].id
                 });
             }
 
-            const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(latestSharedAttribute.shareInfo.sourceAttribute);
-            if (!predecessorSourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, latestSharedAttribute.shareInfo.sourceAttribute.toString());
-
-            if (await this.consumptionController.attributes.isSubsequentInSuccession(predecessorSourceAttribute, existingSourceAttribute)) {
-                let successorSharedAttribute: LocalAttribute;
-                if (existingSourceAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
-                    successorSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
-                } else if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
-                    successorSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
-                } else {
-                    successorSharedAttribute = await this.performThirdPartyOwnedRelationshipAttributeSuccession(latestSharedAttribute.id, existingSourceAttribute, requestInfo);
+            if (predecessorWasSharedBefore) {
+                const sharedPredecessor = latestSharedVersion[0];
+                if (!sharedPredecessor.shareInfo?.sourceAttribute) {
+                    throw new Error(
+                        `The Attribute ${sharedPredecessor.id} doesn't have a 'shareInfo.sourceAttribute', even though it was found as shared version of an Attribute.`
+                    );
                 }
 
-                return AttributeSuccessionAcceptResponseItem.from({
-                    result: ResponseItemResult.Accepted,
-                    successorId: successorSharedAttribute.id,
-                    successorContent: successorSharedAttribute.content,
-                    predecessorId: latestSharedAttribute.id
-                });
+                const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(sharedPredecessor.shareInfo.sourceAttribute);
+                if (!predecessorSourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, sharedPredecessor.shareInfo.sourceAttribute.toString());
+
+                if (await this.consumptionController.attributes.isSubsequentInSuccession(predecessorSourceAttribute, existingSourceAttribute)) {
+                    let successorSharedAttribute: LocalAttribute;
+                    if (existingSourceAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
+                        successorSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(sharedPredecessor.id, existingSourceAttribute, requestInfo);
+                    } else if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
+                        successorSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(sharedPredecessor.id, existingSourceAttribute, requestInfo);
+                    } else {
+                        successorSharedAttribute = await this.performThirdPartyOwnedRelationshipAttributeSuccession(sharedPredecessor.id, existingSourceAttribute, requestInfo);
+                    }
+
+                    return AttributeSuccessionAcceptResponseItem.from({
+                        result: ResponseItemResult.Accepted,
+                        successorId: successorSharedAttribute.id,
+                        successorContent: successorSharedAttribute.content,
+                        predecessorId: sharedPredecessor.id
+                    });
+                }
             }
         } else if (parsedParams.isWithNewAttribute()) {
             if (parsedParams.newAttribute.owner.equals("")) {
