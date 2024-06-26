@@ -121,7 +121,7 @@ describe("Event handling when rejecting a Relationship", () => {
 
         const template: RelationshipTemplateDTO = await exchangeTemplate(sTransportServices, tTransportServices, templateContent);
 
-        if ((await sTransportServices.relationships.getRelationships({ query: { peer: (await tTransportServices.account.getIdentityInfo()).value.address } })).value.length === 0) {
+        if ((await sTransportServices.relationships.getRelationships({})).value.length === 0) {
             await tTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
             const requestId = (await tConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
             await tConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });

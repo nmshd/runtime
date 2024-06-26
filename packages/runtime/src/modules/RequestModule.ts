@@ -28,8 +28,12 @@ import { LocalRequestDTO, RelationshipDTO, RelationshipStatus } from "../types";
 import { RuntimeErrors } from "../useCases";
 
 export class RequestModule extends RuntimeModule {
+    private attributesController: AttributesController;
+    private accountController: AccountController;
+
     public init(): void {
-        // Nothing to do here
+        this.attributesController = Container.get(AttributesController);
+        this.accountController = Container.get(AccountController);
     }
 
     public start(): void {
@@ -318,25 +322,23 @@ export class RequestModule extends RuntimeModule {
     }
 
     private async deleteSharedAttributesForRejectedOrRevokedRelationship(eventTargetAddress: string, relationship: RelationshipDTO) {
-        const attributesController = Container.get<AttributesController>(AttributesController);
-        const accountController = Container.get<AccountController>(AccountController);
-
         const services = await this.runtime.getServices(eventTargetAddress);
         const sharedAttributeDTOs = (await services.consumptionServices.attributes.getAttributes({ query: { "shareInfo.peer": relationship.peer } })).value;
 
         for (const sharedAttributeDTO of sharedAttributeDTOs) {
-            const sharedAttribute = await attributesController.getLocalAttribute(CoreId.from(sharedAttributeDTO.id));
+            const sharedAttribute = await this.attributesController.getLocalAttribute(CoreId.from(sharedAttributeDTO.id));
             if (!sharedAttribute) throw RuntimeErrors.general.recordNotFound(LocalAttribute);
 
-            const validationResult = await attributesController.validateFullAttributeDeletionProcess(sharedAttribute);
+            const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(sharedAttribute);
             if (validationResult.isError()) {
                 return Result.fail(validationResult.error);
             }
 
-            await attributesController.executeFullAttributeDeletionProcess(sharedAttribute);
+            await this.attributesController.executeFullAttributeDeletionProcess(sharedAttribute);
         }
 
-        await accountController.syncDatawallet();
+        await this.accountController.syncDatawallet();
+
         return;
     }
 
