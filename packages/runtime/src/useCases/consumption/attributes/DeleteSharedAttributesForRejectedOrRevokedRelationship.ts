@@ -34,7 +34,11 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
             return Result.fail(RuntimeErrors.relationships.isNeitherRejectedNorRevoked());
         }
 
-        const sharedAttributes = await this.attributesController.getLocalAttributes({ query: { "shareInfo.peer": relationship.peer } });
+        const peerAddress = relationship.peer.address.toString();
+        const query: any = {
+            "shareInfo.peer": peerAddress
+        };
+        const sharedAttributes = await this.attributesController.getLocalAttributes(query);
 
         for (const sharedAttribute of sharedAttributes) {
             const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(sharedAttribute);
