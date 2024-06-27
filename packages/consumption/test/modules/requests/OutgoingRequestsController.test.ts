@@ -6,7 +6,7 @@ import {
     IRequestItemGroup,
     IResponse,
     IResponseItemGroup,
-    RelationshipTemplateContent,
+    RelationshipTemplateContentContainingRequest,
     RequestItemGroup,
     ResponseItemResult,
     ResponseResult
@@ -269,7 +269,7 @@ describe("OutgoingRequestsController", function () {
                 await When.iCreateAnOutgoingRequestFromRelationshipCreationWith({
                     template: TestObjectFactory.createOutgoingIRelationshipTemplate(
                         context.currentIdentity,
-                        RelationshipTemplateContent.from({
+                        RelationshipTemplateContentContainingRequest.from({
                             onNewRelationship: TestObjectFactory.createRequestWithOneItem()
                         })
                     ),
