@@ -1,3 +1,4 @@
+import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentContainingResponseJSON } from "@nmshd/content";
 import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
@@ -28,6 +29,8 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
     }
 
     protected async executeInternal(request: CreateRelationshipRequest): Promise<Result<RelationshipDTO>> {
+        Serializable.fromUnknown(request.creationContent); // invokes the ts-serval check
+
         const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
         if (!template) {
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
