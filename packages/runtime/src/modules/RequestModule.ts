@@ -1,5 +1,4 @@
-import { Result } from "@js-soft/ts-utils";
-import { AttributesController, LocalAttribute, LocalRequestStatus } from "@nmshd/consumption";
+import { LocalRequestStatus } from "@nmshd/consumption";
 import {
     RelationshipCreationChangeRequestContent,
     RelationshipCreationChangeRequestContentJSON,
@@ -10,8 +9,6 @@ import {
     ResponseWrapper,
     ResponseWrapperJSON
 } from "@nmshd/content";
-import { AccountController, CoreId } from "@nmshd/transport";
-import { Container } from "typescript-ioc";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -24,16 +21,11 @@ import {
 import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 import { RuntimeServices } from "../Runtime";
-import { LocalRequestDTO, RelationshipDTO, RelationshipStatus } from "../types";
-import { RuntimeErrors } from "../useCases";
+import { LocalRequestDTO, RelationshipStatus } from "../types";
 
 export class RequestModule extends RuntimeModule {
-    private attributesController: AttributesController;
-    private accountController: AccountController;
-
     public init(): void {
-        this.attributesController = Container.get(AttributesController);
-        this.accountController = Container.get(AccountController);
+        // Nothing to do here
     }
 
     public start(): void {
@@ -289,15 +281,14 @@ export class RequestModule extends RuntimeModule {
 
     private async handleRelationshipChangedEvent(event: RelationshipChangedEvent) {
         const createdRelationship = event.data;
+        const services = await this.runtime.getServices(event.eventTargetAddress);
 
         if (createdRelationship.status === RelationshipStatus.Rejected || createdRelationship.status === RelationshipStatus.Revoked) {
-            await this.deleteSharedAttributesForRejectedOrRevokedRelationship(event.eventTargetAddress, createdRelationship);
+            await services.consumptionServices.attributes.deleteSharedAttributesForRejectedOrRevokedRelationship({ relationshipId: createdRelationship.id });
         }
 
         // only trigger for new relationships that were created from an own template
         if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
-
-        const services = await this.runtime.getServices(event.eventTargetAddress);
 
         const template = createdRelationship.template;
         const templateId = template.id;
@@ -319,27 +310,6 @@ export class RequestModule extends RuntimeModule {
             this.logger.error(`Could not create and complete request for templateId '${templateId}' and changeId '${relationshipChangeId}'. Root error:`, result.error);
             return;
         }
-    }
-
-    private async deleteSharedAttributesForRejectedOrRevokedRelationship(eventTargetAddress: string, relationship: RelationshipDTO) {
-        const services = await this.runtime.getServices(eventTargetAddress);
-        const sharedAttributeDTOs = (await services.consumptionServices.attributes.getAttributes({ query: { "shareInfo.peer": relationship.peer } })).value;
-
-        for (const sharedAttributeDTO of sharedAttributeDTOs) {
-            const sharedAttribute = await this.attributesController.getLocalAttribute(CoreId.from(sharedAttributeDTO.id));
-            if (!sharedAttribute) throw RuntimeErrors.general.recordNotFound(LocalAttribute);
-
-            const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(sharedAttribute);
-            if (validationResult.isError()) {
-                return Result.fail(validationResult.error);
-            }
-
-            await this.attributesController.executeFullAttributeDeletionProcess(sharedAttribute);
-        }
-
-        await this.accountController.syncDatawallet();
-
-        return;
     }
 
     public stop(): void {
