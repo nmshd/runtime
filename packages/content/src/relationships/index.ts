@@ -1,4 +1,4 @@
 export * from "./ArbitraryRelationshipCreationContent";
 export * from "./ArbitraryRelationshipTemplateContent";
-export * from "./RelationshipCreationContent";
-export * from "./RelationshipTemplateContent";
+export * from "./RelationshipCreationContentContainingResponse";
+export * from "./RelationshipTemplateContentContainingRequest";
