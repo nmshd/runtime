@@ -1,3 +1,4 @@
+import { ArbitraryMessageContent, ArbitraryMessageContentJSON, Mail, MailJSON, NotificationJSON, RequestJSON, ResponseWrapper, ResponseWrapperJSON } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { CoreId, File, Message, MessageEnvelopeRecipient } from "@nmshd/transport";
 import { MessageDTO, MessageWithAttachmentsDTO, RecipientDTO } from "../../../types";
@@ -40,10 +41,23 @@ export class MessageMapper {
         if (!message.cache) {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
         }
+        if (
+            !(
+                message.cache.content instanceof Mail ||
+                message.cache.content instanceof Request ||
+                message.cache.content instanceof ResponseWrapper ||
+                message.cache.content instanceof Notification ||
+                message.cache.content instanceof ArbitraryMessageContent
+            )
+        ) {
+            throw RuntimeErrors.general.invalidPropertyValue(
+                `The content type of message ${message.id} is neither Mail nor Request nor ResponseWrapper nor Notification nor ArbitraryMessageContent.`
+            );
+        }
 
         return {
             id: message.id.toString(),
-            content: message.cache.content.toJSON(),
+            content: message.cache.content.toJSON() as MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON,
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: message.cache.recipients.map((r, i) => this.toRecipient(r, message.relationshipIds[i])),

@@ -1,6 +1,7 @@
+import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentContainingResponseJSON } from "@nmshd/content";
 import { RelationshipAuditLogDTO } from "../../types/transport/RelationshipDTO";
-import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
+import { LocalAttributeDVO } from "../consumption";
 
 export enum RelationshipDirection {
     Outgoing = "Outgoing",
@@ -14,7 +15,7 @@ export interface RelationshipDVO extends DataViewObject {
     statusText: string;
     isPinned: boolean;
     theme?: RelationshipTheme;
-    creationContent: any;
+    creationContent: RelationshipCreationContentContainingResponseJSON | ArbitraryRelationshipCreationContentJSON;
     auditLog: RelationshipAuditLogDTO;
     items: LocalAttributeDVO[];
     attributeMap: Record<string, undefined | LocalAttributeDVO[]>;

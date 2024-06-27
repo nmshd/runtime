@@ -285,7 +285,7 @@ export class DataViewExpander {
             wasReadAt: message.wasReadAt
         };
 
-        if (message.content["@type"] === "Mail" || message.content["@type"] === "RequestMail") {
+        if (message.content["@type"] === "Mail") {
             const mailContent = message.content as MailJSON;
 
             const to: RecipientDVO[] = mailContent.to.map((value) => addressMap[value]);
@@ -344,7 +344,7 @@ export class DataViewExpander {
             return requestMessageDVO;
         }
 
-        if (message.content["@type"] === "Response") {
+        if (message.content["@type"] === "ResponseWrapper") {
             let localRequest: LocalRequestDTO;
             if (isOwn) {
                 const localRequestsResult = await this.consumption.incomingRequests.getRequests({

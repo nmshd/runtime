@@ -1,3 +1,4 @@
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContentContainingResponse } from "@nmshd/content";
 import { Relationship, RelationshipAuditLogEntry } from "@nmshd/transport";
 import { RelationshipAuditLogEntryDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
@@ -7,6 +8,16 @@ export class RelationshipMapper {
     public static toRelationshipDTO(relationship: Relationship): RelationshipDTO {
         if (!relationship.cache) {
             throw RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString());
+        }
+        if (
+            !(
+                relationship.cache.creationContent instanceof RelationshipCreationContentContainingResponse ||
+                relationship.cache.creationContent instanceof ArbitraryRelationshipCreationContent
+            )
+        ) {
+            throw RuntimeErrors.general.invalidPropertyValue(
+                `The creationContent type of relationship ${relationship.id} is neither RelationshipCreationContentContainingResponse nor ArbitraryRelationshipCreationContent.`
+            );
         }
 
         return {
