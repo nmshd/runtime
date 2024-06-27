@@ -1,6 +1,7 @@
+import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
-import { ArbitraryRelationshipTemplateContentJSON, RelationshipTemplateContentContainingRequestJSON } from "@nmshd/content";
+import { ArbitraryRelationshipTemplateContentJSON, RelationshipTemplateContentContainingRequest, RelationshipTemplateContentContainingRequestJSON } from "@nmshd/content";
 import { AccountController, CoreDate, RelationshipTemplateController } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -66,11 +67,14 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
     }
 
     private async validateRelationshipTemplateContent(content: any) {
-        const validationResult = await this.outgoingRequestsController.canCreate({ content: content.onNewRelationship });
+        const transformedContent = Serializable.fromUnknown(content);
+        if (!(transformedContent instanceof RelationshipTemplateContentContainingRequest)) return;
+
+        const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
         if (validationResult.isError()) return validationResult.error;
 
-        if (content.onExistingRelationship) {
-            const validationResult = await this.outgoingRequestsController.canCreate({ content: content.onExistingRelationship });
+        if (transformedContent.onExistingRelationship) {
+            const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onExistingRelationship });
             if (validationResult.isError()) return validationResult.error;
         }
 
