@@ -73,7 +73,7 @@ describe("DeciderModule", () => {
         const template = (
             await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: {
-                    "@type": "RelationshipTemplateContent",
+                    "@type": "RelationshipTemplateContentContainingRequest",
                     onNewRelationship: request.toJSON()
                 },
                 expiresAt: CoreDate.utc().add({ minutes: 5 }).toISOString()
@@ -104,7 +104,7 @@ describe("DeciderModule", () => {
         const template = (
             await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: {
-                    "@type": "RelationshipTemplateContent",
+                    "@type": "RelationshipTemplateContentContainingRequest",
                     onNewRelationship: request.toJSON()
                 },
                 expiresAt: CoreDate.utc().add({ minutes: 5 }).toISOString()

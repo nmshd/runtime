@@ -6,7 +6,7 @@ import {
     DecideRequestItemParametersJSON,
     LocalRequestStatus
 } from "@nmshd/consumption";
-import { INotificationItem, Notification, RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { INotificationItem, Notification } from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
@@ -159,11 +159,15 @@ export async function makeUploadRequest(values: object = {}): Promise<UploadOwnF
     };
 }
 
-export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON): Promise<RelationshipTemplateDTO> {
+export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateContentJSON = ArbitraryRelationshipTemplateContent.from({ content: {} }).toJSON();
+
+export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ content: {} }).toJSON();
+
+export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentContainingRequestJSON): Promise<RelationshipTemplateDTO> {
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
         expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
-        content: body
+        content: body ?? emptyRelationshipTemplateContent
     });
 
     expect(response).toBeSuccessful();
@@ -183,7 +187,7 @@ export async function getFileToken(transportServices: TransportServices): Promis
 export async function exchangeTemplate(
     transportServicesCreator: TransportServices,
     transportServicesRecipient: TransportServices,
-    content?: RelationshipTemplateContentJSON
+    content?: RelationshipTemplateContentContainingRequestJSON
 ): Promise<RelationshipTemplateDTO> {
     const template = await createTemplate(transportServicesCreator, content);
 
@@ -279,7 +283,8 @@ export async function establishRelationship(transportServices1: TransportService
     const template = await exchangeTemplate(transportServices1, transportServices2);
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
-        templateId: template.id
+        templateId: template.id,
+        creationContent: emptyRelationshipCreationContent
     });
     expect(createRelationshipResponse).toBeSuccessful();
 
@@ -299,8 +304,8 @@ export async function establishRelationship(transportServices1: TransportService
 export async function establishRelationshipWithContents(
     transportServices1: TransportServices,
     transportServices2: TransportServices,
-    templateContent?: RelationshipTemplateContentJSON,
-    creationContent?: RelationshipCreationContentJSON
+    templateContent?: RelationshipTemplateContentContainingRequestJSON,
+    creationContent?: RelationshipCreationContentContainingResponseJSON
 ): Promise<void> {
     const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
 
@@ -343,7 +348,8 @@ export async function ensurePendingRelationship(sTransportServices: TransportSer
         const template = await exchangeTemplate(sTransportServices, rTransportServices);
 
         const createRelationshipResponse = await rTransportServices.relationships.createRelationship({
-            templateId: template.id
+            templateId: template.id,
+            creationContent: emptyRelationshipCreationContent
         });
         expect(createRelationshipResponse).toBeSuccessful();
 

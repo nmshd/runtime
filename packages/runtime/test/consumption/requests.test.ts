@@ -1,6 +1,6 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipTemplateContentJSON } from "@nmshd/content";
+import { RelationshipTemplateContentContainingRequestJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
@@ -357,7 +357,7 @@ describe("Requests", () => {
         let rEventBus: EventBus;
         let sEventBus: EventBus;
 
-        const templateContent: RelationshipTemplateContentJSON = {
+        const templateContent: RelationshipTemplateContentContainingRequestJSON = {
             "@type": "RelationshipTemplateContent",
             onNewRelationship: {
                 "@type": "Request",

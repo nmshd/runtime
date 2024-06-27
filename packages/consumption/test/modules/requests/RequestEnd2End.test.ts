@@ -1,6 +1,13 @@
 /* eslint-disable jest/expect-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AcceptResponseItem, RelationshipCreationContent, RelationshipTemplateContent, Request, Response, ResponseWrapper } from "@nmshd/content";
+import {
+    AcceptResponseItem,
+    RelationshipCreationContentContainingResponse,
+    RelationshipTemplateContentContainingRequest,
+    Request,
+    Response,
+    ResponseWrapper
+} from "@nmshd/content";
 import { AccountController, CoreDate, Message, Relationship, RelationshipTemplate, Transport } from "@nmshd/transport";
 import { ConsumptionController, LocalRequest, LocalRequestStatus } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
@@ -23,8 +30,8 @@ describe("End2End Request/Response via Relationship Template", function () {
     let sRelationship: Relationship;
     let sLocalRequest: LocalRequest;
 
-    let sCreationContent: RelationshipCreationContent;
-    let rCreationContent: RelationshipCreationContent;
+    let sCreationContent: RelationshipCreationContentContainingResponse;
+    let rCreationContent: RelationshipCreationContentContainingResponse;
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
@@ -48,7 +55,7 @@ describe("End2End Request/Response via Relationship Template", function () {
             items: [TestRequestItem.from({ mustBeAccepted: false })]
         });
         sTemplate = await sAccountController.relationshipTemplates.sendRelationshipTemplate({
-            content: RelationshipTemplateContent.from({ onNewRelationship: request }),
+            content: RelationshipTemplateContentContainingRequest.from({ onNewRelationship: request }),
             expiresAt: CoreDate.utc().add({ hours: 1 }),
             maxNumberOfAllocations: 1
         });
@@ -60,7 +67,7 @@ describe("End2End Request/Response via Relationship Template", function () {
 
     test("recipient: create Local Request", async function () {
         rLocalRequest = await rConsumptionController.incomingRequests.received({
-            receivedRequest: (rTemplate.cache!.content as RelationshipTemplateContent).onNewRelationship,
+            receivedRequest: (rTemplate.cache!.content as RelationshipTemplateContentContainingRequest).onNewRelationship,
             requestSourceObject: rTemplate
         });
     });
@@ -91,9 +98,9 @@ describe("End2End Request/Response via Relationship Template", function () {
     test("recipient: create Relationship with Response in Relationship Creation Content", async function () {
         rRelationship = await rAccountController.relationships.sendRelationship({
             template: rTemplate,
-            creationContent: RelationshipCreationContent.from({ response: rLocalRequest.response!.content })
+            creationContent: RelationshipCreationContentContainingResponse.from({ response: rLocalRequest.response!.content })
         });
-        rCreationContent = rRelationship.cache?.creationContent as RelationshipCreationContent;
+        rCreationContent = rRelationship.cache?.creationContent as RelationshipCreationContentContainingResponse;
     });
 
     test("recipient: complete Local Request", async function () {
@@ -109,7 +116,7 @@ describe("End2End Request/Response via Relationship Template", function () {
     });
 
     test("sender: create Local Request and Response from Relationship Change", async function () {
-        sCreationContent = sRelationship.cache!.creationContent! as RelationshipCreationContent;
+        sCreationContent = sRelationship.cache!.creationContent! as RelationshipCreationContentContainingResponse;
         const response = sCreationContent.response;
 
         sLocalRequest = await sConsumptionController.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
@@ -128,11 +135,11 @@ describe("End2End Request/Response via Relationship Template", function () {
         expect(rLocalRequest.id.toString()).toStrictEqual(sLocalRequest.id.toString());
 
         // make sure (de-)serialization worked as expected
-        expect(sTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContent);
-        expect((sTemplate.cache!.content as RelationshipTemplateContent).onNewRelationship).toBeInstanceOf(Request);
+        expect(sTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContentContainingRequest);
+        expect((sTemplate.cache!.content as RelationshipTemplateContentContainingRequest).onNewRelationship).toBeInstanceOf(Request);
 
-        expect(rTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContent);
-        expect((rTemplate.cache!.content as RelationshipTemplateContent).onNewRelationship).toBeInstanceOf(Request);
+        expect(rTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContentContainingRequest);
+        expect((rTemplate.cache!.content as RelationshipTemplateContentContainingRequest).onNewRelationship).toBeInstanceOf(Request);
 
         expect(sLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
         expect(rLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
@@ -332,7 +339,7 @@ describe("End2End Request via Template and Response via Message", function () {
             items: [TestRequestItem.from({ mustBeAccepted: false })]
         });
         sTemplate = await sAccountController.relationshipTemplates.sendRelationshipTemplate({
-            content: RelationshipTemplateContent.from({
+            content: RelationshipTemplateContentContainingRequest.from({
                 onNewRelationship: request,
                 onExistingRelationship: request
             }),
@@ -347,7 +354,7 @@ describe("End2End Request via Template and Response via Message", function () {
 
     test("recipient: create Local Request", async function () {
         rLocalRequest = await rConsumptionController.incomingRequests.received({
-            receivedRequest: (rTemplate.cache!.content as RelationshipTemplateContent).onExistingRelationship!,
+            receivedRequest: (rTemplate.cache!.content as RelationshipTemplateContentContainingRequest).onExistingRelationship!,
             requestSourceObject: rTemplate
         });
     });
@@ -422,11 +429,11 @@ describe("End2End Request via Template and Response via Message", function () {
         expect(rLocalRequest.id.toString()).toStrictEqual(sLocalRequest.id.toString());
 
         // make sure (de-)serialization worked as expected
-        expect(sTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContent);
-        expect((sTemplate.cache!.content as RelationshipTemplateContent).onExistingRelationship).toBeInstanceOf(Request);
+        expect(sTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContentContainingRequest);
+        expect((sTemplate.cache!.content as RelationshipTemplateContentContainingRequest).onExistingRelationship).toBeInstanceOf(Request);
 
-        expect(rTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContent);
-        expect((rTemplate.cache!.content as RelationshipTemplateContent).onExistingRelationship).toBeInstanceOf(Request);
+        expect(rTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContentContainingRequest);
+        expect((rTemplate.cache!.content as RelationshipTemplateContentContainingRequest).onExistingRelationship).toBeInstanceOf(Request);
 
         expect(sLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
         expect(rLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
