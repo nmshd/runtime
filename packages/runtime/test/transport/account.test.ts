@@ -1,7 +1,7 @@
 import { CoreDate } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
-import { RuntimeServiceProvider, uploadFile } from "../lib";
+import { RuntimeServiceProvider, emptyRelationshipTemplateContent, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -109,6 +109,7 @@ describe("LoadItemFromTruncatedReference", () => {
         beforeAll(async () => {
             const relationshipTemplate = (
                 await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: emptyRelationshipTemplateContent,
                     expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
                 })
             ).value;

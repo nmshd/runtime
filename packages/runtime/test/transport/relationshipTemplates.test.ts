@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { QueryParamConditions, RuntimeServiceProvider } from "../lib";
+import { QueryParamConditions, RuntimeServiceProvider, emptyRelationshipTemplateContent } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -17,7 +17,8 @@ describe("Template Tests", () => {
     test("create a template", async () => {
         const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
             maxNumberOfAllocations: 1,
-            expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
+            expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+            content: emptyRelationshipTemplateContent
         });
 
         expect(response).toBeSuccessful();
@@ -25,6 +26,7 @@ describe("Template Tests", () => {
 
     test("create a template with undefined expiresAt", async () => {
         const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
             expiresAt: undefined as unknown as string
         });
 
@@ -33,6 +35,7 @@ describe("Template Tests", () => {
 
     test("create a template with undefined maxNumberOfAllocations", async () => {
         const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
             expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
         });
 
@@ -45,6 +48,7 @@ describe("Template Tests", () => {
     test("read a template with undefined maxNumberOfAllocations", async () => {
         const templateWithUndefinedMaxNumberOfAllocations = (
             await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
             })
         ).value;
@@ -61,7 +65,8 @@ describe("Template Tests", () => {
         const template = (
             await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
-                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent
             })
         ).value;
 
@@ -76,7 +81,8 @@ describe("Template Tests", () => {
         const template = (
             await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
-                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent
             })
         ).value;
 
@@ -86,6 +92,7 @@ describe("Template Tests", () => {
 
     test("expect a validation error for sending maxNumberOfAllocations 0", async () => {
         const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
             expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
             maxNumberOfAllocations: 0
         });
@@ -100,7 +107,8 @@ describe("RelationshipTemplates query", () => {
         const template = (
             await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
-                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent
             })
         ).value;
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, transportServices1)
@@ -118,7 +126,8 @@ describe("RelationshipTemplates query", () => {
         const template = (
             await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
-                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent
             })
         ).value;
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, transportServices1)
@@ -134,7 +143,8 @@ describe("RelationshipTemplates query", () => {
         const createdTemplate = (
             await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
-                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent
             })
         ).value;
         const peerTemplate = (await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createdTemplate.truncatedReference })).value;
