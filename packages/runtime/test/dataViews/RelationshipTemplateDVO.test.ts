@@ -6,7 +6,11 @@ import {
     IdentityAttributeQuery,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
+    ProprietaryStringJSON,
     RelationshipAttributeConfidentiality,
+    RelationshipAttributeJSON,
+    RelationshipTemplateContentContainingRequestJSON,
+    RequestItemGroupJSON,
     Surname
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
@@ -41,29 +45,29 @@ beforeEach(function () {
 
 describe("RelationshipTemplateDVO", () => {
     beforeAll(async () => {
-        const relationshipAttributeContent1 = {
+        const relationshipAttributeContent1: RelationshipAttributeJSON = {
             "@type": "RelationshipAttribute",
             owner: templator.address,
             value: {
                 "@type": "ProprietaryString",
                 title: "ATitle",
                 value: "AProprietaryStringValue"
-            },
+            } as ProprietaryStringJSON,
             key: "givenName",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-        const relationshipAttributeContent2 = {
+        const relationshipAttributeContent2: RelationshipAttributeJSON = {
             "@type": "RelationshipAttribute",
             owner: templator.address,
             value: {
                 "@type": "ProprietaryString",
                 title: "ATitle",
                 value: "AProprietaryStringValue"
-            },
+            } as ProprietaryStringJSON,
             key: "surname",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-        const templateContent = {
+        const templateContent: RelationshipTemplateContentContainingRequestJSON = {
             "@type": "RelationshipTemplateContentContainingRequest",
             onNewRelationship: {
                 "@type": "Request",
@@ -99,7 +103,7 @@ describe("RelationshipTemplateDVO", () => {
                                     owner: CoreAddress.from(""),
                                     value: GivenName.from("Theo")
                                 })
-                            }),
+                            }).toJSON(),
                             ProposeAttributeRequestItem.from({
                                 mustBeAccepted: true,
                                 query: IdentityAttributeQuery.from({
@@ -109,17 +113,17 @@ describe("RelationshipTemplateDVO", () => {
                                     owner: CoreAddress.from(""),
                                     value: Surname.from("Templator")
                                 })
-                            })
+                            }).toJSON()
                         ]
                     }
                 ]
             }
         };
         const newIdentityAttribute1 = IdentityAttribute.from(
-            (templateContent.onNewRelationship.items[1].items[0] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
+            ((templateContent.onNewRelationship.items[1] as RequestItemGroupJSON).items[0] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
         ).toJSON();
         const newIdentityAttribute2 = IdentityAttribute.from(
-            (templateContent.onNewRelationship.items[1].items[1] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
+            ((templateContent.onNewRelationship.items[1] as RequestItemGroupJSON).items[1] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
         ).toJSON();
         responseItems = [
             { items: [{ accept: true }, { accept: true }] },
