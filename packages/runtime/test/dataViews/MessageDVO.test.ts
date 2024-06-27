@@ -19,6 +19,7 @@ beforeAll(async () => {
         transportServices1,
         transportServices2,
         {
+            "@type": "RelationshipTemplateContentContainingRequest",
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -28,15 +29,16 @@ beforeAll(async () => {
                             "@type": "IdentityAttributeQuery",
                             valueType: "CommunicationLanguage"
                         }
-                    })
+                    }).toJSON()
                 ]
             }
         },
         {
+            "@type": "RelationshipCreationContentContainingResponse",
             response: {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
-                requestId: await CoreId.generate(),
+                requestId: (await CoreId.generate()).toString(),
                 items: [
                     ReadAttributeAcceptResponseItem.from({
                         result: ResponseItemResult.Accepted,
@@ -45,7 +47,7 @@ beforeAll(async () => {
                             owner: CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address),
                             value: GivenName.from("AGivenName")
                         })
-                    })
+                    }).toJSON()
                 ]
             }
         }

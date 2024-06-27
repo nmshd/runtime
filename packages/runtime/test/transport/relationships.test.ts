@@ -18,6 +18,7 @@ import {
     RuntimeServiceProvider,
     TestRuntimeServices,
     createTemplate,
+    emptyRelationshipCreationContent,
     ensureActiveRelationship,
     exchangeMessageWithRequest,
     exchangeTemplate,
@@ -55,7 +56,7 @@ describe("Create Relationship", () => {
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
-            creationContent: { a: "b" }
+            creationContent: emptyRelationshipCreationContent
         });
         expect(createRelationshipResponse).toBeSuccessful();
 
