@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { RelationshipCreationContentJSON } from "@nmshd/content";
-import { AccountController, CoreId, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentContainingResponseJSON } from "@nmshd/content";
+import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -8,7 +8,7 @@ import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface CreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
-    creationContent?: RelationshipCreationContentJSON;
+    creationContent: RelationshipCreationContentContainingResponseJSON | ArbitraryRelationshipCreationContentJSON;
 }
 
 class Validator extends SchemaValidator<CreateRelationshipRequest> {
@@ -33,10 +33,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        const relationship = await this.relationshipsController.sendRelationship({
-            template: template,
-            creationContent: request.creationContent ?? {}
-        });
+        const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: request.creationContent });
 
         await this.accountController.syncDatawallet();
 
