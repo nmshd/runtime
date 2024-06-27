@@ -2,8 +2,8 @@ import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/cons
 import {
     GivenName,
     IdentityAttribute,
-    RelationshipCreationContentJSON,
-    RelationshipTemplateContentJSON,
+    RelationshipCreationContentContainingResponseJSON,
+    RelationshipTemplateContentContainingRequestJSON,
     ResponseItemJSON,
     ResponseItemResult,
     ResponseResult
@@ -78,7 +78,7 @@ describe("RequestModule", () => {
         let template: RelationshipTemplateDTO;
 
         const metadata = { aMetadataKey: "aMetadataValue" };
-        const templateContent: RelationshipTemplateContentJSON = {
+        const templateContent: RelationshipTemplateContentContainingRequestJSON = {
             "@type": "RelationshipTemplateContentContainingRequest",
             onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
             metadata
@@ -144,7 +144,7 @@ describe("RequestModule", () => {
         test("triggers RelationshipTemplateProcessedEvent when another Template is loaded and a pending Relationship exists", async () => {
             const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-            const templateContent: RelationshipTemplateContentJSON = {
+            const templateContent: RelationshipTemplateContentContainingRequestJSON = {
                 "@type": "RelationshipTemplateContentContainingRequest",
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 metadata
@@ -156,7 +156,7 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent if there is no request in the template", async () => {
-            await exchangeTemplate(sTransportServices, rTransportServices, {});
+            await exchangeTemplate(sTransportServices, rTransportServices);
 
             await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.NoRequest);
         });
@@ -182,11 +182,8 @@ describe("RequestModule", () => {
 
             const relationship = relationships[0];
 
-            const creationContent = relationship.creationContent as RelationshipCreationContentJSON;
-            expect(creationContent["@type"]).toBe("RelationshipCreationContent");
-
-            const creationChangeRequestContent = relationship.creationContent as RelationshipCreationContentJSON;
-            expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationContent");
+            const creationContent = relationship.creationContent as RelationshipCreationContentContainingResponseJSON;
+            expect(creationContent["@type"]).toBe("RelationshipCreationContentContainingResponse");
 
             const response = creationContent.response;
             const responseItems = response.items;
@@ -319,7 +316,7 @@ describe("RequestModule", () => {
         });
 
         async function exchangeRelationshipTemplate() {
-            const templateContent: RelationshipTemplateContentJSON = {
+            const templateContent: RelationshipTemplateContentContainingRequestJSON = {
                 "@type": "RelationshipTemplateContentContainingRequest",
                 onNewRelationship: {
                     "@type": "Request",
