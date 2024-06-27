@@ -192,7 +192,7 @@ describe("Un-/RegisterPushNotificationToken", () => {
     test.each(["Development", "Production"])("register with valid enviroment", async (environment: any) => {
         const result = await sTransportServices.account.registerPushNotificationToken({
             handle: "handleLongerThan10Characters",
-            platform: "apns",
+            platform: "dummy",
             appId: "appId",
             environment: environment
         });
