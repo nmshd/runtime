@@ -6,7 +6,16 @@ import {
     DecideRequestItemParametersJSON,
     LocalRequestStatus
 } from "@nmshd/consumption";
-import { INotificationItem, Notification } from "@nmshd/content";
+import {
+    ArbitraryRelationshipCreationContent,
+    ArbitraryRelationshipCreationContentJSON,
+    ArbitraryRelationshipTemplateContent,
+    ArbitraryRelationshipTemplateContentJSON,
+    INotificationItem,
+    Notification,
+    RelationshipCreationContentContainingResponseJSON,
+    RelationshipTemplateContentContainingRequestJSON
+} from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
