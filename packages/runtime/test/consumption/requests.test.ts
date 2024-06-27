@@ -358,7 +358,7 @@ describe("Requests", () => {
         let sEventBus: EventBus;
 
         const templateContent: RelationshipTemplateContentContainingRequestJSON = {
-            "@type": "RelationshipTemplateContent",
+            "@type": "RelationshipTemplateContentContainingRequest",
             onNewRelationship: {
                 "@type": "Request",
                 items: [

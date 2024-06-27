@@ -288,7 +288,7 @@ export class RequestModule extends RuntimeModule {
         const template = createdRelationship.template;
         const templateId = template.id;
         // do not trigger for templates without the correct content type
-        if (template.content["@type"] !== "RelationshipTemplateContent") return;
+        if (template.content["@type"] !== "RelationshipTemplateContentContainingRequest") return;
 
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,

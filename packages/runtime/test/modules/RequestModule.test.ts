@@ -79,7 +79,7 @@ describe("RequestModule", () => {
 
         const metadata = { aMetadataKey: "aMetadataValue" };
         const templateContent: RelationshipTemplateContentJSON = {
-            "@type": "RelationshipTemplateContent",
+            "@type": "RelationshipTemplateContentContainingRequest",
             onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
             metadata
         };
@@ -145,7 +145,7 @@ describe("RequestModule", () => {
             const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
             const templateContent: RelationshipTemplateContentJSON = {
-                "@type": "RelationshipTemplateContent",
+                "@type": "RelationshipTemplateContentContainingRequest",
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 metadata
             };
@@ -320,7 +320,7 @@ describe("RequestModule", () => {
 
         async function exchangeRelationshipTemplate() {
             const templateContent: RelationshipTemplateContentJSON = {
-                "@type": "RelationshipTemplateContent",
+                "@type": "RelationshipTemplateContentContainingRequest",
                 onNewRelationship: {
                     "@type": "Request",
                     items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]

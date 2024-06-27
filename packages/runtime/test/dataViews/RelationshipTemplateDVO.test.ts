@@ -64,7 +64,7 @@ describe("RelationshipTemplateDVO", () => {
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
         const templateContent = {
-            "@type": "RelationshipTemplateContent",
+            "@type": "RelationshipTemplateContentContainingRequest",
             onNewRelationship: {
                 "@type": "Request",
                 items: [
