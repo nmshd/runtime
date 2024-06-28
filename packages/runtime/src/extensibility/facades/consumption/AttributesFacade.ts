@@ -14,6 +14,8 @@ import {
     DeletePeerSharedAttributeAndNotifyOwnerUseCase,
     DeleteRepositoryAttributeRequest,
     DeleteRepositoryAttributeUseCase,
+    DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest,
+    DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
@@ -56,10 +58,6 @@ import {
     ValidateIQLQueryResponse,
     ValidateIQLQueryUseCase
 } from "../../../useCases";
-import {
-    DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest,
-    DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase
-} from "../../../useCases/consumption/attributes/DeleteSharedAttributesForRejectedOrRevokedRelationship";
 
 export class AttributesFacade {
     public constructor(
