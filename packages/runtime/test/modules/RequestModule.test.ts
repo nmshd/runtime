@@ -425,7 +425,7 @@ describe("RequestModule", () => {
     });
 });
 
-describe("RequestModule handling Relationship rejection and revocation", () => {
+describe("Handling the rejection and the revocation of a Relationship by the RequestModule", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider();
     let sRuntimeServices: TestRuntimeServices;
     let rRuntimeServices: TestRuntimeServices;
@@ -459,15 +459,15 @@ describe("RequestModule handling Relationship rejection and revocation", () => {
         rRuntimeServices.eventBus.reset();
 
         const rRepositoryAttributes = (await rRuntimeServices.consumption.attributes.getRepositoryAttributes({})).value;
-        for (const attribute of rRepositoryAttributes) {
-            await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: attribute.id });
+        for (const rRepositoryAttribute of rRepositoryAttributes) {
+            await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: rRepositoryAttribute.id });
         }
     });
 
     afterAll(async () => await runtimeServiceProvider.stop());
 
     test("deletion of the Attributes shared between both Identities involved in the rejected Relationship and keeping the remaining Attributes", async () => {
-        const sRelationship = await establishPendingRelationshipWithRequestFlow(rRuntimeServices, sRuntimeServices, createdRelationshipAttributeForFurtherSharing);
+        const sRelationship = await establishPendingRelationshipWithRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
@@ -485,7 +485,7 @@ describe("RequestModule handling Relationship rejection and revocation", () => {
     });
 
     test("deletion of the Attributes shared between both Identities involved in the revoked Relationship and keeping the remaining Attributes", async () => {
-        const sRelationship = await establishPendingRelationshipWithRequestFlow(rRuntimeServices, sRuntimeServices, createdRelationshipAttributeForFurtherSharing);
+        const sRelationship = await establishPendingRelationshipWithRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
@@ -498,7 +498,7 @@ describe("RequestModule handling Relationship rejection and revocation", () => {
         await syncUntilHasRelationships(sRuntimeServices.transport, 1);
         await sRuntimeServices.eventBus.waitForRunningEventHandlers();
 
-        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
+        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
     });
 });

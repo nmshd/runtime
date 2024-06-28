@@ -341,9 +341,9 @@ export async function establishRelationshipWithContents(
 }
 
 export async function establishPendingRelationshipWithRequestFlow(
-    rRuntimeServices: TestRuntimeServices,
     sRuntimeServices: TestRuntimeServices,
-    createdRelationshipAttributeForFurtherSharing: LocalAttributeDTO
+    rRuntimeServices: TestRuntimeServices,
+    existingRelationshipAttributeForFurtherSharing: LocalAttributeDTO
 ): Promise<RelationshipDTO> {
     const templateContent: RelationshipTemplateContentJSON = {
         "@type": "RelationshipTemplateContent",
@@ -378,8 +378,8 @@ export async function establishPendingRelationshipWithRequestFlow(
                 {
                     "@type": "ShareAttributeRequestItem",
                     mustBeAccepted: true,
-                    sourceAttributeId: createdRelationshipAttributeForFurtherSharing.id,
-                    attribute: createdRelationshipAttributeForFurtherSharing.content
+                    sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
+                    attribute: existingRelationshipAttributeForFurtherSharing.content
                 }
             ]
         }
