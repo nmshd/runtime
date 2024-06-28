@@ -2,6 +2,7 @@ import { AttributesController, DeletionStatus, LocalAttribute } from "@nmshd/con
 import {
     CityJSON,
     CountryJSON,
+    DeleteAttributeRequestItem,
     HouseNumberJSON,
     ReadAttributeRequestItem,
     RelationshipAttributeConfidentiality,
@@ -46,6 +47,7 @@ import {
 import {
     acceptIncomingShareAttributeRequest,
     establishRelationship,
+    exchangeAndAcceptRequestByMessage,
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullNotifyPeerAboutAttributeSuccessionFlow,
@@ -698,6 +700,44 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
         });
         const sUpdatedOwnSharedIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnSharedIdentityAttribute.id })).value;
         expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
+
+        const shareRequestResult2 = await services1.consumption.attributes.shareRepositoryAttribute(shareRequest);
+        expect(shareRequestResult2.isSuccess).toBe(true);
+    });
+
+    test("should send a sharing request containing a repository attribute that was already shared but is to be deleted by the peer", async () => {
+        const shareRequest: ShareRepositoryAttributeRequest = {
+            attributeId: sRepositoryAttribute.id,
+            peer: services2.address
+        };
+        const shareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute(shareRequest);
+
+        const shareRequestId = shareRequestResult.value.id;
+        const sOwnSharedIdentityAttribute = await acceptIncomingShareAttributeRequest(services1, services2, shareRequestId);
+
+        const requestParams = {
+            content: {
+                items: [
+                    DeleteAttributeRequestItem.from({
+                        attributeId: sOwnSharedIdentityAttribute.id,
+                        mustBeAccepted: true
+                    }).toJSON()
+                ]
+            },
+            peer: services2.address
+        };
+
+        const responseItems = [
+            {
+                accept: true,
+                deletionDate: CoreDate.utc().add({ days: 1 }).toString()
+            }
+        ];
+
+        await exchangeAndAcceptRequestByMessage(services1, services2, requestParams, responseItems);
+
+        const sUpdatedOwnSharedIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnSharedIdentityAttribute.id })).value;
+        expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo?.deletionStatus).toStrictEqual(DeletionStatus.ToBeDeletedByPeer);
 
         const shareRequestResult2 = await services1.consumption.attributes.shareRepositoryAttribute(shareRequest);
         expect(shareRequestResult2.isSuccess).toBe(true);

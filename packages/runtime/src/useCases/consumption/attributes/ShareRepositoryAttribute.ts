@@ -55,7 +55,7 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             "content.@type": "IdentityAttribute",
             "shareInfo.sourceAttribute": request.attributeId,
             "shareInfo.peer": request.peer,
-            "deletionInfo.deletionStatus": { $ne: DeletionStatus.DeletedByPeer }
+            "deletionInfo.deletionStatus": { $and: [{ $ne: DeletionStatus.DeletedByPeer }, { $ne: DeletionStatus.ToBeDeletedByPeer }] }
         };
         const ownSharedIdentityAttributesOfRepositoryAttribute = await this.attributeController.getLocalAttributes(query);
         if (ownSharedIdentityAttributesOfRepositoryAttribute.length > 0) {
@@ -65,10 +65,12 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
         }
 
         const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeId, [CoreAddress.from(request.peer)], false);
-        const sharedVersionsNotDeletedByPeer = sharedVersionsOfRepositoryAttribute.filter((attr) => attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer);
-        if (sharedVersionsNotDeletedByPeer.length > 0) {
+        const activeSharedVersions = sharedVersionsOfRepositoryAttribute.filter(
+            (attr) => attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer && attr.deletionInfo?.deletionStatus !== DeletionStatus.ToBeDeletedByPeer
+        );
+        if (activeSharedVersions.length > 0) {
             return Result.fail(
-                RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, sharedVersionsNotDeletedByPeer[0].id)
+                RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, activeSharedVersions[0].id)
             );
         }
 
