@@ -24,6 +24,7 @@ beforeAll(async () => {
     services1 = runtimeServices[0];
     services2 = runtimeServices[1];
 }, 30000);
+
 afterAll(() => serviceProvider.stop());
 
 describe("Create Relationship", () => {
@@ -75,26 +76,32 @@ describe("Create Relationship", () => {
         expect(relationship2Response.value.status).toBe("Active");
     });
 
-    test("returns error if templator has active IdentityDeletionProcess", async () => {
-        // create new services that don't have a relationship yet
-        const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
-        services1 = runtimeServices[0];
-        services2 = runtimeServices[1];
+    describe("Templator with active IdentityDeletionProcess", () => {
+        const serviceProvider = new RuntimeServiceProvider();
+        let services1: TestRuntimeServices;
+        let services2: TestRuntimeServices;
 
-        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
-        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        beforeAll(async () => {
+            const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+            services1 = runtimeServices[0];
+            services2 = runtimeServices[1];
+        }, 30000);
 
-        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
-            templateId: templateId,
-            content: { a: "b" }
+        afterAll(() => serviceProvider.stop());
+
+        test("returns error if templator has active IdentityDeletionProcess", async () => {
+            const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+            await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+
+            const createRelationshipResponse = await services2.transport.relationships.createRelationship({
+                templateId: templateId,
+                content: { a: "b" }
+            });
+            expect(createRelationshipResponse).toBeAnError(
+                "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
+                "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
+            );
         });
-        expect(createRelationshipResponse.isSuccess).toBe(false);
-        expect(createRelationshipResponse).toBeAnError(
-            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
-            "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
-        );
-
-        await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
     });
 });
 
