@@ -7,16 +7,19 @@ import {
     LocalRequestStatus
 } from "@nmshd/consumption";
 import {
+    IdentityAttribute,
     INotificationItem,
     IRelationshipCreationChangeRequestContent,
     IRelationshipTemplateContent,
     Notification,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
     RelationshipCreationChangeRequestContent,
     RelationshipCreationChangeRequestContentJSON,
     RelationshipTemplateContent,
     RelationshipTemplateContentJSON
 } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
 import {
@@ -38,6 +41,7 @@ import {
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
+    RelationshipChangedEvent,
     RelationshipDTO,
     RelationshipStatus,
     RelationshipTemplateDTO,
@@ -334,6 +338,68 @@ export async function establishRelationshipWithContents(
 
     const relationships2 = await syncUntilHasRelationships(transportServices2);
     expect(relationships2).toHaveLength(1);
+}
+
+export async function establishPendingRelationshipWithRequestFlow(
+    rRuntimeServices: TestRuntimeServices,
+    sRuntimeServices: TestRuntimeServices,
+    createdRelationshipAttributeForFurtherSharing: LocalAttributeDTO
+): Promise<RelationshipDTO> {
+    const templateContent: RelationshipTemplateContentJSON = {
+        "@type": "RelationshipTemplateContent",
+        onNewRelationship: {
+            "@type": "Request",
+            items: [
+                {
+                    "@type": "CreateAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        },
+                        owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                    }).toJSON()
+                },
+                {
+                    "@type": "CreateAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: RelationshipAttribute.from({
+                        key: "AKey",
+                        value: {
+                            "@type": "ProprietaryString",
+                            value: "AStringValue",
+                            title: "ATitle"
+                        },
+                        owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }).toJSON()
+                },
+                {
+                    "@type": "ShareAttributeRequestItem",
+                    mustBeAccepted: true,
+                    sourceAttributeId: createdRelationshipAttributeForFurtherSharing.id,
+                    attribute: createdRelationshipAttributeForFurtherSharing.content
+                }
+            ]
+        }
+    };
+
+    const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
+
+    await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === template.id);
+
+    const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+    await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }, { accept: true }, { accept: true }] });
+
+    await rRuntimeServices.eventBus.waitForEvent(RelationshipChangedEvent);
+
+    const sRelationship = (await syncUntilHasRelationships(sRuntimeServices.transport, 1))[0];
+    expect(sRelationship.status).toStrictEqual(RelationshipStatus.Pending);
+
+    await sRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+    return sRelationship;
 }
 
 export async function ensureActiveRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<RelationshipDTO> {

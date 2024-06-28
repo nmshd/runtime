@@ -2,7 +2,6 @@ import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/cons
 import {
     GivenName,
     IdentityAttribute,
-    RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     RelationshipCreationChangeRequestContentJSON,
     RelationshipTemplateContentJSON,
@@ -10,7 +9,6 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -23,7 +21,6 @@ import {
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
-    RelationshipChangedEvent,
     RelationshipStatus,
     RelationshipTemplateDTO,
     RelationshipTemplateProcessedEvent,
@@ -32,6 +29,7 @@ import {
 } from "../../src";
 import {
     ensureActiveRelationship,
+    establishPendingRelationshipWithRequestFlow,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     exchangeTemplate,
@@ -469,7 +467,7 @@ describe("RequestModule handling Relationship rejection and revocation", () => {
     afterAll(async () => await runtimeServiceProvider.stop());
 
     test("deletion of the Attributes shared between both Identities involved in the rejected Relationship and keeping the remaining Attributes", async () => {
-        const sRelationship = await ensurePendingRelationshipWithTemplate(rRuntimeServices, sRuntimeServices, createdRelationshipAttributeForFurtherSharing);
+        const sRelationship = await establishPendingRelationshipWithRequestFlow(rRuntimeServices, sRuntimeServices, createdRelationshipAttributeForFurtherSharing);
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
@@ -487,7 +485,7 @@ describe("RequestModule handling Relationship rejection and revocation", () => {
     });
 
     test("deletion of the Attributes shared between both Identities involved in the revoked Relationship and keeping the remaining Attributes", async () => {
-        const sRelationship = await ensurePendingRelationshipWithTemplate(rRuntimeServices, sRuntimeServices, createdRelationshipAttributeForFurtherSharing);
+        const sRelationship = await establishPendingRelationshipWithRequestFlow(rRuntimeServices, sRuntimeServices, createdRelationshipAttributeForFurtherSharing);
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
@@ -504,65 +502,3 @@ describe("RequestModule handling Relationship rejection and revocation", () => {
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
     });
 });
-
-async function ensurePendingRelationshipWithTemplate(
-    rRuntimeServices: TestRuntimeServices,
-    sRuntimeServices: TestRuntimeServices,
-    createdRelationshipAttributeForFurtherSharing: LocalAttributeDTO
-) {
-    const templateContent: RelationshipTemplateContentJSON = {
-        "@type": "RelationshipTemplateContent",
-        onNewRelationship: {
-            "@type": "Request",
-            items: [
-                {
-                    "@type": "CreateAttributeRequestItem",
-                    mustBeAccepted: true,
-                    attribute: IdentityAttribute.from({
-                        value: {
-                            "@type": "GivenName",
-                            value: "AGivenName"
-                        },
-                        owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
-                    }).toJSON()
-                },
-                {
-                    "@type": "CreateAttributeRequestItem",
-                    mustBeAccepted: true,
-                    attribute: RelationshipAttribute.from({
-                        key: "AKey",
-                        value: {
-                            "@type": "ProprietaryString",
-                            value: "AStringValue",
-                            title: "ATitle"
-                        },
-                        owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }).toJSON()
-                },
-                {
-                    "@type": "ShareAttributeRequestItem",
-                    mustBeAccepted: true,
-                    sourceAttributeId: createdRelationshipAttributeForFurtherSharing.id,
-                    attribute: createdRelationshipAttributeForFurtherSharing.content
-                }
-            ]
-        }
-    };
-
-    const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
-
-    await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === template.id);
-
-    const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
-    await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }, { accept: true }, { accept: true }] });
-
-    await rRuntimeServices.eventBus.waitForEvent(RelationshipChangedEvent);
-
-    const sRelationship = (await syncUntilHasRelationships(sRuntimeServices.transport, 1))[0];
-    expect(sRelationship.status).toStrictEqual(RelationshipStatus.Pending);
-
-    await sRuntimeServices.eventBus.waitForRunningEventHandlers();
-
-    return sRelationship;
-}
