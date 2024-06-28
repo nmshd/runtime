@@ -1,12 +1,11 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import {
     RelationshipCreationContentContainingResponse,
-    RelationshipTemplateContentContainingRequestJSON,
+    RelationshipCreationContentContainingResponseJSON,
     RequestJSON,
     ResponseJSON,
     ResponseResult,
-    ResponseWrapper,
-    ResponseWrapperJSON
+    ResponseWrapper
 } from "@nmshd/content";
 import { RuntimeServices } from "../Runtime";
 import {
@@ -46,7 +45,7 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        const body = template.content as RelationshipTemplateContentContainingRequestJSON;
+        const body = template.content;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
 
@@ -119,17 +118,11 @@ export class RequestModule extends RuntimeModule {
         const messageContentType = message.content["@type"];
         switch (messageContentType) {
             case "Request":
-                await this.createIncomingRequest(services, message.content as RequestJSON, message.id);
-                break;
-
-            // Handle responses directly sent via messages. This is only for backwards compatibility and
-            // not viable for responding to Requests from RelationshipTemplates' onExistingRelationship.
-            case "Response":
-                await this.completeExistingRequestWithResponseReceivedByMessage(services, message.id, message.content as ResponseJSON);
+                await this.createIncomingRequest(services, message.content, message.id);
                 break;
 
             case "ResponseWrapper":
-                const responseWrapper = message.content as ResponseWrapperJSON;
+                const responseWrapper = message.content;
 
                 if (responseWrapper.requestSourceType === "Message") {
                     await this.completeExistingRequestWithResponseReceivedByMessage(services, message.id, responseWrapper.response);
@@ -161,7 +154,7 @@ export class RequestModule extends RuntimeModule {
         if (message.content["@type"] !== "Request") return;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
-        const request = message.content as RequestJSON;
+        const request = message.content;
 
         const requestResult = await services.consumptionServices.outgoingRequests.sent({ requestId: request.id!, messageId: message.id });
         if (requestResult.isError) {
@@ -289,11 +282,14 @@ export class RequestModule extends RuntimeModule {
         const templateId = template.id;
         // do not trigger for templates without the correct content type
         if (template.content["@type"] !== "RelationshipTemplateContentContainingRequest") return;
+        if (createdRelationship.creationContent["@type"] !== "RelationshipCreationContentContainingResponse") {
+            this.logger.error(`The creation content of relationshipId ${createdRelationship.id} is not of type RelationshipCreationContentContainingResponse.`);
+        }
 
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,
             responseSourceId: createdRelationship.id,
-            response: createdRelationship.creationContent.response
+            response: (createdRelationship.creationContent as RelationshipCreationContentContainingResponseJSON).response
         });
         if (result.isError) {
             this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${createdRelationship.id}'. Root error:`, result.error);
