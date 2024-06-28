@@ -343,54 +343,95 @@ export async function establishRelationshipWithContents(
 export async function establishPendingRelationshipWithRequestFlow(
     sRuntimeServices: TestRuntimeServices,
     rRuntimeServices: TestRuntimeServices,
-    existingRelationshipAttributeForFurtherSharing: LocalAttributeDTO
+    existingRelationshipAttributeForFurtherSharing?: LocalAttributeDTO
 ): Promise<RelationshipDTO> {
-    const templateContent: RelationshipTemplateContentJSON = {
-        "@type": "RelationshipTemplateContent",
-        onNewRelationship: {
-            "@type": "Request",
-            items: [
-                {
-                    "@type": "CreateAttributeRequestItem",
-                    mustBeAccepted: true,
-                    attribute: IdentityAttribute.from({
-                        value: {
-                            "@type": "GivenName",
-                            value: "AGivenName"
-                        },
-                        owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
-                    }).toJSON()
-                },
-                {
-                    "@type": "CreateAttributeRequestItem",
-                    mustBeAccepted: true,
-                    attribute: RelationshipAttribute.from({
-                        key: "AKey",
-                        value: {
-                            "@type": "ProprietaryString",
-                            value: "AStringValue",
-                            title: "ATitle"
-                        },
-                        owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }).toJSON()
-                },
-                {
-                    "@type": "ShareAttributeRequestItem",
-                    mustBeAccepted: true,
-                    sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
-                    attribute: existingRelationshipAttributeForFurtherSharing.content
-                }
-            ]
-        }
-    };
+    let templateContent: RelationshipTemplateContentJSON;
 
+    if (existingRelationshipAttributeForFurtherSharing) {
+        templateContent = {
+            "@type": "RelationshipTemplateContent",
+            onNewRelationship: {
+                "@type": "Request",
+                items: [
+                    {
+                        "@type": "CreateAttributeRequestItem",
+                        mustBeAccepted: true,
+                        attribute: IdentityAttribute.from({
+                            value: {
+                                "@type": "GivenName",
+                                value: "AGivenName"
+                            },
+                            owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                        }).toJSON()
+                    },
+                    {
+                        "@type": "CreateAttributeRequestItem",
+                        mustBeAccepted: true,
+                        attribute: RelationshipAttribute.from({
+                            key: "AKey",
+                            value: {
+                                "@type": "ProprietaryString",
+                                value: "AStringValue",
+                                title: "ATitle"
+                            },
+                            owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }).toJSON()
+                    },
+                    {
+                        "@type": "ShareAttributeRequestItem",
+                        mustBeAccepted: true,
+                        sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
+                        attribute: existingRelationshipAttributeForFurtherSharing.content
+                    }
+                ]
+            }
+        };
+    } else {
+        templateContent = {
+            "@type": "RelationshipTemplateContent",
+            onNewRelationship: {
+                "@type": "Request",
+                items: [
+                    {
+                        "@type": "CreateAttributeRequestItem",
+                        mustBeAccepted: true,
+                        attribute: IdentityAttribute.from({
+                            value: {
+                                "@type": "GivenName",
+                                value: "AGivenName"
+                            },
+                            owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                        }).toJSON()
+                    },
+                    {
+                        "@type": "CreateAttributeRequestItem",
+                        mustBeAccepted: true,
+                        attribute: RelationshipAttribute.from({
+                            key: "AKey",
+                            value: {
+                                "@type": "ProprietaryString",
+                                value: "AStringValue",
+                                title: "ATitle"
+                            },
+                            owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }).toJSON()
+                    }
+                ]
+            }
+        };
+    }
     const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
 
     await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === template.id);
 
     const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
-    await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }, { accept: true }, { accept: true }] });
+    if (existingRelationshipAttributeForFurtherSharing) {
+        await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }, { accept: true }, { accept: true }] });
+    } else {
+        await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }, { accept: true }] });
+    }
 
     await rRuntimeServices.eventBus.waitForEvent(RelationshipChangedEvent);
 
