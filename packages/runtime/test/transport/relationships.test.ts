@@ -89,8 +89,9 @@ describe("Create Relationship", () => {
             content: { a: "b" }
         });
         expect(createRelationshipResponse.isSuccess).toBe(false);
-        expect(createRelationshipResponse.error.message).toBe(
-            "An error was thrown in a UseCase: The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
+        expect(createRelationshipResponse).toBeAnError(
+            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
+            "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
         );
 
         await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
