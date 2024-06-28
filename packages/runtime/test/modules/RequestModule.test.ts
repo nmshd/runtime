@@ -28,18 +28,18 @@ import {
     TransportServices
 } from "../../src";
 import {
-    MockEventBus,
-    RuntimeServiceProvider,
-    TestRuntimeServices,
     ensureActiveRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     exchangeTemplate,
+    MockEventBus,
+    RuntimeServiceProvider,
     sendMessage,
     sendMessageWithRequest,
-    syncUntilHasMessageWithResponse,
     syncUntilHasMessages,
-    syncUntilHasRelationships
+    syncUntilHasMessageWithResponse,
+    syncUntilHasRelationships,
+    TestRuntimeServices
 } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
@@ -401,7 +401,7 @@ describe("RequestModule", () => {
         });
 
         test("triggers a MessageProcessedEvent when the incoming Message does not contain a Request", async () => {
-            await sendMessage(sTransportServices, recipientAddress, {});
+            await sendMessage(sTransportServices, recipientAddress);
 
             await syncUntilHasMessages(rTransportServices, 1);
 

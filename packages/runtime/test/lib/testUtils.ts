@@ -7,12 +7,15 @@ import {
     LocalRequestStatus
 } from "@nmshd/consumption";
 import {
+    ArbitraryMessageContentJSON,
     ArbitraryRelationshipCreationContent,
     ArbitraryRelationshipCreationContentJSON,
     ArbitraryRelationshipTemplateContent,
     ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
+    MailJSON,
     Notification,
+    NotificationJSON,
     RelationshipCreationContentContainingResponseJSON,
     RelationshipTemplateContentContainingRequestJSON,
     RequestJSON,
@@ -234,7 +237,12 @@ export async function exchangeToken(transportServicesCreator: TransportServices,
     return response.value;
 }
 
-export async function sendMessage(transportServices: TransportServices, recipient: string, content?: any, attachments?: string[]): Promise<MessageDTO> {
+export async function sendMessage(
+    transportServices: TransportServices,
+    recipient: string,
+    content?: MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON,
+    attachments?: string[]
+): Promise<MessageDTO> {
     const response = await transportServices.messages.sendMessage({
         recipients: [recipient],
         content: content ?? {
@@ -285,6 +293,7 @@ export async function exchangeMessageWithRequest(
     request: CreateOutgoingRequestRequest
 ): Promise<MessageDTO & { content: RequestJSON }> {
     const sentMessage = await sendMessageWithRequest(sender, recipient, request);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id!);
 }
 
