@@ -26,7 +26,7 @@ import { RuntimeServiceProvider, TestRuntimeServices, createTemplate, syncUntilH
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
 let requestor: TestRuntimeServices;
-let templatorTemplate: RelationshipTemplateDTO;
+let templatorTemplate: RelationshipTemplateDTO & { content: RelationshipTemplateContentContainingRequestJSON };
 let templateId: string;
 let responseItems: DecideRequestItemGroupParametersJSON[];
 
@@ -144,7 +144,7 @@ describe("RelationshipTemplateDVO", () => {
                 ]
             }
         ];
-        templatorTemplate = await createTemplate(templator.transport, templateContent);
+        templatorTemplate = (await createTemplate(templator.transport, templateContent)) as RelationshipTemplateDTO & { content: RelationshipTemplateContentContainingRequestJSON };
         templateId = templatorTemplate.id;
     });
 
@@ -179,7 +179,8 @@ describe("RelationshipTemplateDVO", () => {
     });
 
     test("TemplateDVO for requestor", async () => {
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference }))
+            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentContainingRequestJSON };
         await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
         const dto = requestorTemplate;
@@ -251,7 +252,8 @@ describe("RelationshipTemplateDVO", () => {
                 "source.reference": templateId
             }
         });
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference }))
+            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentContainingRequestJSON };
         if (requestResult.value.length === 0) {
             await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             requestResult = await requestor.consumption.incomingRequests.getRequests({

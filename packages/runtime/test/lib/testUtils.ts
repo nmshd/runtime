@@ -14,7 +14,10 @@ import {
     INotificationItem,
     Notification,
     RelationshipCreationContentContainingResponseJSON,
-    RelationshipTemplateContentContainingRequestJSON
+    RelationshipTemplateContentContainingRequestJSON,
+    RequestJSON,
+    ResponseWrapperJSON,
+    ShareAttributeAcceptResponseItemJSON
 } from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
 import fs from "fs";
@@ -104,12 +107,16 @@ export async function syncUntilHasMessage(transportServices: TransportServices, 
     return await syncUntilHas(transportServices, "messages", (m) => m.id === messageId.toString());
 }
 
-export async function syncUntilHasMessageWithRequest(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
-    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "Request" && m.content.id === requestId.toString());
+export async function syncUntilHasMessageWithRequest(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO & { content: RequestJSON }> {
+    return (await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "Request" && m.content.id === requestId.toString())) as MessageDTO & {
+        content: RequestJSON;
+    };
 }
 
-export async function syncUntilHasMessageWithResponse(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
-    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "ResponseWrapper" && m.content.requestId === requestId.toString());
+export async function syncUntilHasMessageWithResponse(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO & { content: ResponseWrapperJSON }> {
+    return (await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "ResponseWrapper" && m.content.requestId === requestId.toString())) as MessageDTO & {
+        content: ResponseWrapperJSON;
+    };
 }
 
 export async function syncUntilHasMessageWithNotification(transportServices: TransportServices, notificationId: string | CoreId): Promise<MessageDTO> {
@@ -244,7 +251,11 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
-export async function sendMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
+export async function sendMessageWithRequest(
+    sender: TestRuntimeServices,
+    recipient: TestRuntimeServices,
+    request: CreateOutgoingRequestRequest
+): Promise<MessageDTO & { content: RequestJSON }> {
     const createRequestResult = await sender.consumption.outgoingRequests.create(request);
     expect(createRequestResult).toBeSuccessful();
     const sendMessageResult = await sender.transport.messages.sendMessage({
@@ -253,7 +264,7 @@ export async function sendMessageWithRequest(sender: TestRuntimeServices, recipi
     });
     expect(sendMessageResult).toBeSuccessful();
 
-    return sendMessageResult.value;
+    return sendMessageResult.value as MessageDTO & { content: RequestJSON };
 }
 
 export async function exchangeMessage(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices, attachments?: string[]): Promise<MessageDTO> {
@@ -268,9 +279,13 @@ export async function exchangeMessage(transportServicesCreator: TransportService
     return message;
 }
 
-export async function exchangeMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
+export async function exchangeMessageWithRequest(
+    sender: TestRuntimeServices,
+    recipient: TestRuntimeServices,
+    request: CreateOutgoingRequestRequest
+): Promise<MessageDTO & { content: RequestJSON }> {
     const sentMessage = await sendMessageWithRequest(sender, recipient, request);
-    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id);
+    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id!);
 }
 
 export async function exchangeMessageWithAttachment(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<MessageDTO> {
@@ -453,7 +468,7 @@ export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeSer
     await recipient.consumption.incomingRequests.accept({ requestId: requestId, items: [{ accept: true }] });
 
     const responseMessage = await syncUntilHasMessageWithResponse(sender.transport, requestId);
-    const sharedAttributeId = responseMessage.content.response.items[0].attributeId;
+    const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
     await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.Completed;
     });
@@ -561,7 +576,7 @@ export async function executeFullRequestAndShareThirdPartyRelationshipAttributeF
     });
 
     const responseMessage = await syncUntilHasMessageWithResponse(peer.transport, localRequest.id);
-    const sharedAttributeId = responseMessage.content.response.items[0].attributeId;
+    const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
     await peer.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });

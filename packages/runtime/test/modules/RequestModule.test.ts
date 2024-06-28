@@ -6,7 +6,8 @@ import {
     RelationshipTemplateContentContainingRequestJSON,
     ResponseItemJSON,
     ResponseItemResult,
-    ResponseResult
+    ResponseResult,
+    ResponseWrapperJSON
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import {
@@ -266,7 +267,10 @@ describe("RequestModule", () => {
 
             await rEventBus.waitForRunningEventHandlers();
 
-            await expect(rEventBus).toHavePublished(MessageSentEvent, (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId);
+            await expect(rEventBus).toHavePublished(
+                MessageSentEvent,
+                (e) => (e.data.content as ResponseWrapperJSON).response.requestId === requestAfterReject.response!.content.requestId
+            );
         });
 
         test("receives the rejected Request by Message", async () => {
@@ -296,7 +300,10 @@ describe("RequestModule", () => {
 
             await rEventBus.waitForRunningEventHandlers();
 
-            await expect(rEventBus).toHavePublished(MessageSentEvent, (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId);
+            await expect(rEventBus).toHavePublished(
+                MessageSentEvent,
+                (e) => (e.data.content as ResponseWrapperJSON).response.requestId === requestAfterReject.response!.content.requestId
+            );
         });
 
         test("receives the accepted Request by Message", async () => {
@@ -362,7 +369,7 @@ describe("RequestModule", () => {
 
             await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (event) => event.data.newStatus === LocalRequestStatus.Open);
 
-            const requestAfterAction = (await sConsumptionServices.outgoingRequests.getRequest({ id: message.content.id })).value;
+            const requestAfterAction = (await sConsumptionServices.outgoingRequests.getRequest({ id: message.content.id! })).value;
 
             expect(requestAfterAction.status).toBe(LocalRequestStatus.Open);
         });
@@ -389,7 +396,7 @@ describe("RequestModule", () => {
 
             expect(incomingRequestStatusChangedEvent.data.newStatus).toBe(LocalRequestStatus.DecisionRequired);
 
-            const requestsResult = await rConsumptionServices.incomingRequests.getRequest({ id: message.content.id });
+            const requestsResult = await rConsumptionServices.incomingRequests.getRequest({ id: message.content.id! });
             expect(requestsResult).toBeSuccessful();
         });
 
@@ -404,7 +411,7 @@ describe("RequestModule", () => {
         test("sends a message when the request is accepted", async () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
             await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-            const acceptRequestResult = await rConsumptionServices.incomingRequests.accept({ requestId: message.content.id, items: [{ accept: true }] });
+            const acceptRequestResult = await rConsumptionServices.incomingRequests.accept({ requestId: message.content.id!, items: [{ accept: true }] });
             expect(acceptRequestResult).toBeSuccessful();
 
             const incomingRequestStatusChangedEvent = await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
