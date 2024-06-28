@@ -285,6 +285,7 @@ export class RequestModule extends RuntimeModule {
 
         if (createdRelationship.status === RelationshipStatus.Rejected || createdRelationship.status === RelationshipStatus.Revoked) {
             await services.consumptionServices.attributes.deleteSharedAttributesForRejectedOrRevokedRelationship({ relationshipId: createdRelationship.id });
+            return;
         }
 
         // only trigger for new relationships that were created from an own template
