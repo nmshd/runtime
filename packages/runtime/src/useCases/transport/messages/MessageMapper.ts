@@ -1,4 +1,15 @@
-import { ArbitraryMessageContent, ArbitraryMessageContentJSON, Mail, MailJSON, NotificationJSON, RequestJSON, ResponseWrapper, ResponseWrapperJSON } from "@nmshd/content";
+import {
+    ArbitraryMessageContent,
+    ArbitraryMessageContentJSON,
+    Mail,
+    MailJSON,
+    Notification,
+    NotificationJSON,
+    Request,
+    RequestJSON,
+    ResponseWrapper,
+    ResponseWrapperJSON
+} from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { CoreId, File, Message, MessageEnvelopeRecipient } from "@nmshd/transport";
 import { MessageDTO, MessageWithAttachmentsDTO, RecipientDTO } from "../../../types";
