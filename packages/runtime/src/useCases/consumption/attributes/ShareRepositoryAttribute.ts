@@ -55,7 +55,7 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             "content.@type": "IdentityAttribute",
             "shareInfo.sourceAttribute": request.attributeId,
             "shareInfo.peer": request.peer,
-            "deletionInfo.deletionStatus": { $and: [{ $ne: DeletionStatus.DeletedByPeer }, { $ne: DeletionStatus.ToBeDeletedByPeer }] }
+            "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
         };
         const ownSharedIdentityAttributesOfRepositoryAttribute = await this.attributeController.getLocalAttributes(query);
         if (ownSharedIdentityAttributesOfRepositoryAttribute.length > 0) {
