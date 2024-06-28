@@ -128,7 +128,7 @@ class Notifications {
     }
 
     public cannotSaveSentNotificationFromPeerMessage(): ApplicationError {
-        return new ApplicationError("error.runtime.notifications.cannotSaveSendNotificationFromPeerMessage", "Cannot send Notification from peer message.");
+        return new ApplicationError("error.runtime.notifications.cannotSaveSentNotificationFromPeerMessage", "Cannot send Notification from peer message.");
     }
 
     public messageDoesNotContainNotification(messageId: CoreId): ApplicationError {
