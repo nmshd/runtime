@@ -13,15 +13,15 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    MockEventBus,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
-    MockEventBus,
-    RuntimeServiceProvider,
     sendMessageWithRequest,
     syncUntilHasMessageWithRequest,
-    syncUntilHasMessageWithResponse,
-    TestRuntimeServices
+    syncUntilHasMessageWithResponse
 } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -87,7 +87,7 @@ beforeEach(function () {
 describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
+        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -154,7 +154,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -209,7 +209,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(responseItem.attribute.valueType).toBe("DisplayName");
         expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
 
-        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 

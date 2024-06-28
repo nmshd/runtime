@@ -14,16 +14,16 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    MockEventBus,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     executeFullCreateAndShareRepositoryAttributeFlow,
-    MockEventBus,
-    RuntimeServiceProvider,
     sendMessageWithRequest,
     syncUntilHasMessageWithRequest,
-    syncUntilHasMessageWithResponse,
-    TestRuntimeServices
+    syncUntilHasMessageWithResponse
 } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -95,7 +95,7 @@ afterAll(() => serviceProvider.stop());
 describe("DeleteAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
+        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -163,7 +163,7 @@ describe("DeleteAttributeRequestItemDVO", () => {
         const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -198,7 +198,7 @@ describe("DeleteAttributeRequestItemDVO", () => {
         expect((responseItem as any).deletionDate).toBe(deletionDate);
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 

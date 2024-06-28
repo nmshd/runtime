@@ -12,15 +12,15 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    MockEventBus,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
-    MockEventBus,
-    RuntimeServiceProvider,
     sendMessageWithRequest,
     syncUntilHasMessageWithRequest,
-    syncUntilHasMessageWithResponse,
-    TestRuntimeServices
+    syncUntilHasMessageWithResponse
 } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -78,7 +78,7 @@ describe("FreeTextRequestItemDVO", () => {
 
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
-        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id);
+        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id!);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -130,7 +130,7 @@ describe("FreeTextRequestItemDVO", () => {
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -169,7 +169,7 @@ describe("FreeTextRequestItemDVO", () => {
         expect(responseItem.freeText).toBe("I accept the free text.");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 
