@@ -138,7 +138,7 @@ describe("Requests", () => {
 
             expect(rLocalRequest).toBeDefined();
             expect(rLocalRequest.status).toBe(LocalRequestStatus.Open);
-            expect(rLocalRequest.id).toBe(rRequestMessage.content.id);
+            expect(rLocalRequest.id).toBe(rRequestMessage.content.id!);
 
             expect(triggeredEvent).toBeDefined();
             expect(triggeredEvent!.data).toBeDefined();

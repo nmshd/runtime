@@ -286,7 +286,7 @@ export async function exchangeMessageWithRequest(
     request: CreateOutgoingRequestRequest
 ): Promise<MessageDTO & { content: RequestJSON }> {
     const sentMessage = await sendMessageWithRequest(sender, recipient, request);
-    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id);
+    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id!);
 }
 
 export async function exchangeMessageWithAttachment(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<MessageDTO> {
