@@ -135,6 +135,7 @@ export class RequestModule extends RuntimeModule {
                     response: responseWrapper.response
                 });
                 break;
+            default:
         }
 
         if (messageContentType !== "Request") {

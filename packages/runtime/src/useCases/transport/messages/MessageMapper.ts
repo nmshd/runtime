@@ -1,15 +1,4 @@
-import {
-    ArbitraryMessageContent,
-    ArbitraryMessageContentJSON,
-    Mail,
-    MailJSON,
-    Notification,
-    NotificationJSON,
-    Request,
-    RequestJSON,
-    ResponseWrapper,
-    ResponseWrapperJSON
-} from "@nmshd/content";
+import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { CoreId, File, Message, MessageEnvelopeRecipient } from "@nmshd/transport";
 import { MessageDTO, MessageWithAttachmentsDTO, RecipientDTO } from "../../../types";
@@ -68,7 +57,7 @@ export class MessageMapper {
 
         return {
             id: message.id.toString(),
-            content: message.cache.content.toJSON() as MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON,
+            content: message.cache.content.toJSON(),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: message.cache.recipients.map((r, i) => this.toRecipient(r, message.relationshipIds[i])),

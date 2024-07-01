@@ -293,7 +293,6 @@ export async function exchangeMessageWithRequest(
     request: CreateOutgoingRequestRequest
 ): Promise<MessageDTO & { content: RequestJSON }> {
     const sentMessage = await sendMessageWithRequest(sender, recipient, request);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id!);
 }
 
