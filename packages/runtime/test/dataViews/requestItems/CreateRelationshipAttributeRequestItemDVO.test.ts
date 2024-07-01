@@ -92,7 +92,7 @@ beforeEach(function () {
 describe("CreateRelationshipAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
+        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -216,7 +216,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect(responseItem.attribute.valueType).toBe("ProprietaryString");
         expect(proprietaryString.value).toStrictEqual((responseItem.attribute.content.value as ProprietaryStringJSON).value);
 
-        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 

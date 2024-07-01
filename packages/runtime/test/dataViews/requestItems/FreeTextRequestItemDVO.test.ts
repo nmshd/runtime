@@ -78,7 +78,7 @@ describe("FreeTextRequestItemDVO", () => {
 
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
-        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id!);
+        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -169,7 +169,7 @@ describe("FreeTextRequestItemDVO", () => {
         expect(responseItem.freeText).toBe("I accept the free text.");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 

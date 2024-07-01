@@ -87,7 +87,7 @@ beforeEach(function () {
 describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
+        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -209,7 +209,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(responseItem.attribute.valueType).toBe("DisplayName");
         expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
 
-        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 
