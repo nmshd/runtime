@@ -21,7 +21,13 @@ export abstract class ValidationResult {
 
     public static fromItems(items: ValidationResult[]): ValidationResult {
         return items.some((r) => r.isError())
-            ? ValidationResult.error(new ApplicationError("inheritedFromItem", "Some child items have errors."), items)
+            ? ValidationResult.error(
+                  new ApplicationError(
+                      "error.consumption.requests.inheritedFromItem",
+                      "Some child items have errors. If this error occured during the creation of a request, we recommand to call 'validate' to get more information."
+                  ),
+                  items
+              )
             : ValidationResult.success(items);
     }
 }
