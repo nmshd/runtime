@@ -51,7 +51,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 const query: any = {
                     "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
                     "shareInfo.peer": recipient.toString(),
-                    "deletionInfo.deletionStatus": { $ne: DeletionStatus.DeletedByPeer } // TODO: not DeletedByPeer
+                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
                 };
 
                 if ((await this.consumptionController.attributes.getLocalAttributes(query)).length > 0) {
