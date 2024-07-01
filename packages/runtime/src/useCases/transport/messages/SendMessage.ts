@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
-import { ArbitraryMessageContent, Mail, Request, ResponseWrapper } from "@nmshd/content";
+import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreId, File, FileController, MessageController } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";

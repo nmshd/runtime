@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
-import { RelationshipTemplateContentContainingRequest, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContentContainingRequest } from "@nmshd/content";
 import { AccountController, CoreDate, RelationshipTemplateController } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -12,7 +12,7 @@ import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
     expiresAt: ISO8601DateTimeString;
-    content: RelationshipTemplateContentJSON;
+    content: any;
     /**
      * @minimum 1
      */
@@ -68,16 +68,19 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
 
     private async validateRelationshipTemplateContent(content: any) {
         const transformedContent = Serializable.fromUnknown(content);
-        if (!(transformedContent instanceof RelationshipTemplateContentContainingRequest)) return;
-
-        const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
-        if (validationResult.isError()) return validationResult.error;
-
-        if (transformedContent.onExistingRelationship) {
-            const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onExistingRelationship });
+        if (transformedContent instanceof RelationshipTemplateContentContainingRequest) {
+            const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
             if (validationResult.isError()) return validationResult.error;
-        }
 
-        return;
+            if (transformedContent.onExistingRelationship) {
+                const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onExistingRelationship });
+                if (validationResult.isError()) return validationResult.error;
+            }
+
+            return;
+        } else if (transformedContent instanceof ArbitraryRelationshipTemplateContent) {
+            return;
+        }
+        return RuntimeErrors.general.invalidPropertyValue("A relationship template content must be of type RelationshipTemplateContent or ArbitraryRelationshipTemplateContent.");
     }
 }
