@@ -164,17 +164,6 @@ class Attributes {
         );
     }
 
-    public anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
-        repositoryAttributeId: CoreId | string,
-        peer: CoreAddress | string,
-        ownSharedIdentityAttributeId: CoreId | string
-    ): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `Another version of repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of previous own shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
-        );
-    }
-
     public noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore",
