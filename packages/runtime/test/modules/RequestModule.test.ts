@@ -2,13 +2,16 @@ import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/cons
 import {
     GivenName,
     IdentityAttribute,
+    RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     RelationshipCreationChangeRequestContentJSON,
     RelationshipTemplateContentJSON,
+    RequestItemJSONDerivations,
     ResponseItemJSON,
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
+import { CoreAddress } from "@nmshd/transport";
 import {
     CreateOutgoingRequestRequest,
     IncomingRequestReceivedEvent,
@@ -20,6 +23,7 @@ import {
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
+    RelationshipDTO,
     RelationshipStatus,
     RelationshipTemplateDTO,
     RelationshipTemplateProcessedEvent,
@@ -475,7 +479,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
     afterAll(async () => await runtimeServiceProvider.stop());
 
     test("deletion of the Attributes shared between both Identities involved in the rejected Relationship and keeping the remaining Attributes", async () => {
-        const sRelationship = await establishPendingRelationshipWithRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
+        const sRelationship = await establishPendingRelationshipWithPredefinedRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
@@ -493,7 +497,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
     });
 
     test("deletion of the Attributes shared between both Identities involved in the revoked Relationship and keeping the remaining Attributes", async () => {
-        const sRelationship = await establishPendingRelationshipWithRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
+        const sRelationship = await establishPendingRelationshipWithPredefinedRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
@@ -510,3 +514,82 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
     });
 });
+
+async function establishPendingRelationshipWithPredefinedRequestFlow(
+    sRuntimeServices: TestRuntimeServices,
+    rRuntimeServices: TestRuntimeServices,
+    existingRelationshipAttributeForFurtherSharing?: LocalAttributeDTO
+): Promise<RelationshipDTO> {
+    let requestItems: RequestItemJSONDerivations[];
+    let acceptParams: DecideRequestItemParametersJSON[];
+
+    if (existingRelationshipAttributeForFurtherSharing) {
+        requestItems = [
+            {
+                "@type": "CreateAttributeRequestItem",
+                mustBeAccepted: true,
+                attribute: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName"
+                    },
+                    owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                }).toJSON()
+            },
+            {
+                "@type": "CreateAttributeRequestItem",
+                mustBeAccepted: true,
+                attribute: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }).toJSON()
+            },
+            {
+                "@type": "ShareAttributeRequestItem",
+                mustBeAccepted: true,
+                sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
+                attribute: existingRelationshipAttributeForFurtherSharing.content
+            }
+        ];
+        acceptParams = [{ accept: true }, { accept: true }, { accept: true }];
+    } else {
+        requestItems = [
+            {
+                "@type": "CreateAttributeRequestItem",
+                mustBeAccepted: true,
+                attribute: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "AGivenName"
+                    },
+                    owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                }).toJSON()
+            },
+            {
+                "@type": "CreateAttributeRequestItem",
+                mustBeAccepted: true,
+                attribute: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }).toJSON()
+            }
+        ];
+        acceptParams = [{ accept: true }, { accept: true }];
+    }
+
+    const sRelationship = await establishPendingRelationshipWithRequestFlow(sRuntimeServices, rRuntimeServices, requestItems, acceptParams);
+
+    return sRelationship;
+}
