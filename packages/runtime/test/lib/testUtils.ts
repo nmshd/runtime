@@ -7,15 +7,13 @@ import {
     LocalRequestStatus
 } from "@nmshd/consumption";
 import {
-    ArbitraryMessageContentJSON,
     ArbitraryRelationshipCreationContent,
     ArbitraryRelationshipCreationContentJSON,
     ArbitraryRelationshipTemplateContent,
     ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
-    MailJSON,
+    MessageContentJSON,
     Notification,
-    NotificationJSON,
     RelationshipCreationContentContainingResponseJSON,
     RelationshipTemplateContentContainingRequestJSON,
     RequestJSON,
@@ -237,12 +235,7 @@ export async function exchangeToken(transportServicesCreator: TransportServices,
     return response.value;
 }
 
-export async function sendMessage(
-    transportServices: TransportServices,
-    recipient: string,
-    content?: MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON,
-    attachments?: string[]
-): Promise<MessageDTO> {
+export async function sendMessage(transportServices: TransportServices, recipient: string, content?: MessageContentJSON, attachments?: string[]): Promise<MessageDTO> {
     const response = await transportServices.messages.sendMessage({
         recipients: [recipient],
         content: content ?? {

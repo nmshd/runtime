@@ -1,4 +1,4 @@
-import { ArbitraryMessageContentJSON, MailJSON, NotificationJSON, RequestJSON, ResponseWrapperJSON } from "@nmshd/content";
+import { MessageContentJSON } from "@nmshd/content";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "./FileDVO";
 import { IdentityDVO } from "./IdentityDVO";
@@ -83,7 +83,7 @@ export interface MessageDVO extends DataViewObject {
     /**
      * The content of the message.
      */
-    content: MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON;
+    content: MessageContentJSON;
 
     /**
      * The read indicator of the message

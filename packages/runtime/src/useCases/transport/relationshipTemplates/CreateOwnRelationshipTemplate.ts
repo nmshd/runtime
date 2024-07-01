@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
-import { ArbitraryRelationshipTemplateContentJSON, RelationshipTemplateContentContainingRequest, RelationshipTemplateContentContainingRequestJSON } from "@nmshd/content";
+import { RelationshipTemplateContentContainingRequest, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { AccountController, CoreDate, RelationshipTemplateController } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -12,7 +12,7 @@ import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
     expiresAt: ISO8601DateTimeString;
-    content: RelationshipTemplateContentContainingRequestJSON | ArbitraryRelationshipTemplateContentJSON;
+    content: RelationshipTemplateContentJSON;
     /**
      * @minimum 1
      */

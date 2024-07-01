@@ -1,4 +1,4 @@
-import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentContainingResponseJSON } from "@nmshd/content";
+import { RelationshipCreationContentJSON } from "@nmshd/content";
 import { RelationshipAuditLogDTO } from "../../types/transport/RelationshipDTO";
 import { DataViewObject } from "../DataViewObject";
 import { LocalAttributeDVO } from "../consumption";
@@ -15,7 +15,7 @@ export interface RelationshipDVO extends DataViewObject {
     statusText: string;
     isPinned: boolean;
     theme?: RelationshipTheme;
-    creationContent: RelationshipCreationContentContainingResponseJSON | ArbitraryRelationshipCreationContentJSON;
+    creationContent: RelationshipCreationContentJSON;
     auditLog: RelationshipAuditLogDTO;
     items: LocalAttributeDVO[];
     attributeMap: Record<string, undefined | LocalAttributeDVO[]>;

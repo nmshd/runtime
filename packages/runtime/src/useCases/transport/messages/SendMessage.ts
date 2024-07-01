@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
-import { ArbitraryMessageContentJSON, MailJSON, NotificationJSON, Request, RequestJSON, ResponseWrapperJSON } from "@nmshd/content";
+import { MessageContentJSON, Request } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreId, File, FileController, MessageController } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
@@ -14,7 +14,7 @@ export interface SendMessageRequest {
      * @minItems 1
      */
     recipients: AddressString[];
-    content: MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON;
+    content: MessageContentJSON;
 
     attachments?: FileIdString[];
 }

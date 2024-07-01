@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentContainingResponseJSON } from "@nmshd/content";
+import { RelationshipCreationContentJSON } from "@nmshd/content";
 import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
@@ -9,7 +9,7 @@ import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface CreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
-    creationContent: RelationshipCreationContentContainingResponseJSON | ArbitraryRelationshipCreationContentJSON;
+    creationContent: RelationshipCreationContentJSON;
 }
 
 class Validator extends SchemaValidator<CreateRelationshipRequest> {

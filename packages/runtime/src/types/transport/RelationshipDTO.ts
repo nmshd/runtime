@@ -1,4 +1,4 @@
-import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentContainingResponseJSON } from "@nmshd/content";
+import { RelationshipCreationContentJSON } from "@nmshd/content";
 import { IdentityDTO } from "./IdentityDTO";
 import { RelationshipTemplateDTO } from "./RelationshipTemplateDTO";
 
@@ -39,6 +39,6 @@ export interface RelationshipDTO {
     status: RelationshipStatus;
     peer: string;
     peerIdentity: IdentityDTO;
-    creationContent: RelationshipCreationContentContainingResponseJSON | ArbitraryRelationshipCreationContentJSON;
+    creationContent: RelationshipCreationContentJSON;
     auditLog: RelationshipAuditLogDTO;
 }
