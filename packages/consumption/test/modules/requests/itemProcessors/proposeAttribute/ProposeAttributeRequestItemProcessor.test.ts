@@ -589,8 +589,8 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidAcceptParameters",
-                message: "You cannot share the predecessor of an already shared Attribute version."
+                code: "error.consumption.requests.attributeQueryMismatch",
+                message: `The provided IdentityAttribute is outdated. You have already shared the successor '${successorRepositoryAttribute.id}' of it.`
             });
         });
     });

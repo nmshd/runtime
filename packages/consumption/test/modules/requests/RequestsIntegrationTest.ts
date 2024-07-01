@@ -125,9 +125,6 @@ export class RequestsTestsContext {
             }
         );
 
-        context.incomingRequestsController = new IncomingRequestsController(collection, processorRegistry, context.consumptionController, context.mockEventBus, {
-            address: account.accountController.identity.address
-        });
         context.requestsCollection = context.incomingRequestsController["localRequests"];
 
         const originalCanCreate = context.outgoingRequestsController.canCreate;

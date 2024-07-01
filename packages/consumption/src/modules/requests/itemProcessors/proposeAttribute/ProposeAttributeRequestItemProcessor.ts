@@ -238,14 +238,6 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             );
         }
 
-        if (!parsedParams.attribute) {
-            throw new Error(
-                "The ProposeAttributeRequestItem wasn't answered with a new Attribute, but it wasn't handled as having been answered with an existing Attribute, either."
-            );
-        }
-
-        sharedLocalAttribute = await this.createNewAttribute(parsedParams.attribute, requestInfo);
-
         return ProposeAttributeAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
             attributeId: sharedLocalAttribute.id,
