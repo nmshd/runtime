@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
-import { MessageContentJSON, Request } from "@nmshd/content";
+import { ArbitraryMessageContent, Mail, Request, ResponseWrapper } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreId, File, FileController, MessageController } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
@@ -14,7 +14,7 @@ export interface SendMessageRequest {
      * @minItems 1
      */
     recipients: AddressString[];
-    content: MessageContentJSON;
+    content: any;
 
     attachments?: FileIdString[];
 }
@@ -58,23 +58,30 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
     private async validateMessageContent(content: any, recipients: string[]) {
         const transformedContent = Serializable.fromUnknown(content);
-        if (!(transformedContent instanceof Request)) return;
+        if (transformedContent instanceof Request) {
+            if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
-        if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
+            const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
+            if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
 
-        const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
-        if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
+            if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
+                return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
+            }
 
-        if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
-            return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
+            if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
+
+            const recipient = CoreAddress.from(recipients[0]);
+            if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
+            return;
+        } else if (
+            transformedContent instanceof Mail ||
+            transformedContent instanceof ResponseWrapper ||
+            transformedContent instanceof Notification ||
+            transformedContent instanceof ArbitraryMessageContent
+        ) {
+            return undefined;
         }
-
-        if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
-
-        const recipient = CoreAddress.from(recipients[0]);
-        if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
-
-        return;
+        return RuntimeErrors.general.invalidPropertyValue("The content type of a message must be Mail, Request, ResponseWrapper, Notification or ArbitraryMessageContent.");
     }
 
     private async transformAttachments(attachmentsIds?: string[]): Promise<Result<File[]>> {
