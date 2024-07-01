@@ -23,7 +23,7 @@
         "build:schemas": "node scripts/buildSchemas.mjs",
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test:ci:lokijs": "USE_LOKIJS=true jest CreateIdentity -i",
+        "test:ci:lokijs": "USE_LOKIJS=true jest -i",
         "test:ci:mongodb": "jest -i",
         "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://localhost:27022' jest",
         "test:local:lokijs": "USE_LOKIJS=true jest",
