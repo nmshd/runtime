@@ -182,7 +182,7 @@ describe("OutgoingRequestsController", function () {
             });
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.inheritedFromItem",
-                message: "Some child items have errors. If this error occured during the creation of a request, we recommand to call 'validate' to get more information.."
+                message: "Some child items have errors. If this error occured during the creation of a request, we recommand to call 'validate' to get more information."
             });
             expect(validationResult.items).toHaveLength(2);
 
