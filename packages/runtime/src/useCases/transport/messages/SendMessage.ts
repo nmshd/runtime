@@ -37,7 +37,6 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
     }
 
     protected async executeInternal(request: SendMessageRequest): Promise<Result<MessageDTO>> {
-        console.log(request.content);
         const validationError = await this.validateMessageContent(request.content, request.recipients);
         if (validationError) return Result.fail(validationError);
 
