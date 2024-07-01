@@ -1,12 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import {
-    RelationshipCreationContentContainingResponse,
-    RelationshipCreationContentContainingResponseJSON,
-    RequestJSON,
-    ResponseJSON,
-    ResponseResult,
-    ResponseWrapper
-} from "@nmshd/content";
+import { RelationshipCreationContentJSON, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
 import { RuntimeServices } from "../Runtime";
 import {
     IncomingRequestStatusChangedEvent,
@@ -40,7 +33,7 @@ export class RequestModule extends RuntimeModule {
         // make sure to not process an own template by accident
         if (template.isOwn) return;
 
-        if (template.content["@type"] !== "RelationshipTemplateContentContainingRequest") {
+        if (template.content["@type"] !== "RelationshipTemplateContent") {
             this.runtime.eventBus.publish(new RelationshipTemplateProcessedEvent(event.eventTargetAddress, { template, result: RelationshipTemplateProcessedResult.NoRequest }));
             return;
         }
@@ -219,7 +212,7 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        const creationContent = RelationshipCreationContentContainingResponse.from({ response: request.response!.content }).toJSON();
+        const creationContent = RelationshipCreationContent.from({ response: request.response!.content }).toJSON();
         const createRelationshipResult = await services.transportServices.relationships.createRelationship({ templateId, creationContent });
         if (createRelationshipResult.isError) {
             this.logger.error(`Could not create relationship for templateId '${templateId}'. Root error:`, createRelationshipResult.error);
@@ -282,15 +275,15 @@ export class RequestModule extends RuntimeModule {
         const template = createdRelationship.template;
         const templateId = template.id;
         // do not trigger for templates without the correct content type
-        if (template.content["@type"] !== "RelationshipTemplateContentContainingRequest") return;
-        if (createdRelationship.creationContent["@type"] !== "RelationshipCreationContentContainingResponse") {
-            this.logger.error(`The creation content of relationshipId ${createdRelationship.id} is not of type RelationshipCreationContentContainingResponse.`);
+        if (template.content["@type"] !== "RelationshipTemplateContent") return;
+        if (createdRelationship.creationContent["@type"] !== "RelationshipCreationContent") {
+            this.logger.error(`The creation content of relationshipId ${createdRelationship.id} is not of type RelationshipCreationContent.`);
         }
 
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,
             responseSourceId: createdRelationship.id,
-            response: (createdRelationship.creationContent as RelationshipCreationContentContainingResponseJSON).response
+            response: (createdRelationship.creationContent as RelationshipCreationContentJSON).response
         });
         if (result.isError) {
             this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${createdRelationship.id}'. Root error:`, result.error);

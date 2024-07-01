@@ -5,7 +5,7 @@ import {
     IdentityAttribute,
     IIdentityAttribute,
     IRelationshipAttribute,
-    IRelationshipTemplateContentContainingRequest,
+    IRelationshipTemplateContent,
     IRequest,
     IResponse,
     ProprietaryString,
@@ -396,7 +396,7 @@ export class TestObjectFactory {
         return RelationshipTemplate.from(this.createOutgoingIRelationshipTemplate(creator));
     }
 
-    public static createOutgoingIRelationshipTemplate(creator: CoreAddress, content?: IRelationshipTemplateContentContainingRequest): IRelationshipTemplate {
+    public static createOutgoingIRelationshipTemplate(creator: CoreAddress, content?: IRelationshipTemplateContent): IRelationshipTemplate {
         return {
             // @ts-expect-error
             "@type": "RelationshipTemplate",

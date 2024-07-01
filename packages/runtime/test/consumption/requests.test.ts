@@ -1,6 +1,6 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipCreationContentContainingResponseJSON, RelationshipTemplateContentContainingRequest, RelationshipTemplateContentContainingRequestJSON } from "@nmshd/content";
+import { RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
@@ -357,7 +357,7 @@ describe("Requests", () => {
         let rEventBus: EventBus;
         let sEventBus: EventBus;
 
-        const templateContent = RelationshipTemplateContentContainingRequest.from({
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -404,7 +404,7 @@ describe("Requests", () => {
             });
 
             const result = await rConsumptionServices.incomingRequests.received({
-                receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentContainingRequestJSON).onNewRelationship,
+                receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentJSON).onNewRelationship,
                 requestSourceId: rRelationshipTemplate.id
             });
 
@@ -425,7 +425,7 @@ describe("Requests", () => {
             const rRelationshipTemplate = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
             const incomingRequest = (
                 await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentContainingRequestJSON).onNewRelationship,
+                    receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentJSON).onNewRelationship,
                     requestSourceId: rRelationshipTemplate.id
                 })
             ).value;
@@ -455,7 +455,7 @@ describe("Requests", () => {
             const rRelationshipTemplate = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
             const incomingRequest = (
                 await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentContainingRequestJSON).onNewRelationship,
+                    receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentJSON).onNewRelationship,
                     requestSourceId: rRelationshipTemplate.id
                 })
             ).value;
@@ -586,7 +586,7 @@ describe("Requests", () => {
 
             const completionResult = await sConsumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
                 responseSourceId: sRelationship.id,
-                response: (sRelationship.creationContent as RelationshipCreationContentContainingResponseJSON).response,
+                response: (sRelationship.creationContent as RelationshipCreationContentJSON).response,
                 templateId: relationship!.template.id
             });
 

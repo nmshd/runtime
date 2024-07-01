@@ -1,12 +1,27 @@
-import { ArbitraryRelationshipCreationContent, ArbitraryRelationshipCreationContentJSON, IArbitraryRelationshipCreationContent } from "./ArbitraryRelationshipCreationContent";
-import {
-    IRelationshipCreationContentContainingResponse,
-    RelationshipCreationContentContainingResponse,
-    RelationshipCreationContentContainingResponseJSON
-} from "./RelationshipCreationContentContainingResponse";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { ContentJSON } from "../ContentJSON";
+import { IResponse, Response, ResponseJSON } from "../requests/response/Response";
 
-export type RelationshipCreationContentJSON = RelationshipCreationContentContainingResponseJSON | ArbitraryRelationshipCreationContentJSON;
+export interface RelationshipCreationContentJSON extends ContentJSON {
+    "@type": "RelationshipCreationContent";
+    response: ResponseJSON;
+}
 
-export type IRelationshipCreationContent = IRelationshipCreationContentContainingResponse | IArbitraryRelationshipCreationContent;
+export interface IRelationshipCreationContent extends ISerializable {
+    response: IResponse;
+}
 
-export type RelationshipCreationContent = RelationshipCreationContentContainingResponse | ArbitraryRelationshipCreationContent;
+@type("RelationshipCreationContent")
+export class RelationshipCreationContent extends Serializable implements IRelationshipCreationContent {
+    @serialize()
+    @validate()
+    public response: Response;
+
+    public static from(value: IRelationshipCreationContent | Omit<RelationshipCreationContentJSON, "@type">): RelationshipCreationContent {
+        return this.fromAny(value);
+    }
+
+    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): RelationshipCreationContentJSON {
+        return super.toJSON(verbose, serializeAsString) as RelationshipCreationContentJSON;
+    }
+}

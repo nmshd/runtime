@@ -14,8 +14,8 @@ import {
     INotificationItem,
     MessageContentJSON,
     Notification,
-    RelationshipCreationContentContainingResponseJSON,
-    RelationshipTemplateContentContainingRequestJSON,
+    RelationshipCreationContentJSON,
+    RelationshipTemplateContentJSON,
     RequestJSON,
     ResponseWrapperJSON,
     ShareAttributeAcceptResponseItemJSON
@@ -180,7 +180,7 @@ export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateCont
 
 export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ content: {} }).toJSON();
 
-export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentContainingRequestJSON): Promise<RelationshipTemplateDTO> {
+export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON): Promise<RelationshipTemplateDTO> {
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
         expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
@@ -204,7 +204,7 @@ export async function getFileToken(transportServices: TransportServices): Promis
 export async function exchangeTemplate(
     transportServicesCreator: TransportServices,
     transportServicesRecipient: TransportServices,
-    content?: RelationshipTemplateContentContainingRequestJSON
+    content?: RelationshipTemplateContentJSON
 ): Promise<RelationshipTemplateDTO> {
     const template = await createTemplate(transportServicesCreator, content);
 
@@ -329,8 +329,8 @@ export async function establishRelationship(transportServices1: TransportService
 export async function establishRelationshipWithContents(
     transportServices1: TransportServices,
     transportServices2: TransportServices,
-    templateContent?: RelationshipTemplateContentContainingRequestJSON,
-    creationContent?: RelationshipCreationContentContainingResponseJSON
+    templateContent?: RelationshipTemplateContentJSON,
+    creationContent?: RelationshipCreationContentJSON
 ): Promise<void> {
     const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
 

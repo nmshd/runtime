@@ -1,14 +1,5 @@
 import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
-import {
-    GivenName,
-    IdentityAttribute,
-    RelationshipCreationContentContainingResponseJSON,
-    RelationshipTemplateContentContainingRequest,
-    ResponseItemJSON,
-    ResponseItemResult,
-    ResponseResult,
-    ResponseWrapperJSON
-} from "@nmshd/content";
+import { GivenName, IdentityAttribute, RelationshipCreationContentJSON, ResponseItemJSON, ResponseItemResult, ResponseResult, ResponseWrapperJSON } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import {
     ConsumptionServices,
@@ -79,7 +70,7 @@ describe("RequestModule", () => {
         let template: RelationshipTemplateDTO;
 
         const metadata = { aMetadataKey: "aMetadataValue" };
-        const templateContent = RelationshipTemplateContentContainingRequest.from({
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
             metadata
         }).toJSON();
@@ -144,7 +135,7 @@ describe("RequestModule", () => {
         test("triggers RelationshipTemplateProcessedEvent when another Template is loaded and a pending Relationship exists", async () => {
             const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-            const templateContent = RelationshipTemplateContentContainingRequest.from({
+            const templateContent = RelationshipTemplateContent.from({
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 metadata
             }).toJSON();
@@ -181,8 +172,8 @@ describe("RequestModule", () => {
 
             const relationship = relationships[0];
 
-            const creationContent = relationship.creationContent as RelationshipCreationContentContainingResponseJSON;
-            expect(creationContent["@type"]).toBe("RelationshipCreationContentContainingResponse");
+            const creationContent = relationship.creationContent as RelationshipCreationContentJSON;
+            expect(creationContent["@type"]).toBe("RelationshipCreationContent");
 
             const response = creationContent.response;
             const responseItems = response.items;
@@ -321,7 +312,7 @@ describe("RequestModule", () => {
         });
 
         async function exchangeRelationshipTemplate() {
-            const templateContent = RelationshipTemplateContentContainingRequest.from({
+            const templateContent = RelationshipTemplateContent.from({
                 onNewRelationship: {
                     "@type": "Request",
                     items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]

@@ -5,8 +5,6 @@ import {
     MailJSON,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
-    RelationshipCreationContentContainingResponse,
-    RelationshipTemplateContentContainingRequest,
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
@@ -29,7 +27,7 @@ beforeAll(async () => {
     await establishRelationshipWithContents(
         transportServices1,
         transportServices2,
-        RelationshipTemplateContentContainingRequest.from({
+        RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -43,7 +41,7 @@ beforeAll(async () => {
                 ]
             }
         }).toJSON(),
-        RelationshipCreationContentContainingResponse.from({
+        RelationshipCreationContent.from({
             response: {
                 "@type": "Response",
                 result: ResponseResult.Accepted,

@@ -1,16 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ApplicationError } from "@js-soft/ts-utils";
-import {
-    IAcceptResponseItem,
-    IRequest,
-    IRequestItemGroup,
-    IResponse,
-    IResponseItemGroup,
-    RelationshipTemplateContentContainingRequest,
-    RequestItemGroup,
-    ResponseItemResult,
-    ResponseResult
-} from "@nmshd/content";
+import { IAcceptResponseItem, IRequest, IRequestItemGroup, IResponse, IResponseItemGroup, RequestItemGroup, ResponseItemResult, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,
@@ -269,7 +259,7 @@ describe("OutgoingRequestsController", function () {
                 await When.iCreateAnOutgoingRequestFromRelationshipCreationWith({
                     template: TestObjectFactory.createOutgoingIRelationshipTemplate(
                         context.currentIdentity,
-                        RelationshipTemplateContentContainingRequest.from({
+                        RelationshipTemplateContent.from({
                             onNewRelationship: TestObjectFactory.createRequestWithOneItem()
                         })
                     ),

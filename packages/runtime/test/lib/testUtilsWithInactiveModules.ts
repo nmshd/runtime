@@ -1,4 +1,4 @@
-import { IResponse, RelationshipCreationContentContainingResponse, RelationshipTemplateContentContainingRequestJSON, ResponseWrapperJSON } from "@nmshd/content";
+import { IResponse, RelationshipTemplateContentJSON, ResponseWrapperJSON } from "@nmshd/content";
 import { CreateOutgoingRequestRequest, LocalRequestDTO, MessageDTO, RelationshipDTO } from "src";
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { exchangeMessageWithRequest, exchangeTemplate, syncUntilHasMessageWithResponse } from "./testUtils";
@@ -84,7 +84,7 @@ export async function exchangeTemplateAndReceiverRequiresManualDecision(
 
     const request = (
         await rRuntimeServices.consumption.incomingRequests.received({
-            receivedRequest: (template.content as RelationshipTemplateContentContainingRequestJSON).onNewRelationship,
+            receivedRequest: (template.content as RelationshipTemplateContentJSON).onNewRelationship,
             requestSourceId: template.id
         })
     ).value;
@@ -121,7 +121,7 @@ export async function exchangeTemplateAndReceiverSendsResponse(
 
     if (actionLowerCase !== "accept") return { request, relationship: undefined };
 
-    const creationContent = RelationshipCreationContentContainingResponse.from({ response: decidedRequest.response!.content as unknown as IResponse }).toJSON();
+    const creationContent = RelationshipCreationContent.from({ response: decidedRequest.response!.content as unknown as IResponse }).toJSON();
     const result = await rRuntimeServices.transport.relationships.createRelationship({ creationContent, templateId });
 
     expect(result).toBeSuccessful();
@@ -129,7 +129,7 @@ export async function exchangeTemplateAndReceiverSendsResponse(
     const relationship = result.value;
     const receivedCreationContent = relationship.creationContent;
 
-    expect(receivedCreationContent["@type"]).toBe("RelationshipCreationContentContainingResponse");
+    expect(receivedCreationContent["@type"]).toBe("RelationshipCreationContent");
 
     return { request, relationship };
 }

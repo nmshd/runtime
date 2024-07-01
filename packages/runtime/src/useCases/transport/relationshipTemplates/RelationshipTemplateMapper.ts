@@ -1,4 +1,4 @@
-import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContentContainingRequest } from "@nmshd/content";
+import { ArbitraryRelationshipTemplateContent } from "@nmshd/content";
 import { RelationshipTemplate } from "@nmshd/transport";
 import { RelationshipTemplateDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
@@ -8,9 +8,9 @@ export class RelationshipTemplateMapper {
         if (!template.cache) {
             throw RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString());
         }
-        if (!(template.cache.content instanceof RelationshipTemplateContentContainingRequest || template.cache.content instanceof ArbitraryRelationshipTemplateContent)) {
+        if (!(template.cache.content instanceof RelationshipTemplateContent || template.cache.content instanceof ArbitraryRelationshipTemplateContent)) {
             throw RuntimeErrors.general.invalidPropertyValue(
-                `The content type of relationship template ${template.id} is neither RelationshipTemplateContentContainingRequest nor ArbitraryRelationshipTemplateContent.`
+                `The content type of relationship template ${template.id} is neither RelationshipTemplateContent nor ArbitraryRelationshipTemplateContent.`
             );
         }
 

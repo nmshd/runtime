@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { ArbitraryRelationshipCreationContent, RelationshipCreationContentContainingResponse } from "@nmshd/content";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
 import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
@@ -31,7 +31,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
     protected async executeInternal(request: CreateRelationshipRequest): Promise<Result<RelationshipDTO>> {
         const transformedContent = Serializable.fromUnknown(request.creationContent);
 
-        if (transformedContent instanceof ArbitraryRelationshipCreationContent || transformedContent instanceof RelationshipCreationContentContainingResponse) {
+        if (transformedContent instanceof ArbitraryRelationshipCreationContent || transformedContent instanceof RelationshipCreationContent) {
             const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
             if (!template) {
                 return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));

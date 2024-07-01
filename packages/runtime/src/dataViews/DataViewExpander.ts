@@ -30,7 +30,6 @@ import {
     RelationshipAttribute,
     RelationshipAttributeJSON,
     RelationshipAttributeQueryJSON,
-    RelationshipTemplateContentContainingRequest,
     RenderHints,
     RenderHintsEditType,
     RenderHintsJSON,
@@ -398,8 +397,8 @@ export class DataViewExpander {
         const description = template.isOwn ? "i18n://dvo.template.outgoing.description" : "i18n://dvo.template.incoming.description";
         let expandedLocalRequest;
 
-        if (template.content["@type"] === "RelationshipTemplateContentContainingRequest") {
-            const templateContent = RelationshipTemplateContentContainingRequest.from(template.content).toJSON();
+        if (template.content["@type"] === "RelationshipTemplateContent") {
+            const templateContent = RelationshipTemplateContent.from(template.content).toJSON();
             if (templateContent.title) {
                 name = templateContent.title;
             }

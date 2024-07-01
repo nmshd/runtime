@@ -9,8 +9,7 @@ import {
     ProprietaryStringJSON,
     RelationshipAttributeConfidentiality,
     RelationshipAttributeJSON,
-    RelationshipTemplateContentContainingRequest,
-    RelationshipTemplateContentContainingRequestJSON,
+    RelationshipTemplateContentJSON,
     RequestItemGroupJSON,
     Surname
 } from "@nmshd/content";
@@ -27,7 +26,7 @@ import { RuntimeServiceProvider, TestRuntimeServices, createTemplate, syncUntilH
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
 let requestor: TestRuntimeServices;
-let templatorTemplate: RelationshipTemplateDTO & { content: RelationshipTemplateContentContainingRequestJSON };
+let templatorTemplate: RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
 let templateId: string;
 let responseItems: DecideRequestItemGroupParametersJSON[];
 
@@ -68,7 +67,7 @@ describe("RelationshipTemplateDVO", () => {
             key: "surname",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-        const templateContent = RelationshipTemplateContentContainingRequest.from({
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -144,7 +143,7 @@ describe("RelationshipTemplateDVO", () => {
                 ]
             }
         ];
-        templatorTemplate = (await createTemplate(templator.transport, templateContent)) as RelationshipTemplateDTO & { content: RelationshipTemplateContentContainingRequestJSON };
+        templatorTemplate = (await createTemplate(templator.transport, templateContent)) as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         templateId = templatorTemplate.id;
     });
 
@@ -180,7 +179,7 @@ describe("RelationshipTemplateDVO", () => {
 
     test("TemplateDVO for requestor", async () => {
         const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference }))
-            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentContainingRequestJSON };
+            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
         const dto = requestorTemplate;
@@ -253,7 +252,7 @@ describe("RelationshipTemplateDVO", () => {
             }
         });
         const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference }))
-            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentContainingRequestJSON };
+            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         if (requestResult.value.length === 0) {
             await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             requestResult = await requestor.consumption.incomingRequests.getRequests({

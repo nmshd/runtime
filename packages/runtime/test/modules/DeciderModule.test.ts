@@ -1,5 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipTemplateContentContainingRequest, Request } from "@nmshd/content";
+import { Request } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
@@ -72,7 +72,7 @@ describe("DeciderModule", () => {
         const request = Request.from({ items: [TestRequestItem.from({ mustBeAccepted: false })] });
         const template = (
             await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                content: RelationshipTemplateContentContainingRequest.from({
+                content: RelationshipTemplateContent.from({
                     onNewRelationship: request
                 }).toJSON(),
                 expiresAt: CoreDate.utc().add({ minutes: 5 }).toISOString()
@@ -102,7 +102,7 @@ describe("DeciderModule", () => {
         const request = Request.from({ items: [TestRequestItem.from({ mustBeAccepted: false })] });
         const template = (
             await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                content: RelationshipTemplateContentContainingRequest.from({
+                content: RelationshipTemplateContent.from({
                     onNewRelationship: request
                 }).toJSON(),
                 expiresAt: CoreDate.utc().add({ minutes: 5 }).toISOString()

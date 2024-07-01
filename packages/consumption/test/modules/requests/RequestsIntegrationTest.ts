@@ -7,7 +7,6 @@ import {
     IRequest,
     IResponse,
     IdentityAttribute,
-    RelationshipTemplateContentContainingRequest,
     Request,
     RequestItemGroup,
     Response,
@@ -635,7 +634,7 @@ export class RequestsWhen {
     public async iCreateAnOutgoingRequestFromRelationshipCreationWith(params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>): Promise<void> {
         params.template ??= TestObjectFactory.createOutgoingIRelationshipTemplate(
             this.context.currentIdentity,
-            RelationshipTemplateContentContainingRequest.from({
+            RelationshipTemplateContent.from({
                 onNewRelationship: TestObjectFactory.createRequestWithOneItem(),
                 onExistingRelationship: TestObjectFactory.createRequestWithTwoItems()
             })
@@ -657,7 +656,7 @@ export class RequestsWhen {
     public async iCreateAnOutgoingRequestFromMessageWith(params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>): Promise<void> {
         params.template ??= TestObjectFactory.createOutgoingIRelationshipTemplate(
             this.context.currentIdentity,
-            RelationshipTemplateContentContainingRequest.from({
+            RelationshipTemplateContent.from({
                 onNewRelationship: TestObjectFactory.createRequestWithOneItem(),
                 onExistingRelationship: TestObjectFactory.createRequestWithOneItem()
             })

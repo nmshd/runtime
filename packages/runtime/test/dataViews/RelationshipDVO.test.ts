@@ -1,13 +1,4 @@
-import {
-    GivenName,
-    IdentityAttribute,
-    ReadAttributeAcceptResponseItem,
-    ReadAttributeRequestItem,
-    RelationshipCreationContentContainingResponse,
-    RelationshipTemplateContentContainingRequest,
-    ResponseItemResult,
-    ResponseResult
-} from "@nmshd/content";
+import { GivenName, IdentityAttribute, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, TransportServices } from "../../src";
 import { RuntimeServiceProvider, establishRelationshipWithContents } from "../lib";
@@ -28,7 +19,7 @@ beforeAll(async () => {
         transportServices1,
         transportServices2,
 
-        RelationshipTemplateContentContainingRequest.from({
+        RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -42,7 +33,7 @@ beforeAll(async () => {
                 ]
             }
         }).toJSON(),
-        RelationshipCreationContentContainingResponse.from({
+        RelationshipCreationContent.from({
             response: {
                 "@type": "Response",
                 result: ResponseResult.Accepted,

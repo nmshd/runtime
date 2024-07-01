@@ -1,14 +1,5 @@
 import { EventBus } from "@js-soft/ts-utils";
-import {
-    DeleteAttributeRequestItem,
-    RelationshipTemplateContentContainingRequest,
-    Request,
-    RequestItem,
-    RequestItemGroup,
-    Response,
-    ResponseItem,
-    ResponseItemGroup
-} from "@nmshd/content";
+import { DeleteAttributeRequestItem, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
 import {
     CoreAddress,
     CoreDate,
@@ -155,10 +146,8 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const requestId = response.requestId;
 
         const templateContent = parsedParams.template.cache!.content;
-        if (!(templateContent instanceof RelationshipTemplateContentContainingRequest)) {
-            throw new ConsumptionError(
-                "The content of the template is not type of RelationshipTemplateContentContainingRequest hence it's not possible to create a request from it."
-            );
+        if (!(templateContent instanceof RelationshipTemplateContent)) {
+            throw new ConsumptionError("The content of the template is not type of RelationshipTemplateContent hence it's not possible to create a request from it.");
         }
 
         // checking for an active relationship is not secure as in the meantime the relationship could have been accepted
