@@ -6,7 +6,6 @@ import {
     RelationshipAttributeConfidentiality,
     RelationshipCreationChangeRequestContentJSON,
     RelationshipTemplateContentJSON,
-    RequestItemJSONDerivations,
     ResponseItemJSON,
     ResponseItemResult,
     ResponseResult
@@ -513,83 +512,51 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
     });
-});
 
-async function establishPendingRelationshipWithPredefinedRequestFlow(
-    sRuntimeServices: TestRuntimeServices,
-    rRuntimeServices: TestRuntimeServices,
-    existingRelationshipAttributeForFurtherSharing?: LocalAttributeDTO
-): Promise<RelationshipDTO> {
-    let requestItems: RequestItemJSONDerivations[];
-    let acceptParams: DecideRequestItemParametersJSON[];
+    async function establishPendingRelationshipWithPredefinedRequestFlow(
+        sRuntimeServices: TestRuntimeServices,
+        rRuntimeServices: TestRuntimeServices,
+        existingRelationshipAttributeForFurtherSharing: LocalAttributeDTO
+    ): Promise<RelationshipDTO> {
+        const sRelationship = await establishPendingRelationshipWithRequestFlow(
+            sRuntimeServices,
+            rRuntimeServices,
+            [
+                {
+                    "@type": "CreateAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        },
+                        owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                    }).toJSON()
+                },
+                {
+                    "@type": "CreateAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: RelationshipAttribute.from({
+                        key: "AKey",
+                        value: {
+                            "@type": "ProprietaryString",
+                            value: "AStringValue",
+                            title: "ATitle"
+                        },
+                        owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }).toJSON()
+                },
+                {
+                    "@type": "ShareAttributeRequestItem",
+                    mustBeAccepted: true,
+                    sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
+                    attribute: existingRelationshipAttributeForFurtherSharing.content
+                }
+            ],
+            [{ accept: true }, { accept: true }, { accept: true }]
+        );
 
-    if (existingRelationshipAttributeForFurtherSharing) {
-        requestItems = [
-            {
-                "@type": "CreateAttributeRequestItem",
-                mustBeAccepted: true,
-                attribute: IdentityAttribute.from({
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
-                    },
-                    owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
-                }).toJSON()
-            },
-            {
-                "@type": "CreateAttributeRequestItem",
-                mustBeAccepted: true,
-                attribute: RelationshipAttribute.from({
-                    key: "AKey",
-                    value: {
-                        "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
-                    },
-                    owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
-                    confidentiality: RelationshipAttributeConfidentiality.Public
-                }).toJSON()
-            },
-            {
-                "@type": "ShareAttributeRequestItem",
-                mustBeAccepted: true,
-                sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
-                attribute: existingRelationshipAttributeForFurtherSharing.content
-            }
-        ];
-        acceptParams = [{ accept: true }, { accept: true }, { accept: true }];
-    } else {
-        requestItems = [
-            {
-                "@type": "CreateAttributeRequestItem",
-                mustBeAccepted: true,
-                attribute: IdentityAttribute.from({
-                    value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
-                    },
-                    owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
-                }).toJSON()
-            },
-            {
-                "@type": "CreateAttributeRequestItem",
-                mustBeAccepted: true,
-                attribute: RelationshipAttribute.from({
-                    key: "AKey",
-                    value: {
-                        "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
-                    },
-                    owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
-                    confidentiality: RelationshipAttributeConfidentiality.Public
-                }).toJSON()
-            }
-        ];
-        acceptParams = [{ accept: true }, { accept: true }];
+        return sRelationship;
     }
-
-    const sRelationship = await establishPendingRelationshipWithRequestFlow(sRuntimeServices, rRuntimeServices, requestItems, acceptParams);
-
-    return sRelationship;
-}
+});
