@@ -1,4 +1,15 @@
-import { GivenName, IdentityAttribute, MailJSON, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
+import {
+    ArbitraryMessageContent,
+    GivenName,
+    IdentityAttribute,
+    MailJSON,
+    ReadAttributeAcceptResponseItem,
+    ReadAttributeRequestItem,
+    RelationshipCreationContentContainingResponse,
+    RelationshipTemplateContentContainingRequest,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, MailDVO, SendMessageRequest, TransportServices } from "../../src";
 import { RuntimeServiceProvider, establishRelationshipWithContents, getRelationship, syncUntilHasMessage, uploadFile } from "../lib";
@@ -18,8 +29,7 @@ beforeAll(async () => {
     await establishRelationshipWithContents(
         transportServices1,
         transportServices2,
-        {
-            "@type": "RelationshipTemplateContentContainingRequest",
+        RelationshipTemplateContentContainingRequest.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -29,12 +39,11 @@ beforeAll(async () => {
                             "@type": "IdentityAttributeQuery",
                             valueType: "CommunicationLanguage"
                         }
-                    }).toJSON()
+                    })
                 ]
             }
-        },
-        {
-            "@type": "RelationshipCreationContentContainingResponse",
+        }).toJSON(),
+        RelationshipCreationContentContainingResponse.from({
             response: {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
@@ -50,7 +59,7 @@ beforeAll(async () => {
                     }).toJSON()
                 ]
             }
-        }
+        }).toJSON()
     );
 }, 30000);
 
@@ -72,12 +81,11 @@ describe("MessageDVO", () => {
 
         messageRequest = {
             recipients: [transportService2Address],
-            content: {
-                "@type": "ArbitraryMessageContent",
+            content: ArbitraryMessageContent.from({
                 content: {
                     arbitraryValue: true
                 }
-            },
+            }).toJSON(),
             attachments: [fileId]
         };
         mailRequest = {

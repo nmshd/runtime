@@ -3,7 +3,7 @@ import {
     GivenName,
     IdentityAttribute,
     RelationshipCreationContentContainingResponseJSON,
-    RelationshipTemplateContentContainingRequestJSON,
+    RelationshipTemplateContentContainingRequest,
     ResponseItemJSON,
     ResponseItemResult,
     ResponseResult,
@@ -28,18 +28,18 @@ import {
     TransportServices
 } from "../../src";
 import {
+    MockEventBus,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     ensureActiveRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     exchangeTemplate,
-    MockEventBus,
-    RuntimeServiceProvider,
     sendMessage,
     sendMessageWithRequest,
-    syncUntilHasMessages,
     syncUntilHasMessageWithResponse,
-    syncUntilHasRelationships,
-    TestRuntimeServices
+    syncUntilHasMessages,
+    syncUntilHasRelationships
 } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
@@ -79,11 +79,10 @@ describe("RequestModule", () => {
         let template: RelationshipTemplateDTO;
 
         const metadata = { aMetadataKey: "aMetadataValue" };
-        const templateContent: RelationshipTemplateContentContainingRequestJSON = {
-            "@type": "RelationshipTemplateContentContainingRequest",
+        const templateContent = RelationshipTemplateContentContainingRequest.from({
             onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
             metadata
-        };
+        }).toJSON();
 
         async function getRequestIdOfTemplate(eventBus: MockEventBus, templateId: string) {
             let requests: LocalRequestDTO[];
@@ -145,11 +144,10 @@ describe("RequestModule", () => {
         test("triggers RelationshipTemplateProcessedEvent when another Template is loaded and a pending Relationship exists", async () => {
             const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-            const templateContent: RelationshipTemplateContentContainingRequestJSON = {
-                "@type": "RelationshipTemplateContentContainingRequest",
+            const templateContent = RelationshipTemplateContentContainingRequest.from({
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 metadata
-            };
+            }).toJSON();
 
             await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
 
@@ -323,8 +321,7 @@ describe("RequestModule", () => {
         });
 
         async function exchangeRelationshipTemplate() {
-            const templateContent: RelationshipTemplateContentContainingRequestJSON = {
-                "@type": "RelationshipTemplateContentContainingRequest",
+            const templateContent = RelationshipTemplateContentContainingRequest.from({
                 onNewRelationship: {
                     "@type": "Request",
                     items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]
@@ -342,7 +339,7 @@ describe("RequestModule", () => {
                         }
                     ]
                 }
-            };
+            }).toJSON();
 
             const template = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
 

@@ -9,6 +9,7 @@ import {
     ProprietaryStringJSON,
     RelationshipAttributeConfidentiality,
     RelationshipAttributeJSON,
+    RelationshipTemplateContentContainingRequest,
     RelationshipTemplateContentContainingRequestJSON,
     RequestItemGroupJSON,
     Surname
@@ -67,8 +68,7 @@ describe("RelationshipTemplateDVO", () => {
             key: "surname",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-        const templateContent: RelationshipTemplateContentContainingRequestJSON = {
-            "@type": "RelationshipTemplateContentContainingRequest",
+        const templateContent = RelationshipTemplateContentContainingRequest.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -118,7 +118,7 @@ describe("RelationshipTemplateDVO", () => {
                     }
                 ]
             }
-        };
+        }).toJSON();
         const newIdentityAttribute1 = IdentityAttribute.from(
             ((templateContent.onNewRelationship.items[1] as RequestItemGroupJSON).items[0] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
         ).toJSON();

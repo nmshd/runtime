@@ -1,6 +1,6 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipCreationContentContainingResponseJSON, RelationshipTemplateContentContainingRequestJSON } from "@nmshd/content";
+import { RelationshipCreationContentContainingResponseJSON, RelationshipTemplateContentContainingRequest, RelationshipTemplateContentContainingRequestJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
@@ -357,8 +357,7 @@ describe("Requests", () => {
         let rEventBus: EventBus;
         let sEventBus: EventBus;
 
-        const templateContent: RelationshipTemplateContentContainingRequestJSON = {
-            "@type": "RelationshipTemplateContentContainingRequest",
+        const templateContent = RelationshipTemplateContentContainingRequest.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -369,7 +368,7 @@ describe("Requests", () => {
                 ],
                 expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
             }
-        };
+        }).toJSON();
 
         beforeAll(async () => {
             const runtimeServices = await runtimeServiceProvider.launch(2);
