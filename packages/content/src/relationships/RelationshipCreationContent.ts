@@ -1,0 +1,12 @@
+import { ArbitraryRelationshipCreationContent, ArbitraryRelationshipCreationContentJSON, IArbitraryRelationshipCreationContent } from "./ArbitraryRelationshipCreationContent";
+import {
+    IRelationshipCreationContentContainingResponse,
+    RelationshipCreationContentContainingResponse,
+    RelationshipCreationContentContainingResponseJSON
+} from "./RelationshipCreationContentContainingResponse";
+
+export type RelationshipCreationContentJSON = RelationshipCreationContentContainingResponseJSON | ArbitraryRelationshipCreationContentJSON;
+
+export type IRelationshipCreationContent = IRelationshipCreationContentContainingResponse | IArbitraryRelationshipCreationContent;
+
+export type RelationshipCreationContent = RelationshipCreationContentContainingResponse | ArbitraryRelationshipCreationContent;
