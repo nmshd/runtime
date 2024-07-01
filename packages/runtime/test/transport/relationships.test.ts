@@ -39,6 +39,7 @@ beforeAll(async () => {
     services1 = runtimeServices[0];
     services2 = runtimeServices[1];
 }, 30000);
+
 afterAll(() => serviceProvider.stop());
 
 describe("Create Relationship", () => {
@@ -150,6 +151,34 @@ describe("Relationship status validations on active relationship", () => {
 
     test("should not revoke a relationship", async () => {
         expect(await services1.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    describe("Templator with active IdentityDeletionProcess", () => {
+        const serviceProvider = new RuntimeServiceProvider();
+        let services1: TestRuntimeServices;
+        let services2: TestRuntimeServices;
+
+        beforeAll(async () => {
+            const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+            services1 = runtimeServices[0];
+            services2 = runtimeServices[1];
+        }, 30000);
+
+        afterAll(() => serviceProvider.stop());
+
+        test("returns error if templator has active IdentityDeletionProcess", async () => {
+            const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+            await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+
+            const createRelationshipResponse = await services2.transport.relationships.createRelationship({
+                templateId: templateId,
+                content: { a: "b" }
+            });
+            expect(createRelationshipResponse).toBeAnError(
+                "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
+                "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
+            );
+        });
     });
 });
 
