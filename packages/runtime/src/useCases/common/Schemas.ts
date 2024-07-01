@@ -274,6 +274,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/CreateAttributeRequestItemJSON"
                 },
                 {
+                    "$ref": "#/definitions/DeleteAttributeRequestItemJSON"
+                },
+                {
                     "$ref": "#/definitions/ShareAttributeRequestItemJSON"
                 },
                 {
@@ -2293,6 +2296,50 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DeleteAttributeRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DeleteAttributeRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -3192,6 +3239,12 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/AcceptResponseItemJSON"
                 },
                 {
+                    "$ref": "#/definitions/AttributeAlreadySharedAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/AttributeSuccessionAcceptResponseItemJSON"
+                },
+                {
                     "$ref": "#/definitions/CreateAttributeAcceptResponseItemJSON"
                 },
                 {
@@ -3234,12 +3287,12 @@ export const CompleteOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "CreateAttributeAcceptResponseItemJSON": {
+        "AttributeAlreadySharedAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "CreateAttributeAcceptResponseItem"
+                    "const": "AttributeAlreadySharedAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -3262,12 +3315,12 @@ export const CompleteOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "ShareAttributeAcceptResponseItemJSON": {
+        "AttributeSuccessionAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
+                    "const": "AttributeSuccessionAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -3279,38 +3332,13 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "attributeId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "ProposeAttributeAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProposeAttributeAcceptResponseItem"
-                },
-                "@context": {
+                "predecessorId": {
                     "type": "string"
                 },
-                "@version": {
+                "successorId": {
                     "type": "string"
                 },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                },
-                "attribute": {
+                "successorContent": {
                     "anyOf": [
                         {
                             "$ref": "#/definitions/IdentityAttributeJSON"
@@ -3323,9 +3351,10 @@ export const CompleteOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "attribute",
-                "attributeId",
-                "result"
+                "predecessorId",
+                "result",
+                "successorContent",
+                "successorId"
             ],
             "additionalProperties": false
         },
@@ -5238,6 +5267,101 @@ export const CompleteOutgoingRequestRequest: any = {
                 "private",
                 "protected"
             ]
+        },
+        "CreateAttributeAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "CreateAttributeAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attributeId",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "ShareAttributeAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAttributeAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attributeId",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "ProposeAttributeAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProposeAttributeAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/IdentityAttributeJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipAttributeJSON"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "attributeId",
+                "result"
+            ],
+            "additionalProperties": false
         },
         "ReadAttributeAcceptResponseItemJSON": {
             "type": "object",
@@ -5545,6 +5669,12 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/AcceptResponseItemJSON"
                 },
                 {
+                    "$ref": "#/definitions/AttributeAlreadySharedAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/AttributeSuccessionAcceptResponseItemJSON"
+                },
+                {
                     "$ref": "#/definitions/CreateAttributeAcceptResponseItemJSON"
                 },
                 {
@@ -5587,12 +5717,12 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
-        "CreateAttributeAcceptResponseItemJSON": {
+        "AttributeAlreadySharedAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "CreateAttributeAcceptResponseItem"
+                    "const": "AttributeAlreadySharedAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -5615,12 +5745,12 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
-        "ShareAttributeAcceptResponseItemJSON": {
+        "AttributeSuccessionAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
+                    "const": "AttributeSuccessionAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -5632,38 +5762,13 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string",
                     "const": "Accepted"
                 },
-                "attributeId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "ProposeAttributeAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProposeAttributeAcceptResponseItem"
-                },
-                "@context": {
+                "predecessorId": {
                     "type": "string"
                 },
-                "@version": {
+                "successorId": {
                     "type": "string"
                 },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                },
-                "attribute": {
+                "successorContent": {
                     "anyOf": [
                         {
                             "$ref": "#/definitions/IdentityAttributeJSON"
@@ -5676,9 +5781,10 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             },
             "required": [
                 "@type",
-                "attribute",
-                "attributeId",
-                "result"
+                "predecessorId",
+                "result",
+                "successorContent",
+                "successorId"
             ],
             "additionalProperties": false
         },
@@ -7592,6 +7698,101 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "protected"
             ]
         },
+        "CreateAttributeAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "CreateAttributeAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attributeId",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "ShareAttributeAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAttributeAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attributeId",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "ProposeAttributeAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProposeAttributeAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/IdentityAttributeJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipAttributeJSON"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "attributeId",
+                "result"
+            ],
+            "additionalProperties": false
+        },
         "ReadAttributeAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
@@ -7870,6 +8071,9 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/CreateAttributeRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/DeleteAttributeRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/ShareAttributeRequestItemJSON"
@@ -9891,6 +10095,50 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DeleteAttributeRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DeleteAttributeRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -11135,6 +11383,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/CreateAttributeRequestItemJSON"
                 },
                 {
+                    "$ref": "#/definitions/DeleteAttributeRequestItemJSON"
+                },
+                {
                     "$ref": "#/definitions/ShareAttributeRequestItemJSON"
                 },
                 {
@@ -13154,6 +13405,50 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DeleteAttributeRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DeleteAttributeRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -17211,45 +17506,6 @@ export const GetRepositoryAttributesRequest: any = {
                     ]
                 },
                 "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -21754,16 +22010,16 @@ export const LoadPeerRelationshipTemplateRequest: any = {
     }
 }
 
-export const RequestRelationshipReactivationRequest: any = {
+export const AcceptRelationshipRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RequestRelationshipReactivationRequest",
+    "$ref": "#/definitions/AcceptRelationshipRequest",
     "definitions": {
-        "RequestRelationshipReactivationRequest": {
+        "AcceptRelationshipRequest": {
             "type": "object",
             "properties": {
                 "relationshipId": {
                     "$ref": "#/definitions/RelationshipIdString"
-                },
+                }
             },
             "required": [
                 "relationshipId"
@@ -21773,7 +22029,7 @@ export const RequestRelationshipReactivationRequest: any = {
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
-        },
+        }
     }
 }
 
@@ -21782,75 +22038,6 @@ export const AcceptRelationshipReactivationRequest: any = {
     "$ref": "#/definitions/AcceptRelationshipReactivationRequest",
     "definitions": {
         "AcceptRelationshipReactivationRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                },
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        },
-    }
-}
-
-export const RejectRelationshipReactivationRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RejectRelationshipReactivationRequest",
-    "definitions": {
-        "RejectRelationshipReactivationRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                },
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        },
-    }
-}
-
-export const RevokeRelationshipReactivationRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RevokeRelationshipReactivationRequest",
-    "definitions": {
-        "RevokeRelationshipReactivationRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                },
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        },
-    }
-}
-
-export const AcceptRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptRelationshipRequest",
-    "definitions": {
-        "AcceptRelationshipRequest": {
             "type": "object",
             "properties": {
                 "relationshipId": {
@@ -22054,11 +22241,80 @@ export const RejectRelationshipRequest: any = {
     }
 }
 
+export const RejectRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RejectRelationshipReactivationRequest",
+    "definitions": {
+        "RejectRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RequestRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RequestRelationshipReactivationRequest",
+    "definitions": {
+        "RequestRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const RevokeRelationshipRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/RevokeRelationshipRequest",
     "definitions": {
         "RevokeRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RevokeRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RevokeRelationshipReactivationRequest",
+    "definitions": {
+        "RevokeRelationshipReactivationRequest": {
             "type": "object",
             "properties": {
                 "relationshipId": {
