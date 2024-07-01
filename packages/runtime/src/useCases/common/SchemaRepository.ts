@@ -49,8 +49,6 @@ export class JsonSchema {
 
     public validate(obj: any): JsonSchemaValidationResult {
         const result = { isValid: this.validateSchema(obj), errors: this.validateSchema.errors ? [...this.validateSchema.errors] : undefined };
-        console.log(obj);
-        console.log(result);
         return result;
     }
 }
