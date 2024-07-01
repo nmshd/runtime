@@ -1,8 +1,15 @@
 /* eslint-disable jest/no-standalone-expect */
 import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
-import { Serializable } from "@js-soft/ts-serval";
 import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import {
+    ArbitraryMessageContent,
+    ArbitraryRelationshipCreationContent,
+    ArbitraryRelationshipTemplateContent,
+    MessageContentJSON,
+    RelationshipCreationContentJSON,
+    RelationshipTemplateContentJSON
+} from "@nmshd/content";
 import { FileDTO, MessageDTO, RelationshipDTO, RelationshipTemplateDTO, SyncEverythingResponse } from "@nmshd/runtime";
 import { CoreDate, IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
@@ -166,9 +173,7 @@ export class TestUtil {
     public static async createAndLoadPeerTemplate(
         from: LocalAccountSession,
         to: LocalAccountSession,
-        content: any = {
-            mycontent: "template"
-        }
+        content: RelationshipTemplateContentJSON = ArbitraryRelationshipTemplateContent.from({ content: {} }).toJSON()
     ): Promise<RelationshipTemplateDTO> {
         const templateFrom = (
             await from.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
@@ -195,9 +200,7 @@ export class TestUtil {
     public static async requestRelationshipForTemplate(
         from: LocalAccountSession,
         templateId: string,
-        content: any = {
-            mycontent: "request"
-        }
+        content: RelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ content: {} }).toJSON()
     ): Promise<RelationshipDTO> {
         const relRequest = await from.transportServices.relationships.createRelationship({ templateId, creationContent: content });
         return relRequest.value;
@@ -285,13 +288,18 @@ export class TestUtil {
         return syncResult.messages[0];
     }
 
-    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: any): Promise<MessageDTO> {
+    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: MessageContentJSON): Promise<MessageDTO> {
         return await this.sendMessagesWithAttachments(from, [to], [], content);
     }
 
-    public static async sendMessagesWithAttachments(from: LocalAccountSession, recipients: LocalAccountSession[], attachments: string[], content?: any): Promise<MessageDTO> {
+    public static async sendMessagesWithAttachments(
+        from: LocalAccountSession,
+        recipients: LocalAccountSession[],
+        attachments: string[],
+        content?: MessageContentJSON
+    ): Promise<MessageDTO> {
         if (!content) {
-            content = Serializable.fromUnknown({ content: "TestContent" });
+            content = ArbitraryMessageContent.from({ content: "TestContent" }).toJSON();
         }
 
         const result = await from.transportServices.messages.sendMessage({
