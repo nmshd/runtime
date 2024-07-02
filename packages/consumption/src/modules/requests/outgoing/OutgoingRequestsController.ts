@@ -147,7 +147,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
         const templateContent = parsedParams.template.cache!.content;
         if (!(templateContent instanceof RelationshipTemplateContent)) {
-            throw new ConsumptionError("The content of the template is not type of RelationshipTemplateContent hence it's not possible to create a request from it.");
+            throw new ConsumptionError("The content of the template is not of type RelationshipTemplateContent hence it's not possible to create a request from it.");
         }
 
         // checking for an active relationship is not secure as in the meantime the relationship could have been accepted

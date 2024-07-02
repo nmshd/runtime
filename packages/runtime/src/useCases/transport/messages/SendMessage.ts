@@ -79,7 +79,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             transformedContent instanceof Notification ||
             transformedContent instanceof ArbitraryMessageContent
         ) {
-            return undefined;
+            return;
         }
         return RuntimeErrors.general.invalidPropertyValue("The content type of a message must be Mail, Request, ResponseWrapper, Notification or ArbitraryMessageContent.");
     }

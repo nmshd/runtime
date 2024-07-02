@@ -34,6 +34,7 @@ export interface RelationshipAuditLogEntryDTO {
 export interface RelationshipAuditLogDTO extends Array<RelationshipAuditLogEntryDTO> {}
 
 export type RelationshipCreationContentDTO = RelationshipCreationContentJSON | ArbitraryRelationshipCreationContentJSON;
+
 export interface RelationshipDTO {
     id: string;
     template: RelationshipTemplateDTO;

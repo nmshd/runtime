@@ -2,6 +2,7 @@ import { ArbitraryMessageContentJSON, MailJSON, NotificationJSON, RequestJSON, R
 import { RecipientDTO } from "./RecipientDTO";
 
 export type MessageContentDTO = MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON;
+
 export interface MessageDTO {
     id: string;
     content: MessageContentDTO;

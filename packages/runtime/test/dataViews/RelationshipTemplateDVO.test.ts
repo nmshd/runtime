@@ -6,7 +6,6 @@ import {
     IdentityAttributeQuery,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
-    ProprietaryStringJSON,
     RelationshipAttributeConfidentiality,
     RelationshipAttributeJSON,
     RelationshipTemplateContent,
@@ -53,7 +52,7 @@ describe("RelationshipTemplateDVO", () => {
                 "@type": "ProprietaryString",
                 title: "ATitle",
                 value: "AProprietaryStringValue"
-            } as ProprietaryStringJSON,
+            },
             key: "givenName",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
@@ -64,7 +63,7 @@ describe("RelationshipTemplateDVO", () => {
                 "@type": "ProprietaryString",
                 title: "ATitle",
                 value: "AProprietaryStringValue"
-            } as ProprietaryStringJSON,
+            },
             key: "surname",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
