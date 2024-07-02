@@ -50,20 +50,20 @@ export class EventProxy {
     }
 
     private proxyTransportEvents() {
-        this.subscribeToSourceEvent(transport.MessageDeliveredEvent, (event) => {
-            this.targetEventBus.publish(new MessageDeliveredEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
+        this.subscribeToSourceEvent(transport.MessageDeliveredEvent, async (event) => {
+            this.targetEventBus.publish(new MessageDeliveredEvent(event.eventTargetAddress, await MessageMapper.toMessageDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(transport.MessageReceivedEvent, (event) => {
-            this.targetEventBus.publish(new MessageReceivedEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
+        this.subscribeToSourceEvent(transport.MessageReceivedEvent, async (event) => {
+            this.targetEventBus.publish(new MessageReceivedEvent(event.eventTargetAddress, await MessageMapper.toMessageDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(transport.MessageSentEvent, (event) => {
-            this.targetEventBus.publish(new MessageSentEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
+        this.subscribeToSourceEvent(transport.MessageSentEvent, async (event) => {
+            this.targetEventBus.publish(new MessageSentEvent(event.eventTargetAddress, await MessageMapper.toMessageDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(transport.MessageWasReadAtChangedEvent, (event) => {
-            this.targetEventBus.publish(new MessageWasReadAtChangedEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
+        this.subscribeToSourceEvent(transport.MessageWasReadAtChangedEvent, async (event) => {
+            this.targetEventBus.publish(new MessageWasReadAtChangedEvent(event.eventTargetAddress, await MessageMapper.toMessageDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.PeerRelationshipTemplateLoadedEvent, (event) => {
