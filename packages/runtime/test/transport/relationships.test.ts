@@ -671,18 +671,24 @@ describe("RelationshipTermination", () => {
 describe("RelationshipDecomposition", () => {
     let services3: TestRuntimeServices;
     let relationshipId: string;
+    let templateId: string;
     let relationshipId2: string;
+    let templateId2: string;
     let multipleRecipientsMessageId: string;
 
     let decompositionResult: Result<null, ApplicationError>;
     beforeAll(async () => {
-        relationshipId = (await ensureActiveRelationship(services1.transport, services2.transport)).id;
+        const relationship = await ensureActiveRelationship(services1.transport, services2.transport);
+        relationshipId = relationship.id;
+        templateId = relationship.template.id;
 
         await createRelationshipData(services1, services2);
 
         const runtimeServices = await serviceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
         services3 = runtimeServices[0];
-        relationshipId2 = (await establishRelationship(services1.transport, services3.transport)).id;
+        const relationship2 = await establishRelationship(services1.transport, services3.transport);
+        relationshipId2 = relationship2.id;
+        templateId2 = relationship2.template.id;
 
         await createRelationshipData(services1, services3);
         multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).id;
@@ -710,8 +716,11 @@ describe("RelationshipDecomposition", () => {
     });
 
     test("relationship template should be deleted", async () => {
-        const relationshipTemplates = await services1.transport.relationshipTemplates.getRelationshipTemplates({});
-        expect(relationshipTemplates).toHaveLength(1); // relationship to services3 remains
+        const result = await services1.transport.relationshipTemplates.getRelationshipTemplate({ id: templateId });
+        expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+
+        const resultControl = await services1.transport.relationshipTemplates.getRelationshipTemplate({ id: templateId2 });
+        expect(resultControl).toBeSuccessful();
     });
 
     test("requests should be deleted", async () => {
