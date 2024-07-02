@@ -152,6 +152,18 @@ describe("Message errors", () => {
         expect(result).toBeAnError("Mail.to:Array :: may not be empty", "error.runtime.requestDeserialization");
     });
 
+    test("should throw correct error for missing 'to' in the Message", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
+    });
+
     test("should throw correct error for false content type", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
