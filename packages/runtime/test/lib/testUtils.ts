@@ -14,7 +14,9 @@ import {
     RelationshipCreationContent,
     RelationshipCreationContentJSON,
     RelationshipTemplateContent,
-    RelationshipTemplateContentJSON
+    RelationshipTemplateContentJSON,
+    RequestItemGroupJSON,
+    RequestItemJSONDerivations
 } from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
 import fs from "fs";
@@ -38,6 +40,7 @@ import {
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
+    RelationshipChangedEvent,
     RelationshipDTO,
     RelationshipStatus,
     RelationshipTemplateDTO,
@@ -347,6 +350,47 @@ export async function establishRelationshipWithContents(
 
     const relationships2 = await syncUntilHasRelationships(transportServices2);
     expect(relationships2).toHaveLength(1);
+}
+
+export async function establishPendingRelationshipWithRequestFlow(
+    sRuntimeServices: TestRuntimeServices,
+    rRuntimeServices: TestRuntimeServices,
+    requestItems: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
+    acceptParams: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[],
+    requestOptions?: {
+        title?: string;
+        description?: string;
+        expiresAt?: string;
+        metadata?: object;
+    }
+): Promise<RelationshipDTO> {
+    const templateContent: RelationshipTemplateContentJSON = {
+        "@type": "RelationshipTemplateContent",
+        onNewRelationship: {
+            "@type": "Request",
+            items: requestItems,
+            title: requestOptions?.title,
+            description: requestOptions?.description,
+            expiresAt: requestOptions?.expiresAt,
+            metadata: requestOptions?.metadata
+        }
+    };
+
+    const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
+
+    await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === template.id);
+
+    const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+    await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: acceptParams });
+
+    await rRuntimeServices.eventBus.waitForEvent(RelationshipChangedEvent);
+
+    const sRelationship = (await syncUntilHasRelationships(sRuntimeServices.transport, 1))[0];
+    expect(sRelationship.status).toStrictEqual(RelationshipStatus.Pending);
+
+    await sRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+    return sRelationship;
 }
 
 export async function ensureActiveRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<RelationshipDTO> {
