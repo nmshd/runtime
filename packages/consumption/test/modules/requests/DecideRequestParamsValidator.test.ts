@@ -355,7 +355,7 @@ describe("DecideRequestParametersValidator", function () {
             return;
         }
 
-        expect(validationResult.error.code).toBe("error.consumption.requests.inheritedFromItem");
+        expect(validationResult.error.code).toBe("error.consumption.validation.inheritedFromItem");
         expect(validationResult.error.message).toBe(
             "Some child items have errors. If this error occured during the creation of a request, we recommand to call 'validate' to get more information."
         );

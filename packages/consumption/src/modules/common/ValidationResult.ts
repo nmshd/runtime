@@ -23,7 +23,7 @@ export abstract class ValidationResult {
         return items.some((r) => r.isError())
             ? ValidationResult.error(
                   new ApplicationError(
-                      "error.consumption.requests.inheritedFromItem",
+                      "error.consumption.validation.inheritedFromItem",
                       "Some child items have errors. If this error occured during the creation of a request, we recommand to call 'validate' to get more information."
                   ),
                   items

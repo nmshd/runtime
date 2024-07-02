@@ -147,7 +147,7 @@ describe("OutgoingRequestsController", function () {
                 }
             });
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.inheritedFromItem",
+                code: "error.consumption.validation.inheritedFromItem",
                 message: "Some child items have errors. If this error occured during the creation of a request, we recommand to call 'validate' to get more information."
             });
             expect(validationResult.items).toHaveLength(2);
@@ -181,7 +181,7 @@ describe("OutgoingRequestsController", function () {
                 }
             });
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.inheritedFromItem",
+                code: "error.consumption.validation.inheritedFromItem",
                 message: "Some child items have errors. If this error occured during the creation of a request, we recommand to call 'validate' to get more information."
             });
             expect(validationResult.items).toHaveLength(2);
@@ -189,7 +189,7 @@ describe("OutgoingRequestsController", function () {
             expect(validationResult.items[0].isError()).toBe(false);
 
             expect(validationResult.items[1].isError()).toBe(true);
-            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("error.consumption.requests.inheritedFromItem");
+            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("error.consumption.validation.inheritedFromItem");
             expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe(
                 "Some child items have errors. If this error occured during the creation of a request, we recommand to call 'validate' to get more information."
             );
