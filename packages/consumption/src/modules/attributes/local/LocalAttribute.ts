@@ -1,10 +1,10 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import {
     AbstractComplexValue,
-    IdentityAttribute,
-    IdentityAttributeJSON,
     IIdentityAttribute,
     IRelationshipAttribute,
+    IdentityAttribute,
+    IdentityAttributeJSON,
     RelationshipAttribute,
     RelationshipAttributeJSON
 } from "@nmshd/content";
@@ -23,6 +23,7 @@ export interface LocalAttributeJSON {
     shareInfo?: LocalAttributeShareInfoJSON;
     deletionInfo?: LocalAttributeDeletionInfoJSON;
     parentId?: string;
+    default?: boolean;
 }
 
 export interface ILocalAttribute extends ICoreSynchronizable {
@@ -33,36 +34,43 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     shareInfo?: ILocalAttributeShareInfo;
     deletionInfo?: ILocalAttributeDeletionInfo;
     parentId?: ICoreId;
+    default?: boolean;
 }
 
 export type OwnSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
     shareInfo: LocalAttributeShareInfo;
+    default: undefined;
 };
 
 export type OwnSharedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
     shareInfo: LocalAttributeShareInfo;
+    default: undefined;
 };
 
 export type PeerSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
+    default: undefined;
 };
 
 export type PeerSharedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
+    default: undefined;
 };
 
 export type ThirdPartyOwnedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
     shareInfo: LocalAttributeShareInfo;
+    default: undefined;
 };
 
 export type RepositoryAttribute = LocalAttribute & {
     content: IdentityAttribute;
     shareInfo: undefined;
+    deletionInfo: undefined;
 };
 
 @type("LocalAttribute")
@@ -75,7 +83,8 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         nameof<LocalAttribute>((r) => r.succeededBy),
         nameof<LocalAttribute>((r) => r.shareInfo),
         nameof<LocalAttribute>((r) => r.deletionInfo),
-        nameof<LocalAttribute>((r) => r.parentId)
+        nameof<LocalAttribute>((r) => r.parentId),
+        nameof<LocalAttribute>((r) => r.default)
     ];
 
     public override readonly userdataProperties = [nameof<LocalAttribute>((r) => r.content)];
@@ -108,6 +117,10 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     @serialize()
     public parentId?: CoreId;
 
+    @validate({ nullable: true })
+    @serialize()
+    public default?: boolean;
+
     public isOwnSharedIdentityAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute {
         return this.isIdentityAttribute() && this.isOwnSharedAttribute(ownAddress, peerAddress);
     }
@@ -132,8 +145,11 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return this.isIdentityAttribute() && !this.isShared() && this.isOwnedBy(ownAddress);
     }
 
+    // TODO: check no default
     public isOwnSharedAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute | OwnSharedRelationshipAttribute {
         let isOwnSharedAttribute = this.isShared() && this.isOwnedBy(ownAddress);
+
+        isOwnSharedAttribute &&= this.isNotDefault();
 
         if (peerAddress) isOwnSharedAttribute &&= this.shareInfo!.peer.equals(peerAddress);
         return isOwnSharedAttribute;
@@ -144,12 +160,16 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
         isPeerSharedAttribute &&= !this.shareInfo!.sourceAttribute;
 
+        isPeerSharedAttribute &&= this.isNotDefault();
+
         if (peerAddress) isPeerSharedAttribute &&= this.isOwnedBy(peerAddress);
         return isPeerSharedAttribute;
     }
 
     public isThirdPartyOwnedAttribute(ownAddress: CoreAddress, thirdPartyAddress?: CoreAddress): this is ThirdPartyOwnedRelationshipAttribute {
         let isThirdPartyOwnedAttribute = this.isShared() && !this.isOwnedBy(ownAddress) && !this.isOwnedBy(this.shareInfo.peer);
+
+        isThirdPartyOwnedAttribute &&= this.isNotDefault();
 
         if (thirdPartyAddress) isThirdPartyOwnedAttribute &&= this.isOwnedBy(thirdPartyAddress);
         return isThirdPartyOwnedAttribute;
@@ -175,6 +195,10 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
     public isShared(): this is LocalAttribute & { shareInfo: LocalAttributeShareInfo } {
         return !!this.shareInfo;
+    }
+
+    public isNotDefault(): this is LocalAttribute & { default: undefined } {
+        return !this.default;
     }
 
     public setDeletionInfo(deletionInfo: LocalAttributeDeletionInfo, ownAddress: CoreAddress): this {

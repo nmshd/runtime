@@ -1,6 +1,6 @@
 import { IdentityAttributeJSON, RelationshipAttributeCreationHintsJSON, RelationshipAttributeJSON, RenderHintsJSON, ValueHintsJSON } from "@nmshd/content";
-import { AttributeQueryDVO } from "../content/AttributeDVOs";
 import { DataViewObject } from "../DataViewObject";
+import { AttributeQueryDVO } from "../content/AttributeDVOs";
 import { IdentityDVO } from "../transport";
 
 /**
@@ -34,6 +34,7 @@ export interface RepositoryAttributeDVO extends LocalAttributeDVO {
     sharedWith: SharedToPeerAttributeDVO[];
     isOwn: true;
     tags?: string[];
+    default?: boolean;
 }
 
 /**

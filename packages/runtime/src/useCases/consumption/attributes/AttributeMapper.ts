@@ -11,7 +11,8 @@ export class AttributeMapper {
             succeeds: attribute.succeeds?.toString(),
             succeededBy: attribute.succeededBy?.toString(),
             shareInfo: attribute.shareInfo?.toJSON() as LocalAttributeShareInfoJSON,
-            deletionInfo: attribute.deletionInfo?.toJSON() as LocalAttributeDeletionInfoJSON
+            deletionInfo: attribute.deletionInfo?.toJSON() as LocalAttributeDeletionInfoJSON,
+            default: attribute.default
         };
     }
 
