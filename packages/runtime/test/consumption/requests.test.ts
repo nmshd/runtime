@@ -1,5 +1,6 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
+import { RelationshipCreationContentJSON, RelationshipTemplateContent, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
@@ -11,13 +12,13 @@ import {
 } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import {
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     establishRelationship,
     exchangeMessageWithRequest,
     exchangeTemplate,
-    RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncUntilHasRelationships,
-    TestRuntimeServices
+    syncUntilHasRelationships
 } from "../lib";
 import {
     exchangeMessageWithRequestAndRequireManualDecision,
@@ -110,7 +111,7 @@ describe("Requests", () => {
                 triggeredEvent = event;
             });
             const sRequestMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-            const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id, messageId: sRequestMessage.id });
+            const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id!, messageId: sRequestMessage.id });
 
             expect(result).toBeSuccessful();
             expect(result.value.status).toBe(LocalRequestStatus.Open);
@@ -137,7 +138,7 @@ describe("Requests", () => {
 
             expect(rLocalRequest).toBeDefined();
             expect(rLocalRequest.status).toBe(LocalRequestStatus.Open);
-            expect(rLocalRequest.id).toBe(rRequestMessage.content.id);
+            expect(rLocalRequest.id).toBe(rRequestMessage.content.id!);
 
             expect(triggeredEvent).toBeDefined();
             expect(triggeredEvent!.data).toBeDefined();
@@ -156,7 +157,7 @@ describe("Requests", () => {
             });
 
             const result = await rConsumptionServices.incomingRequests.checkPrerequisites({
-                requestId: message.content.id
+                requestId: message.content.id!
             });
 
             expect(result).toBeSuccessful();
@@ -179,7 +180,7 @@ describe("Requests", () => {
                 requestSourceId: message.id
             });
             await rConsumptionServices.incomingRequests.checkPrerequisites({
-                requestId: message.content.id
+                requestId: message.content.id!
             });
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
@@ -187,7 +188,7 @@ describe("Requests", () => {
             });
 
             const result = await rConsumptionServices.incomingRequests.requireManualDecision({
-                requestId: message.content.id
+                requestId: message.content.id!
             });
 
             expect(result).toBeSuccessful();
@@ -356,8 +357,7 @@ describe("Requests", () => {
         let rEventBus: EventBus;
         let sEventBus: EventBus;
 
-        const templateContent = {
-            "@type": "RelationshipTemplateContent",
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -368,7 +368,7 @@ describe("Requests", () => {
                 ],
                 expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
             }
-        };
+        }).toJSON();
 
         beforeAll(async () => {
             const runtimeServices = await runtimeServiceProvider.launch(2);
@@ -404,7 +404,7 @@ describe("Requests", () => {
             });
 
             const result = await rConsumptionServices.incomingRequests.received({
-                receivedRequest: rRelationshipTemplate.content.onNewRelationship,
+                receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentJSON).onNewRelationship,
                 requestSourceId: rRelationshipTemplate.id
             });
 
@@ -425,7 +425,7 @@ describe("Requests", () => {
             const rRelationshipTemplate = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
             const incomingRequest = (
                 await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: rRelationshipTemplate.content.onNewRelationship,
+                    receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentJSON).onNewRelationship,
                     requestSourceId: rRelationshipTemplate.id
                 })
             ).value;
@@ -455,7 +455,7 @@ describe("Requests", () => {
             const rRelationshipTemplate = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
             const incomingRequest = (
                 await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: rRelationshipTemplate.content.onNewRelationship,
+                    receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentJSON).onNewRelationship,
                     requestSourceId: rRelationshipTemplate.id
                 })
             ).value;
@@ -586,7 +586,7 @@ describe("Requests", () => {
 
             const completionResult = await sConsumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
                 responseSourceId: sRelationship.id,
-                response: sRelationship.creationContent.response,
+                response: (sRelationship.creationContent as RelationshipCreationContentJSON).response,
                 templateId: relationship!.template.id
             });
 

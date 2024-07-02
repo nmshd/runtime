@@ -35,4 +35,8 @@ export class Notification extends Serializable implements INotification {
     public static from(value: INotification): Notification {
         return this.fromAny(value);
     }
+
+    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): NotificationJSON {
+        return super.toJSON(verbose, serializeAsString) as NotificationJSON;
+    }
 }

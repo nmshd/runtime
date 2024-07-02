@@ -1,5 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { Request } from "@nmshd/content";
+import { RelationshipTemplateContent, Request } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
@@ -10,7 +10,7 @@ import {
     RelationshipTemplateProcessedResult,
     TransportServices
 } from "../../src";
-import { establishRelationship, exchangeMessage, MockEventBus, RuntimeServiceProvider, TestRequestItem } from "../lib";
+import { MockEventBus, RuntimeServiceProvider, TestRequestItem, establishRelationship, exchangeMessage } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -72,7 +72,9 @@ describe("DeciderModule", () => {
         const request = Request.from({ items: [TestRequestItem.from({ mustBeAccepted: false })] });
         const template = (
             await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                content: request,
+                content: RelationshipTemplateContent.from({
+                    onNewRelationship: request
+                }).toJSON(),
                 expiresAt: CoreDate.utc().add({ minutes: 5 }).toISOString()
             })
         ).value;
@@ -100,7 +102,9 @@ describe("DeciderModule", () => {
         const request = Request.from({ items: [TestRequestItem.from({ mustBeAccepted: false })] });
         const template = (
             await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                content: request,
+                content: RelationshipTemplateContent.from({
+                    onNewRelationship: request
+                }).toJSON(),
                 expiresAt: CoreDate.utc().add({ minutes: 5 }).toISOString()
             })
         ).value;

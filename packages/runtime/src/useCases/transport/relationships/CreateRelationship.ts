@@ -1,5 +1,7 @@
+import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreId, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
+import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -27,18 +29,23 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
     }
 
     protected async executeInternal(request: CreateRelationshipRequest): Promise<Result<RelationshipDTO>> {
-        const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
-        if (!template) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
+        const transformedContent = Serializable.fromUnknown(request.creationContent);
+
+        if (transformedContent instanceof ArbitraryRelationshipCreationContent || transformedContent instanceof RelationshipCreationContent) {
+            const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
+            if (!template) {
+                return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
+            }
+
+            const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: request.creationContent });
+
+            await this.accountController.syncDatawallet();
+
+            return Result.ok(RelationshipMapper.toRelationshipDTO(relationship));
         }
 
-        const relationship = await this.relationshipsController.sendRelationship({
-            template: template,
-            creationContent: request.creationContent
-        });
-
-        await this.accountController.syncDatawallet();
-
-        return Result.ok(RelationshipMapper.toRelationshipDTO(relationship));
+        return Result.fail(
+            RuntimeErrors.general.invalidPropertyValue("A relationship creation content must be of type RelationshipCreationContent or ArbitraryRelationshipCreationContent.")
+        );
     }
 }

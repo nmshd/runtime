@@ -1,5 +1,5 @@
 import { ConsentRequestItemJSON } from "@nmshd/content";
-import { CoreDate, CoreId } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/transport";
 import { GetMessagesQuery, MessageReceivedEvent, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
 import {
     QueryParamConditions,
@@ -164,6 +164,14 @@ describe("Message errors", () => {
         expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
     });
 
+    test("should throw correct error for false content type", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {}
+        });
+        expect(result).toBeAnError("The content type", "error.runtime.validation.invalidPropertyValue");
+    });
+
     test("should throw correct error for missing Request ID in a Message with Request content", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
@@ -180,7 +188,7 @@ describe("Message errors", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Request",
-                id: CoreId.from("REQxxxxxxxxxxxxxxxxx"),
+                id: "REQxxxxxxxxxxxxxxxxx",
                 items: [requestItem]
             }
         });
@@ -320,11 +328,23 @@ describe("Message query", () => {
         const relationshipToRecipient2 = await client1.transport.relationships.getRelationshipByAddress({ address: addressRecipient2 });
 
         await client1.transport.messages.sendMessage({
-            content: {},
+            content: {
+                "@type": "Mail",
+                body: "A body",
+                cc: [],
+                subject: "A subject",
+                to: [addressRecipient1]
+            },
             recipients: [addressRecipient1]
         });
         await client1.transport.messages.sendMessage({
-            content: {},
+            content: {
+                "@type": "Mail",
+                body: "A body",
+                cc: [],
+                subject: "A subject",
+                to: [addressRecipient2]
+            },
             recipients: [addressRecipient2]
         });
 

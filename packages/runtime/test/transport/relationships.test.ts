@@ -18,6 +18,7 @@ import {
     RuntimeServiceProvider,
     TestRuntimeServices,
     createTemplate,
+    emptyRelationshipCreationContent,
     ensureActiveRelationship,
     exchangeMessageWithRequest,
     exchangeTemplate,
@@ -51,12 +52,22 @@ describe("Create Relationship", () => {
         expect(response).toBeSuccessful();
     });
 
+    test("should not create a relationship with a false creation content type", async () => {
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+
+        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: {}
+        });
+        expect(createRelationshipResponse).toBeAnError("A relationship creation content", "error.runtime.validation.invalidPropertyValue");
+    });
+
     test("create pending relationship", async () => {
         const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
-            creationContent: { a: "b" }
+            creationContent: emptyRelationshipCreationContent
         });
         expect(createRelationshipResponse).toBeSuccessful();
 
@@ -171,7 +182,7 @@ describe("Relationship status validations on active relationship", () => {
 
             const createRelationshipResponse = await services2.transport.relationships.createRelationship({
                 templateId: templateId,
-                creationContent: { a: "b" }
+                creationContent: emptyRelationshipCreationContent
             });
             expect(createRelationshipResponse).toBeAnError(
                 "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",

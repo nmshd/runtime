@@ -3,10 +3,11 @@ import {
     GivenName,
     IdentityAttribute,
     RelationshipCreationContentJSON,
-    RelationshipTemplateContentJSON,
+    RelationshipTemplateContent,
     ResponseItemJSON,
     ResponseItemResult,
-    ResponseResult
+    ResponseResult,
+    ResponseWrapperJSON
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import {
@@ -78,11 +79,10 @@ describe("RequestModule", () => {
         let template: RelationshipTemplateDTO;
 
         const metadata = { aMetadataKey: "aMetadataValue" };
-        const templateContent: RelationshipTemplateContentJSON = {
-            "@type": "RelationshipTemplateContent",
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
             metadata
-        };
+        }).toJSON();
 
         async function getRequestIdOfTemplate(eventBus: MockEventBus, templateId: string) {
             let requests: LocalRequestDTO[];
@@ -144,11 +144,10 @@ describe("RequestModule", () => {
         test("triggers RelationshipTemplateProcessedEvent when another Template is loaded and a pending Relationship exists", async () => {
             const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
             await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-            const templateContent: RelationshipTemplateContentJSON = {
-                "@type": "RelationshipTemplateContent",
+            const templateContent = RelationshipTemplateContent.from({
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 metadata
-            };
+            }).toJSON();
 
             await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
 
@@ -156,7 +155,7 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent if there is no request in the template", async () => {
-            await exchangeTemplate(sTransportServices, rTransportServices, {});
+            await exchangeTemplate(sTransportServices, rTransportServices);
 
             await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.NoRequest);
         });
@@ -184,9 +183,6 @@ describe("RequestModule", () => {
 
             const creationContent = relationship.creationContent as RelationshipCreationContentJSON;
             expect(creationContent["@type"]).toBe("RelationshipCreationContent");
-
-            const creationChangeRequestContent = relationship.creationContent as RelationshipCreationContentJSON;
-            expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationContent");
 
             const response = creationContent.response;
             const responseItems = response.items;
@@ -269,7 +265,10 @@ describe("RequestModule", () => {
 
             await rEventBus.waitForRunningEventHandlers();
 
-            await expect(rEventBus).toHavePublished(MessageSentEvent, (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId);
+            await expect(rEventBus).toHavePublished(
+                MessageSentEvent,
+                (e) => (e.data.content as ResponseWrapperJSON).response.requestId === requestAfterReject.response!.content.requestId
+            );
         });
 
         test("receives the rejected Request by Message", async () => {
@@ -299,7 +298,10 @@ describe("RequestModule", () => {
 
             await rEventBus.waitForRunningEventHandlers();
 
-            await expect(rEventBus).toHavePublished(MessageSentEvent, (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId);
+            await expect(rEventBus).toHavePublished(
+                MessageSentEvent,
+                (e) => (e.data.content as ResponseWrapperJSON).response.requestId === requestAfterReject.response!.content.requestId
+            );
         });
 
         test("receives the accepted Request by Message", async () => {
@@ -319,8 +321,7 @@ describe("RequestModule", () => {
         });
 
         async function exchangeRelationshipTemplate() {
-            const templateContent: RelationshipTemplateContentJSON = {
-                "@type": "RelationshipTemplateContent",
+            const templateContent = RelationshipTemplateContent.from({
                 onNewRelationship: {
                     "@type": "Request",
                     items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]
@@ -338,7 +339,7 @@ describe("RequestModule", () => {
                         }
                     ]
                 }
-            };
+            }).toJSON();
 
             const template = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
 
@@ -365,7 +366,7 @@ describe("RequestModule", () => {
 
             await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (event) => event.data.newStatus === LocalRequestStatus.Open);
 
-            const requestAfterAction = (await sConsumptionServices.outgoingRequests.getRequest({ id: message.content.id })).value;
+            const requestAfterAction = (await sConsumptionServices.outgoingRequests.getRequest({ id: message.content.id! })).value;
 
             expect(requestAfterAction.status).toBe(LocalRequestStatus.Open);
         });
@@ -392,12 +393,12 @@ describe("RequestModule", () => {
 
             expect(incomingRequestStatusChangedEvent.data.newStatus).toBe(LocalRequestStatus.DecisionRequired);
 
-            const requestsResult = await rConsumptionServices.incomingRequests.getRequest({ id: message.content.id });
+            const requestsResult = await rConsumptionServices.incomingRequests.getRequest({ id: message.content.id! });
             expect(requestsResult).toBeSuccessful();
         });
 
         test("triggers a MessageProcessedEvent when the incoming Message does not contain a Request", async () => {
-            await sendMessage(sTransportServices, recipientAddress, {});
+            await sendMessage(sTransportServices, recipientAddress);
 
             await syncUntilHasMessages(rTransportServices, 1);
 
@@ -407,7 +408,7 @@ describe("RequestModule", () => {
         test("sends a message when the request is accepted", async () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
             await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-            const acceptRequestResult = await rConsumptionServices.incomingRequests.accept({ requestId: message.content.id, items: [{ accept: true }] });
+            const acceptRequestResult = await rConsumptionServices.incomingRequests.accept({ requestId: message.content.id!, items: [{ accept: true }] });
             expect(acceptRequestResult).toBeSuccessful();
 
             const incomingRequestStatusChangedEvent = await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);

@@ -1,3 +1,4 @@
+import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { CoreId, File, Message, MessageEnvelopeRecipient } from "@nmshd/transport";
 import { MessageDTO, MessageWithAttachmentsDTO, RecipientDTO } from "../../../types";
@@ -39,6 +40,19 @@ export class MessageMapper {
     public static toMessageDTO(message: Message): MessageDTO {
         if (!message.cache) {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
+        }
+        if (
+            !(
+                message.cache.content instanceof Mail ||
+                message.cache.content instanceof Request ||
+                message.cache.content instanceof ResponseWrapper ||
+                message.cache.content instanceof Notification ||
+                message.cache.content instanceof ArbitraryMessageContent
+            )
+        ) {
+            throw RuntimeErrors.general.invalidPropertyValue(
+                `The content type of message ${message.id} is neither Mail nor Request nor ResponseWrapper nor Notification nor ArbitraryMessageContent.`
+            );
         }
 
         return {
