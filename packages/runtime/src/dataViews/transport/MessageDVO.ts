@@ -1,4 +1,4 @@
-import { MessageContentJSON } from "@nmshd/content";
+import { MessageContentDTO } from "../../types/transport/MessageDTO";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "./FileDVO";
 import { IdentityDVO } from "./IdentityDVO";
@@ -83,7 +83,7 @@ export interface MessageDVO extends DataViewObject {
     /**
      * The content of the message.
      */
-    content: MessageContentJSON;
+    content: MessageContentDTO;
 
     /**
      * The read indicator of the message
