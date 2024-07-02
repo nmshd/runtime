@@ -66,8 +66,8 @@ export class MessageController extends TransportController {
         const messageDoc = await this.messages.read(messageId.toString());
         const message = Message.from(messageDoc);
 
-        message.relationshipIds = message.relationshipIds.filter((id) => !id.equals(relationship.id));
-        if (message.relationshipIds.length === 0) {
+        message.relationshipIds = message.relationshipIds.map((id) => (id.equals(relationship.id) ? CoreId.from("RELdecomposedxxxx") : id));
+        if (message.relationshipIds.filter((id) => !id.equals("RELdecomposedxxxx")).length === 0) {
             await this.messages.delete(message);
             return;
         }
