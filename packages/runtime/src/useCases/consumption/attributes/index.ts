@@ -4,6 +4,7 @@ export * from "./CreateRepositoryAttribute";
 export * from "./DeleteOwnSharedAttributeAndNotifyPeer";
 export * from "./DeletePeerSharedAttributeAndNotifyOwner";
 export * from "./DeleteRepositoryAttribute";
+export * from "./DeleteSharedAttributesForRejectedOrRevokedRelationship";
 export * from "./DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer";
 export * from "./ExecuteIQLQuery";
 export * from "./ExecuteIdentityAttributeQuery";

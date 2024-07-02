@@ -99,6 +99,10 @@ class Relationships {
             `The relationship '${relationshipId}' has the wrong status (${status}) to run this operation`
         );
     }
+
+    public isNeitherRejectedNorRevoked(): ApplicationError {
+        return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", 'The `status` of the Relationship is neither "Rejected" nor "Revoked".');
+    }
 }
 
 class Messages {
