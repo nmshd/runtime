@@ -752,7 +752,10 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
             peer: services3.address
         });
 
-        expect(repeatedShareRequestResult).toBeAnError(/.*/, "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer");
+        expect(repeatedShareRequestResult).toBeAnError(
+            `The IdentityAttribute with the given sourceAttributeId '${sRepositoryAttribute.id}' has already been shared with the peer.`,
+            "error.consumption.requests.invalidRequestItem"
+        );
     });
 
     test("should reject sharing an attribute, of which a previous version has been shared", async () => {
@@ -781,7 +784,10 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
             attributeId: successorRepositoryAttribute.id,
             peer: services2.address
         });
-        expect(response).toBeAnError(/.*/, "error.runtime.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer");
+        expect(response).toBeAnError(
+            `You have already shared the predecessor '${predecesssorOwnSharedIdentityAttribute.shareInfo!.sourceAttribute}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`,
+            "error.consumption.requests.invalidRequestItem"
+        );
     });
 
     test("should reject sharing an own shared identity attribute", async () => {
