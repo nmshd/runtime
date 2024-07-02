@@ -11,7 +11,7 @@ import {
 import { CoreAddress } from "@nmshd/transport";
 import _ from "lodash";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { DeletionStatus } from "../../../attributes/local/LocalAttributeDeletionInfo";
+import { DeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
