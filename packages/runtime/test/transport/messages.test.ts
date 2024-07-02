@@ -152,6 +152,14 @@ describe("Message errors", () => {
         expect(result).toBeAnError("Mail.to:Array :: may not be empty", "error.runtime.requestDeserialization");
     });
 
+    test("should throw correct error for false content type", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {}
+        });
+        expect(result).toBeAnError("The content type", "error.runtime.validation.invalidPropertyValue");
+    });
+
     test("should throw correct error for missing Request ID in a Message with Request content", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],

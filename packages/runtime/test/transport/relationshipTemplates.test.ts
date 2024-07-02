@@ -100,6 +100,16 @@ describe("Template Tests", () => {
         expect(response.isError).toBeTruthy();
         expect(response.error.code).toBe("error.runtime.validation.invalidPropertyValue");
     });
+
+    test("expect a validation error for sending a false template content type", async () => {
+        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: {},
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+            maxNumberOfAllocations: 1
+        });
+
+        expect(response).toBeAnError("A relationship template content", "error.runtime.validation.invalidPropertyValue");
+    });
 });
 
 describe("RelationshipTemplates query", () => {
