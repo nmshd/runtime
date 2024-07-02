@@ -400,6 +400,7 @@ export async function exchangeAndAcceptRequestByMessage(
 
     await syncUntilHasMessageWithRequest(recipient.transport, requestId);
     await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+    await recipient.eventBus.waitForRunningEventHandlers();
     const acceptIncomingRequestResult = await recipient.consumption.incomingRequests.accept({ requestId: createRequestResult.value.id, items: responseItems });
     expect(acceptIncomingRequestResult).toBeSuccessful();
     await recipient.eventBus.waitForEvent(MessageSentEvent);

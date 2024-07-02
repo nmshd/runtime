@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, CreateOutgoingRequestParameters, LocalAttribute, OutgoingRequestsController } from "@nmshd/consumption";
+import { AttributesController, CreateOutgoingRequestParameters, ErrorValidationResult, LocalAttribute, OutgoingRequestsController } from "@nmshd/consumption";
 import { Request, ShareAttributeRequestItem } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
@@ -50,30 +50,6 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
         }
 
-        const query = {
-            "content.owner": this.accountController.identity.address.toString(),
-            "content.@type": "IdentityAttribute",
-            "shareInfo.sourceAttribute": request.attributeId,
-            "shareInfo.peer": request.peer
-        };
-        const ownSharedIdentityAttributesOfRepositoryAttribute = await this.attributeController.getLocalAttributes(query);
-        if (ownSharedIdentityAttributesOfRepositoryAttribute.length > 0) {
-            return Result.fail(
-                RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, ownSharedIdentityAttributesOfRepositoryAttribute[0].id)
-            );
-        }
-
-        const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeId, [CoreAddress.from(request.peer)], false);
-        if (sharedVersionsOfRepositoryAttribute.length > 0) {
-            return Result.fail(
-                RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
-                    request.attributeId,
-                    request.peer,
-                    sharedVersionsOfRepositoryAttribute[0].id
-                )
-            );
-        }
-
         const requestParams = CreateOutgoingRequestParameters.from({
             peer: request.peer,
             content: Request.from({
@@ -90,7 +66,7 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
         });
 
         const canCreateRequestResult = await this.requestsController.canCreate(requestParams);
-        if (canCreateRequestResult.isError()) return Result.fail(canCreateRequestResult.error);
+        if (canCreateRequestResult.isError()) return Result.fail((canCreateRequestResult.items[0] as ErrorValidationResult).error);
 
         const localRequest = await this.requestsController.create(requestParams);
         await this.messageController.sendMessage({ recipients: [CoreAddress.from(request.peer)], content: localRequest.content });

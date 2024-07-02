@@ -14,7 +14,7 @@ import {
     Surname
 } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
-import { ConsumptionController, ConsumptionIds, LocalAttribute, LocalRequest, LocalRequestStatus, ShareAttributeRequestItemProcessor } from "../../../../../src";
+import { ConsumptionController, ConsumptionIds, DeletionStatus, LocalAttribute, LocalRequest, LocalRequestStatus, ShareAttributeRequestItemProcessor } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 
@@ -312,6 +312,94 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 code: "error.consumption.requests.invalidRequestItem",
                 message: `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has already been shared with the peer.`
             });
+        });
+
+        test("returns success when the IdentityAttribute is already shared with the peer but DeletedByPeer", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+
+            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: IdentityAttribute.from({
+                    owner: sender,
+                    value: GivenName.from({
+                        value: "AGivenName"
+                    })
+                })
+            });
+
+            const localAttributeCopy = await consumptionController.attributes.createAttributeUnsafe({
+                content: IdentityAttribute.from({
+                    owner: sender,
+                    value: GivenName.from({
+                        value: "AGivenName"
+                    })
+                }),
+                shareInfo: {
+                    peer: recipient,
+                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceAttribute: localAttribute.id
+                },
+                deletionInfo: {
+                    deletionStatus: DeletionStatus.DeletedByPeer,
+                    deletionDate: CoreDate.utc().subtract({ days: 1 })
+                }
+            });
+            expect(localAttributeCopy.isShared()).toBe(true);
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: localAttribute.content,
+                sourceAttributeId: localAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).successfulValidationResult();
+        });
+
+        test("returns success when the IdentityAttribute is already shared with the peer but ToBeDeletedByPeer", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+
+            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                content: IdentityAttribute.from({
+                    owner: sender,
+                    value: GivenName.from({
+                        value: "AGivenName"
+                    })
+                })
+            });
+
+            const localAttributeCopy = await consumptionController.attributes.createAttributeUnsafe({
+                content: IdentityAttribute.from({
+                    owner: sender,
+                    value: GivenName.from({
+                        value: "AGivenName"
+                    })
+                }),
+                shareInfo: {
+                    peer: recipient,
+                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceAttribute: localAttribute.id
+                },
+                deletionInfo: {
+                    deletionStatus: DeletionStatus.ToBeDeletedByPeer,
+                    deletionDate: CoreDate.utc().subtract({ days: 1 })
+                }
+            });
+            expect(localAttributeCopy.isShared()).toBe(true);
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: localAttribute.content,
+                sourceAttributeId: localAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).successfulValidationResult();
         });
 
         test("returns an error when a successor of the existing IdentityAttribute is already shared", async function () {

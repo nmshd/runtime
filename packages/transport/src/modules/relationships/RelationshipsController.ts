@@ -157,12 +157,19 @@ export class RelationshipsController extends TransportController {
 
         const creationContentCipher = await this.prepareCreationContent(secretId, template, parameters.creationContent);
 
-        const backboneResponse = (
-            await this.client.createRelationship({
-                creationContent: creationContentCipher.toBase64(),
-                relationshipTemplateId: template.id.toString()
-            })
-        ).value;
+        const result = await this.client.createRelationship({
+            creationContent: creationContentCipher.toBase64(),
+            relationshipTemplateId: template.id.toString()
+        });
+
+        if (result.isError) {
+            if (result.error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
+                throw CoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate();
+            }
+            throw result.error;
+        }
+
+        const backboneResponse = result.value;
 
         const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template, template.cache.identity, parameters.creationContent, secretId);
 
