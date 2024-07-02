@@ -523,7 +523,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                             "@type": "GivenName",
                             value: "AGivenName"
                         },
-                        owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                        owner: ""
                     }).toJSON()
                 },
                 {
@@ -536,7 +536,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                             value: "AStringValue",
                             title: "ATitle"
                         },
-                        owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                        owner: CoreAddress.from(""),
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }).toJSON()
                 },
