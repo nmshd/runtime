@@ -62,6 +62,25 @@ export class MessageController extends TransportController {
         });
     }
 
+    public async deleteRecipientInMessage(messageId: CoreId, relationship: Relationship): Promise<void> {
+        const messageDoc = await this.messages.read(messageId.toString());
+        const message = Message.from(messageDoc);
+
+        message.relationshipIds = message.relationshipIds.filter((id) => !id.equals(relationship.id));
+        if (message.relationshipIds.length === 0) {
+            await this.messages.delete(message);
+            return;
+        }
+        await this.updateCacheOfMessage(message);
+
+        await this.messages.update(messageDoc, message);
+    }
+
+    public async decomposeMessagesOfRelationship(relationship: Relationship): Promise<void> {
+        const messages = await this.getMessagesByRelationshipId(relationship.id);
+        await Promise.all(messages.map((message) => this.deleteRecipientInMessage(message.id, relationship)));
+    }
+
     @log()
     public async getMessagesByAddress(address: CoreAddress): Promise<Message[]> {
         const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(address);

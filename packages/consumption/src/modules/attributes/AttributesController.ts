@@ -15,7 +15,7 @@ import {
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
 import * as iql from "@nmshd/iql";
-import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -321,6 +321,11 @@ export class AttributesController extends ConsumptionBaseController {
         await this.deleteAttributeUnsafe(attribute.id);
 
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
+    }
+
+    public async deleteAttributesSharedWithPeer(peer: ICoreAddress): Promise<void> {
+        const attributes = await this.getLocalAttributes({ "shareInfo.peer": peer.toString() });
+        await Promise.all(attributes.map((attribute) => this.deleteAttributeUnsafe(attribute.id)));
     }
 
     private async deleteChildAttributesOfComplexAttribute(complexAttribute: LocalAttribute): Promise<void> {

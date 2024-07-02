@@ -3,5 +3,6 @@ export enum RelationshipStatus {
     Active = "Active",
     Rejected = "Rejected",
     Revoked = "Revoked",
-    Terminated = "Terminated"
+    Terminated = "Terminated",
+    DeletionProposed = "DeletionProposed"
 }

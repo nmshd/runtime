@@ -127,6 +127,6 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
 
         const messages = await this.messageController.getMessages(query);
 
-        return Result.ok(MessageMapper.toMessageDTOList(messages));
+        return Result.ok(await MessageMapper.toMessageDTOList(messages));
     }
 }

@@ -93,7 +93,9 @@ export class RelationshipTemplateController extends TransportController {
     }
 
     public async deleteRelationshipTemplate(template: RelationshipTemplate): Promise<void> {
-        await this.client.deleteRelationshipTemplate(template.id.toString());
+        const response = await this.client.deleteRelationshipTemplate(template.id.toString());
+        if (response.isError) throw response.error;
+
         await this.templates.delete(template);
     }
 
@@ -245,5 +247,11 @@ export class RelationshipTemplateController extends TransportController {
         this.eventBus.publish(new PeerRelationshipTemplateLoadedEvent(this.parent.identity.address.toString(), relationshipTemplate));
 
         return relationshipTemplate;
+    }
+
+    public async cleanupDuringRelationshipDecomposition(template: RelationshipTemplate): Promise<void> {
+        if (!template.isOwn || template.cache?.maxNumberOfAllocations === 1) {
+            await this.templates.delete(template);
+        }
     }
 }

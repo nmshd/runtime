@@ -31,6 +31,7 @@ import {
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent
 } from "./transport";
+import { RelationshipDecomposedBySelfEvent } from "./transport/RelationshipDecomposedBySelfEvent";
 
 export class EventProxy {
     private readonly subscriptionIds: number[] = [];
@@ -49,20 +50,20 @@ export class EventProxy {
     }
 
     private proxyTransportEvents() {
-        this.subscribeToSourceEvent(transport.MessageDeliveredEvent, (event) => {
-            this.targetEventBus.publish(new MessageDeliveredEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
+        this.subscribeToSourceEvent(transport.MessageDeliveredEvent, async (event) => {
+            this.targetEventBus.publish(new MessageDeliveredEvent(event.eventTargetAddress, await MessageMapper.toMessageDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(transport.MessageReceivedEvent, (event) => {
-            this.targetEventBus.publish(new MessageReceivedEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
+        this.subscribeToSourceEvent(transport.MessageReceivedEvent, async (event) => {
+            this.targetEventBus.publish(new MessageReceivedEvent(event.eventTargetAddress, await MessageMapper.toMessageDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(transport.MessageSentEvent, (event) => {
-            this.targetEventBus.publish(new MessageSentEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
+        this.subscribeToSourceEvent(transport.MessageSentEvent, async (event) => {
+            this.targetEventBus.publish(new MessageSentEvent(event.eventTargetAddress, await MessageMapper.toMessageDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(transport.MessageWasReadAtChangedEvent, (event) => {
-            this.targetEventBus.publish(new MessageWasReadAtChangedEvent(event.eventTargetAddress, MessageMapper.toMessageDTO(event.data)));
+        this.subscribeToSourceEvent(transport.MessageWasReadAtChangedEvent, async (event) => {
+            this.targetEventBus.publish(new MessageWasReadAtChangedEvent(event.eventTargetAddress, await MessageMapper.toMessageDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.PeerRelationshipTemplateLoadedEvent, (event) => {
@@ -79,6 +80,10 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(transport.RelationshipReactivationCompletedEvent, (event) => {
             this.targetEventBus.publish(new RelationshipReactivationCompletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipDecomposedBySelfEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipDecomposedBySelfEvent(event.eventTargetAddress, event.data.toString()));
         });
 
         this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {

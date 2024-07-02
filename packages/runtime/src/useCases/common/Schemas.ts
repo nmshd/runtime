@@ -22040,7 +22040,7 @@ export const AcceptRelationshipReactivationRequest: any = {
             "properties": {
                 "relationshipId": {
                     "$ref": "#/definitions/RelationshipIdString"
-                }
+                },
             },
             "required": [
                 "relationshipId"
@@ -22050,7 +22050,30 @@ export const AcceptRelationshipReactivationRequest: any = {
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
-        }
+        },
+    }
+}
+
+export const DecomposeRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DecomposeRelationshipRequest",
+    "definitions": {
+        "DecomposeRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                },
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        },
     }
 }
 

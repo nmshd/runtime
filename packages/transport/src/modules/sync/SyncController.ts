@@ -461,10 +461,11 @@ export class SyncController extends TransportController {
 
         const { backboneModifications, localModificationIds } = await this.prepareLocalDatawalletModificationsForPush();
 
-        await this.client.finalizeExternalEventSync(this.currentSyncRun.id.toString(), {
+        const response = await this.client.finalizeExternalEventSync(this.currentSyncRun.id.toString(), {
             datawalletModifications: backboneModifications,
             externalEventResults: externalEventResults
         });
+        if (response.isError) throw response.error;
 
         await this.deleteUnpushedDatawalletModifications(localModificationIds);
 

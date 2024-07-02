@@ -7,7 +7,7 @@ import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { TransportIds } from "../../core/TransportIds";
-import { RelationshipChangedEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
+import { RelationshipChangedEvent, RelationshipDecomposedBySelfEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
@@ -297,6 +297,22 @@ export class RelationshipsController extends TransportController {
         }
 
         return await this.completeOperationWithBackboneCall(RelationshipAuditLogEntryReason.AcceptanceOfReactivation, relationshipId);
+    }
+
+    public async decompose(relationshipId: CoreId): Promise<void> {
+        const relationship = await this.getRelationshipWithCache(relationshipId);
+        this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
+
+        const result = await this.client.decomposeRelationship(relationshipId.toString());
+        if (result.isError) throw result.error;
+
+        const isSecretDeletionSuccessful = await this.secrets.deleteSecretForRelationship(relationship.relationshipSecretId);
+        if (!isSecretDeletionSuccessful) {
+            throw new TransportError("Decomposition failed to delete secrets");
+        }
+        await this.relationships.delete({ id: relationshipId });
+
+        this.eventBus.publish(new RelationshipDecomposedBySelfEvent(this.parent.identity.address.toString(), relationshipId));
     }
 
     private async getRelationshipWithCache(id: CoreId): Promise<Relationship & { cache: CachedRelationship }> {

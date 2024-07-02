@@ -29,6 +29,6 @@ export class MarkMessageAsReadUseCase extends UseCase<MarkMessageAsReadRequest, 
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(MessageMapper.toMessageDTO(updatedMessage));
+        return Result.ok(await MessageMapper.toMessageDTO(updatedMessage));
     }
 }
