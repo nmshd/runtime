@@ -1,4 +1,4 @@
-import { ArbitraryRelationshipTemplateContent } from "@nmshd/content";
+import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { RelationshipTemplate } from "@nmshd/transport";
 import { RelationshipTemplateDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";

@@ -1,5 +1,14 @@
 import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
-import { GivenName, IdentityAttribute, RelationshipCreationContentJSON, ResponseItemJSON, ResponseItemResult, ResponseResult, ResponseWrapperJSON } from "@nmshd/content";
+import {
+    GivenName,
+    IdentityAttribute,
+    RelationshipCreationContentJSON,
+    RelationshipTemplateContent,
+    ResponseItemJSON,
+    ResponseItemResult,
+    ResponseResult,
+    ResponseWrapperJSON
+} from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import {
     ConsumptionServices,

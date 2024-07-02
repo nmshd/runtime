@@ -1,6 +1,16 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ApplicationError } from "@js-soft/ts-utils";
-import { IAcceptResponseItem, IRequest, IRequestItemGroup, IResponse, IResponseItemGroup, RequestItemGroup, ResponseItemResult, ResponseResult } from "@nmshd/content";
+import {
+    IAcceptResponseItem,
+    IRequest,
+    IRequestItemGroup,
+    IResponse,
+    IResponseItemGroup,
+    RelationshipTemplateContent,
+    RequestItemGroup,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,

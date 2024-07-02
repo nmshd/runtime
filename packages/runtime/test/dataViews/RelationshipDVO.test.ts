@@ -1,4 +1,13 @@
-import { GivenName, IdentityAttribute, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
+import {
+    GivenName,
+    IdentityAttribute,
+    ReadAttributeAcceptResponseItem,
+    ReadAttributeRequestItem,
+    RelationshipCreationContent,
+    RelationshipTemplateContent,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, TransportServices } from "../../src";
 import { RuntimeServiceProvider, establishRelationshipWithContents } from "../lib";

@@ -1,5 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { Request } from "@nmshd/content";
+import { RelationshipTemplateContent, Request } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,

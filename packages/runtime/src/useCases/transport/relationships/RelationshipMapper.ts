@@ -1,4 +1,4 @@
-import { ArbitraryRelationshipCreationContent } from "@nmshd/content";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
 import { Relationship, RelationshipAuditLogEntry } from "@nmshd/transport";
 import { RelationshipAuditLogEntryDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";

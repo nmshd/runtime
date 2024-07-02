@@ -7,6 +7,7 @@ import {
     IRequest,
     IResponse,
     IdentityAttribute,
+    RelationshipTemplateContent,
     Request,
     RequestItemGroup,
     Response,

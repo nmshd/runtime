@@ -1,5 +1,5 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { DeleteAttributeRequestItem, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
+import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
 import {
     CoreAddress,
     CoreDate,

@@ -9,6 +9,7 @@ import {
     ProprietaryStringJSON,
     RelationshipAttributeConfidentiality,
     RelationshipAttributeJSON,
+    RelationshipTemplateContent,
     RelationshipTemplateContentJSON,
     RequestItemGroupJSON,
     Surname

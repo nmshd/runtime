@@ -5,6 +5,8 @@ import {
     MailJSON,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
+    RelationshipCreationContent,
+    RelationshipTemplateContent,
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";

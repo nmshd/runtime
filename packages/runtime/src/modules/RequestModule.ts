@@ -1,5 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipCreationContentJSON, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
+import { RelationshipCreationContent, RelationshipCreationContentJSON, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
 import { RuntimeServices } from "../Runtime";
 import {
     IncomingRequestStatusChangedEvent,

@@ -12,7 +12,6 @@ import {
     ArbitraryRelationshipTemplateContent,
     ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
-    MessageContentJSON,
     Notification,
     RelationshipCreationContentJSON,
     RelationshipTemplateContentJSON,
@@ -35,6 +34,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
+    MessageContentDTO,
     MessageDTO,
     MessageSentEvent,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
@@ -235,7 +235,7 @@ export async function exchangeToken(transportServicesCreator: TransportServices,
     return response.value;
 }
 
-export async function sendMessage(transportServices: TransportServices, recipient: string, content?: MessageContentJSON, attachments?: string[]): Promise<MessageDTO> {
+export async function sendMessage(transportServices: TransportServices, recipient: string, content?: MessageContentDTO, attachments?: string[]): Promise<MessageDTO> {
     const response = await transportServices.messages.sendMessage({
         recipients: [recipient],
         content: content ?? {
