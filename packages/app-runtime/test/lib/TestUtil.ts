@@ -2,15 +2,17 @@
 import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
 import {
-    ArbitraryMessageContent,
-    ArbitraryRelationshipCreationContent,
-    ArbitraryRelationshipTemplateContent,
-    MessageContentJSON,
-    RelationshipCreationContentJSON,
-    RelationshipTemplateContentJSON
-} from "@nmshd/content";
-import { FileDTO, MessageDTO, RelationshipDTO, RelationshipTemplateDTO, SyncEverythingResponse } from "@nmshd/runtime";
+    FileDTO,
+    MessageContentDTO,
+    MessageDTO,
+    RelationshipCreationContentDTO,
+    RelationshipDTO,
+    RelationshipTemplateContentDTO,
+    RelationshipTemplateDTO,
+    SyncEverythingResponse
+} from "@nmshd/runtime";
 import { CoreDate, IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
@@ -173,7 +175,7 @@ export class TestUtil {
     public static async createAndLoadPeerTemplate(
         from: LocalAccountSession,
         to: LocalAccountSession,
-        content: RelationshipTemplateContentJSON = ArbitraryRelationshipTemplateContent.from({ content: {} }).toJSON()
+        content: RelationshipTemplateContentDTO = ArbitraryRelationshipTemplateContent.from({ content: {} }).toJSON()
     ): Promise<RelationshipTemplateDTO> {
         const templateFrom = (
             await from.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
@@ -200,7 +202,7 @@ export class TestUtil {
     public static async requestRelationshipForTemplate(
         from: LocalAccountSession,
         templateId: string,
-        content: RelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ content: {} }).toJSON()
+        content: RelationshipCreationContentDTO = ArbitraryRelationshipCreationContent.from({ content: {} }).toJSON()
     ): Promise<RelationshipDTO> {
         const relRequest = await from.transportServices.relationships.createRelationship({ templateId, creationContent: content });
         return relRequest.value;
@@ -288,7 +290,7 @@ export class TestUtil {
         return syncResult.messages[0];
     }
 
-    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: MessageContentJSON): Promise<MessageDTO> {
+    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: MessageContentDTO): Promise<MessageDTO> {
         return await this.sendMessagesWithAttachments(from, [to], [], content);
     }
 
@@ -296,7 +298,7 @@ export class TestUtil {
         from: LocalAccountSession,
         recipients: LocalAccountSession[],
         attachments: string[],
-        content?: MessageContentJSON
+        content?: MessageContentDTO
     ): Promise<MessageDTO> {
         if (!content) {
             content = ArbitraryMessageContent.from({ content: "TestContent" }).toJSON();
