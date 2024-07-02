@@ -1,4 +1,4 @@
-import { RelationshipTemplateContentJSON } from "@nmshd/content";
+import { RelationshipTemplateContentDTO } from "../../types/transport/RelationshipTemplateDTO";
 import { DataViewObject } from "../DataViewObject";
 import { LocalRequestDVO } from "../consumption/LocalRequestDVO";
 import { RequestDVO } from "../content";
@@ -21,5 +21,5 @@ export interface RelationshipTemplateDVO extends DataViewObject {
 
     request?: LocalRequestDVO;
 
-    content: RelationshipTemplateContentJSON;
+    content: RelationshipTemplateContentDTO;
 }

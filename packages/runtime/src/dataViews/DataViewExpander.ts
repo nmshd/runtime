@@ -30,6 +30,7 @@ import {
     RelationshipAttribute,
     RelationshipAttributeJSON,
     RelationshipAttributeQueryJSON,
+    RelationshipTemplateContent,
     RenderHints,
     RenderHintsEditType,
     RenderHintsJSON,
