@@ -303,7 +303,9 @@ export class RelationshipsController extends TransportController {
         const relationship = await this.getRelationshipWithCache(relationshipId);
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
 
-        await this.client.decomposeRelationship(relationshipId.toString());
+        const result = await this.client.decomposeRelationship(relationshipId.toString());
+        if (result.isError) throw result.error;
+
         const isSecretDeletionSuccessful = await this.secrets.deleteSecretForRelationship(relationship.relationshipSecretId);
         if (!isSecretDeletionSuccessful) {
             throw new TransportError("Decomposition failed to delete secrets");
