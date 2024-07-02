@@ -1,9 +1,9 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreId, ICoreId, IMessage, IRelationshipChange, Message, RelationshipChange } from "@nmshd/transport";
+import { CoreId, ICoreId, IMessage, IRelationship, Message, Relationship } from "@nmshd/transport";
 
 export interface ICompleteIncomingRequestParameters extends ISerializable {
     requestId: ICoreId;
-    responseSourceObject?: IMessage | IRelationshipChange;
+    responseSourceObject?: IMessage | IRelationship;
 }
 
 export class CompleteIncomingRequestParameters extends Serializable implements ICompleteIncomingRequestParameters {
@@ -11,9 +11,9 @@ export class CompleteIncomingRequestParameters extends Serializable implements I
     @validate()
     public requestId: CoreId;
 
-    @serialize({ unionTypes: [Message, RelationshipChange] })
+    @serialize({ unionTypes: [Message, Relationship] })
     @validate({ nullable: true })
-    public responseSourceObject?: Message | RelationshipChange;
+    public responseSourceObject?: Message | Relationship;
 
     public static from(value: ICompleteIncomingRequestParameters): CompleteIncomingRequestParameters {
         return this.fromAny(value);

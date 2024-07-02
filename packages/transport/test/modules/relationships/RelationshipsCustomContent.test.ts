@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { AccountController, RelationshipChangeRequest, Transport } from "../../../src";
+import { AccountController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("Relationships Custom Content", function () {
@@ -33,18 +33,15 @@ describe("Relationships Custom Content", function () {
         const template = await TestUtil.fetchRelationshipTemplateFromTokenReference(recipient, tokenReference);
         const customContent = Serializable.fromAny({ content: "TestToken" });
         const relRecipient = await TestUtil.sendRelationship(recipient, template, customContent);
-        const relRecipientRequest = relRecipient.cache!.creationChange.request;
+        const relRecipientContent = relRecipient.cache!.creationContent;
 
         const relSender = await TestUtil.syncUntilHasRelationships(sender);
-        const relSenderRequest = relSender[0].cache!.creationChange.request;
+        const relSenderRequest = relSender[0].cache!.creationContent;
 
-        expect(relRecipientRequest).toBeInstanceOf(RelationshipChangeRequest);
-        expect(relSenderRequest).toBeInstanceOf(RelationshipChangeRequest);
-
-        expect(relRecipientRequest.content).toBeInstanceOf(JSONWrapper);
-        const recipientToken = relRecipientRequest.content as JSONWrapper;
-        expect(relSenderRequest.content).toBeInstanceOf(JSONWrapper);
-        const senderToken = relSenderRequest.content as JSONWrapper;
+        expect(relRecipientContent).toBeInstanceOf(JSONWrapper);
+        const recipientToken = relRecipientContent as JSONWrapper;
+        expect(relSenderRequest).toBeInstanceOf(JSONWrapper);
+        const senderToken = relSenderRequest as JSONWrapper;
 
         expect((recipientToken.toJSON() as any).content).toBe("TestToken");
         expect((senderToken.toJSON() as any).content).toBe("TestToken");

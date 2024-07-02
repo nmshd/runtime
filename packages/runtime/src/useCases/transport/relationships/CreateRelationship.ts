@@ -7,7 +7,7 @@ import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface CreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
-    content: any;
+    creationContent: any;
 }
 
 class Validator extends SchemaValidator<CreateRelationshipRequest> {
@@ -34,7 +34,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
 
         const relationship = await this.relationshipsController.sendRelationship({
             template: template,
-            content: request.content
+            creationContent: request.creationContent
         });
 
         await this.accountController.syncDatawallet();

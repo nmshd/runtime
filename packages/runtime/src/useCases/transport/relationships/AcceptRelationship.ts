@@ -1,23 +1,21 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreId, Relationship, RelationshipChange, RelationshipsController } from "@nmshd/transport";
+import { AccountController, CoreId, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
-import { RelationshipChangeIdString, RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
 
-export interface AcceptRelationshipChangeRequest {
+export interface AcceptRelationshipRequest {
     relationshipId: RelationshipIdString;
-    changeId: RelationshipChangeIdString;
-    content: any;
 }
 
-class Validator extends SchemaValidator<AcceptRelationshipChangeRequest> {
+class Validator extends SchemaValidator<AcceptRelationshipRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("AcceptRelationshipChangeRequest"));
+        super(schemaRepository.getSchema("AcceptRelationshipRequest"));
     }
 }
 
-export class AcceptRelationshipChangeUseCase extends UseCase<AcceptRelationshipChangeRequest, RelationshipDTO> {
+export class AcceptRelationshipUseCase extends UseCase<AcceptRelationshipRequest, RelationshipDTO> {
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly accountController: AccountController,
@@ -26,7 +24,7 @@ export class AcceptRelationshipChangeUseCase extends UseCase<AcceptRelationshipC
         super(validator);
     }
 
-    protected async executeInternal(request: AcceptRelationshipChangeRequest): Promise<Result<RelationshipDTO>> {
+    protected async executeInternal(request: AcceptRelationshipRequest): Promise<Result<RelationshipDTO>> {
         const relationship = await this.relationshipsController.getRelationship(CoreId.from(request.relationshipId));
         if (!relationship) {
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
@@ -36,12 +34,7 @@ export class AcceptRelationshipChangeUseCase extends UseCase<AcceptRelationshipC
             return Result.fail(RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString()));
         }
 
-        const change = relationship.cache.changes.find((c) => c.id.toString() === request.changeId);
-        if (!change) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipChange));
-        }
-
-        const updatedRelationship = await this.relationshipsController.acceptChange(change, request.content);
+        const updatedRelationship = await this.relationshipsController.accept(relationship.id);
 
         await this.accountController.syncDatawallet();
 

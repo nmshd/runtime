@@ -49,10 +49,7 @@
     "xmlTools.splitAttributesOnFormat": true,
     "xmlTools.enforcePrettySelfClosingTagOnFormat": true,
     "editor.codeActionsOnSave": {
-        "source.organizeImports": "explicit"
+        "source.organizeImports": "always"
     },
-    "files.eol": "\n",
-    "typescript.unstable": {
-        "organizeImportsIgnoreCase": true
-    }
+    "files.eol": "\n"
 }

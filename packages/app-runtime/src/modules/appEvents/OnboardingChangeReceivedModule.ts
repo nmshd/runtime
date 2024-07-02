@@ -1,4 +1,4 @@
-import { RelationshipChangeStatus } from "@nmshd/runtime";
+import { RelationshipAuditLogEntryReason } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { OnboardingChangeReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
@@ -17,32 +17,35 @@ export class OnboardingChangeReceivedModule extends AppRuntimeModule<OnboardingC
     }
 
     private async handleOnboardingChangeReceived(event: OnboardingChangeReceivedEvent) {
-        const change = event.data.change;
+        const auditLogEntry = event.data.auditLogEntry;
         const identity = event.data.identity;
         let title = "";
         let text = "";
         const session = await this.runtime.getOrCreateSession(event.eventTargetAddress);
 
-        switch (change.status) {
-            case RelationshipChangeStatus.Accepted:
+        switch (auditLogEntry.reason) {
+            case RelationshipAuditLogEntryReason.AcceptanceOfCreation:
                 title = "Kontaktanfrage genehmigt";
                 text = `Du kannst nun mit ${identity.name} kommunizieren`;
                 break;
 
-            case RelationshipChangeStatus.Pending:
+            case RelationshipAuditLogEntryReason.Creation:
                 title = "Kontaktanfrage erhalten";
                 text = `Du hast eine Kontaktanfrage von ${identity.name} erhalten`;
                 break;
 
-            case RelationshipChangeStatus.Rejected:
+            case RelationshipAuditLogEntryReason.RejectionOfCreation:
                 title = "Kontaktanfrage abgelehnt";
                 text = `${identity.name} hat ihre Kontaktanfrage abgelehnt`;
                 break;
 
-            case RelationshipChangeStatus.Revoked:
+            case RelationshipAuditLogEntryReason.RevocationOfCreation:
                 title = "Kontaktanfrage zurückgezogen";
                 text = `${identity.name} hat die Kontaktanfrage zurückgezogen`;
                 break;
+
+            default:
+                return;
         }
         await this.runtime.nativeEnvironment.notificationAccess.schedule(title, text, {
             callback: async () => {

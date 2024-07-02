@@ -8,7 +8,6 @@ import {
     CoreError,
     CoreId,
     DeviceSharedSecret,
-    Realm,
     Transport,
     CoreErrors as TransportCoreErrors,
     TransportLoggerFactory
@@ -162,7 +161,6 @@ export class MultiAccountController {
             id,
             address: deviceSharedSecret.identity.address,
             directory: ".",
-            realm: deviceSharedSecret.identity.realm,
             name: name ?? deviceSharedSecret.name ?? deviceSharedSecret.identity.address.toString(),
             order: -1
         });
@@ -185,14 +183,12 @@ export class MultiAccountController {
         return [updatedLocalAccount, accountController];
     }
 
-    public async createAccount(realm: Realm, name: string): Promise<[LocalAccount, AccountController]> {
-        this._log.trace(`Creating account for realm ${realm}.`);
+    public async createAccount(name: string): Promise<[LocalAccount, AccountController]> {
         const id = await CoreId.generate();
 
         let localAccount = LocalAccount.from({
             id,
             directory: ".",
-            realm,
             name,
             order: -1
         });

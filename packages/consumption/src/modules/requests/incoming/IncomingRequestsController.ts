@@ -1,7 +1,19 @@
 import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
 import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId, Message, RelationshipTemplate, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import {
+    CoreAddress,
+    CoreDate,
+    CoreId,
+    ICoreAddress,
+    ICoreId,
+    Message,
+    Relationship,
+    RelationshipStatus,
+    RelationshipTemplate,
+    SynchronizedCollection,
+    CoreErrors as TransportCoreErrors
+} from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
@@ -35,7 +47,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         private readonly processorRegistry: RequestItemProcessorRegistry,
         parent: ConsumptionController,
         private readonly eventBus: EventBus,
-        private readonly identity: { address: CoreAddress }
+        private readonly identity: { address: CoreAddress },
+        private readonly relationshipResolver: {
+            getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+        }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
     }
@@ -165,8 +180,17 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     private async canDecide(params: InternalDecideRequestParametersJSON): Promise<ValidationResult> {
         // syntactic validation
         InternalDecideRequestParameters.from(params);
-
         const request = await this.getOrThrow(params.requestId);
+
+        const relationship = await this.relationshipResolver.getRelationshipToIdentity(request.peer);
+        // It is safe to decide an incoming Request when no Relationship is found as this is the case when the Request origins from onNewRelationship of the RelationshipTemplateContent
+        if (relationship && relationship.status !== RelationshipStatus.Active) {
+            return ValidationResult.error(
+                CoreErrors.requests.wrongRelationshipStatus(
+                    `You cannot decide a request from '${request.peer.toString()}' since the relationship is in status '${relationship.status}'.`
+                )
+            );
+        }
 
         this.assertRequestStatus(request, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired);
 
@@ -339,7 +363,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         if (parsedParams.responseSourceObject) {
             request.response!.source = LocalResponseSource.from({
-                type: parsedParams.responseSourceObject instanceof Message ? "Message" : "RelationshipChange",
+                type: parsedParams.responseSourceObject instanceof Message ? "Message" : "Relationship",
                 reference: parsedParams.responseSourceObject.id
             });
         } else if (!requestIsRejected || !requestIsFromTemplate) {

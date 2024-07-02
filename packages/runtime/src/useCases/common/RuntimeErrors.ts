@@ -93,6 +93,13 @@ class RelationshipTemplates {
 }
 
 class Relationships {
+    public wrongRelationshipStatus(relationshipId: string, status: string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationships.wrongRelationshipStatus",
+            `The relationship '${relationshipId}' has the wrong status (${status}) to run this operation`
+        );
+    }
+
     public isNeitherRejectedNorRevoked(): ApplicationError {
         return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", 'The `status` of the Relationship is neither "Rejected" nor "Revoked".');
     }
@@ -158,17 +165,6 @@ class Attributes {
         return new ApplicationError(
             "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer",
             `Repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
-        );
-    }
-
-    public anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
-        repositoryAttributeId: CoreId | string,
-        peer: CoreAddress | string,
-        ownSharedIdentityAttributeId: CoreId | string
-    ): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `Another version of repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of previous own shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
         );
     }
 

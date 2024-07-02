@@ -1,5 +1,5 @@
 import { RuntimeConfig } from "@nmshd/runtime";
-import { IConfigOverwrite, Realm } from "@nmshd/transport";
+import { IConfigOverwrite } from "@nmshd/transport";
 import { defaultsDeep } from "lodash";
 
 export interface AppConfig extends RuntimeConfig {
@@ -23,7 +23,6 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
     const appConfig = {
         accountsDbName: "accounts",
         transportLibrary: {
-            realm: Realm.Prod,
             datawalletEnabled: true
         },
         modules: {

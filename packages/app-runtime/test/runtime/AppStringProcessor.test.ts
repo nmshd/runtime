@@ -1,4 +1,3 @@
-import { Realm } from "@nmshd/transport";
 import { AppRuntime } from "../../src";
 import { TestUtil } from "../lib";
 
@@ -14,7 +13,7 @@ describe("AppStringProcessor", function () {
     });
 
     test("should process a URL", async function () {
-        const account = await runtime.accountServices.createAccount(Realm.Prod, Math.random().toString(36).substring(7));
+        const account = await runtime.accountServices.createAccount(Math.random().toString(36).substring(7));
 
         const result = await runtime.stringProcessor.processURL("nmshd://qr#", account);
         expect(result.isError).toBeDefined();

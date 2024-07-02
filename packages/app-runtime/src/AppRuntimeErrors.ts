@@ -83,12 +83,6 @@ class PushNotificationModule {
     }
 }
 
-class MultiAccount {
-    public wrongRealm(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.runtime.MultiAccount.WrongRealm", "The given realm is invalid.");
-    }
-}
-
 class Modules {
     public readonly pushNotificationModule = new PushNotificationModule();
 }
@@ -97,5 +91,4 @@ export class AppRuntimeErrors {
     public static readonly general = new General();
     public static readonly startup = new Startup();
     public static readonly modules = new Modules();
-    public static readonly multiAccount = new MultiAccount();
 }

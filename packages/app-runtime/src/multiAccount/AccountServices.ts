@@ -1,20 +1,14 @@
 import { DeviceMapper, DeviceOnboardingInfoDTO } from "@nmshd/runtime";
-import { CoreId, Realm } from "@nmshd/transport";
-import { AppRuntimeErrors } from "../AppRuntimeErrors";
+import { CoreId } from "@nmshd/transport";
+import { MultiAccountController } from "./MultiAccountController";
 import { LocalAccountDTO } from "./data/LocalAccountDTO";
 import { LocalAccountMapper } from "./data/LocalAccountMapper";
-import { MultiAccountController } from "./MultiAccountController";
 
 export class AccountServices {
     public constructor(protected readonly multiAccountController: MultiAccountController) {}
 
-    public async createAccount(realm: Realm, name: string): Promise<LocalAccountDTO> {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (realm !== Realm.Dev && realm !== Realm.Prod && realm !== Realm.Stage) {
-            throw AppRuntimeErrors.multiAccount.wrongRealm();
-        }
-
-        const [localAccount] = await this.multiAccountController.createAccount(realm, name);
+    public async createAccount(name: string): Promise<LocalAccountDTO> {
+        const [localAccount] = await this.multiAccountController.createAccount(name);
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
     }
 

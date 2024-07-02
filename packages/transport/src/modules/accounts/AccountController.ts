@@ -281,7 +281,7 @@ export class AccountController {
             CoreCrypto.generateSecretKey(),
 
             // Generate address locally
-            IdentityUtil.createAddress(identityKeypair.publicKey, this._config.realm),
+            IdentityUtil.createAddress(identityKeypair.publicKey, new URL(this._config.baseUrl).hostname),
             this.fetchDeviceInfo()
         ]);
 
@@ -302,7 +302,6 @@ export class AccountController {
 
         const identity = Identity.from({
             address: CoreAddress.from(deviceResponse.address),
-            realm: this._config.realm,
             publicKey: identityKeypair.publicKey
         });
 
