@@ -2,24 +2,24 @@ import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-se
 import { IIdentityAttribute, IRelationshipAttribute, IdentityAttribute, IdentityAttributeJSON, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/transport";
 
-export interface CreatePeerLocalAttributeParamsJSON {
-    id: string;
+export interface CreateSharedLocalAttributeParamsJSON {
+    id?: string;
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
     requestReferece: string;
     peer: string;
 }
 
-export interface ICreatePeerLocalAttributeParams extends ISerializable {
+export interface ICreateSharedLocalAttributeParams extends ISerializable {
     id?: ICoreId; // needs to be optional because sometimes (e.g. when accepting a CreateAttributeRequestItem) the id is not known yet
     content: IIdentityAttribute | IRelationshipAttribute;
     requestReference: ICoreId;
     peer: ICoreAddress;
 }
 
-export class CreatePeerLocalAttributeParams extends Serializable implements ICreatePeerLocalAttributeParams {
+export class CreateSharedLocalAttributeParams extends Serializable implements ICreateSharedLocalAttributeParams {
     @serialize()
-    @validate()
-    public id: CoreId;
+    @validate({ nullable: true })
+    public id?: CoreId;
 
     @serialize({ unionTypes: [IdentityAttribute, RelationshipAttribute] })
     @validate()
@@ -33,7 +33,7 @@ export class CreatePeerLocalAttributeParams extends Serializable implements ICre
     @validate()
     public peer: CoreAddress;
 
-    public static from(value: ICreatePeerLocalAttributeParams | CreatePeerLocalAttributeParamsJSON): CreatePeerLocalAttributeParams {
+    public static from(value: ICreateSharedLocalAttributeParams | CreateSharedLocalAttributeParamsJSON): CreateSharedLocalAttributeParams {
         return this.fromAny(value);
     }
 }

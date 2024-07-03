@@ -101,7 +101,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
         test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
             const thirdPartyAttributeId = await ConsumptionIds.attribute.generate();
-            await consumptionController.attributes.createPeerLocalAttribute({
+            await consumptionController.attributes.createSharedLocalAttribute({
                 id: thirdPartyAttributeId,
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: aThirdParty
@@ -917,7 +917,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })
@@ -960,7 +960,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -970,10 +970,8 @@ describe("validateAttributeMatchesWithQuery", function () {
                         value: "AStringValue"
                     })
                 }),
-                shareInfo: {
-                    peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
-                }
+                peer: aThirdParty,
+                requestReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1013,7 +1011,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1023,10 +1021,8 @@ describe("validateAttributeMatchesWithQuery", function () {
                         value: "AStringValue"
                     })
                 }),
-                shareInfo: {
-                    peer: anUninvolvedThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
-                }
+                peer: anUninvolvedThirdParty,
+                requestReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1066,7 +1062,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "AnotherKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1076,10 +1072,8 @@ describe("validateAttributeMatchesWithQuery", function () {
                         value: "AStringValue"
                     })
                 }),
-                shareInfo: {
-                    peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
-                }
+                peer: aThirdParty,
+                requestReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1121,7 +1115,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1133,10 +1127,8 @@ describe("validateAttributeMatchesWithQuery", function () {
                         value: "AStringValue"
                     })
                 }),
-                shareInfo: {
-                    peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
-                }
+                peer: aThirdParty,
+                requestReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {

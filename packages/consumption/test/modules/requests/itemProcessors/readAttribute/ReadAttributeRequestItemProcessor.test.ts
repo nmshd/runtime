@@ -249,7 +249,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
 
-            const attribute = await consumptionController.attributes.createLocalAttribute({
+            const attribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })
@@ -327,7 +327,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const sender = CoreAddress.from("Sender");
             const aThirdParty = CoreAddress.from("AThirdParty");
 
-            const attribute = await consumptionController.attributes.createLocalAttribute({
+            const attribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -337,10 +337,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: "AStringValue"
                     })
                 }),
-                shareInfo: {
-                    peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
-                }
+                peer: aThirdParty,
+                requestReference: await ConsumptionIds.request.generate()
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -411,9 +409,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
         test("returns an error trying to share the predecessor of an already shared Attribute", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -423,7 +421,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         "@type": "GivenName",
                         value: "A new given name"
                     },
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -469,7 +467,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const sender = CoreAddress.from("Sender");
                 const recipient = accountController.identity.address;
 
-                const attribute = await consumptionController.attributes.createPeerLocalAttribute({
+                const attribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient
                     }),
@@ -512,7 +510,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const sender = CoreAddress.from("Sender");
                 const recipient = accountController.identity.address;
 
-                const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient
                     })
@@ -680,7 +678,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -690,10 +688,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             value: "AStringValue"
                         })
                     }),
-                    shareInfo: {
-                        peer: sender,
-                        requestReference: await ConsumptionIds.request.generate()
-                    }
+                    peer: sender,
+                    requestReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -841,7 +837,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createAttributeUnsafe({
                     content: RelationshipAttribute.from({
                         key: "AKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -899,7 +895,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -909,10 +905,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             value: "AStringValue"
                         })
                     }),
-                    shareInfo: {
-                        peer: anUninvolvedThirdParty,
-                        requestReference: await ConsumptionIds.request.generate()
-                    }
+                    peer: anUninvolvedThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1005,7 +999,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1015,10 +1009,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             value: "AStringValue"
                         })
                     }),
-                    shareInfo: {
-                        peer: anUninvolvedThirdParty,
-                        requestReference: await ConsumptionIds.request.generate()
-                    }
+                    peer: anUninvolvedThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1058,7 +1050,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "AKey",
                         confidentiality: RelationshipAttributeConfidentiality.Private,
@@ -1068,10 +1060,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             value: "AStringValue"
                         })
                     }),
-                    shareInfo: {
-                        peer: aThirdParty,
-                        requestReference: await ConsumptionIds.request.generate()
-                    }
+                    peer: aThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1093,7 +1083,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
         test("accept with existing RepositoryAttribute", async function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
-            const attribute = await consumptionController.attributes.createLocalAttribute({
+            const attribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })
@@ -1234,7 +1224,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
         test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
                 })
@@ -1297,9 +1287,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
         test("accept with existing IdentityAttribute whose predecessor was already shared but deleted by peer", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -1309,13 +1299,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         "@type": "GivenName",
                         value: "A succeeded given name"
                     },
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
             await consumptionController.attributes.createAttributeUnsafe({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
@@ -1357,9 +1347,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
         test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -1401,15 +1391,15 @@ describe("ReadAttributeRequestItemProcessor", function () {
         test("accept with existing IdentityAttribute that is already shared and the latest shared version but deleted by peer", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
             const alreadySharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
@@ -1451,14 +1441,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const sender = CoreAddress.from("Sender");
 
-            const predecessorSourceAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorSourceAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createRelationshipAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 }),
-                shareInfo: LocalAttributeShareInfo.from({
-                    peer: thirdPartyAddress,
-                    requestReference: CoreId.from("reqRef")
-                })
+                peer: thirdPartyAddress,
+                requestReference: CoreId.from("reqRef")
             });
 
             const predecessorOwnSharedRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
@@ -1476,7 +1464,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     },
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "AKey",
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 }),
                 shareInfo: LocalAttributeShareInfo.from({
                     peer: thirdPartyAddress,
@@ -1530,14 +1518,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const sender = CoreAddress.from("Sender");
 
-            const predecessorSourceAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorSourceAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createRelationshipAttribute({
                     owner: thirdPartyAddress
                 }),
-                shareInfo: LocalAttributeShareInfo.from({
-                    peer: thirdPartyAddress,
-                    requestReference: CoreId.from("reqRef")
-                })
+                peer: thirdPartyAddress,
+                requestReference: CoreId.from("reqRef")
             });
 
             const predecessorOwnSharedRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
@@ -1649,14 +1635,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
         test("succeeds an existing peer shared IdentityAttribute with the Attribute received in the ResponseItem", async function () {
             const recipient = CoreAddress.from("Recipient");
 
-            const predecessorPeerSharedIdentityAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorPeerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 }),
-                shareInfo: LocalAttributeShareInfo.from({
-                    peer: recipient,
-                    requestReference: CoreId.from("oldReqRef")
-                })
+                peer: recipient,
+                requestReference: CoreId.from("oldReqRef")
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -1706,14 +1690,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const recipient = CoreAddress.from("Recipient");
 
-            const predecessorPeerSharedRelationshipAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorPeerSharedRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createRelationshipAttribute({
                     owner: thirdPartyAddress
                 }),
-                shareInfo: LocalAttributeShareInfo.from({
-                    peer: recipient,
-                    requestReference: CoreId.from("oldReqRef")
-                })
+                peer: recipient,
+                requestReference: CoreId.from("oldReqRef")
             });
 
             const requestItem = ReadAttributeRequestItem.from({
