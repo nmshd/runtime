@@ -190,10 +190,10 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     private async _setDeletionInfo(request: Request) {
         const requestItemsFromRequest = request.items.filter((item) => item instanceof RequestItem) as RequestItem[];
-        const requestItemGroupsFromRequest = request.items.filter((item) => item instanceof RequestItemGroup) as RequestItemGroup[];
+        const requestItemGroupsFromRequest = request.items.filter((item) => item instanceof RequestItemGroup);
         const requestItemsFromGroups = requestItemGroupsFromRequest.map((group) => group.items).flat();
         const requestItems = [...requestItemsFromRequest, ...requestItemsFromGroups];
-        const deleteAttributeRequestItems = requestItems.filter((item) => item instanceof DeleteAttributeRequestItem) as DeleteAttributeRequestItem[];
+        const deleteAttributeRequestItems = requestItems.filter((item) => item instanceof DeleteAttributeRequestItem);
         if (deleteAttributeRequestItems.length === 0) return;
 
         const ownSharedAttributeIds = deleteAttributeRequestItems.map((item) => item.attributeId);

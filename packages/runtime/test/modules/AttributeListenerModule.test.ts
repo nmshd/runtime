@@ -107,7 +107,7 @@ describe("AttributeListenerModule", () => {
 });
 
 function expectShareAttributeRequestItemWith(attribute: IdentityAttributeJSON | RelationshipAttributeJSON) {
-    const event = recipient.eventBus.publishedEvents.find((e) => e instanceof OutgoingRequestCreatedEvent) as OutgoingRequestCreatedEvent | undefined;
+    const event = recipient.eventBus.publishedEvents.find((e) => e instanceof OutgoingRequestCreatedEvent);
     expect(event).toBeDefined();
 
     const request = event!.data;

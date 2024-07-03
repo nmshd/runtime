@@ -54,5 +54,6 @@
     "files.eol": "\n",
     "typescript.unstable": {
         "organizeImportsIgnoreCase": true
-    }
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
