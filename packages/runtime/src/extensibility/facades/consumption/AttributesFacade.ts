@@ -14,6 +14,8 @@ import {
     DeletePeerSharedAttributeAndNotifyOwnerUseCase,
     DeleteRepositoryAttributeRequest,
     DeleteRepositoryAttributeUseCase,
+    DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest,
+    DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
@@ -78,7 +80,8 @@ export class AttributesFacade {
         @Inject private readonly deleteOwnSharedAttributeAndNotifyPeerUseCase: DeleteOwnSharedAttributeAndNotifyPeerUseCase,
         @Inject private readonly deletePeerSharedAttributeAndNotifyOwnerUseCase: DeletePeerSharedAttributeAndNotifyOwnerUseCase,
         @Inject private readonly deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
-        @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase
+        @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
+        @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase
     ) {}
 
     public async createRepositoryAttribute(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
@@ -175,5 +178,9 @@ export class AttributesFacade {
 
     public async deleteRepositoryAttribute(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
         return await this.deleteRepositoryAttributeUseCase.execute(request);
+    }
+
+    public async deleteSharedAttributesForRejectedOrRevokedRelationship(request: DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest): Promise<Result<void>> {
+        return await this.deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase.execute(request);
     }
 }

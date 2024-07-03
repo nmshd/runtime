@@ -234,6 +234,28 @@ describe("AttributesController", function () {
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
+
+        test("should allow to create an attribute shared by a peer", async function () {
+            const content = IdentityAttribute.from({
+                value: {
+                    "@type": "Nationality",
+                    value: "DE"
+                },
+                owner: CoreAddress.from("address")
+            });
+            const createSharedAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: content,
+                requestReference: CoreId.from("requestId"),
+                peer: CoreAddress.from("address")
+            };
+            const peerLocalAttribute = await consumptionController.attributes.createSharedLocalAttribute(createSharedAttributeParams);
+            expect(peerLocalAttribute.content.toJSON()).toStrictEqual(content.toJSON());
+            expect(peerLocalAttribute.content.value).toBeInstanceOf(Nationality);
+            expect(createSharedAttributeParams.peer.address).toStrictEqual(CoreAddress.from("address").toString());
+            expect(createSharedAttributeParams.requestReference.toString()).toStrictEqual(CoreId.from("requestId").toString());
+
+            mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
+        });
     });
 
     describe("query Attributes", function () {
