@@ -24,7 +24,6 @@ describe("Request", function () {
                 } as TestRequestItemJSON,
                 {
                     "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
                     items: [
                         {
                             "@type": "TestRequestItem",
@@ -60,7 +59,6 @@ describe("Request", function () {
                 } as ITestRequestItem,
                 {
                     "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
                     items: [
                         {
                             "@type": "TestRequestItem",
@@ -102,7 +100,6 @@ describe("Request", function () {
                 } as TestRequestItemJSON,
                 {
                     "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
                     title: "item group - title",
                     description: "item group - description",
                     metadata: {
@@ -147,7 +144,6 @@ describe("Request", function () {
             items: [
                 {
                     "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
                     items: []
                 } as RequestItemGroupJSON
             ]
@@ -167,38 +163,5 @@ describe("Request", function () {
         } as RequestJSON;
 
         await expectThrowsAsync(() => Serializable.fromUnknown(requestJSON), "TestRequestItem.mustBeAccepted*Value is not defined");
-    });
-
-    test("should validate the RequestItemGroups mustBeAccepted flag inside a Request", async function () {
-        const requestJSON = {
-            "@type": "Request",
-            items: [
-                {
-                    "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
-                    items: [
-                        {
-                            "@type": "TestRequestItem",
-                            mustBeAccepted: false
-                        }
-                    ]
-                }
-            ]
-        } as RequestJSON;
-
-        await expectThrowsAsync(() => Serializable.fromUnknown(requestJSON), "mustBeAccepted can only be true if at least one item is flagged as mustBeAccepted");
-    });
-});
-
-describe("RequestItemGroup", function () {
-    test("should validate the RequestItemGroups mustBeAccepted flag", async function () {
-        await expectThrowsAsync(
-            () =>
-                RequestItemGroup.from({
-                    mustBeAccepted: true,
-                    items: [TestRequestItem.fromAny({ mustBeAccepted: false })]
-                }),
-            "mustBeAccepted can only be true if at least one item is flagged as mustBeAccepted"
-        );
     });
 });
