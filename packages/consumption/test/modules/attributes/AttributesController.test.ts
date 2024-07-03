@@ -59,6 +59,10 @@ describe("AttributesController", function () {
         await connection.close();
     });
 
+    beforeEach(function () {
+        mockEventBus.clearPublishedEvents();
+    });
+
     afterEach(async function () {
         const attributes = await consumptionController.attributes.getLocalAttributes();
 
