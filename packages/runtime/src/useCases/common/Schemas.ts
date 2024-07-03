@@ -16174,6 +16174,29 @@ export const DeleteRepositoryAttributeRequest: any = {
     }
 }
 
+export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest",
+    "definitions": {
+        "DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest",
@@ -16723,6 +16746,35 @@ export const GetAttributesRequest: any = {
                 "parentId": {
                     "type": "string"
                 },
+                "succeeds": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "succeededBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "default": {
+                    "type": "string"
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -16828,32 +16880,6 @@ export const GetAttributesRequest: any = {
                     ]
                 },
                 "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "succeeds": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "succeededBy": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17464,6 +17490,9 @@ export const GetRepositoryAttributesRequest: any = {
             "type": "object",
             "properties": {
                 "createdAt": {
+                    "type": "string"
+                },
+                "default": {
                     "type": "string"
                 },
                 "content.tags": {
@@ -22633,29 +22662,6 @@ export const LoadPeerTokenRequest: any = {
         "TokenIdString": {
             "type": "string",
             "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest",
-    "definitions": {
-        "DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
         }
     }
 }

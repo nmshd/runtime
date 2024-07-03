@@ -212,6 +212,33 @@ describe("get attribute(s)", () => {
             expect(attributeIds).toContain(relationshipAttributeId);
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
+
+        test("should allow to get only defaul attributes", async function () {
+            const result = await services1.consumption.attributes.getAttributes({
+                query: { default: "true" }
+            });
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(2);
+
+            const attributeIds = attributes.map((attr) => attr.id);
+            expect(attributeIds).toContain(identityAttributeIds[0]);
+            expect(attributeIds).toContain(identityAttributeIds[1]);
+            expect(attributeIds).not.toContain(relationshipAttributeId);
+        });
+
+        test("should allow not to get defaul attributes", async function () {
+            const result = await services1.consumption.attributes.getAttributes({
+                query: { default: "!true" }
+            });
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(1);
+
+            expect(attributes[0].id).toBe(relationshipAttributeId);
+        });
     });
 });
 
@@ -451,6 +478,22 @@ describe("get repository, own shared and peer shared attributes", () => {
             expect(result).toBeSuccessful();
             const repositoryAttributes = result.value;
             expect(repositoryAttributes).toStrictEqual([services1RepoSurnameV0, services1RepoSurnameV1, services1RepoGivenNameV0, services1RepoGivenNameV1]);
+        });
+
+        test("should allow to get only defaul attributes", async function () {
+            const result = await services1.consumption.attributes.getRepositoryAttributes({
+                query: {
+                    default: "true"
+                }
+            });
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(2);
+
+            const attributeIds = attributes.map((attr) => attr.id);
+            expect(attributeIds).toContain(services1RepoSurnameV1.id);
+            expect(attributeIds).toContain(services1RepoGivenNameV1.id);
         });
     });
 

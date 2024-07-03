@@ -3,7 +3,7 @@ import { AttributesController } from "@nmshd/consumption";
 import { Inject } from "typescript-ioc";
 import { AttributeMapper, GetAttributesRequestQuery, GetAttributesUseCase } from "..";
 import { LocalAttributeDTO } from "../../../types";
-import { flattenObject, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { SchemaRepository, SchemaValidator, UseCase, flattenObject } from "../../common";
 
 export interface GetRepositoryAttributesRequest {
     /**
@@ -15,6 +15,7 @@ export interface GetRepositoryAttributesRequest {
 
 export interface GetRepositoryAttributesRequestQuery {
     createdAt?: string;
+    default?: string;
     "content.tags"?: string | string[];
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];
