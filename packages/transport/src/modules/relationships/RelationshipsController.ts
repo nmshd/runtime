@@ -9,7 +9,6 @@ import { DbCollectionName } from "../../core/DbCollectionName";
 import { TransportIds } from "../../core/TransportIds";
 import { RelationshipChangedEvent, RelationshipDecomposedBySelfEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
-import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { RelationshipSecretController } from "./RelationshipSecretController";
@@ -102,21 +101,16 @@ export class RelationshipsController extends TransportController {
     public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
         const query: any = { peerAddress: address.toString() };
         if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
-        let relationshipDoc = await this.relationships.findOne(query);
+        const relationships = await this.relationships.find(query);
 
-        if (!relationshipDoc) {
-            // If we don't find the relationship by peerAddress, we have to check again by peer.address
-            // as the Relationship could have been created before the peerAddress was introduced
-            const query = { [`${nameof<Relationship>((r) => r.peer)}.${nameof<Identity>((r) => r.address)}`]: address.toString() };
-            if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
-            relationshipDoc = await this.relationships.findOne(query);
-        }
+        if (relationships.length === 0) return undefined;
+        if (relationships.length === 1) return Relationship.from(relationships[0]);
 
-        if (!relationshipDoc) {
-            return;
-        }
+        const newestRelationship = relationships.reduce((prev, current) => {
+            return prev.createdAt > current.createdAt ? prev : current;
+        });
 
-        return Relationship.from(relationshipDoc);
+        return Relationship.from(newestRelationship);
     }
 
     public async getActiveRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
