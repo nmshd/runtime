@@ -149,22 +149,20 @@ describe("ShareAttributeRequestItemProcessor", function () {
             let sourceAttribute;
 
             if (testParams.attribute instanceof IdentityAttribute) {
-                sourceAttribute = await consumptionController.attributes.createLocalAttribute({
+                sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
                     content: {
                         ...testParams.attribute.toJSON(),
                         owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
                     } as IIdentityAttribute
                 });
             } else {
-                sourceAttribute = await consumptionController.attributes.createLocalAttribute({
+                sourceAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: {
                         ...testParams.attribute.toJSON(),
                         owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
                     } as IRelationshipAttribute,
-                    shareInfo: {
-                        peer: aThirdParty,
-                        requestReference: await ConsumptionIds.request.generate()
-                    }
+                    peer: aThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
                 });
             }
 
@@ -217,7 +215,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 owner: sender
             });
 
-            const sourceAttribute = await consumptionController.attributes.createLocalAttribute({
+            const sourceAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: attribute
             });
             const requestItem = ShareAttributeRequestItem.from({
@@ -243,7 +241,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const recipient = CoreAddress.from("Recipient");
             const aThirdParty = CoreAddress.from("AThirdParty");
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
@@ -275,7 +273,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
@@ -284,18 +282,10 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 })
             });
 
-            const localAttributeCopy = await consumptionController.attributes.createLocalAttribute({
-                content: IdentityAttribute.from({
-                    owner: sender,
-                    value: GivenName.from({
-                        value: "AGivenName"
-                    })
-                }),
-                shareInfo: {
-                    peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: localAttribute.id
-                }
+            const localAttributeCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                peer: recipient,
+                requestReference: await ConsumptionIds.request.generate(),
+                sourceAttributeId: localAttribute.id
             });
             expect(localAttributeCopy.isShared()).toBe(true);
 
@@ -318,7 +308,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
@@ -362,7 +352,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
@@ -406,7 +396,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
-            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: sender
                 })
@@ -448,7 +438,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
-            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: sender
                 })
@@ -495,7 +485,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const recipient = CoreAddress.from("Recipient");
             const aThirdParty = CoreAddress.from("AThirdParty");
 
-            const relationshipAttribute = await consumptionController.attributes.createLocalAttribute({
+            const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
                     value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
@@ -527,17 +517,15 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
-            const relationshipAttribute = await consumptionController.attributes.createLocalAttribute({
+            const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
                     value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "AKey"
                 }),
-                shareInfo: {
-                    peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate()
-                }
+                peer: recipient,
+                requestReference: await ConsumptionIds.request.generate()
             });
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -656,7 +644,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                         ? TestObjectFactory.createIdentityAttribute({ owner: testAccount.identity.address })
                         : TestObjectFactory.createRelationshipAttribute({ owner: testAccount.identity.address });
 
-                const sourceAttribute = await consumptionController.attributes.createLocalAttribute({
+                const sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
                     content: sourceAttributeContent
                 });
 

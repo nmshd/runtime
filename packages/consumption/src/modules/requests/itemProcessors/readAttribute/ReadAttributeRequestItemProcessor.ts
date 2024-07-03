@@ -317,18 +317,18 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
     private async createNewAttribute(attribute: IdentityAttribute | RelationshipAttribute, requestInfo: LocalRequestInfo) {
         if (attribute instanceof IdentityAttribute) {
-            const repositoryLocalAttribute = await this.consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
                 content: attribute
             });
 
             return await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: CoreId.from(repositoryLocalAttribute.id),
+                sourceAttributeId: CoreId.from(repositoryAttribute.id),
                 peer: CoreAddress.from(requestInfo.peer),
                 requestReference: CoreId.from(requestInfo.id)
             });
         }
 
-        return await this.consumptionController.attributes.createPeerLocalAttribute({
+        return await this.consumptionController.attributes.createSharedLocalAttribute({
             content: attribute,
             peer: requestInfo.peer,
             requestReference: CoreId.from(requestInfo.id)
@@ -341,7 +341,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<PeerSharedAttributeSucceededEvent | void> {
         if (responseItem instanceof ReadAttributeAcceptResponseItem) {
-            await this.consumptionController.attributes.createPeerLocalAttribute({
+            await this.consumptionController.attributes.createSharedLocalAttribute({
                 id: responseItem.attributeId,
                 content: responseItem.attribute,
                 peer: requestInfo.peer,
