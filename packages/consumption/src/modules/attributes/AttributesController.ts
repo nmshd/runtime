@@ -34,9 +34,9 @@ import {
     ThirdPartyOwnedRelationshipAttributeSucceededEvent
 } from "./events";
 import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
-import { CreateLocalAttributeParams, ICreateLocalAttributeParams } from "./local/CreateLocalAttributeParams";
-import { ICreatePeerLocalAttributeParams } from "./local/CreatePeerLocalAttributeParams";
+import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } from "./local/CreateRepositoryAttributeParams";
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
+import { ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
 import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
@@ -232,23 +232,22 @@ export class AttributesController extends ConsumptionBaseController {
         return this.parseArray(attributes, LocalAttribute);
     }
 
-    public async createLocalAttribute(params: ICreateLocalAttributeParams): Promise<LocalAttribute> {
-        const parsedParams = CreateLocalAttributeParams.from(params);
+    public async createRepositoryAttribute(params: ICreateRepositoryAttributeParams): Promise<LocalAttribute> {
+        if (params.content.owner.toString() !== this.identity.address.toString()) {
+            throw CoreErrors.attributes.wrongOwnerOfRepositoryAttribute();
+        }
+
+        const parsedParams = CreateRepositoryAttributeParams.from(params);
         const localAttribute = LocalAttribute.from({
             id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
             createdAt: CoreDate.utc(),
             content: parsedParams.content,
-            parentId: parsedParams.parentId,
-            succeeds: parsedParams.succeeds,
-            shareInfo: parsedParams.shareInfo
+            parentId: parsedParams.parentId
         });
 
         await this.attributes.create(localAttribute);
 
-        if (
-            localAttribute.content instanceof IdentityAttribute && // Local Attributes for children should only be created for Identity Attributes
-            localAttribute.content.value instanceof AbstractComplexValue
-        ) {
+        if (localAttribute.content.value instanceof AbstractComplexValue) {
             await this.createLocalAttributesForChildrenOfComplexAttribute(localAttribute);
         }
 
@@ -270,7 +269,7 @@ export class AttributesController extends ConsumptionBaseController {
                 value: propertyValue.toJSON() as AttributeValues.Identity.Json
             });
 
-            await this.createLocalAttribute({
+            await this.createRepositoryAttribute({
                 content: childAttribute,
                 parentId: localAttribute.id
             });
@@ -297,7 +296,7 @@ export class AttributesController extends ConsumptionBaseController {
         return sharedLocalAttributeCopy;
     }
 
-    public async createPeerLocalAttribute(params: ICreatePeerLocalAttributeParams): Promise<LocalAttribute> {
+    public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
         const shareInfo = LocalAttributeShareInfo.from({
             peer: params.peer,
             requestReference: params.requestReference

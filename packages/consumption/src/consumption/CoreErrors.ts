@@ -216,8 +216,11 @@ class Attributes {
         );
     }
 
-    public invalidPropertyValue(message: string) {
-        return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
+    public wrongOwnerOfRepositoryAttribute() {
+        return new CoreError(
+            "error.consumption.attributes.wrongOwnerOfRepositoryAttribute",
+            "A wrong owner was provided wanting to create a RepositoryAttribute. You can only create RepositoryAttributes for yourself."
+        );
     }
 
     public isNotSharedAttribute(attributeId: string | CoreId) {
