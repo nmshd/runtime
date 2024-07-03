@@ -216,10 +216,6 @@ class Attributes {
         );
     }
 
-    public invalidPropertyValue(message: string) {
-        return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
-    }
-
     public isNotSharedAttribute(attributeId: string | CoreId) {
         return new CoreError("error.consumption.attributes.isNotSharedAttribute", `The attribute (id: ${attributeId}) is not a shared attribute.`);
     }

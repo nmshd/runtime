@@ -73,7 +73,7 @@ class Messages {
 
 class Secrets {
     public wrongSecretType(secretId?: string) {
-        return new CoreError("error.transport.secrets.wrongBaseKeyType", "The given secret type is not supported!", {
+        return new CoreError("error.transport.secrets.wrongSecretType", "The given secret type is not supported!", {
             secretId: secretId
         });
     }
@@ -90,10 +90,6 @@ class Challenges {
 }
 
 class Datawallet {
-    public encryptedPayloadIsNoCipher() {
-        return new CoreError("error.transport.datawallet.encryptedPayloadIsNoCipher", "The given encrypted payload is no cipher.");
-    }
-
     public unsupportedModification(type: "unsupportedCacheChangedModificationCollection", data: any) {
         const errorCode = "error.transport.datawallet.unsupportedModification";
         const formattedData = data ? stringify(data) : "";
@@ -139,10 +135,6 @@ class Files {
 
     public invalidMetadata(id: string) {
         return new CoreError("error.transport.files.invalidMetadata", `The metadata of the file with id "${id}" is invalid.`);
-    }
-
-    public fileContentUndefined() {
-        return new CoreError("error.transport.files.fileContentUndefined", "The given file content is undefined.");
     }
 
     public maxFileSizeExceeded(fileSize: number, platformMaxFileSize: number) {

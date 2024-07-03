@@ -10,7 +10,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus
 } from "../../../src";
-import { loggerFactory, TestUtil } from "../../core/TestUtil";
+import { TestUtil, loggerFactory } from "../../core/TestUtil";
 import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
@@ -367,16 +367,18 @@ describe("IncomingRequestsController", function () {
             });
 
             expect(validationResult).errorValidationResult({
-                code: "inheritedFromItem",
-                message: "Some child items have errors."
+                code: "error.consumption.validation.inheritedFromItem",
+                message: "Some child items have errors. If this error occurred during the creation of a request, call 'canCreate' to get more information."
             });
             expect(validationResult.items).toHaveLength(2);
 
             expect(validationResult.items[0].isError()).toBe(false);
 
             expect(validationResult.items[1].isError()).toBe(true);
-            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("inheritedFromItem");
-            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe("Some child items have errors.");
+            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("error.consumption.validation.inheritedFromItem");
+            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe(
+                "Some child items have errors. If this error occurred during the creation of a request, call 'canCreate' to get more information."
+            );
 
             expect(validationResult.items[1].items).toHaveLength(3);
             expect(validationResult.items[1].items[0].isError()).toBe(true);
@@ -555,16 +557,18 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanRejectWith(rejectParams);
 
             expect(validationResult).errorValidationResult({
-                code: "inheritedFromItem",
-                message: "Some child items have errors."
+                code: "error.consumption.validation.inheritedFromItem",
+                message: "Some child items have errors. If this error occurred during the creation of a request, call 'canCreate' to get more information."
             });
             expect(validationResult.items).toHaveLength(2);
 
             expect(validationResult.items[0].isError()).toBe(false);
 
             expect(validationResult.items[1].isError()).toBe(true);
-            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("inheritedFromItem");
-            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe("Some child items have errors.");
+            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("error.consumption.validation.inheritedFromItem");
+            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe(
+                "Some child items have errors. If this error occurred during the creation of a request, call 'canCreate' to get more information."
+            );
 
             expect(validationResult.items[1].items).toHaveLength(3);
             expect(validationResult.items[1].items[0].isError()).toBe(true);
