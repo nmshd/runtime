@@ -74,7 +74,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         let sharedAttribute: LocalAttribute;
 
         if (requestItem.attribute instanceof IdentityAttribute) {
-            const repositoryAttribute = await this.consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
                 content: requestItem.attribute
             });
 
@@ -84,7 +84,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 sourceAttributeId: repositoryAttribute.id
             });
         } else {
-            sharedAttribute = await this.consumptionController.attributes.createPeerLocalAttribute({
+            sharedAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
                 content: requestItem.attribute,
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id
@@ -110,7 +110,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             requestItem.attribute.owner = requestInfo.peer;
         }
 
-        await this.consumptionController.attributes.createPeerLocalAttribute({
+        await this.consumptionController.attributes.createSharedLocalAttribute({
             id: responseItem.attributeId,
             content: requestItem.attribute,
             peer: requestInfo.peer,

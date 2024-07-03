@@ -212,7 +212,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
 
-            const existingLocalAttribute = await consumptionController.attributes.createLocalAttribute({
+            const existingLocalAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })
@@ -366,7 +366,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
 
-            const attribute = await consumptionController.attributes.createPeerLocalAttribute({
+            const attribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 }),
@@ -412,7 +412,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
 
-            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })
@@ -508,7 +508,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -518,10 +518,8 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                         value: "AnotherStringValue"
                     })
                 }),
-                shareInfo: {
-                    peer: sender,
-                    requestReference: await ConsumptionIds.request.generate()
-                }
+                peer: sender,
+                requestReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -540,9 +538,9 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         test("returns an error trying to share the predecessor of an already shared Attribute", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -552,7 +550,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                         "@type": "GivenName",
                         value: "A new given name"
                     },
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -600,7 +598,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
 
-            const attribute = await consumptionController.attributes.createLocalAttribute({
+            const attribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })
@@ -785,9 +783,9 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -803,7 +801,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                         "@type": "GivenName",
                         value: "A new given name"
                     },
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -852,9 +850,9 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         test("accept with existing IdentityAttribute whose predecessor was already shared but deleted by peer", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -864,13 +862,13 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                         "@type": "GivenName",
                         value: "A succeeded given name"
                     },
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
             await consumptionController.attributes.createAttributeUnsafe({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
@@ -916,9 +914,9 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
@@ -964,15 +962,15 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         test("accept with existing IdentityAttribute that is already shared and the latest shared version but deleted by peer", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 })
             });
 
             const alreadySharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
+                    owner: accountController.identity.address
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
@@ -1059,14 +1057,12 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         test("succeeds an existing peer shared IdentityAttribute with the Attribute received in the ResponseItem", async function () {
             const sender = CoreAddress.from("Sender");
 
-            const predecessorPeerSharedIdentityAttribute = await consumptionController.attributes.createLocalAttribute({
+            const predecessorPeerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: sender
                 }),
-                shareInfo: LocalAttributeShareInfo.from({
-                    peer: sender,
-                    requestReference: CoreId.from("oldReqRef")
-                })
+                peer: sender,
+                requestReference: CoreId.from("oldReqRef")
             });
 
             const requestItem = ProposeAttributeRequestItem.from({
