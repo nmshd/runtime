@@ -364,7 +364,8 @@ export async function establishPendingRelationshipWithRequestFlow(
     await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === template.id);
 
     const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
-    await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: acceptParams });
+    const result = await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: acceptParams });
+    expect(result).toBeSuccessful();
 
     await rRuntimeServices.eventBus.waitForEvent(RelationshipChangedEvent);
 
