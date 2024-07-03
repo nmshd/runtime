@@ -806,7 +806,20 @@ export class DataViewExpander {
             };
         }
 
-        if (requestGroupOrItem["@type"] !== "RequestItem") {
+        if (
+            !(
+                requestGroupOrItem["@type"] === "RequestItem" ||
+                requestGroupOrItem["@type"] === "CreateAttributeRequestItem" ||
+                requestGroupOrItem["@type"] === "DeleteAttributeRequestItem" ||
+                requestGroupOrItem["@type"] === "ShareAttributeRequestItem" ||
+                requestGroupOrItem["@type"] === "ProposeAttributeRequestItem" ||
+                requestGroupOrItem["@type"] === "ReadAttributeRequestItem" ||
+                requestGroupOrItem["@type"] === "ConsentRequestItem" ||
+                requestGroupOrItem["@type"] === "AuthenticationRequestItem" ||
+                requestGroupOrItem["@type"] === "FreeTextRequestItem" ||
+                requestGroupOrItem["@type"] === "RegisterAttributeListenerRequestItem"
+            )
+        ) {
             throw new Error("this should never happen");
         }
 

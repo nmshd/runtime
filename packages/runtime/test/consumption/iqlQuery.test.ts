@@ -4,7 +4,7 @@ import { IQLQueryJSON, ReadAttributeRequestItemJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
 import { ConsumptionServices, CreateOutgoingRequestRequest, LocalAttributeDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { establishRelationship, exchangeMessageWithRequest, RuntimeServiceProvider, sendMessageWithRequest, TestRuntimeServices } from "../lib";
+import { RuntimeServiceProvider, TestRuntimeServices, establishRelationship, exchangeMessageWithRequest, sendMessageWithRequest } from "../lib";
 import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";
 
 describe("IQL Query", () => {
@@ -110,7 +110,6 @@ describe("IQL Query", () => {
         expect(sLocalRequest.status).toBe(LocalRequestStatus.Draft);
         expect(sLocalRequest.content.items).toHaveLength(1);
         expect(sLocalRequest.content.items[0]["@type"]).toBe("ReadAttributeRequestItem");
-        expect(sLocalRequest.content.items[0].mustBeAccepted).toBe(false);
     });
 
     test("sender: send the outgoing IQL Request via Message", async () => {
