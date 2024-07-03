@@ -611,6 +611,35 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "City");
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "Country");
     });
+
+    test("should create a RepositoryAttribute that is the default if it is the first of its value type", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "Pseudonym",
+                    value: "Pseudo Petra"
+                }
+            }
+        };
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const attribute = result.value;
+        expect(attribute.default).toBe(true);
+    });
+
+    test("should create a RepositoryAttribute that is not the default if it is not the first of its value type", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "JobTitle",
+                    value: "Boss"
+                }
+            }
+        };
+        await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const attribute = result.value;
+        expect(attribute.default).toBeUndefined();
+    });
 });
 
 describe(ShareRepositoryAttributeUseCase.name, () => {

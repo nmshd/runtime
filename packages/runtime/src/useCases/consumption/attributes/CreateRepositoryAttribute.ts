@@ -41,8 +41,6 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
         });
         const createdLocalAttribute = await this.attributeController.createRepositoryAttribute(params);
 
-        // TODO: test
-
         await this.accountController.syncDatawallet();
 
         return Result.ok(AttributeMapper.toAttributeDTO(createdLocalAttribute));
