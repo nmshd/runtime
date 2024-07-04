@@ -4,13 +4,7 @@ import { IRequestItemDerivations, RequestItemDerivations, RequestItemJSONDerivat
 
 /**
  * A RequestItemGroup can be used to group one or more RequestItems. This is useful
- * if you want to
- * * make sure that the items in the group can only be accepted together
- *
- *   Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single
- *   Request where the latter one targets an attribute created by the first one, it it should be impossible to
- *   reject the first item, while accepting the second one.
- * * visually group items on the UI and give the a common title/description
+ * if you want to visually group RequestItems on the UI and give them a common `title` or `description`.
  */
 export interface RequestItemGroupJSON extends ContentJSON {
     "@type": "RequestItemGroup";
@@ -40,13 +34,7 @@ export interface RequestItemGroupJSON extends ContentJSON {
 
 /**
  * A RequestItemGroup can be used to group one or more RequestItems. This is useful
- * if you want to
- * * make sure that the items in the group can only be accepted together
- *
- *   Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single
- *   Request where the latter one targets an attribute created by the first one, it it should be impossible to
- *   reject the first item, while accepting the second one.
- * * visually group items on the UI and give the a common title/description
+ * if you want to visually group RequestItems on the UI and give them a common `title` or `description`.
  */
 export interface IRequestItemGroup extends ISerializable {
     /**
