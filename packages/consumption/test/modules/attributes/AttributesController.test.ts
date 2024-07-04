@@ -1276,6 +1276,31 @@ describe("AttributesController", function () {
                 expect((successor.content.value.toJSON() as any).value).toBe("US");
             });
 
+            test("should make successor default succeeding a default repository attribute", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+                const successorParams: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "US"
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    })
+                };
+
+                const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
+                expect(successor.default).toBe(true);
+                expect(updatedPredecessor.default).toBeUndefined();
+            });
+
             test("should succeed an own shared identity attribute", async function () {
                 const predecessorRepo = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -2062,18 +2087,18 @@ describe("AttributesController", function () {
             expect(result0).toStrictEqual([]);
 
             const result1 = await consumptionController.attributes.getPredecessorsOfAttribute(repositoryAttributeVersion1.id);
-            expect(result1).toStrictEqual([repositoryAttributeVersion0]);
+            expect(JSON.stringify(result1)).toStrictEqual(JSON.stringify([repositoryAttributeVersion0]));
 
             const result2 = await consumptionController.attributes.getPredecessorsOfAttribute(repositoryAttributeVersion2.id);
-            expect(result2).toStrictEqual([repositoryAttributeVersion1, repositoryAttributeVersion0]);
+            expect(JSON.stringify(result2)).toStrictEqual(JSON.stringify([repositoryAttributeVersion1, repositoryAttributeVersion0]));
         });
 
         test("should return all successors of a succeeded repository attribute", async function () {
             const result0 = await consumptionController.attributes.getSuccessorsOfAttribute(repositoryAttributeVersion0.id);
-            expect(result0).toStrictEqual([repositoryAttributeVersion1, repositoryAttributeVersion2]);
+            expect(JSON.stringify(result0)).toStrictEqual(JSON.stringify([repositoryAttributeVersion1, repositoryAttributeVersion2]));
 
             const result1 = await consumptionController.attributes.getSuccessorsOfAttribute(repositoryAttributeVersion1.id);
-            expect(result1).toStrictEqual([repositoryAttributeVersion2]);
+            expect(JSON.stringify(result1)).toStrictEqual(JSON.stringify([repositoryAttributeVersion2]));
 
             const result2 = await consumptionController.attributes.getSuccessorsOfAttribute(repositoryAttributeVersion2.id);
             expect(result2).toStrictEqual([]);
@@ -2083,7 +2108,7 @@ describe("AttributesController", function () {
             const allVersions = [repositoryAttributeVersion2, repositoryAttributeVersion1, repositoryAttributeVersion0];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual([repositoryAttributeVersion2, repositoryAttributeVersion1, repositoryAttributeVersion0]);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify([repositoryAttributeVersion2, repositoryAttributeVersion1, repositoryAttributeVersion0]));
             }
         });
 
@@ -2110,7 +2135,7 @@ describe("AttributesController", function () {
             });
 
             const ownSharedIdentityAttributeVersionsBeforeSuccession = await consumptionController.attributes.getVersionsOfAttribute(ownSharedIdentityAttributeVersion0.id);
-            expect(ownSharedIdentityAttributeVersionsBeforeSuccession).toStrictEqual([ownSharedIdentityAttributeVersion0]);
+            expect(JSON.stringify(ownSharedIdentityAttributeVersionsBeforeSuccession)).toStrictEqual(JSON.stringify([ownSharedIdentityAttributeVersion0]));
 
             const ownSharedIdentityAttributeVersion1 = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttributeVersion1.id,
@@ -2139,7 +2164,7 @@ describe("AttributesController", function () {
             const allVersions = [ownSharedIdentityAttributeVersion2, updatedOwnSharedIdentityAttributeVersion1];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual(allVersions);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(allVersions));
             }
         });
 
@@ -2183,7 +2208,7 @@ describe("AttributesController", function () {
             };
 
             const onlyVersion0 = await consumptionController.attributes.getVersionsOfAttribute(version0.id);
-            expect(onlyVersion0).toStrictEqual([version0]);
+            expect(JSON.stringify(onlyVersion0)).toStrictEqual(JSON.stringify([version0]));
 
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedPeerSharedIdentityAttribute(version0.id, successorParams1);
             const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedPeerSharedIdentityAttribute(version1.id, successorParams2);
@@ -2192,7 +2217,7 @@ describe("AttributesController", function () {
 
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual(allVersions);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(allVersions));
             }
         });
 
@@ -2245,7 +2270,7 @@ describe("AttributesController", function () {
             };
 
             const onlyVersion0 = await consumptionController.attributes.getVersionsOfAttribute(version0.id);
-            expect(onlyVersion0).toStrictEqual([version0]);
+            expect(JSON.stringify(onlyVersion0)).toStrictEqual(JSON.stringify([version0]));
 
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedOwnSharedRelationshipAttribute(
                 version0.id,
@@ -2259,7 +2284,7 @@ describe("AttributesController", function () {
             const allVersions = [version2, updatedVersion1, updatedVersion0];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual(allVersions);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(allVersions));
             }
         });
 
@@ -2312,7 +2337,7 @@ describe("AttributesController", function () {
             };
 
             const onlyVersion0 = await consumptionController.attributes.getVersionsOfAttribute(version0.id);
-            expect(onlyVersion0).toStrictEqual([version0]);
+            expect(JSON.stringify(onlyVersion0)).toStrictEqual(JSON.stringify([version0]));
 
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedPeerSharedRelationshipAttribute(
                 version0.id,
@@ -2326,7 +2351,7 @@ describe("AttributesController", function () {
             const allVersions = [version2, updatedVersion1, updatedVersion0];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual(allVersions);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(allVersions));
             }
         });
 
@@ -2458,7 +2483,7 @@ describe("AttributesController", function () {
 
         test("should return all shared predecessors for a single peer", async function () {
             const result = await consumptionController.attributes.getSharedPredecessorsOfAttribute(repositoryAttributeV2, { "shareInfo.peer": "peerB" });
-            expect(result).toStrictEqual([ownSharedIdentityAttributeV1PeerB]);
+            expect(JSON.stringify(result)).toStrictEqual(JSON.stringify([ownSharedIdentityAttributeV1PeerB]));
         });
 
         test("should return all shared successors for all peers", async function () {
@@ -2468,7 +2493,7 @@ describe("AttributesController", function () {
 
         test("should return all shared successors for a single peer", async function () {
             const result = await consumptionController.attributes.getSharedSuccessorsOfAttribute(repositoryAttributeV0, { "shareInfo.peer": "peerB" });
-            expect(result).toStrictEqual([ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV2PeerB]);
+            expect(JSON.stringify(result)).toStrictEqual(JSON.stringify([ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV2PeerB]));
         });
 
         test("should return all shared versions for all peers", async function () {
@@ -2492,10 +2517,10 @@ describe("AttributesController", function () {
             const allOwnSharedAttributeVersionsPeerB = [ownSharedIdentityAttributeV2PeerB, ownSharedIdentityAttributeV1PeerB];
             for (const repositoryAttributeVersion of allRepositoryAttributeVersions) {
                 const resultA = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerA")], false);
-                expect(resultA).toStrictEqual([ownSharedIdentityAttributeV1PeerA]);
+                expect(JSON.stringify(resultA)).toStrictEqual(JSON.stringify([ownSharedIdentityAttributeV1PeerA]));
 
                 const resultB = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerB")], false);
-                expect(resultB).toStrictEqual(allOwnSharedAttributeVersionsPeerB);
+                expect(JSON.stringify(resultB)).toStrictEqual(JSON.stringify(allOwnSharedAttributeVersionsPeerB));
             }
         });
 

@@ -586,13 +586,22 @@ export class AttributesController extends ConsumptionBaseController {
             shareInfo: successorParams.shareInfo,
             parentId: successorParams.parentId,
             createdAt: successorParams.createdAt,
-            succeededBy: successorParams.succeededBy
+            succeededBy: successorParams.succeededBy,
+            default: predecessor.default
         });
+
+        await this.removeDefault(predecessor);
 
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
 
         return { predecessor, successor };
+    }
+
+    private async removeDefault(attribute: LocalAttribute): Promise<LocalAttribute> {
+        attribute.default = undefined;
+        await this.updateAttributeUnsafe(attribute);
+        return attribute;
     }
 
     public async validateRepositoryAttributeSuccession(
