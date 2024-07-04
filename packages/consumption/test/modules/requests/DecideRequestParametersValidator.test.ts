@@ -238,7 +238,7 @@ describe("DecideRequestParametersValidator", function () {
                 }
             },
             expectedError: {
-                indexPath: [0, 1],
+                indexPath: [0],
                 code: "error.consumption.requests.decide.validation.mustBeAcceptedItemNotAccepted",
                 message: "The RequestItem is flagged as 'mustBeAccepted', but it was not accepted."
             }
