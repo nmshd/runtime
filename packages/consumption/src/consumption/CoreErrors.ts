@@ -216,6 +216,13 @@ class Attributes {
         );
     }
 
+    public wrongOwnerOfRepositoryAttribute() {
+        return new CoreError(
+            "error.consumption.attributes.wrongOwnerOfRepositoryAttribute",
+            "A wrong owner was provided wanting to create a RepositoryAttribute. You can only create RepositoryAttributes for yourself."
+        );
+    }
+
     public isNotSharedAttribute(attributeId: string | CoreId) {
         return new CoreError("error.consumption.attributes.isNotSharedAttribute", `The attribute (id: ${attributeId}) is not a shared attribute.`);
     }

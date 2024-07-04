@@ -33,12 +33,12 @@ describe("LocalAttributeDeletionInfo", function () {
     });
 
     beforeEach(async function () {
-        repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+        repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
             content: IdentityAttribute.from({
                 value: EMailAddress.from({
                     value: "my@email.com"
                 }),
-                owner: CoreAddress.from(testAccount.identity.address)
+                owner: testAccount.identity.address
             })
         });
 
@@ -48,7 +48,7 @@ describe("LocalAttributeDeletionInfo", function () {
             requestReference: CoreId.from("request")
         });
 
-        peerSharedIdentityAttribute = await consumptionController.attributes.createPeerLocalAttribute({
+        peerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
             content: IdentityAttribute.from({
                 value: EMailAddress.from({
                     value: "peer@email.com"
@@ -59,7 +59,7 @@ describe("LocalAttributeDeletionInfo", function () {
             requestReference: CoreId.from("request")
         });
 
-        thirdPartyOwnedRelationshipAttribute = await consumptionController.attributes.createPeerLocalAttribute({
+        thirdPartyOwnedRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
             content: RelationshipAttribute.from({
                 value: ProprietaryEMailAddress.from({
                     value: "thirdParty@email.com",
