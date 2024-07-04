@@ -131,7 +131,7 @@ describe("DecideRequestParametersValidator", function () {
             },
             expectedError: {
                 code: "error.consumption.requests.decide.validation.invalidNumberOfItems",
-                message: "Number of items in Request and Response do not match."
+                message: "The number of items in the Request and the Response do not match."
             }
         },
         {
@@ -146,7 +146,7 @@ describe("DecideRequestParametersValidator", function () {
             },
             expectedError: {
                 code: "error.consumption.requests.decide.validation.invalidNumberOfItems",
-                message: "Number of items in Request and Response do not match."
+                message: "The number of items in the Request and the Response do not match."
             }
         },
         {
@@ -198,7 +198,7 @@ describe("DecideRequestParametersValidator", function () {
             expectedError: {
                 indexPath: [0],
                 code: "error.consumption.requests.decide.validation.invalidNumberOfItems",
-                message: "Number of items in RequestItemGroup and ResponseItemGroup do not match."
+                message: "The number of items in the RequestItemGroup and the ResponseItemGroup do not match."
             }
         },
         {

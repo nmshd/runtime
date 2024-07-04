@@ -808,7 +808,7 @@ export class DataViewExpander {
         }
 
         if (!isRequestItemDerivation(requestGroupOrItem)) {
-            throw new Error("Unexpected type.");
+            throw new Error("A derivation of a RequestItem was expected.");
         }
 
         return await this.expandRequestItem(requestGroupOrItem, localRequestDTO, responseGroupOrItemDVO as ResponseItemDVO);

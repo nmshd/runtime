@@ -14,7 +14,7 @@ export class DecideRequestParametersValidator {
         }
 
         if (params.items.length !== request.content.items.length) {
-            return ValidationResult.error(CoreErrors.requests.decideValidation.invalidNumberOfItems("Number of items in Request and Response do not match."));
+            return ValidationResult.error(CoreErrors.requests.decideValidation.invalidNumberOfItems("The number of items in the Request and the Response do not match."));
         }
 
         const validationResults = request.content.items.map((requestItem, index) => this.checkItemOrGroup(requestItem, params.items[index], params.accept));
@@ -63,7 +63,9 @@ export class DecideRequestParametersValidator {
         }
 
         if (responseItemGroup.items.length !== requestItemGroup.items.length) {
-            return ValidationResult.error(CoreErrors.requests.decideValidation.invalidNumberOfItems("Number of items in RequestItemGroup and ResponseItemGroup do not match."));
+            return ValidationResult.error(
+                CoreErrors.requests.decideValidation.invalidNumberOfItems("The number of items in the RequestItemGroup and the ResponseItemGroup do not match.")
+            );
         }
 
         const validationResults = requestItemGroup.items.map((requestItem, index) => this.checkItem(requestItem, responseItemGroup.items[index], isRequestAccepted));
