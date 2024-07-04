@@ -108,7 +108,7 @@ describe("Template Tests", () => {
             maxNumberOfAllocations: 1
         });
 
-        expect(response).toBeAnError("A relationship template content", "error.runtime.validation.invalidPropertyValue");
+        expect(response).toBeAnError("The content of a RelationshipTemplate", "error.runtime.validation.invalidPropertyValue");
     });
 });
 
