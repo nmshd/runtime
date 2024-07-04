@@ -81,7 +81,7 @@ class RelationshipTemplates {
     }
 
     public cannotCreateQRCodeForPeerTemplate(): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateQRCodeForPeerTemplate", "You cannot create a QRCode for a peer template.");
+        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateQRCodeForPeerTemplate", "You cannot create a QR code for a peer template.");
     }
 
     public invalidReference(reference: string): ApplicationError {
@@ -140,8 +140,11 @@ class Notifications {
         return new ApplicationError("error.runtime.notifications.cannotReceiveNotificationFromOwnMessage", "Cannot receive Notification from own message.");
     }
 
-    public cannotSaveSentNotificationFromPeerMessage(): ApplicationError {
-        return new ApplicationError("error.runtime.notifications.cannotSaveSendNotificationFromPeerMessage", "Cannot send Notification from peer message.");
+    public cannotSaveSentNotificationFromPeerMessage(messageId: CoreId): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.notifications.cannotSaveSentNotificationFromPeerMessage",
+            `The Message '${messageId}' was received from a peer, but an own Message is expected here to save its Notification content.`
+        );
     }
 
     public messageDoesNotContainNotification(messageId: CoreId): ApplicationError {

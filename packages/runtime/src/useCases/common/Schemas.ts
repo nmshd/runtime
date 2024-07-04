@@ -16174,6 +16174,29 @@ export const DeleteRepositoryAttributeRequest: any = {
     }
 }
 
+export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest",
+    "definitions": {
+        "DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest",
@@ -19980,11 +20003,11 @@ export const ReceivedNotificationRequest: any = {
     }
 }
 
-export const SentNotificationRequest: any = {
+export const SaveSentNotificationRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SentNotificationRequest",
+    "$ref": "#/definitions/SaveSentNotificationRequest",
     "definitions": {
-        "SentNotificationRequest": {
+        "SaveSentNotificationRequest": {
             "type": "object",
             "properties": {
                 "messageId": {
@@ -22633,29 +22656,6 @@ export const LoadPeerTokenRequest: any = {
         "TokenIdString": {
             "type": "string",
             "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest",
-    "definitions": {
-        "DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
         }
     }
 }

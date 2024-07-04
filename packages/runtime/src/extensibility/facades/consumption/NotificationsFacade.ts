@@ -11,15 +11,15 @@ import {
     ProcessOpenNotifactionsReceivedByCurrentDeviceUseCase,
     ReceivedNotificationRequest,
     ReceivedNotificationUseCase,
-    SentNotificationRequest,
-    SentNotificationUseCase
+    SaveSentNotificationRequest,
+    SaveSentNotificationUseCase
 } from "../../../useCases";
 
 export class NotificationsFacade {
     public constructor(
         @Inject private readonly getUseCase: GetNotificationUseCase,
         @Inject private readonly queryUseCase: GetNotificationsUseCase,
-        @Inject private readonly sentNotificationUseCase: SentNotificationUseCase,
+        @Inject private readonly saveSentNotificationUseCase: SaveSentNotificationUseCase,
         @Inject private readonly receivedNotificationUseCase: ReceivedNotificationUseCase,
         @Inject private readonly processOpenNotifactionsReceivedByCurrentDeviceUseCase: ProcessOpenNotifactionsReceivedByCurrentDeviceUseCase,
         @Inject private readonly processNotificationByIdUseCase: ProcessNotificationByIdUseCase
@@ -33,8 +33,8 @@ export class NotificationsFacade {
         return await this.queryUseCase.execute(request);
     }
 
-    public async sentNotification(request: SentNotificationRequest): Promise<Result<LocalNotificationDTO>> {
-        return await this.sentNotificationUseCase.execute(request);
+    public async saveSentNotification(request: SaveSentNotificationRequest): Promise<Result<LocalNotificationDTO>> {
+        return await this.saveSentNotificationUseCase.execute(request);
     }
 
     public async receivedNotification(request: ReceivedNotificationRequest): Promise<Result<LocalNotificationDTO>> {

@@ -37,7 +37,7 @@ export class NotificationModule extends RuntimeModule {
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
 
-        const sentResult = await services.consumptionServices.notifications.sentNotification({ messageId: message.id });
+        const sentResult = await services.consumptionServices.notifications.saveSentNotification({ messageId: message.id });
         if (sentResult.isError) {
             this.logger.error(`Could not mark Notification as sent by Message '${message.id}'.`, sentResult.error);
             return;
