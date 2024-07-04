@@ -241,10 +241,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string",
                     "description": "The human-readable description of this group."
                 },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not."
-                },
                 "metadata": {
                     "type": "object",
                     "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
@@ -259,11 +255,10 @@ export const CanCreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "items",
-                "mustBeAccepted"
+                "items"
             ],
             "additionalProperties": false,
-            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to\n* make sure that the items in the group can only be accepted together\n\n  Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single   Request where the latter one targets an attribute created by the first one, it it should be impossible to   reject the first item, while accepting the second one.\n* visually group items on the UI and give the a common title/description"
+            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to visually group RequestItems on the UI and give them a common `title` or `description`."
         },
         "RequestItemJSONDerivations": {
             "anyOf": [
@@ -321,11 +316,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -361,11 +356,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2322,11 +2317,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2366,11 +2361,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2421,11 +2416,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2709,11 +2704,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2806,11 +2801,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2853,11 +2848,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2893,11 +2888,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2937,11 +2932,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -8040,10 +8035,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string",
                     "description": "The human-readable description of this group."
                 },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not."
-                },
                 "metadata": {
                     "type": "object",
                     "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
@@ -8058,11 +8049,10 @@ export const CreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "items",
-                "mustBeAccepted"
+                "items"
             ],
             "additionalProperties": false,
-            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to\n* make sure that the items in the group can only be accepted together\n\n  Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single   Request where the latter one targets an attribute created by the first one, it it should be impossible to   reject the first item, while accepting the second one.\n* visually group items on the UI and give the a common title/description"
+            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to visually group RequestItems on the UI and give them a common `title` or `description`."
         },
         "RequestItemJSONDerivations": {
             "anyOf": [
@@ -8120,11 +8110,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -8160,11 +8150,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10121,11 +10111,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10165,11 +10155,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10220,11 +10210,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10508,11 +10498,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10605,11 +10595,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10652,11 +10642,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10692,11 +10682,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10736,11 +10726,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -11350,10 +11340,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string",
                     "description": "The human-readable description of this group."
                 },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not."
-                },
                 "metadata": {
                     "type": "object",
                     "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
@@ -11368,11 +11354,10 @@ export const ReceivedIncomingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "items",
-                "mustBeAccepted"
+                "items"
             ],
             "additionalProperties": false,
-            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to\n* make sure that the items in the group can only be accepted together\n\n  Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single   Request where the latter one targets an attribute created by the first one, it it should be impossible to   reject the first item, while accepting the second one.\n* visually group items on the UI and give the a common title/description"
+            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to visually group RequestItems on the UI and give them a common `title` or `description`."
         },
         "RequestItemJSONDerivations": {
             "anyOf": [
@@ -11430,11 +11415,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -11470,11 +11455,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13431,11 +13416,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13475,11 +13460,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13530,11 +13515,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13818,11 +13803,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13915,11 +13900,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13962,11 +13947,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -14002,11 +13987,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -14046,11 +14031,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -16170,6 +16155,29 @@ export const DeleteRepositoryAttributeRequest: any = {
         "AttributeIdString": {
             "type": "string",
             "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest",
+    "definitions": {
+        "DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
         }
     }
 }
@@ -22656,29 +22664,6 @@ export const LoadPeerTokenRequest: any = {
         "TokenIdString": {
             "type": "string",
             "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest",
-    "definitions": {
-        "DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
         }
     }
 }

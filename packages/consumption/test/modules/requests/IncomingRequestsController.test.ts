@@ -10,7 +10,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus
 } from "../../../src";
-import { loggerFactory, TestUtil } from "../../core/TestUtil";
+import { TestUtil, loggerFactory } from "../../core/TestUtil";
 import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
@@ -133,7 +133,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -261,7 +260,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -318,7 +316,6 @@ describe("IncomingRequestsController", function () {
                         mustBeAccepted: false
                     }),
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             TestRequestItem.from({
                                 mustBeAccepted: false,
@@ -452,7 +449,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -507,7 +503,6 @@ describe("IncomingRequestsController", function () {
                         mustBeAccepted: false
                     }),
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             TestRequestItem.from({
                                 mustBeAccepted: false,
