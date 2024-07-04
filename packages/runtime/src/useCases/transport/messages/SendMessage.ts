@@ -58,7 +58,14 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
     private async validateMessageContent(content: any, recipients: string[]) {
         const transformedContent = Serializable.fromUnknown(content);
-        if (transformedContent instanceof Request) {
+        if (
+            transformedContent instanceof Mail ||
+            transformedContent instanceof ResponseWrapper ||
+            transformedContent instanceof Notification ||
+            transformedContent instanceof ArbitraryMessageContent
+        ) {
+            return;
+        } else if (transformedContent instanceof Request) {
             if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
             const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
@@ -73,15 +80,8 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             const recipient = CoreAddress.from(recipients[0]);
             if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
             return;
-        } else if (
-            transformedContent instanceof Mail ||
-            transformedContent instanceof ResponseWrapper ||
-            transformedContent instanceof Notification ||
-            transformedContent instanceof ArbitraryMessageContent
-        ) {
-            return;
         }
-        return RuntimeErrors.general.invalidPropertyValue("The content type of a message must be Mail, Request, ResponseWrapper, Notification or ArbitraryMessageContent.");
+        return RuntimeErrors.general.invalidPropertyValue("The content type of a Message must be Mail, Request, ResponseWrapper, Notification or ArbitraryMessageContent.");
     }
 
     private async transformAttachments(attachmentsIds?: string[]): Promise<Result<File[]>> {

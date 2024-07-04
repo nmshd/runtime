@@ -81,6 +81,8 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         } else if (transformedContent instanceof ArbitraryRelationshipTemplateContent) {
             return;
         }
-        return RuntimeErrors.general.invalidPropertyValue("A relationship template content must be of type RelationshipTemplateContent or ArbitraryRelationshipTemplateContent.");
+        return RuntimeErrors.general.invalidPropertyValue(
+            "The content of a RelationshipTemplate must be of type RelationshipTemplateContent or ArbitraryRelationshipTemplateContent."
+        );
     }
 }

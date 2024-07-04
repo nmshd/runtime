@@ -10,7 +10,7 @@ export class RelationshipTemplateMapper {
         }
         if (!(template.cache.content instanceof RelationshipTemplateContent || template.cache.content instanceof ArbitraryRelationshipTemplateContent)) {
             throw RuntimeErrors.general.invalidPropertyValue(
-                `The content type of relationship template ${template.id} is neither RelationshipTemplateContent nor ArbitraryRelationshipTemplateContent.`
+                `The content type of RelationshipTemplate ${template.id} is neither RelationshipTemplateContent nor ArbitraryRelationshipTemplateContent.`
             );
         }
 
