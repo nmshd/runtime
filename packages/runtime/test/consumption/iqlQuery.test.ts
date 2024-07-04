@@ -110,6 +110,8 @@ describe("IQL Query", () => {
         expect(sLocalRequest.status).toBe(LocalRequestStatus.Draft);
         expect(sLocalRequest.content.items).toHaveLength(1);
         expect(sLocalRequest.content.items[0]["@type"]).toBe("ReadAttributeRequestItem");
+        if (sLocalRequest.content.items[0]["@type"] !== "ReadAttributeRequestItem") throw new Error("this should never happen");
+        expect(sLocalRequest.content.items[0].mustBeAccepted).toBe(false);
     });
 
     test("sender: send the outgoing IQL Request via Message", async () => {

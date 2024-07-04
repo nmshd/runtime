@@ -96,6 +96,8 @@ describe("Requests", () => {
             expect(sLocalRequest.status).toBe(LocalRequestStatus.Draft);
             expect(sLocalRequest.content.items).toHaveLength(1);
             expect(sLocalRequest.content.items[0]["@type"]).toBe("TestRequestItem");
+            if (sLocalRequest.content.items[0]["@type"] !== "TestRequestItem") throw new Error("this should never happen");
+            expect(sLocalRequest.content.items[0].mustBeAccepted).toBe(false);
         });
 
         // eslint-disable-next-line jest/expect-expect
