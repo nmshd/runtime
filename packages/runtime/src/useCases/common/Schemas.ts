@@ -258,7 +258,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "items"
             ],
             "additionalProperties": false,
-            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to\n* make sure that the items in the group can only be accepted together\n\n  Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single   Request where the latter one targets an attribute created by the first one, it it should be impossible to   reject the first item, while accepting the second one.\n* visually group items on the UI and give the a common title/description"
+            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to visually group RequestItems on the UI and give them a common `title` or `description`."
         },
         "RequestItemJSONDerivations": {
             "anyOf": [
@@ -8052,7 +8052,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "items"
             ],
             "additionalProperties": false,
-            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to\n* make sure that the items in the group can only be accepted together\n\n  Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single   Request where the latter one targets an attribute created by the first one, it it should be impossible to   reject the first item, while accepting the second one.\n* visually group items on the UI and give the a common title/description"
+            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to visually group RequestItems on the UI and give them a common `title` or `description`."
         },
         "RequestItemJSONDerivations": {
             "anyOf": [
@@ -11357,7 +11357,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "items"
             ],
             "additionalProperties": false,
-            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to\n* make sure that the items in the group can only be accepted together\n\n  Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single   Request where the latter one targets an attribute created by the first one, it it should be impossible to   reject the first item, while accepting the second one.\n* visually group items on the UI and give the a common title/description"
+            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to visually group RequestItems on the UI and give them a common `title` or `description`."
         },
         "RequestItemJSONDerivations": {
             "anyOf": [
