@@ -223,8 +223,7 @@ export class TestObjectFactory {
         return Request.from({
             items: [
                 RequestItemGroup.from({
-                    items: [TestRequestItem.from({ mustBeAccepted })],
-                    mustBeAccepted: mustBeAccepted
+                    items: [TestRequestItem.from({ mustBeAccepted })]
                 })
             ],
             ...properties
