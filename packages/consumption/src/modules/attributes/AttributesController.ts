@@ -251,7 +251,7 @@ export class AttributesController extends ConsumptionBaseController {
             await this.createLocalAttributesForChildrenOfComplexAttribute(localAttribute);
         }
 
-        localAttribute = await this.setAsDefaultAttributeIfNoOtherExists(localAttribute.id);
+        localAttribute = await this.setAsDefaultAttributeIfNoOtherExists(localAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), localAttribute));
 
@@ -278,12 +278,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
     }
 
-    public async setAsDefaultAttributeIfNoOtherExists(attributeId: CoreId): Promise<LocalAttribute> {
-        const attribute = await this.getLocalAttribute(attributeId);
-        if (!attribute) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeId.toString());
-        }
-
+    private async setAsDefaultAttributeIfNoOtherExists(attribute: LocalAttribute): Promise<LocalAttribute> {
         const valueType = attribute.content.value.constructor.name as AttributeValues.Identity.TypeName;
         const query: IIdentityAttributeQuery = {
             valueType: valueType
@@ -354,7 +349,6 @@ export class AttributesController extends ConsumptionBaseController {
         }
     }
 
-    // TODO: handle default attributes
     public async succeedRepositoryAttribute(
         predecessorId: CoreId,
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
@@ -999,7 +993,6 @@ export class AttributesController extends ConsumptionBaseController {
         await this.attributes.delete({ id: id });
     }
 
-    // TODO: handle default attributes
     public async executeFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<void> {
         const validationResult = await this.validateFullAttributeDeletionProcess(attribute);
         if (validationResult.isError()) throw validationResult.error;
@@ -1018,6 +1011,9 @@ export class AttributesController extends ConsumptionBaseController {
         await this.detachAttributeCopies(attributeCopiesToDetach);
 
         await this.deletePredecessorsOfAttribute(attribute.id);
+
+        await this.handleDefault(attribute);
+
         await this.deleteAttribute(attribute);
     }
 
@@ -1074,6 +1070,26 @@ export class AttributesController extends ConsumptionBaseController {
         for (const predecessor of predecessors) {
             await this.deleteAttribute(predecessor);
         }
+    }
+
+    private async handleDefault(attribute: LocalAttribute): Promise<void> {
+        if (!attribute.default) return;
+
+        const valueType = attribute.content.value.constructor.name as AttributeValues.Identity.TypeName;
+        const query: IIdentityAttributeQuery = {
+            valueType: valueType
+        };
+
+        const attributesWithSameValueType = await this.executeIdentityAttributeQuery(query);
+        if (attributesWithSameValueType.length <= 1) return;
+
+        const defaultCandidate = attributesWithSameValueType.find((attr) => !attr.succeededBy && attr.id.toString() !== attribute.id.toString());
+
+        // TODO: this should never happen given valid data, should we thus rather throw an error?
+        if (!defaultCandidate) return;
+
+        defaultCandidate.default = true;
+        await this.updateAttributeUnsafe(defaultCandidate);
     }
 
     public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
