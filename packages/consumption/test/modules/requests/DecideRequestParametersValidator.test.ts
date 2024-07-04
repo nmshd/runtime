@@ -255,7 +255,7 @@ describe("DecideRequestParametersValidator", function () {
             },
             expectedError: {
                 indexPath: [0],
-                code: "error.consumption.requests.decide.validation.itemAcceptedButParentNotAccepted",
+                code: "error.consumption.requests.decide.validation.itemAcceptedButRequestNotAccepted",
                 message: "The RequestItem was accepted, but the Request was not accepted."
             }
         },

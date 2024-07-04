@@ -39,7 +39,9 @@ export class DecideRequestParametersValidator {
         }
 
         if (!isRequestAccepted && response.accept) {
-            return ValidationResult.error(CoreErrors.requests.decideValidation.itemAcceptedButParentNotAccepted("The RequestItem was accepted, but the Request was not accepted."));
+            return ValidationResult.error(
+                CoreErrors.requests.decideValidation.itemAcceptedButRequestNotAccepted("The RequestItem was accepted, but the Request was not accepted.")
+            );
         }
 
         if (isRequestAccepted && requestItem.mustBeAccepted && !response.accept) {
