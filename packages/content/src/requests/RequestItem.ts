@@ -155,3 +155,18 @@ export type RequestItemDerivations =
     | AuthenticationRequestItem
     | FreeTextRequestItem
     | RegisterAttributeListenerRequestItem;
+
+export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
+    return (
+        input["@type"] === "RequestItem" ||
+        input["@type"] === "CreateAttributeRequestItem" ||
+        input["@type"] === "DeleteAttributeRequestItem" ||
+        input["@type"] === "ShareAttributeRequestItem" ||
+        input["@type"] === "ProposeAttributeRequestItem" ||
+        input["@type"] === "ReadAttributeRequestItem" ||
+        input["@type"] === "ConsentRequestItem" ||
+        input["@type"] === "AuthenticationRequestItem" ||
+        input["@type"] === "FreeTextRequestItem" ||
+        input["@type"] === "RegisterAttributeListenerRequestItem"
+    );
+}

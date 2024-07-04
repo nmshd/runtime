@@ -48,7 +48,8 @@ import {
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
     ValueHints,
-    ValueHintsJSON
+    ValueHintsJSON,
+    isRequestItemDerivation
 } from "@nmshd/content";
 import { CoreAddress, CoreId, IdentityController, Relationship, RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
@@ -806,21 +807,8 @@ export class DataViewExpander {
             };
         }
 
-        if (
-            !(
-                requestGroupOrItem["@type"] === "RequestItem" ||
-                requestGroupOrItem["@type"] === "CreateAttributeRequestItem" ||
-                requestGroupOrItem["@type"] === "DeleteAttributeRequestItem" ||
-                requestGroupOrItem["@type"] === "ShareAttributeRequestItem" ||
-                requestGroupOrItem["@type"] === "ProposeAttributeRequestItem" ||
-                requestGroupOrItem["@type"] === "ReadAttributeRequestItem" ||
-                requestGroupOrItem["@type"] === "ConsentRequestItem" ||
-                requestGroupOrItem["@type"] === "AuthenticationRequestItem" ||
-                requestGroupOrItem["@type"] === "FreeTextRequestItem" ||
-                requestGroupOrItem["@type"] === "RegisterAttributeListenerRequestItem"
-            )
-        ) {
-            throw new Error("this should never happen");
+        if (!isRequestItemDerivation(requestGroupOrItem)) {
+            throw new Error("Unexpected type.");
         }
 
         return await this.expandRequestItem(requestGroupOrItem, localRequestDTO, responseGroupOrItemDVO as ResponseItemDVO);
