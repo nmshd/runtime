@@ -1,24 +1,24 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipCreationChangeRequestContentJSON } from "@nmshd/content";
+import { TestRequestItemJSON } from "@nmshd/consumption/test/modules/requests/testHelpers/TestRequestItem";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
     OutgoingRequestCreatedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     TransportServices
 } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import {
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     establishRelationship,
     exchangeMessageWithRequest,
     exchangeTemplate,
-    RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncUntilHasRelationships,
-    TestRuntimeServices
+    syncUntilHasRelationships
 } from "../lib";
 import {
     exchangeMessageWithRequestAndRequireManualDecision,
@@ -97,7 +97,7 @@ describe("Requests", () => {
             expect(sLocalRequest.status).toBe(LocalRequestStatus.Draft);
             expect(sLocalRequest.content.items).toHaveLength(1);
             expect(sLocalRequest.content.items[0]["@type"]).toBe("TestRequestItem");
-            expect(sLocalRequest.content.items[0].mustBeAccepted).toBe(false);
+            expect((sLocalRequest.content.items[0] as TestRequestItemJSON).mustBeAccepted).toBe(false);
         });
 
         // eslint-disable-next-line jest/expect-expect
@@ -556,7 +556,7 @@ describe("Requests", () => {
 
             const result = await rConsumptionServices.incomingRequests.complete({
                 requestId: request.id,
-                responseSourceId: action === "Accept" ? relationship?.changes[0].id : undefined
+                responseSourceId: action === "Accept" ? relationship?.id : undefined
             });
 
             expect(result).toBeSuccessful();
@@ -577,17 +577,17 @@ describe("Requests", () => {
 
             expect(syncResult).toHaveLength(1);
 
-            const sRelationshipChange = syncResult[0].changes[0];
+            const sRelationship = syncResult[0];
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            let triggeredCompletionEvent: OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent | undefined;
-            sEventBus.subscribeOnce(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, (event) => {
+            let triggeredCompletionEvent: OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent | undefined;
+            sEventBus.subscribeOnce(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent, (event) => {
                 triggeredCompletionEvent = event;
             });
 
             const completionResult = await sConsumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
-                responseSourceId: sRelationshipChange.id,
-                response: (sRelationshipChange.request.content as RelationshipCreationChangeRequestContentJSON).response,
+                responseSourceId: sRelationship.id,
+                response: sRelationship.creationContent.response,
                 templateId: relationship!.template.id
             });
 

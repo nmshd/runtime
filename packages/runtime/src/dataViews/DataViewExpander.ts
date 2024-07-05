@@ -14,10 +14,10 @@ import {
     FreeTextAcceptResponseItemJSON,
     FreeTextRequestItemJSON,
     GivenNameJSON,
+    IQLQueryJSON,
     IdentityAttribute,
     IdentityAttributeJSON,
     IdentityAttributeQueryJSON,
-    IQLQueryJSON,
     MailJSON,
     MiddleNameJSON,
     ProposeAttributeAcceptResponseItemJSON,
@@ -48,17 +48,18 @@ import {
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
     ValueHints,
-    ValueHintsJSON
+    ValueHintsJSON,
+    isRequestItemDerivation
 } from "@nmshd/content";
-import { CoreAddress, CoreId, IdentityController, Realm, Relationship, RelationshipStatus } from "@nmshd/transport";
+import { CoreAddress, CoreId, IdentityController, Relationship, RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import {
     AuthenticationRequestItemDVO,
     ConsentRequestItemDVO,
     CreateAttributeRequestItemDVO,
-    DeleteAttributeRequestItemDVO,
     DVOError,
+    DeleteAttributeRequestItemDVO,
     FileDVO,
     FreeTextRequestItemDVO,
     IdentityDVO,
@@ -83,11 +84,12 @@ import {
     MessageDTO,
     MessageWithAttachmentsDTO,
     RecipientDTO,
-    RelationshipChangeDTO,
     RelationshipDTO,
     RelationshipTemplateDTO
 } from "../types";
 import { RuntimeErrors } from "../useCases";
+import { DataViewObject } from "./DataViewObject";
+import { DataViewTranslateable } from "./DataViewTranslateable";
 import {
     LocalAttributeDVO,
     LocalAttributeListenerDVO,
@@ -97,8 +99,8 @@ import {
     PeerAttributeDVO,
     PeerRelationshipAttributeDVO,
     ProcessedAttributeQueryDVO,
-    ProcessedIdentityAttributeQueryDVO,
     ProcessedIQLQueryDVO,
+    ProcessedIdentityAttributeQueryDVO,
     ProcessedRelationshipAttributeQueryDVO,
     ProcessedThirdPartyRelationshipAttributeQueryDVO,
     RelationshipSettingDVO,
@@ -121,8 +123,8 @@ import {
     AttributeQueryDVO,
     DraftIdentityAttributeDVO,
     DraftRelationshipAttributeDVO,
-    IdentityAttributeQueryDVO,
     IQLQueryDVO,
+    IdentityAttributeQueryDVO,
     RelationshipAttributeQueryDVO,
     ThirdPartyRelationshipAttributeQueryDVO
 } from "./content/AttributeDVOs";
@@ -143,10 +145,8 @@ import {
     ResponseItemGroupDVO,
     ShareAttributeAcceptResponseItemDVO
 } from "./content/ResponseItemDVOs";
-import { DataViewObject } from "./DataViewObject";
-import { DataViewTranslateable } from "./DataViewTranslateable";
 import { MessageDVO, MessageStatus, RecipientDVO } from "./transport/MessageDVO";
-import { RelationshipChangeDVO, RelationshipChangeResponseDVO, RelationshipDirection, RelationshipDVO } from "./transport/RelationshipDVO";
+import { RelationshipDVO, RelationshipDirection } from "./transport/RelationshipDVO";
 
 export class DataViewExpander {
     public constructor(
@@ -286,7 +286,7 @@ export class DataViewExpander {
             wasReadAt: message.wasReadAt
         };
 
-        if (message.content["@type"] === "Mail" || message.content["@type"] === "RequestMail") {
+        if (message.content["@type"] === "Mail") {
             const mailContent = message.content as MailJSON;
 
             const to: RecipientDVO[] = mailContent.to.map((value) => addressMap[value]);
@@ -345,7 +345,7 @@ export class DataViewExpander {
             return requestMessageDVO;
         }
 
-        if (message.content["@type"] === "Response") {
+        if (message.content["@type"] === "ResponseWrapper") {
             let localRequest: LocalRequestDTO;
             if (isOwn) {
                 const localRequestsResult = await this.consumption.incomingRequests.getRequests({
@@ -803,10 +803,14 @@ export class DataViewExpander {
                 isDecidable,
                 title: requestGroupOrItem.title,
                 description: requestGroupOrItem.description,
-                mustBeAccepted: requestGroupOrItem.mustBeAccepted,
                 response: responseGroup
             };
         }
+
+        if (!isRequestItemDerivation(requestGroupOrItem)) {
+            throw new Error("A derivation of a RequestItem was expected.");
+        }
+
         return await this.expandRequestItem(requestGroupOrItem, localRequestDTO, responseGroupOrItemDVO as ResponseItemDVO);
     }
 
@@ -1559,7 +1563,6 @@ export class DataViewExpander {
             type: "IdentityDVO",
             name: name,
             initials: initials,
-            realm: Realm.Prod,
             description: "i18n://dvo.identity.self.description",
             isSelf: true,
             hasRelationship: false
@@ -1575,7 +1578,6 @@ export class DataViewExpander {
             type: "IdentityDVO",
             name: name,
             initials: initials,
-            realm: Realm.Prod,
             description: "i18n://dvo.identity.unknown.description",
             isSelf: false,
             hasRelationship: false
@@ -1615,48 +1617,6 @@ export class DataViewExpander {
         return await Promise.all(relationshipPromises);
     }
 
-    public expandRelationshipChangeDTO(relationship: RelationshipDTO, change: RelationshipChangeDTO): Promise<RelationshipChangeDVO> {
-        const date = change.response ? change.response.createdAt : change.request.createdAt;
-        let isOwn = false;
-        if (this.identityController.isMe(CoreAddress.from(change.request.createdBy))) {
-            isOwn = true;
-        }
-
-        let response: RelationshipChangeResponseDVO | undefined;
-        if (change.response) {
-            response = {
-                ...change.response,
-                id: `${change.id}_response`,
-                name: "i18n://dvo.relationshipChange.response.name",
-                type: "RelationshipChangeResponseDVO"
-            };
-        }
-
-        return Promise.resolve({
-            type: "RelationshipChangeDVO",
-            id: change.id,
-            name: "",
-            date: date,
-            status: change.status,
-            statusText: `i18n://dvo.relationshipChange.${change.status}`,
-            changeType: change.type,
-            changeTypeText: `i18n://dvo.relationshipChange.${change.type}`,
-            isOwn: isOwn,
-            request: {
-                ...change.request,
-                id: `${change.id}_request`,
-                name: "i18n://dvo.relationshipChange.request.name",
-                type: "RelationshipChangeRequestDVO"
-            },
-            response: response
-        });
-    }
-
-    public async expandRelationshipChangeDTOs(relationship: RelationshipDTO): Promise<RelationshipChangeDVO[]> {
-        const changePromises = relationship.changes.map((change) => this.expandRelationshipChangeDTO(relationship, change));
-        return await Promise.all(changePromises);
-    }
-
     private async createRelationshipDVO(relationship: RelationshipDTO): Promise<RelationshipDVO> {
         let relationshipSetting: RelationshipSettingDVO;
         const settingResult = await this.consumption.settings.getSettings({ query: { reference: relationship.id } });
@@ -1694,7 +1654,7 @@ export class DataViewExpander {
         }
 
         let direction = RelationshipDirection.Incoming;
-        if (this.identityController.isMe(CoreAddress.from(relationship.changes[0].request.createdBy))) {
+        if (!relationship.template.isOwn) {
             direction = RelationshipDirection.Outgoing;
         }
 
@@ -1711,7 +1671,7 @@ export class DataViewExpander {
             statusText = DataViewTranslateable.transport.relationshipActive;
         }
 
-        const changes = await this.expandRelationshipChangeDTOs(relationship);
+        const creationDate = relationship.auditLog[0].createdAt;
 
         let name;
         if (stringByType["DisplayName"]) {
@@ -1732,7 +1692,7 @@ export class DataViewExpander {
             id: relationship.id,
             name: relationshipSetting.userTitle ?? name,
             description: relationshipSetting.userDescription ?? statusText,
-            date: relationship.changes[0].request.createdAt,
+            date: creationDate,
             image: "",
             type: "RelationshipDVO",
             status: relationship.status,
@@ -1742,9 +1702,9 @@ export class DataViewExpander {
             attributeMap: attributesByType,
             items: expandedAttributes,
             nameMap: stringByType,
-            changes: changes,
-            changeCount: changes.length,
-            templateId: relationship.template.id
+            templateId: relationship.template.id,
+            auditLog: relationship.auditLog,
+            creationContent: relationship.creationContent
         };
     }
 
@@ -1759,7 +1719,6 @@ export class DataViewExpander {
             date: relationshipDVO.date,
             description: relationshipDVO.description,
             publicKey: relationship.peerIdentity.publicKey,
-            realm: relationship.peerIdentity.realm,
             initials,
             isSelf: false,
             hasRelationship: true,
@@ -1791,7 +1750,6 @@ export class DataViewExpander {
             name: name,
             initials: initials,
             publicKey: "i18n://dvo.identity.publicKey.unknown",
-            realm: this.identityController.realm.toString(),
             description: "i18n://dvo.identity.unknown",
             isSelf: false,
             hasRelationship: false

@@ -216,8 +216,11 @@ class Attributes {
         );
     }
 
-    public invalidPropertyValue(message: string) {
-        return new CoreError("error.consumption.attributes.invalidPropertyValue", message);
+    public wrongOwnerOfRepositoryAttribute() {
+        return new CoreError(
+            "error.consumption.attributes.wrongOwnerOfRepositoryAttribute",
+            "A wrong owner was provided wanting to create a RepositoryAttribute. You can only create RepositoryAttributes for yourself."
+        );
     }
 
     public isNotSharedAttribute(attributeId: string | CoreId) {
@@ -276,13 +279,25 @@ class Requests {
         return new CoreError("error.consumption.requests.invalidRequestItem", message);
     }
 
+    public attributeQueryMismatch(message: string) {
+        return new CoreError("error.consumption.requests.attributeQueryMismatch", message);
+    }
+
+    public wrongRelationshipStatus(message: string) {
+        return new CoreError("error.consumption.requests.wrongRelationshipStatus", message);
+    }
+
+    public missingRelationship(message: string) {
+        return new CoreError("error.consumption.requests.missingRelationship", message);
+    }
+
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);
         }
 
-        public itemAcceptedButParentNotAccepted(message: string): ApplicationError {
-            return new ApplicationError("error.consumption.requests.decide.validation.itemAcceptedButParentNotAccepted", message);
+        public itemAcceptedButRequestNotAccepted(message: string): ApplicationError {
+            return new ApplicationError("error.consumption.requests.decide.validation.itemAcceptedButRequestNotAccepted", message);
         }
 
         public mustBeAcceptedItemNotAccepted(message: string): ApplicationError {

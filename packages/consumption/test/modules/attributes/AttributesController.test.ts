@@ -10,11 +10,11 @@ import {
     IIQLQuery,
     IRelationshipAttributeQuery,
     Nationality,
-    PhoneNumber,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     Street,
     StreetAddress,
+    ThirdPartyRelationshipAttributeQueryOwner,
     ZipCode
 } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
@@ -24,9 +24,9 @@ import {
     ConsumptionController,
     DeletionStatus,
     IAttributeSuccessorParams,
-    ICreateLocalAttributeParams,
-    ICreatePeerLocalAttributeParams,
+    ICreateRepositoryAttributeParams,
     ICreateSharedLocalAttributeCopyParams,
+    ICreateSharedLocalAttributeParams,
     LocalAttribute,
     LocalAttributeDeletionInfo,
     LocalAttributeShareInfo,
@@ -59,27 +59,7 @@ describe("AttributesController", function () {
         await connection.close();
     });
 
-    beforeEach(async function () {
-        const emailParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: EMailAddress.from({
-                    value: "my@email.address"
-                }),
-                owner: CoreAddress.from("address")
-            })
-        };
-
-        const phoneParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: PhoneNumber.from({
-                    value: "000000000"
-                }),
-                owner: CoreAddress.from("address")
-            })
-        };
-        await consumptionController.attributes.createLocalAttribute(emailParams);
-        await consumptionController.attributes.createLocalAttribute(phoneParams);
-
+    beforeEach(function () {
         mockEventBus.clearPublishedEvents();
     });
 
@@ -91,450 +71,590 @@ describe("AttributesController", function () {
         }
     });
 
-    test("should list all attributes", async function () {
-        const attributes = await consumptionController.attributes.getLocalAttributes();
-        expect(attributes).toHaveLength(2);
-    });
+    describe("create Attributes", function () {
+        test("should create new attributes", async function () {
+            const birthDateParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "ADisplayName"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
 
-    test("should create new attributes", async function () {
-        const attributesBeforeCreate = await consumptionController.attributes.getLocalAttributes();
-        const nrAttributesBeforeCreate = attributesBeforeCreate.length;
+            const birthDate = await consumptionController.attributes.createRepositoryAttribute(birthDateParams);
+            expect(birthDate).toBeInstanceOf(LocalAttribute);
+            expect(birthDate.content).toBeInstanceOf(IdentityAttribute);
 
-        const birthDateParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "DisplayName",
-                    value: "ADisplayName"
-                },
-                owner: CoreAddress.from("address")
-            })
-        };
+            const attributesAfterCreate = await consumptionController.attributes.getLocalAttributes();
+            expect(attributesAfterCreate).toHaveLength(1);
 
-        const birthDate = await consumptionController.attributes.createLocalAttribute(birthDateParams);
-        expect(birthDate).toBeInstanceOf(LocalAttribute);
-        expect(birthDate.content).toBeInstanceOf(IdentityAttribute);
-
-        const attributesAfterCreate = await consumptionController.attributes.getLocalAttributes();
-        const nrAttributesAfterCreate = attributesAfterCreate.length;
-        expect(nrAttributesAfterCreate).toStrictEqual(nrAttributesBeforeCreate + 1);
-
-        mockEventBus.expectPublishedEvents(AttributeCreatedEvent);
-    });
-
-    test("should create LocalAttributes for each property of a complex Identity Attribute", async function () {
-        const attributesBeforeCreate = await consumptionController.attributes.getLocalAttributes();
-        const nrAttributesBeforeCreate = attributesBeforeCreate.length;
-
-        const identityAttribute = IdentityAttribute.from({
-            value: {
-                "@type": "StreetAddress",
-                recipient: "ARecipient",
-                street: "AStreet",
-                houseNo: "AHouseNo",
-                zipCode: "AZipCode",
-                city: "ACity",
-                country: "DE"
-            },
-            validTo: CoreDate.utc(),
-            owner: CoreAddress.from("address")
+            mockEventBus.expectPublishedEvents(AttributeCreatedEvent);
         });
 
-        const address = await consumptionController.attributes.createLocalAttribute({
-            content: identityAttribute
+        test("should create LocalAttributes for each property of a complex Identity Attribute", async function () {
+            const identityAttribute = IdentityAttribute.from({
+                value: {
+                    "@type": "StreetAddress",
+                    recipient: "ARecipient",
+                    street: "AStreet",
+                    houseNo: "AHouseNo",
+                    zipCode: "AZipCode",
+                    city: "ACity",
+                    country: "DE"
+                },
+                validTo: CoreDate.utc(),
+                owner: consumptionController.accountController.identity.address
+            });
+
+            const address = await consumptionController.attributes.createRepositoryAttribute({
+                content: identityAttribute
+            });
+
+            expect(address).toBeInstanceOf(LocalAttribute);
+            expect(address.content).toBeInstanceOf(IdentityAttribute);
+
+            const childAttributes = await consumptionController.attributes.getLocalAttributes({
+                parentId: address.id.toString()
+            });
+            expect(childAttributes).toHaveLength(5);
+            expect(childAttributes[0].content.value).toBeInstanceOf(Street);
+            expect(childAttributes[1].content.value).toBeInstanceOf(HouseNumber);
+            expect(childAttributes[2].content.value).toBeInstanceOf(ZipCode);
+            expect(childAttributes[3].content.value).toBeInstanceOf(City);
+            expect(childAttributes[4].content.value).toBeInstanceOf(Country);
+
+            const attributesAfterCreate = await consumptionController.attributes.getLocalAttributes();
+            expect(attributesAfterCreate).toHaveLength(6);
         });
 
-        expect(address).toBeInstanceOf(LocalAttribute);
-        expect(address.content).toBeInstanceOf(IdentityAttribute);
+        test("should trigger an AttributeCreatedEvent for each created child Attribute of a complex Attribute", async function () {
+            await consumptionController.attributes.getLocalAttributes();
 
-        const childAttributes = await consumptionController.attributes.getLocalAttributes({
-            parentId: address.id.toString()
-        });
-        expect(childAttributes).toHaveLength(5);
-        expect(childAttributes[0].content.value).toBeInstanceOf(Street);
-        expect(childAttributes[1].content.value).toBeInstanceOf(HouseNumber);
-        expect(childAttributes[2].content.value).toBeInstanceOf(ZipCode);
-        expect(childAttributes[3].content.value).toBeInstanceOf(City);
-        expect(childAttributes[4].content.value).toBeInstanceOf(Country);
+            const identityAttribute = IdentityAttribute.from({
+                value: {
+                    "@type": "StreetAddress",
+                    recipient: "ARecipient",
+                    street: "AStreet",
+                    houseNo: "AHouseNo",
+                    zipCode: "AZipCode",
+                    city: "ACity",
+                    country: "DE"
+                },
+                validTo: CoreDate.utc(),
+                owner: consumptionController.accountController.identity.address
+            });
 
-        const attributesAfterCreate = await consumptionController.attributes.getLocalAttributes();
-        const nrAttributesAfterCreate = attributesAfterCreate.length;
-        expect(nrAttributesAfterCreate).toStrictEqual(nrAttributesBeforeCreate + 6);
-    });
+            await consumptionController.attributes.createRepositoryAttribute({ content: identityAttribute });
 
-    test("should trigger an AttributeCreatedEvent for each created child Attribute of a complex Attribute", async function () {
-        await consumptionController.attributes.getLocalAttributes();
-
-        const identityAttribute = IdentityAttribute.from({
-            value: {
-                "@type": "StreetAddress",
-                recipient: "ARecipient",
-                street: "AStreet",
-                houseNo: "AHouseNo",
-                zipCode: "AZipCode",
-                city: "ACity",
-                country: "DE"
-            },
-            validTo: CoreDate.utc(),
-            owner: CoreAddress.from("address")
+            mockEventBus.expectPublishedEvents(
+                AttributeCreatedEvent,
+                AttributeCreatedEvent,
+                AttributeCreatedEvent,
+                AttributeCreatedEvent,
+                AttributeCreatedEvent,
+                AttributeCreatedEvent
+            );
         });
 
-        await consumptionController.attributes.createLocalAttribute({ content: identityAttribute });
+        test("should allow to create a shared attribute copy", async function () {
+            const nationalityParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const nationalityAttribute = await consumptionController.attributes.createRepositoryAttribute(nationalityParams);
 
-        mockEventBus.expectPublishedEvents(
-            AttributeCreatedEvent,
-            AttributeCreatedEvent,
-            AttributeCreatedEvent,
-            AttributeCreatedEvent,
-            AttributeCreatedEvent,
-            AttributeCreatedEvent
-        );
-    });
+            const peer = CoreAddress.from("address");
+            const createSharedAttributesParams: ICreateSharedLocalAttributeCopyParams = {
+                sourceAttributeId: nationalityAttribute.id,
+                peer: peer,
+                requestReference: CoreId.from("requestId")
+            };
 
-    test("should allow to create a share attribute copy", async function () {
-        const nationalityParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "Nationality",
-                    value: "DE"
-                },
-                owner: testAccount.identity.address
-            })
-        };
-        const nationalityAttribute = await consumptionController.attributes.createLocalAttribute(nationalityParams);
+            const sharedNationalityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy(createSharedAttributesParams);
+            expect(sharedNationalityAttribute).toBeInstanceOf(LocalAttribute);
+            expect(sharedNationalityAttribute.shareInfo?.peer).toStrictEqual(peer);
 
-        const peer = CoreAddress.from("address");
-        const createSharedAttributesParams: ICreateSharedLocalAttributeCopyParams = {
-            sourceAttributeId: nationalityAttribute.id,
-            peer: peer,
-            requestReference: CoreId.from("requestId")
-        };
-
-        const sharedNationalityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy(createSharedAttributesParams);
-        expect(sharedNationalityAttribute).toBeInstanceOf(LocalAttribute);
-        expect(sharedNationalityAttribute.shareInfo?.peer).toStrictEqual(peer);
-
-        mockEventBus.expectLastPublishedEvent(SharedAttributeCopyCreatedEvent);
-    });
-
-    test("should allow to query public relationship attributes", async function () {
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Public
-            })
-        };
-        await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
-
-        const query: IRelationshipAttributeQuery = {
-            key: "customerId",
-            owner: testAccount.identity.address,
-            attributeCreationHints: {
-                valueType: "ProprietaryString",
-                title: "someHintTitle",
-                confidentiality: "public" as RelationshipAttributeConfidentiality
-            }
-        };
-
-        const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
-        expect(attribute).toBeDefined();
-        expect(attribute!.content).toBeInstanceOf(RelationshipAttribute);
-        expect((attribute!.content as RelationshipAttribute).key).toBe("customerId");
-    });
-
-    test("should allow to query protected relationship attributes", async function () {
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Protected
-            })
-        };
-        await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
-
-        const query: IRelationshipAttributeQuery = {
-            key: "customerId",
-            owner: testAccount.identity.address,
-            attributeCreationHints: {
-                valueType: "ProprietaryString",
-                title: "someHintTitle",
-                confidentiality: RelationshipAttributeConfidentiality.Protected
-            }
-        };
-
-        const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
-        expect(attribute).toBeDefined();
-        expect(attribute!.content).toBeInstanceOf(RelationshipAttribute);
-        expect((attribute!.content as RelationshipAttribute).key).toBe("customerId");
-    });
-
-    test("should not allow to query private relationship attributes", async function () {
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Private
-            })
-        };
-        await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
-
-        const query: IRelationshipAttributeQuery = {
-            key: "customerId",
-            owner: testAccount.identity.address,
-            attributeCreationHints: {
-                valueType: "ProprietaryString",
-                title: "someHintTitle",
-                confidentiality: RelationshipAttributeConfidentiality.Private
-            }
-        };
-
-        const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
-        expect(attribute).toBeUndefined();
-    });
-
-    test("should query relationship attributes using the ThirdPartyRelationshipAttributeQuery", async function () {
-        const relationshipAttribute = await consumptionController.attributes.createPeerLocalAttribute({
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Protected
-            }),
-            peer: CoreAddress.from("peerAddress"),
-            requestReference: CoreId.from("requestId")
+            mockEventBus.expectLastPublishedEvent(SharedAttributeCopyCreatedEvent);
         });
 
-        const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
-            key: "customerId",
-            owner: testAccount.identity.address,
-            thirdParty: [CoreAddress.from("peerAddress")]
-        });
-        expect(attributes).toHaveLength(1);
-        expect(attributes[0].id.toString()).toStrictEqual(relationshipAttribute.id.toString());
-    });
-
-    test("should not query relationship attributes with confidentiality set to `Private` using the ThirdPartyRelationshipAttributeQuery", async function () {
-        await consumptionController.attributes.createPeerLocalAttribute({
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Private
-            }),
-            peer: CoreAddress.from("peerAddress"),
-            requestReference: CoreId.from("requestId")
-        });
-
-        const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
-            key: "customerId",
-            owner: testAccount.identity.address,
-            thirdParty: [CoreAddress.from("peerAddress")]
-        });
-        expect(attributes).toHaveLength(0);
-    });
-
-    test("should not query relationship attributes with not matching key using the ThirdPartyRelationshipAttributeQuery", async function () {
-        await consumptionController.attributes.createPeerLocalAttribute({
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Private
-            }),
-            peer: CoreAddress.from("peerAddress"),
-            requestReference: CoreId.from("requestId")
-        });
-
-        const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
-            key: "notMatchingKey",
-            owner: testAccount.identity.address,
-            thirdParty: [CoreAddress.from("peerAddress")]
-        });
-        expect(attributes).toHaveLength(0);
-    });
-
-    test("should allow to query identity attributes", async function () {
-        const identityAttributeParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "Nationality",
-                    value: "DE"
-                },
-                owner: testAccount.identity.address
-            })
-        };
-        const identityAttribute = await consumptionController.attributes.createLocalAttribute(identityAttributeParams);
-
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer Id"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: "public" as RelationshipAttributeConfidentiality
-            })
-        };
-        const relationshipAttribute = await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
-
-        const query: IIdentityAttributeQuery = {
-            valueType: "Nationality"
-        };
-
-        const attributes = await consumptionController.attributes.executeIdentityAttributeQuery(query);
-        const attributesId = attributes.map((v) => v.id.toString());
-        expect(attributesId).not.toContain(relationshipAttribute.id.toString());
-        expect(attributesId).toContain(identityAttribute.id.toString());
-    });
-
-    test("should successfully execute IQL queries only with repository attributes", async function () {
-        const identityAttributeParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "Nationality",
-                    value: "DE"
-                },
-                owner: testAccount.identity.address
-            })
-        };
-        const identityAttribute = await consumptionController.attributes.createLocalAttribute(identityAttributeParams);
-        await consumptionController.attributes.createSharedLocalAttributeCopy({
-            peer: CoreAddress.from("a-fake-peer"),
-            requestReference: CoreId.from("a-fake-reference"),
-            sourceAttributeId: identityAttribute.id,
-            attributeId: CoreId.from("fake-attribute-id")
-        });
-
-        const iqlQuery: IIQLQuery = { queryString: "Nationality=DE" };
-        const matchedAttributes = await consumptionController.attributes.executeIQLQuery(iqlQuery);
-        expect(matchedAttributes).toHaveLength(1);
-        const matchedAttributeIds = matchedAttributes.map((v) => v.id.toString());
-        expect(matchedAttributeIds).toContain(identityAttribute.id.toString());
-    });
-
-    test("should only return repository attributes on IdentityAttributeQuery", async function () {
-        const identityAttributeParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "DisplayName",
-                    value: "Dis Play"
-                },
-                owner: testAccount.identity.address
-            })
-        };
-        const identityAttribute = await consumptionController.attributes.createLocalAttribute(identityAttributeParams);
-
-        const relationshipAttributeParams: ICreateLocalAttributeParams = {
-            content: RelationshipAttribute.from({
-                key: "displayName",
-                value: {
-                    "@type": "ProprietaryString",
-                    title: "A Title",
-                    value: "DE"
-                },
-                owner: testAccount.identity.address,
-                confidentiality: "public" as RelationshipAttributeConfidentiality
-            })
-        };
-        const relationshipAttribute = await consumptionController.attributes.createLocalAttribute(relationshipAttributeParams);
-
-        const peerAttributeParams: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "DisplayName",
-                    value: "DE"
-                },
-                owner: CoreAddress.from("peer")
-            })
-        };
-        const peerAttribute = await consumptionController.attributes.createLocalAttribute(peerAttributeParams);
-
-        const sentAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
-            peer: CoreAddress.from("peer"),
-            requestReference: CoreId.from("ref"),
-            sourceAttributeId: identityAttribute.id
-        });
-
-        const receivedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
-            peer: CoreAddress.from("peer"),
-            requestReference: CoreId.from("ref2"),
-            sourceAttributeId: peerAttribute.id,
-            attributeId: CoreId.from("attr1")
-        });
-
-        const query: IIdentityAttributeQuery = {
-            valueType: "DisplayName"
-        };
-
-        const attributes = await consumptionController.attributes.executeIdentityAttributeQuery(query);
-        const attributesId = attributes.map((v) => v.id.toString());
-        expect(attributes).toHaveLength(1);
-        expect(attributesId).not.toContain(relationshipAttribute.id.toString());
-        expect(attributesId).not.toContain(peerAttribute.id.toString());
-        expect(attributesId).not.toContain(sentAttribute.id.toString());
-        expect(attributesId).not.toContain(receivedAttribute.id.toString());
-        expect(attributesId).toContain(identityAttribute.id.toString());
-    });
-
-    test("should allow to create an attribute shared by a peer", async function () {
-        const attribute: ICreateLocalAttributeParams = {
-            content: IdentityAttribute.from({
+        test("should allow to create a shared attribute", async function () {
+            const content = IdentityAttribute.from({
                 value: {
                     "@type": "Nationality",
                     value: "DE"
                 },
                 owner: CoreAddress.from("address")
-            })
-        };
-        const localAttribute = await consumptionController.attributes.createLocalAttribute(attribute);
-        const createPeerAttributeParams: ICreatePeerLocalAttributeParams = {
-            id: localAttribute.id,
-            content: attribute.content,
-            requestReference: CoreId.from("requestId"),
-            peer: CoreAddress.from("address")
-        };
-        const peerLocalAttribute = await consumptionController.attributes.createPeerLocalAttribute(createPeerAttributeParams);
-        expect(peerLocalAttribute.content.toJSON()).toStrictEqual(localAttribute.content.toJSON());
-        expect(peerLocalAttribute.content.value).toBeInstanceOf(Nationality);
-        expect(createPeerAttributeParams.id).toStrictEqual(localAttribute.id);
-        expect(createPeerAttributeParams.peer.address).toStrictEqual(CoreAddress.from("address").toString());
-        expect(createPeerAttributeParams.requestReference.toString()).toStrictEqual(CoreId.from("requestId").toString());
+            });
+            const createPeerAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: content,
+                requestReference: CoreId.from("requestId"),
+                peer: CoreAddress.from("address")
+            };
+            const peerLocalAttribute = await consumptionController.attributes.createSharedLocalAttribute(createPeerAttributeParams);
+            expect(peerLocalAttribute.content.toJSON()).toStrictEqual(content.toJSON());
+            expect(peerLocalAttribute.content.value).toBeInstanceOf(Nationality);
+            expect(createPeerAttributeParams.peer.address).toStrictEqual(CoreAddress.from("address").toString());
+            expect(createPeerAttributeParams.requestReference.toString()).toStrictEqual(CoreId.from("requestId").toString());
 
-        mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
+            mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
+        });
+
+        test("should allow to create an attribute shared by a peer", async function () {
+            const content = IdentityAttribute.from({
+                value: {
+                    "@type": "Nationality",
+                    value: "DE"
+                },
+                owner: CoreAddress.from("address")
+            });
+            const createSharedAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: content,
+                requestReference: CoreId.from("requestId"),
+                peer: CoreAddress.from("address")
+            };
+            const peerLocalAttribute = await consumptionController.attributes.createSharedLocalAttribute(createSharedAttributeParams);
+            expect(peerLocalAttribute.content.toJSON()).toStrictEqual(content.toJSON());
+            expect(peerLocalAttribute.content.value).toBeInstanceOf(Nationality);
+            expect(createSharedAttributeParams.peer.address).toStrictEqual(CoreAddress.from("address").toString());
+            expect(createSharedAttributeParams.requestReference.toString()).toStrictEqual(CoreId.from("requestId").toString());
+
+            mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
+        });
     });
 
-    describe("Attribute deletion", function () {
+    describe("query Attributes", function () {
+        test("should allow to query relationship attributes with empty owner", async function () {
+            const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATtitle"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            };
+            await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
+
+            const query: IRelationshipAttributeQuery = {
+                key: "AKey",
+                owner: CoreAddress.from(""),
+                attributeCreationHints: {
+                    valueType: "ProprietaryString",
+                    title: "ATitle",
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }
+            };
+
+            const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
+            expect(attribute).toBeDefined();
+        });
+
+        test("should allow to query public relationship attributes", async function () {
+            const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            };
+            await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
+
+            const query: IRelationshipAttributeQuery = {
+                key: "customerId",
+                owner: testAccount.identity.address,
+                attributeCreationHints: {
+                    valueType: "ProprietaryString",
+                    title: "someHintTitle",
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }
+            };
+
+            const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
+            expect(attribute).toBeDefined();
+            expect(attribute!.content).toBeInstanceOf(RelationshipAttribute);
+            expect((attribute!.content as RelationshipAttribute).key).toBe("customerId");
+        });
+
+        test("should allow to query protected relationship attributes", async function () {
+            const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Protected
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            };
+            await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
+
+            const query: IRelationshipAttributeQuery = {
+                key: "customerId",
+                owner: testAccount.identity.address,
+                attributeCreationHints: {
+                    valueType: "ProprietaryString",
+                    title: "someHintTitle",
+                    confidentiality: RelationshipAttributeConfidentiality.Protected
+                }
+            };
+
+            const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
+            expect(attribute).toBeDefined();
+            expect(attribute!.content).toBeInstanceOf(RelationshipAttribute);
+            expect((attribute!.content as RelationshipAttribute).key).toBe("customerId");
+        });
+
+        test("should not allow to query private relationship attributes", async function () {
+            const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Private
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            };
+            await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
+
+            const query: IRelationshipAttributeQuery = {
+                key: "customerId",
+                owner: testAccount.identity.address,
+                attributeCreationHints: {
+                    valueType: "ProprietaryString",
+                    title: "someHintTitle",
+                    confidentiality: RelationshipAttributeConfidentiality.Private
+                }
+            };
+
+            const attribute = await consumptionController.attributes.executeRelationshipAttributeQuery(query);
+            expect(attribute).toBeUndefined();
+        });
+
+        test("should query relationship attributes using the ThirdPartyRelationshipAttributeQuery", async function () {
+            const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: CoreAddress.from("peerAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Protected
+                }),
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "customerId",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
+                thirdParty: [CoreAddress.from("peerAddress")]
+            });
+            expect(attributes).toHaveLength(1);
+            expect(attributes[0].id.toString()).toStrictEqual(relationshipAttribute.id.toString());
+        });
+
+        test("should not query relationship attributes with confidentiality set to `Private` using the ThirdPartyRelationshipAttributeQuery", async function () {
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: CoreAddress.from("peerAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Private
+                }),
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "customerId",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
+                thirdParty: [CoreAddress.from("peerAddress")]
+            });
+            expect(attributes).toHaveLength(0);
+        });
+
+        test("should not query relationship attributes with not matching key using the ThirdPartyRelationshipAttributeQuery", async function () {
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: CoreAddress.from("peerAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Private
+                }),
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "notMatchingKey",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
+                thirdParty: [CoreAddress.from("peerAddress")]
+            });
+            expect(attributes).toHaveLength(0);
+        });
+
+        test("can call executeThirdPartyRelationshipAttributeQuery with ThirdPartyRelationshipAttributeQueryOwner.Recipient", async function () {
+            const recipient = testAccount.identity.address;
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: recipient,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("thirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "AKey",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                thirdParty: [CoreAddress.from("thirdPartyAddress")]
+            });
+            expect(attributes).toHaveLength(1);
+        });
+
+        test("can call executeThirdPartyRelationshipAttributeQuery with ThirdPartyRelationshipAttributeQueryOwner.ThirdParty", async function () {
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: CoreAddress.from("thirdPartyAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("thirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "AKey",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
+                thirdParty: [CoreAddress.from("thirdPartyAddress")]
+            });
+            expect(attributes).toHaveLength(1);
+        });
+
+        test("can call executeThirdPartyRelationshipAttributeQuery with ThirdPartyRelationshipAttributeQueryOwner.Empty", async function () {
+            const recipient = testAccount.identity.address;
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: recipient,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("thirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: CoreAddress.from("thirdPartyAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("anotherThirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "AKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "AStringValue",
+                        title: "ATitle"
+                    },
+                    owner: CoreAddress.from("uninvolvedThirdPartyAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("thirdPartyAddress"),
+                requestReference: CoreId.from("requestId")
+            });
+
+            const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
+                key: "AKey",
+                owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
+                thirdParty: [CoreAddress.from("thirdPartyAddress"), CoreAddress.from("anotherThirdPartyAddress")]
+            });
+            expect(attributes).toHaveLength(2);
+        });
+
+        test("should allow to query identity attributes", async function () {
+            const repositoryAttributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(repositoryAttributeParams);
+
+            const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer Id"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            };
+            const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
+
+            const query: IIdentityAttributeQuery = {
+                valueType: "Nationality"
+            };
+
+            const attributes = await consumptionController.attributes.executeIdentityAttributeQuery(query);
+            const attributesId = attributes.map((v) => v.id.toString());
+            expect(attributesId).not.toContain(relationshipAttribute.id.toString());
+            expect(attributesId).toContain(repositoryAttribute.id.toString());
+        });
+
+        test("should successfully execute IQL queries only with repository attributes", async function () {
+            const repositoryAttributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(repositoryAttributeParams);
+            await consumptionController.attributes.createSharedLocalAttributeCopy({
+                peer: CoreAddress.from("a-fake-peer"),
+                requestReference: CoreId.from("a-fake-reference"),
+                sourceAttributeId: repositoryAttribute.id,
+                attributeId: CoreId.from("fake-attribute-id")
+            });
+
+            const iqlQuery: IIQLQuery = { queryString: "Nationality=DE" };
+            const matchedAttributes = await consumptionController.attributes.executeIQLQuery(iqlQuery);
+            expect(matchedAttributes).toHaveLength(1);
+            const matchedAttributeIds = matchedAttributes.map((v) => v.id.toString());
+            expect(matchedAttributeIds).toContain(repositoryAttribute.id.toString());
+        });
+
+        test("should only return repository attributes on IdentityAttributeQuery", async function () {
+            const repositoryAttributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "Dis Play"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(repositoryAttributeParams);
+
+            const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: RelationshipAttribute.from({
+                    key: "displayName",
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "ATitle",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            };
+            const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
+
+            const peerSharedIdentityAttributeParams: ICreateSharedLocalAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "DE"
+                    },
+                    owner: CoreAddress.from("peer")
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            };
+            const peerAttribute = await consumptionController.attributes.createSharedLocalAttribute(peerSharedIdentityAttributeParams);
+
+            const query: IIdentityAttributeQuery = {
+                valueType: "DisplayName"
+            };
+
+            const attributes = await consumptionController.attributes.executeIdentityAttributeQuery(query);
+            const attributesId = attributes.map((v) => v.id.toString());
+            expect(attributes).toHaveLength(1);
+            expect(attributesId).not.toContain(relationshipAttribute.id.toString());
+            expect(attributesId).not.toContain(peerAttribute.id.toString());
+            expect(attributesId).toContain(repositoryAttribute.id.toString());
+        });
+    });
+
+    describe("delete Attributes", function () {
         test("should delete a simple attribute", async function () {
-            const attributeParams: ICreateLocalAttributeParams = {
+            const attributeParams: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
                     value: EMailAddress.from({
                         value: "my@email.address"
@@ -542,7 +662,7 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address
                 })
             };
-            const simpleAttribute = await consumptionController.attributes.createLocalAttribute(attributeParams);
+            const simpleAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(simpleAttribute.id);
             expect(createdAttribute).toBeDefined();
@@ -557,17 +677,17 @@ describe("AttributesController", function () {
         });
 
         test("should delete a complex attribute", async function () {
-            const attributeParams: ICreateLocalAttributeParams = {
+            const attributeParams: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
                     value: BirthDate.from({
                         day: 24,
                         month: 12,
                         year: 2000
                     }),
-                    owner: CoreAddress.from("address")
+                    owner: consumptionController.accountController.identity.address
                 })
             };
-            const complexAttribute = await consumptionController.attributes.createLocalAttribute(attributeParams);
+            const complexAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
             mockEventBus.clearPublishedEvents();
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(complexAttribute.id);
@@ -593,36 +713,29 @@ describe("AttributesController", function () {
         });
     });
 
-    describe("Attribute successions", function () {
+    describe("succeed Attributes", function () {
         describe("Common validator", function () {
-            afterEach(async function () {
-                const attributes = await consumptionController.attributes.getLocalAttributes();
-                for (const attribute of attributes) {
-                    await consumptionController.attributes.deleteAttributeUnsafe(attribute.id);
-                }
-            });
-
             test("should catch if the successor attribute already exist, if an explicit id is provided", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
-                const successorData: IAttributeSuccessorParams = {
+                const successorData = {
                     id: CoreId.from("successorId"),
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("differentAddress")
+                        owner: consumptionController.accountController.identity.address
                     })
                 };
-                await consumptionController.attributes.createLocalAttribute(successorData);
+                await consumptionController.attributes.createRepositoryAttribute(successorData);
 
                 const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
                 expect(validationResult).errorValidationResult({
@@ -631,24 +744,24 @@ describe("AttributesController", function () {
             });
 
             test("should catch if the successor is not linked to predecessor, if succeeds is explicitly set", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
                 const successorData: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
-                            value: "DE"
+                            value: "US"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     }),
-                    succeeds: CoreId.from("differentAddress")
+                    succeeds: CoreId.from("differentAttributeId")
                 };
 
                 const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
@@ -658,24 +771,24 @@ describe("AttributesController", function () {
             });
 
             test("should catch if the successor already has a successor itself", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
                 const successorData: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
-                            value: "DE"
+                            value: "US"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     }),
-                    succeededBy: CoreId.from("differentAddress")
+                    succeededBy: CoreId.from("differentAttributeId")
                 };
 
                 const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
@@ -685,22 +798,22 @@ describe("AttributesController", function () {
             });
 
             test("should catch if the successor has parent", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
                 const successorData: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
-                            value: "DE"
+                            value: "US"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     }),
                     parentId: CoreId.from("parentId")
                 };
@@ -716,9 +829,9 @@ describe("AttributesController", function () {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
-                            value: "DE"
+                            value: "US"
                         },
-                        owner: CoreAddress.from("differentAddress")
+                        owner: consumptionController.accountController.identity.address
                     })
                 };
 
@@ -736,16 +849,16 @@ describe("AttributesController", function () {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
                 const successorData: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
-                            value: "DE"
+                            value: "US"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 };
 
@@ -756,23 +869,23 @@ describe("AttributesController", function () {
             });
 
             test("should catch if the predecessor has parent", async function () {
-                const predecessor = await consumptionController.attributes.createAttributeUnsafe({
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     parentId: CoreId.from("parentId"),
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
                 const successorData: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
-                            value: "DE"
+                            value: "US"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 };
 
@@ -783,20 +896,20 @@ describe("AttributesController", function () {
             });
 
             test("should catch attempted change of owner", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
                 const successorData: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
-                            value: "DE"
+                            value: "US"
                         },
                         owner: CoreAddress.from("differentAddress")
                     })
@@ -809,13 +922,13 @@ describe("AttributesController", function () {
             });
 
             test("should catch attempted change of content type", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
-                            "@type": "Citizenship",
+                            "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
                 const successorData: IAttributeSuccessorParams = {
@@ -826,7 +939,7 @@ describe("AttributesController", function () {
                             value: "ADisplayName",
                             title: "Display Name"
                         },
-                        owner: CoreAddress.from("address"),
+                        owner: consumptionController.accountController.identity.address,
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     })
                 };
@@ -838,13 +951,13 @@ describe("AttributesController", function () {
             });
 
             test("should catch attempted change of value type", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "BirthName",
                             value: "Müller"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 });
                 const successorData: IAttributeSuccessorParams = {
@@ -853,7 +966,7 @@ describe("AttributesController", function () {
                             "@type": "BirthCountry",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 };
 
@@ -870,7 +983,7 @@ describe("AttributesController", function () {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
                         deletionStatus: DeletionStatus.ToBeDeleted,
@@ -881,9 +994,9 @@ describe("AttributesController", function () {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
-                            value: "DE"
+                            value: "US"
                         },
-                        owner: CoreAddress.from("address")
+                        owner: consumptionController.accountController.identity.address
                     })
                 };
 
@@ -895,12 +1008,12 @@ describe("AttributesController", function () {
         });
 
         describe("Validator for own shared identity attribute successions", function () {
-            let predecessorRelationshipAttribute: LocalAttribute;
-            let successorRelationshipAttribute: LocalAttribute;
+            let predecessorRepositoryAttribute: LocalAttribute;
+            let successorRepositoryAttribute: LocalAttribute;
             let predecessorOwnSharedIdentityAttribute: LocalAttribute;
             let successorOwnSharedIdentityAttributeParams: IAttributeSuccessorParams;
             beforeEach(async function () {
-                predecessorRelationshipAttribute = await consumptionController.attributes.createLocalAttribute({
+                predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Citizenship",
@@ -910,7 +1023,7 @@ describe("AttributesController", function () {
                     })
                 });
 
-                ({ successor: successorRelationshipAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRelationshipAttribute.id, {
+                ({ successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Citizenship",
@@ -921,7 +1034,7 @@ describe("AttributesController", function () {
                 }));
 
                 predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                    sourceAttributeId: predecessorRelationshipAttribute.id,
+                    sourceAttributeId: predecessorRepositoryAttribute.id,
                     peer: CoreAddress.from("peer"),
                     requestReference: CoreId.from("reqRef")
                 });
@@ -937,23 +1050,17 @@ describe("AttributesController", function () {
                     shareInfo: {
                         peer: CoreAddress.from("peer"),
                         notificationReference: CoreId.from("notRef"),
-                        sourceAttribute: successorRelationshipAttribute.id
+                        sourceAttribute: successorRepositoryAttribute.id
                     }
                 };
             });
-            afterEach(async function () {
-                const attributes = await consumptionController.attributes.getLocalAttributes();
-                for (const attribute of attributes) {
-                    await consumptionController.attributes.deleteAttributeUnsafe(attribute.id);
-                }
-            });
 
             test("should catch if the source attributes do not succeed one another", async function () {
-                predecessorRelationshipAttribute.succeededBy = undefined;
-                await consumptionController.attributes.updateAttributeUnsafe(predecessorRelationshipAttribute);
+                predecessorRepositoryAttribute.succeededBy = undefined;
+                await consumptionController.attributes.updateAttributeUnsafe(predecessorRepositoryAttribute);
 
-                successorRelationshipAttribute.succeeds = undefined;
-                await consumptionController.attributes.updateAttributeUnsafe(successorRelationshipAttribute);
+                successorRepositoryAttribute.succeeds = undefined;
+                await consumptionController.attributes.updateAttributeUnsafe(successorRepositoryAttribute);
 
                 const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(
                     predecessorOwnSharedIdentityAttribute.id,
@@ -1015,13 +1122,13 @@ describe("AttributesController", function () {
             });
 
             test("should catch if the successor source attribute is not a repository attribute", async function () {
-                successorRelationshipAttribute.shareInfo = LocalAttributeShareInfo.from({
+                successorRepositoryAttribute.shareInfo = LocalAttributeShareInfo.from({
                     peer: CoreAddress.from("peer"),
                     requestReference: CoreId.from("reqRef")
                 });
-                await consumptionController.attributes.updateAttributeUnsafe(successorRelationshipAttribute);
+                await consumptionController.attributes.updateAttributeUnsafe(successorRepositoryAttribute);
 
-                successorOwnSharedIdentityAttributeParams.shareInfo!.sourceAttribute = successorRelationshipAttribute.id;
+                successorOwnSharedIdentityAttributeParams.shareInfo!.sourceAttribute = successorRepositoryAttribute.id;
 
                 const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(
                     predecessorOwnSharedIdentityAttribute.id,
@@ -1081,7 +1188,7 @@ describe("AttributesController", function () {
             });
 
             test("should catch if successor source attribute doesn't exist", async function () {
-                await consumptionController.attributes.deleteAttributeUnsafe(successorRelationshipAttribute.id);
+                await consumptionController.attributes.deleteAttributeUnsafe(successorRepositoryAttribute.id);
 
                 const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(
                     predecessorOwnSharedIdentityAttribute.id,
@@ -1093,13 +1200,13 @@ describe("AttributesController", function () {
             });
 
             test("should allow to succeed an own shared identity attribute whose predecessor source attribute was deleted", async function () {
-                await consumptionController.attributes.deleteAttributeUnsafe(predecessorRelationshipAttribute.id);
+                await consumptionController.attributes.deleteAttributeUnsafe(predecessorRepositoryAttribute.id);
 
                 predecessorOwnSharedIdentityAttribute.shareInfo!.sourceAttribute = undefined;
                 await consumptionController.attributes.updateAttributeUnsafe(predecessorOwnSharedIdentityAttribute);
 
-                successorRelationshipAttribute.succeeds = undefined;
-                await consumptionController.attributes.updateAttributeUnsafe(successorRelationshipAttribute);
+                successorRepositoryAttribute.succeeds = undefined;
+                await consumptionController.attributes.updateAttributeUnsafe(successorRepositoryAttribute);
 
                 const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(
                     predecessorOwnSharedIdentityAttribute.id,
@@ -1110,15 +1217,8 @@ describe("AttributesController", function () {
         });
 
         describe("Happy paths for attribute successions", function () {
-            afterEach(async function () {
-                const attributes = await consumptionController.attributes.getLocalAttributes();
-                for (const attribute of attributes) {
-                    await consumptionController.attributes.deleteAttributeUnsafe(attribute.id);
-                }
-            });
-
             test("should succeed a repository attribute", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
@@ -1148,7 +1248,7 @@ describe("AttributesController", function () {
             });
 
             test("should succeed an own shared identity attribute", async function () {
-                const predecessorRepo = await consumptionController.attributes.createLocalAttribute({
+                const predecessorRepo = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
@@ -1199,7 +1299,7 @@ describe("AttributesController", function () {
             });
 
             test("should succeed an own shared identity attribute skipping one version", async function () {
-                const predecessorRepo = await consumptionController.attributes.createLocalAttribute({
+                const predecessorRepo = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
@@ -1280,7 +1380,7 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     });
 
-                    repoVersion0 = await consumptionController.attributes.createLocalAttribute({
+                    repoVersion0 = await consumptionController.attributes.createRepositoryAttribute({
                         content: identityAttribute
                     });
 
@@ -1398,7 +1498,7 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     });
 
-                    repoVersion0 = await consumptionController.attributes.createLocalAttribute({
+                    repoVersion0 = await consumptionController.attributes.createRepositoryAttribute({
                         content: identityAttribute
                     });
 
@@ -1442,7 +1542,7 @@ describe("AttributesController", function () {
                         },
                         owner: consumptionController.accountController.identity.address
                     });
-                    repoVersion0 = await consumptionController.attributes.createLocalAttribute({
+                    repoVersion0 = await consumptionController.attributes.createRepositoryAttribute({
                         content: identityAttribute
                     });
 
@@ -1597,12 +1697,10 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("peer")
                     });
 
-                    const peerSharedVersion0 = await consumptionController.attributes.createLocalAttribute({
+                    const peerSharedVersion0 = await consumptionController.attributes.createSharedLocalAttribute({
                         content: identityAttribute,
-                        shareInfo: {
-                            peer: CoreAddress.from("peer"),
-                            requestReference: CoreId.from("reqRef2")
-                        }
+                        peer: CoreAddress.from("peer"),
+                        requestReference: CoreId.from("reqRef2")
                     });
 
                     const peerSharedVersion1Params: IAttributeSuccessorParams = {
@@ -1645,7 +1743,7 @@ describe("AttributesController", function () {
             });
 
             test("should succeed a peer shared identity attribute", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createAttributeUnsafe({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
@@ -1683,7 +1781,7 @@ describe("AttributesController", function () {
             });
 
             test("should succeed an own shared relationship attribute", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "customerId",
                         value: {
@@ -1694,10 +1792,8 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address,
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }),
-                    shareInfo: {
-                        peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefA")
-                    }
+                    peer: CoreAddress.from("peerAddress"),
+                    requestReference: CoreId.from("reqRefA")
                 });
                 const successorParams: IAttributeSuccessorParams = {
                     content: RelationshipAttribute.from({
@@ -1730,7 +1826,7 @@ describe("AttributesController", function () {
             });
 
             test("should succeed a peer shared relationship attribute", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
                         key: "customerId",
                         value: {
@@ -1741,10 +1837,8 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("peerAddress"),
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }),
-                    shareInfo: {
-                        peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefA")
-                    }
+                    peer: CoreAddress.from("peerAddress"),
+                    requestReference: CoreId.from("reqRefA")
                 });
                 const successorParams: IAttributeSuccessorParams = {
                     content: RelationshipAttribute.from({
@@ -1777,7 +1871,7 @@ describe("AttributesController", function () {
             });
 
             test("should succeed a third party owned relationship attribute", async function () {
-                const predecessor = await consumptionController.attributes.createLocalAttribute({
+                const predecessor = await consumptionController.attributes.createAttributeUnsafe({
                     content: RelationshipAttribute.from({
                         key: "customerId",
                         value: {
@@ -1827,9 +1921,9 @@ describe("AttributesController", function () {
         });
     });
 
-    describe("hideTechnical", function () {
+    describe("get Attributes", function () {
         beforeEach(async function () {
-            await consumptionController.attributes.createLocalAttribute({
+            await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "notTechnical",
                     value: {
@@ -1840,10 +1934,12 @@ describe("AttributesController", function () {
                     isTechnical: false,
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
-                })
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
             });
 
-            await consumptionController.attributes.createLocalAttribute({
+            await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "isTechnicalNotDefined",
                     value: {
@@ -1853,10 +1949,12 @@ describe("AttributesController", function () {
                     },
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
-                })
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
             });
 
-            await consumptionController.attributes.createLocalAttribute({
+            await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "technical",
                     value: {
@@ -1867,27 +1965,34 @@ describe("AttributesController", function () {
                     isTechnical: true,
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
-                })
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
             });
+        });
+
+        test("should list all attributes", async function () {
+            const attributes = await consumptionController.attributes.getLocalAttributes();
+            expect(attributes).toHaveLength(3);
         });
 
         test("should hide technical attributes when no query is given", async function () {
             const attributes = await consumptionController.attributes.getLocalAttributes(undefined, true);
-            expect(attributes).toHaveLength(4);
+            expect(attributes).toHaveLength(2);
         });
 
         test("should hide technical attributes when empty query is given", async function () {
             const attributes = await consumptionController.attributes.getLocalAttributes({}, true);
-            expect(attributes).toHaveLength(4);
+            expect(attributes).toHaveLength(2);
         });
     });
 
-    describe("get versions of attribute", function () {
-        let rAVersion0: LocalAttribute;
-        let rAVersion1: LocalAttribute;
-        let rAVersion2: LocalAttribute;
+    describe("get versions of an Attribute", function () {
+        let repositoryAttributeVersion0: LocalAttribute;
+        let repositoryAttributeVersion1: LocalAttribute;
+        let repositoryAttributeVersion2: LocalAttribute;
         beforeEach(async function () {
-            rAVersion0 = await consumptionController.attributes.createLocalAttribute({
+            repositoryAttributeVersion0 = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "Nationality",
@@ -1915,41 +2020,47 @@ describe("AttributesController", function () {
                 })
             };
 
-            ({ predecessor: rAVersion0, successor: rAVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(rAVersion0.id, successorParams1));
-            ({ predecessor: rAVersion1, successor: rAVersion2 } = await consumptionController.attributes.succeedRepositoryAttribute(rAVersion1.id, successorParams2));
+            ({ predecessor: repositoryAttributeVersion0, successor: repositoryAttributeVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(
+                repositoryAttributeVersion0.id,
+                successorParams1
+            ));
+            ({ predecessor: repositoryAttributeVersion1, successor: repositoryAttributeVersion2 } = await consumptionController.attributes.succeedRepositoryAttribute(
+                repositoryAttributeVersion1.id,
+                successorParams2
+            ));
         });
         test("should return all predecessors of a succeeded repository attribute", async function () {
-            const result0 = await consumptionController.attributes.getPredecessorsOfAttribute(rAVersion0.id);
+            const result0 = await consumptionController.attributes.getPredecessorsOfAttribute(repositoryAttributeVersion0.id);
             expect(result0).toStrictEqual([]);
 
-            const result1 = await consumptionController.attributes.getPredecessorsOfAttribute(rAVersion1.id);
-            expect(result1).toStrictEqual([rAVersion0]);
+            const result1 = await consumptionController.attributes.getPredecessorsOfAttribute(repositoryAttributeVersion1.id);
+            expect(result1).toStrictEqual([repositoryAttributeVersion0]);
 
-            const result2 = await consumptionController.attributes.getPredecessorsOfAttribute(rAVersion2.id);
-            expect(result2).toStrictEqual([rAVersion1, rAVersion0]);
+            const result2 = await consumptionController.attributes.getPredecessorsOfAttribute(repositoryAttributeVersion2.id);
+            expect(result2).toStrictEqual([repositoryAttributeVersion1, repositoryAttributeVersion0]);
         });
 
         test("should return all successors of a succeeded repository attribute", async function () {
-            const result0 = await consumptionController.attributes.getSuccessorsOfAttribute(rAVersion0.id);
-            expect(result0).toStrictEqual([rAVersion1, rAVersion2]);
+            const result0 = await consumptionController.attributes.getSuccessorsOfAttribute(repositoryAttributeVersion0.id);
+            expect(result0).toStrictEqual([repositoryAttributeVersion1, repositoryAttributeVersion2]);
 
-            const result1 = await consumptionController.attributes.getSuccessorsOfAttribute(rAVersion1.id);
-            expect(result1).toStrictEqual([rAVersion2]);
+            const result1 = await consumptionController.attributes.getSuccessorsOfAttribute(repositoryAttributeVersion1.id);
+            expect(result1).toStrictEqual([repositoryAttributeVersion2]);
 
-            const result2 = await consumptionController.attributes.getSuccessorsOfAttribute(rAVersion2.id);
+            const result2 = await consumptionController.attributes.getSuccessorsOfAttribute(repositoryAttributeVersion2.id);
             expect(result2).toStrictEqual([]);
         });
 
         test("should return all versions of a succeeded repository attribute", async function () {
-            const allVersions = [rAVersion2, rAVersion1, rAVersion0];
+            const allVersions = [repositoryAttributeVersion2, repositoryAttributeVersion1, repositoryAttributeVersion0];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual([rAVersion2, rAVersion1, rAVersion0]);
+                expect(result).toStrictEqual([repositoryAttributeVersion2, repositoryAttributeVersion1, repositoryAttributeVersion0]);
             }
         });
 
         test("should return only input attribute if no successions were performed", async function () {
-            const version0 = await consumptionController.attributes.createLocalAttribute({
+            const version0 = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "Nationality",
@@ -1964,17 +2075,17 @@ describe("AttributesController", function () {
         });
 
         test("should return all versions of a possibly succeeded own shared identity attribute", async function () {
-            const oSIAVersion0 = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: rAVersion0.id,
+            const ownSharedIdentityAttributeVersion0 = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: repositoryAttributeVersion0.id,
                 peer: CoreAddress.from("peerA"),
                 requestReference: CoreId.from("reqRef")
             });
 
-            const oSIAVersionsBeforeSuccession = await consumptionController.attributes.getVersionsOfAttribute(oSIAVersion0.id);
-            expect(oSIAVersionsBeforeSuccession).toStrictEqual([oSIAVersion0]);
+            const ownSharedIdentityAttributeVersionsBeforeSuccession = await consumptionController.attributes.getVersionsOfAttribute(ownSharedIdentityAttributeVersion0.id);
+            expect(ownSharedIdentityAttributeVersionsBeforeSuccession).toStrictEqual([ownSharedIdentityAttributeVersion0]);
 
-            const oSIAVersion1 = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: rAVersion1.id,
+            const ownSharedIdentityAttributeVersion1 = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: repositoryAttributeVersion1.id,
                 peer: CoreAddress.from("peerB"),
                 requestReference: CoreId.from("reqRef1")
             });
@@ -1990,16 +2101,14 @@ describe("AttributesController", function () {
                 shareInfo: {
                     peer: CoreAddress.from("peerB"),
                     requestReference: CoreId.from("reqRef2"),
-                    sourceAttribute: rAVersion2.id
+                    sourceAttribute: repositoryAttributeVersion2.id
                 }
             };
 
-            const { predecessor: updatedOSIAVersion1, successor: oSIAVersion2 } = await consumptionController.attributes.succeedOwnSharedIdentityAttribute(
-                oSIAVersion1.id,
-                successorParams
-            );
+            const { predecessor: updatedOwnSharedIdentityAttributeVersion1, successor: ownSharedIdentityAttributeVersion2 } =
+                await consumptionController.attributes.succeedOwnSharedIdentityAttribute(ownSharedIdentityAttributeVersion1.id, successorParams);
 
-            const allVersions = [oSIAVersion2, updatedOSIAVersion1];
+            const allVersions = [ownSharedIdentityAttributeVersion2, updatedOwnSharedIdentityAttributeVersion1];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
                 expect(result).toStrictEqual(allVersions);
@@ -2007,7 +2116,7 @@ describe("AttributesController", function () {
         });
 
         test("should return all versions of a possibly succeeded peer shared identity attribute", async function () {
-            const version0 = await consumptionController.attributes.createLocalAttribute({
+            const version0 = await consumptionController.attributes.createSharedLocalAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "Nationality",
@@ -2015,10 +2124,8 @@ describe("AttributesController", function () {
                     },
                     owner: CoreAddress.from("peer")
                 }),
-                shareInfo: {
-                    peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRefA")
-                }
+                peer: CoreAddress.from("peer"),
+                requestReference: CoreId.from("reqRefA")
             });
             const successorParams1: IAttributeSuccessorParams = {
                 content: IdentityAttribute.from({
@@ -2062,7 +2169,7 @@ describe("AttributesController", function () {
         });
 
         test("should return all versions of a possibly succeeded own shared relationship attribute", async function () {
-            const version0 = await consumptionController.attributes.createLocalAttribute({
+            const version0 = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "customerId",
                     value: {
@@ -2073,10 +2180,8 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                shareInfo: {
-                    peer: CoreAddress.from("peerAddress"),
-                    requestReference: CoreId.from("reqRefA")
-                }
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("reqRefA")
             });
             const successorParams1: IAttributeSuccessorParams = {
                 content: RelationshipAttribute.from({
@@ -2131,7 +2236,7 @@ describe("AttributesController", function () {
         });
 
         test("should return all versions of a possibly succeeded peer shared relationship attribute", async function () {
-            const version0 = await consumptionController.attributes.createLocalAttribute({
+            const version0 = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     key: "customerId",
                     value: {
@@ -2142,10 +2247,8 @@ describe("AttributesController", function () {
                     owner: CoreAddress.from("peerAddress"),
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                shareInfo: {
-                    peer: CoreAddress.from("peerAddress"),
-                    requestReference: CoreId.from("reqRefA")
-                }
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("reqRefA")
             });
             const successorParams1: IAttributeSuccessorParams = {
                 content: RelationshipAttribute.from({
@@ -2204,7 +2307,7 @@ describe("AttributesController", function () {
         });
 
         test("should check if two attributes are subsequent in succession", async function () {
-            const version0 = await consumptionController.attributes.createLocalAttribute({
+            const version0 = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "Nationality",
@@ -2244,7 +2347,7 @@ describe("AttributesController", function () {
         });
     });
 
-    describe("get shared versions of an attribute", function () {
+    describe("get shared versions of an Attribute", function () {
         let repositoryAttributeV0: LocalAttribute;
         let repositoryAttributeV1: LocalAttribute;
         let repositoryAttributeV2: LocalAttribute;
@@ -2252,7 +2355,7 @@ describe("AttributesController", function () {
         let ownSharedIdentityAttributeV1PeerB: LocalAttribute;
         let ownSharedIdentityAttributeV2PeerB: LocalAttribute;
         beforeEach(async function () {
-            repositoryAttributeV0 = await consumptionController.attributes.createLocalAttribute({
+            repositoryAttributeV0 = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "Nationality",
@@ -2392,7 +2495,7 @@ describe("AttributesController", function () {
         });
 
         test("should return an empty list if a shared identity attribute is queried", async function () {
-            const sharedIdentityAttribute = await consumptionController.attributes.createLocalAttribute({
+            const sharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "DisplayName",
@@ -2400,10 +2503,8 @@ describe("AttributesController", function () {
                     },
                     owner: consumptionController.accountController.identity.address
                 }),
-                shareInfo: {
-                    peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRefX")
-                }
+                peer: CoreAddress.from("peer"),
+                requestReference: CoreId.from("reqRefX")
             });
 
             const result = await consumptionController.attributes.getSharedVersionsOfAttribute(sharedIdentityAttribute.id);
@@ -2411,9 +2512,9 @@ describe("AttributesController", function () {
         });
 
         test("should return an empty list if a relationship attribute without associated third party relationship attributes is queried", async function () {
-            const relationshipAttribute = await consumptionController.attributes.createLocalAttribute({
+            const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "Some key",
+                    key: "AKey",
                     value: {
                         "@type": "ProprietaryString",
                         value: "Some value",
@@ -2422,10 +2523,8 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                shareInfo: {
-                    peer: CoreAddress.from("peerAddress"),
-                    requestReference: CoreId.from("reqRef123")
-                }
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("reqRef123")
             });
 
             const result = await consumptionController.attributes.getSharedVersionsOfAttribute(relationshipAttribute.id);

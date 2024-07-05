@@ -4,7 +4,7 @@ import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { Serializable } from "@js-soft/ts-serval";
 import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import { FileDTO, MessageDTO, RelationshipDTO, RelationshipTemplateDTO, SyncEverythingResponse } from "@nmshd/runtime";
-import { CoreDate, IConfigOverwrite, Realm, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate, IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { NativeBootstrapperMock } from "../mocks/NativeBootstrapperMock";
@@ -55,7 +55,7 @@ export class TestUtil {
     }
 
     public static async createSession(runtime: AppRuntime): Promise<LocalAccountSession> {
-        const localAccount1 = await runtime.accountServices.createAccount(Realm.Prod, "Profil 1");
+        const localAccount1 = await runtime.accountServices.createAccount("Profil 1");
         return await runtime.selectAccount(localAccount1.id);
     }
 
@@ -157,7 +157,7 @@ export class TestUtil {
         const accounts: LocalAccountDTO[] = [];
 
         for (let i = 0; i < count; i++) {
-            accounts.push(await runtime.accountServices.createAccount(Realm.Prod, `Account ${i}`));
+            accounts.push(await runtime.accountServices.createAccount(`Account ${i}`));
         }
 
         return accounts;
@@ -199,76 +199,22 @@ export class TestUtil {
             mycontent: "request"
         }
     ): Promise<RelationshipDTO> {
-        const relRequest = await from.transportServices.relationships.createRelationship({ templateId, content });
+        const relRequest = await from.transportServices.relationships.createRelationship({ templateId, creationContent: content });
         return relRequest.value;
     }
 
-    public static async acceptRelationship(
-        session: LocalAccountSession,
-        relationshipId: string,
-        content: any = {
-            mycontent: "response"
-        }
-    ): Promise<RelationshipDTO> {
-        const relationship = (
-            await session.transportServices.relationships.getRelationship({
-                id: relationshipId
-            })
-        ).value;
-
-        const acceptedRelationship = (
-            await session.transportServices.relationships.acceptRelationshipChange({
-                changeId: relationship.changes[0].id,
-                content,
-                relationshipId
-            })
-        ).value;
+    public static async acceptRelationship(session: LocalAccountSession, relationshipId: string): Promise<RelationshipDTO> {
+        const acceptedRelationship = (await session.transportServices.relationships.acceptRelationship({ relationshipId })).value;
         return acceptedRelationship;
     }
 
-    public static async rejectRelationship(
-        session: LocalAccountSession,
-        relationshipId: string,
-        content: any = {
-            mycontent: "rejection"
-        }
-    ): Promise<RelationshipDTO> {
-        const relationship = (
-            await session.transportServices.relationships.getRelationship({
-                id: relationshipId
-            })
-        ).value;
-
-        const rejectedRelationship = (
-            await session.transportServices.relationships.rejectRelationshipChange({
-                changeId: relationship.changes[0].id,
-                content,
-                relationshipId
-            })
-        ).value;
+    public static async rejectRelationship(session: LocalAccountSession, relationshipId: string): Promise<RelationshipDTO> {
+        const rejectedRelationship = (await session.transportServices.relationships.rejectRelationship({ relationshipId })).value;
         return rejectedRelationship;
     }
 
-    public static async revokeRelationship(
-        session: LocalAccountSession,
-        relationshipId: string,
-        content: any = {
-            mycontent: "revokation"
-        }
-    ): Promise<RelationshipDTO> {
-        const relationship = (
-            await session.transportServices.relationships.getRelationship({
-                id: relationshipId
-            })
-        ).value;
-
-        const rejectedRelationship = (
-            await session.transportServices.relationships.revokeRelationshipChange({
-                changeId: relationship.changes[0].id,
-                content,
-                relationshipId
-            })
-        ).value;
+    public static async revokeRelationship(session: LocalAccountSession, relationshipId: string): Promise<RelationshipDTO> {
+        const rejectedRelationship = (await session.transportServices.relationships.revokeRelationship({ relationshipId })).value;
         return rejectedRelationship;
     }
 
