@@ -71,7 +71,7 @@ export abstract class CoreCrypto {
     public static async generateSecretKey(version: TransportVersion = TransportVersion.Latest): Promise<CryptoSecretKey> {
         switch (version) {
             case TransportVersion.V1:
-                return await CryptoEncryption.generateKey(CryptoEncryptionAlgorithm.XCHACHA20_POLY1305);
+                return await CryptoEncryption.generateKey(CryptoEncryptionAlgorithm.AES256_GCM);
             default:
                 throw this.invalidVersion(version);
         }
@@ -95,7 +95,7 @@ export abstract class CoreCrypto {
     public static async generatePassword(
         master: string,
         salt = "enmeshed",
-        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.AES256_GCM,
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoSecretKey> {
         const masterBuffer = CoreBuffer.fromString(master, Encoding.Utf8);
@@ -112,7 +112,7 @@ export abstract class CoreCrypto {
         secret: CryptoSecretKey | CoreBuffer,
         keyId: number,
         context: string,
-        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.AES256_GCM
     ): Promise<CryptoSecretKey> {
         let buffer;
         if (secret instanceof CryptoSecretKey) {
@@ -128,7 +128,7 @@ export abstract class CoreCrypto {
     public static async deriveClient(
         client: CryptoExchangeKeypair,
         serverPublicKey: CryptoExchangePublicKey,
-        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.AES256_GCM,
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoExchangeSecrets> {
         switch (version) {
@@ -143,7 +143,7 @@ export abstract class CoreCrypto {
     public static async deriveServer(
         server: CryptoExchangeKeypair,
         clientPublicKey: CryptoExchangePublicKey,
-        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.AES256_GCM,
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoExchangeSecrets> {
         switch (version) {

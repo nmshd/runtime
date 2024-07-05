@@ -202,7 +202,7 @@ export class TestObjectFactory {
             relationshipIds: [],
             secretKey: CryptoSecretKey.from({
                 secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
-                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+                algorithm: CryptoEncryptionAlgorithm.AES256_GCM
             }),
             cache: {
                 content: content,
@@ -215,7 +215,7 @@ export class TestObjectFactory {
                         address: recipient,
                         encryptedKey: CryptoCipher.from({
                             cipher: CoreBuffer.fromUtf8("test"),
-                            algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+                            algorithm: CryptoEncryptionAlgorithm.AES256_GCM,
                             nonce: CoreBuffer.fromUtf8("some-arbitrary-nonce....")
                         })
                     }
@@ -252,7 +252,7 @@ export class TestObjectFactory {
             relationshipIds: [],
             secretKey: CryptoSecretKey.from({
                 secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
-                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+                algorithm: CryptoEncryptionAlgorithm.AES256_GCM
             }),
             cache: {
                 content: {},
@@ -265,7 +265,7 @@ export class TestObjectFactory {
                         address: CoreAddress.from("id1"),
                         encryptedKey: CryptoCipher.from({
                             cipher: CoreBuffer.fromUtf8("test"),
-                            algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+                            algorithm: CryptoEncryptionAlgorithm.AES256_GCM,
                             nonce: CoreBuffer.fromUtf8("some-arbitrary-nonce....")
                         })
                     }
@@ -333,7 +333,7 @@ export class TestObjectFactory {
             isOwn: false,
             secretKey: CryptoSecretKey.from({
                 secretKey: CoreBuffer.from("ERt3WazEKVtoyjBoBx2JJu1tkkC4QIW3gi9uM00nI3o"),
-                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+                algorithm: CryptoEncryptionAlgorithm.AES256_GCM
             }),
             cache: {
                 content: {},
@@ -370,7 +370,7 @@ export class TestObjectFactory {
             isOwn: true,
             secretKey: CryptoSecretKey.from({
                 secretKey: CoreBuffer.from("ERt3WazEKVtoyjBoBx2JJu1tkkC4QIW3gi9uM00nI3o"),
-                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+                algorithm: CryptoEncryptionAlgorithm.AES256_GCM
             }),
             cache: {
                 content: content ?? {},
