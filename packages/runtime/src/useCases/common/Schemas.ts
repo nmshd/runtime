@@ -71,6 +71,29 @@ export const GetAttributeListenerRequest: any = {
     }
 }
 
+export const ChangeDefaultRepositoryAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ChangeDefaultRepositoryAttributeRequest",
+    "definitions": {
+        "ChangeDefaultRepositoryAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const AcceptIncomingRequestRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/AcceptIncomingRequestRequest",

@@ -2246,6 +2246,52 @@ describe("AttributesController", function () {
         });
     });
 
+    describe("change Attributes", function () {
+        test("should change default repository attribute", async function () {
+            const firstAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "My default given name"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+
+            const secondAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "My other given name"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            expect(secondAttribute.default).toBeUndefined();
+
+            const updatedSecondAttribute = await consumptionController.attributes.changeDefaultRepositoryAttribute(secondAttribute);
+            expect(updatedSecondAttribute.default).toBe(true);
+
+            const updatedFirstAttribute = await consumptionController.attributes.getLocalAttribute(firstAttribute.id);
+            expect(updatedFirstAttribute!.default).toBeUndefined();
+        });
+
+        test("should not change default repository attribute if candidate is already default", async function () {
+            const firstAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "My default given name"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            expect(firstAttribute.default).toBe(true);
+            const updatedFirstAttribute = await consumptionController.attributes.changeDefaultRepositoryAttribute(firstAttribute);
+            expect(updatedFirstAttribute.default).toBe(true);
+        });
+    });
+
     describe("get Attributes", function () {
         beforeEach(async function () {
             await consumptionController.attributes.createSharedLocalAttribute({

@@ -1092,6 +1092,27 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(defaultCandidate);
     }
 
+    public async changeDefaultRepositoryAttribute(newDefaultAttribute: LocalAttribute): Promise<LocalAttribute> {
+        if (newDefaultAttribute.default) return newDefaultAttribute;
+
+        const valueType = newDefaultAttribute.content.value.constructor.name as AttributeValues.Identity.TypeName;
+        const query: IIdentityAttributeQuery = {
+            valueType: valueType
+        };
+
+        const attributesWithSameValueType = await this.executeIdentityAttributeQuery(query);
+        const currentDefault = attributesWithSameValueType.find((attr) => attr.default);
+
+        if (!currentDefault) throw new ConsumptionError(`No default RepositoryAttribute of type ${valueType.toString()} found.`);
+
+        currentDefault.default = undefined;
+        await this.updateAttributeUnsafe(currentDefault);
+
+        newDefaultAttribute.default = true;
+        await this.updateAttributeUnsafe(newDefaultAttribute);
+        return newDefaultAttribute;
+    }
+
     public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
         const attribute = await this.getLocalAttribute(id);
         if (!attribute) {

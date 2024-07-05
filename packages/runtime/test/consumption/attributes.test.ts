@@ -15,6 +15,7 @@ import {
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/transport";
 import {
     AttributeCreatedEvent,
+    ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
@@ -1327,6 +1328,40 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
             }
         });
         expect(result).toBeAnError(/.*/, "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo");
+    });
+});
+
+describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
+    test("should change default repository attribute", async () => {
+        const defaultAttribute = (
+            await services1.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "My default name"
+                    }
+                }
+            })
+        ).value;
+
+        const desiredDefaultAttribute = (
+            await services1.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "My new default name"
+                    }
+                }
+            })
+        ).value;
+
+        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredDefaultAttribute.id });
+        expect(result.isSuccess).toBe(true);
+        const newDefaultAttribute = result.value;
+        expect(newDefaultAttribute.default).toBe(true);
+
+        const updatedFormerDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: defaultAttribute.id })).value;
+        expect(updatedFormerDefaultAttribute.default).toBeUndefined();
     });
 });
 
