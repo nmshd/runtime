@@ -10,6 +10,7 @@ import { EventBus, EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreBuffer } from "@nmshd/crypto";
 import {
     AccountController,
+    BackboneRelationshipStatus,
     ChangedItems,
     CoreAddress,
     CoreDate,
@@ -19,7 +20,6 @@ import {
     ISendFileParameters,
     Message,
     Relationship,
-    RelationshipStatus,
     RelationshipTemplate,
     TokenContentRelationshipTemplate,
     Transport,
@@ -250,10 +250,10 @@ export class TestUtil {
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
-        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
+        expect(pendingRelationship.status).toStrictEqual(BackboneRelationshipStatus.Pending);
 
         const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
-        expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
+        expect(acceptedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Active);
 
         // Get accepted relationship
         await sleep(300);
@@ -263,7 +263,7 @@ export class TestUtil {
 
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
-        expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
+        expect(acceptedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Active);
         expect(relRequest.id.toString()).toStrictEqual(acceptedRelationshipFromSelf.id.toString());
         expect(relRequest.id.toString()).toStrictEqual(acceptedRelationshipPeer.id.toString());
 

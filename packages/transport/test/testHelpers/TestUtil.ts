@@ -12,6 +12,7 @@ import { DurationLike } from "luxon";
 import { LogLevel } from "typescript-logging";
 import {
     AccountController,
+    BackboneRelationshipStatus,
     ChangedItems,
     CoreAddress,
     CoreDate,
@@ -21,11 +22,10 @@ import {
     File,
     IChangedItems,
     IConfigOverwrite,
-    IdentityDeletionProcess,
     ISendFileParameters,
+    IdentityDeletionProcess,
     Message,
     Relationship,
-    RelationshipStatus,
     RelationshipTemplate,
     RequestError,
     TokenContentRelationshipTemplate,
@@ -327,16 +327,16 @@ export class TestUtil {
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
-        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
+        expect(pendingRelationship.status).toStrictEqual(BackboneRelationshipStatus.Pending);
 
         const rejectedRelationshipFromSelf = await from.relationships.reject(pendingRelationship.id);
-        expect(rejectedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Rejected);
+        expect(rejectedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Rejected);
 
         // Get accepted relationship
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
-        expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
+        expect(acceptedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Rejected);
     }
 
     public static async addRelationship(
@@ -364,10 +364,10 @@ export class TestUtil {
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
-        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
+        expect(pendingRelationship.status).toStrictEqual(BackboneRelationshipStatus.Pending);
 
         const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
-        expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
+        expect(acceptedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Active);
 
         // Get accepted relationship
         await this.sleep(300);
@@ -377,7 +377,7 @@ export class TestUtil {
 
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
-        expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
+        expect(acceptedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Active);
         expect(relRequest.id.toString()).toBe(acceptedRelationshipFromSelf.id.toString());
         expect(relRequest.id.toString()).toBe(acceptedRelationshipPeer.id.toString());
 
