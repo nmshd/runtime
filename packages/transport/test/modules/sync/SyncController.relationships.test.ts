@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { CoreDate, RelationshipStatus } from "../../../src";
+import { BackboneRelationshipStatus, CoreDate } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipSync", function () {
@@ -52,20 +52,20 @@ describe("RelationshipSync", function () {
         await templatorDevice.relationships.accept(createdRelationship.id);
 
         let relationshipOnRequestorDevice1 = (await requestorDevice2.relationships.getRelationship(createdRelationship.id))!;
-        expect(relationshipOnRequestorDevice1.status).toStrictEqual(RelationshipStatus.Pending);
+        expect(relationshipOnRequestorDevice1.status).toStrictEqual(BackboneRelationshipStatus.Pending);
 
         await TestUtil.syncUntilHasRelationship(requestorDevice1, relationshipOnRequestorDevice1.id);
 
         relationshipOnRequestorDevice1 = (await requestorDevice1.relationships.getRelationship(relationshipOnRequestorDevice1.id))!;
-        expect(relationshipOnRequestorDevice1.status).toStrictEqual(RelationshipStatus.Active);
+        expect(relationshipOnRequestorDevice1.status).toStrictEqual(BackboneRelationshipStatus.Active);
 
         relationshipOnRequestorDevice2 = await requestorDevice2.relationships.getRelationship(relationshipOnRequestorDevice1.id);
-        expect(relationshipOnRequestorDevice2!.status).toStrictEqual(RelationshipStatus.Pending);
+        expect(relationshipOnRequestorDevice2!.status).toStrictEqual(BackboneRelationshipStatus.Pending);
 
         await requestorDevice2.syncDatawallet();
 
         relationshipOnRequestorDevice2 = await requestorDevice2.relationships.getRelationship(relationshipOnRequestorDevice1.id);
-        expect(relationshipOnRequestorDevice2!.status).toStrictEqual(RelationshipStatus.Active);
+        expect(relationshipOnRequestorDevice2!.status).toStrictEqual(BackboneRelationshipStatus.Active);
     });
 
     test("syncDatawallet should sync relationships without fetching first", async function () {
@@ -105,15 +105,15 @@ describe("RelationshipSync", function () {
         await TestUtil.syncUntilHasRelationship(requestorDevice2, createdRelationship.id);
 
         relationshipOnRequestorDevice2 = (await requestorDevice2.relationships.getRelationship(createdRelationship.id))!;
-        expect(relationshipOnRequestorDevice2.status).toStrictEqual(RelationshipStatus.Active);
+        expect(relationshipOnRequestorDevice2.status).toStrictEqual(BackboneRelationshipStatus.Active);
 
         let relationshipOnRequestorDevice1 = await requestorDevice1.relationships.getRelationship(createdRelationship.id);
-        expect(relationshipOnRequestorDevice1!.status).toStrictEqual(RelationshipStatus.Pending);
+        expect(relationshipOnRequestorDevice1!.status).toStrictEqual(BackboneRelationshipStatus.Pending);
 
         await requestorDevice1.syncDatawallet();
 
         relationshipOnRequestorDevice1 = await requestorDevice1.relationships.getRelationship(createdRelationship.id);
-        expect(relationshipOnRequestorDevice1!.status).toStrictEqual(RelationshipStatus.Active);
+        expect(relationshipOnRequestorDevice1!.status).toStrictEqual(BackboneRelationshipStatus.Active);
     });
 
     test("syncDatawallet should sync relationships with two templators", async function () {
@@ -158,12 +158,12 @@ describe("RelationshipSync", function () {
         await templatorDevice1.syncDatawallet();
 
         relationshipOnRequestorDevice1 = (await templatorDevice1.relationships.getRelationship(createdRelationship.id))!;
-        expect(relationshipOnRequestorDevice1.status).toStrictEqual(RelationshipStatus.Active);
+        expect(relationshipOnRequestorDevice1.status).toStrictEqual(BackboneRelationshipStatus.Active);
 
         await TestUtil.syncUntilHasRelationship(requestorDevice, relationshipOnRequestorDevice1.id);
 
         relationshipOnRequestorDevice1 = (await requestorDevice.relationships.getRelationship(relationshipOnRequestorDevice1.id))!;
-        expect(relationshipOnRequestorDevice1.status).toStrictEqual(RelationshipStatus.Active);
+        expect(relationshipOnRequestorDevice1.status).toStrictEqual(BackboneRelationshipStatus.Active);
     });
 
     test("syncDatawallet should sync relationship templates", async function () {

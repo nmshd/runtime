@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, CachedRelationship, CoreDate, CoreId, Identity, Relationship, RelationshipStatus, RelationshipTemplate, Transport } from "../../../src";
+import { AccountController, BackboneRelationshipStatus, CachedRelationship, CoreDate, CoreId, Identity, Relationship, RelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipsController", function () {
@@ -18,7 +18,7 @@ describe("RelationshipsController", function () {
 
     function expectValidActiveFreshRelationship(relationship: Relationship, ownAccount: AccountController, peerAccount: AccountController, creationTime: CoreDate) {
         expect(relationship.id).toBeInstanceOf(CoreId);
-        expect(relationship.status).toStrictEqual(RelationshipStatus.Active);
+        expect(relationship.status).toStrictEqual(BackboneRelationshipStatus.Active);
         expect(relationship.peer).toBeInstanceOf(Identity);
         expect(relationship.peer.address).toStrictEqual(peerAccount.identity.address);
 
