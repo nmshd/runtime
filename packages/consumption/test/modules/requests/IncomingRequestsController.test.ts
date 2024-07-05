@@ -133,7 +133,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -261,7 +260,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -318,7 +316,6 @@ describe("IncomingRequestsController", function () {
                         mustBeAccepted: false
                     }),
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             TestRequestItem.from({
                                 mustBeAccepted: false,
@@ -454,7 +451,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -509,7 +505,6 @@ describe("IncomingRequestsController", function () {
                         mustBeAccepted: false
                     }),
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             TestRequestItem.from({
                                 mustBeAccepted: false,

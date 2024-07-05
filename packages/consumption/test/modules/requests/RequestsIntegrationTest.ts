@@ -193,7 +193,6 @@ export class RequestsGiven {
                     }
                 }),
                 RequestItemGroup.from({
-                    mustBeAccepted: false,
                     metadata: {
                         groupMetaKey: "groupMetaValue"
                     },
@@ -721,7 +720,6 @@ export class RequestsWhen {
             content: {
                 items: [
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             DeleteAttributeRequestItem.from({
                                 attributeId: sOwnSharedIdentityAttribute1.id.toString(),
