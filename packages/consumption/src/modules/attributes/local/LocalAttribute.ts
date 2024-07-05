@@ -145,7 +145,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return this.isIdentityAttribute() && !this.isShared() && this.isOwnedBy(ownAddress);
     }
 
-    // TODO: check no default
     public isOwnSharedAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute | OwnSharedRelationshipAttribute {
         let isOwnSharedAttribute = this.isShared() && this.isOwnedBy(ownAddress);
 

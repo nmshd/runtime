@@ -593,6 +593,8 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async removeDefault(attribute: LocalAttribute): Promise<LocalAttribute> {
+        if (!attribute.default) return attribute;
+
         attribute.default = undefined;
         await this.updateAttributeUnsafe(attribute);
         return attribute;
@@ -1085,7 +1087,6 @@ export class AttributesController extends ConsumptionBaseController {
 
         const defaultCandidate = attributesWithSameValueType.find((attr) => !attr.succeededBy && attr.id.toString() !== attribute.id.toString());
 
-        // TODO: this should never happen given valid data, should we thus rather throw an error?
         if (!defaultCandidate) return;
 
         defaultCandidate.default = true;
