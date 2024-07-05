@@ -1,7 +1,6 @@
 export * from "./IdentityDeletionProcessStatusChangedEvent";
 export * from "./MessageDeliveredEvent";
 export * from "./MessageReceivedEvent";
-export * from "./MessageRecipientDeletedEvent";
 export * from "./MessageSentEvent";
 export * from "./MessageWasReadAtChangedEvent";
 export * from "./PeerRelationshipTemplateLoadedEvent";
