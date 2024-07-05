@@ -296,8 +296,8 @@ class Requests {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);
         }
 
-        public itemAcceptedButParentNotAccepted(message: string): ApplicationError {
-            return new ApplicationError("error.consumption.requests.decide.validation.itemAcceptedButParentNotAccepted", message);
+        public itemAcceptedButRequestNotAccepted(message: string): ApplicationError {
+            return new ApplicationError("error.consumption.requests.decide.validation.itemAcceptedButRequestNotAccepted", message);
         }
 
         public mustBeAcceptedItemNotAccepted(message: string): ApplicationError {
