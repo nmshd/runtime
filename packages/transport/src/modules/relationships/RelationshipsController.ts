@@ -19,8 +19,8 @@ import { CachedRelationship } from "./local/CachedRelationship";
 import { Relationship } from "./local/Relationship";
 import { RelationshipAuditLog } from "./local/RelationshipAuditLog";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
+import { BackboneRelationshipStatus } from "./transmission/BackboneRelationshipStatus";
 import { RelationshipAuditLogEntryReason } from "./transmission/RelationshipAuditLog";
-import { RelationshipStatus } from "./transmission/RelationshipStatus";
 import { RelationshipCreationContentCipher } from "./transmission/requests/RelationshipCreationContentCipher";
 import { RelationshipCreationContentSigned } from "./transmission/requests/RelationshipCreationContentSigned";
 import { RelationshipCreationContentWrapper } from "./transmission/requests/RelationshipCreationContentWrapper";
@@ -98,7 +98,7 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
+    public async getRelationshipToIdentity(address: CoreAddress, status?: BackboneRelationshipStatus): Promise<Relationship | undefined> {
         const query: any = { peerAddress: address.toString() };
         if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
         const relationships = await this.relationships.find(query);
@@ -114,7 +114,7 @@ export class RelationshipsController extends TransportController {
     }
 
     public async getActiveRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
-        return await this.getRelationshipToIdentity(address, RelationshipStatus.Active);
+        return await this.getRelationshipToIdentity(address, BackboneRelationshipStatus.Active);
     }
 
     public async getRelationship(id: CoreId): Promise<Relationship | undefined> {
@@ -190,7 +190,7 @@ export class RelationshipsController extends TransportController {
 
     public async accept(relationshipId: CoreId): Promise<Relationship> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, RelationshipStatus.Pending);
+        this.assertRelationshipStatus(relationship, BackboneRelationshipStatus.Pending);
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
@@ -201,7 +201,7 @@ export class RelationshipsController extends TransportController {
 
     public async reject(relationshipId: CoreId): Promise<Relationship> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, RelationshipStatus.Pending);
+        this.assertRelationshipStatus(relationship, BackboneRelationshipStatus.Pending);
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
@@ -212,7 +212,7 @@ export class RelationshipsController extends TransportController {
 
     public async revoke(relationshipId: CoreId): Promise<Relationship> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, RelationshipStatus.Pending);
+        this.assertRelationshipStatus(relationship, BackboneRelationshipStatus.Pending);
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
@@ -223,14 +223,14 @@ export class RelationshipsController extends TransportController {
 
     public async terminate(relationshipId: CoreId): Promise<Relationship> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, RelationshipStatus.Active);
+        this.assertRelationshipStatus(relationship, BackboneRelationshipStatus.Active);
 
         return await this.completeOperationWithBackboneCall(RelationshipAuditLogEntryReason.Termination, relationshipId);
     }
 
     public async requestReactivation(relationshipId: CoreId): Promise<Relationship> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
+        this.assertRelationshipStatus(relationship, BackboneRelationshipStatus.Terminated);
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (lastAuditLogEntry.reason === RelationshipAuditLogEntryReason.ReactivationRequested) {
@@ -247,7 +247,7 @@ export class RelationshipsController extends TransportController {
 
     public async rejectReactivation(relationshipId: CoreId): Promise<Relationship> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
+        this.assertRelationshipStatus(relationship, BackboneRelationshipStatus.Terminated);
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
@@ -264,7 +264,7 @@ export class RelationshipsController extends TransportController {
 
     public async revokeReactivation(relationshipId: CoreId): Promise<Relationship> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
+        this.assertRelationshipStatus(relationship, BackboneRelationshipStatus.Terminated);
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
@@ -280,7 +280,7 @@ export class RelationshipsController extends TransportController {
 
     public async acceptReactivation(relationshipId: CoreId): Promise<Relationship> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
+        this.assertRelationshipStatus(relationship, BackboneRelationshipStatus.Terminated);
 
         const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
@@ -295,7 +295,7 @@ export class RelationshipsController extends TransportController {
 
     public async decompose(relationshipId: CoreId): Promise<void> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
+        this.assertRelationshipStatus(relationship, BackboneRelationshipStatus.Terminated);
 
         const result = await this.client.decomposeRelationship(relationshipId.toString());
         if (result.isError) throw result.error;
@@ -318,7 +318,7 @@ export class RelationshipsController extends TransportController {
         return relationship as Relationship & { cache: CachedRelationship };
     }
 
-    private assertRelationshipStatus(relationship: Relationship, status: RelationshipStatus) {
+    private assertRelationshipStatus(relationship: Relationship, status: BackboneRelationshipStatus) {
         if (relationship.status === status) return;
 
         throw CoreErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status);
@@ -467,7 +467,7 @@ export class RelationshipsController extends TransportController {
         let relationshipDoc = await this.relationships.read(relationshipId);
         if (!relationshipDoc) {
             const newRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
-            if (newRelationship.status === RelationshipStatus.Pending) {
+            if (newRelationship.status === BackboneRelationshipStatus.Pending) {
                 return newRelationship;
             }
             // this path is for a revocation that is processed before its corresponding creation

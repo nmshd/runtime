@@ -1,4 +1,4 @@
-export enum RelationshipStatus {
+export enum BackboneRelationshipStatus {
     Pending = "Pending",
     Active = "Active",
     Rejected = "Rejected",

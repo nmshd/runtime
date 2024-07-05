@@ -4,7 +4,7 @@ import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId } from "../../cor
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
 import { Relationship } from "../relationships/local/Relationship";
-import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus";
+import { BackboneRelationshipStatus } from "../relationships/transmission/BackboneRelationshipStatus";
 import { ChallengeAuthClient } from "./backbone/ChallengeAuthClient";
 import { ChallengeClient } from "./backbone/ChallengeClient";
 import { Challenge, ChallengeType } from "./data/Challenge";
@@ -88,7 +88,7 @@ export class ChallengeController extends TransportController {
 
     @log()
     public async createChallenge(type: ChallengeType = ChallengeType.Identity, relationship?: Relationship): Promise<ChallengeSigned> {
-        if (type === ChallengeType.Relationship && relationship?.status !== RelationshipStatus.Active) {
+        if (type === ChallengeType.Relationship && relationship?.status !== BackboneRelationshipStatus.Active) {
             throw CoreErrors.challenges.challengeTypeRequiresActiveRelationship();
         }
 

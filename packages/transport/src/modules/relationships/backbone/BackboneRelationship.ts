@@ -1,5 +1,5 @@
+import { BackboneRelationshipStatus } from "../transmission/BackboneRelationshipStatus";
 import { BackboneRelationshipAuditLog } from "../transmission/RelationshipAuditLog";
-import { RelationshipStatus } from "../transmission/RelationshipStatus";
 
 export interface BackboneRelationship {
     id: string;
@@ -8,7 +8,7 @@ export interface BackboneRelationship {
     to: string;
 
     createdAt: string;
-    status: RelationshipStatus;
+    status: BackboneRelationshipStatus;
     auditLog: BackboneRelationshipAuditLog;
     creationContent?: string;
     creationResponseContent?: string;

@@ -708,7 +708,7 @@ describe("RelationshipDecomposition", () => {
         expect(ownRelationship).toBeAnError(/.*/, "error.runtime.recordNotFound");
 
         const peerRelationship = (await syncUntilHasRelationships(services2.transport))[0];
-        expect(peerRelationship.status).toBe(RelationshipStatus.DeletionProposed);
+        expect(peerRelationship.status).toBe(RelationshipStatus.DecomposedByPeer);
         await expect(services2.eventBus).toHavePublished(
             RelationshipChangedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Decomposition

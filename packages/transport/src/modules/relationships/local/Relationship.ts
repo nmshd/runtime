@@ -1,17 +1,17 @@
 import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
 import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
-import { Identity, IIdentity } from "../../accounts/data/Identity";
+import { IIdentity, Identity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
-import { RelationshipStatus } from "../transmission/RelationshipStatus";
+import { BackboneRelationshipStatus } from "../transmission/BackboneRelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 import { RelationshipAuditLog } from "./RelationshipAuditLog";
 
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;
     peer: IIdentity;
-    status: RelationshipStatus;
+    status: BackboneRelationshipStatus;
 
     cache?: ICachedRelationship;
     cachedAt?: CoreDate;
@@ -42,7 +42,7 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
 
     @validate()
     @serialize()
-    public status: RelationshipStatus;
+    public status: BackboneRelationshipStatus;
 
     @validate({ nullable: true })
     @serialize()
@@ -87,7 +87,7 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
             id: CoreId.from(response.id),
             relationshipSecretId: relationshipSecretId,
             peer: peer,
-            status: RelationshipStatus.Pending,
+            status: BackboneRelationshipStatus.Pending,
             cache: cache,
             cachedAt: CoreDate.utc()
         });

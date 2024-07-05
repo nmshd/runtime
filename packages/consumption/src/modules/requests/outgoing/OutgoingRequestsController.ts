@@ -1,13 +1,13 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
 import {
+    BackboneRelationshipStatus,
     CoreAddress,
     CoreDate,
     CoreId,
     ICoreId,
     Message,
     Relationship,
-    RelationshipStatus,
     RelationshipTemplate,
     SynchronizedCollection,
     CoreErrors as TransportCoreErrors
@@ -60,7 +60,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
                 );
             }
 
-            if (!(relationship.status === RelationshipStatus.Pending || relationship.status === RelationshipStatus.Active)) {
+            if (!(relationship.status === BackboneRelationshipStatus.Pending || relationship.status === BackboneRelationshipStatus.Active)) {
                 return ValidationResult.error(
                     CoreErrors.requests.wrongRelationshipStatus(
                         `You cannot create a request to '${parsedParams.peer.toString()}' since the relationship is in status '${relationship.status}'.`

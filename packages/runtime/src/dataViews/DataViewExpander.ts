@@ -51,7 +51,7 @@ import {
     ValueHintsJSON,
     isRequestItemDerivation
 } from "@nmshd/content";
-import { CoreAddress, CoreId, IdentityController, Relationship, RelationshipStatus } from "@nmshd/transport";
+import { BackboneRelationshipStatus, CoreAddress, CoreId, IdentityController, Relationship } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import {
@@ -1659,15 +1659,15 @@ export class DataViewExpander {
         }
 
         let statusText = "";
-        if (relationship.status === RelationshipStatus.Pending && direction === RelationshipDirection.Outgoing) {
+        if (relationship.status === BackboneRelationshipStatus.Pending && direction === RelationshipDirection.Outgoing) {
             statusText = DataViewTranslateable.transport.relationshipOutgoing;
-        } else if (relationship.status === RelationshipStatus.Pending) {
+        } else if (relationship.status === BackboneRelationshipStatus.Pending) {
             statusText = DataViewTranslateable.transport.relationshipIncoming;
-        } else if (relationship.status === RelationshipStatus.Rejected) {
+        } else if (relationship.status === BackboneRelationshipStatus.Rejected) {
             statusText = DataViewTranslateable.transport.relationshipRejected;
-        } else if (relationship.status === RelationshipStatus.Revoked) {
+        } else if (relationship.status === BackboneRelationshipStatus.Revoked) {
             statusText = DataViewTranslateable.transport.relationshipRevoked;
-        } else if (relationship.status === RelationshipStatus.Active) {
+        } else if (relationship.status === BackboneRelationshipStatus.Active) {
             statusText = DataViewTranslateable.transport.relationshipActive;
         }
 
