@@ -19,7 +19,6 @@ import {
 } from "@nmshd/content";
 import { CoreBuffer, CryptoCipher, CryptoEncryptionAlgorithm, CryptoExchangeAlgorithm, CryptoSecretKey, CryptoSignatureAlgorithm, CryptoSignaturePublicKey } from "@nmshd/crypto";
 import {
-    BackboneRelationshipStatus,
     CachedRelationship,
     CoreAddress,
     CoreDate,
@@ -32,6 +31,7 @@ import {
     Message,
     Relationship,
     RelationshipAuditLogEntryReason,
+    RelationshipStatus,
     RelationshipTemplate,
     RelationshipTemplatePublicKey
 } from "@nmshd/transport";
@@ -51,7 +51,7 @@ export class TestObjectFactory {
                         publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
                     })
                 }),
-            status: properties?.status ?? BackboneRelationshipStatus.Pending,
+            status: properties?.status ?? RelationshipStatus.Pending,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
             cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
             cache:
@@ -63,7 +63,7 @@ export class TestObjectFactory {
                             createdBy: CoreAddress.from("id2"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: BackboneRelationshipStatus.Pending
+                            newStatus: RelationshipStatus.Pending
                         }
                     ],
                     template: this.createIncomingRelationshipTemplate()
@@ -83,7 +83,7 @@ export class TestObjectFactory {
                         publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
                     })
                 }),
-            status: properties?.status ?? BackboneRelationshipStatus.Active,
+            status: properties?.status ?? RelationshipStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
             cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
             cache:
@@ -95,7 +95,7 @@ export class TestObjectFactory {
                             createdBy: CoreAddress.from("id2"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: BackboneRelationshipStatus.Pending
+                            newStatus: RelationshipStatus.Pending
                         },
 
                         {
@@ -103,8 +103,8 @@ export class TestObjectFactory {
                             createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
-                            oldStatus: BackboneRelationshipStatus.Pending,
-                            newStatus: BackboneRelationshipStatus.Active
+                            oldStatus: RelationshipStatus.Pending,
+                            newStatus: RelationshipStatus.Active
                         }
                     ],
                     template: this.createIncomingRelationshipTemplate()
@@ -124,7 +124,7 @@ export class TestObjectFactory {
                         publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
                     })
                 }),
-            status: properties?.status ?? BackboneRelationshipStatus.Terminated,
+            status: properties?.status ?? RelationshipStatus.Terminated,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
             cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
             cache:
@@ -136,7 +136,7 @@ export class TestObjectFactory {
                             createdBy: CoreAddress.from("id2"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: BackboneRelationshipStatus.Pending
+                            newStatus: RelationshipStatus.Pending
                         },
 
                         {
@@ -144,8 +144,8 @@ export class TestObjectFactory {
                             createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
-                            oldStatus: BackboneRelationshipStatus.Pending,
-                            newStatus: BackboneRelationshipStatus.Active
+                            oldStatus: RelationshipStatus.Pending,
+                            newStatus: RelationshipStatus.Active
                         },
 
                         {
@@ -153,8 +153,8 @@ export class TestObjectFactory {
                             createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.Termination,
-                            oldStatus: BackboneRelationshipStatus.Active,
-                            newStatus: BackboneRelationshipStatus.Terminated
+                            oldStatus: RelationshipStatus.Active,
+                            newStatus: RelationshipStatus.Terminated
                         }
                     ],
                     template: this.createIncomingRelationshipTemplate()
