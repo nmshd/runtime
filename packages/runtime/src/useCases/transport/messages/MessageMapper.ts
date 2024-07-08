@@ -1,4 +1,3 @@
-import { MailJSON } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { CoreId, File, IdentityUtil, Message, MessageEnvelopeRecipient } from "@nmshd/transport";
 import { MessageDTO, MessageWithAttachmentsDTO, RecipientDTO } from "../../../types";
@@ -28,7 +27,7 @@ export class MessageMapper {
             const pseudonym = await this.getPseudonymizedAddress(message.cache.recipients[0].address.toString());
             return {
                 id: message.id.toString(),
-                content: this.getPseudonymizedMessageContent(message.cache.content.toJSON(), message.cache.recipients, pseudonym),
+                content: message.cache.content.toJSON(),
                 createdBy: message.cache.createdBy.toString(),
                 createdByDevice: message.cache.createdByDevice.toString(),
                 recipients: this.getPseudonymizedRecipients(message.cache.recipients, message.relationshipIds, pseudonym),
@@ -59,7 +58,7 @@ export class MessageMapper {
             const pseudonym = await this.getPseudonymizedAddress(message.cache.recipients[0].address.toString());
             return {
                 id: message.id.toString(),
-                content: this.getPseudonymizedMessageContent(message.cache.content.toJSON(), message.cache.recipients, pseudonym),
+                content: message.cache.content.toJSON(),
                 createdBy: message.cache.createdBy.toString(),
                 createdByDevice: message.cache.createdByDevice.toString(),
                 recipients: this.getPseudonymizedRecipients(message.cache.recipients, message.relationshipIds, pseudonym),
@@ -108,18 +107,6 @@ export class MessageMapper {
 
     private static isPseudonymizationRequired(recipients: MessageEnvelopeRecipient[], relationshipIds: CoreId[]): boolean {
         return recipients.length === relationshipIds.length ? false : true;
-    }
-
-    private static getPseudonymizedMessageContent(messageContent: any, recipients: MessageEnvelopeRecipient[], pseudonym: string): Promise<any> {
-        if (messageContent["@type"] === "Mail") {
-            const mail = messageContent as MailJSON;
-            const recipientAddresses = recipients.map((recipient) => recipient.address.toString());
-            mail.to = mail.to.map((toAddress) => (recipientAddresses.includes(toAddress) ? toAddress : pseudonym));
-            if (mail.cc) {
-                mail.cc = mail.cc.map((ccAddress) => (recipientAddresses.includes(ccAddress) ? ccAddress : pseudonym));
-            }
-        }
-        return messageContent;
     }
 
     private static async getPseudonymizedAddress(address: string): Promise<string> {
