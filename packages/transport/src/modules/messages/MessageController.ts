@@ -62,7 +62,7 @@ export class MessageController extends TransportController {
         });
     }
 
-    public async deleteRecipientInMessage(messageId: CoreId, relationship: Relationship): Promise<void> {
+    public async deleteRelationshipFromMessage(messageId: CoreId, relationship: Relationship): Promise<void> {
         const messageDoc = await this.messages.read(messageId.toString());
         const message = Message.from(messageDoc);
 
@@ -76,9 +76,9 @@ export class MessageController extends TransportController {
         await this.messages.update(messageDoc, message);
     }
 
-    public async decomposeMessagesOfRelationship(relationship: Relationship): Promise<void> {
+    public async deleteRelationshipFromMessages(relationship: Relationship): Promise<void> {
         const messages = await this.getMessagesByRelationshipId(relationship.id);
-        await Promise.all(messages.map((message) => this.deleteRecipientInMessage(message.id, relationship)));
+        await Promise.all(messages.map((message) => this.deleteRelationshipFromMessage(message.id, relationship)));
     }
 
     @log()

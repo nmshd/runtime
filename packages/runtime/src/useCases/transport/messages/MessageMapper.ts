@@ -110,13 +110,13 @@ export class MessageMapper {
         return recipients.length === relationshipIds.length ? false : true;
     }
 
-    private static async getPseudonymizedMessageContent(messageContent: any, recipients: MessageEnvelopeRecipient[], pseudonym: string): Promise<any> {
+    private static getPseudonymizedMessageContent(messageContent: any, recipients: MessageEnvelopeRecipient[], pseudonym: string): Promise<any> {
         if (messageContent["@type"] === "Mail") {
             const mail = messageContent as MailJSON;
             const recipientAddresses = recipients.map((recipient) => recipient.address.toString());
-            mail.to = await Promise.all(mail.to.map((toAddress) => (recipientAddresses.includes(toAddress) ? toAddress : pseudonym)));
+            mail.to = mail.to.map((toAddress) => (recipientAddresses.includes(toAddress) ? toAddress : pseudonym));
             if (mail.cc) {
-                mail.cc = await Promise.all(mail.cc.map((ccAddress) => (recipientAddresses.includes(ccAddress) ? ccAddress : pseudonym)));
+                mail.cc = mail.cc.map((ccAddress) => (recipientAddresses.includes(ccAddress) ? ccAddress : pseudonym));
             }
         }
         return messageContent;

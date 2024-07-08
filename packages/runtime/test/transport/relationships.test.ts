@@ -759,7 +759,7 @@ describe("RelationshipDecomposition", () => {
         expect(notificationsControl).not.toHaveLength(0);
     });
 
-    test.skip("messages should be deleted/anonymized", async () => {
+    test("messages should be deleted/anonymized", async () => {
         const messagesToPeer = (await services1.transport.messages.getMessages({ query: { "recipients.address": services2.address } })).value;
         expect(messagesToPeer).toHaveLength(0);
 
@@ -780,7 +780,7 @@ describe("RelationshipDecomposition", () => {
         expect(anonymizedMessage.recipients).toBe([services3.address, addressPseudonym]);
     });
 
-    test.skip("messages with multiple recipients should be deleted if all its relationships are decomposed", async () => {
+    test("messages with multiple recipients should be deleted if all its relationships are decomposed", async () => {
         await services1.transport.relationships.decomposeRelationship({ relationshipId: relationshipId2 });
         const messages = (await services1.transport.messages.getMessages({})).value;
         expect(messages).toHaveLength(0);

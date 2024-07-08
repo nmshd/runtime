@@ -43,7 +43,7 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
         // backbone call first so nothing is deleted in case it goes wrong
         await this.relationshipsController.decompose(relationship.id);
         await this.relationshipTemplateController.cleanupDuringRelationshipDecomposition(relationship.cache.template);
-        await this.messageController.decomposeMessagesOfRelationship(relationship);
+        await this.messageController.deleteRelationshipFromMessages(relationship);
         await this.incomingRequestsController.deleteRequestsFromPeer(peer.address);
         await this.outgoingRequestsController.deleteRequestsToPeer(peer.address);
         await this.notificationsController.deleteNotificationsWithPeer(peer.address);
