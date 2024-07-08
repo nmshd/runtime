@@ -1,5 +1,5 @@
 import { CoreBuffer } from "@nmshd/crypto";
-import { CoreId, File, IdentityUtil, Message, MessageEnvelopeRecipient } from "@nmshd/transport";
+import { CoreId, File, Message, MessageEnvelopeRecipient } from "@nmshd/transport";
 import { MessageDTO, MessageWithAttachmentsDTO, RecipientDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { FileMapper } from "../files/FileMapper";
@@ -18,62 +18,33 @@ export class MessageMapper {
         };
     }
 
-    public static async toMessageWithAttachmentsDTO(message: Message, attachments: File[]): Promise<MessageWithAttachmentsDTO> {
+    public static toMessageWithAttachmentsDTO(message: Message, attachments: File[]): MessageWithAttachmentsDTO {
         if (!message.cache) {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
-        }
-
-        if (this.isPseudonymizationRequired(message.cache.recipients, message.relationshipIds)) {
-            const pseudonym = await this.getPseudonymizedAddress(message.cache.recipients[0].address.toString());
-            return {
-                id: message.id.toString(),
-                content: message.cache.content.toJSON(),
-                createdBy: message.cache.createdBy.toString(),
-                createdByDevice: message.cache.createdByDevice.toString(),
-                recipients: this.getPseudonymizedRecipients(message.cache.recipients, message.relationshipIds, pseudonym),
-                createdAt: message.cache.createdAt.toString(),
-                attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
-                isOwn: message.isOwn,
-                wasReadAt: message.wasReadAt?.toString()
-            };
         }
         return {
             id: message.id.toString(),
             content: message.cache.content.toJSON(),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: message.cache.recipients.map((r, i) => this.toRecipient(r, message.relationshipIds[i])),
+            recipients: this.getRecipients(message.cache.recipients, message.relationshipIds),
             createdAt: message.cache.createdAt.toString(),
             attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
-            isOwn: message.isOwn
+            isOwn: message.isOwn,
+            wasReadAt: message.wasReadAt?.toString()
         };
     }
 
-    public static async toMessageDTO(message: Message): Promise<MessageDTO> {
+    public static toMessageDTO(message: Message): MessageDTO {
         if (!message.cache) {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
-        }
-
-        if (this.isPseudonymizationRequired(message.cache.recipients, message.relationshipIds)) {
-            const pseudonym = await this.getPseudonymizedAddress(message.cache.recipients[0].address.toString());
-            return {
-                id: message.id.toString(),
-                content: message.cache.content.toJSON(),
-                createdBy: message.cache.createdBy.toString(),
-                createdByDevice: message.cache.createdByDevice.toString(),
-                recipients: this.getPseudonymizedRecipients(message.cache.recipients, message.relationshipIds, pseudonym),
-                createdAt: message.cache.createdAt.toString(),
-                attachments: message.cache.attachments.map((a) => a.toString()),
-                isOwn: message.isOwn,
-                wasReadAt: message.wasReadAt?.toString()
-            };
         }
         return {
             id: message.id.toString(),
             content: message.cache.content.toJSON(),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: message.cache.recipients.map((r, i) => this.toRecipient(r, message.relationshipIds[i])),
+            recipients: this.getRecipients(message.cache.recipients, message.relationshipIds),
             createdAt: message.cache.createdAt.toString(),
             attachments: message.cache.attachments.map((a) => a.toString()),
             isOwn: message.isOwn,
@@ -85,10 +56,10 @@ export class MessageMapper {
         return await Promise.all(messages.map((message) => this.toMessageDTO(message)));
     }
 
-    private static getPseudonymizedRecipients(recipients: MessageEnvelopeRecipient[], relationshipIds: CoreId[], pseudonym: string) {
+    private static getRecipients(recipients: MessageEnvelopeRecipient[], relationshipIds: CoreId[]) {
         let index = -1;
         return recipients.map((r) => {
-            if (r.address.toString() === pseudonym) {
+            if (r.address.toString() === process.env.pseudonym) {
                 return this.toRecipient(r);
             }
             index += 1;
@@ -103,15 +74,5 @@ export class MessageMapper {
             receivedByDevice: recipient.receivedByDevice?.toString(),
             relationshipId: relationshipId?.toString()
         };
-    }
-
-    private static isPseudonymizationRequired(recipients: MessageEnvelopeRecipient[], relationshipIds: CoreId[]): boolean {
-        return recipients.length === relationshipIds.length ? false : true;
-    }
-
-    private static async getPseudonymizedAddress(address: string): Promise<string> {
-        const backboneHostname = address.split(":")[2]; // did:e:backboneHostname:...
-        const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
-        return (await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, backboneHostname)).toString();
     }
 }

@@ -1,7 +1,7 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
 import { log } from "@js-soft/ts-utils";
-import { CryptoSecretKey } from "@nmshd/crypto";
+import { CoreBuffer, CryptoSecretKey } from "@nmshd/crypto";
 import { AbstractAuthenticator, Authenticator, ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
 import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
@@ -132,6 +132,10 @@ export class AccountController {
         let device: Device;
         let identityCreated = false;
         let deviceUpdated = false;
+
+        process.env.pseudonym = (
+            await IdentityUtil.createAddress({ algorithm: 1, publicKey: CoreBuffer.fromUtf8("deleted identity") }, new URL(this._config.baseUrl).hostname)
+        ).toString();
 
         if (!availableIdentityDoc && !availableDeviceDoc) {
             if (!deviceSharedSecret) {
