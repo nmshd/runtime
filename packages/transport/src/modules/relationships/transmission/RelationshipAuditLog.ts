@@ -1,4 +1,4 @@
-import { BackboneRelationshipStatus } from "./BackboneRelationshipStatus";
+import { RelationshipStatus } from "./RelationshipStatus";
 
 export interface BackboneRelationshipAuditLog extends Array<BackboneRelationshipAuditLogEntry> {}
 
@@ -7,8 +7,8 @@ export interface BackboneRelationshipAuditLogEntry {
     createdBy: string;
     createdByDevice: string;
     reason: RelationshipAuditLogEntryReason;
-    oldStatus?: BackboneRelationshipStatus;
-    newStatus: BackboneRelationshipStatus;
+    oldStatus?: RelationshipStatus;
+    newStatus: RelationshipStatus;
 }
 
 export enum RelationshipAuditLogEntryReason {

@@ -7,7 +7,7 @@ export enum RelationshipStatus {
     Rejected = "Rejected",
     Revoked = "Revoked",
     Terminated = "Terminated",
-    DecomposedByPeer = "DecomposedByPeer"
+    DeletionProposed = "DeletionProposed"
 }
 
 export enum RelationshipAuditLogEntryReason {

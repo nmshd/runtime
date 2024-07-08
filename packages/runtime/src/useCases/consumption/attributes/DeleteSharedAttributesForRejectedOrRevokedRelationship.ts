@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
-import { AccountController, BackboneRelationshipStatus, CoreId, Relationship, RelationshipsController } from "@nmshd/transport";
+import { AccountController, CoreId, Relationship, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -30,7 +30,7 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }
 
-        if (!(relationship.status === BackboneRelationshipStatus.Rejected || relationship.status === BackboneRelationshipStatus.Revoked)) {
+        if (!(relationship.status === RelationshipStatus.Rejected || relationship.status === RelationshipStatus.Revoked)) {
             return Result.fail(RuntimeErrors.relationships.isNeitherRejectedNorRevoked());
         }
 

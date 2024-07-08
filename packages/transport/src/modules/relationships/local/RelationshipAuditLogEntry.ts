@@ -1,15 +1,15 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, CoreSerializable, ICoreAddress, ICoreDate, ICoreId } from "../../../core";
-import { BackboneRelationshipStatus } from "../transmission/BackboneRelationshipStatus";
 import { RelationshipAuditLogEntryReason } from "../transmission/RelationshipAuditLog";
+import { RelationshipStatus } from "../transmission/RelationshipStatus";
 
 export interface IRelationshipAuditLogEntry {
     createdAt: ICoreDate;
     createdBy: ICoreAddress;
     createdByDevice: ICoreId;
     reason: RelationshipAuditLogEntryReason;
-    oldStatus?: BackboneRelationshipStatus;
-    newStatus: BackboneRelationshipStatus;
+    oldStatus?: RelationshipStatus;
+    newStatus: RelationshipStatus;
 }
 
 @type("RelationshipAuditLogEntry")
@@ -34,16 +34,16 @@ export class RelationshipAuditLogEntry extends CoreSerializable implements IRela
 
     @validate({
         nullable: true,
-        customValidator: (v) => (!Object.values(BackboneRelationshipStatus).includes(v) ? `must be one of: ${Object.values(BackboneRelationshipStatus)}` : undefined)
+        customValidator: (v) => (!Object.values(RelationshipStatus).includes(v) ? `must be one of: ${Object.values(RelationshipStatus)}` : undefined)
     })
     @serialize()
-    public oldStatus?: BackboneRelationshipStatus;
+    public oldStatus?: RelationshipStatus;
 
     @validate({
-        customValidator: (v) => (!Object.values(BackboneRelationshipStatus).includes(v) ? `must be one of: ${Object.values(BackboneRelationshipStatus)}` : undefined)
+        customValidator: (v) => (!Object.values(RelationshipStatus).includes(v) ? `must be one of: ${Object.values(RelationshipStatus)}` : undefined)
     })
     @serialize()
-    public newStatus: BackboneRelationshipStatus;
+    public newStatus: RelationshipStatus;
 
     public static from(value: IRelationshipAuditLogEntry): RelationshipAuditLogEntry {
         return this.fromAny({ ...value, oldStatus: value.oldStatus ?? undefined });

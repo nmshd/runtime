@@ -1,5 +1,5 @@
 import stringify from "json-stringify-safe";
-import { BackboneRelationshipStatus } from "../modules";
+import { RelationshipStatus } from "../modules";
 import { CoreError } from "./CoreError";
 
 class Relationships {
@@ -7,7 +7,7 @@ class Relationships {
         return new CoreError("error.transport.relationships.operationOnlyAllowedForPeer", message);
     }
 
-    public wrongRelationshipStatus(relationshipId: string, status: BackboneRelationshipStatus) {
+    public wrongRelationshipStatus(relationshipId: string, status: RelationshipStatus) {
         return new CoreError(
             "error.transport.relationships.wrongRelationshipStatus",
             `The relationship '${relationshipId}' has the wrong status (${status}) to run this operation`
