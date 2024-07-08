@@ -302,7 +302,7 @@ export class RelationshipsController extends TransportController {
 
         const isSecretDeletionSuccessful = await this.secrets.deleteSecretForRelationship(relationship.relationshipSecretId);
         if (!isSecretDeletionSuccessful) {
-            throw new TransportError("Decomposition failed to delete secrets");
+            this._log.error("Decomposition failed to delete secrets");
         }
         await this.relationships.delete({ id: relationshipId });
 
