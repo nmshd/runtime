@@ -1,16 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CoreBuffer } from "@nmshd/crypto";
-import {
-    AccountController,
-    BackboneRelationshipStatus,
-    CoreDate,
-    CoreId,
-    FileReference,
-    RelationshipAuditLogEntryReason,
-    TokenContentRelationshipTemplate,
-    Transport
-} from "../../src";
+import { AccountController, CoreDate, CoreId, FileReference, RelationshipAuditLogEntryReason, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "../../src";
 import { TestUtil } from "../testHelpers/TestUtil";
 
 describe("AccountTest", function () {
@@ -106,10 +97,10 @@ describe("RelationshipTest: Accept", function () {
 
         expect(request.cache!.template.id.toString()).toStrictEqual(templateTo.id.toString());
         expect(request.cache!.template.isOwn).toBe(false);
-        expect(request.status).toStrictEqual(BackboneRelationshipStatus.Pending);
+        expect(request.status).toStrictEqual(RelationshipStatus.Pending);
 
         expect(request.cache?.auditLog).toHaveLength(1);
-        expect(request.cache!.auditLog[0].newStatus).toBe(BackboneRelationshipStatus.Pending);
+        expect(request.cache!.auditLog[0].newStatus).toBe(RelationshipStatus.Pending);
 
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationships).toHaveLength(1);
@@ -122,14 +113,14 @@ describe("RelationshipTest: Accept", function () {
         expect(templateResponseContent.value).toHaveProperty("mycontent");
         expect(templateResponseContent.value.mycontent).toBe("template");
 
-        expect(pendingRelationship.status).toStrictEqual(BackboneRelationshipStatus.Pending);
+        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
         const acceptedRelationshipFromSelf = await from.relationships.accept(relationshipId);
         expect(acceptedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(acceptedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Active);
+        expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         expect(acceptedRelationshipFromSelf.cache?.auditLog).toHaveLength(2);
-        expect(acceptedRelationshipFromSelf.cache!.auditLog[1].newStatus).toBe(BackboneRelationshipStatus.Active);
+        expect(acceptedRelationshipFromSelf.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Active);
 
         expect(acceptedRelationshipFromSelf.peer).toBeDefined();
 
@@ -138,10 +129,10 @@ describe("RelationshipTest: Accept", function () {
         const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
 
         expect(acceptedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(acceptedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Active);
+        expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
 
         expect(acceptedRelationshipPeer.cache?.auditLog).toHaveLength(2);
-        expect(acceptedRelationshipPeer.cache!.auditLog[1].newStatus).toBe(BackboneRelationshipStatus.Active);
+        expect(acceptedRelationshipPeer.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Active);
         expect(acceptedRelationshipPeer.peer).toBeDefined();
         expect(acceptedRelationshipPeer.peer.address.toString()).toStrictEqual(templateTo.cache?.identity.address.toString());
     });
@@ -220,7 +211,7 @@ describe("RelationshipTest: Reject", function () {
 
         expect(request.cache!.template.id.toString()).toStrictEqual(templateTo.id.toString());
         expect(request.cache!.template.isOwn).toBe(false);
-        expect(request.status).toStrictEqual(BackboneRelationshipStatus.Pending);
+        expect(request.status).toStrictEqual(RelationshipStatus.Pending);
 
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationships).toHaveLength(1);
@@ -232,25 +223,25 @@ describe("RelationshipTest: Reject", function () {
         expect(templateResponseContent.value).toHaveProperty("mycontent");
         expect(templateResponseContent.value.mycontent).toBe("template");
 
-        expect(pendingRelationship.status).toStrictEqual(BackboneRelationshipStatus.Pending);
+        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
         const rejectedRelationshipFromSelf = await from.relationships.reject(relationshipId);
         expect(rejectedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(rejectedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Rejected);
+        expect(rejectedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Rejected);
         expect(rejectedRelationshipFromSelf.cache?.auditLog).toHaveLength(2);
-        expect(rejectedRelationshipFromSelf.cache!.auditLog[1].newStatus).toBe(BackboneRelationshipStatus.Rejected);
+        expect(rejectedRelationshipFromSelf.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Rejected);
 
         expect(rejectedRelationshipFromSelf.peer).toBeDefined();
 
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const rejectedRelationshipPeer = syncedRelationshipsPeer[0];
-        expect(rejectedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Rejected);
+        expect(rejectedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
 
         expect(rejectedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(rejectedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Rejected);
+        expect(rejectedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
         expect(rejectedRelationshipPeer.cache?.auditLog).toHaveLength(2);
-        expect(rejectedRelationshipPeer.cache!.auditLog[1].newStatus).toBe(BackboneRelationshipStatus.Rejected);
+        expect(rejectedRelationshipPeer.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Rejected);
         expect(rejectedRelationshipPeer.peer).toBeDefined();
         expect(rejectedRelationshipPeer.peer.address.toString()).toStrictEqual(templateTo.cache?.identity.address.toString());
     });
@@ -333,12 +324,12 @@ describe("RelationshipTest: Revoke", function () {
 
         expect(request.cache!.template.id.toString()).toStrictEqual(templateRequestor.id.toString());
         expect(request.cache!.template.isOwn).toBe(false);
-        expect(request.status).toStrictEqual(BackboneRelationshipStatus.Pending);
+        expect(request.status).toStrictEqual(RelationshipStatus.Pending);
 
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(templator);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
-        expect(pendingRelationship.status).toStrictEqual(BackboneRelationshipStatus.Pending);
+        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
         expect(pendingRelationship.cache!.template.id.toString()).toStrictEqual(templateRequestor.id.toString());
         expect(pendingRelationship.cache!.template.isOwn).toBe(true);
@@ -346,26 +337,26 @@ describe("RelationshipTest: Revoke", function () {
         const templateResponseContent = pendingRelationship.cache!.template.cache!.content as JSONWrapper;
         expect(templateResponseContent.value).toHaveProperty("mycontent");
         expect(templateResponseContent.value.mycontent).toBe("template");
-        expect(pendingRelationship.status).toStrictEqual(BackboneRelationshipStatus.Pending);
+        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
         const revokedRelationshipSelf = await requestor.relationships.revoke(relationshipId);
-        expect(revokedRelationshipSelf.status).toStrictEqual(BackboneRelationshipStatus.Revoked);
+        expect(revokedRelationshipSelf.status).toStrictEqual(RelationshipStatus.Revoked);
 
         expect(revokedRelationshipSelf.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(revokedRelationshipSelf.status).toStrictEqual(BackboneRelationshipStatus.Revoked);
+        expect(revokedRelationshipSelf.status).toStrictEqual(RelationshipStatus.Revoked);
         expect(revokedRelationshipSelf.cache?.auditLog).toHaveLength(2);
-        expect(revokedRelationshipSelf.cache!.auditLog[1].newStatus).toBe(BackboneRelationshipStatus.Revoked);
+        expect(revokedRelationshipSelf.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Revoked);
         expect(revokedRelationshipSelf.peer).toBeDefined();
         expect(revokedRelationshipSelf.peer.address.toString()).toStrictEqual(revokedRelationshipSelf.cache!.template.cache?.identity.address.toString());
 
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(templator);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const revokedRelationshipPeer = syncedRelationshipsPeer[0];
-        expect(revokedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Revoked);
+        expect(revokedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Revoked);
         expect(revokedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(revokedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Revoked);
+        expect(revokedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Revoked);
         expect(revokedRelationshipPeer.cache?.auditLog).toHaveLength(2);
-        expect(revokedRelationshipPeer.cache!.auditLog[1].newStatus).toBe(BackboneRelationshipStatus.Revoked);
+        expect(revokedRelationshipPeer.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Revoked);
         expect(revokedRelationshipPeer.peer).toBeDefined();
     });
 
@@ -410,13 +401,13 @@ describe("RelationshipTest: Revoke", function () {
         });
 
         const revokedRelationshipSelf = await requestor.relationships.revoke(pendingRelationship.id);
-        expect(revokedRelationshipSelf.status).toStrictEqual(BackboneRelationshipStatus.Revoked);
+        expect(revokedRelationshipSelf.status).toStrictEqual(RelationshipStatus.Revoked);
 
         await TestUtil.syncUntilHasRelationships(templator, 2); // wait for pending and revoked
         const relationshipsPeer = await templator.relationships.getRelationships({});
         expect(relationshipsPeer).toHaveLength(1);
         const revokedRelationshipPeer = relationshipsPeer[0];
-        expect(revokedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Revoked);
+        expect(revokedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Revoked);
     });
 });
 
@@ -449,7 +440,7 @@ describe("RelationshipTest: Terminate", function () {
 
         const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
         expect(terminatedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(terminatedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Terminated);
+        expect(terminatedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(terminatedRelationshipFromSelf.cache?.auditLog).toHaveLength(3);
         expect(terminatedRelationshipFromSelf.cache!.auditLog[2].reason).toBe(RelationshipAuditLogEntryReason.Termination);
 
@@ -458,7 +449,7 @@ describe("RelationshipTest: Terminate", function () {
         const terminatedRelationshipPeer = syncedRelationshipsPeer[0];
 
         expect(terminatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(terminatedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Terminated);
+        expect(terminatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(terminatedRelationshipPeer.cache?.auditLog).toHaveLength(3);
         expect(terminatedRelationshipPeer.cache!.auditLog[2].reason).toBe(RelationshipAuditLogEntryReason.Termination);
     });
@@ -496,7 +487,7 @@ describe("RelationshipTest: Request Reactivation", function () {
         const reactivationRequestedRelationshipFromSelf = await from.relationships.requestReactivation(relationshipId);
 
         expect(reactivationRequestedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(reactivationRequestedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Terminated);
+        expect(reactivationRequestedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(reactivationRequestedRelationshipFromSelf.cache?.auditLog).toHaveLength(4);
         expect(reactivationRequestedRelationshipFromSelf.cache!.auditLog[3].reason).toBe(RelationshipAuditLogEntryReason.ReactivationRequested);
 
@@ -505,7 +496,7 @@ describe("RelationshipTest: Request Reactivation", function () {
         const reactivationRequestedRelationshipPeer = syncedRelationshipsPeer[0];
 
         expect(reactivationRequestedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(reactivationRequestedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Terminated);
+        expect(reactivationRequestedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(reactivationRequestedRelationshipPeer.cache?.auditLog).toHaveLength(4);
         expect(reactivationRequestedRelationshipPeer.cache!.auditLog[3].reason).toBe(RelationshipAuditLogEntryReason.ReactivationRequested);
     });
@@ -544,7 +535,7 @@ describe("RelationshipTest: Accept Reactivation", function () {
     test("should accept the reactivation of a relationship between two accounts", async function () {
         const acceptedReactivatedRelationshipPeer = await to.relationships.acceptReactivation(relationshipId);
         expect(acceptedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(acceptedReactivatedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Active);
+        expect(acceptedReactivatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
         expect(acceptedReactivatedRelationshipPeer.cache?.auditLog).toHaveLength(5);
         expect(acceptedReactivatedRelationshipPeer.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.AcceptanceOfReactivation);
 
@@ -553,7 +544,7 @@ describe("RelationshipTest: Accept Reactivation", function () {
         const acceptedReactivatedRelationshipFromSelf = syncedRelationshipsFromSelf[0];
 
         expect(acceptedReactivatedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(acceptedReactivatedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Active);
+        expect(acceptedReactivatedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
         expect(acceptedReactivatedRelationshipFromSelf.cache?.auditLog).toHaveLength(5);
         expect(acceptedReactivatedRelationshipFromSelf.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.AcceptanceOfReactivation);
     });
@@ -592,7 +583,7 @@ describe("RelationshipTest: Reject Reactivation", function () {
     test("should reject the reactivation  of a relationship between two accounts", async function () {
         const rejectedReactivatedRelationshipPeer = await to.relationships.rejectReactivation(relationshipId);
         expect(rejectedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(rejectedReactivatedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Terminated);
+        expect(rejectedReactivatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(rejectedReactivatedRelationshipPeer.cache?.auditLog).toHaveLength(5);
         expect(rejectedReactivatedRelationshipPeer.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.RejectionOfReactivation);
 
@@ -601,7 +592,7 @@ describe("RelationshipTest: Reject Reactivation", function () {
         const rejectedReactivatedRelationshipFromSelf = syncedRelationshipsFromSelf[0];
 
         expect(rejectedReactivatedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(rejectedReactivatedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Terminated);
+        expect(rejectedReactivatedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(rejectedReactivatedRelationshipFromSelf.cache?.auditLog).toHaveLength(5);
         expect(rejectedReactivatedRelationshipFromSelf.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.RejectionOfReactivation);
     });
@@ -640,7 +631,7 @@ describe("RelationshipTest: Revoke Reactivation", function () {
     test("should revoke the reactivation  of a relationship between two accounts", async function () {
         const revokedReactivatedRelationshipFromSelf = await from.relationships.revokeReactivation(relationshipId);
         expect(revokedReactivatedRelationshipFromSelf.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(revokedReactivatedRelationshipFromSelf.status).toStrictEqual(BackboneRelationshipStatus.Terminated);
+        expect(revokedReactivatedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(revokedReactivatedRelationshipFromSelf.cache?.auditLog).toHaveLength(5);
         expect(revokedReactivatedRelationshipFromSelf.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.RevocationOfReactivation);
 
@@ -649,7 +640,7 @@ describe("RelationshipTest: Revoke Reactivation", function () {
         const revokedReactivatedRelationshipPeer = syncedRelationshipsPeer[0];
 
         expect(revokedReactivatedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(revokedReactivatedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.Terminated);
+        expect(revokedReactivatedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Terminated);
         expect(revokedReactivatedRelationshipPeer.cache?.auditLog).toHaveLength(5);
         expect(revokedReactivatedRelationshipPeer.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.RevocationOfReactivation);
     });
@@ -692,7 +683,7 @@ describe("RelationshipTest: Decompose", function () {
         const decomposedRelationshipPeer = syncedRelationshipsPeer[0];
 
         expect(decomposedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
-        expect(decomposedRelationshipPeer.status).toStrictEqual(BackboneRelationshipStatus.DeletionProposed);
+        expect(decomposedRelationshipPeer.status).toStrictEqual(RelationshipStatus.DeletionProposed);
         expect(decomposedRelationshipPeer.cache?.auditLog).toHaveLength(4);
         expect(decomposedRelationshipPeer.cache!.auditLog[3].reason).toBe(RelationshipAuditLogEntryReason.Decomposition);
     });
