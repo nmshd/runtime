@@ -322,7 +322,7 @@ export class AttributesController extends ConsumptionBaseController {
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
     }
 
-    public async deleteAttributesSharedWithPeer(peer: CoreAddress): Promise<void> {
+    public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
         const attributes = await this.getLocalAttributes({ "shareInfo.peer": peer.toString() });
         await Promise.all(attributes.map((attribute) => this.deleteAttributeUnsafe(attribute.id)));
     }

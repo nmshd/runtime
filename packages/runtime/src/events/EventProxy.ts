@@ -28,10 +28,10 @@ import {
     MessageWasReadAtChangedEvent,
     PeerRelationshipTemplateLoadedEvent,
     RelationshipChangedEvent,
+    RelationshipDecomposedBySelfEvent,
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent
 } from "./transport";
-import { RelationshipDecomposedBySelfEvent } from "./transport/RelationshipDecomposedBySelfEvent";
 
 export class EventProxy {
     private readonly subscriptionIds: number[] = [];
