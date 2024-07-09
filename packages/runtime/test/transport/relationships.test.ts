@@ -758,7 +758,7 @@ describe("RelationshipDecomposition", () => {
 
     test("messages should be deleted/anonymized", async () => {
         const messagesToPeer = (await services1.transport.messages.getMessages({ query: { "recipients.address": services2.address } })).value;
-        expect(messagesToPeer).toHaveLength(1); // TODO: change expected length to 0 after implemented pesudonymization
+        expect(messagesToPeer).toHaveLength(0);
 
         const messagesFromPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services2.address } })).value;
         expect(messagesFromPeer).toHaveLength(0);
