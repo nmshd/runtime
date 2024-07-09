@@ -295,7 +295,7 @@ export class RelationshipsController extends TransportController {
 
     public async decompose(relationshipId: CoreId): Promise<void> {
         const relationship = await this.getRelationshipWithCache(relationshipId);
-        this.assertRelationshipStatus(relationship, [RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed]);
+        this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed);
 
         const result = await this.client.decomposeRelationship(relationshipId.toString());
         if (result.isError) throw result.error;
@@ -318,7 +318,7 @@ export class RelationshipsController extends TransportController {
         return relationship as Relationship & { cache: CachedRelationship };
     }
 
-    private assertRelationshipStatus(relationship: Relationship, status: RelationshipStatus | RelationshipStatus[]) {
+    private assertRelationshipStatus(relationship: Relationship, ...status: RelationshipStatus[]) {
         if (status.includes(relationship.status)) return;
 
         throw CoreErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status);
