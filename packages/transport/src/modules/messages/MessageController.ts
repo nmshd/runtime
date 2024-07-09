@@ -73,7 +73,7 @@ export class MessageController extends TransportController {
         const message = Message.from(messageDoc);
 
         // a received message only has one recipient (yourself) so it can be deleted without further looking into the recipients
-        if (!message.isOwn) {
+        if (message.cache?.recipients.length === 1 || !message.isOwn) {
             await this.messages.delete(message);
             return;
         }
