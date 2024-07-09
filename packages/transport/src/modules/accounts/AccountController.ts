@@ -1,7 +1,7 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
 import { log } from "@js-soft/ts-utils";
-import { CoreBuffer, CryptoSecretKey } from "@nmshd/crypto";
+import { CryptoSecretKey } from "@nmshd/crypto";
 import { AbstractAuthenticator, Authenticator, ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
 import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
@@ -12,30 +12,30 @@ import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
 import { CertificateValidator } from "../certificates/CertificateValidator";
 import { ChallengeController } from "../challenges/ChallengeController";
+import { DeviceController } from "../devices/DeviceController";
+import { DeviceSecretType } from "../devices/DeviceSecretController";
+import { DevicesController } from "../devices/DevicesController";
 import { BackbonePutDevicesPushNotificationRequest, DeviceAuthClient } from "../devices/backbone/DeviceAuthClient";
 import { DeviceClient } from "../devices/backbone/DeviceClient";
-import { DeviceController } from "../devices/DeviceController";
-import { DevicesController } from "../devices/DevicesController";
-import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { Device, DeviceInfo, DeviceType } from "../devices/local/Device";
 import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredentials";
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
-import { RelationshipsController } from "../relationships/RelationshipsController";
-import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
+import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
+import { RelationshipsController } from "../relationships/RelationshipsController";
 import { SecretController } from "../secrets/SecretController";
 import { ChangedItems } from "../sync/ChangedItems";
 import { SyncProgressCallback, SyncProgressReporter } from "../sync/SyncCallback";
 import { SyncController } from "../sync/SyncController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { TokenController } from "../tokens/TokenController";
-import { IdentityClient } from "./backbone/IdentityClient";
-import { Identity } from "./data/Identity";
 import { IdentityController } from "./IdentityController";
 import { IdentityDeletionProcessController } from "./IdentityDeletionProcessController";
 import { IdentityUtil } from "./IdentityUtil";
+import { IdentityClient } from "./backbone/IdentityClient";
+import { Identity } from "./data/Identity";
 
 export class AccountController {
     private readonly _authenticator: AbstractAuthenticator;
@@ -132,10 +132,6 @@ export class AccountController {
         let device: Device;
         let identityCreated = false;
         let deviceUpdated = false;
-
-        process.env.pseudonym = (
-            await IdentityUtil.createAddress({ algorithm: 1, publicKey: CoreBuffer.fromUtf8("deleted identity") }, new URL(this._config.baseUrl).hostname)
-        ).toString();
 
         if (!availableIdentityDoc && !availableDeviceDoc) {
             if (!deviceSharedSecret) {
