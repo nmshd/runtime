@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
-import { AccountController, CachedRelationship, CoreId, Relationship, RelationshipsController } from "@nmshd/transport";
+import { AccountController, CoreId, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -36,8 +36,9 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
 
         // backbone call first so nothing is deleted in case it goes wrong
         await this.relationshipsController.decompose(relationship.id);
-        await this.accountController.cleanupDataOfDecomposedRelationship(relationship as Relationship & { cache: CachedRelationship });
-        await this.consumptionController.deleteDataExchangedWithPeer(relationship.peer.address, relationship.id);
+
+        await this.accountController.cleanupDataOfDecomposedRelationship(relationship);
+        await this.consumptionController.cleanupDataOfDecomposedRelationship(relationship.peer.address, relationship.id);
 
         await this.accountController.syncDatawallet();
 
