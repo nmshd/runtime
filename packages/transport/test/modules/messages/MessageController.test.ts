@@ -191,23 +191,27 @@ describe("MessageController", function () {
 
         describe("tests after relationship decomposition", function () {
             let relationship2Id: CoreId;
+            let recipient2: AccountController;
+
             beforeAll(async function () {
-                const recipient2 = await TestUtil.provideAccounts(transport, 1);
+                recipient2 = (await TestUtil.provideAccounts(transport, 1))[0];
                 relationship2Id = (await TestUtil.addRelationship(sender, recipient2)).acceptedRelationshipFromSelf.id;
+
                 await TestUtil.sendMessage(sender, recipient2);
                 await TestUtil.decomposeRelationship(sender, recipient);
             });
 
-            test("messages should be deleted/pseudonymized", function () {
+            test("messages should be deleted/pseudonymized", async function () {
                 const messages = await recipient.messages.getMessages();
                 expect(messages).toHaveLength(1);
-                expect(message[0].cache.recipients.map((r) => [r.address, r.relationshipId])).toBe([
-                    [await TestUtil.generateAddressPseudonym(), undefined],
+                expect(messages[0].cache!.recipients.map((r) => [r.address, r.relationshipId])).toBe([
+                    [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
                     [recipient2.identity.address, relationship2Id]
                 ]);
             });
         });
     });
+
     test("should sync the pseudonymization", async function () {
         const { device1: sender1, device2: sender2 } = await TestUtil.createIdentityWithTwoDevices(connection, {
             datawalletEnabled: true
@@ -228,7 +232,7 @@ describe("MessageController", function () {
         await TestUtil.syncUntilHasMessages(sender2);
         const sender2Messages = await sender2.messages.getMessages();
         expect(sender2Messages[0].cache?.recipients.map((r) => [r.address, r.relationshipId])).toBe([
-            [await TestUtil.generateAddressPseudonym(), undefined],
+            [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
             [recipient2.identity.address, relationship2Id]
         ]);
     });

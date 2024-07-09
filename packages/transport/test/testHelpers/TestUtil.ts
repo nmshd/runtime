@@ -22,6 +22,7 @@ import {
     IChangedItems,
     IConfigOverwrite,
     IdentityDeletionProcess,
+    IdentityUtil,
     ISendFileParameters,
     Message,
     Relationship,
@@ -396,7 +397,7 @@ export class TestUtil {
     }
 
     public static async decomposeRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
-        const relationship = await from.relationships.getRelationshipToIdentity(to.identity.address);
+        const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
         await from.relationships.decompose(relationship.id);
         await from.cleanupDataOfDecomposedRelationship(relationship);
         const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
@@ -553,7 +554,7 @@ export class TestUtil {
     }
 
     public static async sendMessages(from: AccountController, recipients: AccountController[], content?: Serializable): Promise<Message> {
-        return await this.sendMessagesWithFiles(from, to, [], content);
+        return await this.sendMessagesWithFiles(from, recipients, [], content);
     }
 
     public static async sendMessagesWithFile(from: AccountController, recipients: AccountController[], file: File, content?: Serializable): Promise<Message> {

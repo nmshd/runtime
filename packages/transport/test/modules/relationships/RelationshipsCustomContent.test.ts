@@ -28,6 +28,7 @@ describe("Relationships Custom Content", function () {
 
         await connection.close();
     });
+
     test("should create a relationship with custom content", async function () {
         const tokenReference = await TestUtil.sendRelationshipTemplateAndToken(sender);
         const template = await TestUtil.fetchRelationshipTemplateFromTokenReference(recipient, tokenReference);

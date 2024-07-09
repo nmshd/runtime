@@ -9,11 +9,11 @@ import {
     RelationshipAuditLogEntryReason,
     RelationshipChangedEvent,
     RelationshipDTO,
+    RelationshipDecomposedBySelfEvent,
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent,
     RelationshipStatus
 } from "../../src";
-import { RelationshipDecomposedBySelfEvent } from "../../src/events/transport/RelationshipDecomposedBySelfEvent";
 import {
     QueryParamConditions,
     RuntimeServiceProvider,

@@ -139,6 +139,7 @@ describe("Message errors", () => {
         });
         requestId = createRequestResult.value.id;
     });
+
     test("should throw correct error for empty 'to' in the Message", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
