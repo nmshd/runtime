@@ -155,7 +155,7 @@ export class ConsumptionController {
         ]);
     }
 
-    public async deleteDataExchangedWithPeer(peer: CoreAddress, relationshipId: CoreId): Promise<void> {
+    public async cleanupDataOfDecomposedRelationship(peer: CoreAddress, relationshipId: CoreId): Promise<void> {
         await this.attributes.deleteAttributesExchangedWithPeer(peer);
         await this.outgoingRequests.deleteRequestsToPeer(peer);
         await this.incomingRequests.deleteRequestsFromPeer(peer);
