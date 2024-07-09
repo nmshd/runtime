@@ -36,7 +36,7 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
 
         // backbone call first so nothing is deleted in case it goes wrong
         await this.accountController.decomposeRelationshipAndCleanupData(relationship as Relationship & { cache: CachedRelationship });
-        await this.consumptionController.deleteDataExchangedWithPeer(relationship.peer.address);
+        await this.consumptionController.deleteDataExchangedWithPeer(relationship.peer.address, relationship.id);
 
         await this.accountController.syncDatawallet();
 

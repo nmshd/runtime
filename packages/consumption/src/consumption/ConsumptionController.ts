@@ -13,7 +13,7 @@ import {
     ShareAttributeRequestItem,
     ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem
 } from "@nmshd/content";
-import { AccountController, CoreAddress, Transport } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreId, Transport } from "@nmshd/transport";
 import {
     AttributeListenersController,
     AttributesController,
@@ -155,10 +155,12 @@ export class ConsumptionController {
         ]);
     }
 
-    public async deleteDataExchangedWithPeer(peer: CoreAddress): Promise<void> {
-        await this.incomingRequests.deleteRequestsFromPeer(peer);
-        await this.outgoingRequests.deleteRequestsToPeer(peer);
-        await this.notifications.deleteNotificationsExchangedWithPeer(peer);
+    public async deleteDataExchangedWithPeer(peer: CoreAddress, relationshipId: CoreId): Promise<void> {
         await this.attributes.deleteAttributesExchangedWithPeer(peer);
+        await this.outgoingRequests.deleteRequestsToPeer(peer);
+        await this.incomingRequests.deleteRequestsFromPeer(peer);
+        await this.settings.deleteSettingsForRelationship(relationshipId);
+        await this.attributeListeners.deletePeerAttributeListeners(peer);
+        await this.notifications.deleteNotificationsExchangedWithPeer(peer);
     }
 }
