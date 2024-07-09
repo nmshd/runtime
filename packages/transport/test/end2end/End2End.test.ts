@@ -686,6 +686,8 @@ describe("RelationshipTest: Decompose", function () {
         expect(decomposedRelationshipPeer.status).toStrictEqual(RelationshipStatus.DeletionProposed);
         expect(decomposedRelationshipPeer.cache?.auditLog).toHaveLength(4);
         expect(decomposedRelationshipPeer.cache!.auditLog[3].reason).toBe(RelationshipAuditLogEntryReason.Decomposition);
+
+        expect(to.relationships.decompose).not.toThrow();
     });
 });
 
