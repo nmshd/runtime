@@ -27,7 +27,7 @@ export class MessageMapper {
             content: message.cache.content.toJSON(),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: this.getRecipients(message.cache.recipients),
+            recipients: this.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
             attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
             isOwn: message.isOwn,
@@ -44,7 +44,7 @@ export class MessageMapper {
             content: message.cache.content.toJSON(),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: this.getRecipients(message.cache.recipients),
+            recipients: this.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
             attachments: message.cache.attachments.map((a) => a.toString()),
             isOwn: message.isOwn,
@@ -56,7 +56,7 @@ export class MessageMapper {
         return messages.map((message) => this.toMessageDTO(message));
     }
 
-    private static getRecipients(recipients: CachedMessageRecipient[]) {
+    private static toRecipients(recipients: CachedMessageRecipient[]) {
         return recipients.map((r) => {
             return {
                 address: r.address.toString(),
