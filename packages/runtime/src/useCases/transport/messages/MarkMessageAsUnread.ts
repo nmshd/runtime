@@ -29,6 +29,6 @@ export class MarkMessageAsUnreadUseCase extends UseCase<MarkMessageAsUnreadReque
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(await MessageMapper.toMessageDTO(updatedMessage));
+        return Result.ok(MessageMapper.toMessageDTO(updatedMessage));
     }
 }

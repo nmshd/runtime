@@ -49,7 +49,7 @@ export class SyncEverythingUseCase extends UseCase<SyncEverythingRequest, SyncEv
     private async _executeInternal(request: SyncEverythingRequest) {
         const changedItems = await this.accountController.syncEverything(request.callback);
 
-        const messageDTOs = await MessageMapper.toMessageDTOList(changedItems.messages);
+        const messageDTOs = MessageMapper.toMessageDTOList(changedItems.messages);
         const relationshipDTOs = RelationshipMapper.toRelationshipDTOList(changedItems.relationships);
         const identityDeletionProcessDTOs = IdentityDeletionProcessMapper.toIdentityDeletionProcessDTOList(changedItems.identityDeletionProcesses);
 

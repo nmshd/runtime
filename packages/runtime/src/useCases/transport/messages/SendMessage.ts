@@ -53,7 +53,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(await MessageMapper.toMessageDTO(result));
+        return Result.ok(MessageMapper.toMessageDTO(result));
     }
 
     private async validateMessageContent(content: any, recipients: string[]) {

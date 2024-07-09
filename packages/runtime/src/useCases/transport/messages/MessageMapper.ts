@@ -52,8 +52,8 @@ export class MessageMapper {
         };
     }
 
-    public static async toMessageDTOList(messages: Message[]): Promise<MessageDTO[]> {
-        return await Promise.all(messages.map((message) => this.toMessageDTO(message)));
+    public static toMessageDTOList(messages: Message[]): MessageDTO[] {
+        return messages.map((message) => this.toMessageDTO(message));
     }
 
     private static getRecipients(recipients: MessageEnvelopeRecipient[], relationshipIds: CoreId[]) {
