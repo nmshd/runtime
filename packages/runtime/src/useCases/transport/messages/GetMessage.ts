@@ -40,6 +40,6 @@ export class GetMessageUseCase extends UseCase<GetMessageRequest, MessageWithAtt
             throw new Error("A file could not be fetched.");
         }
 
-        return Result.ok(await MessageMapper.toMessageWithAttachmentsDTO(message, attachments as File[]));
+        return Result.ok(MessageMapper.toMessageWithAttachmentsDTO(message, attachments as File[]));
     }
 }

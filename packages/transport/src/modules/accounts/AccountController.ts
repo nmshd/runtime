@@ -25,6 +25,8 @@ import { MessageController } from "../messages/MessageController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
+import { CachedRelationship } from "../relationships/local/CachedRelationship";
+import { Relationship } from "../relationships/local/Relationship";
 import { SecretController } from "../secrets/SecretController";
 import { ChangedItems } from "../sync/ChangedItems";
 import { SyncProgressCallback, SyncProgressReporter } from "../sync/SyncCallback";
@@ -429,5 +431,11 @@ export class AccountController {
         }
 
         return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, this.unpushedDatawalletModifications);
+    }
+
+    public async decomposeRelationshipAndCleanupData(relationship: Relationship & { cache: CachedRelationship }): Promise<void> {
+        await this.relationships.decompose(relationship.id);
+        await this.relationshipTemplates.cleanupTemplateOfDecomposedRelationship(relationship.cache.template);
+        await this.messages.deleteRelationshipFromMessages(relationship);
     }
 }

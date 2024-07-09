@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { AttributesController, IncomingRequestsController, NotificationsController, OutgoingRequestsController } from "@nmshd/consumption";
-import { AccountController, CoreId, MessageController, Relationship, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
+import { ConsumptionController } from "@nmshd/consumption";
+import { AccountController, CachedRelationship, CoreId, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -16,14 +16,9 @@ class Validator extends SchemaValidator<DecomposeRelationshipRequest> {
 
 export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipRequest, null> {
     public constructor(
-        @Inject private readonly relationshipsController: RelationshipsController,
-        @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
-        @Inject private readonly incomingRequestsController: IncomingRequestsController,
-        @Inject private readonly outgoingRequestsController: OutgoingRequestsController,
-        @Inject private readonly messageController: MessageController,
-        @Inject private readonly notificationsController: NotificationsController,
-        @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly consumptionController: ConsumptionController,
+        @Inject private readonly relationshipsController: RelationshipsController,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -38,16 +33,10 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
         if (!relationship.cache) {
             return Result.fail(RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString()));
         }
-        const peer = relationship.peer;
 
         // backbone call first so nothing is deleted in case it goes wrong
-        await this.relationshipsController.decompose(relationship.id);
-        await this.relationshipTemplateController.cleanupTemplateOfDecomposedRelationship(relationship.cache.template);
-        await this.messageController.deleteRelationshipFromMessages(relationship);
-        await this.incomingRequestsController.deleteRequestsFromPeer(peer.address);
-        await this.outgoingRequestsController.deleteRequestsToPeer(peer.address);
-        await this.notificationsController.deleteNotificationsWithPeer(peer.address);
-        await this.attributesController.deleteAttributesExchangedWithPeer(peer.address);
+        await this.accountController.decomposeRelationshipAndCleanupData(relationship as Relationship & { cache: CachedRelationship });
+        await this.consumptionController.deleteDataExchangedWithPeer(relationship.peer.address);
 
         await this.accountController.syncDatawallet();
 
