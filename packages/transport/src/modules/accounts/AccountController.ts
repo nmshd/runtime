@@ -433,8 +433,7 @@ export class AccountController {
         return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, this.unpushedDatawalletModifications);
     }
 
-    public async decomposeRelationshipAndCleanupData(relationship: Relationship & { cache: CachedRelationship }): Promise<void> {
-        await this.relationships.decompose(relationship.id);
+    public async cleanupDataOfDecomposedRelationship(relationship: Relationship & { cache: CachedRelationship }): Promise<void> {
         await this.relationshipTemplates.cleanupTemplateOfDecomposedRelationship(relationship.cache.template);
         await this.messages.deleteRelationshipFromMessages(relationship);
     }
