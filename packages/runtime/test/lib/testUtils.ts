@@ -18,7 +18,8 @@ import {
     RequestItemGroupJSON,
     RequestItemJSONDerivations
 } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreBuffer } from "@nmshd/crypto";
+import { CoreAddress, CoreId, IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
 import {
@@ -696,4 +697,11 @@ export async function waitForEvent<TEvent>(
         eventBus.unsubscribe(subscriptionId);
         clearTimeout(timeoutId);
     });
+}
+
+export async function generateAddressPseudonym(backboneBaseUrl: string): Promise<CoreAddress> {
+    const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
+    const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, new URL(backboneBaseUrl).hostname);
+
+    return pseudonym;
 }
