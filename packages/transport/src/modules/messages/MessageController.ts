@@ -72,8 +72,8 @@ export class MessageController extends TransportController {
         const messageDoc = await this.messages.read(messageId.toString());
         const message = Message.from(messageDoc);
 
-        // a received message only has one recipient (yourself) so it can be deleted without further looking into the recipients
-        if (message.cache?.recipients.length === 1 || !message.isOwn) {
+        // also if the message is not own, it can be deleted when there is only one recipient
+        if (!message.isOwn || message.cache!.recipients.length === 1) {
             await this.messages.delete(message);
             return;
         }
@@ -93,9 +93,6 @@ export class MessageController extends TransportController {
             await this.messages.delete(message);
             return;
         }
-
-        // TODO: this will work in the future, but for now it only undoes the changes made above
-        // await this.updateCacheOfMessage(message);
 
         await this.messages.update(messageDoc, message);
     }
@@ -494,7 +491,6 @@ export class MessageController extends TransportController {
             let relationship = await this.relationships.getRelationshipToIdentity(peer);
             if (relationship?.status === RelationshipStatus.Rejected || relationship?.status === RelationshipStatus.Revoked) {
                 // if the relationship is rejected or revoked, it should be handled like there is no relationship
-                // TODO: remove this when we remove Rejected and Revoked relationships from the database
                 relationship = undefined;
             }
 

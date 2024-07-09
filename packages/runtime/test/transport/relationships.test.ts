@@ -26,6 +26,7 @@ import {
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
+    generateAddressPseudonym,
     getRelationship,
     sendAndReceiveNotification,
     sendMessageToMultipleRecipients,
@@ -672,6 +673,7 @@ describe("RelationshipDecomposition", () => {
     let templateId: string;
     let relationshipId2: string;
     let templateId2: string;
+    let multipleRecipientsMessageId: string;
 
     let decompositionResult: Result<null, ApplicationError>;
     beforeAll(async () => {
@@ -688,7 +690,7 @@ describe("RelationshipDecomposition", () => {
         templateId2 = relationship2.template.id;
 
         await createRelationshipData(services1, services3);
-        await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
+        multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).id;
 
         await services1.transport.relationships.terminateRelationship({ relationshipId });
         decompositionResult = await services1.transport.relationships.decomposeRelationship({ relationshipId });
@@ -769,13 +771,13 @@ describe("RelationshipDecomposition", () => {
         const messagesFromControlPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services3.address } })).value;
         expect(messagesFromControlPeer).not.toHaveLength(0);
 
-        // TODO: use those tests again after implemented pseudonymization
-        // const addressPseudonym = (await getAddressPseudonym()).toString();
-        // const anonymizedMessages = (await services1.transport.messages.getMessages({ query: { "recipients.address": addressPseudonym } })).value;
-        // expect(anonymizedMessages).toHaveLength(1);
-        // const anonymizedMessage = anonymizedMessages[0];
-        // expect(anonymizedMessage.id).toBe(multipleRecipientsMessageId);
-        // expect(anonymizedMessage.recipients).toBe([services3.address, addressPseudonym]);
+        const addressPseudonym = (await generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!)).toString();
+        const anonymizedMessages = (await services1.transport.messages.getMessages({ query: { "recipients.address": addressPseudonym } })).value;
+        expect(anonymizedMessages).toHaveLength(1);
+
+        const anonymizedMessage = anonymizedMessages[0];
+        expect(anonymizedMessage.id).toBe(multipleRecipientsMessageId);
+        expect(anonymizedMessage.recipients.map((r) => r.address)).toStrictEqual([addressPseudonym, services3.address]);
     });
 
     test("messages with multiple recipients should be deleted if all its relationships are decomposed", async () => {
