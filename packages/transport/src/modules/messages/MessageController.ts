@@ -63,12 +63,12 @@ export class MessageController extends TransportController {
         });
     }
 
-    public async deleteRelationshipFromMessages(relationship: Relationship): Promise<void> {
+    public async cleanupMessagesOfDecomposedRelationship(relationship: Relationship): Promise<void> {
         const messages = await this.getMessagesByRelationshipId(relationship.id);
-        await Promise.all(messages.map((message) => this.deleteRelationshipFromMessage(message.id, relationship)));
+        await Promise.all(messages.map((message) => this.cleanupMessageOfDecomposedRelationship(message.id, relationship)));
     }
 
-    private async deleteRelationshipFromMessage(messageId: CoreId, relationship: Relationship): Promise<void> {
+    private async cleanupMessageOfDecomposedRelationship(messageId: CoreId, relationship: Relationship): Promise<void> {
         const messageDoc = await this.messages.read(messageId.toString());
         const message = Message.from(messageDoc);
 

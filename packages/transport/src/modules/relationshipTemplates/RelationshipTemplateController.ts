@@ -6,6 +6,7 @@ import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { PeerRelationshipTemplateLoadedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
+import { Relationship } from "../relationships/local/Relationship";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetRelationshipTemplatesResponse } from "./backbone/BackboneGetRelationshipTemplates";
@@ -249,9 +250,19 @@ export class RelationshipTemplateController extends TransportController {
         return relationshipTemplate;
     }
 
-    public async cleanupTemplateOfDecomposedRelationship(template: RelationshipTemplate): Promise<void> {
-        if (!template.isOwn || template.cache?.maxNumberOfAllocations === 1) {
-            await this.templates.delete(template);
+    public async cleanupTemplatesOfDecomposedRelationship(relationship: Relationship): Promise<void> {
+        const templateOfRelationship = relationship.cache!.template;
+
+        if (!templateOfRelationship.isOwn || templateOfRelationship.cache!.maxNumberOfAllocations === 1) {
+            await this.templates.delete(templateOfRelationship);
+        }
+
+        const otherTemplatesOfPeer = await this.getRelationshipTemplates({
+            "cache.createdBy": relationship.peer.address.toString()
+        });
+
+        for (const teamplate of otherTemplatesOfPeer) {
+            await this.templates.delete(teamplate);
         }
     }
 }
