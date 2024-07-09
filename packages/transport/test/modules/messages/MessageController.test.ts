@@ -16,8 +16,8 @@ describe("MessageController", function () {
 
     function expectValidMessages(sentMessage: Message, receivedMessage: Message, nowMinusSeconds: CoreDate) {
         expect(sentMessage.id.toString()).toBe(receivedMessage.id.toString());
-        const sentRelIds = sentMessage.relationshipIds.map((id) => id.toString());
-        const receivedRelIds = receivedMessage.relationshipIds.map((id) => id.toString());
+        const sentRelIds = sentMessage.cache!.recipients.map((recipient) => recipient.relationshipId!.toString());
+        const receivedRelIds = receivedMessage.cache!.recipients.map((recipient) => recipient.relationshipId?.toString());
         expect(sentRelIds.join()).toBe(receivedRelIds.join());
         expect(sentMessage.cache).toBeDefined();
         expect(sentMessage.cachedAt?.isSameOrAfter(nowMinusSeconds)).toBe(true);
@@ -94,8 +94,8 @@ describe("MessageController", function () {
 
         const relationship = await recipient.relationships.getRelationshipToIdentity(receivedMessage.cache!.createdBy);
         expectValidMessages(sentMessage, receivedMessage, tempDate);
-        expect(receivedMessage.relationshipIds[0].toString()).toStrictEqual(relationship!.id.toString());
-        expect(sentMessage.relationshipIds[0].toString()).toStrictEqual(relationship!.id.toString());
+        expect(receivedMessage.cache!.recipients[0].relationshipId!.toString()).toStrictEqual(relationship!.id.toString());
+        expect(sentMessage.cache!.recipients[0].relationshipId!.toString()).toStrictEqual(relationship!.id.toString());
         expect(receivedMessage.cache!.recipients[0].receivedByDevice?.toString()).toBe(recipient.activeDevice.id.toString());
     });
 

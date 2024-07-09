@@ -489,7 +489,9 @@ export class MessageController extends TransportController {
         const recipients: CachedMessageRecipient[] = [];
 
         for (const recipient of envelope.recipients) {
-            let relationship = await this.relationships.getRelationshipToIdentity(recipient.address);
+            // this resolves relationships of incoming and outgoing messages, therefore we have to make sure the peer is resolved instead of the recipient, because the recipient can be the current address
+            const peer = this.parent.identity.isMe(envelope.createdBy) ? recipient.address : envelope.createdBy;
+            let relationship = await this.relationships.getRelationshipToIdentity(peer);
             if (relationship?.status === RelationshipStatus.Rejected || relationship?.status === RelationshipStatus.Revoked) {
                 // if the relationship is rejected or revoked, it should be handled like there is no relationship
                 // TODO: remove this when we remove Rejected and Revoked relationships from the database
