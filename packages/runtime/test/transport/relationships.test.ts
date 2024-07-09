@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { CoreBuffer } from "@nmshd/crypto";
-import { IdentityUtil } from "@nmshd/transport";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
@@ -675,7 +672,6 @@ describe("RelationshipDecomposition", () => {
     let templateId: string;
     let relationshipId2: string;
     let templateId2: string;
-    let multipleRecipientsMessageId: string;
 
     let decompositionResult: Result<null, ApplicationError>;
     beforeAll(async () => {
@@ -692,7 +688,7 @@ describe("RelationshipDecomposition", () => {
         templateId2 = relationship2.template.id;
 
         await createRelationshipData(services1, services3);
-        multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).id;
+        await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
 
         await services1.transport.relationships.terminateRelationship({ relationshipId });
         decompositionResult = await services1.transport.relationships.decomposeRelationship({ relationshipId });
@@ -787,11 +783,6 @@ describe("RelationshipDecomposition", () => {
         const messages = (await services1.transport.messages.getMessages({})).value;
         expect(messages).toHaveLength(0);
     });
-
-    async function getAddressPseudonym() {
-        const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
-        return await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, "prod.enmeshed.eu");
-    }
 
     async function createRelationshipData(services1: TestRuntimeServices, services2: TestRuntimeServices) {
         const requestContent = {
