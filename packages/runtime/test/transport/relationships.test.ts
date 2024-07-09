@@ -74,9 +74,11 @@ describe("Create Relationship", () => {
         test("should not accept relationship sent by yourself", async () => {
             expect(await services2.transport.relationships.acceptRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
         });
+
         test("should not reject relationship sent by yourself", async () => {
             expect(await services2.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
         });
+
         test("should not revoke relationship sent by yourself", async () => {
             expect(await services1.transport.relationships.revokeRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
         });
