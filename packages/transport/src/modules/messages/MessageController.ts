@@ -2,21 +2,24 @@ import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId, ICoreAddress, TransportError } from "../../core";
+import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId, ICoreAddress, ICoreId, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { MessageSentEvent, MessageWasReadAtChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
+import { IdentityUtil } from "../accounts/IdentityUtil";
 import { File } from "../files/local/File";
 import { FileReference } from "../files/transmission/FileReference";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
 import { Relationship } from "../relationships/local/Relationship";
+import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetMessagesResponse } from "./backbone/BackboneGetMessages";
 import { BackbonePostMessagesRecipientRequest } from "./backbone/BackbonePostMessages";
 import { MessageClient } from "./backbone/MessageClient";
 import { CachedMessage } from "./local/CachedMessage";
+import { CachedMessageRecipient } from "./local/CachedMessageRecipient";
 import { Message } from "./local/Message";
 import { ISendMessageParameters, SendMessageParameters } from "./local/SendMessageParameters";
 import { MessageContentWrapper } from "./transmission/MessageContentWrapper";
@@ -56,9 +59,7 @@ export class MessageController extends TransportController {
 
     public async getMessagesByRelationshipId(id: CoreId): Promise<Message[]> {
         return await this.getMessages({
-            [nameof<Message>((m) => m.relationshipIds)]: {
-                $contains: id.toString()
-            }
+            [`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.recipients)}.${nameof<CachedMessageRecipient>((m) => m.relationshipId)}`]: id.toString()
         });
     }
 
@@ -71,12 +72,30 @@ export class MessageController extends TransportController {
         const messageDoc = await this.messages.read(messageId.toString());
         const message = Message.from(messageDoc);
 
-        message.relationshipIds = message.relationshipIds.filter((id) => !id.equals(relationship.id));
-        if (message.relationshipIds.length === 0) {
+        // a received message only has one recipient (yourself) so it can be deleted without further looking into the recipients
+        if (!message.isOwn) {
             await this.messages.delete(message);
             return;
         }
-        await this.updateCacheOfMessage(message);
+
+        const recipient = message.cache!.recipients.find((r) => r.relationshipId?.equals(relationship.id));
+        if (!recipient) {
+            this.log.warn(`Recipient not found in message ${message.id.toString()}`);
+            return;
+        }
+
+        const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: CoreBuffer.fromUtf8("deleted identity") }, new URL(this.parent.config.baseUrl).hostname);
+
+        recipient.address = pseudonym;
+        recipient.relationshipId = undefined;
+
+        if (message.cache!.recipients.every((r) => r.address.equals(pseudonym))) {
+            await this.messages.delete(message);
+            return;
+        }
+
+        // TODO: this will work in the future, but for now it only undoes the changes made above
+        // await this.updateCacheOfMessage(message);
 
         await this.messages.update(messageDoc, message);
     }
@@ -173,8 +192,7 @@ export class MessageController extends TransportController {
         const message = Message.from({
             id: envelope.id,
             isOwn: false,
-            secretKey: messageKey,
-            relationshipIds: [relationship.id]
+            secretKey: messageKey
         });
         message.setCache(cachedMessage);
         await this.messages.create(message);
@@ -301,7 +319,10 @@ export class MessageController extends TransportController {
         const plaintextBuffer = CoreBuffer.fromUtf8(serializedPlaintext);
 
         const messageSignatures: MessageSignature[] = [];
-        const relationshipIds = [];
+
+        // a object of address to relationshipId
+        const addressToRelationshipId: Record<string, ICoreId> = {};
+
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
             if (!relationship) {
@@ -314,7 +335,8 @@ export class MessageController extends TransportController {
                 signature: signature
             });
             messageSignatures.push(messageSignature);
-            relationshipIds.push(relationship.id);
+
+            addressToRelationshipId[recipient.toString()] = relationship.id;
         }
 
         const signed = MessageSigned.from({
@@ -345,12 +367,22 @@ export class MessageController extends TransportController {
             })
         ).value;
 
+        const recipients = envelopeRecipients.map((r) =>
+            CachedMessageRecipient.from({
+                address: r.address,
+                encryptedKey: r.encryptedKey,
+                receivedAt: r.receivedAt,
+                receivedByDevice: r.receivedByDevice,
+                relationshipId: addressToRelationshipId[r.address.toString()]
+            })
+        );
+
         const cachedMessage = CachedMessage.from({
             content: parsedParams.content,
             createdAt: CoreDate.from(response.createdAt),
             createdBy: this.parent.identity.identity.address,
             createdByDevice: this.parent.activeDevice.id,
-            recipients: envelopeRecipients,
+            recipients,
             attachments: publicAttachmentArray,
             receivedByEveryone: false
         });
@@ -360,8 +392,7 @@ export class MessageController extends TransportController {
             secretKey: secret,
             cache: cachedMessage,
             cachedAt: CoreDate.utc(),
-            isOwn: true,
-            relationshipIds: relationshipIds
+            isOwn: true
         });
 
         await this.messages.create(message);
@@ -454,6 +485,30 @@ export class MessageController extends TransportController {
             messageKey = peerKey;
         }
 
+        const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: CoreBuffer.fromUtf8("deleted identity") }, new URL(this.parent.config.baseUrl).hostname);
+        const recipients: CachedMessageRecipient[] = [];
+
+        for (const recipient of envelope.recipients) {
+            let relationship = await this.relationships.getRelationshipToIdentity(recipient.address);
+            if (relationship?.status === RelationshipStatus.Rejected || relationship?.status === RelationshipStatus.Revoked) {
+                // if the relationship is rejected or revoked, it should be handled like there is no relationship
+                // TODO: remove this when we remove Rejected and Revoked relationships from the database
+                relationship = undefined;
+            }
+
+            recipients.push(
+                CachedMessageRecipient.from({
+                    // make sure to save the pseudonym instead of the real address if the relationship was removed
+                    // in cases the backbone did not already process the relationship termination
+                    address: relationship ? recipient.address : pseudonym,
+                    encryptedKey: recipient.encryptedKey,
+                    receivedAt: recipient.receivedAt,
+                    receivedByDevice: recipient.receivedByDevice,
+                    relationshipId: relationship?.id
+                })
+            );
+        }
+
         this.log.trace("Message is valid. Fetching attachments for message...");
         const fileArray: CoreId[] = [];
         const promises = [];
@@ -468,7 +523,7 @@ export class MessageController extends TransportController {
         const cachedMessage = CachedMessage.from({
             createdBy: envelope.createdBy,
             createdByDevice: envelope.createdByDevice,
-            recipients: envelope.recipients,
+            recipients,
             attachments: fileArray,
             content: plainMessage.content,
             createdAt: envelope.createdAt,
