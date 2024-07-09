@@ -22,6 +22,8 @@ import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredential
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
+import { CachedRelationship } from "../relationships/local/CachedRelationship";
+import { Relationship } from "../relationships/local/Relationship";
 import { RelationshipsController } from "../relationships/RelationshipsController";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
@@ -433,5 +435,11 @@ export class AccountController {
         }
 
         return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, this.unpushedDatawalletModifications);
+    }
+
+    public async decomposeRelationshipAndCleanupData(relationship: Relationship & { cache: CachedRelationship }): Promise<void> {
+        await this.relationships.decompose(relationship.id);
+        await this.relationshipTemplates.cleanupTemplateOfDecomposedRelationship(relationship.cache.template);
+        await this.messages.deleteRelationshipFromMessages(relationship);
     }
 }
