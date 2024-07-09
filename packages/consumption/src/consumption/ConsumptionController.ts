@@ -158,7 +158,7 @@ export class ConsumptionController {
     public async deleteDataExchangedWithPeer(peer: CoreAddress): Promise<void> {
         await this.incomingRequests.deleteRequestsFromPeer(peer);
         await this.outgoingRequests.deleteRequestsToPeer(peer);
-        await this.notifications.deleteNotificationsWithPeer(peer);
+        await this.notifications.deleteNotificationsExchangedWithPeer(peer);
         await this.attributes.deleteAttributesExchangedWithPeer(peer);
     }
 }
