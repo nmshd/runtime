@@ -1,6 +1,6 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { CachedMessage, Message, MessageController, MessageEnvelopeRecipient } from "@nmshd/transport";
+import { CachedMessage, CachedMessageRecipient, Message, MessageController, MessageEnvelopeRecipient } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
 import { MessageDTO, RecipientDTO } from "../../../types";
@@ -62,7 +62,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
 
         custom: {
             [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.relationshipId)}`]: (query: any, input: any) => {
-                query[nameof<Message>((m) => m.relationshipIds)] = {
+                query[`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.recipients)}.${nameof<CachedMessageRecipient>((m) => m.relationshipId)}`] = {
                     $containsAny: Array.isArray(input) ? input : [input]
                 };
             },
