@@ -1,6 +1,6 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { CachedMessage, Message, MessageController, MessageEnvelopeRecipient } from "@nmshd/transport";
+import { CachedMessage, CachedMessageRecipient, Message, MessageController, MessageEnvelopeRecipient } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
 import { MessageDTO, RecipientDTO } from "../../../types";
@@ -54,6 +54,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
             [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.address)}`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>(
                 (m) => m.recipients
             )}.${nameof<MessageEnvelopeRecipient>((r) => r.address)}`,
+            [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.relationshipId)}`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.recipients)}.${nameof<CachedMessageRecipient>((m) => m.relationshipId)}`,
             [`${nameof<MessageDTO>((m) => m.content)}.@type`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.@type`,
             [`${nameof<MessageDTO>((m) => m.content)}.body`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.body`,
             [`${nameof<MessageDTO>((m) => m.content)}.subject`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.subject`,
@@ -61,11 +62,6 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
         },
 
         custom: {
-            [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.relationshipId)}`]: (query: any, input: any) => {
-                query[nameof<Message>((m) => m.relationshipIds)] = {
-                    $containsAny: Array.isArray(input) ? input : [input]
-                };
-            },
             [nameof<MessageDTO>((m) => m.attachments)]: (query: any, input: any) => {
                 if (input === "+") {
                     query[`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.attachments)}`] = { $not: { $size: 0 } };
