@@ -128,7 +128,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 ownSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatuses for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'.");
+            }).toThrow("The only valid `deletionStatuses` for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'.");
         });
 
         test("should throw trying to set the deletionInfo of an own shared Attribute to DeletedByOwner", function () {
@@ -136,7 +136,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 ownSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatuses for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'.");
+            }).toThrow("The only valid `deletionStatuses` for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'.");
         });
     });
 
@@ -166,7 +166,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 peerSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
+            }).toThrow("The only valid `deletionStatuses` for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
         });
 
         test("should throw trying to set the deletionInfo of a peer shared Attribute to DeletionRequestRejected", function () {
@@ -174,7 +174,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 peerSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
+            }).toThrow("The only valid `deletionStatuses` for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
         });
 
         test("should throw trying to set the deletionInfo of a peer shared Attribute to ToBeDeletedByPeer", function () {
@@ -182,7 +182,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 peerSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
+            }).toThrow("The only valid `deletionStatuses` for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
         });
 
         test("should throw trying to set the deletionInfo of a peer shared Attribute to DeletedByPeer", function () {
@@ -190,7 +190,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 peerSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
+            }).toThrow("The only valid `deletionStatuses` for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
         });
     });
 
@@ -210,7 +210,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+            }).toThrow("The only valid `deletionStatus` for third party owned `RelationshipAttributes` is 'DeletedByPeer'.");
         });
 
         test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to DeletionRequestSent", function () {
@@ -218,7 +218,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+            }).toThrow("The only valid `deletionStatus` for third party owned `RelationshipAttributes` is 'DeletedByPeer'.");
         });
 
         test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to DeletionRequestRejected", function () {
@@ -226,7 +226,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+            }).toThrow("The only valid `deletionStatus` for third party owned `RelationshipAttributes` is 'DeletedByPeer'.");
         });
 
         test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to ToBeDeletedByPeer", function () {
@@ -234,7 +234,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+            }).toThrow("The only valid `deletionStatus` for third party owned `RelationshipAttributes` is 'DeletedByPeer'.");
         });
 
         test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to ToBeDeleted", function () {
@@ -242,7 +242,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+            }).toThrow("The only valid `deletionStatus` for third party owned `RelationshipAttributes` is 'DeletedByPeer'.");
         });
     });
 
@@ -252,7 +252,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to DeletionRequestRejected", function () {
@@ -260,7 +260,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to DeletedByPeer", function () {
@@ -268,7 +268,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to DeletedByOwner", function () {
@@ -276,7 +276,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to ToBeDeletedByPeer", function () {
@@ -284,7 +284,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to ToBeDeleted", function () {
@@ -292,7 +292,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
         });
     });
 
