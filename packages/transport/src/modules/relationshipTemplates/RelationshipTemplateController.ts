@@ -127,7 +127,9 @@ export class RelationshipTemplateController extends TransportController {
         const decryptionPromises = backboneRelationships.map(async (t) => {
             const templateDoc = await this.templates.read(t.id);
             if (!templateDoc) {
-                this._log.error(`Template '${t.id}' not found in local database and the cache can therefore not be applied.`);
+                this._log.error(
+                    `Template '${t.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
+                );
                 return;
             }
 

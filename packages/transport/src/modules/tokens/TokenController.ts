@@ -116,7 +116,9 @@ export class TokenController extends TransportController {
         const decryptionPromises = backboneTokens.map(async (t) => {
             const tokenDoc = await this.tokens.read(t.id);
             if (!tokenDoc) {
-                this._log.error(`Token '${t.id}' not found in local database and the cache can therefore not be applied.`);
+                this._log.error(
+                    `Token '${t.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
+                );
                 return;
             }
 

@@ -141,7 +141,9 @@ export class MessageController extends TransportController {
         const decryptionPromises = backboneMessages.map(async (m) => {
             const messageDoc = await this.messages.read(m.id);
             if (!messageDoc) {
-                this._log.error(`Message '${m.id}' not found in local database and the cache can therefore not be applied.`);
+                this._log.error(
+                    `Message '${m.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
+                );
                 return;
             }
 
