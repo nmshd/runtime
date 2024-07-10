@@ -270,12 +270,4 @@ export class FileController extends TransportController {
 
         return decrypt;
     }
-
-    public async cleanupFilesOfDecomposedRelationship(peer: CoreAddress): Promise<void> {
-        const tokenDocs = await this.getFiles({ "cache.createdBy": peer.toString() });
-        const tokens = this.parseArray<File>(tokenDocs, File);
-        for await (const token of tokens) {
-            await this.files.delete(token);
-        }
-    }
 }
