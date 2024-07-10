@@ -424,7 +424,9 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
     public async deleteRequestsFromPeer(peer: CoreAddress): Promise<void> {
         const requests = await this.getIncomingRequests({ peer: peer.toString() });
-        requests.forEach(async (request) => await this.localRequests.delete(request));
+        for (const request of requests) {
+            await this.localRequests.delete(request);
+        }
     }
 
     private assertRequestStatus(request: LocalRequest, ...status: LocalRequestStatus[]) {

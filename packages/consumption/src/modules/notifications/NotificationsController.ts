@@ -159,6 +159,8 @@ export class NotificationsController extends ConsumptionBaseController {
 
     public async deleteNotificationsExchangedWithPeer(peer: CoreAddress): Promise<void> {
         const notifications = await this.getNotifications({ peer: peer.toString() });
-        notifications.forEach(async (notification) => await this.localNotifications.delete(notification));
+        for (const notification of notifications) {
+            await this.localNotifications.delete(notification);
+        }
     }
 }
