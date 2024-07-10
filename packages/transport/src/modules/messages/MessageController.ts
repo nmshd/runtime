@@ -152,8 +152,8 @@ export class MessageController extends TransportController {
             return { id: CoreId.from(m.id), cache: cachedMessage };
         });
 
-        const chaches = await Promise.all(decryptionPromises);
-        return chaches.filter((c) => c !== undefined);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     @log()
