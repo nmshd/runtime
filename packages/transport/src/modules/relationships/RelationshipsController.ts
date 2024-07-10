@@ -74,6 +74,11 @@ export class RelationshipsController extends TransportController {
 
         const decryptionPromises = backboneRelationships.map(async (r) => {
             const relationshipDoc = await this.relationships.read(r.id);
+            if (!relationshipDoc) {
+                this._log.error(`Relationship '${r.id}' not found in local database and the cache can therefore not be applied.`);
+                return;
+            }
+
             const relationship = Relationship.from(relationshipDoc);
 
             return {
@@ -82,7 +87,8 @@ export class RelationshipsController extends TransportController {
             };
         });
 
-        return await Promise.all(decryptionPromises);
+        const fetchedCaches = await Promise.all(decryptionPromises);
+        return fetchedCaches.filter((c) => c !== undefined);
     }
 
     @log()

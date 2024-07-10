@@ -48,12 +48,18 @@ export class FileController extends TransportController {
 
         const decryptionPromises = backboneFiles.map(async (f) => {
             const fileDoc = await this.files.read(f.id);
+            if (!fileDoc) {
+                this._log.error(`File '${f.id}' not found in local database and the cache can therefore not be applied.`);
+                return;
+            }
+
             const file = File.from(fileDoc);
 
             return { id: CoreId.from(f.id), cache: await this.decryptFile(f, file.secretKey) };
         });
 
-        return await Promise.all(decryptionPromises);
+        const chaches = await Promise.all(decryptionPromises);
+        return chaches.filter((c) => c !== undefined);
     }
 
     public async updateCache(ids: string[]): Promise<File[]> {
