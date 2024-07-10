@@ -67,8 +67,8 @@ export class DatawalletModificationsProcessor {
     public async execute(): Promise<void> {
         await this.applyCreates();
         await this.applyUpdates();
-        await this.applyCacheChanges();
         await this.applyDeletes();
+        await this.applyCacheChanges();
 
         // cache-fills are optimized by the backbone, so it is possible that the processedItemCount is
         // lower than the total number of items - in this case the 100% callback is triggered here
@@ -156,7 +156,8 @@ export class DatawalletModificationsProcessor {
 
         this.ensureAllItemsAreCacheable();
 
-        const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(this.cacheChanges);
+        const cacheChangesWithoutDeletes = this.cacheChanges.filter((c) => !this.deletes.some((d) => d.objectIdentifier.equals(c.objectIdentifier)));
+        const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(cacheChangesWithoutDeletes);
 
         const caches = await this.cacheFetcher.fetchCacheFor({
             files: cacheChangesGroupedByCollection.fileIds,

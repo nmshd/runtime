@@ -12,30 +12,31 @@ import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
 import { CertificateValidator } from "../certificates/CertificateValidator";
 import { ChallengeController } from "../challenges/ChallengeController";
+import { DeviceController } from "../devices/DeviceController";
+import { DeviceSecretType } from "../devices/DeviceSecretController";
+import { DevicesController } from "../devices/DevicesController";
 import { BackbonePutDevicesPushNotificationRequest, DeviceAuthClient } from "../devices/backbone/DeviceAuthClient";
 import { DeviceClient } from "../devices/backbone/DeviceClient";
-import { DeviceController } from "../devices/DeviceController";
-import { DevicesController } from "../devices/DevicesController";
-import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { Device, DeviceInfo, DeviceType } from "../devices/local/Device";
 import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredentials";
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
-import { RelationshipsController } from "../relationships/RelationshipsController";
-import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
+import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
+import { RelationshipsController } from "../relationships/RelationshipsController";
+import { Relationship } from "../relationships/local/Relationship";
 import { SecretController } from "../secrets/SecretController";
 import { ChangedItems } from "../sync/ChangedItems";
 import { SyncProgressCallback, SyncProgressReporter } from "../sync/SyncCallback";
 import { SyncController } from "../sync/SyncController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { TokenController } from "../tokens/TokenController";
-import { IdentityClient } from "./backbone/IdentityClient";
-import { Identity } from "./data/Identity";
 import { IdentityController } from "./IdentityController";
 import { IdentityDeletionProcessController } from "./IdentityDeletionProcessController";
 import { IdentityUtil } from "./IdentityUtil";
+import { IdentityClient } from "./backbone/IdentityClient";
+import { Identity } from "./data/Identity";
 
 export class AccountController {
     private readonly _authenticator: AbstractAuthenticator;
@@ -429,5 +430,11 @@ export class AccountController {
         }
 
         return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, this.unpushedDatawalletModifications);
+    }
+
+    public async cleanupDataOfDecomposedRelationship(relationship: Relationship): Promise<void> {
+        await this.messages.cleanupMessagesOfDecomposedRelationship(relationship);
+        await this.relationshipTemplates.cleanupTemplatesOfDecomposedRelationship(relationship);
+        await this.tokens.cleanupTokensOfDecomposedRelationship(relationship.peer.address);
     }
 }
