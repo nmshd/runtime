@@ -433,7 +433,6 @@ export class AccountController {
     }
 
     public async cleanupDataOfDecomposedRelationship(relationship: Relationship): Promise<void> {
-        await this.files.cleanupFilesOfDecomposedRelationship(relationship.peer.address);
         await this.messages.cleanupMessagesOfDecomposedRelationship(relationship);
         await this.relationshipTemplates.cleanupTemplatesOfDecomposedRelationship(relationship);
         await this.tokens.cleanupTokensOfDecomposedRelationship(relationship.peer.address);
