@@ -9,6 +9,7 @@ describe("MessageController", function () {
 
     let sender: AccountController;
     let recipient: AccountController;
+    let recipient2: AccountController;
     let tempId1: CoreId;
     let tempId2: CoreId;
     let tempDate: CoreDate;
@@ -18,7 +19,7 @@ describe("MessageController", function () {
         expect(sentMessage.id.toString()).toBe(receivedMessage.id.toString());
         const sentRelIds = sentMessage.cache!.recipients.map((recipient) => recipient.relationshipId!.toString());
         const receivedRelIds = receivedMessage.cache!.recipients.map((recipient) => recipient.relationshipId?.toString());
-        expect(sentRelIds.join()).toBe(receivedRelIds.join());
+        expect(sentRelIds).toContainEqual(receivedRelIds[0]);
         expect(sentMessage.cache).toBeDefined();
         expect(sentMessage.cachedAt?.isSameOrAfter(nowMinusSeconds)).toBe(true);
         expect(sentMessage.cache?.createdBy.toString()).toBe(sender.identity.address.toString());
@@ -29,7 +30,7 @@ describe("MessageController", function () {
         expect(receivedMessage.cache?.createdBy.toString()).toBe(sender.identity.address.toString());
         expect(receivedMessage.cache?.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
         expect(receivedMessage.cache?.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(sentMessage.cache!.recipients.map((r) => r.toString())).toStrictEqual(receivedMessage.cache!.recipients.map((r) => r.toString()));
+        expect(sentMessage.cache!.recipients.map((r) => r.toString())).toContainEqual(receivedMessage.cache!.recipients[0].toString());
         expect(sentMessage.cache!.attachments.map((r) => r.toString())).toStrictEqual(receivedMessage.cache!.attachments.map((r) => r.toString()));
         expect(sentMessage.cache!.receivedByEveryone).toBe(receivedMessage.cache!.receivedByEveryone);
         expect(sentMessage.cache!.content.serialize()).toBe(receivedMessage.cache!.content.serialize());
@@ -41,10 +42,12 @@ describe("MessageController", function () {
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, 3);
         sender = accounts[0];
         recipient = accounts[1];
+        recipient2 = accounts[2];
         const rels = await TestUtil.addRelationship(sender, recipient);
+        await TestUtil.addRelationship(sender, recipient2);
         relationshipId = rels.acceptedRelationshipFromSelf.id;
     });
 
@@ -178,6 +181,22 @@ describe("MessageController", function () {
 
         const unreadMessage = await recipient.messages.markMessageAsUnread(readMessage.id);
         expect(unreadMessage.wasReadAt).toBeUndefined();
+    });
+
+    test("should send and receive a Message (multiple recipients)", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const sentMessage = await TestUtil.sendMessage(sender, [recipient, recipient2]);
+
+        const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
+        const receivedMessage = messages[0];
+
+        const messages2 = await TestUtil.syncUntilHasMessages(recipient2, 1);
+        const receivedMessage2 = messages2[0];
+
+        tempId1 = sentMessage.id;
+
+        expectValidMessages(sentMessage, receivedMessage, tempDate);
+        expectValidMessages(sentMessage, receivedMessage2, tempDate);
     });
 
     describe("Relationship Termination", function () {
