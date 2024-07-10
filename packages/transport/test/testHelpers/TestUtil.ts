@@ -22,6 +22,7 @@ import {
     IChangedItems,
     IConfigOverwrite,
     IdentityDeletionProcess,
+    IdentityUtil,
     ISendFileParameters,
     Message,
     Relationship,
@@ -395,6 +396,22 @@ export class TestUtil {
         return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
     }
 
+    public static async decomposeRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
+        const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
+        await from.relationships.decompose(relationship.id);
+        await from.cleanupDataOfDecomposedRelationship(relationship);
+        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return decomposedRelationshipPeer;
+    }
+
+    public static async generateAddressPseudonym(backboneBaseUrl: string): Promise<CoreAddress> {
+        const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
+        const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, new URL(backboneBaseUrl).hostname);
+
+        return pseudonym;
+    }
+
     /**
      * SyncEvents in the backbone are only eventually consistent. This means that if you send a message now and
      * get all SyncEvents right after, you cannot rely on getting a NewMessage SyncEvent right away. So instead
@@ -528,8 +545,8 @@ export class TestUtil {
         return template;
     }
 
-    public static async sendMessage(from: AccountController, to: AccountController, content?: Serializable): Promise<Message> {
-        return await this.sendMessagesWithFiles(from, [to], [], content);
+    public static async sendMessage(from: AccountController, to: AccountController | AccountController[], content?: Serializable): Promise<Message> {
+        return await this.sendMessagesWithFiles(from, Array.isArray(to) ? to : [to], [], content);
     }
 
     public static async sendMessageWithFile(from: AccountController, to: AccountController, file: File, content?: Serializable): Promise<Message> {

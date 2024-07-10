@@ -422,6 +422,13 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         await this.localRequests.update(requestDoc, request);
     }
 
+    public async deleteRequestsFromPeer(peer: CoreAddress): Promise<void> {
+        const requests = await this.getIncomingRequests({ peer: peer.toString() });
+        for (const request of requests) {
+            await this.localRequests.delete(request);
+        }
+    }
+
     private assertRequestStatus(request: LocalRequest, ...status: LocalRequestStatus[]) {
         if (!status.includes(request.status)) {
             throw new ConsumptionError(`Local Request has to be in status '${status.join("/")}'.`);
