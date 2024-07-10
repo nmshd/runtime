@@ -545,16 +545,12 @@ export class TestUtil {
         return template;
     }
 
-    public static async sendMessage(from: AccountController, to: AccountController, content?: Serializable): Promise<Message> {
-        return await this.sendMessagesWithFiles(from, [to], [], content);
+    public static async sendMessage(from: AccountController, to: AccountController | AccountController[], content?: Serializable): Promise<Message> {
+        return await this.sendMessagesWithFiles(from, Array.isArray(to) ? to : [to], [], content);
     }
 
     public static async sendMessageWithFile(from: AccountController, to: AccountController, file: File, content?: Serializable): Promise<Message> {
         return await this.sendMessagesWithFiles(from, [to], [file], content);
-    }
-
-    public static async sendMessages(from: AccountController, recipients: AccountController[], content?: Serializable): Promise<Message> {
-        return await this.sendMessagesWithFiles(from, recipients, [], content);
     }
 
     public static async sendMessagesWithFile(from: AccountController, recipients: AccountController[], file: File, content?: Serializable): Promise<Message> {

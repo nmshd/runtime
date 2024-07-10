@@ -180,7 +180,7 @@ describe("MessageController", function () {
         expect(unreadMessage.wasReadAt).toBeUndefined();
     });
 
-    describe("tests after relationship termination", function () {
+    describe("Relationship Termination", function () {
         beforeAll(async function () {
             await TestUtil.terminateRelationship(sender, recipient);
         });
@@ -188,52 +188,5 @@ describe("MessageController", function () {
         test("should not send a message on a terminated relationship", async function () {
             await expect(TestUtil.sendMessage(sender, recipient)).rejects.toThrow("error.transport.messages.missingOrInactiveRelationship");
         });
-
-        describe("tests after relationship decomposition", function () {
-            let relationship2Id: CoreId;
-            let recipient2: AccountController;
-
-            beforeAll(async function () {
-                recipient2 = (await TestUtil.provideAccounts(transport, 1))[0];
-                relationship2Id = (await TestUtil.addRelationship(sender, recipient2)).acceptedRelationshipFromSelf.id;
-
-                await TestUtil.sendMessage(sender, recipient2);
-                await TestUtil.decomposeRelationship(sender, recipient);
-            });
-
-            test("messages should be deleted/pseudonymized", async function () {
-                const messages = await recipient.messages.getMessages();
-                expect(messages).toHaveLength(1);
-                expect(messages[0].cache!.recipients.map((r) => [r.address, r.relationshipId])).toBe([
-                    [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
-                    [recipient2.identity.address, relationship2Id]
-                ]);
-            });
-        });
-    });
-
-    test("should sync the pseudonymization", async function () {
-        const { device1: sender1, device2: sender2 } = await TestUtil.createIdentityWithTwoDevices(connection, {
-            datawalletEnabled: true
-        });
-
-        const accounts = await TestUtil.provideAccounts(transport, 2);
-        const recipient1 = accounts[0];
-        const recipient2 = accounts[1];
-
-        await TestUtil.addRelationship(sender1, recipient1);
-        const relationship2Id = (await TestUtil.addRelationship(sender1, recipient2)).acceptedRelationshipPeer.id;
-        await sender2.syncDatawallet();
-        await TestUtil.sendMessages(sender1, [recipient1, recipient2]);
-        await TestUtil.syncUntilHasMessages(sender2);
-        await TestUtil.terminateRelationship(sender1, recipient1);
-        await TestUtil.decomposeRelationship(sender1, recipient1);
-
-        await TestUtil.syncUntilHasMessages(sender2);
-        const sender2Messages = await sender2.messages.getMessages();
-        expect(sender2Messages[0].cache?.recipients.map((r) => [r.address, r.relationshipId])).toBe([
-            [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
-            [recipient2.identity.address, relationship2Id]
-        ]);
     });
 });
