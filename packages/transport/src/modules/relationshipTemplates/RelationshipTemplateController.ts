@@ -267,8 +267,8 @@ export class RelationshipTemplateController extends TransportController {
             "cache.createdBy": relationship.peer.address.toString()
         });
 
-        for (const teamplate of otherTemplatesOfPeer) {
-            await this.templates.delete(teamplate);
+        for (const template of otherTemplatesOfPeer) {
+            await this.templates.delete(template);
         }
     }
 }
