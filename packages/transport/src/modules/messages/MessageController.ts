@@ -65,7 +65,7 @@ export class MessageController extends TransportController {
 
     public async cleanupMessagesOfDecomposedRelationship(relationship: Relationship): Promise<void> {
         const messages = await this.getMessagesByRelationshipId(relationship.id);
-        await Promise.all(messages.map((message) => this.cleanupMessageOfDecomposedRelationship(message.id, relationship)));
+        messages.forEach((message) => this.cleanupMessageOfDecomposedRelationship(message.id, relationship));
     }
 
     private async cleanupMessageOfDecomposedRelationship(messageId: CoreId, relationship: Relationship): Promise<void> {
