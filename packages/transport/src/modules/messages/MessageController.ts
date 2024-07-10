@@ -152,8 +152,8 @@ export class MessageController extends TransportController {
             return { id: CoreId.from(m.id), cache: cachedMessage };
         });
 
-        const chaches = await Promise.all(decryptionPromises);
-        return chaches.filter((c) => c !== undefined);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     @log()
@@ -472,6 +472,8 @@ export class MessageController extends TransportController {
         let plainMessage: MessageContentWrapper;
         let messageKey: CryptoSecretKey;
 
+        const recipients: CachedMessageRecipient[] = [];
+
         let relationship;
         if (this.parent.identity.isMe(envelope.createdBy)) {
             if (!secretKey) {
@@ -479,6 +481,28 @@ export class MessageController extends TransportController {
             }
             messageKey = secretKey;
             plainMessage = await this.decryptOwnEnvelope(envelope, secretKey);
+
+            const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: CoreBuffer.fromUtf8("deleted identity") }, new URL(this.parent.config.baseUrl).hostname);
+
+            for (const recipient of envelope.recipients) {
+                let relationship = await this.relationships.getRelationshipToIdentity(recipient.address);
+                if (relationship?.status === RelationshipStatus.Rejected || relationship?.status === RelationshipStatus.Revoked) {
+                    // if the relationship is rejected or revoked, it should be handled like there is no relationship
+                    relationship = undefined;
+                }
+
+                recipients.push(
+                    CachedMessageRecipient.from({
+                        // make sure to save the pseudonym instead of the real address if the relationship was removed
+                        // in cases the backbone did not already process the relationship termination
+                        address: relationship ? recipient.address : pseudonym,
+                        encryptedKey: recipient.encryptedKey,
+                        receivedAt: recipient.receivedAt,
+                        receivedByDevice: recipient.receivedByDevice,
+                        relationshipId: relationship?.id
+                    })
+                );
+            }
         } else {
             relationship = await this.relationships.getActiveRelationshipToIdentity(envelope.createdBy);
 
@@ -489,29 +513,16 @@ export class MessageController extends TransportController {
             const [peerMessage, peerKey] = await this.decryptPeerEnvelope(envelope, relationship);
             plainMessage = peerMessage;
             messageKey = peerKey;
-        }
 
-        const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: CoreBuffer.fromUtf8("deleted identity") }, new URL(this.parent.config.baseUrl).hostname);
-        const recipients: CachedMessageRecipient[] = [];
-
-        for (const recipient of envelope.recipients) {
-            // this resolves relationships of incoming and outgoing messages, therefore we have to make sure the peer is resolved instead of the recipient, because the recipient can be the current address
-            const peer = this.parent.identity.isMe(envelope.createdBy) ? recipient.address : envelope.createdBy;
-            let relationship = await this.relationships.getRelationshipToIdentity(peer);
-            if (relationship?.status === RelationshipStatus.Rejected || relationship?.status === RelationshipStatus.Revoked) {
-                // if the relationship is rejected or revoked, it should be handled like there is no relationship
-                relationship = undefined;
-            }
-
+            // we don't care about other recipients in the envelope, because we do not need them
+            const currentIdentityAsRecipient = envelope.recipients.find((r) => this.parent.identity.isMe(r.address))!;
             recipients.push(
                 CachedMessageRecipient.from({
-                    // make sure to save the pseudonym instead of the real address if the relationship was removed
-                    // in cases the backbone did not already process the relationship termination
-                    address: relationship ? recipient.address : pseudonym,
-                    encryptedKey: recipient.encryptedKey,
-                    receivedAt: recipient.receivedAt,
-                    receivedByDevice: recipient.receivedByDevice,
-                    relationshipId: relationship?.id
+                    address: currentIdentityAsRecipient.address,
+                    encryptedKey: currentIdentityAsRecipient.encryptedKey,
+                    receivedAt: currentIdentityAsRecipient.receivedAt,
+                    receivedByDevice: currentIdentityAsRecipient.receivedByDevice,
+                    relationshipId: relationship.id
                 })
             );
         }

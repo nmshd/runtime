@@ -87,8 +87,8 @@ export class RelationshipsController extends TransportController {
             };
         });
 
-        const fetchedCaches = await Promise.all(decryptionPromises);
-        return fetchedCaches.filter((c) => c !== undefined);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     @log()

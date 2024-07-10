@@ -136,8 +136,8 @@ export class RelationshipTemplateController extends TransportController {
             return { id: CoreId.from(t.id), cache: await this.decryptRelationshipTemplate(t, template.secretKey) };
         });
 
-        const chaches = await Promise.all(decryptionPromises);
-        return chaches.filter((c) => c !== undefined);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     @log()

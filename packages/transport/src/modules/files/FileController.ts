@@ -58,8 +58,8 @@ export class FileController extends TransportController {
             return { id: CoreId.from(f.id), cache: await this.decryptFile(f, file.secretKey) };
         });
 
-        const chaches = await Promise.all(decryptionPromises);
-        return chaches.filter((c) => c !== undefined);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     public async updateCache(ids: string[]): Promise<File[]> {

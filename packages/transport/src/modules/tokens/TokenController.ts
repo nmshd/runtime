@@ -125,8 +125,8 @@ export class TokenController extends TransportController {
             return { id: CoreId.from(t), cache: await this.decryptToken(t, token.secretKey) };
         });
 
-        const chaches = await Promise.all(decryptionPromises);
-        return chaches.filter((c) => c !== undefined);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     @log()
