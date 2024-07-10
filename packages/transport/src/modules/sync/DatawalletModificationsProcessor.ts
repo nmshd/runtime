@@ -69,6 +69,7 @@ export class DatawalletModificationsProcessor {
         await this.applyUpdates();
         await this.applyCacheChanges();
         await this.applyDeletes();
+        await this.reapplyMessageCacheChangesAfterDeletion();
 
         // cache-fills are optimized by the backbone, so it is possible that the processedItemCount is
         // lower than the total number of items - in this case the 100% callback is triggered here
@@ -181,6 +182,19 @@ export class DatawalletModificationsProcessor {
         await this.saveNewCaches(relationshipCaches.relationships, DbCollectionName.Relationships, Relationship);
     }
 
+    private async reapplyMessageCacheChangesAfterDeletion() {
+        if (this.cacheChanges.length === 0) {
+            return;
+        }
+
+        this.ensureAllItemsAreCacheable();
+
+        const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(this.cacheChanges);
+
+        const caches = await this.cacheFetcher.fetchCacheFor({ messages: cacheChangesGroupedByCollection.messageIds });
+        await this.saveNewCaches(caches.messages, DbCollectionName.Messages, Message, false);
+    }
+
     @log()
     private ensureAllItemsAreCacheable() {
         const collections = this.cacheChanges.map((c) => c.collection);
@@ -205,7 +219,12 @@ export class DatawalletModificationsProcessor {
         return { fileIds, messageIds, relationshipTemplateIds: templateIds, tokenIds, relationshipIds, identityDeletionProcessIds };
     }
 
-    private async saveNewCaches<T extends ICacheable>(caches: FetchCacheOutputItem<any>[], collectionName: DbCollectionName, constructorOfT: new () => T) {
+    private async saveNewCaches<T extends ICacheable>(
+        caches: FetchCacheOutputItem<any>[],
+        collectionName: DbCollectionName,
+        constructorOfT: new () => T,
+        updateSyncProgress = true
+    ) {
         if (caches.length === 0) return;
 
         const collection = await this.collectionProvider.getCollection(collectionName);
@@ -216,7 +235,7 @@ export class DatawalletModificationsProcessor {
                 const item = (constructorOfT as any).from(itemDoc);
                 item.setCache(c.cache);
                 await collection.update(itemDoc, item);
-                this.syncStep.progress();
+                if (updateSyncProgress) this.syncStep.progress();
             })
         );
     }

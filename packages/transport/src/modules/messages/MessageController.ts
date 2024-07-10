@@ -138,6 +138,12 @@ export class MessageController extends TransportController {
 
         const decryptionPromises = backboneMessages.map(async (m) => {
             const messageDoc = await this.messages.read(m.id);
+
+            // under certain circumstances we get a cache update for a message that is not in the database
+            // in this case we just ignore it
+            // this is most likely caused by a relationship termination & decomposition
+            if (!messageDoc) return;
+
             const message = Message.from(messageDoc);
             const envelope = this.getEnvelopeFromBackboneGetMessagesResponse(m);
 
@@ -145,7 +151,8 @@ export class MessageController extends TransportController {
             return { id: CoreId.from(m.id), cache: cachedMessage };
         });
 
-        return await Promise.all(decryptionPromises);
+        const chaches = await Promise.all(decryptionPromises);
+        return chaches.filter((c) => c !== undefined);
     }
 
     @log()
