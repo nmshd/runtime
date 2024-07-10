@@ -652,6 +652,7 @@ describe("RelationshipTest: Decompose", function () {
 
     let from: AccountController;
     let to: AccountController;
+
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
         transport = TestUtil.createTransport(connection);
@@ -692,8 +693,9 @@ describe("RelationshipTest: Decompose", function () {
 });
 
 describe("RelationshipTest: validations for non-existent record", function () {
-    let transport: Transport;
     let connection: IDatabaseConnection;
+
+    let transport: Transport;
     let from: AccountController;
     const fakeRelationshipId = CoreId.from("REL00000000000000000");
 
@@ -703,7 +705,7 @@ describe("RelationshipTest: validations for non-existent record", function () {
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, 1);
         from = accounts[0];
     });
 
