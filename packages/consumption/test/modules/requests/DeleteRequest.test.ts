@@ -26,7 +26,7 @@ describe("End2End Request/Response via Messages", function () {
         const accounts = await TestUtil.provideAccounts(transport, 2);
 
         ({ accountController: sAccountController, consumptionController: sConsumptionController } = accounts[0]);
-        rConsumptionController.incomingRequests["processorRegistry"].registerProcessor(TestRequestItem, TestRequestItemProcessor);
+        sConsumptionController.incomingRequests["processorRegistry"].registerProcessor(TestRequestItem, TestRequestItemProcessor);
         ({ accountController: rAccountController, consumptionController: rConsumptionController } = accounts[1]);
         rConsumptionController.incomingRequests["processorRegistry"].registerProcessor(TestRequestItem, TestRequestItemProcessor);
 
@@ -56,8 +56,8 @@ describe("End2End Request/Response via Messages", function () {
 
     test("requests should be deleted after decomposing", async function () {
         await TestUtil.terminateRelationship(sAccountController, rAccountController);
-        await TestUtil.decomposeRelationship(sAccountController, rAccountController);
-        await TestUtil.decomposeRelationship(rAccountController, sAccountController);
+        await TestUtil.decomposeRelationship(sAccountController, sConsumptionController, rAccountController);
+        await TestUtil.decomposeRelationship(rAccountController, rConsumptionController, sAccountController);
         const sRequest = await sConsumptionController.outgoingRequests.getOutgoingRequest(sLocalRequest.id);
         const rRequest = await sConsumptionController.incomingRequests.getIncomingRequest(rLocalRequest.id);
         expect(sRequest).toBeUndefined();

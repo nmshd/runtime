@@ -281,10 +281,11 @@ export class TestUtil {
         return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
     }
 
-    public static async decomposeRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
-        const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
-        await from.relationships.decompose(relationship.id);
-        await from.cleanupDataOfDecomposedRelationship(relationship);
+    public static async decomposeRelationship(fromAccount: AccountController, fromConsumption: ConsumptionController, to: AccountController): Promise<Relationship> {
+        const relationship = (await fromAccount.relationships.getRelationshipToIdentity(to.identity.address))!;
+        await fromAccount.relationships.decompose(relationship.id);
+        await fromAccount.cleanupDataOfDecomposedRelationship(relationship);
+        await fromConsumption.cleanupDataOfDecomposedRelationship(to.identity.address, relationship.id);
         const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
 
         return decomposedRelationshipPeer;
