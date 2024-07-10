@@ -49,7 +49,9 @@ export class FileController extends TransportController {
         const decryptionPromises = backboneFiles.map(async (f) => {
             const fileDoc = await this.files.read(f.id);
             if (!fileDoc) {
-                this._log.error(`File '${f.id}' not found in local database and the cache can therefore not be applied.`);
+                this._log.error(
+                    `File '${f.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
+                );
                 return;
             }
 
