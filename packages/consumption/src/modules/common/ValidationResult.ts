@@ -24,7 +24,7 @@ export abstract class ValidationResult {
             ? ValidationResult.error(
                   new ApplicationError(
                       "error.consumption.validation.inheritedFromItem",
-                      "Some child items have errors. If this error occurred during the creation of a request, call 'canCreate' to get more information."
+                      "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
                   ),
                   items
               )

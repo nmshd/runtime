@@ -15,7 +15,7 @@ class Relationships {
     }
 
     public reactivationNotRequested(relationshipId: string) {
-        return new CoreError("error.transport.relationships.reactivationNotRequested", `The relationship '${relationshipId}' has no reactivation request to respond to.`);
+        return new CoreError("error.transport.relationships.reactivationNotRequested", `The Relationship '${relationshipId}' has no reactivation Request to respond to.`);
     }
 
     public reactivationAlreadyRequested(message: string) {
@@ -55,14 +55,14 @@ class Messages {
     public signatureNotValid() {
         return new CoreError(
             "error.transport.messages.signatureNotValid",
-            "The digital signature on this message for peer key is invalid. An impersonation attack might be the cause of this."
+            "The digital signature on this Message for peer key is invalid. An impersonation attack might be the cause of this."
         );
     }
 
     public ownAddressNotInList(messageId: string) {
         return new CoreError(
             "error.transport.messages.ownAddressNotInList",
-            `The recipients list of message ${messageId} didn't contain an entry for the own address. This message should not have been received.`
+            `The recipients list of message ${messageId} didn't contain an entry for the own address. This Message should not have been received.`
         );
     }
 
@@ -85,7 +85,7 @@ class Secrets {
 
 class Challenges {
     public challengeTypeRequiresActiveRelationship() {
-        return new CoreError("error.transport.challenges.challengeTypeRequiresActiveRelationship", "The challenge type 'Relationship' requires an active relationship.");
+        return new CoreError("error.transport.challenges.challengeTypeRequiresActiveRelationship", "The challenge type 'Relationship' requires an active Relationship.");
     }
 }
 
@@ -134,20 +134,20 @@ class Files {
     }
 
     public invalidMetadata(id: string) {
-        return new CoreError("error.transport.files.invalidMetadata", `The metadata of the file with id "${id}" is invalid.`);
+        return new CoreError("error.transport.files.invalidMetadata", `The metadata of the File with id "${id}" is invalid.`);
     }
 
     public maxFileSizeExceeded(fileSize: number, platformMaxFileSize: number) {
         return new CoreError(
             "error.transport.files.maxFileSizeExceeded",
-            `The given file content size (${fileSize}) exceeds the max file size the backbone accepts (${platformMaxFileSize}).`
+            `The given file content size (${fileSize}) exceeds the max file size the Backbone accepts (${platformMaxFileSize}).`
         );
     }
 }
 
 class Tokens {
     public invalidTokenContent(id: string) {
-        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of token ${id} is not of type TokenContent`);
+        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of Token ${id} is not of type TokenContent`);
     }
 }
 

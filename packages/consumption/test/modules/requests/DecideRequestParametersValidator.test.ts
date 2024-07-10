@@ -272,7 +272,7 @@ describe("DecideRequestParametersValidator", function () {
             expectedError: {
                 indexPath: [0],
                 code: "error.consumption.validation.inheritedFromItem",
-                message: "Some child items have errors. If this error occurred during the creation of a request, call 'canCreate' to get more information."
+                message: "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
             }
         }
     ];
@@ -317,7 +317,7 @@ describe("DecideRequestParametersValidator", function () {
 
         expect(validationResult.error.code).toBe("error.consumption.validation.inheritedFromItem");
         expect(validationResult.error.message).toBe(
-            "Some child items have errors. If this error occurred during the creation of a request, call 'canCreate' to get more information."
+            "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
         );
 
         let childResult = validationResult;
