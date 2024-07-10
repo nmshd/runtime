@@ -4,6 +4,7 @@ import { AccountController, Message, Transport } from "@nmshd/transport";
 import { ConsumptionController, LocalRequest } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 import { TestRequestItem } from "./testHelpers/TestRequestItem";
+import { TestRequestItemProcessor } from "./testHelpers/TestRequestItemProcessor";
 
 let connection: IDatabaseConnection;
 let transport: Transport;
@@ -25,7 +26,9 @@ describe("End2End Request/Response via Messages", function () {
         const accounts = await TestUtil.provideAccounts(transport, 2);
 
         ({ accountController: sAccountController, consumptionController: sConsumptionController } = accounts[0]);
+        rConsumptionController.incomingRequests["processorRegistry"].registerProcessor(TestRequestItem, TestRequestItemProcessor);
         ({ accountController: rAccountController, consumptionController: rConsumptionController } = accounts[1]);
+        rConsumptionController.incomingRequests["processorRegistry"].registerProcessor(TestRequestItem, TestRequestItemProcessor);
 
         await TestUtil.addRelationship(sAccountController, rAccountController);
         sLocalRequest = await sConsumptionController.outgoingRequests.create({
