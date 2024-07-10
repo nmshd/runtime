@@ -121,4 +121,19 @@ describe("FileController", function () {
         expect(file.metadataModifiedAt!.isSameOrBefore(creationTime.add({ seconds: 1 }))).toBe(true);
         expect(file.metadataModifiedAt!.isSameOrAfter(creationTime.subtract({ seconds: 2 }))).toBe(true);
     });
+
+    test("should delete file during relationship decomposition", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const content = CoreBuffer.fromUtf8("Test");
+        const sentFile = await TestUtil.uploadFile(sender, content);
+
+        const reference = sentFile.toFileReference().truncate();
+        const receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
+
+        await TestUtil.terminateRelationship(recipient, sender);
+        await TestUtil.decomposeRelationship(recipient, sender);
+
+        const file = recipient.files.getFile(receivedFile.id);
+        expect(file).toBeUndefined();
+    });
 });

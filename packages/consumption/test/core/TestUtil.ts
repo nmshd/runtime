@@ -270,6 +270,26 @@ export class TestUtil {
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
     }
 
+    public static async terminateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
+        const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
+        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
+    }
+
+    public static async decomposeRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
+        const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
+        await from.relationships.decompose(relationship.id);
+        await from.cleanupDataOfDecomposedRelationship(relationship);
+        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return decomposedRelationshipPeer;
+    }
+
     /**
      * SyncEvents in the backbone are only enventually consistent. This means that if you send a message now and
      * get all SyncEvents right after, you cannot rely on getting a NewMessage SyncEvent right away. So instead
