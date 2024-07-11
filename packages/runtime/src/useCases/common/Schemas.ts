@@ -20379,17 +20379,6 @@ export const RegisterPushNotificationTokenRequest: any = {
     }
 }
 
-export const SyncDatawalletRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SyncDatawalletRequest",
-    "definitions": {
-        "SyncDatawalletRequest": {
-            "type": "object",
-            "additionalProperties": false
-        }
-    }
-}
-
 export const GetIdentityDeletionProcessRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetIdentityDeletionProcessRequest",
@@ -20440,17 +20429,6 @@ export const DownloadAttachmentRequest: any = {
         "FileIdString": {
             "type": "string",
             "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const SyncEverythingRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SyncEverythingRequest",
-    "definitions": {
-        "SyncEverythingRequest": {
-            "type": "object",
-            "additionalProperties": false
         }
     }
 }

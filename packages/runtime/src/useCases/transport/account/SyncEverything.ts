@@ -15,11 +15,7 @@ export interface SyncEverythingResponse {
     identityDeletionProcesses: IdentityDeletionProcessDTO[];
 }
 
-export interface SyncEverythingRequest {
-    callback?(percentage: number, syncStep: string): void;
-}
-
-export class SyncEverythingUseCase extends UseCase<SyncEverythingRequest, SyncEverythingResponse> {
+export class SyncEverythingUseCase extends UseCase<void, SyncEverythingResponse> {
     private readonly logger: ILogger;
     public constructor(
         @Inject private readonly accountController: AccountController,
@@ -32,12 +28,12 @@ export class SyncEverythingUseCase extends UseCase<SyncEverythingRequest, SyncEv
 
     private currentSync?: Promise<Result<SyncEverythingResponse>>;
 
-    protected async executeInternal(request: SyncEverythingRequest): Promise<Result<SyncEverythingResponse>> {
+    protected async executeInternal(): Promise<Result<SyncEverythingResponse>> {
         if (this.currentSync) {
             return await this.currentSync;
         }
 
-        this.currentSync = this._executeInternal(request);
+        this.currentSync = this._executeInternal();
 
         try {
             return await this.currentSync;
@@ -46,8 +42,8 @@ export class SyncEverythingUseCase extends UseCase<SyncEverythingRequest, SyncEv
         }
     }
 
-    private async _executeInternal(request: SyncEverythingRequest) {
-        const changedItems = await this.accountController.syncEverything(request.callback);
+    private async _executeInternal() {
+        const changedItems = await this.accountController.syncEverything();
 
         const messageDTOs = MessageMapper.toMessageDTOList(changedItems.messages);
         const relationshipDTOs = RelationshipMapper.toRelationshipDTOList(changedItems.relationships);

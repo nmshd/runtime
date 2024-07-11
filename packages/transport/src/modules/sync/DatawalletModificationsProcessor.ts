@@ -24,14 +24,12 @@ import { CachedToken } from "../tokens/local/CachedToken";
 import { Token } from "../tokens/local/Token";
 import { TokenController } from "../tokens/TokenController";
 import { DatawalletModification, DatawalletModificationType } from "./local/DatawalletModification";
-import { SyncProgressReporter, SyncProgressReporterStep, SyncStep } from "./SyncCallback";
 
 export class DatawalletModificationsProcessor {
     private readonly creates: DatawalletModification[];
     private readonly updates: DatawalletModification[];
     private readonly deletes: DatawalletModification[];
     private readonly cacheChanges: DatawalletModification[];
-    private readonly syncStep: SyncProgressReporterStep;
 
     public get log(): ILogger {
         return this.logger;
@@ -41,8 +39,7 @@ export class DatawalletModificationsProcessor {
         modifications: DatawalletModification[],
         private readonly cacheFetcher: CacheFetcher,
         private readonly collectionProvider: IDatabaseCollectionProvider,
-        private readonly logger: ILogger,
-        reporter: SyncProgressReporter
+        private readonly logger: ILogger
     ) {
         const modificationsGroupedByType = _.groupBy(modifications, (m) => m.type);
 
@@ -50,9 +47,6 @@ export class DatawalletModificationsProcessor {
         this.updates = modificationsGroupedByType[DatawalletModificationType.Update] ?? [];
         this.deletes = modificationsGroupedByType[DatawalletModificationType.Delete] ?? [];
         this.cacheChanges = modificationsGroupedByType[DatawalletModificationType.CacheChanged] ?? [];
-
-        const totalItems = this.creates.length + this.updates.length + this.deletes.length + this.cacheChanges.length;
-        this.syncStep = reporter.createStep(SyncStep.DatawalletSyncProcessing, totalItems);
     }
 
     private readonly collectionsWithCacheableItems: string[] = [
@@ -69,10 +63,6 @@ export class DatawalletModificationsProcessor {
         await this.applyUpdates();
         await this.applyDeletes();
         await this.applyCacheChanges();
-
-        // cache-fills are optimized by the backbone, so it is possible that the processedItemCount is
-        // lower than the total number of items - in this case the 100% callback is triggered here
-        this.syncStep.finish();
     }
 
     private async applyCreates() {
@@ -105,8 +95,6 @@ export class DatawalletModificationsProcessor {
                 await this.simulateCacheChangeForCreate(targetCollectionName, objectIdentifier);
                 await targetCollection.create(newObject);
             }
-
-            this.syncStep.progress();
         }
     }
 
@@ -125,7 +113,6 @@ export class DatawalletModificationsProcessor {
         });
 
         this.cacheChanges.push(modification);
-        this.syncStep.incrementTotalNumberOfItems();
     }
 
     private async applyUpdates() {
@@ -145,7 +132,6 @@ export class DatawalletModificationsProcessor {
             const newObject = { ...oldObject.toJSON(), ...updateModification.payload };
 
             await targetCollection.update(oldDoc, newObject);
-            this.syncStep.progress();
         }
     }
 
@@ -217,7 +203,6 @@ export class DatawalletModificationsProcessor {
                 const item = (constructorOfT as any).from(itemDoc);
                 item.setCache(c.cache);
                 await collection.update(itemDoc, item);
-                this.syncStep.progress();
             })
         );
     }
@@ -230,7 +215,6 @@ export class DatawalletModificationsProcessor {
         for (const deleteModification of this.deletes) {
             const targetCollection = await this.collectionProvider.getCollection(deleteModification.collection);
             await targetCollection.delete({ id: deleteModification.objectIdentifier.toString() });
-            this.syncStep.progress();
         }
     }
 }
