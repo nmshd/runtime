@@ -28,7 +28,6 @@ import { RelationshipsController } from "../relationships/RelationshipsControlle
 import { Relationship } from "../relationships/local/Relationship";
 import { SecretController } from "../secrets/SecretController";
 import { ChangedItems } from "../sync/ChangedItems";
-import { SyncProgressCallback, SyncProgressReporter } from "../sync/SyncCallback";
 import { SyncController } from "../sync/SyncController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { TokenController } from "../tokens/TokenController";
@@ -226,18 +225,16 @@ export class AccountController {
         await this.syncDatawallet();
     }
 
-    public async syncDatawallet(force = false, syncProgressCallback?: SyncProgressCallback): Promise<void> {
+    public async syncDatawallet(force = false): Promise<void> {
         if (!force && !this.autoSync) {
             return;
         }
 
-        const reporter = SyncProgressReporter.fromCallback(syncProgressCallback);
-        return await this.synchronization.sync("OnlyDatawallet", reporter);
+        return await this.synchronization.sync("OnlyDatawallet");
     }
 
-    public async syncEverything(syncProgressCallback?: SyncProgressCallback): Promise<ChangedItems> {
-        const reporter = SyncProgressReporter.fromCallback(syncProgressCallback);
-        return await this.synchronization.sync("Everything", reporter);
+    public async syncEverything(): Promise<ChangedItems> {
+        return await this.synchronization.sync("Everything");
     }
 
     public async getLastCompletedSyncTime(): Promise<CoreDate | undefined> {
