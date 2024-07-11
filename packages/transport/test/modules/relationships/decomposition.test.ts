@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
-import { AccountController, CoreDate, CoreId, Relationship, Token, Transport } from "../../../src";
+import { CoreBuffer } from "@nmshd/crypto";
+import { AccountController, CoreDate, CoreId, Relationship, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("Data cleanup after relationship decomposition", function () {
@@ -15,8 +16,9 @@ describe("Data cleanup after relationship decomposition", function () {
     let relationship: Relationship;
     let relationship2Id: CoreId;
 
-    let token: Token;
+    let tokenId: CoreId;
     let templateId: CoreId;
+    let fileId: CoreId;
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
@@ -47,7 +49,13 @@ describe("Data cleanup after relationship decomposition", function () {
             ephemeral: false
         });
         const reference = sentToken.toTokenReference().truncate();
-        token = await sender.tokens.loadPeerTokenByTruncated(reference, false);
+        tokenId = (await sender.tokens.loadPeerTokenByTruncated(reference, false)).id;
+
+        const fileContent = CoreBuffer.fromUtf8("Test");
+        const sentFile = await TestUtil.uploadFile(recipient1, fileContent);
+
+        const fileReference = sentFile.toFileReference().truncate();
+        fileId = (await sender.files.getOrLoadFileByTruncated(fileReference)).id;
 
         await TestUtil.terminateRelationship(sender, recipient1);
         await TestUtil.decomposeRelationship(sender, recipient1);
@@ -68,8 +76,15 @@ describe("Data cleanup after relationship decomposition", function () {
     });
 
     test("token should be deleted", async function () {
-        const tokenAfterDecompose = await sender.tokens.getToken(token.id);
-        expect(tokenAfterDecompose).toBeUndefined();
+        const token = await sender.tokens.getToken(tokenId);
+        expect(token).toBeUndefined();
+    });
+
+    // whether files should be deleted is to be discussed
+    // eslint-disable-next-line jest/no-disabled-tests
+    test.skip("file should be deleted", async function () {
+        const file = await sender.files.getFile(fileId);
+        expect(file).toBeUndefined();
     });
 
     test("messages should be deleted/pseudonymized", async function () {
