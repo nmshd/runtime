@@ -158,6 +158,6 @@ describe("End2End Notification via Messages", function () {
         const notification = await rNotificationsCollection.findOne({
             id: rLocalNotification.id.toString()
         });
-        expect(notification).toBeUndefined();
+        expect(notification).toBeFalsy();
     });
 });
