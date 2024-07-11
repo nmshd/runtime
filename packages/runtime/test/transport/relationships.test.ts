@@ -186,7 +186,7 @@ describe("Templator with active IdentityDeletionProcess", () => {
             creationContent: { a: "b" }
         });
         expect(createRelationshipResponse).toBeAnError(
-            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
+            "The Identity who created the `RelationshipTemplate` is currently in the process of deleting itself. Thus, it is not possible to establish a `Relationship` to it.",
             "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
         );
     });

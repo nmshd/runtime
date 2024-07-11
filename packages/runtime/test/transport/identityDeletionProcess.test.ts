@@ -84,7 +84,7 @@ describe("IdentityDeletionProcess", () => {
             await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             const result = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(result).toBeAnError(
-                "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per Identity.",
+                "There is already an active `IdentityDeletionProcess`. You cannot start another, as there may only be one active `IdentityDeletionProcess` per Identity.",
                 "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists"
             );
         });
@@ -94,7 +94,7 @@ describe("IdentityDeletionProcess", () => {
             await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             const result = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(result).toBeAnError(
-                "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per Identity.",
+                "There is already an active `IdentityDeletionProcess`. You cannot start another, as there may only be one active `IdentityDeletionProcess` per Identity.",
                 "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists"
             );
         });
@@ -114,7 +114,7 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to get the active IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.getActiveIdentityDeletionProcess();
-            expect(result).toBeAnError("No active IdentityDeletionProcess found.", "error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess");
+            expect(result).toBeAnError("No active `IdentityDeletionProcess` found.", "error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess");
         });
     });
 
@@ -192,7 +192,7 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to cancel an IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            expect(result).toBeAnError("No approved IdentityDeletionProcess found.", "error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess");
+            expect(result).toBeAnError("No approved `IdentityDeletionProcess` found.", "error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess");
         });
     });
 
@@ -212,7 +212,7 @@ describe("IdentityDeletionProcess", () => {
         test("should return an error trying to approve an IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
             expect(result).toBeAnError(
-                "No IdentityDeletionProcess waiting for decision found.",
+                "No `IdentityDeletionProcess` waiting for decision found.",
                 "error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess"
             );
         });
@@ -234,7 +234,7 @@ describe("IdentityDeletionProcess", () => {
         test("should return an error trying to reject an IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
             expect(result).toBeAnError(
-                "No IdentityDeletionProcess waiting for decision found.",
+                "No `IdentityDeletionProcess` waiting for decision found.",
                 "error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess"
             );
         });
