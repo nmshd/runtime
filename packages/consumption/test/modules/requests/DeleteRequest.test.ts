@@ -8,7 +8,7 @@ import { TestRequestItemProcessor } from "./testHelpers/TestRequestItemProcessor
 
 let connection: IDatabaseConnection;
 let transport: Transport;
-describe("End2End Request/Response via Messages", function () {
+describe("Delete requests", function () {
     let sAccountController: AccountController;
     let sConsumptionController: ConsumptionController;
     let rAccountController: AccountController;

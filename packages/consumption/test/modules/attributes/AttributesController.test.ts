@@ -2532,6 +2532,7 @@ describe("AttributesController", function () {
             expect(result).toHaveLength(0);
         });
     });
+
     test("should delete attributes exchanged with peer", async function () {
         const ownRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
             content: RelationshipAttribute.from({
