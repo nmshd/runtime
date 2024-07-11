@@ -2029,6 +2029,7 @@ describe("AttributesController", function () {
                 successorParams2
             ));
         });
+
         test("should return all predecessors of a succeeded repository attribute", async function () {
             const result0 = await consumptionController.attributes.getPredecessorsOfAttribute(repositoryAttributeVersion0.id);
             expect(result0).toStrictEqual([]);

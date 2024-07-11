@@ -29,12 +29,14 @@ describe("PasswordGeneratorTest", function () {
                 expect(password.length).toBeLessThanOrEqual(12);
             }
         });
+
         test("should return a random password with the correct given fix length", async function () {
             for (let i = 1; i < 20; i++) {
                 const pass = await PasswordGenerator.createStrongPassword(50, 50);
                 expect(pass).toHaveLength(50);
             }
         });
+
         test("should return a random password with the correct given length interval", async function () {
             for (let i = 1; i < 20; i++) {
                 const pass = await PasswordGenerator.createStrongPassword(20, 50);
@@ -43,6 +45,7 @@ describe("PasswordGeneratorTest", function () {
                 expect(pass.length).toBeLessThanOrEqual(51);
             }
         });
+
         test("should throw an error if minLength is too low", async function () {
             for (let i = 1; i < 20; i++) {
                 await TestUtil.expectThrowsAsync(PasswordGenerator.createStrongPassword(2, 20), "Minimum password length for a strong password should be 8 characters.");

@@ -2,14 +2,7 @@ import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { TestRequestItemJSON } from "@nmshd/consumption/test/modules/requests/testHelpers/TestRequestItem";
 import { CoreDate } from "@nmshd/transport";
-import {
-    ConsumptionServices,
-    CreateOutgoingRequestRequest,
-    OutgoingRequestCreatedEvent,
-    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
-    OutgoingRequestStatusChangedEvent,
-    TransportServices
-} from "../../src";
+import { ConsumptionServices, CreateOutgoingRequestRequest, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import {
     RuntimeServiceProvider,
@@ -355,7 +348,6 @@ describe("Requests", () => {
         let sTransportServices: TransportServices;
         let rTransportServices: TransportServices;
         let rEventBus: EventBus;
-        let sEventBus: EventBus;
 
         const templateContent = {
             "@type": "RelationshipTemplateContent",
@@ -379,7 +371,6 @@ describe("Requests", () => {
             rTransportServices = rRuntimeServices.transport;
             sConsumptionServices = sRuntimeServices.consumption;
             rConsumptionServices = rRuntimeServices.consumption;
-            sEventBus = sRuntimeServices.eventBus;
             rEventBus = rRuntimeServices.eventBus;
         }, 30000);
         afterAll(async () => await runtimeServiceProvider.stop());
@@ -578,12 +569,6 @@ describe("Requests", () => {
             expect(syncResult).toHaveLength(1);
 
             const sRelationship = syncResult[0];
-
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            let triggeredCompletionEvent: OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent | undefined;
-            sEventBus.subscribeOnce(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent, (event) => {
-                triggeredCompletionEvent = event;
-            });
 
             const completionResult = await sConsumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
                 responseSourceId: sRelationship.id,
