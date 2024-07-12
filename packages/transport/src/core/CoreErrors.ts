@@ -10,7 +10,7 @@ class Relationships {
     public wrongRelationshipStatus(relationshipId: string, status: RelationshipStatus) {
         return new CoreError(
             "error.transport.relationships.wrongRelationshipStatus",
-            `The Relationship '${relationshipId}' has the wrong status (${status}) to run this operation`
+            `The Relationship '${relationshipId}' has the wrong status ('${status}') to run this operation.`
         );
     }
 
@@ -36,7 +36,7 @@ class Device {
     }
 
     public couldNotDeleteDevice(reason: string, rootCause?: any) {
-        return new CoreError("error.transport.devices.couldNotDeleteDevice", `Could not delete device: ${reason}`, rootCause);
+        return new CoreError("error.transport.devices.couldNotDeleteDevice", `Could not delete device: '${reason}'`, rootCause);
     }
 }
 
@@ -44,12 +44,12 @@ class Messages {
     public plaintextMismatch(ownAddress: string) {
         return new CoreError(
             "error.transport.messages.plaintextMismatch",
-            `The own address ${ownAddress} was not named as a recipient within the signed MessagePlaintext. A replay attack might be the cause of this.`
+            `The own address '${ownAddress}' was not named as a recipient within the signed MessagePlaintext. A replay attack might be the cause of this.`
         );
     }
 
     public signatureListMismatch(address: string) {
-        return new CoreError("error.transport.messages.signatureListMismatch", `The signature list didn't contain an entry for address ${address}.`);
+        return new CoreError("error.transport.messages.signatureListMismatch", `The signature list didn't contain an entry for address '${address}'.`);
     }
 
     public signatureNotValid() {
@@ -79,7 +79,7 @@ class Secrets {
     }
 
     public secretNotFound(type: string) {
-        return new CoreError("error.transport.secrets.secretNotFound", `secret "${type}" not found`);
+        return new CoreError("error.transport.secrets.secretNotFound", `secret '${type}' not found`);
     }
 }
 
@@ -98,7 +98,7 @@ class Datawallet {
             case "unsupportedCacheChangedModificationCollection":
                 return new CoreError(
                     errorCode,
-                    `The following collections were received in CacheChanged datawallet modifications but are not supported by the current version of this library: ${formattedData}.`
+                    `The following collections were received in CacheChanged datawallet modifications but are not supported by the current version of this library: '${formattedData}'.`
                 );
 
             default:
@@ -134,7 +134,7 @@ class Files {
     }
 
     public invalidMetadata(id: string) {
-        return new CoreError("error.transport.files.invalidMetadata", `The metadata of the File with id "${id}" is invalid.`);
+        return new CoreError("error.transport.files.invalidMetadata", `The metadata of the File with id '${id}' is invalid.`);
     }
 
     public maxFileSizeExceeded(fileSize: number, platformMaxFileSize: number) {
@@ -147,7 +147,7 @@ class Files {
 
 class Tokens {
     public invalidTokenContent(id: string) {
-        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of Token ${id} is not of type TokenContent`);
+        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of Token '${id}' is not of type TokenContent`);
     }
 }
 

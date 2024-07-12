@@ -7,17 +7,17 @@ import { LocalNotificationDTO } from "../../../types";
 import { MessageIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { NotificationMapper } from "./NotificationMapper";
 
-export interface SaveSentNotificationRequest {
+export interface SentNotificationRequest {
     messageId: MessageIdString;
 }
 
-class Validator extends SchemaValidator<SaveSentNotificationRequest> {
+class Validator extends SchemaValidator<SentNotificationRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("SaveSentNotificationRequest"));
+        super(schemaRepository.getSchema("SentNotificationRequest"));
     }
 }
 
-export class SaveSentNotificationUseCase extends UseCase<SaveSentNotificationRequest, LocalNotificationDTO> {
+export class SentNotificationUseCase extends UseCase<SentNotificationRequest, LocalNotificationDTO> {
     public constructor(
         @Inject private readonly notificationsController: NotificationsController,
         @Inject private readonly messageController: MessageController,
@@ -27,14 +27,14 @@ export class SaveSentNotificationUseCase extends UseCase<SaveSentNotificationReq
         super(validator);
     }
 
-    protected async executeInternal(request: SaveSentNotificationRequest): Promise<Result<LocalNotificationDTO, ApplicationError>> {
+    protected async executeInternal(request: SentNotificationRequest): Promise<Result<LocalNotificationDTO, ApplicationError>> {
         const message = await this.messageController.getMessage(CoreId.from(request.messageId));
         if (!message) return Result.fail(RuntimeErrors.general.recordNotFound(Message));
 
         if (!(message.cache!.content instanceof Notification)) return Result.fail(RuntimeErrors.notifications.messageDoesNotContainNotification(message.id));
         if (!message.isOwn) return Result.fail(RuntimeErrors.notifications.cannotSaveSentNotificationFromPeerMessage(message.id));
 
-        const notification = await this.notificationsController.saveSent(message);
+        const notification = await this.notificationsController.sent(message);
         const dto = NotificationMapper.toNotificationDTO(notification);
 
         return Result.ok(dto);

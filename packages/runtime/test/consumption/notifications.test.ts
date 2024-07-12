@@ -39,13 +39,13 @@ afterEach(async () => {
 });
 
 describe("Notifications", () => {
-    test("saveSentNotification", async () => {
+    test("sentNotification", async () => {
         const message = await sTransportServices.messages.sendMessage({
             recipients: [rAddress],
             content: Notification.from({ id: await ConsumptionIds.notification.generate(), items: [TestNotificationItem.from({})] }).toJSON()
         });
 
-        const notification = await sConsumptionServices.notifications.saveSentNotification({ messageId: message.value.id });
+        const notification = await sConsumptionServices.notifications.sentNotification({ messageId: message.value.id });
         expect(notification).toBeSuccessful();
 
         const getNotificationResult = await sConsumptionServices.notifications.getNotification({ id: notification.value.id });
@@ -53,13 +53,13 @@ describe("Notifications", () => {
         expect(getNotificationResult.value.status).toStrictEqual(LocalNotificationStatus.Sent);
     });
 
-    test("saveSentNotification with error", async () => {
+    test("sentNotification with error", async () => {
         const id = await ConsumptionIds.notification.generate();
         const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
         await sTransportServices.messages.sendMessage({ recipients: [rAddress], content: notificationToSend.toJSON() });
 
         const message = await syncUntilHasMessageWithNotification(rTransportServices, id);
-        const result = await rConsumptionServices.notifications.saveSentNotification({ messageId: message.id });
+        const result = await rConsumptionServices.notifications.sentNotification({ messageId: message.id });
         expect(result).toBeAnError(
             RuntimeErrors.notifications.cannotSaveSentNotificationFromPeerMessage(CoreId.from(message.id)).message,
             "error.runtime.notifications.cannotSaveSentNotificationFromPeerMessage"
@@ -136,12 +136,12 @@ describe("Notifications", () => {
         });
 
         test("wrong message id for saveSentNotification", async () => {
-            const result = await sConsumptionServices.notifications.saveSentNotification({ messageId: "wrong-id" });
+            const result = await sConsumptionServices.notifications.sentNotification({ messageId: "wrong-id" });
             expect(result).toBeAnError("messageId must match pattern MSG\\[A-Za-z0-9\\]\\{17\\}", "error.runtime.validation.invalidPropertyValue");
         });
 
         test("not existing message id for saveSentNotification", async () => {
-            const result = await sConsumptionServices.notifications.saveSentNotification({ messageId: (await new CoreIdHelper("MSG").generate()).toString() });
+            const result = await sConsumptionServices.notifications.sentNotification({ messageId: (await new CoreIdHelper("MSG").generate()).toString() });
             expect(result).toBeAnError("Message not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });
 

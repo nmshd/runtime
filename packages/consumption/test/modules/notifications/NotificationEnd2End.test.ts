@@ -67,7 +67,7 @@ describe("End2End Notification via Messages", function () {
     });
 
     test("sender: save sent Notification", async function () {
-        const localNotification = await sConsumptionController.notifications.saveSent(sMessageWithNotification);
+        const localNotification = await sConsumptionController.notifications.sent(sMessageWithNotification);
         expect(localNotification.status).toStrictEqual(LocalNotificationStatus.Sent);
         expect(localNotification.content.items[0]).toBeInstanceOf(TestNotificationItem);
 

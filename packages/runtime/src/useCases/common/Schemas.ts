@@ -19988,11 +19988,11 @@ export const ReceivedNotificationRequest: any = {
     }
 }
 
-export const SaveSentNotificationRequest: any = {
+export const SentNotificationRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SaveSentNotificationRequest",
+    "$ref": "#/definitions/SentNotificationRequest",
     "definitions": {
-        "SaveSentNotificationRequest": {
+        "SentNotificationRequest": {
             "type": "object",
             "properties": {
                 "messageId": {

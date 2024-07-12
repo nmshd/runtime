@@ -3,4 +3,4 @@ export * from "./GetNotifications";
 export * from "./ProcessNotificationById";
 export * from "./ProcessOpenNotifactionsReceivedByCurrentDevice";
 export * from "./ReceivedNotification";
-export * from "./SaveSentNotification";
+export * from "./SentNotification";

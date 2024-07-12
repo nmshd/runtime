@@ -315,10 +315,9 @@ describe("DecideRequestParametersValidator", function () {
             return;
         }
 
-        expect(validationResult.error.code).toBe("error.consumption.validation.inheritedFromItem");
-        expect(validationResult.error.message).toBe(
-            "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
-        );
+        expect(validationResult).errorValidationResult({
+            code: "error.consumption.validation.inheritedFromItem"
+        });
 
         let childResult = validationResult;
         for (const index of errorIndexPath) childResult = childResult.items[index] as ErrorValidationResult;

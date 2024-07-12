@@ -96,7 +96,7 @@ class Relationships {
     public wrongRelationshipStatus(relationshipId: string, status: string): ApplicationError {
         return new ApplicationError(
             "error.runtime.relationships.wrongRelationshipStatus",
-            `The relationship '${relationshipId}' has the wrong status (${status}) to run this operation`
+            `The relationship '${relationshipId}' has the wrong status ('${status}') to run this operation`
         );
     }
 
@@ -167,7 +167,7 @@ class Attributes {
     ): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `RepositoryAttribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared IdentityAttribute: ${ownSharedIdentityAttributeId.toString()}.`
+            `RepositoryAttribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared IdentityAttribute: '${ownSharedIdentityAttributeId.toString()}'.`
         );
     }
 

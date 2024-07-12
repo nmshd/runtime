@@ -55,7 +55,7 @@ class Attributes {
     public cannotSucceedChildOfComplexAttribute(parentId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.cannotSucceedChildOfComplexAttribute",
-            `The Attribute you want to succeed is child Attribute of a complex Attribute (id: ${parentId}), and cannot be succeeded on its own. Instead, succeed the parent which will implicitly succeed all its children.`
+            `The Attribute you want to succeed is child Attribute of a complex Attribute (id: '${parentId}'), and cannot be succeeded on its own. Instead, succeed the parent which will implicitly succeed all its children.`
         );
     }
 
@@ -178,7 +178,7 @@ class Attributes {
     }
 
     public invalidParentSuccessor(parentSuccessorId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.invalidParentSuccessor", `The complex parent successor (id: ${parentSuccessorId}) does not exist.`);
+        return new CoreError("error.consumption.attributes.invalidParentSuccessor", `The complex parent successor (id: '${parentSuccessorId}') does not exist.`);
     }
 
     public cannotSucceedAttributesWithDeletionInfo() {
@@ -224,28 +224,28 @@ class Attributes {
     }
 
     public isNotSharedAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotSharedAttribute", `The Attribute (id: ${attributeId}) is not a shared Attribute.`);
+        return new CoreError("error.consumption.attributes.isNotSharedAttribute", `The Attribute (id: '${attributeId}') is not a shared Attribute.`);
     }
 
     public isNotOwnSharedAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotOwnSharedAttribute", `The Attribute (id: ${attributeId}) is not an own shared Attribute.`);
+        return new CoreError("error.consumption.attributes.isNotOwnSharedAttribute", `The Attribute (id: '${attributeId}') is not an own shared Attribute.`);
     }
 
     public isNotPeerSharedAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotPeerSharedAttribute", `The Attribute (id: ${attributeId}) is not a peer shared Attribute.`);
+        return new CoreError("error.consumption.attributes.isNotPeerSharedAttribute", `The Attribute (id: '${attributeId}') is not a peer shared Attribute.`);
     }
 
     public isNotThirdPartyOwnedRelationshipAttribute(attributeId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.isNotThirdPartyOwnedRelationshipAttribute",
-            `The Attribute (id: ${attributeId}) is not a third party owned RelationshipAttribute.`
+            `The Attribute (id: '${attributeId}') is not a third party owned RelationshipAttribute.`
         );
     }
 
     public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.senderIsNotPeerOfSharedAttribute",
-            `The sender (id: ${senderId}) is not the peer you shared the attribute (id: ${attributeId}) with.`
+            `The sender (id: '${senderId}') is not the peer you shared the attribute (id: '${attributeId}') with.`
         );
     }
 }
