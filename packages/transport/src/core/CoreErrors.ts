@@ -10,12 +10,12 @@ class Relationships {
     public wrongRelationshipStatus(relationshipId: string, status: RelationshipStatus) {
         return new CoreError(
             "error.transport.relationships.wrongRelationshipStatus",
-            `The 'Relationship' '${relationshipId}' has the wrong status (${status}) to run this operation`
+            `The Relationship '${relationshipId}' has the wrong status (${status}) to run this operation`
         );
     }
 
     public reactivationNotRequested(relationshipId: string) {
-        return new CoreError("error.transport.relationships.reactivationNotRequested", `The 'Relationship' '${relationshipId}' has no reactivation 'Request' to respond to.`);
+        return new CoreError("error.transport.relationships.reactivationNotRequested", `The Relationship '${relationshipId}' has no reactivation Request to respond to.`);
     }
 
     public reactivationAlreadyRequested(message: string) {
@@ -25,7 +25,7 @@ class Relationships {
     public activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate() {
         return new CoreError(
             "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate",
-            "The Identity who created the `RelationshipTemplate` is currently in the process of deleting itself. Thus, it is not possible to establish a `Relationship` to it."
+            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
         );
     }
 }
@@ -55,19 +55,19 @@ class Messages {
     public signatureNotValid() {
         return new CoreError(
             "error.transport.messages.signatureNotValid",
-            "The digital signature on this `Message` for peer key is invalid. An impersonation attack might be the cause of this."
+            "The digital signature on this Message for peer key is invalid. An impersonation attack might be the cause of this."
         );
     }
 
     public ownAddressNotInList(messageId: string) {
         return new CoreError(
             "error.transport.messages.ownAddressNotInList",
-            `The recipients list of 'Message' ${messageId} didn't contain an entry for the own address. This 'Message' should not have been received.`
+            `The recipients list of Message ${messageId} didn't contain an entry for the own address. This Message should not have been received.`
         );
     }
 
     public missingOrInactiveRelationship(address: string) {
-        return new CoreError("error.transport.messages.missingOrInactiveRelationship", `An active 'Relationship' with the given address '${address}' does not exist.`);
+        return new CoreError("error.transport.messages.missingOrInactiveRelationship", `An active Relationship with the given address '${address}' does not exist.`);
     }
 }
 
@@ -85,7 +85,7 @@ class Secrets {
 
 class Challenges {
     public challengeTypeRequiresActiveRelationship() {
-        return new CoreError("error.transport.challenges.challengeTypeRequiresActiveRelationship", "The challenge type 'Relationship' requires an active 'Relationship'.");
+        return new CoreError("error.transport.challenges.challengeTypeRequiresActiveRelationship", "The challenge type Relationship requires an active Relationship.");
     }
 }
 
@@ -134,20 +134,20 @@ class Files {
     }
 
     public invalidMetadata(id: string) {
-        return new CoreError("error.transport.files.invalidMetadata", `The metadata of the 'File' with id "${id}" is invalid.`);
+        return new CoreError("error.transport.files.invalidMetadata", `The metadata of the File with id "${id}" is invalid.`);
     }
 
     public maxFileSizeExceeded(fileSize: number, platformMaxFileSize: number) {
         return new CoreError(
             "error.transport.files.maxFileSizeExceeded",
-            `The given file content size (${fileSize}) exceeds the max file size the 'Backbone' accepts (${platformMaxFileSize}).`
+            `The given file content size (${fileSize}) exceeds the max file size the Backbone accepts (${platformMaxFileSize}).`
         );
     }
 }
 
 class Tokens {
     public invalidTokenContent(id: string) {
-        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of 'Token' ${id} is not of type TokenContent`);
+        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of Token ${id} is not of type TokenContent`);
     }
 }
 

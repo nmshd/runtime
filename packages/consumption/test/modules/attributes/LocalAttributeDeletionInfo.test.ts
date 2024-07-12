@@ -252,7 +252,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to DeletionRequestRejected", function () {
@@ -260,7 +260,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to DeletedByPeer", function () {
@@ -268,7 +268,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to DeletedByOwner", function () {
@@ -276,7 +276,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to ToBeDeletedByPeer", function () {
@@ -284,7 +284,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
         });
 
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to ToBeDeleted", function () {
@@ -292,7 +292,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("`RepositoryAttributes` can not have a `deletionInfo`, since they are not shared with a peer and you can delete them directly.");
+            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
         });
     });
 

@@ -44,7 +44,7 @@ class General {
     }
 
     public invalidTokenContent() {
-        return new ApplicationError("error.runtime.invalidTokenContent", "The given `Token` has an invalid content for this route.");
+        return new ApplicationError("error.runtime.invalidTokenContent", "The given Token has an invalid content for this route.");
     }
 
     public cacheEmpty(entityName: string | Function, id: string) {
@@ -70,24 +70,24 @@ class Files {
     public invalidReference(reference: string): ApplicationError {
         return new ApplicationError(
             "error.runtime.files.invalidReference",
-            `The given reference '${reference}' is not valid. The reference for a 'File' must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.File}'.`
+            `The given reference '${reference}' is not valid. The reference for a File must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.File}'.`
         );
     }
 }
 
 class RelationshipTemplates {
     public cannotCreateTokenForPeerTemplate(): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateTokenForPeerTemplate", "You cannot create a `Token` for a peer `RelationshipTemplate`.");
+        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateTokenForPeerTemplate", "You cannot create a Token for a peer RelationshipTemplate.");
     }
 
     public cannotCreateQRCodeForPeerTemplate(): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateQRCodeForPeerTemplate", "You cannot create a QR code for a peer `RelationshipTemplate`.");
+        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateQRCodeForPeerTemplate", "You cannot create a QR code for a peer RelationshipTemplate.");
     }
 
     public invalidReference(reference: string): ApplicationError {
         return new ApplicationError(
             "error.runtime.relationshipTemplates.invalidReference",
-            `The given reference '${reference}' is not valid. The reference for a 'RelationshipTemplate' must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.RelationshipTemplate}'.`
+            `The given reference '${reference}' is not valid. The reference for a RelationshipTemplate must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.RelationshipTemplate}'.`
         );
     }
 }
@@ -101,13 +101,13 @@ class Relationships {
     }
 
     public isNeitherRejectedNorRevoked(): ApplicationError {
-        return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", 'The `status` of the `Relationship` is neither "Rejected" nor "Revoked".');
+        return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", 'The status of the Relationship is neither "Rejected" nor "Revoked".');
     }
 }
 
 class Messages {
     public fileNotFoundInMessage(attachmentId: string) {
-        return new ApplicationError("error.runtime.messages.fileNotFoundInMessage", `The requested 'File' '${attachmentId}' was not found in the given 'Message'.`);
+        return new ApplicationError("error.runtime.messages.fileNotFoundInMessage", `The requested File '${attachmentId}' was not found in the given Message.`);
     }
 }
 
@@ -137,27 +137,27 @@ class Challenges {
 
 class Notifications {
     public cannotReceiveNotificationFromOwnMessage(): ApplicationError {
-        return new ApplicationError("error.runtime.notifications.cannotReceiveNotificationFromOwnMessage", "Cannot receive `Notification` from own `Message`.");
+        return new ApplicationError("error.runtime.notifications.cannotReceiveNotificationFromOwnMessage", "Cannot receive Notification from own Message.");
     }
 
     public cannotSaveSentNotificationFromPeerMessage(messageId: CoreId): ApplicationError {
         return new ApplicationError(
             "error.runtime.notifications.cannotSaveSentNotificationFromPeerMessage",
-            `The 'Message' '${messageId}' was received from a peer, but an own 'Message' is expected here to save its 'Notification' content.`
+            `The Message '${messageId}' was received from a peer, but an own Message is expected here to save its Notification content.`
         );
     }
 
     public messageDoesNotContainNotification(messageId: CoreId): ApplicationError {
         return new ApplicationError(
             "error.runtime.notifications.messageDoesNotContainNotification",
-            `The 'Message' with the ID '${messageId.toString()}' does not contain a 'Notification'.`
+            `The Message with the ID '${messageId.toString()}' does not contain a Notification.`
         );
     }
 }
 
 class Attributes {
     public isNotRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotRepositoryAttribute", `Attribute '${attributeId.toString()}' is not a 'RepositoryAttribute'.`);
+        return new ApplicationError("error.runtime.attributes.isNotRepositoryAttribute", `Attribute '${attributeId.toString()}' is not a RepositoryAttribute.`);
     }
 
     public repositoryAttributeHasAlreadyBeenSharedWithPeer(
@@ -167,14 +167,14 @@ class Attributes {
     ): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `'RepositoryAttribute' '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared 'IdentityAttribute': ${ownSharedIdentityAttributeId.toString()}.`
+            `RepositoryAttribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared IdentityAttribute: ${ownSharedIdentityAttributeId.toString()}.`
         );
     }
 
     public noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore",
-            `No previous version of 'RepositoryAttribute' '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this Attribute, use 'ShareRepositoryAttribute'.`
+            `No previous version of RepositoryAttribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this Attribute, use ShareRepositoryAttribute.`
         );
     }
 
@@ -189,31 +189,28 @@ class Attributes {
     public isNotThirdPartyOwnedRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.isNotThirdPartyOwnedRelationshipAttribute",
-            `Attribute '${attributeId.toString()}' is not a third party owned 'RelationshipAttribute'.`
+            `Attribute '${attributeId.toString()}' is not a third party owned RelationshipAttribute.`
         );
     }
 }
 
 class IdentityDeletionProcess {
     public noActiveIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess", "No active `IdentityDeletionProcess` found.");
+        return new ApplicationError("error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess", "No active IdentityDeletionProcess found.");
     }
 
     public noWaitingForApprovalIdentityDeletionProcess() {
-        return new ApplicationError(
-            "error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess",
-            "No `IdentityDeletionProcess` waiting for decision found."
-        );
+        return new ApplicationError("error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess", "No IdentityDeletionProcess waiting for decision found.");
     }
 
     public noApprovedIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess", "No approved `IdentityDeletionProcess` found.");
+        return new ApplicationError("error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess", "No approved IdentityDeletionProcess found.");
     }
 
     public activeIdentityDeletionProcessAlreadyExists() {
         return new ApplicationError(
             "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists",
-            "There is already an active `IdentityDeletionProcess`. You cannot start another, as there may only be one active `IdentityDeletionProcess` per Identity."
+            "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per Identity."
         );
     }
 }
