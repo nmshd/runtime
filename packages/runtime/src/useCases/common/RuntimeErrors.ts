@@ -101,7 +101,7 @@ class Relationships {
     }
 
     public isNeitherRejectedNorRevoked(): ApplicationError {
-        return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", 'The status of the Relationship is neither "Rejected" nor "Revoked".');
+        return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", "The status of the Relationship is neither 'Rejected' nor 'Revoked'.");
     }
 }
 

@@ -198,21 +198,21 @@ class Attributes {
     public invalidDeletionInfoOfOwnSharedAttribute() {
         return new CoreError(
             "error.consumption.attributes.invalidDeletionInfoOfOwnSharedAttribute",
-            "The only valid `deletionStatuses` for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'."
+            "The only valid deletionStatuses for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'."
         );
     }
 
     public invalidDeletionInfoOfPeerSharedAttribute() {
         return new CoreError(
             "error.consumption.attributes.invalidDeletionInfoOfPeerSharedAttribute",
-            "The only valid `deletionStatuses` for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'."
+            "The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'."
         );
     }
 
     public invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute() {
         return new CoreError(
             "error.consumption.attributes.invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute",
-            "The only valid `deletionStatus` for third party owned `RelationshipAttributes` is 'DeletedByPeer'."
+            "The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'."
         );
     }
 
