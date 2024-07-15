@@ -14,6 +14,8 @@ import {
     DeletePeerSharedAttributeAndNotifyOwnerUseCase,
     DeleteRepositoryAttributeRequest,
     DeleteRepositoryAttributeUseCase,
+    DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest,
+    DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
@@ -35,6 +37,8 @@ import {
     GetPeerSharedAttributesUseCase,
     GetRepositoryAttributesRequest,
     GetRepositoryAttributesUseCase,
+    GetSharedVersionsOfAttributeRequest,
+    GetSharedVersionsOfAttributeUseCase,
     GetSharedVersionsOfRepositoryAttributeRequest,
     GetSharedVersionsOfRepositoryAttributeUseCase,
     GetVersionsOfAttributeRequest,
@@ -65,6 +69,7 @@ export class AttributesFacade {
         @Inject private readonly getAttributeUseCase: GetAttributeUseCase,
         @Inject private readonly getAttributesUseCase: GetAttributesUseCase,
         @Inject private readonly getVersionsOfAttributeUseCase: GetVersionsOfAttributeUseCase,
+        @Inject private readonly getSharedVersionsOfAttributeUseCase: GetSharedVersionsOfAttributeUseCase,
         @Inject private readonly getSharedVersionsOfRepositoryAttributeUseCase: GetSharedVersionsOfRepositoryAttributeUseCase,
         @Inject private readonly succeedRepositoryAttributeUseCase: SucceedRepositoryAttributeUseCase,
         @Inject private readonly executeIdentityAttributeQueryUseCase: ExecuteIdentityAttributeQueryUseCase,
@@ -78,7 +83,8 @@ export class AttributesFacade {
         @Inject private readonly deleteOwnSharedAttributeAndNotifyPeerUseCase: DeleteOwnSharedAttributeAndNotifyPeerUseCase,
         @Inject private readonly deletePeerSharedAttributeAndNotifyOwnerUseCase: DeletePeerSharedAttributeAndNotifyOwnerUseCase,
         @Inject private readonly deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
-        @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase
+        @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
+        @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase
     ) {}
 
     public async createRepositoryAttribute(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
@@ -109,6 +115,13 @@ export class AttributesFacade {
         return await this.getVersionsOfAttributeUseCase.execute(request);
     }
 
+    public async getSharedVersionsOfAttribute(request: GetSharedVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
+        return await this.getSharedVersionsOfAttributeUseCase.execute(request);
+    }
+
+    /**
+     * @deprecated getSharedVersionsOfRepositoryAttribute won't be available in version 5 anymore. Use getSharedVersionsOfAttribute instead.
+     */
     public async getSharedVersionsOfRepositoryAttribute(request: GetSharedVersionsOfRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
         return await this.getSharedVersionsOfRepositoryAttributeUseCase.execute(request);
     }
@@ -175,5 +188,9 @@ export class AttributesFacade {
 
     public async deleteRepositoryAttribute(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
         return await this.deleteRepositoryAttributeUseCase.execute(request);
+    }
+
+    public async deleteSharedAttributesForRejectedOrRevokedRelationship(request: DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest): Promise<Result<void>> {
+        return await this.deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase.execute(request);
     }
 }

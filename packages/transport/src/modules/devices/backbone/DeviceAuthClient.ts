@@ -14,6 +14,10 @@ export interface BackbonePutDevicesPushNotificationRequest {
     environment?: "Development" | "Production";
 }
 
+export interface BackbonePutDevicesPushNotificationResponse {
+    devicePushIdentifier: string;
+}
+
 export class DeviceAuthClient extends RESTClientAuthenticate {
     protected override _logDirective = RESTClientLogDirective.LogResponse;
 
@@ -29,8 +33,8 @@ export class DeviceAuthClient extends RESTClientAuthenticate {
         return await this.delete<void>(`/api/v1/Devices/${deviceId}`);
     }
 
-    public async registerPushNotificationToken(input: BackbonePutDevicesPushNotificationRequest): Promise<ClientResult<void>> {
-        return await this.put<void>("/api/v1/Devices/Self/PushNotifications", input);
+    public async registerPushNotificationToken(input: BackbonePutDevicesPushNotificationRequest): Promise<ClientResult<BackbonePutDevicesPushNotificationResponse>> {
+        return await this.put<BackbonePutDevicesPushNotificationResponse>("/api/v1/Devices/Self/PushNotifications", input);
     }
 
     public async unregisterPushNotificationToken(): Promise<ClientResult<void>> {

@@ -149,10 +149,9 @@ class Mail extends Serializable implements IMail {
     public body: string;
 
     protected static override preFrom(value: any): any {
-        if (typeof value.cc === "undefined") {
-            value.cc = [];
-        }
-        if (typeof value.body === "undefined" && value.content) {
+        if (!value.cc) value.cc = [];
+
+        if (!value.body && value.content) {
             value.body = value.content;
             delete value.content;
         }

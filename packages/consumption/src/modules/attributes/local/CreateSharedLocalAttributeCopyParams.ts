@@ -3,7 +3,7 @@ import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/transport";
 
 export interface CreateSharedLocalAttributeCopyParamsJSON {
     attributeId?: string;
-    sourceAttributeId?: string;
+    sourceAttributeId: string;
     peer: string;
     requestReference: string;
 }

@@ -24,9 +24,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 );
             }
 
-            if (recipientIsAttributeOwner || ownerIsEmptyString || typeof recipient === "undefined") {
-                return ValidationResult.success();
-            }
+            if (recipientIsAttributeOwner || ownerIsEmptyString || !recipient) return ValidationResult.success();
 
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(
@@ -35,9 +33,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             );
         }
 
-        if (recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString || typeof recipient === "undefined") {
-            return ValidationResult.success();
-        }
+        if (recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString || !recipient) return ValidationResult.success();
 
         return ValidationResult.error(
             CoreErrors.requests.invalidRequestItem(

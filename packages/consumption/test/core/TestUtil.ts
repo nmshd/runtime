@@ -84,9 +84,7 @@ export class TestUtil {
 
         expect(error).toBeInstanceOf(Error);
 
-        if (typeof errorMessageRegexp === "undefined") {
-            return;
-        }
+        if (!errorMessageRegexp) return;
 
         if (typeof errorMessageRegexp === "function") {
             errorMessageRegexp(error!);
@@ -125,9 +123,7 @@ export class TestUtil {
 
         expect(error).toBeInstanceOf(Error);
 
-        if (typeof errorMessageRegexp === "undefined") {
-            return;
-        }
+        if (!errorMessageRegexp) return;
 
         if (typeof errorMessageRegexp === "function") {
             errorMessageRegexp(error!);

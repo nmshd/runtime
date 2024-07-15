@@ -57,9 +57,7 @@ export class ClientResult<T> {
     }
 
     public get value(): T {
-        if (!this._isSuccess) {
-            throw this.error;
-        }
+        if (!this._isSuccess) throw this.error;
 
         return this._value!;
     }

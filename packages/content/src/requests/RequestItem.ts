@@ -7,11 +7,14 @@ import {
     ConsentRequestItemJSON,
     CreateAttributeRequestItem,
     CreateAttributeRequestItemJSON,
+    DeleteAttributeRequestItem,
+    DeleteAttributeRequestItemJSON,
     FreeTextRequestItem,
     FreeTextRequestItemJSON,
     IAuthenticationRequestItem,
     IConsentRequestItem,
     ICreateAttributeRequestItem,
+    IDeleteAttributeRequestItem,
     IFreeTextRequestItem,
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
@@ -67,6 +70,7 @@ export interface RequestItemJSON extends ContentJSON {
 export type RequestItemJSONDerivations =
     | RequestItemJSON
     | CreateAttributeRequestItemJSON
+    | DeleteAttributeRequestItemJSON
     | ShareAttributeRequestItemJSON
     | ProposeAttributeRequestItemJSON
     | ReadAttributeRequestItemJSON
@@ -115,6 +119,7 @@ export interface IRequestItem extends ISerializable {
 export type IRequestItemDerivations =
     | IRequestItem
     | ICreateAttributeRequestItem
+    | IDeleteAttributeRequestItem
     | IShareAttributeRequestItem
     | IProposeAttributeRequestItem
     | IReadAttributeRequestItem
@@ -152,6 +157,7 @@ export abstract class RequestItem extends Serializable {
 export type RequestItemDerivations =
     | RequestItem
     | CreateAttributeRequestItem
+    | DeleteAttributeRequestItem
     | ShareAttributeRequestItem
     | ProposeAttributeRequestItem
     | ReadAttributeRequestItem

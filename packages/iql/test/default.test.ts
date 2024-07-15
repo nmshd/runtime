@@ -162,7 +162,7 @@ test("Check validity", () => {
 
     for (const e of table) {
         const result = iql.validate(e.iqlQuery);
-        // eslint-disable-next-line jest/no-if
+        // eslint-disable-next-line jest/no-conditional-in-test
         expect(result.isValid, `IQL query "${e.iqlQuery}" is unexepectedly ${e.isValid ? "invalid" : "valid"}.`).toBe(e.isValid);
     }
 });

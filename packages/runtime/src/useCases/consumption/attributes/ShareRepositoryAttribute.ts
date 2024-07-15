@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, CreateOutgoingRequestParameters, LocalAttribute, OutgoingRequestsController } from "@nmshd/consumption";
+import { AttributesController, CreateOutgoingRequestParameters, DeletionStatus, LocalAttribute, OutgoingRequestsController } from "@nmshd/consumption";
 import { Request, ShareAttributeRequestItem } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreId, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
@@ -44,10 +44,7 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
     protected async executeInternal(request: ShareRepositoryAttributeRequest): Promise<Result<LocalRequestDTO>> {
         const repositoryAttributeId = CoreId.from(request.attributeId);
         const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
-
-        if (typeof repositoryAttribute === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
-        }
+        if (!repositoryAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
 
         if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
@@ -57,7 +54,8 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             "content.owner": this.accountController.identity.address.toString(),
             "content.@type": "IdentityAttribute",
             "shareInfo.sourceAttribute": request.attributeId,
-            "shareInfo.peer": request.peer
+            "shareInfo.peer": request.peer,
+            "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
         };
         const ownSharedIdentityAttributesOfRepositoryAttribute = await this.attributeController.getLocalAttributes(query);
         if (ownSharedIdentityAttributesOfRepositoryAttribute.length > 0) {
@@ -66,18 +64,13 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
             );
         }
 
-        const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfRepositoryAttribute(
-            repositoryAttributeId,
-            [CoreAddress.from(request.peer)],
-            false
+        const sharedVersionsOfRepositoryAttribute = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeId, [CoreAddress.from(request.peer)], false);
+        const activeSharedVersions = sharedVersionsOfRepositoryAttribute.filter(
+            (attr) => attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer && attr.deletionInfo?.deletionStatus !== DeletionStatus.ToBeDeletedByPeer
         );
-        if (sharedVersionsOfRepositoryAttribute.length > 0) {
+        if (activeSharedVersions.length > 0) {
             return Result.fail(
-                RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
-                    request.attributeId,
-                    request.peer,
-                    sharedVersionsOfRepositoryAttribute[0].id
-                )
+                RuntimeErrors.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, activeSharedVersions[0].id)
             );
         }
 

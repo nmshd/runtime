@@ -1,3 +1,4 @@
+import { Event } from "@js-soft/ts-utils";
 import { AcceptResponseItem, RejectResponseItem, Request, RequestItem, ResponseItem } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { ValidationResult } from "../../common/ValidationResult";
@@ -22,5 +23,5 @@ export interface IRequestItemProcessor<
 
     canCreateOutgoingRequestItem(requestItem: TRequestItem, request: Request, recipient?: CoreAddress): Promise<ValidationResult> | ValidationResult;
     canApplyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Promise<ValidationResult> | ValidationResult;
-    applyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Promise<void> | void;
+    applyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Event | void | Promise<Event | void>;
 }

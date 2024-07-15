@@ -48,8 +48,8 @@ export class RequestError extends ApplicationError {
         delete errorCopy.config.adapter;
         delete errorCopy.config.data;
         delete errorCopy.config.headers["Authorization"];
-        delete errorCopy.config.httpAgent;
-        delete errorCopy.config.httpsAgent;
+        delete errorCopy.config.httpAgentOptions;
+        delete errorCopy.config.httpsAgentOptions;
         delete errorCopy.config.transformRequest;
         delete errorCopy.config.transformResponse;
         delete errorCopy.config.validateStatus;

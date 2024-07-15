@@ -11,7 +11,7 @@ export class NativeDeviceInfoAccessMock implements INativeDeviceInfoAccess {
             manufacturer: "Mock-Manufacturer",
             platform: "Mock-Platform",
             version: "Mock-Version",
-            pushService: PushServices.fcm
+            pushService: "dummy" as any as PushServices
         };
     }
 

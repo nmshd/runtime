@@ -1,7 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, CoreDate, FileController } from "@nmshd/transport";
-import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
 import { FileDTO } from "../../../types";
@@ -12,7 +11,7 @@ export interface UploadOwnFileRequest {
     content: Uint8Array;
     filename: string;
     mimetype: string;
-    expiresAt: ISO8601DateTimeString;
+    expiresAt?: ISO8601DateTimeString;
     title: string;
     description?: string;
 }
@@ -53,7 +52,7 @@ class Validator extends SchemaValidator<UploadOwnFileValidatableRequest> {
             );
         }
 
-        if (DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
+        if (input.expiresAt && CoreDate.from(input.expiresAt).isSameOrBefore(CoreDate.utc())) {
             validationResult.addFailure(
                 new ValidationFailure(
                     RuntimeErrors.general.invalidPropertyValue(`'${nameof<UploadOwnFileValidatableRequest>((r) => r.expiresAt)}' must be in the future`),
@@ -77,13 +76,16 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
     }
 
     protected async executeInternal(request: UploadOwnFileRequest): Promise<Result<FileDTO>> {
+        const maxDate = "9999-12-31T00:00:00.000Z";
+        const expiresAt = request.expiresAt ?? maxDate;
+
         const file = await this.fileController.sendFile({
             buffer: CoreBuffer.from(request.content),
             title: request.title,
             description: request.description ?? "",
             filename: request.filename,
             mimetype: request.mimetype,
-            expiresAt: CoreDate.from(request.expiresAt)
+            expiresAt: CoreDate.from(expiresAt)
         });
 
         await this.accountController.syncDatawallet();

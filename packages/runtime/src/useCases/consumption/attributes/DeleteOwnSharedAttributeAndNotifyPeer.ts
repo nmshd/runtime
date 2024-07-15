@@ -32,10 +32,7 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
     protected async executeInternal(request: DeleteOwnSharedAttributeAndNotifyPeerRequest): Promise<Result<DeleteOwnSharedAttributeAndNotifyPeerResponse>> {
         const ownSharedAttributeId = CoreId.from(request.attributeId);
         const ownSharedAttribute = await this.attributesController.getLocalAttribute(ownSharedAttributeId);
-
-        if (typeof ownSharedAttribute === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
-        }
+        if (!ownSharedAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!ownSharedAttribute.isOwnSharedAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotOwnSharedAttribute(ownSharedAttributeId));

@@ -280,11 +280,16 @@ export class RequestModule extends RuntimeModule {
     }
 
     private async handleRelationshipChangedEvent(event: RelationshipChangedEvent) {
-        // only trigger for new relationships that were created from an own template
         const createdRelationship = event.data;
-        if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
-
         const services = await this.runtime.getServices(event.eventTargetAddress);
+
+        if (createdRelationship.status === RelationshipStatus.Rejected || createdRelationship.status === RelationshipStatus.Revoked) {
+            await services.consumptionServices.attributes.deleteSharedAttributesForRejectedOrRevokedRelationship({ relationshipId: createdRelationship.id });
+            return;
+        }
+
+        // only trigger for new relationships that were created from an own template
+        if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
 
         const template = createdRelationship.template;
         const templateId = template.id;

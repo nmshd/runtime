@@ -10,7 +10,8 @@ export class LocalAccountMapper {
             realm: localAccount.realm,
             directory: localAccount.directory.toString(),
             order: localAccount.order,
-            lastAccessedAt: localAccount.lastAccessedAt?.toString()
+            lastAccessedAt: localAccount.lastAccessedAt?.toString(),
+            devicePushIdentifier: localAccount.devicePushIdentifier
         };
     }
 }

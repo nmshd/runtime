@@ -26,9 +26,7 @@ export class GetVersionsOfAttributeUseCase extends UseCase<GetVersionsOfAttribut
 
     protected async executeInternal(request: GetVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
         const attribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
-        if (typeof attribute === "undefined") {
-            throw RuntimeErrors.general.recordNotFound(LocalAttribute);
-        }
+        if (!attribute) throw RuntimeErrors.general.recordNotFound(LocalAttribute);
 
         const allVersions = await this.attributeController.getVersionsOfAttribute(CoreId.from(request.attributeId));
 

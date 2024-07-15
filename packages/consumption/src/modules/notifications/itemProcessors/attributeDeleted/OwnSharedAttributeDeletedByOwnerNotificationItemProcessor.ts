@@ -22,9 +22,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
 
-        if (typeof attribute === "undefined") {
-            return ValidationResult.success();
-        }
+        if (!attribute) return ValidationResult.success();
 
         if (!attribute.isPeerSharedAttribute()) {
             return ValidationResult.error(CoreErrors.attributes.isNotPeerSharedAttribute(notificationItem.attributeId));
@@ -42,7 +40,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
         _notification: LocalNotification
     ): Promise<OwnSharedAttributeDeletedByOwnerEvent | void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         const deletionInfo = LocalAttributeDeletionInfo.from({
             deletionStatus: DeletionStatus.DeletedByOwner,
@@ -52,7 +50,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
 
         for (const attr of [attribute, ...predecessors]) {
-            if (typeof attr.deletionInfo === "undefined") {
+            if (!attr.deletionInfo) {
                 attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
                 await this.consumptionController.attributes.updateAttributeUnsafe(attr);
             }
@@ -63,7 +61,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
 
     public override async rollback(notificationItem: OwnSharedAttributeDeletedByOwnerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
         for (const attr of [attribute, ...predecessors]) {

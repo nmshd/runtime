@@ -22,8 +22,6 @@ export class RequestInterceptor {
         return this._client;
     }
 
-    private oldCreateAxios: any;
-
     public constructor(client: RESTClient) {
         this._client = client;
         this._measuringRequests = true;
@@ -32,23 +30,18 @@ export class RequestInterceptor {
 
     private injectToClient(client: RESTClient) {
         const that = this;
-        const anyC = client as any;
-        this.oldCreateAxios = anyC.createAxios;
-        function newCreateAxios() {
-            const axiosInstance = that.oldCreateAxios.apply(anyC);
-            axiosInstance.interceptors.request.use((req: AxiosRequestConfig) => {
-                if (!that._measuringRequests) return req;
-                that._requests.push(req);
-                return req;
-            });
-            axiosInstance.interceptors.response.use((res: AxiosResponse) => {
-                if (!that._measuringRequests) return res;
-                that._responses.push(res);
-                return res;
-            });
-            return axiosInstance;
-        }
-        anyC.createAxios = newCreateAxios;
+
+        const axiosInstance = client["axiosInstance"];
+        axiosInstance.interceptors.request.use((req) => {
+            if (!that._measuringRequests) return req;
+            that._requests.push(req);
+            return req;
+        });
+        axiosInstance.interceptors.response.use((res) => {
+            if (!that._measuringRequests) return res;
+            that._responses.push(res);
+            return res;
+        });
     }
 
     public start(): this {

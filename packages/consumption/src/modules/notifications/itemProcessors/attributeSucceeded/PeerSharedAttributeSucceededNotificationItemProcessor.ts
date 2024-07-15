@@ -79,14 +79,14 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
 
     private async rollbackPartialWork(notificationItem: PeerSharedAttributeSucceededNotificationItem, _notification: LocalNotification): Promise<void> {
         const successor = await this.consumptionController.attributes.getLocalAttribute(notificationItem.successorId);
-        if (typeof successor !== "undefined") {
+        if (successor) {
             await this.consumptionController.attributes
                 .deleteAttributeUnsafe(successor.id)
                 .catch((e) => this._logger.error(`Deletion failed for attribute (attribute id: ${successor.id}).`, e));
         }
 
         const predecessor = await this.consumptionController.attributes.getLocalAttribute(notificationItem.predecessorId);
-        if (typeof predecessor?.succeededBy !== "undefined") {
+        if (predecessor?.succeededBy) {
             predecessor.succeededBy = undefined;
             await this.consumptionController.attributes
                 .updateAttributeUnsafe(predecessor)

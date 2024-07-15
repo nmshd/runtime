@@ -70,7 +70,7 @@ export class LocalNotification extends CoreSynchronizable implements ILocalNotif
             throw new ConsumptionError("this should never happen");
         }
 
-        if (value.isOwn && typeof value.receivedByDevice !== "undefined") {
+        if (value.isOwn && value.receivedByDevice) {
             throw new ValidationError(
                 LocalNotification.name,
                 nameof<LocalNotification>((x) => x.receivedByDevice),
@@ -78,7 +78,7 @@ export class LocalNotification extends CoreSynchronizable implements ILocalNotif
             );
         }
 
-        if (!value.isOwn && typeof value.receivedByDevice === "undefined") {
+        if (!value.isOwn && !value.receivedByDevice) {
             throw new ValidationError(
                 LocalNotification.name,
                 nameof<LocalNotification>((x) => x.receivedByDevice),

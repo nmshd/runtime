@@ -103,7 +103,7 @@ describe("IQLQueryExpanded", () => {
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
         expect(givenName.value).toBe("Hugo");
-        expect(dvo.tags[0]).toBe("default");
+        expect(dvo.tags![0]).toBe("default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);
@@ -150,7 +150,7 @@ describe("IQLQueryExpanded", () => {
         const value3 = dvo.value as AbstractStringJSON;
         expect(value3["@type"]).toBe("GivenName");
         expect(value3.value).toBe("Tester");
-        expect(dvo.tags[0]).toBe("fake");
+        expect(dvo.tags![0]).toBe("fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);
@@ -195,7 +195,7 @@ describe("IQLQueryExpanded", () => {
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
         expect(givenName.value).toBe("Hugo");
-        expect(dvo.tags[0]).toBe("default");
+        expect(dvo.tags![0]).toBe("default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);
@@ -240,7 +240,7 @@ describe("IQLQueryExpanded", () => {
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
         expect(givenName.value).toBe("Tester");
-        expect(dvo.tags[0]).toBe("fake");
+        expect(dvo.tags![0]).toBe("fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);
@@ -282,7 +282,7 @@ describe("IQLQueryExpanded", () => {
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
         expect(givenName.value).toBe("Tester");
-        expect(dvo.tags[0]).toBe("fake");
+        expect(dvo.tags![0]).toBe("fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);
@@ -306,7 +306,7 @@ describe("IQLQueryExpanded", () => {
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("Surname");
         expect(value.value).toBe("Nachname");
-        expect(dvo.tags[0]).toBe("fake");
+        expect(dvo.tags![0]).toBe("fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);

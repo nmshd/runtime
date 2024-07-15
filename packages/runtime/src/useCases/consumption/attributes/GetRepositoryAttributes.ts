@@ -19,9 +19,6 @@ export interface GetRepositoryAttributesRequestQuery {
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];
     "content.value.@type"?: string | string[];
-    deletionInfo?: string | string[];
-    "deletionInfo.deletionStatus"?: string | string[];
-    "deletionInfo.deletionDate"?: string | string[];
 }
 
 export interface GetRepositoryAttributesResponse extends Array<LocalAttributeDTO> {}
@@ -46,9 +43,7 @@ export class GetRepositoryAttributesUseCase extends UseCase<GetRepositoryAttribu
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
         dbQuery.shareInfo = { $exists: false };
 
-        if (typeof request.onlyLatestVersions === "undefined" || request.onlyLatestVersions) {
-            dbQuery["succeededBy"] = { $exists: false };
-        }
+        if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
         const attributes = await this.attributesController.getLocalAttributes(dbQuery);
 

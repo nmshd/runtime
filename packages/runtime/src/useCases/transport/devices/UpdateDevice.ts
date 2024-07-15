@@ -34,10 +34,7 @@ export class UpdateDeviceUseCase extends UseCase<UpdateDeviceRequest, DeviceDTO>
             return Result.fail(RuntimeErrors.general.recordNotFound(Device));
         }
 
-        if (typeof request.name !== "undefined") {
-            device.name = request.name;
-        }
-
+        if (request.name) device.name = request.name;
         device.description = request.description;
 
         await this.devicesController.update(device);

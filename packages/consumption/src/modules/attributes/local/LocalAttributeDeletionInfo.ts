@@ -2,6 +2,8 @@ import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreSerializable, ICoreDate } from "@nmshd/transport";
 
 export enum DeletionStatus {
+    DeletionRequestSent = "DeletionRequestSent",
+    DeletionRequestRejected = "DeletionRequestRejected",
     ToBeDeleted = "ToBeDeleted",
     ToBeDeletedByPeer = "ToBeDeletedByPeer",
     DeletedByPeer = "DeletedByPeer",

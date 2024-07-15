@@ -407,9 +407,7 @@ export class SyncController extends TransportController {
             downloadingStep.manualReport(percentage)
         );
 
-        if (getExternalEventsResult.isError) {
-            throw getExternalEventsResult.error;
-        }
+        if (getExternalEventsResult.isError) throw getExternalEventsResult.error;
 
         const externalEvents = await getExternalEventsResult.value.collect();
 
@@ -489,9 +487,7 @@ export class SyncController extends TransportController {
             datawalletModifications: backboneModifications
         });
 
-        if (response.isError) {
-            throw response.error;
-        }
+        if (response.isError) throw response.error;
 
         await this.deleteUnpushedDatawalletModifications(localModificationIds);
 

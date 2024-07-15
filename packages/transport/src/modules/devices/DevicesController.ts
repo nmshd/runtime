@@ -92,9 +92,7 @@ export class DevicesController extends TransportController {
         const count = await this.devices.count();
         const device = Device.from(deviceDoc);
 
-        if (typeof device.publicKey !== "undefined") {
-            throw CoreErrors.device.alreadyOnboarded();
-        }
+        if (device.publicKey) throw CoreErrors.device.alreadyOnboarded();
 
         const isAdmin = device.isAdmin === true;
 
@@ -111,9 +109,7 @@ export class DevicesController extends TransportController {
     }
 
     public async delete(device: Device): Promise<void> {
-        if (typeof device.publicKey !== "undefined") {
-            throw CoreErrors.device.couldNotDeleteDevice("Device is already onboarded.");
-        }
+        if (device.publicKey) throw CoreErrors.device.couldNotDeleteDevice("Device is already onboarded.");
 
         const result = await this.client.deleteDevice(device.id.toString());
         if (result.isError) {

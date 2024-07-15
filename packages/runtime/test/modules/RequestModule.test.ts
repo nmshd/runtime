@@ -2,34 +2,39 @@ import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/cons
 import {
     GivenName,
     IdentityAttribute,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
     RelationshipCreationChangeRequestContentJSON,
     RelationshipTemplateContentJSON,
     ResponseItemJSON,
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
+import { CoreAddress } from "@nmshd/transport";
 import {
-    ConsumptionServices,
     CreateOutgoingRequestRequest,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
+    LocalAttributeDTO,
     LocalRequestDTO,
     MessageProcessedEvent,
     MessageSentEvent,
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
+    RelationshipDTO,
     RelationshipStatus,
     RelationshipTemplateDTO,
     RelationshipTemplateProcessedEvent,
-    RelationshipTemplateProcessedResult,
-    TransportServices
+    RelationshipTemplateProcessedResult
 } from "../../src";
 import {
     ensureActiveRelationship,
+    establishPendingRelationshipWithRequestFlow,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     exchangeTemplate,
+    executeFullCreateAndShareRelationshipAttributeFlow,
     MockEventBus,
     RuntimeServiceProvider,
     sendMessage,
@@ -40,39 +45,25 @@ import {
     TestRuntimeServices
 } from "../lib";
 
-const runtimeServiceProvider = new RuntimeServiceProvider();
-let sRuntimeServices: TestRuntimeServices;
-let sTransportServices: TransportServices;
-let sConsumptionServices: ConsumptionServices;
-let sEventBus: MockEventBus;
-
-let rRuntimeServices: TestRuntimeServices;
-let rTransportServices: TransportServices;
-let rConsumptionServices: ConsumptionServices;
-let rEventBus: MockEventBus;
-
-beforeAll(async () => {
-    const runtimeServices = await runtimeServiceProvider.launch(2, { enableRequestModule: true });
-
-    sRuntimeServices = runtimeServices[0];
-    sTransportServices = sRuntimeServices.transport;
-    sConsumptionServices = sRuntimeServices.consumption;
-    sEventBus = sRuntimeServices.eventBus;
-
-    rRuntimeServices = runtimeServices[1];
-    rTransportServices = rRuntimeServices.transport;
-    rConsumptionServices = rRuntimeServices.consumption;
-    rEventBus = rRuntimeServices.eventBus;
-}, 30000);
-
-afterEach(() => {
-    sEventBus.reset();
-    rEventBus.reset();
-});
-
-afterAll(async () => await runtimeServiceProvider.stop());
-
 describe("RequestModule", () => {
+    const runtimeServiceProvider = new RuntimeServiceProvider();
+    let sRuntimeServices: TestRuntimeServices;
+    let rRuntimeServices: TestRuntimeServices;
+
+    beforeAll(async () => {
+        const runtimeServices = await runtimeServiceProvider.launch(2, { enableRequestModule: true });
+
+        sRuntimeServices = runtimeServices[0];
+        rRuntimeServices = runtimeServices[1];
+    }, 30000);
+
+    afterEach(() => {
+        sRuntimeServices.eventBus.reset();
+        rRuntimeServices.eventBus.reset();
+    });
+
+    afterAll(async () => await runtimeServiceProvider.stop());
+
     describe("Relationships / RelationshipTemplates (onNewRelationship)", () => {
         let template: RelationshipTemplateDTO;
 
@@ -85,21 +76,21 @@ describe("RequestModule", () => {
 
         async function getRequestIdOfTemplate(eventBus: MockEventBus, templateId: string) {
             let requests: LocalRequestDTO[];
-            requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
+            requests = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
             if (requests.length === 0) {
                 await eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-                requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
+                requests = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
             }
             return requests[0].id;
         }
 
         async function ensureActiveRelationshipWithTemplate(sRuntimeServices: TestRuntimeServices, rRuntimeServices: TestRuntimeServices, template: RelationshipTemplateDTO) {
-            if ((await sTransportServices.relationships.getRelationships({})).value.length === 0) {
-                await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
-                const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
-                await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-                const relationship = (await syncUntilHasRelationships(sTransportServices, 1))[0];
-                await sTransportServices.relationships.acceptRelationshipChange({
+            if ((await sRuntimeServices.transport.relationships.getRelationships({})).value.length === 0) {
+                await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+                const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+                await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
+                const relationship = (await syncUntilHasRelationships(sRuntimeServices.transport, 1))[0];
+                await sRuntimeServices.transport.relationships.acceptRelationshipChange({
                     relationshipId: relationship.id,
                     changeId: relationship.changes[0].id,
                     content: {}
@@ -108,34 +99,37 @@ describe("RequestModule", () => {
         }
 
         beforeAll(async () => {
-            template = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
+            template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
         });
 
         test("creates a request for a loaded peer Relationship Template and checks its prerequisites", async () => {
-            await expect(rEventBus).toHavePublished(IncomingRequestReceivedEvent);
-            await expect(rEventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            await expect(rRuntimeServices.eventBus).toHavePublished(IncomingRequestReceivedEvent);
+            await expect(rRuntimeServices.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
-            const requestsResult = await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } });
+            const requestsResult = await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } });
             expect(requestsResult.value).toHaveLength(1);
         });
 
         test("does not create a second Request from the same Template if an open Request exists", async () => {
-            await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
-            await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.NonCompletedRequestExists);
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.NonCompletedRequestExists
+            );
 
-            const requestsWithTemplateAsSource = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
+            const requestsWithTemplateAsSource = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
 
             expect(requestsWithTemplateAsSource).toHaveLength(1);
         });
 
         test("completes the Request when the Request is accepted by creating a Relationship", async () => {
-            const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
-            await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
+            const requestId = await getRequestIdOfTemplate(rRuntimeServices.eventBus, template.id);
+            await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
 
-            await expect(rEventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+            await expect(rRuntimeServices.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
-            const getRelationshipsResult = await rTransportServices.relationships.getRelationships({});
+            const getRelationshipsResult = await rRuntimeServices.transport.relationships.getRelationships({});
             expect(getRelationshipsResult).toBeSuccessful();
 
             expect(getRelationshipsResult.value).toHaveLength(1);
@@ -143,41 +137,47 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent when another Template is loaded and a pending Relationship exists", async () => {
-            const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
-            await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
+            const requestId = await getRequestIdOfTemplate(rRuntimeServices.eventBus, template.id);
+            await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
             const templateContent: RelationshipTemplateContentJSON = {
                 "@type": "RelationshipTemplateContent",
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 metadata
             };
 
-            await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
+            await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
 
-            await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists);
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
+            );
         });
 
         test("triggers RelationshipTemplateProcessedEvent if there is no request in the template", async () => {
-            await exchangeTemplate(sTransportServices, rTransportServices, {});
+            await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, {});
 
-            await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.NoRequest);
+            await expect(rRuntimeServices.eventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.NoRequest);
         });
 
         test("triggers RelationshipTemplateProcessedEvent if a pending Relationship exists", async () => {
-            const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
-            const relationships = (await rTransportServices.relationships.getRelationships({})).value;
+            const requestId = await getRequestIdOfTemplate(rRuntimeServices.eventBus, template.id);
+            const relationships = (await rRuntimeServices.transport.relationships.getRelationships({})).value;
             if (relationships.length === 0) {
-                await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-                await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+                await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
+                await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
             }
-            await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
-            await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists);
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
+            );
         });
 
         test("templator: creates a Relationship with the correct data on an incoming Relationship Change with a Response", async () => {
-            const requestId = await getRequestIdOfTemplate(rEventBus, template.id);
-            await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-            const relationships = await syncUntilHasRelationships(sTransportServices, 1);
+            const requestId = await getRequestIdOfTemplate(rRuntimeServices.eventBus, template.id);
+            await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
+            const relationships = await syncUntilHasRelationships(sRuntimeServices.transport, 1);
 
             expect(relationships).toHaveLength(1);
 
@@ -194,23 +194,23 @@ describe("RequestModule", () => {
             expect(responseItem["@type"]).toBe("AcceptResponseItem");
             expect(responseItem.result).toBe(ResponseItemResult.Accepted);
 
-            await expect(sEventBus).toHavePublished(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, (e) => e.data.id === response.requestId);
+            await expect(sRuntimeServices.eventBus).toHavePublished(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, (e) => e.data.id === response.requestId);
 
-            const requestsResult = await sConsumptionServices.outgoingRequests.getRequest({ id: response.requestId });
+            const requestsResult = await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: response.requestId });
             expect(requestsResult).toBeSuccessful();
 
-            await sTransportServices.relationships.acceptRelationshipChange({ relationshipId: relationship.id, changeId: relationship.changes[0].id, content: {} });
-            await syncUntilHasRelationships(rTransportServices, 1);
+            await sRuntimeServices.transport.relationships.acceptRelationshipChange({ relationshipId: relationship.id, changeId: relationship.changes[0].id, content: {} });
+            await syncUntilHasRelationships(rRuntimeServices.transport, 1);
         });
 
         test("does not create a second Request from the same Template if an active Relationship exists", async () => {
-            await ensureActiveRelationship(sTransportServices, rTransportServices);
-            rEventBus.reset();
-            await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await ensureActiveRelationship(sRuntimeServices.transport, rRuntimeServices.transport);
+            rRuntimeServices.eventBus.reset();
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
-            await expect(rEventBus).not.toHavePublished(IncomingRequestReceivedEvent);
+            await expect(rRuntimeServices.eventBus).not.toHavePublished(IncomingRequestReceivedEvent);
 
-            const requestsFromTemplate = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
+            const requestsFromTemplate = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
 
             expect(requestsFromTemplate).toHaveLength(1);
         });
@@ -218,23 +218,26 @@ describe("RequestModule", () => {
         test("triggers RelationshipTemplateProcessedEvent if an active Relationship exists", async () => {
             await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
 
-            rEventBus.reset();
-            await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            rRuntimeServices.eventBus.reset();
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
-            await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists);
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
+            );
         });
     });
 
     describe("Relationships / RelationshipTemplates (onExistingRelationship)", () => {
-        beforeAll(async () => await ensureActiveRelationship(sTransportServices, rTransportServices));
+        beforeAll(async () => await ensureActiveRelationship(sRuntimeServices.transport, rRuntimeServices.transport));
 
         test("creates a request from onExistingRelationship if a relationship already exists", async () => {
             const template = await exchangeRelationshipTemplate();
 
-            await expect(rEventBus).toHavePublished(IncomingRequestReceivedEvent);
-            await expect(rEventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            await expect(rRuntimeServices.eventBus).toHavePublished(IncomingRequestReceivedEvent);
+            await expect(rRuntimeServices.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
-            const requests = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
+            const requests = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value;
 
             expect(requests).toHaveLength(1);
 
@@ -246,42 +249,48 @@ describe("RequestModule", () => {
         test("triggers RelationshipTemplateProcessedEvent if an active Relationship exists", async () => {
             const template = await exchangeRelationshipTemplate();
 
-            await rTransportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
-            await expect(rEventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.NonCompletedRequestExists);
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.NonCompletedRequestExists
+            );
         });
 
         test("sends the Reject-Response by Message", async () => {
             const template = await exchangeRelationshipTemplate();
 
-            await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
             const requests = (
-                await rConsumptionServices.incomingRequests.getRequests({
+                await rRuntimeServices.consumption.incomingRequests.getRequests({
                     query: { "source.reference": template.id }
                 })
             ).value;
             const request = requests[0];
 
-            const requestAfterReject = (await rConsumptionServices.incomingRequests.reject({ requestId: request.id, items: [{ accept: false }] })).value;
+            const requestAfterReject = (await rRuntimeServices.consumption.incomingRequests.reject({ requestId: request.id, items: [{ accept: false }] })).value;
 
-            await rEventBus.waitForRunningEventHandlers();
+            await rRuntimeServices.eventBus.waitForRunningEventHandlers();
 
-            await expect(rEventBus).toHavePublished(MessageSentEvent, (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId);
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                MessageSentEvent,
+                (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId
+            );
         });
 
         test("receives the rejected Request by Message", async () => {
             const template = await exchangeRelationshipTemplate();
-            await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
-            await rConsumptionServices.incomingRequests.reject({ requestId, items: [{ accept: false }] });
-            await syncUntilHasMessageWithResponse(sTransportServices, requestId);
+            await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+            await rRuntimeServices.consumption.incomingRequests.reject({ requestId, items: [{ accept: false }] });
+            await syncUntilHasMessageWithResponse(sRuntimeServices.transport, requestId);
 
-            await sEventBus.waitForRunningEventHandlers();
+            await sRuntimeServices.eventBus.waitForRunningEventHandlers();
 
-            await expect(sEventBus).toHavePublished(OutgoingRequestCreatedAndCompletedEvent, (e) => e.data.id === requestId);
+            await expect(sRuntimeServices.eventBus).toHavePublished(OutgoingRequestCreatedAndCompletedEvent, (e) => e.data.id === requestId);
 
-            const request = (await sConsumptionServices.outgoingRequests.getRequest({ id: requestId })).value;
+            const request = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
             expect(request.status).toBe(LocalRequestStatus.Completed);
             expect(request.response!.content.result).toBe(ResponseResult.Rejected);
         });
@@ -289,29 +298,32 @@ describe("RequestModule", () => {
         test("sends the Accept-Response by Message", async () => {
             const template = await exchangeRelationshipTemplate();
 
-            await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
-            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+            const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
 
-            const requestAfterReject = (await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: false }] })).value;
+            const requestAfterReject = (await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: false }] })).value;
 
-            await rEventBus.waitForRunningEventHandlers();
+            await rRuntimeServices.eventBus.waitForRunningEventHandlers();
 
-            await expect(rEventBus).toHavePublished(MessageSentEvent, (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId);
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                MessageSentEvent,
+                (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId
+            );
         });
 
         test("receives the accepted Request by Message", async () => {
             const template = await exchangeRelationshipTemplate();
-            await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-            const requestId = (await rConsumptionServices.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
-            await rConsumptionServices.incomingRequests.accept({ requestId, items: [{ accept: false }] });
-            await syncUntilHasMessageWithResponse(sTransportServices, requestId);
+            await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+            await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: false }] });
+            await syncUntilHasMessageWithResponse(sRuntimeServices.transport, requestId);
 
-            await sEventBus.waitForRunningEventHandlers();
+            await sRuntimeServices.eventBus.waitForRunningEventHandlers();
 
-            await expect(sEventBus).toHavePublished(OutgoingRequestCreatedAndCompletedEvent, (e) => e.data.id === requestId);
+            await expect(sRuntimeServices.eventBus).toHavePublished(OutgoingRequestCreatedAndCompletedEvent, (e) => e.data.id === requestId);
 
-            const request = (await sConsumptionServices.outgoingRequests.getRequest({ id: requestId })).value;
+            const request = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
             expect(request.status).toBe(LocalRequestStatus.Completed);
             expect(request.response!.content.result).toBe(ResponseResult.Accepted);
         });
@@ -330,7 +342,7 @@ describe("RequestModule", () => {
                             "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
                             attribute: IdentityAttribute.from({
-                                owner: (await rTransportServices.account.getIdentityInfo()).value.address,
+                                owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address,
                                 value: GivenName.from("AGivenName").toJSON()
                             }).toJSON()
                         }
@@ -338,7 +350,7 @@ describe("RequestModule", () => {
                 }
             };
 
-            const template = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
+            const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
 
             return template;
         }
@@ -350,7 +362,7 @@ describe("RequestModule", () => {
         let responseItems: DecideRequestItemParametersJSON[];
 
         beforeAll(async () => {
-            recipientAddress = (await ensureActiveRelationship(sTransportServices, rTransportServices)).peer;
+            recipientAddress = (await ensureActiveRelationship(sRuntimeServices.transport, rRuntimeServices.transport)).peer;
             requestContent = {
                 content: { items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 peer: recipientAddress
@@ -361,9 +373,9 @@ describe("RequestModule", () => {
         test("sending the request moves the request status to open", async () => {
             const message = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
 
-            await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (event) => event.data.newStatus === LocalRequestStatus.Open);
+            await sRuntimeServices.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (event) => event.data.newStatus === LocalRequestStatus.Open);
 
-            const requestAfterAction = (await sConsumptionServices.outgoingRequests.getRequest({ id: message.content.id })).value;
+            const requestAfterAction = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: message.content.id })).value;
 
             expect(requestAfterAction.status).toBe(LocalRequestStatus.Open);
         });
@@ -372,46 +384,49 @@ describe("RequestModule", () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
 
             // kick every event created from requests of previous tests
-            const receivedEvents = rEventBus.publishedEvents;
+            const receivedEvents = rRuntimeServices.eventBus.publishedEvents;
             const lastEvent = receivedEvents[receivedEvents.length - 1];
             const secondToLastEvent = receivedEvents[receivedEvents.length - 2];
-            rEventBus.reset();
-            rEventBus.publish(secondToLastEvent);
-            rEventBus.publish(lastEvent);
+            rRuntimeServices.eventBus.reset();
+            rRuntimeServices.eventBus.publish(secondToLastEvent);
+            rRuntimeServices.eventBus.publish(lastEvent);
 
-            const incomingRequestReceivedEvent = await rEventBus.waitForEvent(IncomingRequestReceivedEvent);
+            const incomingRequestReceivedEvent = await rRuntimeServices.eventBus.waitForEvent(IncomingRequestReceivedEvent);
             const request = incomingRequestReceivedEvent.data;
             expect(request.id).toBe(message.content.id);
 
-            const incomingRequestStatusChangedEvent = await rEventBus.waitForEvent(
+            const incomingRequestStatusChangedEvent = await rRuntimeServices.eventBus.waitForEvent(
                 IncomingRequestStatusChangedEvent,
                 (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired
             );
 
             expect(incomingRequestStatusChangedEvent.data.newStatus).toBe(LocalRequestStatus.DecisionRequired);
 
-            const requestsResult = await rConsumptionServices.incomingRequests.getRequest({ id: message.content.id });
+            const requestsResult = await rRuntimeServices.consumption.incomingRequests.getRequest({ id: message.content.id });
             expect(requestsResult).toBeSuccessful();
         });
 
         test("triggers a MessageProcessedEvent when the incoming Message does not contain a Request", async () => {
-            await sendMessage(sTransportServices, recipientAddress, {});
+            await sendMessage(sRuntimeServices.transport, recipientAddress, {});
 
-            await syncUntilHasMessages(rTransportServices, 1);
+            await syncUntilHasMessages(rRuntimeServices.transport, 1);
 
-            await expect(rEventBus).toHavePublished(MessageProcessedEvent);
+            await expect(rRuntimeServices.eventBus).toHavePublished(MessageProcessedEvent);
         });
 
         test("sends a message when the request is accepted", async () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-            await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-            const acceptRequestResult = await rConsumptionServices.incomingRequests.accept({ requestId: message.content.id, items: [{ accept: true }] });
+            await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            const acceptRequestResult = await rRuntimeServices.consumption.incomingRequests.accept({ requestId: message.content.id, items: [{ accept: true }] });
             expect(acceptRequestResult).toBeSuccessful();
 
-            const incomingRequestStatusChangedEvent = await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+            const incomingRequestStatusChangedEvent = await rRuntimeServices.eventBus.waitForEvent(
+                IncomingRequestStatusChangedEvent,
+                (e) => e.data.newStatus === LocalRequestStatus.Completed
+            );
             expect(incomingRequestStatusChangedEvent.data.newStatus).toBe(LocalRequestStatus.Completed);
 
-            const messageSentEvent = await rEventBus.waitForEvent(MessageSentEvent);
+            const messageSentEvent = await rRuntimeServices.eventBus.waitForEvent(MessageSentEvent);
             expect(messageSentEvent.data.content["@type"]).toBe("ResponseWrapper");
         });
 
@@ -419,4 +434,129 @@ describe("RequestModule", () => {
             await expect(exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems)).resolves.not.toThrow();
         });
     });
+});
+
+describe("Handling the rejection and the revocation of a Relationship by the RequestModule", () => {
+    const runtimeServiceProvider = new RuntimeServiceProvider();
+    let sRuntimeServices: TestRuntimeServices;
+    let rRuntimeServices: TestRuntimeServices;
+    let tRuntimeServices: TestRuntimeServices;
+
+    let createdRelationshipAttributeForFurtherSharing: LocalAttributeDTO;
+
+    beforeAll(async () => {
+        const runtimeServices = await runtimeServiceProvider.launch(3, { enableRequestModule: true, enableDeciderModule: true });
+
+        sRuntimeServices = runtimeServices[0];
+        rRuntimeServices = runtimeServices[1];
+        tRuntimeServices = runtimeServices[2];
+
+        await ensureActiveRelationship(sRuntimeServices.transport, tRuntimeServices.transport);
+        createdRelationshipAttributeForFurtherSharing = await executeFullCreateAndShareRelationshipAttributeFlow(sRuntimeServices, tRuntimeServices, {
+            content: {
+                key: "AKey",
+                value: {
+                    "@type": "ProprietaryString",
+                    value: "AStringValue",
+                    title: "ATitle"
+                },
+                confidentiality: RelationshipAttributeConfidentiality.Public
+            }
+        });
+    }, 30000);
+
+    afterEach(async () => {
+        sRuntimeServices.eventBus.reset();
+        rRuntimeServices.eventBus.reset();
+
+        const rRepositoryAttributes = (await rRuntimeServices.consumption.attributes.getRepositoryAttributes({})).value;
+        for (const rRepositoryAttribute of rRepositoryAttributes) {
+            await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: rRepositoryAttribute.id });
+        }
+    });
+
+    afterAll(async () => await runtimeServiceProvider.stop());
+
+    test("deletion of the Attributes shared between both Identities involved in the rejected Relationship and keeping the remaining Attributes", async () => {
+        const sRelationship = await establishPendingRelationshipWithPredefinedRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
+        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
+        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
+
+        await sRuntimeServices.transport.relationships.rejectRelationshipChange({
+            relationshipId: sRelationship.id,
+            changeId: sRelationship.changes[0].id,
+            content: {}
+        });
+        await sRuntimeServices.eventBus.waitForRunningEventHandlers();
+        await syncUntilHasRelationships(rRuntimeServices.transport, 1);
+        await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
+        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
+    });
+
+    test("deletion of the Attributes shared between both Identities involved in the revoked Relationship and keeping the remaining Attributes", async () => {
+        const sRelationship = await establishPendingRelationshipWithPredefinedRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
+        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
+        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
+
+        await rRuntimeServices.transport.relationships.revokeRelationshipChange({
+            relationshipId: sRelationship.id,
+            changeId: sRelationship.changes[0].id,
+            content: {}
+        });
+        await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+        await syncUntilHasRelationships(sRuntimeServices.transport, 1);
+        await sRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
+        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
+    });
+
+    async function establishPendingRelationshipWithPredefinedRequestFlow(
+        sRuntimeServices: TestRuntimeServices,
+        rRuntimeServices: TestRuntimeServices,
+        existingRelationshipAttributeForFurtherSharing: LocalAttributeDTO
+    ): Promise<RelationshipDTO> {
+        const sRelationship = await establishPendingRelationshipWithRequestFlow(
+            sRuntimeServices,
+            rRuntimeServices,
+            [
+                {
+                    "@type": "CreateAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        },
+                        owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                    }).toJSON()
+                },
+                {
+                    "@type": "CreateAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: RelationshipAttribute.from({
+                        key: "AKey",
+                        value: {
+                            "@type": "ProprietaryString",
+                            value: "AStringValue",
+                            title: "ATitle"
+                        },
+                        owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }).toJSON()
+                },
+                {
+                    "@type": "ShareAttributeRequestItem",
+                    mustBeAccepted: true,
+                    sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
+                    attribute: existingRelationshipAttributeForFurtherSharing.content
+                }
+            ],
+            [{ accept: true }, { accept: true }, { accept: true }]
+        );
+
+        return sRelationship;
+    }
 });

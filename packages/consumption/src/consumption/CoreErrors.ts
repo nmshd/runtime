@@ -92,6 +92,10 @@ class Attributes {
         return new CoreError("error.consumption.attributes.predecessorIsNotPeerSharedRelationshipAttribute", "Predecessor is not a peer shared relationship attribute.");
     }
 
+    public predecessorIsNotThirdPartyOwnedRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotThirdPartyOwnedRelationshipAttribute", "Predecessor is not a third party owned relationship attribute.");
+    }
+
     public successorIsNotRepositoryAttribute() {
         return new CoreError("error.consumption.attributes.successorIsNotRepositoryAttribute", "Successor is not a repository attribute.");
     }
@@ -110,6 +114,10 @@ class Attributes {
 
     public successorIsNotPeerSharedRelationshipAttribute() {
         return new CoreError("error.consumption.attributes.successorIsNotPeerSharedRelationshipAttribute", "Successor is not a peer shared relationship attribute.");
+    }
+
+    public successorIsNotThirdPartyOwnedRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotThirdPartyOwnedRelationshipAttribute", "Successor is not a third party owned relationship attribute.");
     }
 
     public setPredecessorIdDoesNotMatchActualPredecessorId() {
@@ -190,7 +198,7 @@ class Attributes {
     public invalidDeletionInfoOfOwnSharedAttribute() {
         return new CoreError(
             "error.consumption.attributes.invalidDeletionInfoOfOwnSharedAttribute",
-            "The only valid deletionStatuses for own shared Attributes are 'DeletedByPeer' or 'ToBeDeletedByPeer'."
+            "The only valid deletionStatuses for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'."
         );
     }
 

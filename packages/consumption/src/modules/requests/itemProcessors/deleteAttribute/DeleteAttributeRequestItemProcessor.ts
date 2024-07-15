@@ -10,10 +10,7 @@ import { AcceptDeleteAttributeRequestItemParametersJSON } from "./AcceptDeleteAt
 export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProcessor<DeleteAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: DeleteAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-
-        if (typeof attribute === "undefined") {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem(`The Attribute '${requestItem.attributeId.toString()}' could not be found.`));
-        }
+        if (!attribute) return ValidationResult.error(CoreErrors.requests.invalidRequestItem(`The Attribute '${requestItem.attributeId.toString()}' could not be found.`));
 
         if (!attribute.isOwnSharedAttribute(this.accountController.identity.address)) {
             return ValidationResult.error(
@@ -46,9 +43,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         _requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-        if (typeof attribute === "undefined") {
-            return ValidationResult.success();
-        }
+        if (!attribute) return ValidationResult.success();
 
         const deletionDate = CoreDate.from(params.deletionDate);
 
@@ -69,9 +64,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         _requestInfo: LocalRequestInfo
     ): Promise<DeleteAttributeAcceptResponseItem | AcceptResponseItem> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-        if (typeof attribute === "undefined") {
-            return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
-        }
+        if (!attribute) return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
 
         const deletionDate = CoreDate.from(params.deletionDate);
         const deletionInfo = LocalAttributeDeletionInfo.from({
@@ -96,26 +89,42 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         requestItem: DeleteAttributeRequestItem,
         _requestInfo: LocalRequestInfo
     ): Promise<void> {
-        if (!(responseItem instanceof DeleteAttributeAcceptResponseItem)) {
+        if (responseItem instanceof AcceptResponseItem && !(responseItem instanceof DeleteAttributeAcceptResponseItem)) {
             return;
         }
 
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         if (attribute.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer) return;
 
-        const deletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: DeletionStatus.ToBeDeletedByPeer,
-            deletionDate: responseItem.deletionDate
-        });
-
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
 
-        for (const attr of [attribute, ...predecessors]) {
-            if (attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
-                attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
-                await this.consumptionController.attributes.updateAttributeUnsafe(attr);
+        if (responseItem instanceof DeleteAttributeAcceptResponseItem) {
+            const deletionInfo = LocalAttributeDeletionInfo.from({
+                deletionStatus: DeletionStatus.ToBeDeletedByPeer,
+                deletionDate: responseItem.deletionDate
+            });
+
+            for (const attr of [attribute, ...predecessors]) {
+                if (attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                    attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+                    await this.consumptionController.attributes.updateAttributeUnsafe(attr);
+                }
+            }
+        }
+
+        if (responseItem instanceof RejectResponseItem) {
+            const deletionInfo = LocalAttributeDeletionInfo.from({
+                deletionStatus: DeletionStatus.DeletionRequestRejected,
+                deletionDate: CoreDate.utc()
+            });
+
+            for (const attr of [attribute, ...predecessors]) {
+                if (attr.deletionInfo?.deletionStatus !== DeletionStatus.ToBeDeletedByPeer && attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                    attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
+                    await this.consumptionController.attributes.updateAttributeUnsafe(attr);
+                }
             }
         }
     }

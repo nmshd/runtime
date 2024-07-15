@@ -56,17 +56,14 @@ export class CoreDate extends CoreSerializable {
     }
 
     public isWithin(rangeMinusOrBoth: number | Duration | DurationLike, rangePlus?: number | Duration | DurationLike, other?: CoreDate, granularity?: DateTimeUnit): boolean {
-        if (typeof rangePlus === "undefined") {
-            rangePlus = rangeMinusOrBoth;
-        }
-        if (typeof other === "undefined") {
-            other = CoreDate.utc();
-        }
+        if (!rangePlus) rangePlus = rangeMinusOrBoth;
+
+        if (!other) other = CoreDate.utc();
 
         const start = other.subtract(rangeMinusOrBoth);
         const end = other.add(rangePlus);
 
-        if (typeof granularity !== "undefined") {
+        if (granularity) {
             return this.dateTime.startOf(granularity) > start.dateTime.startOf(granularity) && this.dateTime.startOf(granularity) < end.dateTime.startOf(granularity);
         }
 
@@ -74,49 +71,37 @@ export class CoreDate extends CoreSerializable {
     }
 
     public isBefore(other: CoreDate, granularity?: DateTimeUnit): boolean {
-        if (typeof granularity !== "undefined") {
-            return this.dateTime.startOf(granularity) < other.dateTime.startOf(granularity);
-        }
+        if (granularity) return this.dateTime.startOf(granularity) < other.dateTime.startOf(granularity);
 
         return this.dateTime < other.dateTime;
     }
 
     public isAfter(other: CoreDate, granularity?: DateTimeUnit): boolean {
-        if (typeof granularity !== "undefined") {
-            return this.dateTime.startOf(granularity) > other.dateTime.startOf(granularity);
-        }
+        if (granularity) return this.dateTime.startOf(granularity) > other.dateTime.startOf(granularity);
 
         return this.dateTime > other.dateTime;
     }
 
-    public isSame(other: CoreDate, granularity: DateTimeUnit): boolean {
-        if (typeof granularity !== "undefined") {
-            return this.dateTime.startOf(granularity).valueOf() === other.dateTime.startOf(granularity).valueOf();
-        }
+    public isSame(other: CoreDate, granularity?: DateTimeUnit): boolean {
+        if (granularity) return this.dateTime.startOf(granularity).valueOf() === other.dateTime.startOf(granularity).valueOf();
 
         return this.dateTime.valueOf() === other.dateTime.valueOf();
     }
 
     public isSameOrAfter(other: CoreDate, granularity?: DateTimeUnit): boolean {
-        if (typeof granularity !== "undefined") {
-            return this.dateTime.startOf(granularity) >= other.dateTime.startOf(granularity);
-        }
+        if (granularity) return this.dateTime.startOf(granularity) >= other.dateTime.startOf(granularity);
 
         return this.dateTime >= other.dateTime;
     }
 
     public isSameOrBefore(other: CoreDate, granularity?: DateTimeUnit): boolean {
-        if (typeof granularity !== "undefined") {
-            return this.dateTime.startOf(granularity) <= other.dateTime.startOf(granularity);
-        }
+        if (granularity) return this.dateTime.startOf(granularity) <= other.dateTime.startOf(granularity);
 
         return this.dateTime <= other.dateTime;
     }
 
     public isBetween(start: CoreDate, end?: CoreDate, granularity?: DateTimeUnit): boolean {
-        if (!end) {
-            return this.isAfter(start, granularity);
-        }
+        if (!end) return this.isAfter(start, granularity);
 
         return Interval.fromDateTimes(start.dateTime, end.dateTime).contains(this.dateTime);
     }
@@ -158,12 +143,10 @@ export class CoreDate extends CoreSerializable {
     }
 
     protected static override preFrom(value: any): any {
-        if (typeof value === "undefined") {
-            throw new TransportError("The provided object is undefined and cannot be deserialized.");
-        }
+        if (!value) throw new TransportError("The provided object is undefined and cannot be deserialized.");
 
         if (typeof value === "object") {
-            if (typeof value.date === "undefined") {
+            if (!value.date) {
                 if (typeof value.toISOString !== "function") {
                     throw new TransportError("The provided object doesn't have an 'toISOString' string method.");
                 }
@@ -175,13 +158,9 @@ export class CoreDate extends CoreSerializable {
             return DateTime.fromISO(value.date, { zone: "utc" });
         }
 
-        if (typeof value === "number") {
-            return DateTime.fromMillis(value);
-        }
+        if (typeof value === "number") return DateTime.fromMillis(value);
 
-        if (typeof value === "string") {
-            return DateTime.fromISO(value, { zone: "utc" }).toUTC();
-        }
+        if (typeof value === "string") return DateTime.fromISO(value, { zone: "utc" }).toUTC();
 
         throw new TransportError("The provided object is invalid and cannot be deserialized.");
     }

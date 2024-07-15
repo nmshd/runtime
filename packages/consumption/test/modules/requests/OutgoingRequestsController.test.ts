@@ -23,7 +23,7 @@ import {
     OutgoingRequestStatusChangedEvent,
     ValidationResult
 } from "../../../src";
-import { TestUtil, loggerFactory } from "../../core/TestUtil";
+import { loggerFactory, TestUtil } from "../../core/TestUtil";
 import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
@@ -369,6 +369,11 @@ describe("OutgoingRequestsController", function () {
             await Given.anOutgoingRequestInStatus(LocalRequestStatus.Draft);
             await When.iTryToCallSentWith({ requestSourceObject: invalidSource });
             await Then.itThrowsAnErrorWithTheErrorMessage("Cannot create outgoing Request from a peer*");
+        });
+
+        test("sets deletionInfo in case of DeleteAttributeRequestItems", async function () {
+            await When.iSentAnOutgoingRequestWithDeleteAttributeRequestItems();
+            await Then.theDeletionInfoOfTheAssociatedAttributesAndPredecessorsIsSet();
         });
     });
 

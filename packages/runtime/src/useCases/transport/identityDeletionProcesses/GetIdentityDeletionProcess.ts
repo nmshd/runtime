@@ -25,9 +25,7 @@ export class GetIdentityDeletionProcessUseCase extends UseCase<GetIdentityDeleti
 
     protected async executeInternal(request: GetIdentityDeletionProcessRequest): Promise<Result<IdentityDeletionProcessDTO>> {
         const identityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcess(request.id);
-        if (typeof identityDeletionProcess === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(IdentityDeletionProcess));
-        }
+        if (!identityDeletionProcess) return Result.fail(RuntimeErrors.general.recordNotFound(IdentityDeletionProcess));
 
         return Result.ok(IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(identityDeletionProcess));
     }

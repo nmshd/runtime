@@ -13,20 +13,23 @@ export const attributes = [
             "@type": "PhoneNumber",
             value: "06221/553132"
         },
-        tags: ["emergency", "hello world", "pew"],
+        tags: ["emergency"],
         validFrom: "2021-02-03T00:00:00",
-        validTo: "2024-01-01T00:00:00",
-        flag: true
+        validTo: "2024-01-01T00:00:00"
+    },
+    {
+        value: {
+            "@type": "Website",
+            value: "https://enmeshed.eu"
+        }
     },
     {
         value: {
             "@type": "GivenName",
-            value: "Steven Nicholas"
+            value: "Steven-Nicholas"
         },
         validFrom: "2020-01-01T00:00:00",
-        validTo: "2023-11-01T00:00:00",
-        flag: true,
-        emptyValue: ""
+        validTo: "2023-11-01T00:00:00"
     },
     {
         value: {
@@ -34,52 +37,36 @@ export const attributes = [
             value: "O'Malley"
         },
         validFrom: "2021-01-01T00:00:00",
-        validTo: "2023-12-01T00:00:00",
-        friends: ["Hans Peter", "Julia", "'X' \\\\ '", "'X'\\\\'"]
+        validTo: "2023-12-01T00:00:00"
     },
     {
         value: {
-            "@type": "LanguageCertification",
-            grade: "c1",
-            language: "en",
-            validFrom: "2021-01-01T00:00:00",
-            validTo: "2023-01-01T00:00:00",
-            lvl1: {
-                lvl2: {
-                    lvl3: "hello world",
-                    date: "2019-03-11",
-                    cities: ["Paris", "New York"]
-                }
-            }
+            "@type": "StreetAddress",
+            recipient: "Steven-Nicholas O'Malley",
+            street: "Luisenstr.",
+            houseNo: "7",
+            zipCode: "76646",
+            city: "Bruchsal",
+            country: "DE"
         },
-        validFrom: "2021-01-01T00:00:00",
-        validTo: "2023-01-01T00:00:00",
-        peer: "idasdf0x123152",
-        tags: ["language:en", "language:de"]
+        tags: ["delivery", "business"]
     },
     {
         value: {
-            "@type": "LanguageCertification",
-            grade: "b2",
-            language: "de"
+            "@type": "StreetAddress",
+            recipient: "Steven-Nicholas O'Malley",
+            street: "Frankfurter Straße",
+            houseNo: "81",
+            zipCode: "76646",
+            city: "Bruchsal",
+            country: "DE"
         },
-        tags: ["language:en", "language:es"],
-        validFrom: "2021-01-01T00:00:00",
-        validTo: "2028-01-01T00:00:00"
+        tags: ["private"]
     },
     {
         value: {
-            "@type": "FileReference",
-            id: "0xaffed00fdecafbad"
-        },
-        tags: ["language:de", "language:en", "content:edu.de.higher.certOfEnrolment", "#hashtag pewpew"],
-        validFrom: "2019-01-01T00:00:00",
-        validTo: "2020-01-14T00:00:00"
-    },
-    {
-        value: {
-            "@type": "FileReference",
-            id: "0xdeadbeef"
+            "@type": "IdentityFileReference",
+            value: "0xdeadbeef"
         },
         tags: [
             "urn:xbildung-de:xbildung:codeliste:artdesnachweises=http://www.xbildung.de/def/xbildung/0.9/code/ArtDesNachweises",

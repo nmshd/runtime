@@ -4,5 +4,5 @@ import { RejectRequestItemParametersJSON } from "./RejectRequestItemParameters";
 export type DecideRequestItemParametersJSON = AcceptRequestItemParametersJSON | RejectRequestItemParametersJSON;
 
 export function isDecideRequestItemParametersJSON(json: any): json is DecideRequestItemParametersJSON {
-    return typeof json.items === "undefined" && typeof json.accept !== "undefined";
+    return json.items === undefined && json.accept !== undefined;
 }

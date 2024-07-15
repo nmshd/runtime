@@ -6,6 +6,13 @@ class Relationships {
     public wrongChangeStatus(status: RelationshipChangeStatus) {
         return new CoreError("error.transport.relationships.wrongChangeStatus", `The relationship change has the wrong status (${status}) to run this operation`);
     }
+
+    public activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate() {
+        return new CoreError(
+            "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate",
+            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
+        );
+    }
 }
 
 class Device {

@@ -44,9 +44,7 @@ export async function expectThrowsAsync(method: Function | Promise<any>, errorMe
 
     expect(error, "Expected an error to be thrown").toBeInstanceOf(Error);
 
-    if (typeof errorMessageRegexp === "undefined") {
-        return;
-    }
+    if (!errorMessageRegexp) return;
 
     if (typeof errorMessageRegexp === "function") {
         errorMessageRegexp(error!);
