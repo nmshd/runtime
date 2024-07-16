@@ -60,7 +60,7 @@ export class TestObjectFactory {
                     auditLog: [
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("id2"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.Creation,
                             newStatus: RelationshipStatus.Pending
@@ -92,7 +92,7 @@ export class TestObjectFactory {
                     auditLog: [
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("id2"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.Creation,
                             newStatus: RelationshipStatus.Pending
@@ -133,7 +133,7 @@ export class TestObjectFactory {
                     auditLog: [
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("id2"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
                             createdByDevice: CoreId.from("DVC1"),
                             reason: RelationshipAuditLogEntryReason.Creation,
                             newStatus: RelationshipStatus.Pending
