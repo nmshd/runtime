@@ -99,7 +99,7 @@ export class RelationshipsFacade {
         return await this.revokeRelationshipReactivationUseCase.execute(request);
     }
 
-    public async decomposeRelationship(request: DecomposeRelationshipRequest): Promise<Result<null>> {
+    public async decomposeRelationship(request: DecomposeRelationshipRequest): Promise<Result<void>> {
         return await this.decomposeRelationshipUseCase.execute(request);
     }
 
