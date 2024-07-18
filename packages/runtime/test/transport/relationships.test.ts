@@ -701,7 +701,7 @@ describe("RelationshipDecomposition", () => {
     });
 
     test("relationship should be decomposed", async () => {
-        await expect(services1.eventBus).toHavePublished(RelationshipDecomposedBySelfEvent, (e) => e.data === relationshipId);
+        await expect(services1.eventBus).toHavePublished(RelationshipDecomposedBySelfEvent, (e) => e.data.relationshipId === relationshipId);
 
         const ownRelationship = await services1.transport.relationships.getRelationship({ id: relationshipId });
         expect(ownRelationship).toBeAnError(/.*/, "error.runtime.recordNotFound");
