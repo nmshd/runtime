@@ -25,7 +25,7 @@ export class AttributeListenerModule extends RuntimeModule {
 
         const getAttributeListenersResult = await services.consumptionServices.attributeListeners.getAttributeListeners();
         if (getAttributeListenersResult.isError) {
-            this.logger.error("Could not get attribute listeners", getAttributeListenersResult.error);
+            this.logger.error("Could not get LocalAttributeListeners", getAttributeListenersResult.error);
             return;
         }
 
@@ -65,12 +65,10 @@ export class AttributeListenerModule extends RuntimeModule {
             for (const relationshipAttribute of relationshipAttributesWithPeer) {
                 if (relationshipAttribute.content["@type"] !== "RelationshipAttribute") return;
                 if (relationshipAttribute.content.confidentiality === RelationshipAttributeConfidentiality.Private) return;
-                // TODO: Ensure that RelationshipAttribute is from the new Relationship switched from `"Pending"` to `"Active"`...
-                // ...and not from a former Relationship that has `"DeletionProposed"` as RelationshipStatus.
 
                 const getAttributeListenersResult = await services.consumptionServices.attributeListeners.getAttributeListeners();
                 if (getAttributeListenersResult.isError) {
-                    this.logger.error("Could not get attribute listeners", getAttributeListenersResult.error);
+                    this.logger.error("Could not get LocalAttributeListeners", getAttributeListenersResult.error);
                     return;
                 }
 
@@ -107,7 +105,7 @@ export class AttributeListenerModule extends RuntimeModule {
             peer: attributeListener.peer
         });
         if (!validationResult.value.isSuccess) {
-            this.logger.error("Could not validate outgoing request", validationResult.value);
+            this.logger.error("Could not validate outgoing Request", validationResult.value);
             return;
         }
 
@@ -117,7 +115,7 @@ export class AttributeListenerModule extends RuntimeModule {
         });
 
         if (requestCreatedResult.isError) {
-            this.logger.error("Could not create request", requestCreatedResult.error);
+            this.logger.error("Could not create Request", requestCreatedResult.error);
             return;
         }
 
