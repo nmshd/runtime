@@ -314,7 +314,7 @@ export class RelationshipsController extends TransportController {
         }
         await this.relationships.delete({ id: relationshipId });
 
-        this.eventBus.publish(new RelationshipDecomposedBySelfEvent(this.parent.identity.address.toString(), relationshipId));
+        this.eventBus.publish(new RelationshipDecomposedBySelfEvent(this.parent.identity.address.toString(), { relationshipId }));
     }
 
     private async getRelationshipWithCache(id: CoreId): Promise<Relationship & { cache: CachedRelationship }> {
