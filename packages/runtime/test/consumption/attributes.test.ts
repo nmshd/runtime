@@ -214,7 +214,7 @@ describe("get attribute(s)", () => {
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
-        test("should allow to get only defaul attributes", async function () {
+        test("should allow to get only default attributes", async function () {
             const result = await services1.consumption.attributes.getAttributes({
                 query: { default: "true" }
             });
@@ -229,7 +229,7 @@ describe("get attribute(s)", () => {
             expect(attributeIds).not.toContain(relationshipAttributeId);
         });
 
-        test("should allow not to get defaul attributes", async function () {
+        test("should allow not to get default attributes", async function () {
             const result = await services1.consumption.attributes.getAttributes({
                 query: { default: "!true" }
             });
@@ -481,7 +481,7 @@ describe("get repository, own shared and peer shared attributes", () => {
             expect(repositoryAttributes).toStrictEqual([services1RepoSurnameV0, services1RepoSurnameV1, services1RepoGivenNameV0, services1RepoGivenNameV1]);
         });
 
-        test("should allow to get only defaul attributes", async function () {
+        test("should allow to get only default attributes", async function () {
             const result = await services1.consumption.attributes.getRepositoryAttributes({
                 query: {
                     default: "true"

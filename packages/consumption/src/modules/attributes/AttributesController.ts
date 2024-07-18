@@ -1014,7 +1014,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.deletePredecessorsOfAttribute(attribute.id);
 
-        await this.handleDefault(attribute);
+        await this.transmitDefault(attribute);
 
         await this.deleteAttribute(attribute);
     }
@@ -1074,7 +1074,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
     }
 
-    private async handleDefault(attribute: LocalAttribute): Promise<void> {
+    private async transmitDefault(attribute: LocalAttribute): Promise<void> {
         if (!attribute.default) return;
 
         const valueType = attribute.content.value.constructor.name as AttributeValues.Identity.TypeName;

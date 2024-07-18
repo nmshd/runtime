@@ -148,7 +148,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     public isOwnSharedAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute | OwnSharedRelationshipAttribute {
         let isOwnSharedAttribute = this.isShared() && this.isOwnedBy(ownAddress);
 
-        isOwnSharedAttribute &&= this.isNotDefault();
+        isOwnSharedAttribute &&= !this.isDefault();
 
         if (peerAddress) isOwnSharedAttribute &&= this.shareInfo!.peer.equals(peerAddress);
         return isOwnSharedAttribute;
@@ -159,7 +159,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
         isPeerSharedAttribute &&= !this.shareInfo!.sourceAttribute;
 
-        isPeerSharedAttribute &&= this.isNotDefault();
+        isPeerSharedAttribute &&= !this.isDefault();
 
         if (peerAddress) isPeerSharedAttribute &&= this.isOwnedBy(peerAddress);
         return isPeerSharedAttribute;
@@ -168,7 +168,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     public isThirdPartyOwnedAttribute(ownAddress: CoreAddress, thirdPartyAddress?: CoreAddress): this is ThirdPartyOwnedRelationshipAttribute {
         let isThirdPartyOwnedAttribute = this.isShared() && !this.isOwnedBy(ownAddress) && !this.isOwnedBy(this.shareInfo.peer);
 
-        isThirdPartyOwnedAttribute &&= this.isNotDefault();
+        isThirdPartyOwnedAttribute &&= !this.isDefault();
 
         if (thirdPartyAddress) isThirdPartyOwnedAttribute &&= this.isOwnedBy(thirdPartyAddress);
         return isThirdPartyOwnedAttribute;
@@ -196,8 +196,8 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return !!this.shareInfo;
     }
 
-    public isNotDefault(): this is LocalAttribute & { default: undefined } {
-        return !this.default;
+    public isDefault(): this is LocalAttribute & { default: true } {
+        return !!this.default;
     }
 
     public setDeletionInfo(deletionInfo: LocalAttributeDeletionInfo, ownAddress: CoreAddress): this {
