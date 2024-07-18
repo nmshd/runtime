@@ -99,7 +99,7 @@ export class IdentityDeletionProcessController extends TransportController {
     public async getIdentityDeletionProcesses(): Promise<IdentityDeletionProcess[]> {
         return (await this.identityDeletionProcessCollection.find())
             .map((identityDeletionProcess) => (identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined))
-            .filter((identityDeletionProcess) => !!identityDeletionProcess) as IdentityDeletionProcess[];
+            .filter((identityDeletionProcess) => !!identityDeletionProcess);
     }
 
     public async getIdentityDeletionProcessByStatus(...identityDeletionProcessStatus: IdentityDeletionProcessStatus[]): Promise<IdentityDeletionProcess | undefined> {

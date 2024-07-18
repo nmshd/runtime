@@ -646,10 +646,56 @@ describe("RelationshipTest: Revoke Reactivation", function () {
     });
 });
 
-describe("RelationshipTest: validations for non-existent record", function () {
+describe("RelationshipTest: Decompose", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
+    let from: AccountController;
+    let to: AccountController;
+
+    beforeAll(async function () {
+        connection = await TestUtil.createDatabaseConnection();
+        transport = TestUtil.createTransport(connection);
+
+        await transport.init();
+
+        const accounts = await TestUtil.provideAccounts(transport, 2);
+        from = accounts[0];
+        to = accounts[1];
+    });
+
+    afterAll(async function () {
+        await from.close();
+        await to.close();
+        await connection.close();
+    });
+
+    test("should request decomposing a relationship", async function () {
+        const relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
+        await from.relationships.terminate(relationshipId);
+        await TestUtil.syncUntilHasRelationships(to);
+
+        await from.relationships.decompose(relationshipId);
+        const decomposedRelationship = await from.relationships.getRelationship(relationshipId);
+        expect(decomposedRelationship).toBeUndefined();
+
+        const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
+        expect(syncedRelationshipsPeer).toHaveLength(1);
+        const decomposedRelationshipPeer = syncedRelationshipsPeer[0];
+
+        expect(decomposedRelationshipPeer.id.toString()).toStrictEqual(relationshipId.toString());
+        expect(decomposedRelationshipPeer.status).toStrictEqual(RelationshipStatus.DeletionProposed);
+        expect(decomposedRelationshipPeer.cache?.auditLog).toHaveLength(4);
+        expect(decomposedRelationshipPeer.cache!.auditLog[3].reason).toBe(RelationshipAuditLogEntryReason.Decomposition);
+
+        await expect(to.relationships.decompose(relationshipId)).resolves.not.toThrow();
+    });
+});
+
+describe("RelationshipTest: validations for non-existent record", function () {
+    let connection: IDatabaseConnection;
+
+    let transport: Transport;
     let from: AccountController;
     const fakeRelationshipId = CoreId.from("REL00000000000000000");
 
@@ -659,7 +705,7 @@ describe("RelationshipTest: validations for non-existent record", function () {
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, 1);
         from = accounts[0];
     });
 
@@ -698,6 +744,10 @@ describe("RelationshipTest: validations for non-existent record", function () {
 
     test("should not revoke a relationship reactivation", async function () {
         await expect(from.relationships.revokeReactivation(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should not decompose a relationship", async function () {
+        await expect(from.relationships.decompose(fakeRelationshipId)).rejects.toThrow("error.transport.recordNotFound");
     });
 });
 
@@ -890,6 +940,10 @@ describe("RelationshipTest: relationship status validation (on active relationsh
 
     test("should not revoke a relationship reactivation", async function () {
         await expect(from.relationships.revokeReactivation(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
+    });
+
+    test("should not decompose a relationship", async function () {
+        await expect(from.relationships.decompose(relationshipId)).rejects.toThrow("error.transport.relationships.wrongRelationshipStatus");
     });
 
     test("should not accept a relationship", async function () {

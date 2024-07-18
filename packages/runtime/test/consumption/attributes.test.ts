@@ -1607,6 +1607,7 @@ describe("Get (shared) versions of attribute", () => {
         beforeAll(async () => {
             await setUpIdentityAttributeVersions();
         });
+
         test("should get only latest shared version per peer of a repository attribute", async () => {
             for (const version of sRepositoryAttributeVersions) {
                 const result1 = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: version.id });

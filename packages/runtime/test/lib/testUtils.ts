@@ -18,7 +18,8 @@ import {
     RequestItemGroupJSON,
     RequestItemJSONDerivations
 } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreBuffer } from "@nmshd/crypto";
+import { CoreAddress, CoreId, IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
 import {
@@ -235,6 +236,23 @@ export async function sendMessage(transportServices: TransportServices, recipien
             body: "This is the mail body",
             cc: [],
             to: [recipient]
+        },
+        attachments
+    });
+    expect(response).toBeSuccessful();
+
+    return response.value;
+}
+
+export async function sendMessageToMultipleRecipients(transportServices: TransportServices, recipients: string[], content?: any, attachments?: string[]): Promise<MessageDTO> {
+    const response = await transportServices.messages.sendMessage({
+        recipients,
+        content: content ?? {
+            "@type": "Mail",
+            subject: "This is the mail subject",
+            body: "This is the mail body",
+            cc: [],
+            to: recipients
         },
         attachments
     });
@@ -679,4 +697,11 @@ export async function waitForEvent<TEvent>(
         eventBus.unsubscribe(subscriptionId);
         clearTimeout(timeoutId);
     });
+}
+
+export async function generateAddressPseudonym(backboneBaseUrl: string): Promise<CoreAddress> {
+    const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
+    const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, new URL(backboneBaseUrl).hostname);
+
+    return pseudonym;
 }

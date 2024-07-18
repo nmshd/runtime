@@ -338,6 +338,13 @@ export class AttributesController extends ConsumptionBaseController {
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
     }
 
+    public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
+        const attributes = await this.getLocalAttributes({ "shareInfo.peer": peer.toString() });
+        for (const attribute of attributes) {
+            await this.deleteAttributeUnsafe(attribute.id);
+        }
+    }
+
     private async deleteChildAttributesOfComplexAttribute(complexAttribute: LocalAttribute): Promise<void> {
         if (!(complexAttribute.content instanceof IdentityAttribute)) {
             throw new ConsumptionError("Only IdentityAttributes may have child Attributes.");

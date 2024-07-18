@@ -7,7 +7,7 @@ import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { TransportIds } from "../../core/TransportIds";
-import { RelationshipChangedEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
+import { RelationshipChangedEvent, RelationshipDecomposedBySelfEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
@@ -74,6 +74,13 @@ export class RelationshipsController extends TransportController {
 
         const decryptionPromises = backboneRelationships.map(async (r) => {
             const relationshipDoc = await this.relationships.read(r.id);
+            if (!relationshipDoc) {
+                this._log.error(
+                    `Relationship '${r.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
+                );
+                return;
+            }
+
             const relationship = Relationship.from(relationshipDoc);
 
             return {
@@ -82,7 +89,8 @@ export class RelationshipsController extends TransportController {
             };
         });
 
-        return await Promise.all(decryptionPromises);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     @log()
@@ -293,6 +301,22 @@ export class RelationshipsController extends TransportController {
         return await this.completeOperationWithBackboneCall(RelationshipAuditLogEntryReason.AcceptanceOfReactivation, relationshipId);
     }
 
+    public async decompose(relationshipId: CoreId): Promise<void> {
+        const relationship = await this.getRelationshipWithCache(relationshipId);
+        this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed);
+
+        const result = await this.client.decomposeRelationship(relationshipId.toString());
+        if (result.isError) throw result.error;
+
+        const isSecretDeletionSuccessful = await this.secrets.deleteSecretForRelationship(relationship.relationshipSecretId);
+        if (!isSecretDeletionSuccessful) {
+            this._log.error("Decomposition failed to delete secrets");
+        }
+        await this.relationships.delete({ id: relationshipId });
+
+        this.eventBus.publish(new RelationshipDecomposedBySelfEvent(this.parent.identity.address.toString(), relationshipId));
+    }
+
     private async getRelationshipWithCache(id: CoreId): Promise<Relationship & { cache: CachedRelationship }> {
         const relationship = await this.getRelationship(id);
         if (!relationship) throw CoreErrors.general.recordNotFound(Relationship, id.toString());
@@ -302,8 +326,8 @@ export class RelationshipsController extends TransportController {
         return relationship as Relationship & { cache: CachedRelationship };
     }
 
-    private assertRelationshipStatus(relationship: Relationship, status: RelationshipStatus) {
-        if (relationship.status === status) return;
+    private assertRelationshipStatus(relationship: Relationship, ...status: RelationshipStatus[]) {
+        if (status.includes(relationship.status)) return;
 
         throw CoreErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status);
     }

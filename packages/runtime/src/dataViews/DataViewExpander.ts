@@ -48,7 +48,8 @@ import {
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
     ValueHints,
-    ValueHintsJSON
+    ValueHintsJSON,
+    isRequestItemDerivation
 } from "@nmshd/content";
 import { CoreAddress, CoreId, IdentityController, Relationship, RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
@@ -285,7 +286,7 @@ export class DataViewExpander {
             wasReadAt: message.wasReadAt
         };
 
-        if (message.content["@type"] === "Mail" || message.content["@type"] === "RequestMail") {
+        if (message.content["@type"] === "Mail") {
             const mailContent = message.content as MailJSON;
 
             const to: RecipientDVO[] = mailContent.to.map((value) => addressMap[value]);
@@ -344,7 +345,7 @@ export class DataViewExpander {
             return requestMessageDVO;
         }
 
-        if (message.content["@type"] === "Response") {
+        if (message.content["@type"] === "ResponseWrapper") {
             let localRequest: LocalRequestDTO;
             if (isOwn) {
                 const localRequestsResult = await this.consumption.incomingRequests.getRequests({
@@ -802,10 +803,14 @@ export class DataViewExpander {
                 isDecidable,
                 title: requestGroupOrItem.title,
                 description: requestGroupOrItem.description,
-                mustBeAccepted: requestGroupOrItem.mustBeAccepted,
                 response: responseGroup
             };
         }
+
+        if (!isRequestItemDerivation(requestGroupOrItem)) {
+            throw new Error("A derivation of a RequestItem was expected.");
+        }
+
         return await this.expandRequestItem(requestGroupOrItem, localRequestDTO, responseGroupOrItemDVO as ResponseItemDVO);
     }
 

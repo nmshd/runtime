@@ -88,6 +88,7 @@ describe("IdentityDeletionProcess", () => {
                 "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists"
             );
         });
+
         test("should return an error trying to initiate an IdentityDeletionProcess if there already is one waiting for approval", async function () {
             await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
             await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
