@@ -1,10 +1,13 @@
-import { RelationshipIdString } from "../../useCases/common";
 import { DataEvent } from "../DataEvent";
 
-export class RelationshipDecomposedBySelfEvent extends DataEvent<RelationshipIdString> {
+export interface RelationshipDecomposedBySelfEventData {
+    relationshipId: string;
+}
+
+export class RelationshipDecomposedBySelfEvent extends DataEvent<RelationshipDecomposedBySelfEventData> {
     public static readonly namespace = "transport.relationshipDecomposedBySelf";
 
-    public constructor(eventTargetAddress: string, data: RelationshipIdString) {
+    public constructor(eventTargetAddress: string, data: RelationshipDecomposedBySelfEventData) {
         super(RelationshipDecomposedBySelfEvent.namespace, eventTargetAddress, data);
     }
 }

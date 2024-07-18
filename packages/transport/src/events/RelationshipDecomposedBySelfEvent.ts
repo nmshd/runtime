@@ -1,10 +1,14 @@
 import { CoreId } from "../core";
 import { TransportDataEvent } from "./TransportDataEvent";
 
-export class RelationshipDecomposedBySelfEvent extends TransportDataEvent<CoreId> {
+export interface RelationshipDecomposedBySelfEventData {
+    relationshipId: CoreId;
+}
+
+export class RelationshipDecomposedBySelfEvent extends TransportDataEvent<RelationshipDecomposedBySelfEventData> {
     public static readonly namespace = "transport.relationshipDecomposedBySelf";
 
-    public constructor(eventTargetAddress: string, relationshipId: CoreId) {
-        super(RelationshipDecomposedBySelfEvent.namespace, eventTargetAddress, relationshipId);
+    public constructor(eventTargetAddress: string, data: RelationshipDecomposedBySelfEventData) {
+        super(RelationshipDecomposedBySelfEvent.namespace, eventTargetAddress, data);
     }
 }
