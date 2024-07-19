@@ -63,7 +63,8 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 }
 
                 const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, {
-                    "shareInfo.peer": recipient.toString()
+                    "shareInfo.peer": recipient.toString(),
+                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
                 });
 
                 if (ownSharedIdentityAttributeSuccessors.length > 0) {
@@ -75,7 +76,8 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 }
 
                 const ownSharedIdentityAttributePredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfAttribute(foundAttribute, {
-                    "shareInfo.peer": recipient.toString()
+                    "shareInfo.peer": recipient.toString(),
+                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
                 });
 
                 if (ownSharedIdentityAttributePredecessors.length > 0) {
@@ -88,6 +90,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             }
         }
 
+        // TODO: deletionInfo
         if (requestItem.attribute instanceof RelationshipAttribute) {
             if (!foundAttribute.isShared()) {
                 throw new Error(
