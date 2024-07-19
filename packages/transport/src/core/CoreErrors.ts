@@ -79,7 +79,7 @@ class Secrets {
     }
 
     public secretNotFound(type: string) {
-        return new CoreError("error.transport.secrets.secretNotFound", `secret '${type}' not found`);
+        return new CoreError("error.transport.secrets.secretNotFound", `Secret '${type}' not found.`);
     }
 }
 
@@ -140,14 +140,14 @@ class Files {
     public maxFileSizeExceeded(fileSize: number, platformMaxFileSize: number) {
         return new CoreError(
             "error.transport.files.maxFileSizeExceeded",
-            `The given file content size (${fileSize}) exceeds the max file size the Backbone accepts (${platformMaxFileSize}).`
+            `The given File content size (${fileSize}) exceeds the max File size the Backbone accepts (${platformMaxFileSize}).`
         );
     }
 }
 
 class Tokens {
     public invalidTokenContent(id: string) {
-        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of Token '${id}' is not of type TokenContent`);
+        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of Token '${id}' is not of type TokenContent.`);
     }
 }
 

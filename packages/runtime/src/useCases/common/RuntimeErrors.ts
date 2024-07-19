@@ -96,7 +96,7 @@ class Relationships {
     public wrongRelationshipStatus(relationshipId: string, status: string): ApplicationError {
         return new ApplicationError(
             "error.runtime.relationships.wrongRelationshipStatus",
-            `The relationship '${relationshipId}' has the wrong status ('${status}') to run this operation`
+            `The Relationship '${relationshipId}' has the wrong status ('${status}') to run this operation.`
         );
     }
 
@@ -174,7 +174,7 @@ class Attributes {
     public noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore",
-            `No previous version of RepositoryAttribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this Attribute, use ShareRepositoryAttribute.`
+            `No previous version of the RepositoryAttribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this Attribute, use the ShareRepositoryAttributeUseCase instead.`
         );
     }
 

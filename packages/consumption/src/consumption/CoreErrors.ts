@@ -15,7 +15,7 @@ class Attributes {
     public successionMustNotChangeKey() {
         return new CoreError(
             "error.consumption.attributes.successionMustNotChangeKey",
-            "The predecessor Attribute's key does not match that of the successor. The succession of a RelationshipAttribute must not change the key."
+            "The predecessor RelationshipAttribute's key does not match that of the successor. The succession of a RelationshipAttribute must not change the key."
         );
     }
 
@@ -41,21 +41,21 @@ class Attributes {
     public predecessorSourceContentIsNotEqualToCopyContent() {
         return new CoreError(
             "error.consumption.attributes.predecessorSourceContentIsNotEqualToCopyContent",
-            "Predecessor sourceAttribute content doesn't match predecessor shared Attribute copy."
+            "Predecessor sourceAttribute content doesn't match the content of the predecessor shared Attribute copy."
         );
     }
 
     public successorSourceContentIsNotEqualToCopyContent() {
         return new CoreError(
             "error.consumption.attributes.successorSourceContentIsNotEqualToCopyContent",
-            "Successor sourceAttribute content doesn't match successor shared Attribute copy."
+            "Successor sourceAttribute content doesn't match the content of the successor shared Attribute copy."
         );
     }
 
     public cannotSucceedChildOfComplexAttribute(parentId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.cannotSucceedChildOfComplexAttribute",
-            `The Attribute you want to succeed is child Attribute of a complex Attribute (id: '${parentId}'), and cannot be succeeded on its own. Instead, succeed the parent which will implicitly succeed all its children.`
+            `The Attribute you want to succeed is a child Attribute of a complex Attribute (id: '${parentId}'), and cannot be succeeded on its own. Instead, succeed the parent which will implicitly succeed all its children.`
         );
     }
 
@@ -245,7 +245,7 @@ class Attributes {
     public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.senderIsNotPeerOfSharedAttribute",
-            `The sender (id: '${senderId}') is not the peer you shared the attribute (id: '${attributeId}') with.`
+            `The sender (id: '${senderId}') of the Notification is not the peer you shared the Attribute (id: '${attributeId}') with.`
         );
     }
 }

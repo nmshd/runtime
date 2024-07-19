@@ -53,7 +53,7 @@ describe("Notifications", () => {
         expect(getNotificationResult.value.status).toStrictEqual(LocalNotificationStatus.Sent);
     });
 
-    test("sentNotification with error", async () => {
+    test("sent Notification with error", async () => {
         const id = await ConsumptionIds.notification.generate();
         const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
         await sTransportServices.messages.sendMessage({ recipients: [rAddress], content: notificationToSend.toJSON() });
@@ -135,12 +135,12 @@ describe("Notifications", () => {
             expect(result).toBeAnError("'LocalNotification' not found.", "error.transport.recordNotFound");
         });
 
-        test("wrong message id for saveSentNotification", async () => {
+        test("wrong Message ID for sentNotification with status 'Sent'", async () => {
             const result = await sConsumptionServices.notifications.sentNotification({ messageId: "wrong-id" });
             expect(result).toBeAnError("messageId must match pattern MSG\\[A-Za-z0-9\\]\\{17\\}", "error.runtime.validation.invalidPropertyValue");
         });
 
-        test("not existing message id for saveSentNotification", async () => {
+        test("not existing Message ID for sentNotification with status 'Sent'", async () => {
             const result = await sConsumptionServices.notifications.sentNotification({ messageId: (await new CoreIdHelper("MSG").generate()).toString() });
             expect(result).toBeAnError("Message not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });
