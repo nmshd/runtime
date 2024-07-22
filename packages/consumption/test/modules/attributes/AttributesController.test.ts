@@ -1011,6 +1011,33 @@ describe("AttributesController", function () {
             const updatedOtherRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(otherRepositoryAttribute.id);
             expect(updatedOtherRepositoryAttribute!.default).toBe(true);
         });
+
+        test("should do nothing if the deleted default attribute had predecessors but no other candidate exists", async function () {
+            const attributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: EMailAddress.from({
+                        value: "my@email.address"
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const attributeParams2: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: EMailAddress.from({
+                        value: "my2@email.address"
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const defaultRepositoryAttributePredecessor = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            const defaultRepositoryAttribute = (await consumptionController.attributes.succeedRepositoryAttribute(defaultRepositoryAttributePredecessor.id, attributeParams2))
+                .successor;
+
+            await consumptionController.attributes.executeFullAttributeDeletionProcess(defaultRepositoryAttribute);
+
+            const defaultAttributes = await consumptionController.attributes.getLocalAttributes({ default: "true" });
+            expect(defaultAttributes).toHaveLength(0);
+        });
     });
 
     describe("succeed Attributes", function () {
