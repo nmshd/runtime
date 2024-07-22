@@ -8,10 +8,7 @@ export interface SetCommunicationLanguageRequest {
 }
 
 export class SetCommunicationLanguageUseCase extends UseCase<SetCommunicationLanguageRequest, void> {
-    public constructor(
-        @Inject private readonly deviceController: DeviceController
-        // @Inject validator: Validator
-    ) {
+    public constructor(@Inject private readonly deviceController: DeviceController) {
         super();
     }
 
