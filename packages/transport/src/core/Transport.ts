@@ -24,6 +24,7 @@ export interface IConfig {
     platformMaxUnencryptedFileSize: number;
     platformAdditionalHeaders?: Record<string, string>;
     baseUrl: string;
+    addressGenerationBaseUrlOverride?: string;
     datawalletEnabled: boolean;
     httpAgentOptions: AgentOptions;
     httpsAgentOptions: HTTPSAgentOptions;
@@ -40,6 +41,7 @@ export interface IConfigOverwrite {
     platformMaxUnencryptedFileSize?: number;
     platformAdditionalHeaders?: Record<string, string>;
     baseUrl: string;
+    addressGenerationBaseUrlOverride?: string;
     datawalletEnabled?: boolean;
     httpAgentOptions?: AgentOptions;
     httpsAgentOptions?: HTTPSAgentOptions;
