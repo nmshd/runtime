@@ -24,4 +24,9 @@ describe("Devices", () => {
         const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: "fr" });
         expect(result).toBeSuccessful();
     });
+
+    test("should not set the communication language with an invalid language", async () => {
+        const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: "fra" });
+        expect(result).toBeAnError(/.*/, "error.runtime.devices.communicationLanguageNotISO639");
+    });
 });

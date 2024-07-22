@@ -216,6 +216,15 @@ class IdentityDeletionProcess {
     }
 }
 
+class Devices {
+    public communicationLanguageNotISO639(language: string) {
+        return new ApplicationError(
+            "error.runtime.devices.communicationLanguageNotISO639",
+            `You tried setting '${language}' as communication language, which is not a valid ISO 639-1 code.`
+        );
+    }
+}
+
 export class RuntimeErrors {
     public static readonly general = new General();
     public static readonly serval = new Serval();
@@ -228,4 +237,5 @@ export class RuntimeErrors {
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
     public static readonly identityDeletionProcess = new IdentityDeletionProcess();
+    public static readonly devices = new Devices();
 }

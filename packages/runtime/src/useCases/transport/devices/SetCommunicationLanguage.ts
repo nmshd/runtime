@@ -2,10 +2,10 @@ import { Result } from "@js-soft/ts-utils";
 import { LanguageISO639 } from "@nmshd/content";
 import { DeviceController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { UseCase } from "../../common";
+import { RuntimeErrors, UseCase } from "../../common";
 
 export interface SetCommunicationLanguageRequest {
-    communicationLanguage: LanguageISO639;
+    communicationLanguage: string;
 }
 
 export class SetCommunicationLanguageUseCase extends UseCase<SetCommunicationLanguageRequest, void> {
@@ -14,8 +14,12 @@ export class SetCommunicationLanguageUseCase extends UseCase<SetCommunicationLan
     }
 
     protected async executeInternal(request: SetCommunicationLanguageRequest): Promise<Result<void>> {
-        await this.deviceController.setCommunicationLanguage(request.communicationLanguage);
+        if (request.communicationLanguage in LanguageISO639) {
+            await this.deviceController.setCommunicationLanguage(request.communicationLanguage);
 
-        return Result.ok(undefined);
+            return Result.ok(undefined);
+        }
+
+        return Result.fail(RuntimeErrors.devices.communicationLanguageNotISO639(request.communicationLanguage));
     }
 }
