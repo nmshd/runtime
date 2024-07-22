@@ -27,6 +27,9 @@ describe("Devices", () => {
 
     test("should not set the communication language with an invalid language", async () => {
         const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: "fra" });
-        expect(result).toBeAnError(/.*/, "error.runtime.devices.communicationLanguageNotISO639");
+        expect(result).toBeAnError(
+            "You tried setting 'fra' as communication language, which is not a valid ISO 639-1 code.",
+            "error.runtime.devices.communicationLanguageNotISO639"
+        );
     });
 });
