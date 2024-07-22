@@ -295,34 +295,7 @@ export class AccountController {
         this._log.trace(`Registered identity with address ${deviceResponse.address}, device id is ${deviceResponse.device.id}.`);
 
         if (!localAddress.equals(deviceResponse.address)) {
-            const baseErrorMessage = "The backbone address does not match the local address.";
-
-            if (localAddress.address.startsWith("did:e:") && deviceResponse.address.startsWith("did:e:")) {
-                throw new TransportError(`${baseErrorMessage} One of the addresses does not start with 'did:e:'.`);
-            }
-
-            const localSegments = localAddress.address.split(":");
-            const backboneSegments = deviceResponse.address.split(":");
-
-            if (localSegments.length !== 5 || backboneSegments.length !== 5) {
-                throw new TransportError(`${baseErrorMessage} One of the addresses does not have 5 segments.`);
-            }
-
-            const localAddressPart = localSegments[2];
-            const backboneAddressPart = backboneSegments[2];
-
-            if (localAddressPart !== backboneAddressPart) {
-                throw new TransportError(`${baseErrorMessage} The address parts do not match. Local: ${localAddressPart}, Backbone: ${backboneAddressPart}.`);
-            }
-
-            const localPubkeyPart = localSegments[4];
-            const backbonePubkeyPart = backboneSegments[4];
-
-            if (localPubkeyPart !== backbonePubkeyPart) {
-                throw new TransportError(`${baseErrorMessage} The generated public key parts do not match.`);
-            }
-
-            throw new TransportError(`${baseErrorMessage} The addresses do not match.`);
+            throw new TransportError(`The backbone address '${deviceResponse.address}' does not match the local address '${localAddress.toString()}'.`);
         }
 
         const identity = Identity.from({
