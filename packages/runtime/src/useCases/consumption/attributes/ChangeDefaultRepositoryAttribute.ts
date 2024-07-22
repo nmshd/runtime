@@ -26,14 +26,18 @@ export class ChangeDefaultRepositoryAttributeUseCase extends UseCase<ChangeDefau
     }
 
     protected async executeInternal(request: ChangeDefaultRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        const repositoryAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
-        if (!repositoryAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
+        const newDefaultAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
+        if (!newDefaultAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
-        if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
+        if (!newDefaultAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(CoreId.from(request.attributeId)));
         }
 
-        const defaultRepositoryAttribute = await this.attributesController.changeDefaultRepositoryAttribute(repositoryAttribute);
+        if (newDefaultAttribute.succeededBy) {
+            return Result.fail(RuntimeErrors.attributes.hasSuccessor(newDefaultAttribute));
+        }
+
+        const defaultRepositoryAttribute = await this.attributesController.changeDefaultRepositoryAttribute(newDefaultAttribute);
 
         await this.accountController.syncDatawallet();
 

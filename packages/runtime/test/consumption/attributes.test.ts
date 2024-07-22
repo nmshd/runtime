@@ -1363,6 +1363,74 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         const updatedFormerDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: defaultAttribute.id })).value;
         expect(updatedFormerDefaultAttribute.default).toBeUndefined();
     });
+
+    test("should return an error if the new default attribute is not a repository attribute", async () => {
+        await services1.consumption.attributes.createRepositoryAttribute({
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "My default name"
+                }
+            }
+        });
+
+        const desiredSharedDefaultAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "My new shared name"
+                }
+            }
+        });
+        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredSharedDefaultAttribute.id });
+        expect(result).toBeAnError(
+            `Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not a repository attribute.`,
+            "error.runtime.attributes.isNotRepositoryAttribute"
+        );
+    });
+
+    test("should return an error if the new default attribute has a successor", async () => {
+        await services1.consumption.attributes.createRepositoryAttribute({
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "My default name"
+                }
+            }
+        });
+
+        const desiredDefaultAttribute = (
+            await services1.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "My new default name"
+                    }
+                }
+            })
+        ).value;
+
+        const successionResult = (
+            await services1.consumption.attributes.succeedRepositoryAttribute({
+                predecessorId: desiredDefaultAttribute.id,
+                successorContent: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "My new successor default name"
+                    }
+                }
+            })
+        ).value;
+
+        const updatedDesiredDefaultAttribute = successionResult.predecessor;
+        const desiredDefaultAttributeSuccessor = successionResult.successor;
+
+        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: updatedDesiredDefaultAttribute.id });
+        expect(result).toBeAnError(
+            `Attribute '${updatedDesiredDefaultAttribute.id.toString()}' already has a successor ${desiredDefaultAttributeSuccessor.id.toString()}.`,
+            "error.runtime.attributes.hasSuccessor"
+        );
+    });
 });
 
 describe("Get (shared) versions of attribute", () => {
