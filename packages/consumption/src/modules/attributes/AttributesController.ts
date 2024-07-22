@@ -1094,7 +1094,11 @@ export class AttributesController extends ConsumptionBaseController {
 
         const defaultCandidate = attributesWithSameValueType.find((attr) => !attr.succeededBy && attr.id.toString() !== attribute.id.toString());
 
-        if (!defaultCandidate) return;
+        if (!defaultCandidate) {
+            throw new ConsumptionError(
+                `No new default Attribute could be set in the process of deleting the previous default Attribute ${attribute.id.toString()}. There seems to be an error within the existing Attributes.`
+            );
+        }
 
         defaultCandidate.default = true;
         await this.updateAttributeUnsafe(defaultCandidate);
