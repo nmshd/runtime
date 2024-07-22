@@ -251,7 +251,7 @@ export class AttributesController extends ConsumptionBaseController {
             await this.createLocalAttributesForChildrenOfComplexAttribute(localAttribute);
         }
 
-        localAttribute = await this.setAsDefaultAttributeIfNoOtherExists(localAttribute);
+        localAttribute = await this.setAsDefaultRepositoryAttributeIfNoOtherExists(localAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), localAttribute));
 
@@ -278,7 +278,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
     }
 
-    private async setAsDefaultAttributeIfNoOtherExists(attribute: LocalAttribute): Promise<LocalAttribute> {
+    private async setAsDefaultRepositoryAttributeIfNoOtherExists(attribute: LocalAttribute): Promise<LocalAttribute> {
         const valueType = attribute.content.value.constructor.name as AttributeValues.Identity.TypeName;
         const query: IIdentityAttributeQuery = {
             valueType: valueType

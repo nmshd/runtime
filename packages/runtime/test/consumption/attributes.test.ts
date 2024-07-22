@@ -661,7 +661,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "Pseudonym",
-                    value: "Pseudo Petra"
+                    value: "A pseudonym"
                 }
             }
         };
@@ -675,7 +675,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "JobTitle",
-                    value: "Boss"
+                    value: "A job title"
                 }
             }
         };
@@ -1332,7 +1332,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
 });
 
 describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
-    test("should change default repository attribute", async () => {
+    test("should change default RepositoryAttribute", async () => {
         const defaultAttribute = (
             await services1.consumption.attributes.createRepositoryAttribute({
                 content: {
@@ -1364,7 +1364,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         expect(updatedFormerDefaultAttribute.default).toBeUndefined();
     });
 
-    test("should return an error if the new default attribute is not a repository attribute", async () => {
+    test("should return an error if the new default attribute is not a RepositoryAttribute", async () => {
         await services1.consumption.attributes.createRepositoryAttribute({
             content: {
                 value: {
