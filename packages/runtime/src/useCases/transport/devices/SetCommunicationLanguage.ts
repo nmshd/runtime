@@ -1,10 +1,11 @@
 import { Result } from "@js-soft/ts-utils";
+import { LanguageISO639 } from "@nmshd/content";
 import { DeviceController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { UseCase } from "../../common";
 
 export interface SetCommunicationLanguageRequest {
-    communicationLanguage: string;
+    communicationLanguage: LanguageISO639;
 }
 
 export class SetCommunicationLanguageUseCase extends UseCase<SetCommunicationLanguageRequest, void> {
