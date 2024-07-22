@@ -1,6 +1,6 @@
 import { RESTClient, RESTClientLogDirective } from "../../../core";
 import { ClientResult } from "../../../core/backbone/ClientResult";
-import { BackboneGetCommunicationLanguageResponse, BackboneSetCommunicationLanguageRequest } from "./BackboneCommunicationLanguage";
+import { BackboneSetCommunicationLanguageRequest } from "./BackboneCommunicationLanguage";
 import { BackbonePostDevicesRequest, BackbonePostDevicesResponse } from "./BackbonePostDevices";
 
 export class DeviceClient extends RESTClient {
@@ -12,9 +12,5 @@ export class DeviceClient extends RESTClient {
 
     public async setCommunicationLanguage(value: BackboneSetCommunicationLanguageRequest): Promise<ClientResult<void>> {
         return await this.put<void>("/api/v1/Devices/Self", value);
-    }
-
-    public async getCommunicationLanguage(): Promise<ClientResult<BackboneGetCommunicationLanguageResponse>> {
-        return await this.put<BackboneGetCommunicationLanguageResponse>("/api/v1/Devices/Self", {});
     }
 }
