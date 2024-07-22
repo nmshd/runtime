@@ -7,12 +7,6 @@ export interface SetCommunicationLanguageRequest {
     communicationLanguage: string;
 }
 
-// class Validator extends SchemaValidator<SetCommunicationLanguageRequest> {
-//     public constructor(@Inject schemaRepository: SchemaRepository) {
-//         super(schemaRepository.getSchema("SetCommunicationLanguageRequest"));
-//     }
-// }
-
 export class SetCommunicationLanguageUseCase extends UseCase<SetCommunicationLanguageRequest, void> {
     public constructor(
         @Inject private readonly deviceController: DeviceController
