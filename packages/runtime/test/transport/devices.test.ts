@@ -19,4 +19,9 @@ describe("Devices", () => {
         const sharedSecret = DeviceMapper.toDeviceSharedSecret(onboardingInfo);
         expect(sharedSecret).toBeDefined();
     });
+
+    test("should set the communication language", async () => {
+        const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: "fr" });
+        expect(result).toBeSuccessful();
+    });
 });

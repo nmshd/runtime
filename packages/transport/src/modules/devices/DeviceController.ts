@@ -143,6 +143,10 @@ export class DeviceController extends TransportController {
         };
     }
 
+    public async setCommunicationLanguage(language: string): Promise<void> {
+        await this.parent.deviceClient.setCommunicationLanguage({ communicationLanguage: language });
+    }
+
     public async markAsOffboarded(): Promise<void> {
         this.device.isOffboarded = true;
         await this.parent.devices.update(this.device);
