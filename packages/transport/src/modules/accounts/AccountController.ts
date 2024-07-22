@@ -279,7 +279,7 @@ export class AccountController {
             CoreCrypto.generateSecretKey(),
 
             // Generate address locally
-            IdentityUtil.createAddress(identityKeypair.publicKey, new URL(this._config.baseUrl).hostname),
+            IdentityUtil.createAddress(identityKeypair.publicKey, this._config.addressGenerationHostnameOverride ?? new URL(this._config.baseUrl).hostname),
             this.fetchDeviceInfo()
         ]);
 
@@ -295,7 +295,7 @@ export class AccountController {
         this._log.trace(`Registered identity with address ${deviceResponse.address}, device id is ${deviceResponse.device.id}.`);
 
         if (!localAddress.equals(deviceResponse.address)) {
-            throw new TransportError("The backbone address does not match the local address.");
+            throw new TransportError(`The backbone address '${deviceResponse.address}' does not match the local address '${localAddress.toString()}'.`);
         }
 
         const identity = Identity.from({
