@@ -1107,6 +1107,10 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async changeDefaultRepositoryAttribute(newDefaultAttribute: LocalAttribute): Promise<LocalAttribute> {
+        if (!newDefaultAttribute.isRepositoryAttribute(this.identity.address)) {
+            throw CoreErrors.attributes.isNotRepositoryAttribute(newDefaultAttribute.id);
+        }
+
         if (newDefaultAttribute.default) return newDefaultAttribute;
 
         const valueType = newDefaultAttribute.content.value.constructor.name;

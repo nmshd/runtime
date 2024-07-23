@@ -2273,8 +2273,8 @@ describe("AttributesController", function () {
         });
     });
 
-    describe("change Attributes", function () {
-        test("should change default repository attribute", async function () {
+    describe("change default Attributes", function () {
+        test("should change default RepositoryAttribute", async function () {
             const firstAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: {
@@ -2303,7 +2303,7 @@ describe("AttributesController", function () {
             expect(updatedFirstAttribute!.default).toBeUndefined();
         });
 
-        test("should not change default repository attribute if candidate is already default", async function () {
+        test("should not change default RepositoryAttribute if candidate is already default", async function () {
             const firstAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: {
@@ -2316,6 +2316,27 @@ describe("AttributesController", function () {
             expect(firstAttribute.default).toBe(true);
             const updatedFirstAttribute = await consumptionController.attributes.changeDefaultRepositoryAttribute(firstAttribute);
             expect(updatedFirstAttribute.default).toBe(true);
+        });
+
+        test("should throw an error if the new default Attribute is not a RepositoryAttribute", async function () {
+            const sharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "My shared given name"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: CoreAddress.from("peer"),
+                    requestReference: CoreId.from("reqRef")
+                })
+            });
+
+            await TestUtil.expectThrowsAsync(
+                consumptionController.attributes.changeDefaultRepositoryAttribute(sharedAttribute),
+                "error.consumption.attributes.isNotRepositoryAttribute"
+            );
         });
     });
 

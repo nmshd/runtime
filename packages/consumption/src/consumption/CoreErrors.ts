@@ -223,6 +223,10 @@ class Attributes {
         );
     }
 
+    public isNotRepositoryAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotRepositoryAttribute", `The attribute (id: ${attributeId}) is not a RepositoryAttribute.`);
+    }
+
     public isNotSharedAttribute(attributeId: string | CoreId) {
         return new CoreError("error.consumption.attributes.isNotSharedAttribute", `The attribute (id: ${attributeId}) is not a shared attribute.`);
     }
