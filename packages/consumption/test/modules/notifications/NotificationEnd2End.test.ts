@@ -150,4 +150,14 @@ describe("End2End Notification via Messages", function () {
         await rConsumptionController.notifications.processOpenNotifactionsReceivedByCurrentDevice();
         expect(TestNotificationItemProcessor.processedItems).toHaveLength(0);
     });
+
+    test("recipient: delete notification while decomposing relationship", async function () {
+        await TestUtil.terminateRelationship(rAccountController, sAccountController);
+        await TestUtil.decomposeRelationship(rAccountController, rConsumptionController, sAccountController);
+
+        const notification = await rNotificationsCollection.findOne({
+            id: rLocalNotification.id.toString()
+        });
+        expect(notification).toBeFalsy();
+    });
 });

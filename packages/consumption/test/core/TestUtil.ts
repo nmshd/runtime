@@ -270,6 +270,27 @@ export class TestUtil {
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
     }
 
+    public static async terminateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
+        const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
+        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
+    }
+
+    public static async decomposeRelationship(fromAccount: AccountController, fromConsumption: ConsumptionController, to: AccountController): Promise<Relationship> {
+        const relationship = (await fromAccount.relationships.getRelationshipToIdentity(to.identity.address))!;
+        await fromAccount.relationships.decompose(relationship.id);
+        await fromAccount.cleanupDataOfDecomposedRelationship(relationship);
+        await fromConsumption.cleanupDataOfDecomposedRelationship(to.identity.address, relationship.id);
+        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return decomposedRelationshipPeer;
+    }
+
     /**
      * SyncEvents in the backbone are only enventually consistent. This means that if you send a message now and
      * get all SyncEvents right after, you cannot rely on getting a NewMessage SyncEvent right away. So instead
