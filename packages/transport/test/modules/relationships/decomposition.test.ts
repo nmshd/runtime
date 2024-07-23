@@ -1,6 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
-import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, CoreDate, CoreId, Relationship, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
@@ -18,7 +17,6 @@ describe("Data cleanup after relationship decomposition", function () {
 
     let tokenId: CoreId;
     let templateId: CoreId;
-    let fileId: CoreId;
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
@@ -51,12 +49,6 @@ describe("Data cleanup after relationship decomposition", function () {
         const reference = sentToken.toTokenReference().truncate();
         tokenId = (await sender.tokens.loadPeerTokenByTruncated(reference, false)).id;
 
-        const fileContent = CoreBuffer.fromUtf8("Test");
-        const sentFile = await TestUtil.uploadFile(recipient1, fileContent);
-
-        const fileReference = sentFile.toFileReference().truncate();
-        fileId = (await sender.files.getOrLoadFileByTruncated(fileReference)).id;
-
         await TestUtil.terminateRelationship(sender, recipient1);
         await TestUtil.decomposeRelationship(sender, recipient1);
     });
@@ -78,13 +70,6 @@ describe("Data cleanup after relationship decomposition", function () {
     test("token should be deleted", async function () {
         const token = await sender.tokens.getToken(tokenId);
         expect(token).toBeUndefined();
-    });
-
-    // whether files should be deleted is to be discussed
-    // eslint-disable-next-line jest/no-disabled-tests
-    test.skip("file should be deleted", async function () {
-        const file = await sender.files.getFile(fileId);
-        expect(file).toBeUndefined();
     });
 
     test("messages should be deleted/pseudonymized", async function () {
