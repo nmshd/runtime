@@ -31,4 +31,8 @@ describe("set the communication language", function () {
     test("should set the communication language", async function () {
         await expect(deviceAccount.activeDevice.setCommunicationLanguage("fr")).resolves.not.toThrow();
     });
+
+    test("should not set a false communication language", async function () {
+        await expect(deviceAccount.activeDevice.setCommunicationLanguage("fra")).rejects.toThrow("Request failed with status code 400");
+    });
 });
