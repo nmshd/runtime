@@ -8,12 +8,6 @@ export interface DiscardOutgoingRequestRequest {
     id: RequestIdString;
 }
 
-// class Validator extends SchemaValidator<DiscardOutgoingRequestRequest> {
-//     public constructor(@Inject schemaRepository: SchemaRepository) {
-//         super(schemaRepository.getSchema("DiscardOutgoingRequestRequest"));
-//     }
-// }
-
 export class DiscardOutgoingRequestUseCase extends UseCase<DiscardOutgoingRequestRequest, void> {
     public constructor(@Inject private readonly outgoingRequestsController: OutgoingRequestsController) {
         super();

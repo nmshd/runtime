@@ -12,12 +12,6 @@ export interface CompleteOutgoingRequestRequest {
     messageId: MessageIdString;
 }
 
-// class Validator extends SchemaValidator<CompleteOutgoingRequestRequest> {
-//     public constructor(@Inject schemaRepository: SchemaRepository) {
-//         super(schemaRepository.getSchema("CompleteOutgoingRequestRequest"));
-//     }
-// }
-
 export class CompleteOutgoingRequestUseCase extends UseCase<CompleteOutgoingRequestRequest, LocalRequestDTO> {
     public constructor(
         @Inject private readonly outgoingRequestsController: OutgoingRequestsController,
