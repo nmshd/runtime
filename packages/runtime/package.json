@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/runtime",
-    "version": "5.0.0-alpha.9",
+    "version": "5.0.0-alpha.10",
     "description": "The enmeshed client runtime.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -56,10 +56,10 @@
         "@js-soft/logging-abstractions": "^1.0.1",
         "@js-soft/ts-serval": "2.0.10",
         "@js-soft/ts-utils": "^2.3.3",
-        "@nmshd/consumption": "5.0.0-alpha.9",
-        "@nmshd/content": "5.0.0-alpha.9",
+        "@nmshd/consumption": "5.0.0-alpha.10",
+        "@nmshd/content": "5.0.0-alpha.10",
         "@nmshd/crypto": "2.0.6",
-        "@nmshd/transport": "5.0.0-alpha.9",
+        "@nmshd/transport": "5.0.0-alpha.10",
         "ajv": "^8.17.1",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
