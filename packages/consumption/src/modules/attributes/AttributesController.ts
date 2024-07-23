@@ -1084,42 +1084,53 @@ export class AttributesController extends ConsumptionBaseController {
     private async transmitDefault(attribute: LocalAttribute): Promise<void> {
         if (!attribute.default) return;
 
-        const valueType = attribute.content.value.constructor.name as AttributeValues.Identity.TypeName;
-        const query: IIdentityAttributeQuery = {
-            valueType: valueType
+        const valueType = attribute.content.value.constructor.name;
+        const query = {
+            $and: [
+                {
+                    [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType
+                },
+                {
+                    [nameof<LocalAttribute>((c) => c.succeededBy)]: undefined
+                },
+                {
+                    [nameof<LocalAttribute>((c) => c.id)]: { $ne: attribute.id.toString() }
+                }
+            ]
         };
 
-        const attributesWithSameValueType = await this.executeIdentityAttributeQuery(query);
-        const currentAttributesWithSameValueType = attributesWithSameValueType.filter((attr) => !attr.succeededBy);
-        if (currentAttributesWithSameValueType.length <= 1) return;
+        const defaultCandidates = await this.getLocalAttributes(query);
+        if (defaultCandidates.length === 0) return;
 
-        const defaultCandidate = currentAttributesWithSameValueType.find((attr) => attr.id.toString() !== attribute.id.toString());
-
-        if (!defaultCandidate) {
-            throw new ConsumptionError(
-                `No new default Attribute could be set in the process of deleting the previous default Attribute ${attribute.id.toString()}. There seems to be an error within the existing Attributes.`
-            );
-        }
-
-        defaultCandidate.default = true;
-        await this.updateAttributeUnsafe(defaultCandidate);
+        defaultCandidates[0].default = true;
+        await this.updateAttributeUnsafe(defaultCandidates[0]);
     }
 
     public async changeDefaultRepositoryAttribute(newDefaultAttribute: LocalAttribute): Promise<LocalAttribute> {
         if (newDefaultAttribute.default) return newDefaultAttribute;
 
-        const valueType = newDefaultAttribute.content.value.constructor.name as AttributeValues.Identity.TypeName;
-        const query: IIdentityAttributeQuery = {
-            valueType: valueType
+        const valueType = newDefaultAttribute.content.value.constructor.name;
+        const query = {
+            $and: [
+                {
+                    [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType
+                },
+                {
+                    [nameof<LocalAttribute>((c) => c.default)]: true
+                }
+            ]
         };
 
-        const attributesWithSameValueType = await this.executeIdentityAttributeQuery(query);
-        const currentDefault = attributesWithSameValueType.find((attr) => attr.default);
+        const currentDefaultAttributeResult = await this.getLocalAttributes(query);
 
-        if (!currentDefault) throw new ConsumptionError(`No default RepositoryAttribute of type ${valueType.toString()} found.`);
+        if (currentDefaultAttributeResult.length > 1) {
+            throw new ConsumptionError(`There seem to be multiple default Attributes for type ${valueType.toString()}, even though only one is expected.`);
+        }
+        if (currentDefaultAttributeResult.length === 0) throw new ConsumptionError(`No default RepositoryAttribute of type ${valueType.toString()} found.`);
 
-        currentDefault.default = undefined;
-        await this.updateAttributeUnsafe(currentDefault);
+        const currentDefaultAttribute = currentDefaultAttributeResult[0];
+        currentDefaultAttribute.default = undefined;
+        await this.updateAttributeUnsafe(currentDefaultAttribute);
 
         newDefaultAttribute.default = true;
         await this.updateAttributeUnsafe(newDefaultAttribute);
