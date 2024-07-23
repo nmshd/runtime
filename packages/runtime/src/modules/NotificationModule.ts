@@ -3,7 +3,7 @@ import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 
 export class NotificationModule extends RuntimeModule {
     public init(): void {
-        // Noting to do here
+        // Nothing to do here
     }
 
     public start(): void {
