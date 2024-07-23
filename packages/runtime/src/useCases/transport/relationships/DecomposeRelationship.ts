@@ -14,7 +14,7 @@ class Validator extends SchemaValidator<DecomposeRelationshipRequest> {
     }
 }
 
-export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipRequest, null> {
+export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipRequest, void> {
     public constructor(
         @Inject private readonly accountController: AccountController,
         @Inject private readonly consumptionController: ConsumptionController,
@@ -24,7 +24,7 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
         super(validator);
     }
 
-    protected async executeInternal(request: DecomposeRelationshipRequest): Promise<Result<null, ApplicationError>> {
+    protected async executeInternal(request: DecomposeRelationshipRequest): Promise<Result<void, ApplicationError>> {
         const relationship = await this.relationshipsController.getRelationship(CoreId.from(request.relationshipId));
         if (!relationship) {
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
@@ -42,6 +42,6 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(null);
+        return Result.ok(undefined);
     }
 }

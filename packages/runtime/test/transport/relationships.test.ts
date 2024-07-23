@@ -677,7 +677,6 @@ describe("RelationshipDecomposition", () => {
     let templateId2: string;
     let multipleRecipientsMessageId: string;
 
-    let decompositionResult: Result<null, ApplicationError>;
     beforeAll(async () => {
         const relationship = await ensureActiveRelationship(services1.transport, services2.transport);
         relationshipId = relationship.id;
@@ -695,15 +694,14 @@ describe("RelationshipDecomposition", () => {
         multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).id;
 
         await services1.transport.relationships.terminateRelationship({ relationshipId });
-        decompositionResult = await services1.transport.relationships.decomposeRelationship({ relationshipId });
+        await services1.transport.relationships.decomposeRelationship({ relationshipId });
         await services2.eventBus.waitForEvent(RelationshipChangedEvent);
 
         await services1.transport.relationships.terminateRelationship({ relationshipId: relationshipId2 });
     });
 
     test("relationship should be decomposed", async () => {
-        expect(decompositionResult).toBeSuccessful();
-        await expect(services1.eventBus).toHavePublished(RelationshipDecomposedBySelfEvent, (e) => e.data === relationshipId);
+        await expect(services1.eventBus).toHavePublished(RelationshipDecomposedBySelfEvent, (e) => e.data.relationshipId === relationshipId);
 
         const ownRelationship = await services1.transport.relationships.getRelationship({ id: relationshipId });
         expect(ownRelationship).toBeAnError(/.*/, "error.runtime.recordNotFound");

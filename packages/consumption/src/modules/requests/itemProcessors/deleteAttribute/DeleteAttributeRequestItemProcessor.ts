@@ -5,7 +5,7 @@ import { DeletionStatus, LocalAttributeDeletionInfo } from "../../../attributes"
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
-import { AcceptDeleteAttributeRequestItemParametersJSON } from "./AcceptDeleteAttributeRequestItemParameters";
+import { AcceptDeleteAttributeRequestItemParameters, AcceptDeleteAttributeRequestItemParametersJSON } from "./AcceptDeleteAttributeRequestItemParameters";
 
 export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProcessor<DeleteAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: DeleteAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
@@ -42,10 +42,11 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         params: AcceptDeleteAttributeRequestItemParametersJSON,
         _requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
+        const parsedParams = AcceptDeleteAttributeRequestItemParameters.from(params);
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
         if (!attribute) return ValidationResult.success();
 
-        const deletionDate = CoreDate.from(params.deletionDate);
+        const deletionDate = parsedParams.deletionDate;
 
         if (!deletionDate.dateTime.isValid) {
             return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The deletionDate is invalid."));

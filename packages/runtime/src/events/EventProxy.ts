@@ -83,7 +83,7 @@ export class EventProxy {
         });
 
         this.subscribeToSourceEvent(transport.RelationshipDecomposedBySelfEvent, (event) => {
-            this.targetEventBus.publish(new RelationshipDecomposedBySelfEvent(event.eventTargetAddress, event.data.toString()));
+            this.targetEventBus.publish(new RelationshipDecomposedBySelfEvent(event.eventTargetAddress, { relationshipId: event.data.relationshipId.toString() }));
         });
 
         this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {

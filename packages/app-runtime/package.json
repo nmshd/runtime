@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/app-runtime",
-    "version": "5.0.0-alpha.6",
+    "version": "5.0.0-alpha.9",
     "description": "The App Runtime",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -49,12 +49,12 @@
     },
     "devDependencies": {
         "@js-soft/web-logger": "^1.0.4",
-        "@types/lodash": "^4.17.6",
+        "@types/lodash": "^4.17.7",
         "@types/lokijs": "^1.5.14",
         "@types/luxon": "^3.4.2"
     },
     "peerDependencies": {
-        "@nmshd/runtime": "^5.0.0-alpha.6"
+        "@nmshd/runtime": "^5.0.0-alpha.9"
     },
     "publishConfig": {
         "access": "public",
