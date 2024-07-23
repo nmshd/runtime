@@ -1,17 +1,22 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, CoreId, Transport } from "../../../src";
+import { Serializable } from "@js-soft/ts-serval";
+import { AccountController, CoreDate, CoreId, Relationship, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
-describe("Relationship Decomposition", function () {
+describe("Data cleanup after relationship decomposition", function () {
     let connection: IDatabaseConnection;
 
     let transport: Transport;
 
     let sender: AccountController;
     let recipient1: AccountController;
-
-    let relationship2Id: CoreId;
     let recipient2: AccountController;
+
+    let relationship: Relationship;
+    let relationship2Id: CoreId;
+
+    let tokenId: CoreId;
+    let templateId: CoreId;
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
@@ -24,12 +29,26 @@ describe("Relationship Decomposition", function () {
         recipient1 = accounts[1];
         recipient2 = accounts[2];
 
-        await TestUtil.addRelationship(sender, recipient1);
+        relationship = (await TestUtil.addRelationship(sender, recipient1)).acceptedRelationshipFromSelf;
         relationship2Id = (await TestUtil.addRelationship(sender, recipient2)).acceptedRelationshipFromSelf.id;
 
         await TestUtil.sendMessage(sender, [recipient1, recipient2]);
-
         await TestUtil.syncUntilHasMessages(recipient1);
+
+        // generate another template not used for a relationship
+        const tokenReference = await TestUtil.sendRelationshipTemplateAndToken(recipient1);
+        templateId = (await TestUtil.fetchRelationshipTemplateFromTokenReference(sender, tokenReference)).id;
+
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await recipient1.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        tokenId = (await sender.tokens.loadPeerTokenByTruncated(reference, false)).id;
+
         await TestUtil.terminateRelationship(sender, recipient1);
         await TestUtil.decomposeRelationship(sender, recipient1);
     });
@@ -39,6 +58,18 @@ describe("Relationship Decomposition", function () {
         await recipient1.close();
         await recipient2.close();
         await connection.close();
+    });
+
+    test("templates should be deleted", async function () {
+        const templateForRelationship = await sender.relationshipTemplates.getRelationshipTemplate(relationship.cache!.template.id);
+        const otherTemplate = await sender.relationshipTemplates.getRelationshipTemplate(templateId);
+        expect(templateForRelationship).toBeUndefined();
+        expect(otherTemplate).toBeUndefined();
+    });
+
+    test("token should be deleted", async function () {
+        const token = await sender.tokens.getToken(tokenId);
+        expect(token).toBeUndefined();
     });
 
     test("messages should be deleted/pseudonymized", async function () {
