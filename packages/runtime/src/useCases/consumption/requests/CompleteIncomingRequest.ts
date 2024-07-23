@@ -11,12 +11,6 @@ export interface CompleteIncomingRequestRequest {
     responseSourceId?: MessageIdString | RelationshipChangeIdString;
 }
 
-// class Validator extends SchemaValidator<CompleteIncomingRequestRequest> {
-//     public constructor(@Inject schemaRepository: SchemaRepository) {
-//         super(schemaRepository.getSchema("CompleteIncomingRequestRequest"));
-//     }
-// }
-
 export class CompleteIncomingRequestUseCase extends UseCase<CompleteIncomingRequestRequest, LocalRequestDTO> {
     public constructor(
         @Inject private readonly incomingRequestsController: IncomingRequestsController,
