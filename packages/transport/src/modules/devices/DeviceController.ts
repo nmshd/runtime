@@ -144,7 +144,7 @@ export class DeviceController extends TransportController {
     }
 
     public async setCommunicationLanguage(language: string): Promise<void> {
-        const result = await this.parent.deviceClient.updateCurrentDevice({ communicationLanguage: language });
+        const result = await this.parent.deviceAuthClient.updateCurrentDevice({ communicationLanguage: language });
         if (result.isError) {
             throw result.error;
         }
