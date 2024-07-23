@@ -12,12 +12,6 @@ export interface CanCreateOutgoingRequestRequest {
     peer?: AddressString;
 }
 
-// class Validator extends SchemaValidator<CanCreateOutgoingRequestRequest> {
-//     public constructor(@Inject schemaRepository: SchemaRepository) {
-//         super(schemaRepository.getSchema("CanCreateOutgoingRequestRequest"));
-//     }
-// }
-
 export class CanCreateOutgoingRequestUseCase extends UseCase<CanCreateOutgoingRequestRequest, RequestValidationResultDTO> {
     public constructor(@Inject private readonly outgoingRequestsController: OutgoingRequestsController) {
         super();
