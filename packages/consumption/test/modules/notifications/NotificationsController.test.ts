@@ -13,7 +13,7 @@ describe("End2End Notification via Messages", function () {
     let sConsumptionController: ConsumptionController;
     let rAccountController: AccountController;
     let rConsumptionController: ConsumptionController;
-    let rLocalNotification: LocalNotification;
+    let localNotification: LocalNotification;
 
     let rNotificationsCollection: SynchronizedCollection;
 
@@ -33,7 +33,7 @@ describe("End2End Notification via Messages", function () {
         await TestUtil.addRelationship(sAccountController, rAccountController);
 
         const id = await ConsumptionIds.notification.generate();
-        const localNotification = LocalNotification.from({
+        localNotification = LocalNotification.from({
             id,
             content: Notification.from({ id, items: [TestNotificationItem.from({})] }),
             isOwn: true,
@@ -61,7 +61,7 @@ describe("End2End Notification via Messages", function () {
         await rConsumptionController.notifications.deleteNotificationsExchangedWithPeer(sAccountController.identity.address);
 
         const notification = await rNotificationsCollection.findOne({
-            id: rLocalNotification.id.toString()
+            id: localNotification.id.toString()
         });
         expect(notification).toBeFalsy();
     });
