@@ -3,12 +3,12 @@ import { Notification } from "@nmshd/content";
 import { CoreId, CoreIdHelper } from "@nmshd/transport";
 import { ConsumptionServices, RuntimeErrors, TransportServices } from "../../src";
 import {
-    RuntimeServiceProvider,
-    TestNotificationItem,
-    TestNotificationItemProcessor,
     establishRelationship,
+    RuntimeServiceProvider,
     sendAndReceiveNotification,
-    syncUntilHasMessageWithNotification
+    syncUntilHasMessageWithNotification,
+    TestNotificationItem,
+    TestNotificationItemProcessor
 } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
@@ -135,12 +135,12 @@ describe("Notifications", () => {
             expect(result).toBeAnError("'LocalNotification' not found.", "error.transport.recordNotFound");
         });
 
-        test("wrong Message ID for sentNotification with status 'Sent'", async () => {
+        test("wrong Message ID for sentNotification", async () => {
             const result = await sConsumptionServices.notifications.sentNotification({ messageId: "wrong-id" });
             expect(result).toBeAnError("messageId must match pattern MSG\\[A-Za-z0-9\\]\\{17\\}", "error.runtime.validation.invalidPropertyValue");
         });
 
-        test("not existing Message ID for sentNotification with status 'Sent'", async () => {
+        test("not existing Message ID for sentNotification", async () => {
             const result = await sConsumptionServices.notifications.sentNotification({ messageId: (await new CoreIdHelper("MSG").generate()).toString() });
             expect(result).toBeAnError("Message not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });

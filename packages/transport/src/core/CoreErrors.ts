@@ -10,7 +10,7 @@ class Relationships {
     public wrongRelationshipStatus(relationshipId: string, status: RelationshipStatus) {
         return new CoreError(
             "error.transport.relationships.wrongRelationshipStatus",
-            `The Relationship '${relationshipId}' has the wrong status ('${status}') to run this operation.`
+            `The Relationship '${relationshipId}' has the wrong status '${status}' to run this operation.`
         );
     }
 

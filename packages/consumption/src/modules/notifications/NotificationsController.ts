@@ -34,7 +34,7 @@ export class NotificationsController extends ConsumptionBaseController {
     }
 
     public async sent(message: Message): Promise<LocalNotification> {
-        if (!message.isOwn) throw new Error("Cannot save a LocalNotification with status 'Sent' from a received Message.");
+        if (!message.isOwn) throw new Error("Cannot mark a LocalNotification as sent from a received Message.");
 
         const content = this.extractNotificationFromMessage(message);
 
