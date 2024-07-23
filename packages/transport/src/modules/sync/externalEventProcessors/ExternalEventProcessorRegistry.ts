@@ -4,16 +4,18 @@ import { IdentityDeletionProcessChangedEventProcessor } from "./IdentityDeletion
 import { IdentityDeletionProcessStartedEventProcessor } from "./IdentityDeletionProcessStartedEventProcessor";
 import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor";
 import { MessageReceivedExternalEventProcessor } from "./MessageReceivedExternalEventProcessor";
-import { RelationshipChangeCompletedExternalEventProcessor } from "./RelationshipChangeCompletedExternalEventProcessor";
-import { RelationshipChangeCreatedExternalEventProcessor } from "./RelationshipChangeCreatedExternalEventProcessor";
+import { RelationshipReactivationCompletedExternalEventProcessor } from "./RelationshipReactivationCompletedExternalEventProcessor";
+import { RelationshipReactivationRequestedExternalEventProcessor } from "./RelationshipReactivationRequestedExternalEventProcessor";
+import { RelationshipStatusChangedExternalEventProcessor } from "./RelationshipStatusChangedExternalEventProcessor";
 
 export class ExternalEventProcessorRegistry {
     private readonly processors = new Map<string, ExternalEventProcessorConstructor>();
     public constructor() {
         this.registerProcessor("MessageReceived", MessageReceivedExternalEventProcessor);
         this.registerProcessor("MessageDelivered", MessageDeliveredExternalEventProcessor);
-        this.registerProcessor("RelationshipChangeCreated", RelationshipChangeCreatedExternalEventProcessor);
-        this.registerProcessor("RelationshipChangeCompleted", RelationshipChangeCompletedExternalEventProcessor);
+        this.registerProcessor("RelationshipStatusChanged", RelationshipStatusChangedExternalEventProcessor);
+        this.registerProcessor("RelationshipReactivationRequested", RelationshipReactivationRequestedExternalEventProcessor);
+        this.registerProcessor("RelationshipReactivationCompleted", RelationshipReactivationCompletedExternalEventProcessor);
         this.registerProcessor("IdentityDeletionProcessStarted", IdentityDeletionProcessStartedEventProcessor);
         this.registerProcessor("IdentityDeletionProcessStatusChanged", IdentityDeletionProcessChangedEventProcessor);
     }

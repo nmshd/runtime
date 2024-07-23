@@ -56,4 +56,11 @@ export class SettingsController extends ConsumptionBaseController {
     public async deleteSetting(setting: Setting): Promise<void> {
         await this.settings.delete(setting);
     }
+
+    public async deleteSettingsForRelationship(relationshipId: CoreId): Promise<void> {
+        const settings = await this.getSettings({ reference: relationshipId.toString(), scope: SettingScope.Relationship });
+        for (const setting of settings) {
+            await this.deleteSetting(setting);
+        }
+    }
 }

@@ -4,7 +4,7 @@ import {
     IdentityAttribute,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
-    RelationshipCreationChangeRequestContentJSON,
+    RelationshipCreationContentJSON,
     RelationshipTemplateContentJSON,
     ResponseItemJSON,
     ResponseItemResult,
@@ -20,7 +20,7 @@ import {
     MessageProcessedEvent,
     MessageSentEvent,
     OutgoingRequestCreatedAndCompletedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     RelationshipDTO,
     RelationshipStatus,
@@ -29,20 +29,20 @@ import {
     RelationshipTemplateProcessedResult
 } from "../../src";
 import {
+    MockEventBus,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     ensureActiveRelationship,
     establishPendingRelationshipWithRequestFlow,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     exchangeTemplate,
     executeFullCreateAndShareRelationshipAttributeFlow,
-    MockEventBus,
-    RuntimeServiceProvider,
     sendMessage,
     sendMessageWithRequest,
-    syncUntilHasMessages,
     syncUntilHasMessageWithResponse,
-    syncUntilHasRelationships,
-    TestRuntimeServices
+    syncUntilHasMessages,
+    syncUntilHasRelationships
 } from "../lib";
 
 describe("RequestModule", () => {
@@ -90,10 +90,8 @@ describe("RequestModule", () => {
                 const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
                 await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
                 const relationship = (await syncUntilHasRelationships(sRuntimeServices.transport, 1))[0];
-                await sRuntimeServices.transport.relationships.acceptRelationshipChange({
-                    relationshipId: relationship.id,
-                    changeId: relationship.changes[0].id,
-                    content: {}
+                await sRuntimeServices.transport.relationships.acceptRelationship({
+                    relationshipId: relationship.id
                 });
             }
         }
@@ -183,10 +181,13 @@ describe("RequestModule", () => {
 
             const relationship = relationships[0];
 
-            const creationChangeRequestContent = relationship.changes[0].request.content as RelationshipCreationChangeRequestContentJSON;
-            expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationChangeRequestContent");
+            const creationContent = relationship.creationContent as RelationshipCreationContentJSON;
+            expect(creationContent["@type"]).toBe("RelationshipCreationContent");
 
-            const response = creationChangeRequestContent.response;
+            const creationChangeRequestContent = relationship.creationContent as RelationshipCreationContentJSON;
+            expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationContent");
+
+            const response = creationContent.response;
             const responseItems = response.items;
             expect(responseItems).toHaveLength(1);
 
@@ -194,12 +195,12 @@ describe("RequestModule", () => {
             expect(responseItem["@type"]).toBe("AcceptResponseItem");
             expect(responseItem.result).toBe(ResponseItemResult.Accepted);
 
-            await expect(sRuntimeServices.eventBus).toHavePublished(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, (e) => e.data.id === response.requestId);
+            await expect(sRuntimeServices.eventBus).toHavePublished(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent, (e) => e.data.id === response.requestId);
 
             const requestsResult = await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: response.requestId });
             expect(requestsResult).toBeSuccessful();
 
-            await sRuntimeServices.transport.relationships.acceptRelationshipChange({ relationshipId: relationship.id, changeId: relationship.changes[0].id, content: {} });
+            await sRuntimeServices.transport.relationships.acceptRelationship({ relationshipId: relationship.id });
             await syncUntilHasRelationships(rRuntimeServices.transport, 1);
         });
 
@@ -342,7 +343,7 @@ describe("RequestModule", () => {
                             "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
                             attribute: IdentityAttribute.from({
-                                owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address,
+                                owner: CoreAddress.from(""),
                                 value: GivenName.from("AGivenName").toJSON()
                             }).toJSON()
                         }
@@ -482,11 +483,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
-        await sRuntimeServices.transport.relationships.rejectRelationshipChange({
-            relationshipId: sRelationship.id,
-            changeId: sRelationship.changes[0].id,
-            content: {}
-        });
+        await sRuntimeServices.transport.relationships.rejectRelationship({ relationshipId: sRelationship.id });
         await sRuntimeServices.eventBus.waitForRunningEventHandlers();
         await syncUntilHasRelationships(rRuntimeServices.transport, 1);
         await rRuntimeServices.eventBus.waitForRunningEventHandlers();
@@ -500,11 +497,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
-        await rRuntimeServices.transport.relationships.revokeRelationshipChange({
-            relationshipId: sRelationship.id,
-            changeId: sRelationship.changes[0].id,
-            content: {}
-        });
+        await rRuntimeServices.transport.relationships.revokeRelationship({ relationshipId: sRelationship.id });
         await rRuntimeServices.eventBus.waitForRunningEventHandlers();
         await syncUntilHasRelationships(sRuntimeServices.transport, 1);
         await sRuntimeServices.eventBus.waitForRunningEventHandlers();
@@ -530,7 +523,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                             "@type": "GivenName",
                             value: "AGivenName"
                         },
-                        owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                        owner: ""
                     }).toJSON()
                 },
                 {
@@ -543,7 +536,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                             value: "AStringValue",
                             title: "ATitle"
                         },
-                        owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                        owner: CoreAddress.from(""),
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }).toJSON()
                 },
