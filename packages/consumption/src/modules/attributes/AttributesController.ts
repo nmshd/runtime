@@ -1090,9 +1090,10 @@ export class AttributesController extends ConsumptionBaseController {
         };
 
         const attributesWithSameValueType = await this.executeIdentityAttributeQuery(query);
-        if (attributesWithSameValueType.length <= 1) return;
+        const currentAttributesWithSameValueType = attributesWithSameValueType.filter((attr) => !attr.succeededBy);
+        if (currentAttributesWithSameValueType.length <= 1) return;
 
-        const defaultCandidate = attributesWithSameValueType.find((attr) => !attr.succeededBy && attr.id.toString() !== attribute.id.toString());
+        const defaultCandidate = currentAttributesWithSameValueType.find((attr) => attr.id.toString() !== attribute.id.toString());
 
         if (!defaultCandidate) {
             throw new ConsumptionError(
