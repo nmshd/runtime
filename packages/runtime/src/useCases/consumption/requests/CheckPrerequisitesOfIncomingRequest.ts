@@ -10,12 +10,6 @@ export interface CheckPrerequisitesOfIncomingRequestRequest {
     requestId: RequestIdString;
 }
 
-// class Validator extends SchemaValidator<CheckPrerequisitesOfIncomingRequestRequest> {
-//     public constructor(@Inject schemaRepository: SchemaRepository) {
-//         super(schemaRepository.getSchema("CheckPrerequisitesOfIncomingRequestRequest"));
-//     }
-// }
-
 export class CheckPrerequisitesOfIncomingRequestUseCase extends UseCase<CheckPrerequisitesOfIncomingRequestRequest, LocalRequestDTO> {
     public constructor(@Inject private readonly incomingRequestsController: IncomingRequestsController) {
         super();
