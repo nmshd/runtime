@@ -1021,7 +1021,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.deletePredecessorsOfAttribute(attribute.id);
 
-        await this.transmitDefault(attribute);
+        await this.transferDefault(attribute);
 
         await this.deleteAttribute(attribute);
     }
@@ -1081,7 +1081,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
     }
 
-    private async transmitDefault(attribute: LocalAttribute): Promise<void> {
+    private async transferDefault(attribute: LocalAttribute): Promise<void> {
         if (!attribute.default) return;
 
         const valueType = attribute.content.value.constructor.name;
@@ -1102,8 +1102,8 @@ export class AttributesController extends ConsumptionBaseController {
         const defaultCandidates = await this.getLocalAttributes(query);
         if (defaultCandidates.length === 0) return;
 
-        defaultCandidates[0].default = true;
-        await this.updateAttributeUnsafe(defaultCandidates[0]);
+        defaultCandidates[defaultCandidates.length - 1].default = true;
+        await this.updateAttributeUnsafe(defaultCandidates[defaultCandidates.length - 1]);
     }
 
     public async changeDefaultRepositoryAttribute(newDefaultAttribute: LocalAttribute): Promise<LocalAttribute> {
@@ -1128,7 +1128,7 @@ export class AttributesController extends ConsumptionBaseController {
         const currentDefaultAttributeResult = await this.getLocalAttributes(query);
 
         if (currentDefaultAttributeResult.length > 1) {
-            throw new ConsumptionError(`There seem to be multiple default Attributes for type ${valueType.toString()}, even though only one is expected.`);
+            throw new ConsumptionError(`There seem to be multiple default RepositoryAttributes for type ${valueType.toString()}, even though only one is expected.`);
         }
         if (currentDefaultAttributeResult.length === 0) throw new ConsumptionError(`No default RepositoryAttribute of type ${valueType.toString()} found.`);
 

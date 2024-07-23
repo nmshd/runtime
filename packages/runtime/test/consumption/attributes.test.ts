@@ -215,6 +215,17 @@ describe("get attribute(s)", () => {
         });
 
         test("should allow to get only default attributes", async function () {
+            const notDefaultRepositoryAttribute = (
+                await services1.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "Surname",
+                            value: "Another Surname"
+                        }
+                    }
+                })
+            ).value;
+
             const result = await services1.consumption.attributes.getAttributes({
                 query: { default: "true" }
             });
@@ -226,19 +237,33 @@ describe("get attribute(s)", () => {
             const attributeIds = attributes.map((attr) => attr.id);
             expect(attributeIds).toContain(identityAttributeIds[0]);
             expect(attributeIds).toContain(identityAttributeIds[1]);
+            expect(attributeIds).not.toContain(notDefaultRepositoryAttribute.id);
             expect(attributeIds).not.toContain(relationshipAttributeId);
         });
 
         test("should allow not to get default attributes", async function () {
+            const notDefaultRepositoryAttribute = (
+                await services1.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "Surname",
+                            value: "Another Surname"
+                        }
+                    }
+                })
+            ).value;
+
             const result = await services1.consumption.attributes.getAttributes({
                 query: { default: "!true" }
             });
             expect(result).toBeSuccessful();
 
             const attributes = result.value;
-            expect(attributes).toHaveLength(1);
+            expect(attributes).toHaveLength(2);
 
-            expect(attributes[0].id).toBe(relationshipAttributeId);
+            const attributeIds = attributes.map((attr) => attr.id);
+            expect(attributeIds).toContain(relationshipAttributeId);
+            expect(attributeIds).toContain(notDefaultRepositoryAttribute.id);
         });
     });
 });
@@ -1343,6 +1368,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
                 }
             })
         ).value;
+        expect(defaultAttribute.default).toBe(true);
 
         const desiredDefaultAttribute = (
             await services1.consumption.attributes.createRepositoryAttribute({
@@ -1354,11 +1380,15 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
                 }
             })
         ).value;
+        expect(desiredDefaultAttribute.default).toBeUndefined();
 
         const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredDefaultAttribute.id });
         expect(result.isSuccess).toBe(true);
         const newDefaultAttribute = result.value;
         expect(newDefaultAttribute.default).toBe(true);
+
+        const updatedFormerDesiredDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: desiredDefaultAttribute.id })).value;
+        expect(updatedFormerDesiredDefaultAttribute.default).toBe(true);
 
         const updatedFormerDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: defaultAttribute.id })).value;
         expect(updatedFormerDefaultAttribute.default).toBeUndefined();

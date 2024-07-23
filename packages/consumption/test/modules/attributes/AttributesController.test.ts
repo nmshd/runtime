@@ -987,28 +987,39 @@ describe("AttributesController", function () {
             expect(result).toBeUndefined();
         });
 
-        test("should change default from deleted attribute if another candidate exists", async function () {
-            const attributeParams: ICreateRepositoryAttributeParams = {
+        test("should change default from deleted attribute to newest of the same value type if another exists", async function () {
+            const defaultRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: EMailAddress.from({
                         value: "my@email.address"
                     }),
                     owner: consumptionController.accountController.identity.address
                 })
-            };
-            const attributeParams2: ICreateRepositoryAttributeParams = {
+            });
+            expect(defaultRepositoryAttribute.default).toBe(true);
+
+            const otherRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: EMailAddress.from({
                         value: "my2@email.address"
                     }),
                     owner: consumptionController.accountController.identity.address
                 })
-            };
-            const defaultRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
-            const otherRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams2);
+            });
+            expect(otherRepositoryAttribute.default).toBeUndefined();
+
+            const otherNewerRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: EMailAddress.from({
+                        value: "my3@email.address"
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            expect(otherNewerRepositoryAttribute.default).toBeUndefined();
 
             await consumptionController.attributes.executeFullAttributeDeletionProcess(defaultRepositoryAttribute);
-            const updatedOtherRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(otherRepositoryAttribute.id);
+            const updatedOtherRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(otherNewerRepositoryAttribute.id);
             expect(updatedOtherRepositoryAttribute!.default).toBe(true);
         });
 
