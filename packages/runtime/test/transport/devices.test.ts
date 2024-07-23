@@ -1,3 +1,4 @@
+import { LanguageISO639 } from "@nmshd/content";
 import { DeviceMapper, TransportServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
@@ -21,15 +22,7 @@ describe("Devices", () => {
     });
 
     test("should set the communication language", async () => {
-        const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: "fr" });
+        const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: LanguageISO639.fr });
         expect(result).toBeSuccessful();
-    });
-
-    test("should not set the communication language with an invalid language", async () => {
-        const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: "fra" });
-        expect(result).toBeAnError(
-            "You tried setting 'fra' as communication language, which is not a valid ISO 639-1 code.",
-            "error.runtime.devices.communicationLanguageNotISO639"
-        );
     });
 });
