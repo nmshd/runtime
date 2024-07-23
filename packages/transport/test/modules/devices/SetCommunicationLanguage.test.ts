@@ -9,7 +9,7 @@ describe("set the communication language", function () {
 
     let deviceTest: AppDeviceTest;
 
-    let device1Account: AccountController;
+    let deviceAccount: AccountController;
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
@@ -19,7 +19,7 @@ describe("set the communication language", function () {
 
         await deviceTest.init();
 
-        device1Account = await deviceTest.createAccount();
+        deviceAccount = await deviceTest.createAccount();
     });
 
     afterAll(async function () {
@@ -29,6 +29,6 @@ describe("set the communication language", function () {
     });
 
     test("should set the communication language", async function () {
-        await expect(device1Account.activeDevice.setCommunicationLanguage("fr")).resolves.not.toThrow();
+        await expect(deviceAccount.activeDevice.setCommunicationLanguage("fr")).resolves.not.toThrow();
     });
 });
