@@ -2532,4 +2532,42 @@ describe("AttributesController", function () {
             expect(result).toHaveLength(0);
         });
     });
+
+    test("should delete attributes exchanged with peer", async function () {
+        const ownRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+            content: RelationshipAttribute.from({
+                key: "AKey",
+                value: {
+                    "@type": "ProprietaryString",
+                    value: "Some value",
+                    title: "Some title"
+                },
+                owner: consumptionController.accountController.identity.address,
+                confidentiality: RelationshipAttributeConfidentiality.Public
+            }),
+            peer: CoreAddress.from("peerAddress"),
+            requestReference: CoreId.from("reqRef123")
+        });
+
+        const peerRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+            content: RelationshipAttribute.from({
+                key: "AKey",
+                value: {
+                    "@type": "ProprietaryString",
+                    value: "Some value",
+                    title: "Some title"
+                },
+                owner: consumptionController.accountController.identity.address,
+                confidentiality: RelationshipAttributeConfidentiality.Public
+            }),
+            peer: CoreAddress.from("peerAddress"),
+            requestReference: CoreId.from("reqRef123")
+        });
+
+        await consumptionController.attributes.deleteAttributesExchangedWithPeer(CoreAddress.from("peerAddress"));
+        const ownAttribute = await consumptionController.attributes.getLocalAttribute(ownRelationshipAttribute.id);
+        const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
+        expect(ownAttribute).toBeUndefined();
+        expect(peerAttribute).toBeUndefined();
+    });
 });
