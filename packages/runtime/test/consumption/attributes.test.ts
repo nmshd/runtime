@@ -1346,6 +1346,10 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
 });
 
 describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
+    beforeAll(async () => {
+        await cleanupAttributes();
+    });
+
     test("should change default RepositoryAttribute", async () => {
         const defaultAttribute = (
             await services1.consumption.attributes.createRepositoryAttribute({
