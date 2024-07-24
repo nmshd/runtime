@@ -34,7 +34,7 @@ export class NotificationsController extends ConsumptionBaseController {
     }
 
     public async sent(message: Message): Promise<LocalNotification> {
-        if (!message.isOwn) throw new Error("Cannot send a Notification from a foreign message.");
+        if (!message.isOwn) throw new Error("Cannot mark a LocalNotification as sent from a received Message.");
 
         const content = this.extractNotificationFromMessage(message);
 

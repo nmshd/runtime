@@ -10,12 +10,12 @@ class Relationships {
     public wrongRelationshipStatus(relationshipId: string, status: RelationshipStatus) {
         return new CoreError(
             "error.transport.relationships.wrongRelationshipStatus",
-            `The relationship '${relationshipId}' has the wrong status (${status}) to run this operation`
+            `The Relationship '${relationshipId}' has the wrong status '${status}' to run this operation.`
         );
     }
 
     public reactivationNotRequested(relationshipId: string) {
-        return new CoreError("error.transport.relationships.reactivationNotRequested", `The relationship '${relationshipId}' has no reactivation request to respond to.`);
+        return new CoreError("error.transport.relationships.reactivationNotRequested", `The Relationship '${relationshipId}' has no reactivation Request to respond to.`);
     }
 
     public reactivationAlreadyRequested(message: string) {
@@ -36,7 +36,7 @@ class Device {
     }
 
     public couldNotDeleteDevice(reason: string, rootCause?: any) {
-        return new CoreError("error.transport.devices.couldNotDeleteDevice", `Could not delete device: ${reason}`, rootCause);
+        return new CoreError("error.transport.devices.couldNotDeleteDevice", `Could not delete device: '${reason}'`, rootCause);
     }
 }
 
@@ -44,25 +44,25 @@ class Messages {
     public plaintextMismatch(ownAddress: string) {
         return new CoreError(
             "error.transport.messages.plaintextMismatch",
-            `The own address ${ownAddress} was not named as a recipient within the signed MessagePlaintext. A replay attack might be the cause of this.`
+            `The own address '${ownAddress}' was not named as a recipient within the signed MessagePlaintext. A replay attack might be the cause of this.`
         );
     }
 
     public signatureListMismatch(address: string) {
-        return new CoreError("error.transport.messages.signatureListMismatch", `The signature list didn't contain an entry for address ${address}.`);
+        return new CoreError("error.transport.messages.signatureListMismatch", `The signature list didn't contain an entry for address '${address}'.`);
     }
 
     public signatureNotValid() {
         return new CoreError(
             "error.transport.messages.signatureNotValid",
-            "The digital signature on this message for peer key is invalid. An impersonation attack might be the cause of this."
+            "The digital signature on this Message for peer key is invalid. An impersonation attack might be the cause of this."
         );
     }
 
     public ownAddressNotInList(messageId: string) {
         return new CoreError(
             "error.transport.messages.ownAddressNotInList",
-            `The recipients list of message ${messageId} didn't contain an entry for the own address. This message should not have been received.`
+            `The recipients list of Message ${messageId} didn't contain an entry for the own address. This Message should not have been received.`
         );
     }
 
@@ -73,27 +73,23 @@ class Messages {
 
 class Secrets {
     public wrongSecretType(secretId?: string) {
-        return new CoreError("error.transport.secrets.wrongBaseKeyType", "The given secret type is not supported!", {
+        return new CoreError("error.transport.secrets.wrongSecretType", "The given secret type is not supported!", {
             secretId: secretId
         });
     }
 
     public secretNotFound(type: string) {
-        return new CoreError("error.transport.secrets.secretNotFound", `secret "${type}" not found`);
+        return new CoreError("error.transport.secrets.secretNotFound", `Secret '${type}' not found.`);
     }
 }
 
 class Challenges {
     public challengeTypeRequiresActiveRelationship() {
-        return new CoreError("error.transport.challenges.challengeTypeRequiresActiveRelationship", "The challenge type 'Relationship' requires an active relationship.");
+        return new CoreError("error.transport.challenges.challengeTypeRequiresActiveRelationship", "The challenge type Relationship requires an active Relationship.");
     }
 }
 
 class Datawallet {
-    public encryptedPayloadIsNoCipher() {
-        return new CoreError("error.transport.datawallet.encryptedPayloadIsNoCipher", "The given encrypted payload is no cipher.");
-    }
-
     public unsupportedModification(type: "unsupportedCacheChangedModificationCollection", data: any) {
         const errorCode = "error.transport.datawallet.unsupportedModification";
         const formattedData = data ? stringify(data) : "";
@@ -102,7 +98,7 @@ class Datawallet {
             case "unsupportedCacheChangedModificationCollection":
                 return new CoreError(
                     errorCode,
-                    `The following collections were received in CacheChanged datawallet modifications but are not supported by the current version of this library: ${formattedData}.`
+                    `The following collections were received in CacheChanged datawallet modifications but are not supported by the current version of this library: '${formattedData}'.`
                 );
 
             default:
@@ -138,24 +134,20 @@ class Files {
     }
 
     public invalidMetadata(id: string) {
-        return new CoreError("error.transport.files.invalidMetadata", `The metadata of the file with id "${id}" is invalid.`);
-    }
-
-    public fileContentUndefined() {
-        return new CoreError("error.transport.files.fileContentUndefined", "The given file content is undefined.");
+        return new CoreError("error.transport.files.invalidMetadata", `The metadata of the File with id '${id}' is invalid.`);
     }
 
     public maxFileSizeExceeded(fileSize: number, platformMaxFileSize: number) {
         return new CoreError(
             "error.transport.files.maxFileSizeExceeded",
-            `The given file content size (${fileSize}) exceeds the max file size the backbone accepts (${platformMaxFileSize}).`
+            `The given File content size (${fileSize}) exceeds the max File size the Backbone accepts (${platformMaxFileSize}).`
         );
     }
 }
 
 class Tokens {
     public invalidTokenContent(id: string) {
-        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of token ${id} is not of type TokenContent`);
+        return new CoreError("error.transport.tokens.invalidTokenContent", `The content of Token '${id}' is not of type TokenContent.`);
     }
 }
 
