@@ -21,7 +21,7 @@ export class AttributeListenerModule extends RuntimeModule {
         const createdAttribute = event.data;
         if (createdAttribute.content["@type"] === "IdentityAttribute" && createdAttribute.shareInfo) return;
         if (createdAttribute.content["@type"] === "RelationshipAttribute" && createdAttribute.content.confidentiality === RelationshipAttributeConfidentiality.Private) return;
-        if (await AttributeListenerModule.relationshipAttributeOfPendingRelationship(services, createdAttribute)) return;
+        if (await AttributeListenerModule.relationshipAttributeOfNonActiveRelationship(services, createdAttribute)) return;
 
         const getAttributeListenersResult = await services.consumptionServices.attributeListeners.getAttributeListeners();
         if (getAttributeListenersResult.isError) {
@@ -36,15 +36,16 @@ export class AttributeListenerModule extends RuntimeModule {
         await Promise.all(promises);
     }
 
-    private static async relationshipAttributeOfPendingRelationship(services: RuntimeServices, attribute: LocalAttributeDTO): Promise<boolean> {
+    private static async relationshipAttributeOfNonActiveRelationship(services: RuntimeServices, attribute: LocalAttributeDTO): Promise<boolean> {
         if (attribute.content["@type"] !== "RelationshipAttribute") {
             return false;
         }
 
-        const relationshipsToPeer = (await services.transportServices.relationships.getRelationships({ query: { peer: attribute.shareInfo?.peer } })).value;
+        const activeRelationshipToPeer = (
+            await services.transportServices.relationships.getRelationships({ query: { peer: attribute.shareInfo?.peer, status: RelationshipStatus.Active } })
+        ).value;
 
-        const pendingRelationshipToPeer = relationshipsToPeer.filter((r) => r.status === RelationshipStatus.Pending);
-        if (pendingRelationshipToPeer.length !== 0) {
+        if (activeRelationshipToPeer.length === 0) {
             return true;
         }
 
