@@ -1406,10 +1406,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
             }
         });
         const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredSharedDefaultAttribute.id });
-        expect(result).toBeAnError(
-            `Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not a repository attribute.`,
-            "error.runtime.attributes.isNotRepositoryAttribute"
-        );
+        expect(result).toBeAnError(`Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not a RepositoryAttribute.`, "error.runtime.attributes.isNotRepositoryAttribute");
     });
 
     test("should return an error if the new default attribute has a successor", async () => {
