@@ -15,6 +15,8 @@ import {
     Notification,
     RelationshipCreationContentJSON,
     RelationshipTemplateContentJSON,
+    RequestItemGroupJSON,
+    RequestItemJSONDerivations,
     RequestJSON,
     ResponseWrapperJSON,
     ShareAttributeAcceptResponseItemJSON

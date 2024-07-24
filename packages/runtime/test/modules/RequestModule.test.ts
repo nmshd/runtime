@@ -8,7 +8,8 @@ import {
     RelationshipTemplateContent,
     ResponseItemJSON,
     ResponseItemResult,
-    ResponseResult
+    ResponseResult,
+    ResponseWrapperJSON
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import {
@@ -137,7 +138,6 @@ describe("RequestModule", () => {
             const requestId = await getRequestIdOfTemplate(rRuntimeServices.eventBus, template.id);
             await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
             const templateContent = RelationshipTemplateContent.from({
-                "@type": "RelationshipTemplateContent",
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 metadata
             }).toJSON();
@@ -151,7 +151,7 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent if there is no request in the template", async () => {
-            await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, {});
+            await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport);
 
             await expect(rRuntimeServices.eventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.NoRequest);
         });
@@ -272,7 +272,7 @@ describe("RequestModule", () => {
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 MessageSentEvent,
-                (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId
+                (e) => (e.data.content as ResponseWrapperJSON).response.requestId === requestAfterReject.response!.content.requestId
             );
         });
 
@@ -305,7 +305,7 @@ describe("RequestModule", () => {
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 MessageSentEvent,
-                (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId
+                (e) => (e.data.content as ResponseWrapperJSON).response.requestId === requestAfterReject.response!.content.requestId
             );
         });
 
@@ -371,7 +371,7 @@ describe("RequestModule", () => {
 
             await sRuntimeServices.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (event) => event.data.newStatus === LocalRequestStatus.Open);
 
-            const requestAfterAction = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: message.content.id })).value;
+            const requestAfterAction = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: message.content.id! })).value;
 
             expect(requestAfterAction.status).toBe(LocalRequestStatus.Open);
         });
@@ -398,12 +398,12 @@ describe("RequestModule", () => {
 
             expect(incomingRequestStatusChangedEvent.data.newStatus).toBe(LocalRequestStatus.DecisionRequired);
 
-            const requestsResult = await rRuntimeServices.consumption.incomingRequests.getRequest({ id: message.content.id });
+            const requestsResult = await rRuntimeServices.consumption.incomingRequests.getRequest({ id: message.content.id! });
             expect(requestsResult).toBeSuccessful();
         });
 
         test("triggers a MessageProcessedEvent when the incoming Message does not contain a Request", async () => {
-            await sendMessage(sRuntimeServices.transport, recipientAddress, {});
+            await sendMessage(sRuntimeServices.transport, recipientAddress);
 
             await syncUntilHasMessages(rRuntimeServices.transport, 1);
 
@@ -413,7 +413,7 @@ describe("RequestModule", () => {
         test("sends a message when the request is accepted", async () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
             await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-            const acceptRequestResult = await rRuntimeServices.consumption.incomingRequests.accept({ requestId: message.content.id, items: [{ accept: true }] });
+            const acceptRequestResult = await rRuntimeServices.consumption.incomingRequests.accept({ requestId: message.content.id!, items: [{ accept: true }] });
             expect(acceptRequestResult).toBeSuccessful();
 
             const incomingRequestStatusChangedEvent = await rRuntimeServices.eventBus.waitForEvent(
