@@ -741,17 +741,19 @@ describe("AttributesController", function () {
             }
         });
 
-        describe("should validate full attribute deletion process", function () {
-            test("should return success for valid succeeded shared attribute", async function () {
-                const attributeParams: ICreateRepositoryAttributeParams = {
+        describe("should validate and execute full attribute deletion process", function () {
+            let predecessorRepositoryAttribute: LocalAttribute;
+            let successorRepositoryAttribute: LocalAttribute;
+            let predecessorOwnSharedIdentityAttribute: LocalAttribute;
+            beforeEach(async () => {
+                predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: EMailAddress.from({
                             value: "my@email.address"
                         }),
                         owner: consumptionController.accountController.identity.address
                     })
-                };
-                const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+                });
 
                 const repositorySuccessorParams: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
@@ -762,11 +764,13 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     })
                 };
-                const { predecessor: updatedPredecessorRepositoryAttribute, successor: successorRepositoryAttribute } =
-                    await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, repositorySuccessorParams);
+                ({ predecessor: predecessorRepositoryAttribute, successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(
+                    predecessorRepositoryAttribute.id,
+                    repositorySuccessorParams
+                ));
 
-                const predecessorSharedCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                    sourceAttributeId: updatedPredecessorRepositoryAttribute.id,
+                predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: predecessorRepositoryAttribute.id,
                     peer: CoreAddress.from("peer"),
                     requestReference: CoreId.from("reqRef")
                 });
@@ -785,13 +789,18 @@ describe("AttributesController", function () {
                         sourceAttribute: successorRepositoryAttribute.id
                     }
                 };
-                await consumptionController.attributes.succeedOwnSharedIdentityAttribute(predecessorSharedCopy.id, sharedSuccessorParams);
+                ({ predecessor: predecessorOwnSharedIdentityAttribute } = await consumptionController.attributes.succeedOwnSharedIdentityAttribute(
+                    predecessorOwnSharedIdentityAttribute.id,
+                    sharedSuccessorParams
+                ));
+            });
 
+            test("should return validation success for valid succeeded shared attribute", async function () {
                 const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(successorRepositoryAttribute);
                 expect(result.isSuccess()).toBe(true);
             });
 
-            test("should return error for invalid predecessor", async function () {
+            test("should return validation error for attribute with invalid succeededBy field", async function () {
                 const invalidPredecessor = await consumptionController.attributes.createAttributeUnsafe({
                     content: IdentityAttribute.from({
                         value: EMailAddress.from({
@@ -799,255 +808,93 @@ describe("AttributesController", function () {
                         }),
                         owner: consumptionController.accountController.identity.address
                     }),
-                    succeededBy: CoreId.from("invalidAttribute")
+                    succeededBy: CoreId.from("invalidSuccessorId")
                 });
 
                 const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(invalidPredecessor);
                 expect(result).errorValidationResult({ message: "The successor does not exist.", code: "error.consumption.attributes.successorDoesNotExist" });
             });
-        });
 
-        test("should delete a succeeded shared attribute", async function () {
-            const attributeParams: ICreateRepositoryAttributeParams = {
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            test("should delete an attribute", async function () {
+                const attributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
+                expect(attributeBeforeDeletion).toStrictEqual(successorRepositoryAttribute);
 
-            const repositorySuccessorParams: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "EMailAddress",
-                        value: "my-new@email.address"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const { predecessor: updatedPredecessorRepositoryAttribute, successor: successorRepositoryAttribute } =
-                await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, repositorySuccessorParams);
-
-            const predecessorSharedCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: updatedPredecessorRepositoryAttribute.id,
-                peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef")
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+                const result = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
+                expect(result).toBeUndefined();
             });
 
-            const sharedSuccessorParams: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "EMailAddress",
-                        value: "my-new@email.address"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef2"),
-                    sourceAttribute: successorRepositoryAttribute.id
-                }
-            };
-            await consumptionController.attributes.succeedOwnSharedIdentityAttribute(predecessorSharedCopy.id, sharedSuccessorParams);
+            test("should detach successor of deleted attribute", async function () {
+                const successorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
+                expect(successorBeforeDeletion!.succeeds).toStrictEqual(predecessorRepositoryAttribute.id);
 
-            await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
-            const result = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
-            expect(result).toBeUndefined();
-        });
-
-        test("should detach successor of deleted attribute", async function () {
-            const attributeParams: ICreateRepositoryAttributeParams = {
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
-
-            const repositorySuccessorParams: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "EMailAddress",
-                        value: "my-new@email.address"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const { predecessor: updatedPredecessorRepositoryAttribute, successor: successorRepositoryAttribute } =
-                await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, repositorySuccessorParams);
-
-            await consumptionController.attributes.executeFullAttributeDeletionProcess(updatedPredecessorRepositoryAttribute);
-            const updatedSuccessorRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
-            expect(updatedSuccessorRepositoryAttribute!.succeeds).toBeUndefined();
-        });
-
-        test("should detach shared attribute copies of deleted attribute", async function () {
-            const attributeParams: ICreateRepositoryAttributeParams = {
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
-
-            const sharedCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: repositoryAttribute.id,
-                peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef")
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(predecessorRepositoryAttribute);
+                const updatedSuccessorRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
+                expect(updatedSuccessorRepositoryAttribute!.succeeds).toBeUndefined();
             });
 
-            await consumptionController.attributes.executeFullAttributeDeletionProcess(repositoryAttribute);
-            const updatedSharedCopy = await consumptionController.attributes.getLocalAttribute(sharedCopy.id);
-            expect(updatedSharedCopy!.shareInfo!.sourceAttribute).toBeUndefined();
-        });
+            test("should detach shared attribute copies of deleted attribute", async function () {
+                const sharedAttributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(sharedAttributeBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorRepositoryAttribute.id);
 
-        test("should detach shared attribute copies of predecessors of deleted attribute", async function () {
-            const attributeParams: ICreateRepositoryAttributeParams = {
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
-
-            const repositorySuccessorParams: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "EMailAddress",
-                        value: "my-new@email.address"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const { predecessor: updatedPredecessorRepositoryAttribute, successor: successorRepositoryAttribute } =
-                await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, repositorySuccessorParams);
-
-            const predecessorSharedCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: updatedPredecessorRepositoryAttribute.id,
-                peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef")
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(predecessorRepositoryAttribute);
+                const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             });
 
-            const sharedSuccessorParams: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "EMailAddress",
-                        value: "my-new@email.address"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef2"),
-                    sourceAttribute: successorRepositoryAttribute.id
-                }
-            };
-            await consumptionController.attributes.succeedOwnSharedIdentityAttribute(predecessorSharedCopy.id, sharedSuccessorParams);
+            test("should detach shared attribute copies of predecessors of deleted attribute", async function () {
+                const sharedPredecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(sharedPredecessorBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorRepositoryAttribute.id);
 
-            await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
-            const updatedPredecessorSharedCopy = await consumptionController.attributes.getLocalAttribute(predecessorSharedCopy.id);
-            expect(updatedPredecessorSharedCopy!.shareInfo!.sourceAttribute).toBeUndefined();
-        });
-
-        test("should delete predecessors of deleted attribute", async function () {
-            const attributeParams: ICreateRepositoryAttributeParams = {
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
-
-            const repositorySuccessorParams: IAttributeSuccessorParams = {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "EMailAddress",
-                        value: "my-new@email.address"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(
-                predecessorRepositoryAttribute.id,
-                repositorySuccessorParams
-            );
-
-            await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
-            const result = await consumptionController.attributes.getLocalAttribute(predecessorRepositoryAttribute.id);
-            expect(result).toBeUndefined();
-        });
-
-        test("should change default from deleted attribute to newest of the same value type if another exists", async function () {
-            const defaultRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+                const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             });
-            expect(defaultRepositoryAttribute.default).toBe(true);
 
-            const otherRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my2@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
+            test("should delete predecessors of deleted attribute", async function () {
+                const predecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorRepositoryAttribute.id);
+                expect(JSON.stringify(predecessorBeforeDeletion)).toStrictEqual(JSON.stringify(predecessorRepositoryAttribute));
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+                const result = await consumptionController.attributes.getLocalAttribute(predecessorRepositoryAttribute.id);
+                expect(result).toBeUndefined();
             });
-            expect(otherRepositoryAttribute.default).toBeUndefined();
 
-            const otherNewerRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my3@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
+            test("should change default from deleted attribute to newest of the same value type if another exists", async function () {
+                const otherRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: EMailAddress.from({
+                            value: "my2@email.address"
+                        }),
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+
+                const otherNewerRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: EMailAddress.from({
+                            value: "my3@email.address"
+                        }),
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+
+                expect(successorRepositoryAttribute.default).toBe(true);
+                expect(otherRepositoryAttribute.default).toBeUndefined();
+                expect(otherNewerRepositoryAttribute.default).toBeUndefined();
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+                const updatedOtherRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(otherNewerRepositoryAttribute.id);
+                expect(updatedOtherRepositoryAttribute!.default).toBe(true);
             });
-            expect(otherNewerRepositoryAttribute.default).toBeUndefined();
 
-            await consumptionController.attributes.executeFullAttributeDeletionProcess(defaultRepositoryAttribute);
-            const updatedOtherRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(otherNewerRepositoryAttribute.id);
-            expect(updatedOtherRepositoryAttribute!.default).toBe(true);
-        });
+            test("should not set a default if the deleted default attribute had predecessors but no other candidate exists", async function () {
+                expect(successorRepositoryAttribute.default).toBe(true);
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
 
-        test("should do nothing if the deleted default attribute had predecessors but no other candidate exists", async function () {
-            const attributeParams: ICreateRepositoryAttributeParams = {
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const attributeParams2: ICreateRepositoryAttributeParams = {
-                content: IdentityAttribute.from({
-                    value: EMailAddress.from({
-                        value: "my2@email.address"
-                    }),
-                    owner: consumptionController.accountController.identity.address
-                })
-            };
-            const defaultRepositoryAttributePredecessor = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
-            const defaultRepositoryAttribute = (await consumptionController.attributes.succeedRepositoryAttribute(defaultRepositoryAttributePredecessor.id, attributeParams2))
-                .successor;
-
-            await consumptionController.attributes.executeFullAttributeDeletionProcess(defaultRepositoryAttribute);
-
-            const defaultAttributes = await consumptionController.attributes.getLocalAttributes({ default: "true" });
-            expect(defaultAttributes).toHaveLength(0);
+                const defaultAttributes = await consumptionController.attributes.getLocalAttributes({ default: "true" });
+                expect(defaultAttributes).toHaveLength(0);
+            });
         });
     });
 
@@ -1595,6 +1442,8 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     })
                 });
+                expect(predecessor.default).toBe(true);
+
                 const successorParams: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
