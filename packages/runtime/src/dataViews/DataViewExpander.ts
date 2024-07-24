@@ -1602,7 +1602,7 @@ export class DataViewExpander {
         ).value;
         templateResult.sort((template1, template2) => (template2.createdAt > template1.createdAt ? 1 : -1));
         if (templateResult.length !== 0 && templateResult.at(-1)?.content["@type"] === "RelationshipTemplateContent") {
-            return this.expandFromTemplate(templateResult.at(-1)!);
+            return this.expandAddressFromTemplate(templateResult.at(-1)!);
         }
 
         return this.expandUnknown(address);
@@ -1670,7 +1670,7 @@ export class DataViewExpander {
         return await Promise.all(changePromises);
     }
 
-    private expandFromTemplate(template: RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON }): IdentityDVO {
+    private expandAddressFromTemplate(template: RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON }): IdentityDVO {
         const requestOnNewRelationship = template.content.onNewRelationship;
         const sharedAttributesOnNewRelationship = this.getSharedAttributesFromRequest(requestOnNewRelationship);
         const address = template.createdBy;
