@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, CoreDate, CoreId, Message, Transport } from "../../../src";
+import { AccountController, CoreDate, CoreId, Message, Relationship, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("MessageController", function () {
@@ -13,7 +13,9 @@ describe("MessageController", function () {
     let tempId1: CoreId;
     let tempId2: CoreId;
     let tempDate: CoreDate;
+    let relationship: Relationship;
     let relationshipId: CoreId;
+    let relationship2: Relationship;
 
     function expectValidMessages(sentMessage: Message, receivedMessage: Message, nowMinusSeconds: CoreDate) {
         expect(sentMessage.id.toString()).toBe(receivedMessage.id.toString());
@@ -46,9 +48,9 @@ describe("MessageController", function () {
         sender = accounts[0];
         recipient = accounts[1];
         recipient2 = accounts[2];
-        const rels = await TestUtil.addRelationship(sender, recipient);
-        await TestUtil.addRelationship(sender, recipient2);
-        relationshipId = rels.acceptedRelationshipFromSelf.id;
+        relationship = (await TestUtil.addRelationship(sender, recipient)).acceptedRelationshipFromSelf;
+        relationship2 = (await TestUtil.addRelationship(sender, recipient2)).acceptedRelationshipFromSelf;
+        relationshipId = relationship.id;
     });
 
     afterAll(async function () {
@@ -197,6 +199,22 @@ describe("MessageController", function () {
 
         expectValidMessages(sentMessage, receivedMessage, tempDate);
         expectValidMessages(sentMessage, receivedMessage2, tempDate);
+    });
+
+    test("should delete / pseudonymize messages", async function () {
+        const multipleRecipientsMessage = await TestUtil.sendMessage(sender, [recipient, recipient2]);
+        const message = await TestUtil.sendMessage(sender, recipient);
+        await sender.messages.cleanupMessagesOfDecomposedRelationship(relationship);
+
+        expect(await sender.messages.getMessage(message.id)).toBeUndefined();
+        const pseudonymizedMessage = await sender.messages.getMessage(multipleRecipientsMessage.id);
+        expect(pseudonymizedMessage).toBeDefined();
+        expect(pseudonymizedMessage!.cache!.recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
+            expect.arrayContaining([
+                [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
+                [recipient2.identity.address, relationship2.id]
+            ])
+        );
     });
 
     describe("Relationship Termination", function () {
