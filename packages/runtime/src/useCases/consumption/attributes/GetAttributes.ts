@@ -18,7 +18,7 @@ export interface GetAttributesRequest {
 
 export interface GetAttributesRequestQuery {
     createdAt?: string;
-    parentId?: string;
+    parentId?: string | string[];
     succeeds?: string | string[];
     succeededBy?: string | string[];
     default?: string;
@@ -28,7 +28,7 @@ export interface GetAttributesRequestQuery {
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];
     "content.key"?: string | string[];
-    "content.isTechnical"?: string | string[];
+    "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
     shareInfo?: string | string[];

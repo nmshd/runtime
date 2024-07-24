@@ -16752,7 +16752,17 @@ export const GetAttributesRequest: any = {
                     "type": "string"
                 },
                 "parentId": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 },
                 "succeeds": {
                     "anyOf": [
@@ -16862,17 +16872,7 @@ export const GetAttributesRequest: any = {
                     ]
                 },
                 "content.isTechnical": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
+                    "type": "string"
                 },
                 "content.confidentiality": {
                     "anyOf": [
@@ -17115,17 +17115,7 @@ export const GetOwnSharedAttributesRequest: any = {
                     ]
                 },
                 "content.isTechnical": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
+                    "type": "string"
                 },
                 "content.confidentiality": {
                     "anyOf": [
@@ -17355,17 +17345,7 @@ export const GetPeerSharedAttributesRequest: any = {
                     ]
                 },
                 "content.isTechnical": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
+                    "type": "string"
                 },
                 "content.confidentiality": {
                     "anyOf": [
