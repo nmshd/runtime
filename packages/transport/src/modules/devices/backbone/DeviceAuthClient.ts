@@ -1,6 +1,7 @@
 import { RESTClientAuthenticate, RESTClientLogDirective } from "../../../core";
 import { ClientResult } from "../../../core/backbone/ClientResult";
 import { BackbonePostDevicesRequest, BackbonePostDevicesResponse } from "./BackbonePostDevices";
+import { BackboneUpdateDeviceRequest } from "./BackboneUpdateDevice";
 
 export interface BackbonePutDevicesPasswordRequest {
     oldPassword: string;
@@ -39,5 +40,9 @@ export class DeviceAuthClient extends RESTClientAuthenticate {
 
     public async unregisterPushNotificationToken(): Promise<ClientResult<void>> {
         return await this.delete<void>("/api/v1/Devices/Self/PushNotifications");
+    }
+
+    public async updateCurrentDevice(value: BackboneUpdateDeviceRequest): Promise<ClientResult<void>> {
+        return await this.put<void>("/api/v1/Devices/Self", value);
     }
 }

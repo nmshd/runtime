@@ -30,6 +30,7 @@ export * from "./challenges/ChallengeController";
 export * from "./challenges/data/Challenge";
 export * from "./challenges/data/ChallengeSigned";
 export * from "./devices/backbone/BackbonePostDevices";
+export * from "./devices/backbone/BackboneUpdateDevice";
 export * from "./devices/backbone/DeviceAuthClient";
 export * from "./devices/backbone/DeviceClient";
 export * from "./devices/DeviceController";
