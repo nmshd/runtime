@@ -110,6 +110,14 @@ describe("get attribute(s)", () => {
             {
                 content: {
                     value: {
+                        "@type": "GivenName",
+                        value: "AGivenName"
+                    }
+                }
+            },
+            {
+                content: {
+                    value: {
                         "@type": "Surname",
                         value: "ASurname"
                     }
@@ -118,8 +126,8 @@ describe("get attribute(s)", () => {
             {
                 content: {
                     value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
+                        "@type": "Surname",
+                        value: "Another Surname"
                     }
                 }
             }
@@ -164,7 +172,7 @@ describe("get attribute(s)", () => {
             const result = await services1.consumption.attributes.getAttributes({ query: {} });
             expect(result.isSuccess).toBe(true);
             const attributes = result.value;
-            expect(attributes).toHaveLength(3);
+            expect(attributes).toHaveLength(4);
             const attributeIds = attributes.map((attribute) => attribute.id);
             expect(attributeIds).toContain(relationshipAttributeId);
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
@@ -172,7 +180,7 @@ describe("get attribute(s)", () => {
 
         test("should allow to get an attribute by type", async function () {
             const result = await services1.consumption.attributes.getAttributes({
-                query: { "content.value.@type": "Surname" }
+                query: { "content.value.@type": "GivenName" }
             });
 
             expect(result).toBeSuccessful();
@@ -190,7 +198,10 @@ describe("get attribute(s)", () => {
             expect(result).toBeSuccessful();
 
             const attributes = result.value;
-            expect(attributes).toHaveLength(2);
+            expect(attributes).toHaveLength(3);
+
+            const attributeIds = attributes.map((attribute) => attribute.id);
+            expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
         test("should hide technical attributes when hideTechnical=true", async () => {
@@ -198,7 +209,7 @@ describe("get attribute(s)", () => {
             expect(result.isSuccess).toBe(true);
             const attributes = result.value;
             expect(attributes.filter((a) => a.id === relationshipAttributeId)).toHaveLength(0);
-            expect(attributes).toHaveLength(2);
+            expect(attributes).toHaveLength(3);
             const attributeIds = attributes.map((attribute) => attribute.id);
             expect(attributeIds).toStrictEqual(identityAttributeIds);
         });
@@ -208,24 +219,13 @@ describe("get attribute(s)", () => {
             expect(getAttributesResponse.isSuccess).toBe(true);
             const attributes = getAttributesResponse.value;
             expect(attributes.filter((a) => a.id === relationshipAttributeId)).toHaveLength(1);
-            expect(attributes).toHaveLength(3);
+            expect(attributes).toHaveLength(4);
             const attributeIds = attributes.map((attribute) => attribute.id);
             expect(attributeIds).toContain(relationshipAttributeId);
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
         test("should allow to get only default attributes", async function () {
-            const notDefaultRepositoryAttribute = (
-                await services1.consumption.attributes.createRepositoryAttribute({
-                    content: {
-                        value: {
-                            "@type": "Surname",
-                            value: "Another Surname"
-                        }
-                    }
-                })
-            ).value;
-
             const result = await services1.consumption.attributes.getAttributes({
                 query: { default: "true" }
             });
@@ -237,22 +237,11 @@ describe("get attribute(s)", () => {
             const attributeIds = attributes.map((attr) => attr.id);
             expect(attributeIds).toContain(identityAttributeIds[0]);
             expect(attributeIds).toContain(identityAttributeIds[1]);
-            expect(attributeIds).not.toContain(notDefaultRepositoryAttribute.id);
+            expect(attributeIds).not.toContain(identityAttributeIds[2]);
             expect(attributeIds).not.toContain(relationshipAttributeId);
         });
 
         test("should allow not to get default attributes", async function () {
-            const notDefaultRepositoryAttribute = (
-                await services1.consumption.attributes.createRepositoryAttribute({
-                    content: {
-                        value: {
-                            "@type": "Surname",
-                            value: "Another Surname"
-                        }
-                    }
-                })
-            ).value;
-
             const result = await services1.consumption.attributes.getAttributes({
                 query: { default: "!true" }
             });
@@ -263,7 +252,7 @@ describe("get attribute(s)", () => {
 
             const attributeIds = attributes.map((attr) => attr.id);
             expect(attributeIds).toContain(relationshipAttributeId);
-            expect(attributeIds).toContain(notDefaultRepositoryAttribute.id);
+            expect(attributeIds).toContain(identityAttributeIds[2]);
         });
     });
 });
