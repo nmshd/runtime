@@ -147,7 +147,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             requestItem.attribute.owner = requestInfo.peer;
         }
 
-        const localAttribute = await this.consumptionController.attributes.createPeerLocalAttribute({
+        const localAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
             content: requestItem.attribute,
             peer: requestInfo.peer,
             requestReference: requestInfo.id

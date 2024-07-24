@@ -19,7 +19,8 @@ import {
     ResponseWrapperJSON,
     ShareAttributeAcceptResponseItemJSON
 } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreBuffer } from "@nmshd/crypto";
+import { CoreAddress, CoreId, IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
 import {
@@ -42,6 +43,7 @@ import {
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
+    RelationshipChangedEvent,
     RelationshipDTO,
     RelationshipStatus,
     RelationshipTemplateDTO,
@@ -252,6 +254,23 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
+export async function sendMessageToMultipleRecipients(transportServices: TransportServices, recipients: string[], content?: any, attachments?: string[]): Promise<MessageDTO> {
+    const response = await transportServices.messages.sendMessage({
+        recipients,
+        content: content ?? {
+            "@type": "Mail",
+            subject: "This is the mail subject",
+            body: "This is the mail body",
+            cc: [],
+            to: recipients
+        },
+        attachments
+    });
+    expect(response).toBeSuccessful();
+
+    return response.value;
+}
+
 export async function sendMessageWithRequest(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
@@ -350,6 +369,48 @@ export async function establishRelationshipWithContents(
 
     const relationships2 = await syncUntilHasRelationships(transportServices2);
     expect(relationships2).toHaveLength(1);
+}
+
+export async function establishPendingRelationshipWithRequestFlow(
+    sRuntimeServices: TestRuntimeServices,
+    rRuntimeServices: TestRuntimeServices,
+    requestItems: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
+    acceptParams: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[],
+    requestOptions?: {
+        title?: string;
+        description?: string;
+        expiresAt?: string;
+        metadata?: object;
+    }
+): Promise<RelationshipDTO> {
+    const templateContent: RelationshipTemplateContentJSON = {
+        "@type": "RelationshipTemplateContent",
+        onNewRelationship: {
+            "@type": "Request",
+            items: requestItems,
+            title: requestOptions?.title,
+            description: requestOptions?.description,
+            expiresAt: requestOptions?.expiresAt,
+            metadata: requestOptions?.metadata
+        }
+    };
+
+    const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
+
+    await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === template.id);
+
+    const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
+    const result = await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: acceptParams });
+    expect(result).toBeSuccessful();
+
+    await rRuntimeServices.eventBus.waitForEvent(RelationshipChangedEvent);
+
+    const sRelationship = (await syncUntilHasRelationships(sRuntimeServices.transport, 1))[0];
+    expect(sRelationship.status).toStrictEqual(RelationshipStatus.Pending);
+
+    await sRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+    return sRelationship;
 }
 
 export async function ensureActiveRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<RelationshipDTO> {
@@ -654,4 +715,11 @@ export async function waitForEvent<TEvent>(
         eventBus.unsubscribe(subscriptionId);
         clearTimeout(timeoutId);
     });
+}
+
+export async function generateAddressPseudonym(backboneBaseUrl: string): Promise<CoreAddress> {
+    const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
+    const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, new URL(backboneBaseUrl).hostname);
+
+    return pseudonym;
 }

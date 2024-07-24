@@ -2,13 +2,13 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreId, CoreSerializable, ICoreAddress, ICoreId, ICoreSerializable } from "../../../core";
 import { CoreDate, ICoreDate } from "../../../core/types/CoreDate";
-import { IMessageEnvelopeRecipient, MessageEnvelopeRecipient } from "../transmission/MessageEnvelopeRecipient";
+import { CachedMessageRecipient, ICachedMessageRecipient } from "./CachedMessageRecipient";
 
 export interface ICachedMessage extends ICoreSerializable {
     createdBy: ICoreAddress;
     createdByDevice: ICoreId;
 
-    recipients: IMessageEnvelopeRecipient[];
+    recipients: ICachedMessageRecipient[];
 
     createdAt: ICoreDate;
 
@@ -29,8 +29,8 @@ export class CachedMessage extends CoreSerializable implements ICachedMessage {
     public createdByDevice: CoreId;
 
     @validate()
-    @serialize({ type: MessageEnvelopeRecipient })
-    public recipients: MessageEnvelopeRecipient[];
+    @serialize({ type: CachedMessageRecipient })
+    public recipients: CachedMessageRecipient[];
 
     @validate()
     @serialize()

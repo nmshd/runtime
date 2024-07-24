@@ -52,11 +52,14 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const parsedParams = CanCreateOutgoingRequestParameters.from(params);
         if (parsedParams.peer) {
             const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
+
+            // there should at minimum be a Pending relationship to the peer
             if (!relationship) {
                 return ValidationResult.error(
                     CoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
                 );
             }
+
             if (!(relationship.status === RelationshipStatus.Pending || relationship.status === RelationshipStatus.Active)) {
                 return ValidationResult.error(
                     CoreErrors.requests.wrongRelationshipStatus(
@@ -187,6 +190,13 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
+    public async deleteRequestsToPeer(peer: CoreAddress): Promise<void> {
+        const requests = await this.getOutgoingRequests({ peer: peer.toString() });
+        for (const request of requests) {
+            await this.localRequests.delete(request);
+        }
+    }
+
     private async _sent(requestId: CoreId, requestSourceObject: Message | RelationshipTemplate): Promise<LocalRequest> {
         const request = await this.getOrThrow(requestId);
 
@@ -205,10 +215,10 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     private async _setDeletionInfo(request: Request) {
         const requestItemsFromRequest = request.items.filter((item) => item instanceof RequestItem) as RequestItem[];
-        const requestItemGroupsFromRequest = request.items.filter((item) => item instanceof RequestItemGroup) as RequestItemGroup[];
+        const requestItemGroupsFromRequest = request.items.filter((item) => item instanceof RequestItemGroup);
         const requestItemsFromGroups = requestItemGroupsFromRequest.map((group) => group.items).flat();
         const requestItems = [...requestItemsFromRequest, ...requestItemsFromGroups];
-        const deleteAttributeRequestItems = requestItems.filter((item) => item instanceof DeleteAttributeRequestItem) as DeleteAttributeRequestItem[];
+        const deleteAttributeRequestItems = requestItems.filter((item) => item instanceof DeleteAttributeRequestItem);
         if (deleteAttributeRequestItems.length === 0) return;
 
         const ownSharedAttributeIds = deleteAttributeRequestItems.map((item) => item.attributeId);

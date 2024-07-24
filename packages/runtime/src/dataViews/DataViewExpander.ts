@@ -48,7 +48,8 @@ import {
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
     ValueHints,
-    ValueHintsJSON
+    ValueHintsJSON,
+    isRequestItemDerivation
 } from "@nmshd/content";
 import { CoreAddress, CoreId, IdentityController, Relationship, RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
@@ -802,10 +803,14 @@ export class DataViewExpander {
                 isDecidable,
                 title: requestGroupOrItem.title,
                 description: requestGroupOrItem.description,
-                mustBeAccepted: requestGroupOrItem.mustBeAccepted,
                 response: responseGroup
             };
         }
+
+        if (!isRequestItemDerivation(requestGroupOrItem)) {
+            throw new Error("A derivation of a RequestItem was expected.");
+        }
+
         return await this.expandRequestItem(requestGroupOrItem, localRequestDTO, responseGroupOrItemDVO as ResponseItemDVO);
     }
 

@@ -84,6 +84,7 @@ describe("RelationshipDVO", () => {
 
         expect(dvo.relationship!.templateId).toBe(dto.template.id);
     });
+
     test("check the relationship dvo for the requestor", async () => {
         const dtos = (await transportServices2.relationships.getRelationships({})).value;
         const dvos = await expander2.expandRelationshipDTOs(dtos);

@@ -9,6 +9,7 @@ import {
     RelationshipAuditLogEntryReason,
     RelationshipChangedEvent,
     RelationshipDTO,
+    RelationshipDecomposedBySelfEvent,
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent,
     RelationshipStatus
@@ -20,12 +21,16 @@ import {
     createTemplate,
     emptyRelationshipCreationContent,
     ensureActiveRelationship,
+    establishRelationship,
     exchangeMessageWithRequest,
     exchangeTemplate,
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
+    generateAddressPseudonym,
     getRelationship,
+    sendAndReceiveNotification,
+    sendMessageToMultipleRecipients,
     syncUntilHasMessageWithNotification,
     syncUntilHasRelationships
 } from "../lib";
@@ -80,9 +85,11 @@ describe("Create Relationship", () => {
         test("should not accept relationship sent by yourself", async () => {
             expect(await services2.transport.relationships.acceptRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
         });
+
         test("should not reject relationship sent by yourself", async () => {
             expect(await services2.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
         });
+
         test("should not revoke relationship sent by yourself", async () => {
             expect(await services1.transport.relationships.revokeRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
         });
@@ -163,32 +170,36 @@ describe("Relationship status validations on active relationship", () => {
         expect(await services1.transport.relationships.rejectRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
     });
 
-    describe("Templator with active IdentityDeletionProcess", () => {
-        const serviceProvider = new RuntimeServiceProvider();
-        let services1: TestRuntimeServices;
-        let services2: TestRuntimeServices;
+    test("should not decompose a relationship", async () => {
+        expect(await services1.transport.relationships.decomposeRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
+    });
+});
 
-        beforeAll(async () => {
-            const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
-            services1 = runtimeServices[0];
-            services2 = runtimeServices[1];
-        }, 30000);
+describe("Templator with active IdentityDeletionProcess", () => {
+    const serviceProvider = new RuntimeServiceProvider();
+    let services1: TestRuntimeServices;
+    let services2: TestRuntimeServices;
 
-        afterAll(() => serviceProvider.stop());
+    beforeAll(async () => {
+        const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+        services1 = runtimeServices[0];
+        services2 = runtimeServices[1];
+    }, 30000);
 
-        test("returns error if templator has active IdentityDeletionProcess", async () => {
-            const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
-            await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+    afterAll(() => serviceProvider.stop());
 
-            const createRelationshipResponse = await services2.transport.relationships.createRelationship({
-                templateId: templateId,
-                creationContent: emptyRelationshipCreationContent
-            });
-            expect(createRelationshipResponse).toBeAnError(
-                "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
-                "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
-            );
+    test("returns error if templator has active IdentityDeletionProcess", async () => {
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+
+        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: emptyRelationshipCreationContent
         });
+        expect(createRelationshipResponse).toBeAnError(
+            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
+            "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
+        );
     });
 });
 
@@ -669,6 +680,159 @@ describe("RelationshipTermination", () => {
     });
 });
 
+describe("RelationshipDecomposition", () => {
+    let services3: TestRuntimeServices;
+    let relationshipId: string;
+    let templateId: string;
+    let relationshipId2: string;
+    let templateId2: string;
+    let multipleRecipientsMessageId: string;
+
+    beforeAll(async () => {
+        const relationship = await ensureActiveRelationship(services1.transport, services2.transport);
+        relationshipId = relationship.id;
+        templateId = relationship.template.id;
+
+        await createRelationshipData(services1, services2);
+
+        const runtimeServices = await serviceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+        services3 = runtimeServices[0];
+        const relationship2 = await establishRelationship(services1.transport, services3.transport);
+        relationshipId2 = relationship2.id;
+        templateId2 = relationship2.template.id;
+
+        await createRelationshipData(services1, services3);
+        multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).id;
+
+        await services1.transport.relationships.terminateRelationship({ relationshipId });
+        await services1.transport.relationships.decomposeRelationship({ relationshipId });
+        await services2.eventBus.waitForEvent(RelationshipChangedEvent);
+
+        await services1.transport.relationships.terminateRelationship({ relationshipId: relationshipId2 });
+    });
+
+    test("relationship should be decomposed", async () => {
+        await expect(services1.eventBus).toHavePublished(RelationshipDecomposedBySelfEvent, (e) => e.data.relationshipId === relationshipId);
+
+        const ownRelationship = await services1.transport.relationships.getRelationship({ id: relationshipId });
+        expect(ownRelationship).toBeAnError(/.*/, "error.runtime.recordNotFound");
+
+        const peerRelationship = (await syncUntilHasRelationships(services2.transport))[0];
+        expect(peerRelationship.status).toBe(RelationshipStatus.DeletionProposed);
+        await expect(services2.eventBus).toHavePublished(
+            RelationshipChangedEvent,
+            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Decomposition
+        );
+    });
+
+    test("relationship template should be deleted", async () => {
+        const result = await services1.transport.relationshipTemplates.getRelationshipTemplate({ id: templateId });
+        expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+
+        const resultControl = await services1.transport.relationshipTemplates.getRelationshipTemplate({ id: templateId2 });
+        expect(resultControl).toBeSuccessful();
+    });
+
+    test("requests should be deleted", async () => {
+        const outgoingRequests = (await services1.consumption.outgoingRequests.getRequests({ query: { peer: services2.address } })).value;
+        expect(outgoingRequests).toHaveLength(0);
+
+        const incomingRequests = (await services1.consumption.incomingRequests.getRequests({ query: { peer: services2.address } })).value;
+        expect(incomingRequests).toHaveLength(0);
+
+        const outgoingRequestsControl = (await services1.consumption.outgoingRequests.getRequests({ query: { peer: services3.address } })).value;
+        expect(outgoingRequestsControl).not.toHaveLength(0);
+
+        const incomingRequestsControl = (await services1.consumption.incomingRequests.getRequests({ query: { peer: services3.address } })).value;
+        expect(incomingRequestsControl).not.toHaveLength(0);
+    });
+
+    test("attributes should be deleted", async () => {
+        const ownSharedAttributes = (await services1.consumption.attributes.getOwnSharedAttributes({ peer: services2.address })).value;
+        expect(ownSharedAttributes).toHaveLength(0);
+
+        const peerSharedAttributes = (await services1.consumption.attributes.getPeerSharedAttributes({ peer: services2.address })).value;
+        expect(peerSharedAttributes).toHaveLength(0);
+
+        const ownSharedAttributesControl = (await services1.consumption.attributes.getOwnSharedAttributes({ peer: services3.address })).value;
+        expect(ownSharedAttributesControl).not.toHaveLength(0);
+
+        const peerSharedAttributesControl = (await services1.consumption.attributes.getPeerSharedAttributes({ peer: services3.address })).value;
+        expect(peerSharedAttributesControl).not.toHaveLength(0);
+    });
+
+    test("notifications should be deleted", async () => {
+        const notifications = (await services1.consumption.notifications.getNotifications({ query: { peer: services2.address } })).value;
+        expect(notifications).toHaveLength(0);
+
+        const notificationsControl = (await services1.consumption.notifications.getNotifications({ query: { peer: services3.address } })).value;
+        expect(notificationsControl).not.toHaveLength(0);
+    });
+
+    test("messages should be deleted/anonymized", async () => {
+        const messagesToPeer = (await services1.transport.messages.getMessages({ query: { "recipients.address": services2.address } })).value;
+        expect(messagesToPeer).toHaveLength(0);
+
+        const messagesFromPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services2.address } })).value;
+        expect(messagesFromPeer).toHaveLength(0);
+
+        const messagesToControlPeer = (await services1.transport.messages.getMessages({ query: { "recipients.address": services3.address } })).value;
+        expect(messagesToControlPeer).not.toHaveLength(0);
+
+        const messagesFromControlPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services3.address } })).value;
+        expect(messagesFromControlPeer).not.toHaveLength(0);
+
+        const addressPseudonym = (await generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!)).toString();
+        const anonymizedMessages = (await services1.transport.messages.getMessages({ query: { "recipients.address": addressPseudonym } })).value;
+        expect(anonymizedMessages).toHaveLength(1);
+
+        const anonymizedMessage = anonymizedMessages[0];
+        expect(anonymizedMessage.id).toBe(multipleRecipientsMessageId);
+        expect(anonymizedMessage.recipients.map((r) => r.address)).toStrictEqual([addressPseudonym, services3.address]);
+    });
+
+    test("messages with multiple recipients should be deleted if all its relationships are decomposed", async () => {
+        await services1.transport.relationships.decomposeRelationship({ relationshipId: relationshipId2 });
+        const messages = (await services1.transport.messages.getMessages({})).value;
+        expect(messages).toHaveLength(0);
+    });
+
+    async function createRelationshipData(services1: TestRuntimeServices, services2: TestRuntimeServices) {
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            }
+        };
+        await exchangeMessageWithRequest(services1, services2, { ...requestContent, peer: services2.address });
+        await exchangeMessageWithRequest(services2, services1, { ...requestContent, peer: services1.address });
+
+        await sendAndReceiveNotification(services1.transport, services2.transport, services2.consumption);
+
+        await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Own name"
+                }
+            }
+        });
+
+        await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Own name"
+                }
+            }
+        });
+    }
+});
+
 describe("Relationship existence check", () => {
     const fakeRelationshipId = "REL00000000000000000";
 
@@ -702,5 +866,9 @@ describe("Relationship existence check", () => {
 
     test("should not revoke a relationship reactivation", async function () {
         expect(await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("should not decompose a relationship", async function () {
+        expect(await services1.transport.relationships.decomposeRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 });

@@ -73,7 +73,6 @@ describe("RelationshipTemplateDVO", () => {
                 items: [
                     {
                         "@type": "RequestItemGroup",
-                        mustBeAccepted: true,
                         title: "Templator Attributes",
                         items: [
                             {
@@ -90,7 +89,6 @@ describe("RelationshipTemplateDVO", () => {
                     },
                     {
                         "@type": "RequestItemGroup",
-                        mustBeAccepted: true,
                         title: "Proposed Attributes",
                         items: [
                             ProposeAttributeRequestItem.from({

@@ -72,8 +72,7 @@ describe("IdentityInfo", () => {
         expect(identityInfoResult).toBeSuccessful();
 
         const identityInfo = identityInfoResult.value;
-        expect(identityInfo.address.length).toBeGreaterThanOrEqual(35);
-        expect(identityInfo.address).toMatch(/^did:e:/);
+        expect(identityInfo.address).toMatch(/^did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}$/);
         expect(identityInfo.publicKey).toHaveLength(82);
     });
 });

@@ -39,7 +39,7 @@ describe("DecideRequestParametersValidator", function () {
 
     const successParams: TestParam[] = [
         {
-            description: "(1) success: accept Request with one RequestItem and accept the item",
+            description: "(1) success: accept Request with one RequestItem and accept the RequestItem",
             input: {
                 request: TestObjectFactory.createRequestWithOneItem(),
                 response: {
@@ -50,7 +50,7 @@ describe("DecideRequestParametersValidator", function () {
             }
         },
         {
-            description: "(2) success: accept Request with RequestItemGroup and accept the item",
+            description: "(2) success: accept Request with RequestItemGroup and accept the contained RequestItem",
             input: {
                 request: TestObjectFactory.createRequestWithOneItemGroup(),
                 response: {
@@ -61,7 +61,7 @@ describe("DecideRequestParametersValidator", function () {
             }
         },
         {
-            description: "(3) success: accept Request with one RequestItem and reject the item",
+            description: "(3) success: accept Request with one RequestItem and reject the RequestItem",
             input: {
                 request: TestObjectFactory.createRequestWithOneItem(),
                 response: {
@@ -72,7 +72,7 @@ describe("DecideRequestParametersValidator", function () {
             }
         },
         {
-            description: "(4) success: accept Request with RequestItemGroup and reject the item",
+            description: "(4) success: accept Request with RequestItemGroup and reject the contained RequestItem",
             input: {
                 request: TestObjectFactory.createRequestWithOneItemGroup(),
                 response: {
@@ -83,29 +83,7 @@ describe("DecideRequestParametersValidator", function () {
             }
         },
         {
-            description: "(5) success: group must not be accepted, item must be accepted; reject item",
-            input: {
-                request: Request.from({
-                    items: [
-                        RequestItemGroup.from({
-                            mustBeAccepted: false,
-                            items: [TestRequestItem.from({ mustBeAccepted: true })]
-                        })
-                    ]
-                }),
-                response: {
-                    accept: true,
-                    items: [
-                        {
-                            items: [{ accept: false }]
-                        }
-                    ],
-                    requestId
-                }
-            }
-        },
-        {
-            description: "(6) success: accept a Request without accepting any item (no items mustBeAccepted)",
+            description: "(5) success: accept a Request without accepting any RequestItem (no RequestItems mustBeAccepted)",
             input: {
                 request: Request.from({
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
@@ -118,13 +96,12 @@ describe("DecideRequestParametersValidator", function () {
             }
         },
         {
-            description: "(7) success: items that must not be accepted in a group are rejected",
+            description: "(6) success: RequestItems that must not be accepted in a RequestItemGroup are rejected",
             input: {
                 request: Request.from({
                     items: [
                         RequestItemGroup.from({
-                            items: [TestRequestItem.from({ mustBeAccepted: false }), TestRequestItem.from({ mustBeAccepted: true })],
-                            mustBeAccepted: false
+                            items: [TestRequestItem.from({ mustBeAccepted: false }), TestRequestItem.from({ mustBeAccepted: true })]
                         })
                     ]
                 }),
@@ -143,7 +120,7 @@ describe("DecideRequestParametersValidator", function () {
 
     const errorParams: TestParam[] = [
         {
-            description: "(1) error: Request with two items is answered with one item",
+            description: "(1) error: Request with two RequestItems is answered with one item",
             input: {
                 request: TestObjectFactory.createRequestWithTwoItems(),
                 response: {
@@ -154,11 +131,11 @@ describe("DecideRequestParametersValidator", function () {
             },
             expectedError: {
                 code: "error.consumption.requests.decide.validation.invalidNumberOfItems",
-                message: "Number of items in Request and Response do not match"
+                message: "The number of items in the Request and the Response do not match."
             }
         },
         {
-            description: "(2) error: Request with one item is answered with two items",
+            description: "(2) error: Request with one RequestItem is answered with two items",
             input: {
                 request: TestObjectFactory.createRequestWithOneItem(),
                 response: {
@@ -169,7 +146,7 @@ describe("DecideRequestParametersValidator", function () {
             },
             expectedError: {
                 code: "error.consumption.requests.decide.validation.invalidNumberOfItems",
-                message: "Number of items in Request and Response do not match"
+                message: "The number of items in the Request and the Response do not match."
             }
         },
         {
@@ -221,7 +198,7 @@ describe("DecideRequestParametersValidator", function () {
             expectedError: {
                 indexPath: [0],
                 code: "error.consumption.requests.decide.validation.invalidNumberOfItems",
-                message: "Number of items in RequestItemGroup and ResponseItemGroup do not match"
+                message: "The number of items in the RequestItemGroup and the ResponseItemGroup do not match."
             }
         },
         {
@@ -241,61 +218,12 @@ describe("DecideRequestParametersValidator", function () {
             }
         },
         {
-            description: "(7) error: item in a RequestItemGroup that must be accepted was rejected",
-            input: {
-                request: TestObjectFactory.createRequestWithOneItemGroup(undefined, true),
-                response: {
-                    accept: true,
-                    items: [{ items: [{ accept: false }] }],
-                    requestId
-                }
-            },
-            expectedError: {
-                indexPath: [0],
-                code: "error.consumption.requests.decide.validation.mustBeAcceptedItemNotAccepted",
-                message: "The RequestItemGroup is flagged as 'mustBeAccepted', but it was not accepted. Please accept all 'mustBeAccepted' items in this group."
-            }
-        },
-        {
-            description: "(8) error: when the Request is rejected no RequestItem may be accepted",
-            input: {
-                request: TestObjectFactory.createRequestWithOneItem(),
-                response: {
-                    accept: false,
-                    items: [{ accept: true }],
-                    requestId
-                }
-            },
-            expectedError: {
-                indexPath: [0],
-                code: "error.consumption.requests.decide.validation.itemAcceptedButParentNotAccepted",
-                message: "The RequestItem was accepted, but the parent was not accepted."
-            }
-        },
-        {
-            description: "(9) error: when the Request is rejected no RequestItemGroup may be accepted",
-            input: {
-                request: TestObjectFactory.createRequestWithOneItemGroup(),
-                response: {
-                    accept: false,
-                    items: [{ items: [{ accept: true }] }],
-                    requestId
-                }
-            },
-            expectedError: {
-                indexPath: [0],
-                code: "error.consumption.requests.decide.validation.itemAcceptedButParentNotAccepted",
-                message: "The RequestItemGroup was accepted, but the parent was not accepted."
-            }
-        },
-        {
-            description: "(10) error: accepting a group but not accepting all 'mustBeAccepted' items in the group",
+            description: "(7) error: RequestItem contained within a RequestItemGroup that must be accepted was rejected",
             input: {
                 request: Request.from({
                     items: [
                         RequestItemGroup.from({
-                            items: [TestRequestItem.from({ mustBeAccepted: true }), TestRequestItem.from({ mustBeAccepted: true })],
-                            mustBeAccepted: false
+                            items: [TestRequestItem.from({ mustBeAccepted: true }), TestRequestItem.from({ mustBeAccepted: true })]
                         })
                     ]
                 }),
@@ -313,6 +241,38 @@ describe("DecideRequestParametersValidator", function () {
                 indexPath: [0, 1],
                 code: "error.consumption.requests.decide.validation.mustBeAcceptedItemNotAccepted",
                 message: "The RequestItem is flagged as 'mustBeAccepted', but it was not accepted."
+            }
+        },
+        {
+            description: "(8) error: when the Request is rejected no RequestItem may be accepted",
+            input: {
+                request: TestObjectFactory.createRequestWithOneItem(),
+                response: {
+                    accept: false,
+                    items: [{ accept: true }],
+                    requestId
+                }
+            },
+            expectedError: {
+                indexPath: [0],
+                code: "error.consumption.requests.decide.validation.itemAcceptedButRequestNotAccepted",
+                message: "The RequestItem was accepted, but the Request was not accepted."
+            }
+        },
+        {
+            description: "(9) error: when the Request is rejected no RequestItem contained within a RequestItemGroup may be accepted",
+            input: {
+                request: TestObjectFactory.createRequestWithOneItemGroup(),
+                response: {
+                    accept: false,
+                    items: [{ items: [{ accept: true }] }],
+                    requestId
+                }
+            },
+            expectedError: {
+                indexPath: [0],
+                code: "error.consumption.validation.inheritedFromItem",
+                message: "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
             }
         }
     ];
@@ -355,8 +315,9 @@ describe("DecideRequestParametersValidator", function () {
             return;
         }
 
-        expect(validationResult.error.code).toBe("inheritedFromItem");
-        expect(validationResult.error.message).toBe("Some child items have errors.");
+        expect(validationResult).errorValidationResult({
+            code: "error.consumption.validation.inheritedFromItem"
+        });
 
         let childResult = validationResult;
         for (const index of errorIndexPath) childResult = childResult.items[index] as ErrorValidationResult;
