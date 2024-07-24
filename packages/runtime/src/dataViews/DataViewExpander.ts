@@ -31,6 +31,7 @@ import {
     RelationshipAttributeJSON,
     RelationshipAttributeQueryJSON,
     RelationshipTemplateContent,
+    RelationshipTemplateContentJSON,
     RenderHints,
     RenderHintsEditType,
     RenderHintsJSON,
@@ -1588,11 +1589,23 @@ export class DataViewExpander {
         }
 
         const result = await this.transport.relationships.getRelationshipByAddress({ address });
-        if (result.isError) {
-            return this.expandUnknown(address);
+        if (result.isSuccess) {
+            return await this.expandRelationshipDTO(result.value);
         }
 
-        return await this.expandRelationshipDTO(result.value);
+        const templateResult = (
+            await this.transport.relationshipTemplates.getRelationshipTemplates({
+                query: {
+                    createdBy: address
+                }
+            })
+        ).value;
+        templateResult.sort((template1, template2) => (template2.createdAt > template1.createdAt ? 1 : -1));
+        if (templateResult.length !== 0 && templateResult.at(-1)?.content["@type"] === "RelationshipTemplateContent") {
+            return this.expandFromTemplate(templateResult.at(-1)!);
+        }
+
+        return this.expandUnknown(address);
     }
 
     public async expandAddresses(addresses: string[]): Promise<IdentityDVO[]> {
@@ -1655,6 +1668,69 @@ export class DataViewExpander {
     public async expandRelationshipChangeDTOs(relationship: RelationshipDTO): Promise<RelationshipChangeDVO[]> {
         const changePromises = relationship.changes.map((change) => this.expandRelationshipChangeDTO(relationship, change));
         return await Promise.all(changePromises);
+    }
+
+    private expandFromTemplate(template: RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON }): IdentityDVO {
+        const requestOnNewRelationship = template.content.onNewRelationship;
+        const sharedAttributesOnNewRelationship = this.getSharedAttributesFromRequest(requestOnNewRelationship);
+        const address = template.createdBy;
+        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship) ?? address.substring(3, 9);
+        const initials = (name.match(/\b\w/g) ?? []).join("");
+
+        return {
+            type: "IdentityDVO",
+            id: address,
+            name: name,
+            realm: Realm.Prod,
+            initials,
+            description: "i18n://dvo.identity.unknown.description",
+            isSelf: false,
+            hasRelationship: false
+        };
+    }
+
+    private getSharedAttributesFromRequest(request: RequestJSON): (IdentityAttributeJSON | RelationshipAttributeJSON)[] {
+        let shareAttributeRequestItems: ShareAttributeRequestItemJSON[] = [];
+        shareAttributeRequestItems = shareAttributeRequestItems.concat(
+            request.items.filter((item) => item["@type"] === "ShareAttributeRequestItem") as ShareAttributeRequestItemJSON[]
+        );
+
+        const itemGroups = request.items.filter((item) => item["@type"] === "RequestItemGroup") as RequestItemGroupJSON[];
+        itemGroups.forEach((itemGroup) => {
+            shareAttributeRequestItems = shareAttributeRequestItems.concat(
+                itemGroup.items.filter((item) => item["@type"] === "ShareAttributeRequestItem") as ShareAttributeRequestItemJSON[]
+            );
+        });
+        return shareAttributeRequestItems.map((item) => item.attribute);
+    }
+
+    private getNameFromAttributeContents(attributes: (IdentityAttributeJSON | RelationshipAttributeJSON)[]): string | undefined {
+        const stringByType: Record<string, undefined | string> = {};
+        attributes.forEach((attribute) => {
+            const valueType = attribute.value["@type"];
+            const nameRelevantAttributeTypes = ["DisplayName", "GivenName", "MiddleName", "Surname", "Sex"];
+            if (nameRelevantAttributeTypes.includes(valueType)) {
+                const attributeValue = attribute.value as DisplayNameJSON | GivenNameJSON | MiddleNameJSON | SurnameJSON | SexJSON;
+                if (stringByType[valueType] && valueType === "GivenName") {
+                    stringByType[valueType] += ` ${attributeValue.value}`;
+                } else {
+                    stringByType[valueType] = attributeValue.value;
+                }
+            }
+        });
+
+        if (stringByType["DisplayName"]) {
+            return stringByType["DisplayName"];
+        } else if (stringByType["MiddleName"] && stringByType["GivenName"] && stringByType["Surname"]) {
+            return `${stringByType["GivenName"]} ${stringByType["MiddleName"]} ${stringByType["Surname"]}`;
+        } else if (stringByType["GivenName"] && stringByType["Surname"]) {
+            return `${stringByType["GivenName"]} ${stringByType["Surname"]}`;
+        } else if (stringByType["Sex"] && stringByType["Surname"]) {
+            return `i18n://dvo.identity.Salutation.${stringByType["Sex"]} ${stringByType["Surname"]}`;
+        } else if (stringByType["Surname"]) {
+            return `${stringByType["Surname"]}`;
+        }
+        return;
     }
 
     private async createRelationshipDVO(relationship: RelationshipDTO): Promise<RelationshipDVO> {
