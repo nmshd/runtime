@@ -23,7 +23,7 @@ export interface LocalAttributeJSON {
     shareInfo?: LocalAttributeShareInfoJSON;
     deletionInfo?: LocalAttributeDeletionInfoJSON;
     parentId?: string;
-    default?: boolean;
+    default?: true;
 }
 
 export interface ILocalAttribute extends ICoreSynchronizable {
@@ -34,7 +34,7 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     shareInfo?: ILocalAttributeShareInfo;
     deletionInfo?: ILocalAttributeDeletionInfo;
     parentId?: ICoreId;
-    default?: boolean;
+    default?: true;
 }
 
 export type OwnSharedIdentityAttribute = LocalAttribute & {
@@ -119,7 +119,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
     @validate({ nullable: true })
     @serialize()
-    public default?: boolean;
+    public default?: true;
 
     public isOwnSharedIdentityAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute {
         return this.isIdentityAttribute() && this.isOwnSharedAttribute(ownAddress, peerAddress);

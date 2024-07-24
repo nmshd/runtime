@@ -10,5 +10,5 @@ export interface LocalAttributeDTO {
     succeededBy?: string;
     shareInfo?: LocalAttributeShareInfoJSON;
     deletionInfo?: LocalAttributeDeletionInfoJSON;
-    default?: boolean;
+    default?: true;
 }
