@@ -18,14 +18,14 @@ export interface GetAttributesRequest {
 
 export interface GetAttributesRequestQuery {
     createdAt?: string;
-    parentId?: string;
+    parentId?: string | string[];
     "content.@type"?: string | string[];
     "content.tags"?: string | string[];
     "content.owner"?: string | string[];
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];
     "content.key"?: string | string[];
-    "content.isTechnical"?: string | string[];
+    "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
     succeeds?: string | string[];
