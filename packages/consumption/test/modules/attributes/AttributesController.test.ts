@@ -1071,7 +1071,7 @@ describe("AttributesController", function () {
                 });
             });
 
-            test("should catch if the predecessor is not an own shared identity attribute", async function () {
+            test("should catch if the predecessor is not an own shared IdentityAttribute", async function () {
                 predecessorOwnSharedIdentityAttribute.shareInfo = undefined;
                 await consumptionController.attributes.updateAttributeUnsafe(predecessorOwnSharedIdentityAttribute);
 
@@ -1084,7 +1084,7 @@ describe("AttributesController", function () {
                 });
             });
 
-            test("should catch if the successor is not an own shared identity attribute", async function () {
+            test("should catch if the successor is not an own shared IdentityAttribute", async function () {
                 successorOwnSharedIdentityAttributeParams.shareInfo = undefined;
 
                 const validationResult = await consumptionController.attributes.validateOwnSharedIdentityAttributeSuccession(

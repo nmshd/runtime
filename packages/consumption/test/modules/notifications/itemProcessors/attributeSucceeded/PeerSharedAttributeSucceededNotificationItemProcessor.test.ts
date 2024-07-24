@@ -243,7 +243,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
         expect(checkResult).errorValidationResult({
             code: "error.consumption.attributes.successionPeerIsNotOwner",
-            message: "The peer of the succeeded attribute is not its owner. This may be an attempt of spoofing."
+            message: "The peer of the succeeded Attribute is not its owner. This may be an attempt of spoofing."
         });
     });
 });

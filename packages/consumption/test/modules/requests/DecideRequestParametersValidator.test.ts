@@ -271,8 +271,8 @@ describe("DecideRequestParametersValidator", function () {
             },
             expectedError: {
                 indexPath: [0],
-                code: "inheritedFromItem",
-                message: "Some child items have errors."
+                code: "error.consumption.validation.inheritedFromItem",
+                message: "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
             }
         }
     ];
@@ -315,8 +315,9 @@ describe("DecideRequestParametersValidator", function () {
             return;
         }
 
-        expect(validationResult.error.code).toBe("inheritedFromItem");
-        expect(validationResult.error.message).toBe("Some child items have errors.");
+        expect(validationResult).errorValidationResult({
+            code: "error.consumption.validation.inheritedFromItem"
+        });
 
         let childResult = validationResult;
         for (const index of errorIndexPath) childResult = childResult.items[index] as ErrorValidationResult;
