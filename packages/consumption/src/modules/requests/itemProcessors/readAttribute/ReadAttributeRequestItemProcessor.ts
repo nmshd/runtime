@@ -13,7 +13,7 @@ import {
     ResponseItemResult,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
-import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreId, RelationshipStatus, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { AttributeSuccessorParams, DeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
@@ -135,6 +135,18 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     return ValidationResult.error(
                         CoreErrors.requests.attributeQueryMismatch(
                             "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
+                        )
+                    );
+                }
+
+                const pendingRelationshipToPeer = await this.accountController.relationships.getRelationships({
+                    query: { peer: foundLocalAttribute.shareInfo.peer, status: RelationshipStatus.Pending }
+                });
+
+                if (pendingRelationshipToPeer.length !== 0) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship(
+                            "The provided RelationshipAttribute exists in the context of a pending Relationship with a third party. Before sharing it, activate the Relationship."
                         )
                     );
                 }
