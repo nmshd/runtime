@@ -1,6 +1,6 @@
 import { ArbitraryRelationshipTemplateContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
 
-export type RelationshipTemplateContentDerivationDTO = RelationshipTemplateContentJSON | ArbitraryRelationshipTemplateContentJSON;
+export type RelationshipTemplateContentDerivation = RelationshipTemplateContentJSON | ArbitraryRelationshipTemplateContentJSON;
 
 export interface RelationshipTemplateDTO {
     id: string;
@@ -8,7 +8,7 @@ export interface RelationshipTemplateDTO {
     createdBy: string;
     createdByDevice: string;
     createdAt: string;
-    content: RelationshipTemplateContentDerivationDTO;
+    content: RelationshipTemplateContentDerivation;
     expiresAt?: string;
     maxNumberOfAllocations?: number;
     secretKey: string;

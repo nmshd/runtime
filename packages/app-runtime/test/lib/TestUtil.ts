@@ -7,9 +7,9 @@ import {
     FileDTO,
     MessageContentDTO,
     MessageDTO,
-    RelationshipCreationContentDerivationDTO,
+    RelationshipCreationContentDerivation,
     RelationshipDTO,
-    RelationshipTemplateContentDerivationDTO,
+    RelationshipTemplateContentDerivation,
     RelationshipTemplateDTO,
     SyncEverythingResponse
 } from "@nmshd/runtime";
@@ -175,7 +175,7 @@ export class TestUtil {
     public static async createAndLoadPeerTemplate(
         from: LocalAccountSession,
         to: LocalAccountSession,
-        content: RelationshipTemplateContentDerivationDTO = ArbitraryRelationshipTemplateContent.from({ value: {} }).toJSON()
+        content: RelationshipTemplateContentDerivation = ArbitraryRelationshipTemplateContent.from({ value: {} }).toJSON()
     ): Promise<RelationshipTemplateDTO> {
         const templateFrom = (
             await from.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
@@ -202,7 +202,7 @@ export class TestUtil {
     public static async requestRelationshipForTemplate(
         from: LocalAccountSession,
         templateId: string,
-        content: RelationshipCreationContentDerivationDTO = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON()
+        content: RelationshipCreationContentDerivation = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON()
     ): Promise<RelationshipDTO> {
         const relRequest = await from.transportServices.relationships.createRelationship({ templateId, creationContent: content });
         return relRequest.value;

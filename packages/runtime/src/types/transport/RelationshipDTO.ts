@@ -35,7 +35,7 @@ export interface RelationshipAuditLogEntryDTO {
 
 export interface RelationshipAuditLogDTO extends Array<RelationshipAuditLogEntryDTO> {}
 
-export type RelationshipCreationContentDerivationDTO = RelationshipCreationContentJSON | ArbitraryRelationshipCreationContentJSON;
+export type RelationshipCreationContentDerivation = RelationshipCreationContentJSON | ArbitraryRelationshipCreationContentJSON;
 
 export interface RelationshipDTO {
     id: string;
@@ -43,6 +43,6 @@ export interface RelationshipDTO {
     status: RelationshipStatus;
     peer: string;
     peerIdentity: IdentityDTO;
-    creationContent: RelationshipCreationContentDerivationDTO;
+    creationContent: RelationshipCreationContentDerivation;
     auditLog: RelationshipAuditLogDTO;
 }
