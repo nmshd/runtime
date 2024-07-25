@@ -112,6 +112,27 @@ describe("Template Tests", () => {
     });
 });
 
+describe("Serialization Errors", () => {
+    test("create a template with wrong content : missing values", async () => {
+        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: { a: "A", "@type": "Message" },
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
+        });
+        expect(response).toBeAnError("Message.secretKey :: Value is not defined", "error.runtime.requestDeserialization");
+    });
+
+    test("create a template with wrong content : not existent type", async () => {
+        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: { a: "A", "@type": "someNoneExistingType" },
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
+        });
+        expect(response).toBeAnError(
+            "Type 'someNoneExistingType' with version 1 was not found within reflection classes. You might have to install a module first.",
+            "error.runtime.unknownType"
+        );
+    });
+});
+
 describe("RelationshipTemplates query", () => {
     test("query all relationshipTemplates", async () => {
         const template = (
