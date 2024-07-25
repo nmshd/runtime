@@ -766,6 +766,24 @@ describe("AttributesController", function () {
                 expect(result.isSuccess()).toBe(true);
             });
 
+            test("should return validation error for child attribute with invalid succeededBy field", async function () {
+                const invalidChildPredecessor = await consumptionController.attributes.createAttributeUnsafe({
+                    content: IdentityAttribute.from({
+                        value: BirthDate.from({
+                            day: 28,
+                            month: 2,
+                            year: 2000
+                        }),
+                        owner: consumptionController.accountController.identity.address
+                    }),
+                    parentId: predecessorComplexAttribute.id,
+                    succeededBy: CoreId.from("invalidSuccessorId")
+                });
+
+                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(invalidChildPredecessor);
+                expect(result).errorValidationResult({ message: "The successor does not exist.", code: "error.consumption.attributes.successorDoesNotExist" });
+            });
+
             test("should delete the child attribute", async function () {
                 const childAttributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorChildAttribute.id);
                 expect(childAttributeBeforeDeletion).toStrictEqual(successorChildAttribute);

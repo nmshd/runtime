@@ -944,12 +944,15 @@ export class AttributesController extends ConsumptionBaseController {
         const validationResult = await this.validateFullAttributeDeletionProcess(attribute);
         if (validationResult.isError()) throw validationResult.error;
 
-        if (attribute.succeededBy) {
-            const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (!successor) {
-                throw CoreErrors.attributes.successorDoesNotExist();
+        const childAttributes = await this.getLocalAttributes({ parentId: attribute.id.toString() });
+        for (const attr of [attribute, ...childAttributes]) {
+            if (attr.succeededBy) {
+                const successor = await this.getLocalAttribute(attr.succeededBy);
+                if (!successor) {
+                    throw CoreErrors.attributes.successorDoesNotExist();
+                }
+                await this.detachSuccessor(successor);
             }
-            await this.detachSuccessor(successor);
         }
 
         const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": attribute.id.toString() });
@@ -962,9 +965,12 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async validateFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<ValidationResult> {
-        const validateSuccessorResult = await this.validateSuccessor(attribute);
-        if (validateSuccessorResult.isError()) {
-            return validateSuccessorResult;
+        const childAttributes = await this.getLocalAttributes({ parentId: attribute.id.toString() });
+        for (const attr of [attribute, ...childAttributes]) {
+            const validateSuccessorResult = await this.validateSuccessor(attr);
+            if (validateSuccessorResult.isError()) {
+                return validateSuccessorResult;
+            }
         }
 
         const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": attribute.id.toString() });
