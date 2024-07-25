@@ -29,23 +29,22 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
     }
 
     protected async executeInternal(request: CreateRelationshipRequest): Promise<Result<RelationshipDTO>> {
-        const transformedContent = Serializable.fromUnknown(request.creationContent);
-
-        if (transformedContent instanceof ArbitraryRelationshipCreationContent || transformedContent instanceof RelationshipCreationContent) {
-            const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
-            if (!template) {
-                return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
-            }
-
-            const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: request.creationContent });
-
-            await this.accountController.syncDatawallet();
-
-            return Result.ok(RelationshipMapper.toRelationshipDTO(relationship));
+        const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
+        if (!template) {
+            return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        return Result.fail(
-            RuntimeErrors.general.invalidPropertyValue("A relationship creation content must be of type RelationshipCreationContent or ArbitraryRelationshipCreationContent.")
-        );
+        const transformedContent = Serializable.fromUnknown(request.creationContent);
+        if (!(transformedContent instanceof ArbitraryRelationshipCreationContent || transformedContent instanceof RelationshipCreationContent)) {
+            return Result.fail(
+                RuntimeErrors.general.invalidPropertyValue("A relationship creation content must be of type RelationshipCreationContent or ArbitraryRelationshipCreationContent.")
+            );
+        }
+
+        const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: request.creationContent });
+
+        await this.accountController.syncDatawallet();
+
+        return Result.ok(RelationshipMapper.toRelationshipDTO(relationship));
     }
 }
