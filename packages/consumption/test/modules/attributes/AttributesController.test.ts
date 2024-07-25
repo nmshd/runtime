@@ -761,12 +761,12 @@ describe("AttributesController", function () {
                 )[0];
             });
 
-            test("should return validation success for valid succeeded child attribute", async function () {
+            test("should return validation success for full attribute deletion process of valid succeeded child attribute", async function () {
                 const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(successorComplexAttribute);
                 expect(result.isSuccess()).toBe(true);
             });
 
-            test("should return validation error for child attribute with invalid succeededBy field", async function () {
+            test("should return validation error for full attribute deletion process of child attribute with invalid succeededBy field", async function () {
                 const invalidChildPredecessor = await consumptionController.attributes.createAttributeUnsafe({
                     content: IdentityAttribute.from({
                         value: BirthDate.from({
