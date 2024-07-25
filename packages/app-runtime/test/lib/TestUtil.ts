@@ -7,9 +7,9 @@ import {
     FileDTO,
     MessageContentDTO,
     MessageDTO,
-    RelationshipCreationContentDTO,
+    RelationshipCreationContentDerivationDTO,
     RelationshipDTO,
-    RelationshipTemplateContentDTO,
+    RelationshipTemplateContentDerivationDTO,
     RelationshipTemplateDTO,
     SyncEverythingResponse
 } from "@nmshd/runtime";
@@ -175,7 +175,7 @@ export class TestUtil {
     public static async createAndLoadPeerTemplate(
         from: LocalAccountSession,
         to: LocalAccountSession,
-        content: RelationshipTemplateContentDTO = ArbitraryRelationshipTemplateContent.from({ content: {} }).toJSON()
+        content: RelationshipTemplateContentDerivationDTO = ArbitraryRelationshipTemplateContent.from({ value: {} }).toJSON()
     ): Promise<RelationshipTemplateDTO> {
         const templateFrom = (
             await from.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
@@ -202,7 +202,7 @@ export class TestUtil {
     public static async requestRelationshipForTemplate(
         from: LocalAccountSession,
         templateId: string,
-        content: RelationshipCreationContentDTO = ArbitraryRelationshipCreationContent.from({ content: {} }).toJSON()
+        content: RelationshipCreationContentDerivationDTO = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON()
     ): Promise<RelationshipDTO> {
         const relRequest = await from.transportServices.relationships.createRelationship({ templateId, creationContent: content });
         return relRequest.value;
@@ -301,7 +301,7 @@ export class TestUtil {
         content?: MessageContentDTO
     ): Promise<MessageDTO> {
         if (!content) {
-            content = ArbitraryMessageContent.from({ content: "TestContent" }).toJSON();
+            content = ArbitraryMessageContent.from({ value: "TestContent" }).toJSON();
         }
 
         const result = await from.transportServices.messages.sendMessage({
