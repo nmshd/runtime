@@ -591,6 +591,127 @@ describe("AttributesController", function () {
                 expect(deletedChildAttribute).toBeUndefined();
             }
         });
+
+        describe("should validate and execute full attribute deletion process", function () {
+            let predecessorRepositoryAttribute: LocalAttribute;
+            let successorRepositoryAttribute: LocalAttribute;
+            let predecessorOwnSharedIdentityAttribute: LocalAttribute;
+
+            beforeEach(async () => {
+                predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: IdentityAttribute.from({
+                        value: EMailAddress.from({
+                            value: "my@email.address"
+                        }),
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+
+                const repositorySuccessorParams: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "EMailAddress",
+                            value: "my-new@email.address"
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    })
+                };
+                ({ predecessor: predecessorRepositoryAttribute, successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(
+                    predecessorRepositoryAttribute.id,
+                    repositorySuccessorParams
+                ));
+
+                predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: predecessorRepositoryAttribute.id,
+                    peer: CoreAddress.from("peer"),
+                    requestReference: CoreId.from("reqRef")
+                });
+
+                const sharedSuccessorParams: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "EMailAddress",
+                            value: "my-new@email.address"
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    }),
+                    shareInfo: {
+                        peer: CoreAddress.from("peer"),
+                        requestReference: CoreId.from("reqRef2"),
+                        sourceAttribute: successorRepositoryAttribute.id
+                    }
+                };
+                ({ predecessor: predecessorOwnSharedIdentityAttribute } = await consumptionController.attributes.succeedOwnSharedIdentityAttribute(
+                    predecessorOwnSharedIdentityAttribute.id,
+                    sharedSuccessorParams
+                ));
+            });
+
+            test("should return validation success for full attribute deletion process of valid succeeded shared attribute", async function () {
+                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(successorRepositoryAttribute);
+                expect(result.isSuccess()).toBe(true);
+            });
+
+            test("should return validation error for full attribute deletion process of attribute with invalid succeededBy field", async function () {
+                const invalidPredecessor = await consumptionController.attributes.createAttributeUnsafe({
+                    content: IdentityAttribute.from({
+                        value: EMailAddress.from({
+                            value: "my@email.address"
+                        }),
+                        owner: consumptionController.accountController.identity.address
+                    }),
+                    succeededBy: CoreId.from("invalidSuccessorId")
+                });
+
+                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(invalidPredecessor);
+                expect(result).errorValidationResult({ message: "The successor does not exist.", code: "error.consumption.attributes.successorDoesNotExist" });
+            });
+
+            test("should delete an attribute", async function () {
+                const attributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
+                expect(attributeBeforeDeletion).toStrictEqual(successorRepositoryAttribute);
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+                const result = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
+                expect(result).toBeUndefined();
+            });
+
+            test("should detach successor of deleted attribute", async function () {
+                const successorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
+                expect(successorBeforeDeletion!.succeeds).toStrictEqual(predecessorRepositoryAttribute.id);
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(predecessorRepositoryAttribute);
+                const updatedSuccessorRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(successorRepositoryAttribute.id);
+                expect(updatedSuccessorRepositoryAttribute!.succeeds).toBeUndefined();
+            });
+
+            test("should detach shared attribute copies of deleted attribute", async function () {
+                const sharedAttributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(sharedAttributeBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorRepositoryAttribute.id);
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(predecessorRepositoryAttribute);
+                const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+            });
+
+            test("should delete predecessors of deleted attribute", async function () {
+                const predecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorRepositoryAttribute.id);
+                expect(JSON.stringify(predecessorBeforeDeletion)).toStrictEqual(JSON.stringify(predecessorRepositoryAttribute));
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+                const result = await consumptionController.attributes.getLocalAttribute(predecessorRepositoryAttribute.id);
+                expect(result).toBeUndefined();
+            });
+
+            test("should detach shared attribute copies of predecessors of deleted attribute", async function () {
+                const sharedPredecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(sharedPredecessorBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorRepositoryAttribute.id);
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+                const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+            });
+        });
     });
 
     describe("Attribute successions", function () {
