@@ -31,7 +31,6 @@ import {
     RelationshipAttributeJSON,
     RelationshipAttributeQueryJSON,
     RelationshipTemplateContent,
-    RelationshipTemplateContentJSON,
     RenderHints,
     RenderHintsEditType,
     RenderHintsJSON,
@@ -1593,16 +1592,17 @@ export class DataViewExpander {
             return await this.expandRelationshipDTO(result.value);
         }
 
-        const templateResult = (
-            await this.transport.relationshipTemplates.getRelationshipTemplates({
+        const requestResult = (
+            await this.consumption.incomingRequests.getRequests({
                 query: {
-                    createdBy: address
+                    peer: address,
+                    status: [LocalRequestStatus.ManualDecisionRequired, LocalRequestStatus.DecisionRequired]
                 }
             })
         ).value;
-        templateResult.sort((template1, template2) => (template2.createdAt > template1.createdAt ? 1 : -1));
-        if (templateResult.length !== 0 && templateResult.at(-1)?.content["@type"] === "RelationshipTemplateContent") {
-            return this.expandAddressFromTemplate(templateResult.at(-1)!);
+        requestResult.sort((request1, request2) => (request2.createdAt > request1.createdAt ? 1 : -1));
+        if (requestResult.length > 0) {
+            return this.expandAddressFromRequest(requestResult.at(-1)!);
         }
 
         return this.expandUnknown(address);
@@ -1670,10 +1670,9 @@ export class DataViewExpander {
         return await Promise.all(changePromises);
     }
 
-    private expandAddressFromTemplate(template: RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON }): IdentityDVO {
-        const requestOnNewRelationship = template.content.onNewRelationship;
-        const sharedAttributesOnNewRelationship = this.getSharedAttributesFromRequest(requestOnNewRelationship);
-        const address = template.createdBy;
+    private expandAddressFromRequest(request: LocalRequestDTO): IdentityDVO {
+        const sharedAttributesOnNewRelationship = this.getSharedAttributesFromRequest(request);
+        const address = request.peer;
         const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship) ?? address.substring(3, 9);
         const initials = (name.match(/\b\w/g) ?? []).join("");
 
@@ -1689,13 +1688,13 @@ export class DataViewExpander {
         };
     }
 
-    private getSharedAttributesFromRequest(request: RequestJSON): (IdentityAttributeJSON | RelationshipAttributeJSON)[] {
+    private getSharedAttributesFromRequest(request: LocalRequestDTO): (IdentityAttributeJSON | RelationshipAttributeJSON)[] {
         let shareAttributeRequestItems: ShareAttributeRequestItemJSON[] = [];
         shareAttributeRequestItems = shareAttributeRequestItems.concat(
-            request.items.filter((item) => item["@type"] === "ShareAttributeRequestItem") as ShareAttributeRequestItemJSON[]
+            request.content.items.filter((item) => item["@type"] === "ShareAttributeRequestItem") as ShareAttributeRequestItemJSON[]
         );
 
-        const itemGroups = request.items.filter((item) => item["@type"] === "RequestItemGroup") as RequestItemGroupJSON[];
+        const itemGroups = request.content.items.filter((item) => item["@type"] === "RequestItemGroup") as RequestItemGroupJSON[];
         itemGroups.forEach((itemGroup) => {
             shareAttributeRequestItems = shareAttributeRequestItems.concat(
                 itemGroup.items.filter((item) => item["@type"] === "ShareAttributeRequestItem") as ShareAttributeRequestItemJSON[]
