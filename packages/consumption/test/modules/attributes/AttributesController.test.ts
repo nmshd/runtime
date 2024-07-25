@@ -798,6 +798,7 @@ describe("AttributesController", function () {
             let predecessorRepositoryAttribute: LocalAttribute;
             let successorRepositoryAttribute: LocalAttribute;
             let predecessorOwnSharedIdentityAttribute: LocalAttribute;
+
             beforeEach(async () => {
                 predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -848,12 +849,12 @@ describe("AttributesController", function () {
                 ));
             });
 
-            test("should return validation success for valid succeeded shared attribute", async function () {
+            test("should return validation success for full attribute deletion process of valid succeeded shared attribute", async function () {
                 const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(successorRepositoryAttribute);
                 expect(result.isSuccess()).toBe(true);
             });
 
-            test("should return validation error for attribute with invalid succeededBy field", async function () {
+            test("should return validation error for full attribute deletion process of attribute with invalid succeededBy field", async function () {
                 const invalidPredecessor = await consumptionController.attributes.createAttributeUnsafe({
                     content: IdentityAttribute.from({
                         value: EMailAddress.from({
@@ -895,15 +896,6 @@ describe("AttributesController", function () {
                 expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             });
 
-            test("should detach shared attribute copies of predecessors of deleted attribute", async function () {
-                const sharedPredecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
-                expect(sharedPredecessorBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorRepositoryAttribute.id);
-
-                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
-                const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
-                expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
-            });
-
             test("should delete predecessors of deleted attribute", async function () {
                 const predecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorRepositoryAttribute.id);
                 expect(JSON.stringify(predecessorBeforeDeletion)).toStrictEqual(JSON.stringify(predecessorRepositoryAttribute));
@@ -911,6 +903,15 @@ describe("AttributesController", function () {
                 await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
                 const result = await consumptionController.attributes.getLocalAttribute(predecessorRepositoryAttribute.id);
                 expect(result).toBeUndefined();
+            });
+
+            test("should detach shared attribute copies of predecessors of deleted attribute", async function () {
+                const sharedPredecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(sharedPredecessorBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorRepositoryAttribute.id);
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+                const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             });
 
             test("should change default from deleted attribute to newest of the same value type if another exists", async function () {
