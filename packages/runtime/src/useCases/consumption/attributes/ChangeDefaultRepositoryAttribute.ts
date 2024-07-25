@@ -37,7 +37,7 @@ export class ChangeDefaultRepositoryAttributeUseCase extends UseCase<ChangeDefau
             return Result.fail(RuntimeErrors.attributes.hasSuccessor(newDefaultAttribute));
         }
 
-        const defaultRepositoryAttribute = await this.attributesController.changeDefaultRepositoryAttribute(newDefaultAttribute);
+        const defaultRepositoryAttribute = await this.attributesController.setAsDefaultRepositoryAttribute(newDefaultAttribute, false);
 
         await this.accountController.syncDatawallet();
 
