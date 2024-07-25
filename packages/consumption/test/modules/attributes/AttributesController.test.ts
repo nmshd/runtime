@@ -596,6 +596,7 @@ describe("AttributesController", function () {
             let predecessorRepositoryAttribute: LocalAttribute;
             let successorRepositoryAttribute: LocalAttribute;
             let predecessorOwnSharedIdentityAttribute: LocalAttribute;
+
             beforeEach(async () => {
                 predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
                     content: IdentityAttribute.from({
