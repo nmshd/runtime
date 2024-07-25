@@ -1791,6 +1791,39 @@ describe("DeleteAttributeUseCases", () => {
             const result = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: unknownAttributeId });
             expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
+
+        test("should throw trying to call with a child of a complex attribute", async () => {
+            const complexAttribute = (
+                await services1.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "StreetAddress",
+                            recipient: "ARecipient",
+                            street: "AStreet",
+                            houseNo: "AHouseNo",
+                            zipCode: "AZipCode",
+                            city: "ACity",
+                            country: "DE"
+                        }
+                    }
+                })
+            ).value;
+
+            const childAttributes = (
+                await services1.consumption.attributes.getAttributes({
+                    query: {
+                        parentId: complexAttribute.id
+                    }
+                })
+            ).value;
+            expect(childAttributes).toHaveLength(5);
+
+            const result = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: childAttributes[0].id });
+            expect(result).toBeAnError(
+                `Attribute '${childAttributes[0].id.toString()}' is a child of a complex Attribute. If you want to delete it, you must delete its parent.`,
+                "error.runtime.attributes.cannotSeparatelyDeleteChildOfComplexAttribute"
+            );
+        });
     });
 
     describe(DeleteOwnSharedAttributeAndNotifyPeerUseCase.name, () => {
