@@ -712,6 +712,87 @@ describe("AttributesController", function () {
                 expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             });
         });
+
+        describe("should validate and execute full attribute deletion process for child attribute", function () {
+            let predecessorComplexAttribute: LocalAttribute;
+            let successorComplexAttribute: LocalAttribute;
+
+            let predecessorChildAttribute: LocalAttribute;
+            let successorChildAttribute: LocalAttribute;
+
+            beforeEach(async () => {
+                predecessorComplexAttribute = await consumptionController.attributes.createLocalAttribute({
+                    content: IdentityAttribute.from({
+                        value: BirthDate.from({
+                            day: 29,
+                            month: 2,
+                            year: 2000
+                        }),
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+
+                const successorParams: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: BirthDate.from({
+                            day: 28,
+                            month: 2,
+                            year: 2000
+                        }),
+                        owner: consumptionController.accountController.identity.address
+                    })
+                };
+                ({ predecessor: predecessorComplexAttribute, successor: successorComplexAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(
+                    predecessorComplexAttribute.id,
+                    successorParams
+                ));
+
+                predecessorChildAttribute = (
+                    await consumptionController.attributes.getLocalAttributes({
+                        parentId: predecessorComplexAttribute.id.toString(),
+                        "content.value.@type": "BirthDay"
+                    })
+                )[0];
+                successorChildAttribute = (
+                    await consumptionController.attributes.getLocalAttributes({
+                        parentId: successorComplexAttribute.id.toString(),
+                        "content.value.@type": "BirthDay"
+                    })
+                )[0];
+            });
+
+            test("should return validation success for valid succeeded child attribute", async function () {
+                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(successorComplexAttribute);
+                expect(result.isSuccess()).toBe(true);
+            });
+
+            test("should delete the child attribute", async function () {
+                const childAttributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorChildAttribute.id);
+                expect(childAttributeBeforeDeletion).toStrictEqual(successorChildAttribute);
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorComplexAttribute);
+                const result = await consumptionController.attributes.getLocalAttribute(successorChildAttribute.id);
+                expect(result).toBeUndefined();
+            });
+
+            test("should detach successor of deleted child attribute", async function () {
+                const childSuccessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorChildAttribute.id);
+                expect(childSuccessorBeforeDeletion!.succeeds).toStrictEqual(predecessorChildAttribute.id);
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(predecessorComplexAttribute);
+                const updatedSuccessorChildAttribute = await consumptionController.attributes.getLocalAttribute(successorChildAttribute.id);
+                expect(updatedSuccessorChildAttribute!.succeeds).toBeUndefined();
+            });
+
+            test("should delete predecessors of deleted child attribute", async function () {
+                const predecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorChildAttribute.id);
+                expect(JSON.stringify(predecessorBeforeDeletion)).toStrictEqual(JSON.stringify(predecessorChildAttribute));
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorComplexAttribute);
+                const result = await consumptionController.attributes.getLocalAttribute(predecessorChildAttribute.id);
+                expect(result).toBeUndefined();
+            });
+        });
     });
 
     describe("Attribute successions", function () {
