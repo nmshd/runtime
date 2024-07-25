@@ -180,9 +180,9 @@ export async function makeUploadRequest(values: object = {}): Promise<UploadOwnF
     };
 }
 
-export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateContentJSON = ArbitraryRelationshipTemplateContent.from({ content: {} }).toJSON();
+export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateContentJSON = ArbitraryRelationshipTemplateContent.from({ value: {} }).toJSON();
 
-export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ content: {} }).toJSON();
+export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON();
 
 export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON): Promise<RelationshipTemplateDTO> {
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({

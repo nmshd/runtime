@@ -82,7 +82,7 @@ describe("MessageDVO", () => {
         messageRequest = {
             recipients: [transportService2Address],
             content: ArbitraryMessageContent.from({
-                content: {
+                value: {
                     arbitraryValue: true
                 }
             }).toJSON(),
