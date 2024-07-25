@@ -8,7 +8,7 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress, RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { DeletionStatus } from "../../../attributes";
@@ -102,6 +102,20 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             if (typeof recipient !== "undefined" && foundAttribute.shareInfo.peer.equals(recipient)) {
                 return ValidationResult.error(
                     CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
+                );
+            }
+
+            const query: any = {
+                "peer.address": foundAttribute.shareInfo.peer.address,
+                status: RelationshipStatus.Pending
+            };
+            const pendingRelationshipToPeer = await this.accountController.relationships.getRelationships(query);
+
+            if (pendingRelationshipToPeer.length !== 0) {
+                return ValidationResult.error(
+                    CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship(
+                        "The provided RelationshipAttribute only exists in the context of a pending Relationship with a third party."
+                    )
                 );
             }
         }

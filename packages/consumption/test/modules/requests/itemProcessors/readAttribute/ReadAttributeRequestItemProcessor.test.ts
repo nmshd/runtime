@@ -977,7 +977,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "cannotShareRelationshipAttributeOfPendingRelationship",
-                    message: "The provided RelationshipAttribute exists in the context of a pending Relationship with a third party. Before sharing it, activate the Relationship."
+                    message: "The provided RelationshipAttribute exists in the context of a pending Relationship with a third party."
                 });
             });
 
