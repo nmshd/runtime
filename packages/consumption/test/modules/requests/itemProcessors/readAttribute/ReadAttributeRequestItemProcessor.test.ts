@@ -42,16 +42,20 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
     let processor: ReadAttributeRequestItemProcessor;
 
+    let thirdPartyAccountController: AccountController;
+
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
         ({ accountController, consumptionController } = accounts[0]);
 
         processor = new ReadAttributeRequestItemProcessor(consumptionController);
+
+        ({ accountController: thirdPartyAccountController } = accounts[1]);
     });
 
     afterAll(async function () {
@@ -925,7 +929,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
             test("returns an error when a RelationshipAttribute is shared with a third party with which only a pending Relationship exists", async function () {
                 const sender = CoreAddress.from("Sender");
                 const recipient = accountController.identity.address;
-                const aThirdParty = CoreAddress.from("AThirdParty");
+                const aThirdParty = thirdPartyAccountController.identity.address;
+                await TestUtil.addPendingRelationship(accountController, thirdPartyAccountController);
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,

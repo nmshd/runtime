@@ -139,9 +139,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     );
                 }
 
-                const pendingRelationshipToPeer = await this.accountController.relationships.getRelationships({
-                    query: { peer: foundLocalAttribute.shareInfo.peer, status: RelationshipStatus.Pending }
-                });
+                const query: any = {
+                    "peer.address": foundLocalAttribute.shareInfo.peer.address,
+                    status: RelationshipStatus.Pending
+                };
+                const pendingRelationshipToPeer = await this.accountController.relationships.getRelationships(query);
 
                 if (pendingRelationshipToPeer.length !== 0) {
                     return ValidationResult.error(
