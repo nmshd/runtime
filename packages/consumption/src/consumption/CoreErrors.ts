@@ -283,6 +283,10 @@ class Requests {
         return new CoreError("error.consumption.requests.attributeQueryMismatch", message);
     }
 
+    public cannotShareRelationshipAttributeOfPendingRelationship(message: string) {
+        return new CoreError("error.consumption.requests.cannotShareRelationshipAttributeOfPendingRelationship", message);
+    }
+
     public wrongRelationshipStatus(message: string) {
         return new CoreError("error.consumption.requests.wrongRelationshipStatus", message);
     }
