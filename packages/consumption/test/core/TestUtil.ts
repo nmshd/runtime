@@ -270,6 +270,38 @@ export class TestUtil {
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
     }
 
+    public static async addPendingRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ pendingRelationshipFromSelf: Relationship; pendingRelationshipPeer: Relationship }> {
+        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
+            content: {
+                mycontent: "template"
+            },
+            expiresAt: CoreDate.utc().add({ minutes: 5 }),
+            maxNumberOfAllocations: 1
+        });
+
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(templateFrom.id, templateFrom.secretKey);
+
+        await to.relationships.sendRelationship({
+            template: templateTo,
+            creationContent: {
+                mycontent: "request"
+            }
+        });
+
+        const pendingRelationshipPeer = (await to.relationships.getRelationshipToIdentity(from.identity.address))!;
+        expect(pendingRelationshipPeer.status).toStrictEqual(RelationshipStatus.Pending);
+
+        const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
+        expect(syncedRelationships).toHaveLength(1);
+        const pendingRelationshipFromSelf = syncedRelationships[0];
+        expect(pendingRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Pending);
+
+        return { pendingRelationshipFromSelf, pendingRelationshipPeer };
+    }
+
     public static async terminateRelationship(
         from: AccountController,
         to: AccountController
