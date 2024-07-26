@@ -17,6 +17,8 @@ export interface IConfig {
     allowIdentityCreation: boolean;
     supportedDatawalletVersion: number;
     supportedIdentityVersion: number;
+    supportedMinBackboneVersion: number;
+    supportedMaxBackboneVersion: number;
     debug: boolean;
     platformClientId: string;
     platformClientSecret: string;
@@ -37,6 +39,8 @@ export interface IConfigOverwrite {
     platformClientId: string;
     platformClientSecret: string;
     supportedIdentityVersion: number;
+    supportedMinBackboneVersion?: number;
+    supportedMaxBackboneVersion?: number;
     platformTimeout?: number;
     platformMaxRedirects?: number;
     platformMaxUnencryptedFileSize?: number;
@@ -60,6 +64,8 @@ export class Transport {
         allowIdentityCreation: true,
         supportedDatawalletVersion: 1,
         supportedIdentityVersion: -1,
+        supportedMinBackboneVersion: 5,
+        supportedMaxBackboneVersion: 5,
         debug: false,
         platformClientId: "",
         platformClientSecret: "",

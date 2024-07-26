@@ -29,4 +29,34 @@ describe("AccountController", function () {
     test("should init a second time", async function () {
         await account!.init();
     });
+
+    test("should correctly check a valid backbone version", async function () {
+        const transport = TestUtil.createTransport(connection, { supportedMinBackboneVersion: 1, supportedMaxBackboneVersion: 50 });
+        await transport.init();
+        const accounts = await TestUtil.provideAccounts(transport, 1);
+        account = accounts[0];
+
+        const versionCheckResult = await account.validateUsedBackboneVersion();
+        expect(versionCheckResult.isSuccess).toBe(true);
+    });
+
+    test("should catch a too low backbone version", async function () {
+        const transport = TestUtil.createTransport(connection, { supportedMinBackboneVersion: 51, supportedMaxBackboneVersion: 60 });
+        await transport.init();
+        const accounts = await TestUtil.provideAccounts(transport, 1);
+        account = accounts[0];
+
+        const versionCheckResult = await account.validateUsedBackboneVersion();
+        expect(versionCheckResult.error.code).toBe("error.transport.files.runtimeVersionIncompatibleWithBackboneVersion");
+    });
+
+    test("should catch a too high backbone version", async function () {
+        const transport = TestUtil.createTransport(connection, { supportedMinBackboneVersion: 1, supportedMaxBackboneVersion: 2 });
+        await transport.init();
+        const accounts = await TestUtil.provideAccounts(transport, 1);
+        account = accounts[0];
+
+        const versionCheckResult = await account.validateUsedBackboneVersion();
+        expect(versionCheckResult.error.code).toBe("error.transport.files.runtimeVersionIncompatibleWithBackboneVersion");
+    });
 });
