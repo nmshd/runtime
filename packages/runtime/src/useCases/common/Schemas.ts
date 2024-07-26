@@ -16790,7 +16790,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "default": {
+                "isDefault": {
                     "type": "string"
                 },
                 "content.@type": {
@@ -17480,7 +17480,7 @@ export const GetRepositoryAttributesRequest: any = {
                 "createdAt": {
                     "type": "string"
                 },
-                "default": {
+                "isDefault": {
                     "type": "string"
                 },
                 "content.tags": {

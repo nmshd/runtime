@@ -283,12 +283,12 @@ export class AttributesController extends ConsumptionBaseController {
             throw CoreErrors.attributes.isNotRepositoryAttribute(newDefaultAttribute.id);
         }
 
-        if (newDefaultAttribute.default) return newDefaultAttribute;
+        if (newDefaultAttribute.isDefault) return newDefaultAttribute;
 
         if (newDefaultAttribute.parentId) {
             const parentAttribute = await this.getLocalAttribute(newDefaultAttribute.parentId);
             if (!parentAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, newDefaultAttribute.parentId.toString());
-            if (parentAttribute.default) skipOverwrite = false;
+            if (parentAttribute.isDefault) skipOverwrite = false;
         }
 
         const valueType = newDefaultAttribute.content.value.constructor.name;
@@ -298,7 +298,7 @@ export class AttributesController extends ConsumptionBaseController {
                     [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType
                 },
                 {
-                    [nameof<LocalAttribute>((c) => c.default)]: true
+                    [nameof<LocalAttribute>((c) => c.isDefault)]: true
                 }
             ]
         };
@@ -314,11 +314,11 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (!skipOverwrite && currentDefaultAttributeExists) {
             const currentDefaultAttribute = currentDefaultAttributeResult[0];
-            currentDefaultAttribute.default = undefined;
+            currentDefaultAttribute.isDefault = undefined;
             await this.updateAttributeUnsafe(currentDefaultAttribute);
         }
 
-        newDefaultAttribute.default = true;
+        newDefaultAttribute.isDefault = true;
         await this.updateAttributeUnsafe(newDefaultAttribute);
         return newDefaultAttribute;
     }
@@ -619,7 +619,7 @@ export class AttributesController extends ConsumptionBaseController {
             parentId: successorParams.parentId,
             createdAt: successorParams.createdAt,
             succeededBy: successorParams.succeededBy,
-            default: predecessor.default
+            isDefault: predecessor.isDefault
         });
 
         await this.removeDefault(predecessor);
@@ -631,9 +631,9 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async removeDefault(attribute: LocalAttribute): Promise<LocalAttribute> {
-        if (!attribute.default) return attribute;
+        if (!attribute.isDefault) return attribute;
 
-        attribute.default = undefined;
+        attribute.isDefault = undefined;
         await this.updateAttributeUnsafe(attribute);
         return attribute;
     }
@@ -999,7 +999,7 @@ export class AttributesController extends ConsumptionBaseController {
             succeededBy: attributeData.succeededBy,
             succeeds: attributeData.succeeds,
             deletionInfo: attributeData.deletionInfo,
-            default: attributeData.default
+            isDefault: attributeData.isDefault
         });
         await this.attributes.create(localAttribute);
         return localAttribute;
@@ -1022,7 +1022,7 @@ export class AttributesController extends ConsumptionBaseController {
             succeededBy: attributeParams.succeededBy,
             succeeds: attributeParams.succeeds,
             deletionInfo: attributeParams.deletionInfo,
-            default: attributeParams.default
+            isDefault: attributeParams.isDefault
         };
         const newAttribute = LocalAttribute.from(params);
         await this.attributes.update(doc, newAttribute);
@@ -1113,7 +1113,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async transferDefault(attribute: LocalAttribute): Promise<void> {
-        if (!attribute.default) return;
+        if (!attribute.isDefault) return;
 
         const valueType = attribute.content.value.constructor.name;
         const query = {
@@ -1133,7 +1133,7 @@ export class AttributesController extends ConsumptionBaseController {
         const defaultCandidates = await this.getLocalAttributes(query);
         if (defaultCandidates.length === 0) return;
 
-        defaultCandidates[defaultCandidates.length - 1].default = true;
+        defaultCandidates[defaultCandidates.length - 1].isDefault = true;
         await this.updateAttributeUnsafe(defaultCandidates[defaultCandidates.length - 1]);
     }
 

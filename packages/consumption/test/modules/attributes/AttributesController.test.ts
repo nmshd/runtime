@@ -169,7 +169,7 @@ describe("AttributesController", function () {
                 })
             };
             const attribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
-            expect(attribute.default).toBe(true);
+            expect(attribute.isDefault).toBe(true);
         });
 
         test("should not set an Attribute as default if already another exists with that value type", async function () {
@@ -182,10 +182,10 @@ describe("AttributesController", function () {
                 })
             };
             const firstAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
-            expect(firstAttribute.default).toBe(true);
+            expect(firstAttribute.isDefault).toBe(true);
 
             const secondAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
-            expect(secondAttribute.default).toBeUndefined();
+            expect(secondAttribute.isDefault).toBeUndefined();
         });
 
         test("should set a child Attribute of a complex default attribute as default", async function () {
@@ -199,14 +199,14 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address
                 })
             });
-            expect(complexBirthDate.default).toBe(true);
+            expect(complexBirthDate.isDefault).toBe(true);
 
             const childBirthYear = await consumptionController.attributes.getLocalAttributes({
                 parentId: complexBirthDate.id.toString(),
                 "content.value.@type": "BirthYear"
             });
             expect(childBirthYear).toHaveLength(1);
-            expect(childBirthYear[0].default).toBe(true);
+            expect(childBirthYear[0].isDefault).toBe(true);
         });
 
         test("should set a child Attribute of a complex default attribute as default even if already another attribute with that value type exists", async function () {
@@ -218,7 +218,7 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address
                 })
             });
-            expect(independentBirthYear.default).toBe(true);
+            expect(independentBirthYear.isDefault).toBe(true);
 
             const complexBirthDate = await consumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
@@ -230,14 +230,14 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address
                 })
             });
-            expect(complexBirthDate.default).toBe(true);
+            expect(complexBirthDate.isDefault).toBe(true);
 
             const childBirthYear = await consumptionController.attributes.getLocalAttributes({ parentId: complexBirthDate.id.toString(), "content.value.@type": "BirthYear" });
             expect(childBirthYear).toHaveLength(1);
-            expect(childBirthYear[0].default).toBe(true);
+            expect(childBirthYear[0].isDefault).toBe(true);
 
             const updatedIndependentBirthYear = await consumptionController.attributes.getLocalAttribute(independentBirthYear.id);
-            expect(updatedIndependentBirthYear!.default).toBeUndefined();
+            expect(updatedIndependentBirthYear!.isDefault).toBeUndefined();
         });
 
         test("should allow to create a shared attribute copy", async function () {
@@ -933,20 +933,20 @@ describe("AttributesController", function () {
                     })
                 });
 
-                expect(successorRepositoryAttribute.default).toBe(true);
-                expect(otherRepositoryAttribute.default).toBeUndefined();
-                expect(otherNewerRepositoryAttribute.default).toBeUndefined();
+                expect(successorRepositoryAttribute.isDefault).toBe(true);
+                expect(otherRepositoryAttribute.isDefault).toBeUndefined();
+                expect(otherNewerRepositoryAttribute.isDefault).toBeUndefined();
 
                 await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
                 const updatedOtherRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(otherNewerRepositoryAttribute.id);
-                expect(updatedOtherRepositoryAttribute!.default).toBe(true);
+                expect(updatedOtherRepositoryAttribute!.isDefault).toBe(true);
             });
 
             test("should not set a default if the deleted default attribute had predecessors but no other candidate exists", async function () {
-                expect(successorRepositoryAttribute.default).toBe(true);
+                expect(successorRepositoryAttribute.isDefault).toBe(true);
                 await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
 
-                const defaultAttributes = await consumptionController.attributes.getLocalAttributes({ default: "true" });
+                const defaultAttributes = await consumptionController.attributes.getLocalAttributes({ isDefault: "true" });
                 expect(defaultAttributes).toHaveLength(0);
             });
         });
@@ -1496,7 +1496,7 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     })
                 });
-                expect(predecessor.default).toBe(true);
+                expect(predecessor.isDefault).toBe(true);
 
                 const successorParams: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
@@ -1509,8 +1509,8 @@ describe("AttributesController", function () {
                 };
 
                 const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
-                expect(successor.default).toBe(true);
-                expect(updatedPredecessor.default).toBeUndefined();
+                expect(successor.isDefault).toBe(true);
+                expect(updatedPredecessor.isDefault).toBeUndefined();
             });
 
             test("should succeed an own shared identity attribute", async function () {
@@ -2208,13 +2208,13 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address
                 })
             });
-            expect(secondAttribute.default).toBeUndefined();
+            expect(secondAttribute.isDefault).toBeUndefined();
 
             const updatedSecondAttribute = await consumptionController.attributes.setAsDefaultRepositoryAttribute(secondAttribute);
-            expect(updatedSecondAttribute.default).toBe(true);
+            expect(updatedSecondAttribute.isDefault).toBe(true);
 
             const updatedFirstAttribute = await consumptionController.attributes.getLocalAttribute(firstAttribute.id);
-            expect(updatedFirstAttribute!.default).toBeUndefined();
+            expect(updatedFirstAttribute!.isDefault).toBeUndefined();
         });
 
         test("should not change default RepositoryAttribute if candidate is already default", async function () {
@@ -2227,9 +2227,9 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address
                 })
             });
-            expect(firstAttribute.default).toBe(true);
+            expect(firstAttribute.isDefault).toBe(true);
             const updatedFirstAttribute = await consumptionController.attributes.setAsDefaultRepositoryAttribute(firstAttribute);
-            expect(updatedFirstAttribute.default).toBe(true);
+            expect(updatedFirstAttribute.isDefault).toBe(true);
         });
 
         test("should throw an error if the new default Attribute is not a RepositoryAttribute", async function () {

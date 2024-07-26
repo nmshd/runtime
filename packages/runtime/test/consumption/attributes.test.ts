@@ -227,7 +227,7 @@ describe("get attribute(s)", () => {
 
         test("should allow to get only default attributes", async function () {
             const result = await services1.consumption.attributes.getAttributes({
-                query: { default: "true" }
+                query: { isDefault: "true" }
             });
             expect(result).toBeSuccessful();
 
@@ -243,7 +243,7 @@ describe("get attribute(s)", () => {
 
         test("should allow not to get default attributes", async function () {
             const result = await services1.consumption.attributes.getAttributes({
-                query: { default: "!true" }
+                query: { isDefault: "!true" }
             });
             expect(result).toBeSuccessful();
 
@@ -498,7 +498,7 @@ describe("get repository, own shared and peer shared attributes", () => {
         test("should allow to get only default attributes", async function () {
             const result = await services1.consumption.attributes.getRepositoryAttributes({
                 query: {
-                    default: "true"
+                    isDefault: "true"
                 }
             });
             expect(result).toBeSuccessful();
@@ -681,7 +681,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         };
         const result = await services1.consumption.attributes.createRepositoryAttribute(request);
         const attribute = result.value;
-        expect(attribute.default).toBe(true);
+        expect(attribute.isDefault).toBe(true);
     });
 
     test("should create a RepositoryAttribute that is not the default if it is not the first of its value type", async () => {
@@ -696,7 +696,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         await services1.consumption.attributes.createRepositoryAttribute(request);
         const result = await services1.consumption.attributes.createRepositoryAttribute(request);
         const attribute = result.value;
-        expect(attribute.default).toBeUndefined();
+        expect(attribute.isDefault).toBeUndefined();
     });
 });
 
@@ -1361,7 +1361,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
                 }
             })
         ).value;
-        expect(defaultAttribute.default).toBe(true);
+        expect(defaultAttribute.isDefault).toBe(true);
 
         const desiredDefaultAttribute = (
             await services1.consumption.attributes.createRepositoryAttribute({
@@ -1373,18 +1373,18 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
                 }
             })
         ).value;
-        expect(desiredDefaultAttribute.default).toBeUndefined();
+        expect(desiredDefaultAttribute.isDefault).toBeUndefined();
 
         const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredDefaultAttribute.id });
         expect(result.isSuccess).toBe(true);
         const newDefaultAttribute = result.value;
-        expect(newDefaultAttribute.default).toBe(true);
+        expect(newDefaultAttribute.isDefault).toBe(true);
 
         const updatedFormerDesiredDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: desiredDefaultAttribute.id })).value;
-        expect(updatedFormerDesiredDefaultAttribute.default).toBe(true);
+        expect(updatedFormerDesiredDefaultAttribute.isDefault).toBe(true);
 
         const updatedFormerDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: defaultAttribute.id })).value;
-        expect(updatedFormerDefaultAttribute.default).toBeUndefined();
+        expect(updatedFormerDefaultAttribute.isDefault).toBeUndefined();
     });
 
     test("should return an error if the new default attribute is not a RepositoryAttribute", async () => {

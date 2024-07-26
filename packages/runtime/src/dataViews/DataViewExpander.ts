@@ -1216,7 +1216,7 @@ export class DataViewExpander {
             sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
             tags: identityAttribute.tags,
             valueType,
-            default: attribute.default
+            isDefault: attribute.isDefault
         };
     }
 

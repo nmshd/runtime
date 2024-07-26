@@ -15,7 +15,7 @@ export interface GetRepositoryAttributesRequest {
 
 export interface GetRepositoryAttributesRequestQuery {
     createdAt?: string;
-    default?: string;
+    isDefault?: string;
     "content.tags"?: string | string[];
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];

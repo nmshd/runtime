@@ -34,7 +34,7 @@ export interface RepositoryAttributeDVO extends LocalAttributeDVO {
     sharedWith: SharedToPeerAttributeDVO[];
     isOwn: true;
     tags?: string[];
-    default?: true;
+    isDefault?: true;
 }
 
 /**
