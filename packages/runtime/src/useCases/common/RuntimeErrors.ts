@@ -193,6 +193,13 @@ class Attributes {
             `Attribute '${attributeId.toString()}' is not a third party owned relationship attribute.`
         );
     }
+
+    public cannotSeparatelyDeleteChildOfComplexAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotSeparatelyDeleteChildOfComplexAttribute",
+            `Attribute '${attributeId.toString()}' is a child of a complex Attribute. If you want to delete it, you must delete its parent.`
+        );
+    }
 }
 
 class IdentityDeletionProcess {
