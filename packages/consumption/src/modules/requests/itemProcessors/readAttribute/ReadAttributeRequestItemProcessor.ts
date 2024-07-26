@@ -139,13 +139,30 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     );
                 }
 
-                const query: any = {
+                const queryForPendingRelationship: any = {
                     "peer.address": foundLocalAttribute.shareInfo.peer.address,
                     status: RelationshipStatus.Pending
                 };
-                const pendingRelationshipToPeer = await this.accountController.relationships.getRelationships(query);
+                const pendingRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForPendingRelationship);
 
-                if (pendingRelationshipToPeer.length !== 0) {
+                const queryForActivatedOrTerminatedRelationship: any = {
+                    "peer.address": foundLocalAttribute.shareInfo.peer.address,
+                    $or: [
+                        {
+                            ["status"]: { $eq: RelationshipStatus.Active }
+                        },
+                        {
+                            ["status"]: { $eq: RelationshipStatus.Terminated }
+                        },
+                        {
+                            ["status"]: { $eq: RelationshipStatus.DeletionProposed }
+                        }
+                    ]
+                };
+
+                const activatedOrTerminatedRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForActivatedOrTerminatedRelationship);
+
+                if (pendingRelationshipToPeer.length !== 0 || activatedOrTerminatedRelationshipToPeer.length === 0) {
                     return ValidationResult.error(
                         CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship(
                             "The provided RelationshipAttribute exists in the context of a pending Relationship and therefore cannot be shared."
