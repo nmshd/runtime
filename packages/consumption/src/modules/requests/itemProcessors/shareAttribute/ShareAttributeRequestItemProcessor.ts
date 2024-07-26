@@ -114,7 +114,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             if (pendingRelationshipToPeer.length !== 0) {
                 return ValidationResult.error(
                     CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship(
-                        "The provided RelationshipAttribute only exists in the context of a pending Relationship with a third party."
+                        "The provided RelationshipAttribute only exists in the context of a pending Relationship and therefore cannot be shared."
                     )
                 );
             }

@@ -27,14 +27,18 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
     let processor: ShareAttributeRequestItemProcessor;
 
+    let thirdPartyTestAccount: AccountController;
+
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
 
         await transport.init();
 
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
-        ({ accountController: testAccount, consumptionController } = account);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
+        ({ accountController: testAccount, consumptionController } = accounts[0]);
+
+        ({ accountController: thirdPartyTestAccount } = accounts[1]);
     });
 
     afterAll(async function () {
@@ -539,6 +543,39 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
                 message: "The provided RelationshipAttribute already exists in the context of the Relationship with the peer."
+            });
+        });
+
+        test("returns an error when trying to share a RelationshipAttribute of a pending Relationship", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+            const aThirdParty = thirdPartyTestAccount.identity.address;
+            await TestUtil.addPendingRelationship(testAccount, thirdPartyTestAccount);
+
+            const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    owner: sender,
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "AKey"
+                }),
+                shareInfo: {
+                    peer: aThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
+                }
+            });
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: relationshipAttribute.content,
+                sourceAttributeId: relationshipAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.cannotShareRelationshipAttributeOfPendingRelationship",
+                message: "The provided RelationshipAttribute only exists in the context of a pending Relationship and therefore cannot be shared."
             });
         });
     });

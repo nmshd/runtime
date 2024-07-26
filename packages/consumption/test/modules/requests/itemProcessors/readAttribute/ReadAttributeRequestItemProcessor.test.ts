@@ -926,7 +926,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when a RelationshipAttribute is shared with a third party with which only a pending Relationship exists", async function () {
+            test("returns an error when trying to share a RelationshipAttribute of a pending Relationship", async function () {
                 const sender = CoreAddress.from("Sender");
                 const recipient = accountController.identity.address;
                 const aThirdParty = thirdPartyAccountController.identity.address;
@@ -977,7 +977,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "cannotShareRelationshipAttributeOfPendingRelationship",
-                    message: "The provided RelationshipAttribute exists in the context of a pending Relationship with a third party."
+                    message: "The provided RelationshipAttribute exists in the context of a pending Relationship and therefore cannot be shared."
                 });
             });
 
