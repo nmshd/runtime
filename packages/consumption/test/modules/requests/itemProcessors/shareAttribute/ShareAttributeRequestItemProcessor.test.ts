@@ -13,7 +13,7 @@ import {
     ShareAttributeRequestItem,
     Surname
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, RelationshipStatus, Transport } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, DeletionStatus, LocalAttribute, LocalRequest, LocalRequestStatus, ShareAttributeRequestItemProcessor } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
@@ -54,28 +54,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
     describe("canCreateOutgoingRequestItem", function () {
         beforeEach(async function () {
-            const queryForActiveRelationship: any = {
-                "peer.address": aThirdParty.address,
-                status: RelationshipStatus.Active
-            };
-            const activeRelationshipToThirdParty = await testAccount.relationships.getRelationships(queryForActiveRelationship);
-
-            if (activeRelationshipToThirdParty.length === 0) {
-                await TestUtil.addRelationship(testAccount, thirdPartyTestAccount);
-            }
-        });
-
-        afterEach(async function () {
-            const queryForPendingRelationship: any = {
-                "peer.address": aThirdParty.address,
-                status: RelationshipStatus.Pending
-            };
-            const pendingRelationshipToThirdParty = await testAccount.relationships.getRelationships(queryForPendingRelationship);
-
-            if (pendingRelationshipToThirdParty.length !== 0) {
-                await testAccount.relationships.reject(pendingRelationshipToThirdParty[0].id);
-                await TestUtil.syncUntilHasRelationships(thirdPartyTestAccount);
-            }
+            await TestUtil.ensureActiveRelationship(testAccount, thirdPartyTestAccount);
         });
 
         test.each([

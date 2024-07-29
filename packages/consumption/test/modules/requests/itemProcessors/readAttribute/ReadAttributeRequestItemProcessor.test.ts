@@ -16,7 +16,7 @@ import {
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, RelationshipStatus, Transport } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
@@ -253,28 +253,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
     describe("canAccept", function () {
         beforeEach(async function () {
-            const queryForActiveRelationship: any = {
-                "peer.address": aThirdParty.address,
-                status: RelationshipStatus.Active
-            };
-            const activeRelationshipToThirdParty = await accountController.relationships.getRelationships(queryForActiveRelationship);
-
-            if (activeRelationshipToThirdParty.length === 0) {
-                await TestUtil.addRelationship(accountController, thirdPartyAccountController);
-            }
-        });
-
-        afterEach(async function () {
-            const queryForPendingRelationship: any = {
-                "peer.address": aThirdParty.address,
-                status: RelationshipStatus.Pending
-            };
-            const pendingRelationshipToThirdParty = await accountController.relationships.getRelationships(queryForPendingRelationship);
-
-            if (pendingRelationshipToThirdParty.length !== 0) {
-                await accountController.relationships.reject(pendingRelationshipToThirdParty[0].id);
-                await TestUtil.syncUntilHasRelationships(thirdPartyAccountController);
-            }
+            await TestUtil.ensureActiveRelationship(accountController, thirdPartyAccountController);
         });
 
         test("can be called with the id of an existing own LocalAttribute", async function () {
@@ -1061,14 +1040,14 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             test("can be called with an arbitrary third party if the thirdParty string array of the ThirdPartyRelationshipAttributeQuery contains an empty string", async function () {
                 const sender = CoreAddress.from("Sender");
-                const anInvolvedThirdParty = CoreAddress.from("AnInvolvedThirdParty");
+                const aQueriedThirdParty = CoreAddress.from("AQueriedThirdParty");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
                         owner: "",
                         key: "AKey",
-                        thirdParty: ["", anInvolvedThirdParty.toString()]
+                        thirdParty: ["", aQueriedThirdParty.toString()]
                     })
                 });
 

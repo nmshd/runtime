@@ -994,15 +994,15 @@ describe("validateAttributeMatchesWithQuery", function () {
             });
         });
 
-        test("returns an error when a RelationshipAttribute that was queried by a ThirdPartyRelationshipAttributeQuery does not belong to the Recipient or one of the involved third parties, but an empty string was specified for the owner of the query", async function () {
-            const anInvolvedThirdParty = CoreAddress.from("AnInvolvedThirdParty");
+        test("returns an error when a RelationshipAttribute that was queried by a ThirdPartyRelationshipAttributeQuery does not belong to the Recipient or one of the queried third parties, but an empty string was specified for the owner of the query", async function () {
+            const aQueriedThirdParty = CoreAddress.from("AQueriedThirdParty");
 
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
                     key: "AKey",
-                    thirdParty: [anInvolvedThirdParty.toString()]
+                    thirdParty: [aQueriedThirdParty.toString()]
                 })
             });
 

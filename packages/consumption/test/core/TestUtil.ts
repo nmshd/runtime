@@ -302,6 +302,35 @@ export class TestUtil {
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
     }
 
+    public static async ensureActiveRelationship(from: AccountController, to: AccountController): Promise<void> {
+        const toAddress = to.identity.address.toString();
+
+        const queryForPendingRelationship: any = {
+            "peer.address": toAddress,
+            status: RelationshipStatus.Pending
+        };
+        const pendingRelationship = await from.relationships.getRelationships(queryForPendingRelationship);
+
+        if (pendingRelationship.length !== 0) {
+            await from.relationships.accept(pendingRelationship[0].id);
+            await TestUtil.syncUntilHasRelationships(to);
+            return;
+        }
+
+        const queryForActiveRelationship: any = {
+            "peer.address": toAddress,
+            status: RelationshipStatus.Active
+        };
+        const activeRelationship = await from.relationships.getRelationships(queryForActiveRelationship);
+
+        if (activeRelationship.length === 0) {
+            await TestUtil.addRelationship(from, to);
+            return;
+        }
+
+        return;
+    }
+
     public static async terminateRelationship(
         from: AccountController,
         to: AccountController

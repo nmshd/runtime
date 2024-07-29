@@ -21,7 +21,7 @@ export class AttributeListenerModule extends RuntimeModule {
         const createdAttribute = event.data;
         if (createdAttribute.content["@type"] === "IdentityAttribute" && createdAttribute.shareInfo) return;
         if (createdAttribute.content["@type"] === "RelationshipAttribute" && createdAttribute.content.confidentiality === RelationshipAttributeConfidentiality.Private) return;
-        if (await AttributeListenerModule.relationshipAttributeOfNonActiveRelationship(services, createdAttribute)) return;
+        if (await AttributeListenerModule.relationshipAttributeOfInactiveRelationship(services, createdAttribute)) return;
 
         const getAttributeListenersResult = await services.consumptionServices.attributeListeners.getAttributeListeners();
         if (getAttributeListenersResult.isError) {
@@ -36,7 +36,7 @@ export class AttributeListenerModule extends RuntimeModule {
         await Promise.all(promises);
     }
 
-    private static async relationshipAttributeOfNonActiveRelationship(services: RuntimeServices, attribute: LocalAttributeDTO): Promise<boolean> {
+    private static async relationshipAttributeOfInactiveRelationship(services: RuntimeServices, attribute: LocalAttributeDTO): Promise<boolean> {
         if (attribute.content["@type"] !== "RelationshipAttribute") {
             return false;
         }
@@ -54,10 +54,9 @@ export class AttributeListenerModule extends RuntimeModule {
 
     private async handleRelationshipChanged(event: RelationshipChangedEvent) {
         const changedRelationship = event.data;
-        if (changedRelationship.status !== RelationshipStatus.Active || changedRelationship.auditLog.length > 2) return;
 
-        const lastAuditLogEntry = changedRelationship.auditLog[changedRelationship.auditLog.length - 1];
-        if (lastAuditLogEntry.reason === RelationshipAuditLogEntryReason.AcceptanceOfCreation) {
+        const lastAuditLogEntry = changedRelationship.auditLog.at(-1);
+        if (lastAuditLogEntry && lastAuditLogEntry.reason === RelationshipAuditLogEntryReason.AcceptanceOfCreation) {
             const services = await this.runtime.getServices(event.eventTargetAddress);
             const relationshipAttributesWithPeer = (
                 await services.consumptionServices.attributes.getAttributes({ query: { "content.@type": "RelationshipAttribute", "shareInfo.peer": changedRelationship.peer } })
