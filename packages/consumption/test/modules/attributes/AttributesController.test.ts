@@ -718,7 +718,7 @@ describe("AttributesController", function () {
             let predecessorOwnSharedIdentityAttribute: LocalAttribute;
 
             beforeEach(async () => {
-                predecessorRepositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+                predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: EMailAddress.from({
                             value: "my@email.address"
