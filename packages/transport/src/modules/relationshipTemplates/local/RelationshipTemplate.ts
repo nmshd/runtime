@@ -69,4 +69,12 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
         this.metadataModifiedAt = CoreDate.utc();
         return this;
     }
+
+    public isExpired(): boolean {
+        if (this.cache?.expiresAt?.isBefore(CoreDate.utc())) {
+            return true;
+        }
+
+        return false;
+    }
 }

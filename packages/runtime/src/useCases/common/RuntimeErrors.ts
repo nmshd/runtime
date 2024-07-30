@@ -90,6 +90,10 @@ class RelationshipTemplates {
             `The given reference '${reference}' is not valid. The reference for a relationship template must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.RelationshipTemplate}'.`
         );
     }
+
+    public expiredRelationshipTemplate(reference: string): ApplicationError {
+        return new ApplicationError("error.runtime.relationshipTemplates.expiredRelationshipTemplate", `The RelationshipTemplate '${reference}' has already expired.`);
+    }
 }
 
 class Relationships {
