@@ -12,8 +12,7 @@ export class DataViewTranslateable {
 
     public static readonly consumption = {
         mails: {
-            mailSubjectFallback: `${DataViewTranslateable.prefix}mails.mailSubjectFallback`,
-            requestMailSubjectFallback: `${DataViewTranslateable.prefix}mails.requestMailSubjectFallback`
+            mailSubjectFallback: `${DataViewTranslateable.prefix}mails.mailSubjectFallback`
         },
         attributes: {
             unknownAttributeName: `${DataViewTranslateable.prefix}attributes.UnknownAttributeName`
