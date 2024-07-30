@@ -1600,9 +1600,8 @@ export class DataViewExpander {
                 }
             })
         ).value;
-        requestResult.sort((request1, request2) => (request2.createdAt > request1.createdAt ? 1 : -1));
         if (requestResult.length > 0) {
-            return this.expandAddressFromRequest(requestResult.at(-1)!);
+            return this.expandAddressFromRequest(requestResult[0]); // with no relationship max 1 request available
         }
 
         return this.expandUnknown(address);
