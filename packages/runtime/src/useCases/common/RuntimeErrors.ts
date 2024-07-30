@@ -91,8 +91,8 @@ class RelationshipTemplates {
         );
     }
 
-    public expiredRelationshipTemplate(reference: string): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.expiredRelationshipTemplate", `The RelationshipTemplate '${reference}' has already expired.`);
+    public expiredRelationshipTemplate(message: string): ApplicationError {
+        return new ApplicationError("error.runtime.relationshipTemplates.expiredRelationshipTemplate", message);
     }
 }
 

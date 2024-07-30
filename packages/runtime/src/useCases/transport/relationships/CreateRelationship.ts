@@ -32,6 +32,14 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
+        if (template.isExpired()) {
+            throw Result.fail(
+                RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
+                    `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
+                )
+            );
+        }
+
         const relationship = await this.relationshipsController.sendRelationship({
             template: template,
             content: request.content

@@ -31,7 +31,11 @@ export class AcceptIncomingRequestUseCase extends UseCase<AcceptIncomingRequestR
             }
 
             if (template.isExpired()) {
-                throw Result.fail(RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(template.id.toString()));
+                throw Result.fail(
+                    RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
+                        `The LocalRequest has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to.`
+                    )
+                );
             }
         }
 
