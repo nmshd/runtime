@@ -717,7 +717,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns error when the RelationshipAttribute exists in the context of the Relationship with the peer", async function () {
+        test("returns error when the initial RelationshipAttribute already exists in the context of the Relationship with the peer", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
@@ -744,6 +744,149 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 code: "error.consumption.requests.invalidRequestItem",
                 message: "The provided RelationshipAttribute already exists in the context of the Relationship with the peer."
             });
+        });
+
+        test("returns error when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+            const aThirdParty = CoreAddress.from("AThirdParty");
+
+            const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    owner: sender,
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "AKey"
+                }),
+                shareInfo: {
+                    peer: aThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
+                }
+            });
+
+            await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    owner: sender,
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "AKey"
+                }),
+                shareInfo: {
+                    peer: recipient,
+                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceAttribute: initialRelationshipAttribute.id
+                }
+            });
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: initialRelationshipAttribute.content,
+                sourceAttributeId: initialRelationshipAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: "The provided RelationshipAttribute already exists in the context of the Relationship with the peer."
+            });
+        });
+
+        test("returns success when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer but is ToBeDeletedByPeer", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+            const aThirdParty = CoreAddress.from("AThirdParty");
+
+            const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    owner: sender,
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "AKey"
+                }),
+                shareInfo: {
+                    peer: aThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
+                }
+            });
+
+            await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    owner: sender,
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "AKey"
+                }),
+                shareInfo: {
+                    peer: recipient,
+                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceAttribute: initialRelationshipAttribute.id
+                },
+                deletionInfo: {
+                    deletionStatus: DeletionStatus.ToBeDeletedByPeer,
+                    deletionDate: CoreDate.utc().add({ day: 1 })
+                }
+            });
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: initialRelationshipAttribute.content,
+                sourceAttributeId: initialRelationshipAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).successfulValidationResult();
+        });
+
+        test("returns success when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer but is DeletedByPeer", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+            const aThirdParty = CoreAddress.from("AThirdParty");
+
+            const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    owner: sender,
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "AKey"
+                }),
+                shareInfo: {
+                    peer: aThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
+                }
+            });
+
+            await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    owner: sender,
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "AKey"
+                }),
+                shareInfo: {
+                    peer: recipient,
+                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceAttribute: initialRelationshipAttribute.id
+                },
+                deletionInfo: {
+                    deletionStatus: DeletionStatus.DeletedByPeer,
+                    deletionDate: CoreDate.utc().subtract({ day: 1 })
+                }
+            });
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: initialRelationshipAttribute.content,
+                sourceAttributeId: initialRelationshipAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).successfulValidationResult();
         });
     });
 

@@ -101,11 +101,19 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You can only share RelationshipAttributes that are not a copy of a sourceAttribute."));
             }
 
-            // TODO: deletionInfo
-            if (typeof recipient !== "undefined" && foundAttribute.shareInfo.peer.equals(recipient)) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
-                );
+            if (typeof recipient !== "undefined") {
+                const query: any = {
+                    "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
+                    "shareInfo.peer": recipient.toString(),
+                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
+                };
+                const thirdPartyRelationshipAttribute = await this.consumptionController.attributes.getLocalAttributes(query);
+
+                if (foundAttribute.shareInfo.peer.equals(recipient) || thirdPartyRelationshipAttribute.length > 0) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
+                    );
+                }
             }
         }
 
