@@ -1669,6 +1669,11 @@ export class DataViewExpander {
             statusText = DataViewTranslateable.transport.relationshipRevoked;
         } else if (relationship.status === RelationshipStatus.Active) {
             statusText = DataViewTranslateable.transport.relationshipActive;
+        } else if (relationship.status === RelationshipStatus.Terminated) {
+            statusText = DataViewTranslateable.transport.relationshipTerminated;
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        } else if (relationship.status === RelationshipStatus.DeletionProposed) {
+            statusText = DataViewTranslateable.transport.relationshipDeletionProposed;
         }
 
         const creationDate = relationship.auditLog[0].createdAt;
