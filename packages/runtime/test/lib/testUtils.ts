@@ -171,10 +171,20 @@ export async function makeUploadRequest(values: object = {}): Promise<UploadOwnF
     };
 }
 
-export async function createTemplate(transportServices: TransportServices, body: RelationshipTemplateDTO | {} = {}): Promise<RelationshipTemplateDTO> {
+export async function createTemplate(
+    transportServices: TransportServices,
+    body: RelationshipTemplateDTO | {} = {},
+    templateExpiresAt?: DateTime
+): Promise<RelationshipTemplateDTO> {
+    let expirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
+
+    if (templateExpiresAt) {
+        expirationDateTime = templateExpiresAt.toString();
+    }
+
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
-        expiresAt: DateTime.utc().plus({ seconds: 5 }).toString(),
+        expiresAt: expirationDateTime,
         content: body
     });
 
@@ -195,9 +205,10 @@ export async function getFileToken(transportServices: TransportServices): Promis
 export async function exchangeTemplate(
     transportServicesCreator: TransportServices,
     transportServicesRecipient: TransportServices,
-    content: RelationshipTemplateContent | {} = {}
+    content: RelationshipTemplateContent | {} = {},
+    templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
-    const template = await createTemplate(transportServicesCreator, content);
+    const template = await createTemplate(transportServicesCreator, content, templateExpiresAt);
 
     const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
     expect(response).toBeSuccessful();

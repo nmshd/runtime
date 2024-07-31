@@ -2,6 +2,7 @@ import { EventBus } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipCreationChangeRequestContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
+import { DateTime } from "luxon";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -647,7 +648,8 @@ describe("Requests", () => {
         afterAll(async () => await runtimeServiceProvider.stop());
 
         test(`recipient: ${actionLowerCase} incoming Request`, async () => {
-            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
+                .request;
 
             /* 
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
@@ -655,7 +657,7 @@ describe("Requests", () => {
                 triggeredEvent = event;
             }); */
 
-            await delay(15000);
+            await delay(12000);
 
             const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
                 requestId: request.id,
