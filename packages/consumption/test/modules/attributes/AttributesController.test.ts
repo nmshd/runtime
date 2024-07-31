@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
     BirthDate,
+    BirthYear,
     City,
     Country,
     EMailAddress,
@@ -156,6 +157,87 @@ describe("AttributesController", function () {
                 AttributeCreatedEvent,
                 AttributeCreatedEvent
             );
+        });
+
+        test("should set an Attribute as default if it is the only of its value type", async function () {
+            const attributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: EMailAddress.from({
+                        value: "my@email.address"
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const attribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            expect(attribute.isDefault).toBe(true);
+        });
+
+        test("should not set an Attribute as default if already another exists with that value type", async function () {
+            const attributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: EMailAddress.from({
+                        value: "my@email.address"
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const firstAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            expect(firstAttribute.isDefault).toBe(true);
+
+            const secondAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            expect(secondAttribute.isDefault).toBeUndefined();
+        });
+
+        test("should set a child Attribute of a complex default attribute as default", async function () {
+            const complexBirthDate = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: BirthDate.from({
+                        day: 28,
+                        month: 2,
+                        year: 2000
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            expect(complexBirthDate.isDefault).toBe(true);
+
+            const childBirthYear = await consumptionController.attributes.getLocalAttributes({
+                parentId: complexBirthDate.id.toString(),
+                "content.value.@type": "BirthYear"
+            });
+            expect(childBirthYear).toHaveLength(1);
+            expect(childBirthYear[0].isDefault).toBe(true);
+        });
+
+        test("should set a child Attribute of a complex default attribute as default even if already another attribute with that value type exists", async function () {
+            const independentBirthYear = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: BirthYear.from({
+                        value: 2000
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            expect(independentBirthYear.isDefault).toBe(true);
+
+            const complexBirthDate = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: BirthDate.from({
+                        day: 28,
+                        month: 2,
+                        year: 2000
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            expect(complexBirthDate.isDefault).toBe(true);
+
+            const childBirthYear = await consumptionController.attributes.getLocalAttributes({ parentId: complexBirthDate.id.toString(), "content.value.@type": "BirthYear" });
+            expect(childBirthYear).toHaveLength(1);
+            expect(childBirthYear[0].isDefault).toBe(true);
+
+            const updatedIndependentBirthYear = await consumptionController.attributes.getLocalAttribute(independentBirthYear.id);
+            expect(updatedIndependentBirthYear!.isDefault).toBeUndefined();
         });
 
         test("should allow to create a shared attribute copy", async function () {
@@ -831,6 +913,42 @@ describe("AttributesController", function () {
                 const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
                 expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             });
+
+            test("should change default from deleted attribute to newest of the same value type if another exists", async function () {
+                const otherRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: EMailAddress.from({
+                            value: "my2@email.address"
+                        }),
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+
+                const otherNewerRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: EMailAddress.from({
+                            value: "my3@email.address"
+                        }),
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+
+                expect(successorRepositoryAttribute.isDefault).toBe(true);
+                expect(otherRepositoryAttribute.isDefault).toBeUndefined();
+                expect(otherNewerRepositoryAttribute.isDefault).toBeUndefined();
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+                const updatedOtherRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(otherNewerRepositoryAttribute.id);
+                expect(updatedOtherRepositoryAttribute!.isDefault).toBe(true);
+            });
+
+            test("should not set a default if the deleted default attribute had predecessors but no other candidate exists", async function () {
+                expect(successorRepositoryAttribute.isDefault).toBe(true);
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+
+                const defaultAttributes = await consumptionController.attributes.getLocalAttributes({ isDefault: "true" });
+                expect(defaultAttributes).toHaveLength(0);
+            });
         });
 
         describe("should validate and execute full attribute deletion process for child attribute", function () {
@@ -1089,7 +1207,7 @@ describe("AttributesController", function () {
             });
 
             test("should catch if the predecessor has parent", async function () {
-                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                const predecessor = await consumptionController.attributes.createAttributeUnsafe({
                     parentId: CoreId.from("parentId"),
                     content: IdentityAttribute.from({
                         value: {
@@ -1465,6 +1583,33 @@ describe("AttributesController", function () {
                 expect(successor.succeeds!.equals(updatedPredecessor.id)).toBe(true);
                 expect((predecessor.content.value.toJSON() as any).value).toBe("DE");
                 expect((successor.content.value.toJSON() as any).value).toBe("US");
+            });
+
+            test("should make successor default succeeding a default repository attribute", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+                expect(predecessor.isDefault).toBe(true);
+
+                const successorParams: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "US"
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    })
+                };
+
+                const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
+                expect(successor.isDefault).toBe(true);
+                expect(updatedPredecessor.isDefault).toBeUndefined();
             });
 
             test("should succeed an own shared identity attribute", async function () {
@@ -2141,6 +2286,73 @@ describe("AttributesController", function () {
         });
     });
 
+    describe("change default Attributes", function () {
+        test("should change default RepositoryAttribute", async function () {
+            const firstAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "My default given name"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+
+            const secondAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "My other given name"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            expect(secondAttribute.isDefault).toBeUndefined();
+
+            const updatedSecondAttribute = await consumptionController.attributes.setAsDefaultRepositoryAttribute(secondAttribute);
+            expect(updatedSecondAttribute.isDefault).toBe(true);
+
+            const updatedFirstAttribute = await consumptionController.attributes.getLocalAttribute(firstAttribute.id);
+            expect(updatedFirstAttribute!.isDefault).toBeUndefined();
+        });
+
+        test("should not change default RepositoryAttribute if candidate is already default", async function () {
+            const firstAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "My default given name"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            expect(firstAttribute.isDefault).toBe(true);
+            const updatedFirstAttribute = await consumptionController.attributes.setAsDefaultRepositoryAttribute(firstAttribute);
+            expect(updatedFirstAttribute.isDefault).toBe(true);
+        });
+
+        test("should throw an error if the new default Attribute is not a RepositoryAttribute", async function () {
+            const sharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "My shared given name"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: CoreAddress.from("peer"),
+                    requestReference: CoreId.from("reqRef")
+                })
+            });
+
+            await TestUtil.expectThrowsAsync(
+                consumptionController.attributes.setAsDefaultRepositoryAttribute(sharedAttribute),
+                "error.consumption.attributes.isNotRepositoryAttribute"
+            );
+        });
+    });
+
     describe("get Attributes", function () {
         beforeEach(async function () {
             await consumptionController.attributes.createSharedLocalAttribute({
@@ -2190,7 +2402,6 @@ describe("AttributesController", function () {
                 peer: CoreAddress.from("peer")
             });
         });
-
         test("should list all attributes", async function () {
             const attributes = await consumptionController.attributes.getLocalAttributes();
             expect(attributes).toHaveLength(3);
@@ -2255,18 +2466,18 @@ describe("AttributesController", function () {
             expect(result0).toStrictEqual([]);
 
             const result1 = await consumptionController.attributes.getPredecessorsOfAttribute(repositoryAttributeVersion1.id);
-            expect(result1).toStrictEqual([repositoryAttributeVersion0]);
+            expect(JSON.stringify(result1)).toStrictEqual(JSON.stringify([repositoryAttributeVersion0]));
 
             const result2 = await consumptionController.attributes.getPredecessorsOfAttribute(repositoryAttributeVersion2.id);
-            expect(result2).toStrictEqual([repositoryAttributeVersion1, repositoryAttributeVersion0]);
+            expect(JSON.stringify(result2)).toStrictEqual(JSON.stringify([repositoryAttributeVersion1, repositoryAttributeVersion0]));
         });
 
         test("should return all successors of a succeeded repository attribute", async function () {
             const result0 = await consumptionController.attributes.getSuccessorsOfAttribute(repositoryAttributeVersion0.id);
-            expect(result0).toStrictEqual([repositoryAttributeVersion1, repositoryAttributeVersion2]);
+            expect(JSON.stringify(result0)).toStrictEqual(JSON.stringify([repositoryAttributeVersion1, repositoryAttributeVersion2]));
 
             const result1 = await consumptionController.attributes.getSuccessorsOfAttribute(repositoryAttributeVersion1.id);
-            expect(result1).toStrictEqual([repositoryAttributeVersion2]);
+            expect(JSON.stringify(result1)).toStrictEqual(JSON.stringify([repositoryAttributeVersion2]));
 
             const result2 = await consumptionController.attributes.getSuccessorsOfAttribute(repositoryAttributeVersion2.id);
             expect(result2).toStrictEqual([]);
@@ -2276,7 +2487,7 @@ describe("AttributesController", function () {
             const allVersions = [repositoryAttributeVersion2, repositoryAttributeVersion1, repositoryAttributeVersion0];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual([repositoryAttributeVersion2, repositoryAttributeVersion1, repositoryAttributeVersion0]);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify([repositoryAttributeVersion2, repositoryAttributeVersion1, repositoryAttributeVersion0]));
             }
         });
 
@@ -2303,7 +2514,7 @@ describe("AttributesController", function () {
             });
 
             const ownSharedIdentityAttributeVersionsBeforeSuccession = await consumptionController.attributes.getVersionsOfAttribute(ownSharedIdentityAttributeVersion0.id);
-            expect(ownSharedIdentityAttributeVersionsBeforeSuccession).toStrictEqual([ownSharedIdentityAttributeVersion0]);
+            expect(JSON.stringify(ownSharedIdentityAttributeVersionsBeforeSuccession)).toStrictEqual(JSON.stringify([ownSharedIdentityAttributeVersion0]));
 
             const ownSharedIdentityAttributeVersion1 = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttributeVersion1.id,
@@ -2332,7 +2543,7 @@ describe("AttributesController", function () {
             const allVersions = [ownSharedIdentityAttributeVersion2, updatedOwnSharedIdentityAttributeVersion1];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual(allVersions);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(allVersions));
             }
         });
 
@@ -2376,7 +2587,7 @@ describe("AttributesController", function () {
             };
 
             const onlyVersion0 = await consumptionController.attributes.getVersionsOfAttribute(version0.id);
-            expect(onlyVersion0).toStrictEqual([version0]);
+            expect(JSON.stringify(onlyVersion0)).toStrictEqual(JSON.stringify([version0]));
 
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedPeerSharedIdentityAttribute(version0.id, successorParams1);
             const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedPeerSharedIdentityAttribute(version1.id, successorParams2);
@@ -2385,7 +2596,7 @@ describe("AttributesController", function () {
 
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual(allVersions);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(allVersions));
             }
         });
 
@@ -2438,7 +2649,7 @@ describe("AttributesController", function () {
             };
 
             const onlyVersion0 = await consumptionController.attributes.getVersionsOfAttribute(version0.id);
-            expect(onlyVersion0).toStrictEqual([version0]);
+            expect(JSON.stringify(onlyVersion0)).toStrictEqual(JSON.stringify([version0]));
 
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedOwnSharedRelationshipAttribute(
                 version0.id,
@@ -2452,7 +2663,7 @@ describe("AttributesController", function () {
             const allVersions = [version2, updatedVersion1, updatedVersion0];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual(allVersions);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(allVersions));
             }
         });
 
@@ -2505,7 +2716,7 @@ describe("AttributesController", function () {
             };
 
             const onlyVersion0 = await consumptionController.attributes.getVersionsOfAttribute(version0.id);
-            expect(onlyVersion0).toStrictEqual([version0]);
+            expect(JSON.stringify(onlyVersion0)).toStrictEqual(JSON.stringify([version0]));
 
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedPeerSharedRelationshipAttribute(
                 version0.id,
@@ -2519,7 +2730,7 @@ describe("AttributesController", function () {
             const allVersions = [version2, updatedVersion1, updatedVersion0];
             for (const version of allVersions) {
                 const result = await consumptionController.attributes.getVersionsOfAttribute(version.id);
-                expect(result).toStrictEqual(allVersions);
+                expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(allVersions));
             }
         });
 
@@ -2651,7 +2862,7 @@ describe("AttributesController", function () {
 
         test("should return all shared predecessors for a single peer", async function () {
             const result = await consumptionController.attributes.getSharedPredecessorsOfAttribute(repositoryAttributeV2, { "shareInfo.peer": "peerB" });
-            expect(result).toStrictEqual([ownSharedIdentityAttributeV1PeerB]);
+            expect(JSON.stringify(result)).toStrictEqual(JSON.stringify([ownSharedIdentityAttributeV1PeerB]));
         });
 
         test("should return all shared successors for all peers", async function () {
@@ -2661,7 +2872,7 @@ describe("AttributesController", function () {
 
         test("should return all shared successors for a single peer", async function () {
             const result = await consumptionController.attributes.getSharedSuccessorsOfAttribute(repositoryAttributeV0, { "shareInfo.peer": "peerB" });
-            expect(result).toStrictEqual([ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV2PeerB]);
+            expect(JSON.stringify(result)).toStrictEqual(JSON.stringify([ownSharedIdentityAttributeV1PeerB, ownSharedIdentityAttributeV2PeerB]));
         });
 
         test("should return all shared versions for all peers", async function () {
@@ -2685,10 +2896,10 @@ describe("AttributesController", function () {
             const allOwnSharedAttributeVersionsPeerB = [ownSharedIdentityAttributeV2PeerB, ownSharedIdentityAttributeV1PeerB];
             for (const repositoryAttributeVersion of allRepositoryAttributeVersions) {
                 const resultA = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerA")], false);
-                expect(resultA).toStrictEqual([ownSharedIdentityAttributeV1PeerA]);
+                expect(JSON.stringify(resultA)).toStrictEqual(JSON.stringify([ownSharedIdentityAttributeV1PeerA]));
 
                 const resultB = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, [CoreAddress.from("peerB")], false);
-                expect(resultB).toStrictEqual(allOwnSharedAttributeVersionsPeerB);
+                expect(JSON.stringify(resultB)).toStrictEqual(JSON.stringify(allOwnSharedAttributeVersionsPeerB));
             }
         });
 
