@@ -605,6 +605,84 @@ describe("Requests", () => {
             expect(triggeredEvent!.data).toBeDefined();
         });
     });
+
+    describe.each([
+        {
+            action: "Accept"
+        },
+        {
+            action: "Reject"
+        }
+    ] as TestCase[])("Cannot respond to Request of expired RelationshipTemplate: $action Request", ({ action }) => {
+        const actionLowerCase = action.toLowerCase() as "accept" | "reject";
+
+        const runtimeServiceProvider = new RuntimeServiceProvider();
+        let sRuntimeServices: TestRuntimeServices;
+        let rRuntimeServices: TestRuntimeServices;
+        let rConsumptionServices: ConsumptionServices;
+
+        let rEventBus: EventBus;
+
+        const templateContent = {
+            "@type": "RelationshipTemplateContent",
+            onNewRelationship: {
+                "@type": "Request",
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ],
+                expiresAt: CoreDate.utc().subtract({ second: 1 }).toISOString()
+            }
+        };
+
+        beforeAll(async () => {
+            const runtimeServices = await runtimeServiceProvider.launch(2);
+            sRuntimeServices = runtimeServices[0];
+            rRuntimeServices = runtimeServices[1];
+            rConsumptionServices = rRuntimeServices.consumption;
+            rEventBus = rRuntimeServices.eventBus;
+        }, 30000);
+        afterAll(async () => await runtimeServiceProvider.stop());
+
+        test(`recipient: ${actionLowerCase} incoming Request`, async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
+
+            let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+            rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
+                triggeredEvent = event;
+            });
+
+            const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
+                requestId: request.id,
+                items: [
+                    {
+                        accept: action === "Accept"
+                    }
+                ]
+            });
+
+            expect(result).toBeAnError(
+                `The LocalRequest has the already expired RelationshipTemplate '${request.source!.reference}' as its source, which is why it cannot be responded to.`,
+                "error.runtime.relationshipTemplates.expiredRelationshipTemplate"
+            );
+
+            /*
+            const rLocalRequest = result.value;
+
+            expect(rLocalRequest).toBeDefined();
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Decided);
+            expect(rLocalRequest.response).toBeDefined();
+            expect(rLocalRequest.response!.content).toBeDefined();
+            */
+
+            expect(triggeredEvent).toBeDefined();
+            expect(triggeredEvent!.data).toBeDefined();
+            expect(triggeredEvent!.data.oldStatus).toBe(LocalRequestStatus.ManualDecisionRequired);
+            // expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Decided);
+        });
+    });
 });
 
 interface TestCase {
