@@ -1590,11 +1590,23 @@ export class DataViewExpander {
         }
 
         const result = await this.transport.relationships.getRelationshipByAddress({ address });
-        if (result.isError) {
-            return this.expandUnknown(address);
+        if (result.isSuccess) {
+            return await this.expandRelationshipDTO(result.value);
         }
 
-        return await this.expandRelationshipDTO(result.value);
+        const requestResult = (
+            await this.consumption.incomingRequests.getRequests({
+                query: {
+                    peer: address,
+                    status: [LocalRequestStatus.ManualDecisionRequired, LocalRequestStatus.DecisionRequired]
+                }
+            })
+        ).value;
+        if (requestResult.length > 0) {
+            return this.expandAddressFromRequest(requestResult[0]); // with no relationship max 1 request available
+        }
+
+        return this.expandUnknown(address);
     }
 
     public async expandAddresses(addresses: string[]): Promise<IdentityDVO[]> {
@@ -1615,6 +1627,67 @@ export class DataViewExpander {
     public async expandRecipientDTOs(recipients: RecipientDTO[]): Promise<RecipientDVO[]> {
         const relationshipPromises = recipients.map((recipient) => this.expandRecipientDTO(recipient));
         return await Promise.all(relationshipPromises);
+    }
+
+    private expandAddressFromRequest(request: LocalRequestDTO): IdentityDVO {
+        const sharedAttributesOnNewRelationship = this.getSharedAttributesFromRequest(request);
+        const address = request.peer;
+        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship) ?? address.substring(3, 9);
+        const initials = (name.match(/\b\w/g) ?? []).join("");
+
+        return {
+            type: "IdentityDVO",
+            id: address,
+            name: name,
+            initials,
+            description: "i18n://dvo.identity.unknown.description",
+            isSelf: false,
+            hasRelationship: false
+        };
+    }
+
+    private getSharedAttributesFromRequest(request: LocalRequestDTO): (IdentityAttributeJSON | RelationshipAttributeJSON)[] {
+        let shareAttributeRequestItems: ShareAttributeRequestItemJSON[] = [];
+        shareAttributeRequestItems = shareAttributeRequestItems.concat(
+            request.content.items.filter((item) => item["@type"] === "ShareAttributeRequestItem") as ShareAttributeRequestItemJSON[]
+        );
+
+        const itemGroups = request.content.items.filter((item) => item["@type"] === "RequestItemGroup") as RequestItemGroupJSON[];
+        itemGroups.forEach((itemGroup) => {
+            shareAttributeRequestItems = shareAttributeRequestItems.concat(
+                itemGroup.items.filter((item) => item["@type"] === "ShareAttributeRequestItem") as ShareAttributeRequestItemJSON[]
+            );
+        });
+        return shareAttributeRequestItems.map((item) => item.attribute);
+    }
+
+    private getNameFromAttributeContents(attributes: (IdentityAttributeJSON | RelationshipAttributeJSON)[]): string | undefined {
+        const stringByType: Record<string, undefined | string> = {};
+        attributes.forEach((attribute) => {
+            const valueType = attribute.value["@type"];
+            const nameRelevantAttributeTypes = ["DisplayName", "GivenName", "MiddleName", "Surname", "Sex"];
+            if (nameRelevantAttributeTypes.includes(valueType)) {
+                const attributeValue = attribute.value as DisplayNameJSON | GivenNameJSON | MiddleNameJSON | SurnameJSON | SexJSON;
+                if (stringByType[valueType] && valueType === "GivenName") {
+                    stringByType[valueType] += ` ${attributeValue.value}`;
+                } else {
+                    stringByType[valueType] = attributeValue.value;
+                }
+            }
+        });
+
+        if (stringByType["DisplayName"]) {
+            return stringByType["DisplayName"];
+        } else if (stringByType["MiddleName"] && stringByType["GivenName"] && stringByType["Surname"]) {
+            return `${stringByType["GivenName"]} ${stringByType["MiddleName"]} ${stringByType["Surname"]}`;
+        } else if (stringByType["GivenName"] && stringByType["Surname"]) {
+            return `${stringByType["GivenName"]} ${stringByType["Surname"]}`;
+        } else if (stringByType["Sex"] && stringByType["Surname"]) {
+            return `i18n://dvo.identity.Salutation.${stringByType["Sex"]} ${stringByType["Surname"]}`;
+        } else if (stringByType["Surname"]) {
+            return `${stringByType["Surname"]}`;
+        }
+        return;
     }
 
     private async createRelationshipDVO(relationship: RelationshipDTO): Promise<RelationshipDVO> {
