@@ -621,7 +621,6 @@ describe("Requests", () => {
         let sRuntimeServices: TestRuntimeServices;
         let rRuntimeServices: TestRuntimeServices;
         let rConsumptionServices: ConsumptionServices;
-
         // let rEventBus: EventBus;
 
         const templateContent = {
@@ -651,8 +650,7 @@ describe("Requests", () => {
             const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
                 .request;
 
-            /* 
-            let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+            /* let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
             }); */
@@ -673,19 +671,17 @@ describe("Requests", () => {
                 "error.runtime.relationshipTemplates.expiredRelationshipTemplate"
             );
 
-            /*
-            const rLocalRequest = result.value;
+            /* const rLocalRequest = result.value;
 
             expect(rLocalRequest).toBeDefined();
             expect(rLocalRequest.status).toBe(LocalRequestStatus.Decided);
             expect(rLocalRequest.response).toBeDefined();
             expect(rLocalRequest.response!.content).toBeDefined();
 
-
             expect(triggeredEvent).toBeDefined();
             expect(triggeredEvent!.data).toBeDefined();
-            expect(triggeredEvent!.data.oldStatus).toBe(LocalRequestStatus.ManualDecisionRequired); */
-            // expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Decided);
+            expect(triggeredEvent!.data.oldStatus).toBe(LocalRequestStatus.ManualDecisionRequired); 
+            expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Decided); */
         });
 
         function delay(milliseconds: number): Promise<void> {
