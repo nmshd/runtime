@@ -51,7 +51,7 @@ import {
     ValueHintsJSON,
     isRequestItemDerivation
 } from "@nmshd/content";
-import { CoreAddress, CoreId, IdentityController, Relationship, RelationshipStatus } from "@nmshd/transport";
+import { CoreAddress, CoreId, IdentityController, Relationship } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import {
@@ -85,6 +85,7 @@ import {
     MessageWithAttachmentsDTO,
     RecipientDTO,
     RelationshipDTO,
+    RelationshipStatus,
     RelationshipTemplateDTO
 } from "../types";
 import { RuntimeErrors } from "../useCases";
@@ -1215,7 +1216,8 @@ export class DataViewExpander {
             isDraft: false,
             sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
             tags: identityAttribute.tags,
-            valueType
+            valueType,
+            isDefault: attribute.isDefault
         };
     }
 
@@ -1732,16 +1734,26 @@ export class DataViewExpander {
         }
 
         let statusText = "";
-        if (relationship.status === RelationshipStatus.Pending && direction === RelationshipDirection.Outgoing) {
-            statusText = DataViewTranslateable.transport.relationshipOutgoing;
-        } else if (relationship.status === RelationshipStatus.Pending) {
-            statusText = DataViewTranslateable.transport.relationshipIncoming;
-        } else if (relationship.status === RelationshipStatus.Rejected) {
-            statusText = DataViewTranslateable.transport.relationshipRejected;
-        } else if (relationship.status === RelationshipStatus.Revoked) {
-            statusText = DataViewTranslateable.transport.relationshipRevoked;
-        } else if (relationship.status === RelationshipStatus.Active) {
-            statusText = DataViewTranslateable.transport.relationshipActive;
+        switch (relationship.status) {
+            case RelationshipStatus.Pending:
+                statusText =
+                    direction === RelationshipDirection.Outgoing ? DataViewTranslateable.transport.relationshipOutgoing : DataViewTranslateable.transport.relationshipIncoming;
+                break;
+            case RelationshipStatus.Rejected:
+                statusText = DataViewTranslateable.transport.relationshipRejected;
+                break;
+            case RelationshipStatus.Revoked:
+                statusText = DataViewTranslateable.transport.relationshipRevoked;
+                break;
+            case RelationshipStatus.Active:
+                statusText = DataViewTranslateable.transport.relationshipActive;
+                break;
+            case RelationshipStatus.Terminated:
+                statusText = DataViewTranslateable.transport.relationshipTerminated;
+                break;
+            case RelationshipStatus.DeletionProposed:
+                statusText = DataViewTranslateable.transport.relationshipDeletionProposed;
+                break;
         }
 
         const creationDate = relationship.auditLog[0].createdAt;
