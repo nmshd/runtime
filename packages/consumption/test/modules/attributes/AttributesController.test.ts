@@ -841,7 +841,7 @@ describe("AttributesController", function () {
             let successorChildAttribute: LocalAttribute;
 
             beforeEach(async () => {
-                predecessorComplexAttribute = await consumptionController.attributes.createLocalAttribute({
+                predecessorComplexAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: BirthDate.from({
                             day: 29,
