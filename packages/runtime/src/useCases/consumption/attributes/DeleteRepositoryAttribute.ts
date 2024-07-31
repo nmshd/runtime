@@ -28,7 +28,11 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
         if (!repositoryAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
-            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(CoreId.from(request.attributeId)));
+            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(request.attributeId));
+        }
+
+        if (repositoryAttribute.parentId) {
+            return Result.fail(RuntimeErrors.attributes.cannotSeparatelyDeleteChildOfComplexAttribute(request.attributeId));
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(repositoryAttribute);
