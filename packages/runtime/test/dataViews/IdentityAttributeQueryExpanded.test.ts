@@ -81,6 +81,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(givenName["@type"]).toBe("GivenName");
         expect(givenName.value).toBe("A second given name");
         expect(dvo.tags).toStrictEqual(["default"]);
+        expect(dvo.isDefault).toBe(true);
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);
@@ -105,6 +106,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(value["@type"]).toBe("GivenName");
         expect(value.value).toBe("A first given name");
         expect(dvo.tags).toStrictEqual(["notDefault"]);
+        expect(dvo.isDefault).toBeUndefined();
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);
