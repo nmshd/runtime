@@ -1,4 +1,5 @@
 export * from "./AttributeMapper";
+export * from "./ChangeDefaultRepositoryAttribute";
 export * from "./CreateAndShareRelationshipAttribute";
 export * from "./CreateRepositoryAttribute";
 export * from "./DeleteOwnSharedAttributeAndNotifyPeer";
