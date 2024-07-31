@@ -30,7 +30,9 @@ export class AcceptIncomingRequestUseCase extends UseCase<AcceptIncomingRequestR
                 return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
             }
 
-            if (template.isExpired()) {
+            if (template.cache?.expiresAt && template.isExpired()) {
+                await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
+
                 return Result.fail(
                     RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
                         `The LocalRequest has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to.`
