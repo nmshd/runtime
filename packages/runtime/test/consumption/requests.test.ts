@@ -685,6 +685,10 @@ describe("Requests", () => {
         });
 
         function delay(milliseconds: number): Promise<void> {
+            if (milliseconds <= 0) {
+                throw new Error("The specified delay time must be positive.");
+            }
+
             return new Promise((resolve) => setTimeout(resolve, milliseconds));
         }
     });
