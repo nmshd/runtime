@@ -300,7 +300,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has already been shared with the peer.`
+                message: `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' is already shared with the peer.`
             });
         });
 
@@ -430,7 +430,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
+                message: `The provided IdentityAttribute is outdated. Its successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' is already shared with the peer.`
             });
         });
 
@@ -578,7 +578,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `You have already shared the predecessor '${ownSharedCopyOfPredecessor.shareInfo?.sourceAttribute?.toString()}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                message: `The predecessor '${ownSharedCopyOfPredecessor.shareInfo?.sourceAttribute?.toString()}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
             });
         });
 
