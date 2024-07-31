@@ -633,7 +633,7 @@ describe("Requests", () => {
                         mustBeAccepted: false
                     }
                 ],
-                expiresAt: CoreDate.utc().subtract({ second: 1 }).toISOString()
+                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
             }
         };
 
@@ -653,6 +653,8 @@ describe("Requests", () => {
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
             });
+
+            await delay(10000);
 
             const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
                 requestId: request.id,
@@ -682,6 +684,10 @@ describe("Requests", () => {
             expect(triggeredEvent!.data.oldStatus).toBe(LocalRequestStatus.ManualDecisionRequired);
             // expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Decided);
         });
+
+        function delay(milliseconds: number): Promise<void> {
+            return new Promise((resolve) => setTimeout(resolve, milliseconds));
+        }
     });
 });
 

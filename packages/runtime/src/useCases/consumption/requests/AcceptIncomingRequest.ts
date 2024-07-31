@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { DecideRequestParametersJSON, IncomingRequestsController, LocalRequest } from "@nmshd/consumption";
-import { CoreId, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { CoreDate, CoreId, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
 import { RuntimeErrors, UseCase } from "../../common";
@@ -30,8 +30,11 @@ export class AcceptIncomingRequestUseCase extends UseCase<AcceptIncomingRequestR
                 return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
             }
 
-            if (template.isExpired()) {
-                throw Result.fail(
+            const currentTime = CoreDate.utc();
+            const templateExpired = template.cache?.expiresAt;
+
+            if (templateExpired?.isBefore(currentTime)) {
+                return Result.fail(
                     RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
                         `The LocalRequest has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to.`
                     )
