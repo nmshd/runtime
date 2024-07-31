@@ -176,7 +176,8 @@ export async function createTemplate(
     body: RelationshipTemplateDTO | {} = {},
     templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
-    let expirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
+    const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
+    let expirationDateTime = defaultExpirationDateTime;
 
     if (templateExpiresAt) {
         expirationDateTime = templateExpiresAt.toString();
