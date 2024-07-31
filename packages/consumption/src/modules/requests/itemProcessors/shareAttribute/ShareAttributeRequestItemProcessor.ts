@@ -57,31 +57,33 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 if ((await this.consumptionController.attributes.getLocalAttributes(query)).length > 0) {
                     return ValidationResult.error(
                         CoreErrors.requests.invalidRequestItem(
-                            `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' has already been shared with the peer.`
+                            `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' is already shared with the peer.`
                         )
                     );
                 }
 
                 const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, {
-                    "shareInfo.peer": recipient.toString()
+                    "shareInfo.peer": recipient.toString(),
+                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
                 });
 
                 if (ownSharedIdentityAttributeSuccessors.length > 0) {
                     return ValidationResult.error(
                         CoreErrors.requests.invalidRequestItem(
-                            `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute}' of it.`
+                            `The provided IdentityAttribute is outdated. Its successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute}' is already shared with the peer.`
                         )
                     );
                 }
 
                 const ownSharedIdentityAttributePredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfAttribute(foundAttribute, {
-                    "shareInfo.peer": recipient.toString()
+                    "shareInfo.peer": recipient.toString(),
+                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
                 });
 
                 if (ownSharedIdentityAttributePredecessors.length > 0) {
                     return ValidationResult.error(
                         CoreErrors.requests.invalidRequestItem(
-                            `You have already shared the predecessor '${ownSharedIdentityAttributePredecessors[0].shareInfo?.sourceAttribute}' of the IdentityAttribute. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                            `The predecessor '${ownSharedIdentityAttributePredecessors[0].shareInfo?.sourceAttribute}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
                         )
                     );
                 }
@@ -99,10 +101,19 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You can only share RelationshipAttributes that are not a copy of a sourceAttribute."));
             }
 
-            if (typeof recipient !== "undefined" && foundAttribute.shareInfo.peer.equals(recipient)) {
-                return ValidationResult.error(
-                    CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
-                );
+            if (typeof recipient !== "undefined") {
+                const query: any = {
+                    "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
+                    "shareInfo.peer": recipient.toString(),
+                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
+                };
+                const thirdPartyRelationshipAttribute = await this.consumptionController.attributes.getLocalAttributes(query);
+
+                if (foundAttribute.shareInfo.peer.equals(recipient) || thirdPartyRelationshipAttribute.length > 0) {
+                    return ValidationResult.error(
+                        CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
+                    );
+                }
             }
         }
 
