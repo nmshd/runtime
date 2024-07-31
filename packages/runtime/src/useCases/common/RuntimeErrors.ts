@@ -200,6 +200,13 @@ class Attributes {
             `Attribute '${predecessor.id.toString()}' already has a successor ${predecessor.succeededBy?.toString()}.`
         );
     }
+
+    public cannotSeparatelyDeleteChildOfComplexAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotSeparatelyDeleteChildOfComplexAttribute",
+            `Attribute '${attributeId.toString()}' is a child of a complex Attribute. If you want to delete it, you must delete its parent.`
+        );
+    }
 }
 
 class IdentityDeletionProcess {
