@@ -174,7 +174,7 @@ export async function makeUploadRequest(values: object = {}): Promise<UploadOwnF
 export async function createTemplate(transportServices: TransportServices, body: RelationshipTemplateDTO | {} = {}): Promise<RelationshipTemplateDTO> {
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
-        expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+        expiresAt: DateTime.utc().plus({ seconds: 5 }).toString(),
         content: body
     });
 
