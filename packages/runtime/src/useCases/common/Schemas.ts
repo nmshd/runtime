@@ -71,6 +71,29 @@ export const GetAttributeListenerRequest: any = {
     }
 }
 
+export const ChangeDefaultRepositoryAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ChangeDefaultRepositoryAttributeRequest",
+    "definitions": {
+        "ChangeDefaultRepositoryAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const AcceptIncomingRequestRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/AcceptIncomingRequestRequest",
@@ -16741,6 +16764,35 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
+                "succeeds": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "succeededBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "isDefault": {
+                    "type": "string"
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -16836,32 +16888,6 @@ export const GetAttributesRequest: any = {
                     ]
                 },
                 "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "succeeds": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "succeededBy": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17452,6 +17478,9 @@ export const GetRepositoryAttributesRequest: any = {
             "type": "object",
             "properties": {
                 "createdAt": {
+                    "type": "string"
+                },
+                "isDefault": {
                     "type": "string"
                 },
                 "content.tags": {
