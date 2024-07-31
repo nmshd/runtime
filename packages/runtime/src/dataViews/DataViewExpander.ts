@@ -1402,7 +1402,9 @@ export class DataViewExpander {
         });
         if (matchedAttributeDTOs.isError) throw matchedAttributeDTOs.error;
 
-        const matchedAttributeDTOsSortedByDefaultFirst = matchedAttributeDTOs.value.sort((attr1, attr2) => Number(!!attr2.isDefault) - Number(!!attr1.isDefault));
+        const matchedAttributeDTOsSortedByDefaultFirst = matchedAttributeDTOs.value.sort((attribute1, attribute2) =>
+            attribute1.isDefault === attribute2.isDefault ? 0 : attribute1.isDefault ? -1 : 1
+        );
         const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOsSortedByDefaultFirst);
 
         return {
