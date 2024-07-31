@@ -15,6 +15,7 @@ import {
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/transport";
 import {
     AttributeCreatedEvent,
+    ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
@@ -109,6 +110,14 @@ describe("get attribute(s)", () => {
             {
                 content: {
                     value: {
+                        "@type": "GivenName",
+                        value: "AGivenName"
+                    }
+                }
+            },
+            {
+                content: {
+                    value: {
                         "@type": "Surname",
                         value: "ASurname"
                     }
@@ -117,8 +126,8 @@ describe("get attribute(s)", () => {
             {
                 content: {
                     value: {
-                        "@type": "GivenName",
-                        value: "AGivenName"
+                        "@type": "Surname",
+                        value: "Another Surname"
                     }
                 }
             }
@@ -163,7 +172,7 @@ describe("get attribute(s)", () => {
             const result = await services1.consumption.attributes.getAttributes({ query: {} });
             expect(result.isSuccess).toBe(true);
             const attributes = result.value;
-            expect(attributes).toHaveLength(3);
+            expect(attributes).toHaveLength(4);
             const attributeIds = attributes.map((attribute) => attribute.id);
             expect(attributeIds).toContain(relationshipAttributeId);
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
@@ -171,7 +180,7 @@ describe("get attribute(s)", () => {
 
         test("should allow to get an attribute by type", async function () {
             const result = await services1.consumption.attributes.getAttributes({
-                query: { "content.value.@type": "Surname" }
+                query: { "content.value.@type": "GivenName" }
             });
 
             expect(result).toBeSuccessful();
@@ -189,7 +198,10 @@ describe("get attribute(s)", () => {
             expect(result).toBeSuccessful();
 
             const attributes = result.value;
-            expect(attributes).toHaveLength(2);
+            expect(attributes).toHaveLength(3);
+
+            const attributeIds = attributes.map((attribute) => attribute.id);
+            expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
         test("should hide technical attributes when hideTechnical=true", async () => {
@@ -197,7 +209,7 @@ describe("get attribute(s)", () => {
             expect(result.isSuccess).toBe(true);
             const attributes = result.value;
             expect(attributes.filter((a) => a.id === relationshipAttributeId)).toHaveLength(0);
-            expect(attributes).toHaveLength(2);
+            expect(attributes).toHaveLength(3);
             const attributeIds = attributes.map((attribute) => attribute.id);
             expect(attributeIds).toStrictEqual(identityAttributeIds);
         });
@@ -207,10 +219,40 @@ describe("get attribute(s)", () => {
             expect(getAttributesResponse.isSuccess).toBe(true);
             const attributes = getAttributesResponse.value;
             expect(attributes.filter((a) => a.id === relationshipAttributeId)).toHaveLength(1);
-            expect(attributes).toHaveLength(3);
+            expect(attributes).toHaveLength(4);
             const attributeIds = attributes.map((attribute) => attribute.id);
             expect(attributeIds).toContain(relationshipAttributeId);
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
+        });
+
+        test("should allow to get only default attributes", async function () {
+            const result = await services1.consumption.attributes.getAttributes({
+                query: { isDefault: "true" }
+            });
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(2);
+
+            const attributeIds = attributes.map((attr) => attr.id);
+            expect(attributeIds).toContain(identityAttributeIds[0]);
+            expect(attributeIds).toContain(identityAttributeIds[1]);
+            expect(attributeIds).not.toContain(identityAttributeIds[2]);
+            expect(attributeIds).not.toContain(relationshipAttributeId);
+        });
+
+        test("should allow not to get default attributes", async function () {
+            const result = await services1.consumption.attributes.getAttributes({
+                query: { isDefault: "!true" }
+            });
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(2);
+
+            const attributeIds = attributes.map((attr) => attr.id);
+            expect(attributeIds).toContain(relationshipAttributeId);
+            expect(attributeIds).toContain(identityAttributeIds[2]);
         });
     });
 });
@@ -452,6 +494,22 @@ describe("get repository, own shared and peer shared attributes", () => {
             const repositoryAttributes = result.value;
             expect(repositoryAttributes).toStrictEqual([services1RepoSurnameV0, services1RepoSurnameV1, services1RepoGivenNameV0, services1RepoGivenNameV1]);
         });
+
+        test("should allow to get only default attributes", async function () {
+            const result = await services1.consumption.attributes.getRepositoryAttributes({
+                query: {
+                    isDefault: "true"
+                }
+            });
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(2);
+
+            const attributeIds = attributes.map((attr) => attr.id);
+            expect(attributeIds).toContain(services1RepoSurnameV1.id);
+            expect(attributeIds).toContain(services1RepoGivenNameV1.id);
+        });
     });
 
     describe(GetOwnSharedAttributesUseCase.name, () => {
@@ -610,6 +668,35 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "ZipCode");
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "City");
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "Country");
+    });
+
+    test("should create a RepositoryAttribute that is the default if it is the first of its value type", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "Pseudonym",
+                    value: "A pseudonym"
+                }
+            }
+        };
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const attribute = result.value;
+        expect(attribute.isDefault).toBe(true);
+    });
+
+    test("should create a RepositoryAttribute that is not the default if it is not the first of its value type", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "JobTitle",
+                    value: "A job title"
+                }
+            }
+        };
+        await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const attribute = result.value;
+        expect(attribute.isDefault).toBeUndefined();
     });
 });
 
@@ -1255,6 +1342,114 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
             }
         });
         expect(result).toBeAnError(/.*/, "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo");
+    });
+});
+
+describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
+    beforeAll(async () => {
+        await cleanupAttributes();
+    });
+
+    test("should change default RepositoryAttribute", async () => {
+        const defaultAttribute = (
+            await services1.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "My default name"
+                    }
+                }
+            })
+        ).value;
+        expect(defaultAttribute.isDefault).toBe(true);
+
+        const desiredDefaultAttribute = (
+            await services1.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "My new default name"
+                    }
+                }
+            })
+        ).value;
+        expect(desiredDefaultAttribute.isDefault).toBeUndefined();
+
+        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredDefaultAttribute.id });
+        expect(result.isSuccess).toBe(true);
+        const newDefaultAttribute = result.value;
+        expect(newDefaultAttribute.isDefault).toBe(true);
+
+        const updatedFormerDesiredDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: desiredDefaultAttribute.id })).value;
+        expect(updatedFormerDesiredDefaultAttribute.isDefault).toBe(true);
+
+        const updatedFormerDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: defaultAttribute.id })).value;
+        expect(updatedFormerDefaultAttribute.isDefault).toBeUndefined();
+    });
+
+    test("should return an error if the new default attribute is not a RepositoryAttribute", async () => {
+        await services1.consumption.attributes.createRepositoryAttribute({
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "My default name"
+                }
+            }
+        });
+
+        const desiredSharedDefaultAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "My new shared name"
+                }
+            }
+        });
+        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredSharedDefaultAttribute.id });
+        expect(result).toBeAnError(`Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not a RepositoryAttribute.`, "error.runtime.attributes.isNotRepositoryAttribute");
+    });
+
+    test("should return an error if the new default attribute has a successor", async () => {
+        await services1.consumption.attributes.createRepositoryAttribute({
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "My default name"
+                }
+            }
+        });
+
+        const desiredDefaultAttribute = (
+            await services1.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "My new default name"
+                    }
+                }
+            })
+        ).value;
+
+        const successionResult = (
+            await services1.consumption.attributes.succeedRepositoryAttribute({
+                predecessorId: desiredDefaultAttribute.id,
+                successorContent: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "My new successor default name"
+                    }
+                }
+            })
+        ).value;
+
+        const updatedDesiredDefaultAttribute = successionResult.predecessor;
+        const desiredDefaultAttributeSuccessor = successionResult.successor;
+
+        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: updatedDesiredDefaultAttribute.id });
+        expect(result).toBeAnError(
+            `Attribute '${updatedDesiredDefaultAttribute.id.toString()}' already has a successor ${desiredDefaultAttributeSuccessor.id.toString()}.`,
+            "error.runtime.attributes.hasSuccessor"
+        );
     });
 });
 

@@ -1,4 +1,5 @@
 import { ApplicationError } from "@js-soft/ts-utils";
+import { LocalAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
 
@@ -190,6 +191,13 @@ class Attributes {
         return new ApplicationError(
             "error.runtime.attributes.isNotThirdPartyOwnedRelationshipAttribute",
             `Attribute '${attributeId.toString()}' is not a third party owned RelationshipAttribute.`
+        );
+    }
+
+    public hasSuccessor(predecessor: LocalAttribute): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.hasSuccessor",
+            `Attribute '${predecessor.id.toString()}' already has a successor ${predecessor.succeededBy?.toString()}.`
         );
     }
 
