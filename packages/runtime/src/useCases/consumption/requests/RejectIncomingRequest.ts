@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { DecideRequestParametersJSON, IncomingRequestsController, LocalRequest, LocalRequestStatus } from "@nmshd/consumption";
-import { CoreId, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { CoreId, RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
 import { RuntimeErrors, UseCase } from "../../common";
@@ -11,6 +11,7 @@ export interface RejectIncomingRequestRequest extends DecideRequestParametersJSO
 export class RejectIncomingRequestUseCase extends UseCase<RejectIncomingRequestRequest, LocalRequestDTO> {
     public constructor(
         @Inject private readonly incomingRequestsController: IncomingRequestsController,
+        @Inject private readonly relationshipController: RelationshipsController,
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController
     ) {
         super();
@@ -33,12 +34,26 @@ export class RejectIncomingRequestUseCase extends UseCase<RejectIncomingRequestR
                 return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
             }
 
-            if (template.cache?.expiresAt && template.isExpired()) {
+            const queryForExistingRelationship: any = {
+                "peer.address": localRequest.peer,
+                $and: [
+                    {
+                        ["status"]: { $neq: RelationshipStatus.Rejected }
+                    },
+                    {
+                        ["status"]: { $neq: RelationshipStatus.Revoked }
+                    }
+                ]
+            };
+
+            const existingRelationshipToPeer = await this.relationshipController.getRelationships(queryForExistingRelationship);
+
+            if (existingRelationshipToPeer.length === 0 && template.cache?.expiresAt && template.isExpired()) {
                 await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
 
                 return Result.fail(
                     RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
-                        `The LocalRequest has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to.`
+                        `The LocalRequest has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to in order to accept or to reject the creation of a Relationship.`
                     )
                 );
             }

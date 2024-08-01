@@ -667,7 +667,7 @@ describe("Requests", () => {
             });
 
             expect(result).toBeAnError(
-                `The LocalRequest has the already expired RelationshipTemplate '${request.source!.reference}' as its source, which is why it cannot be responded to.`,
+                `The LocalRequest has the already expired RelationshipTemplate '${request.source!.reference}' as its source, which is why it cannot be responded to in order to accept or to reject the creation of a Relationship.`,
                 "error.runtime.relationshipTemplates.expiredRelationshipTemplate"
             );
 
