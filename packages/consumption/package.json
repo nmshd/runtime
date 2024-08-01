@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/consumption",
-    "version": "3.12.2",
+    "version": "3.12.3",
     "description": "The consumption library extends the transport library.",
     "homepage": "https://enmeshed.eu",
     "repository": {
