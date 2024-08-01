@@ -614,7 +614,7 @@ describe("Requests", () => {
         {
             action: "Reject"
         }
-    ] as TestCase[])("Cannot respond to Request of expired RelationshipTemplate: $action Request", ({ action }) => {
+    ] as TestCase[])("Cannot respond to Request of expired RelationshipTemplate: $action Request throws error", ({ action }) => {
         const actionLowerCase = action.toLowerCase() as "accept" | "reject";
 
         const runtimeServiceProvider = new RuntimeServiceProvider();
@@ -646,7 +646,7 @@ describe("Requests", () => {
         }, 30000);
         afterAll(async () => await runtimeServiceProvider.stop());
 
-        test(`recipient: ${actionLowerCase} incoming Request`, async () => {
+        test(`recipient: cannot ${actionLowerCase} incoming Request`, async () => {
             const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
                 .request;
 
