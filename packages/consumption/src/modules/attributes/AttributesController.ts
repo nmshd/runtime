@@ -37,6 +37,7 @@ import { CreateLocalAttributeParams, ICreateLocalAttributeParams } from "./local
 import { ICreatePeerLocalAttributeParams } from "./local/CreatePeerLocalAttributeParams";
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
+import { DeletionStatus } from "./local/LocalAttributeDeletionInfo";
 import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
 
@@ -891,7 +892,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(CoreErrors.attributes.successionMustNotChangeValueType());
         }
 
-        if (predecessor.hasDeletionInfo()) {
+        if (predecessor.hasDeletionInfo() && predecessor.deletionInfo.deletionStatus !== DeletionStatus.DeletionRequestRejected) {
             return ValidationResult.error(CoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
