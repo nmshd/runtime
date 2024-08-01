@@ -201,7 +201,9 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             const wasSharedBefore = latestSharedVersion.length > 0;
             const wasDeletedByPeerOrOwner =
                 latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByOwner;
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByOwner ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeletedByPeer ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeleted;
             const isLatestSharedVersion = latestSharedVersion[0]?.shareInfo?.sourceAttribute?.toString() === existingSourceAttribute.id.toString();
             const predecessorWasSharedBefore = wasSharedBefore && !isLatestSharedVersion;
 
