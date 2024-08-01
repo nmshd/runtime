@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { DecideRequestParametersJSON, IncomingRequestsController, LocalRequest } from "@nmshd/consumption";
+import { DecideRequestParametersJSON, IncomingRequestsController, LocalRequest, LocalRequestStatus } from "@nmshd/consumption";
 import { CoreId, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
@@ -23,7 +23,10 @@ export class RejectIncomingRequestUseCase extends UseCase<RejectIncomingRequestR
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalRequest));
         }
 
-        if (localRequest.source?.type === "RelationshipTemplate") {
+        if (
+            localRequest.source?.type === "RelationshipTemplate" &&
+            [LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired].includes(localRequest.status)
+        ) {
             const template = await this.relationshipTemplateController.getRelationshipTemplate(localRequest.source.reference);
 
             if (!template) {
