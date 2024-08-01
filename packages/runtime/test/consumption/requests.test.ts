@@ -621,7 +621,7 @@ describe("Requests", () => {
         let sRuntimeServices: TestRuntimeServices;
         let rRuntimeServices: TestRuntimeServices;
         let rConsumptionServices: ConsumptionServices;
-        // let rEventBus: EventBus;
+        let rEventBus: EventBus;
 
         const templateContent = {
             "@type": "RelationshipTemplateContent",
@@ -642,7 +642,7 @@ describe("Requests", () => {
             sRuntimeServices = runtimeServices[0];
             rRuntimeServices = runtimeServices[1];
             rConsumptionServices = rRuntimeServices.consumption;
-            // rEventBus = rRuntimeServices.eventBus;
+            rEventBus = rRuntimeServices.eventBus;
         }, 30000);
         afterAll(async () => await runtimeServiceProvider.stop());
 
@@ -650,10 +650,10 @@ describe("Requests", () => {
             const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
                 .request;
 
-            /* let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+            let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
-            }); */
+            });
 
             await delay(12000);
 
@@ -671,17 +671,13 @@ describe("Requests", () => {
                 "error.runtime.relationshipTemplates.expiredRelationshipTemplate"
             );
 
-            /* const rLocalRequest = result.value;
+            const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
 
             expect(rLocalRequest).toBeDefined();
-            expect(rLocalRequest.status).toBe(LocalRequestStatus.Decided);
-            expect(rLocalRequest.response).toBeDefined();
-            expect(rLocalRequest.response!.content).toBeDefined();
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+            expect(rLocalRequest.response).toBeUndefined();
 
-            expect(triggeredEvent).toBeDefined();
-            expect(triggeredEvent!.data).toBeDefined();
-            expect(triggeredEvent!.data.oldStatus).toBe(LocalRequestStatus.ManualDecisionRequired); 
-            expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Decided); */
+            expect(triggeredEvent).toBeUndefined();
         });
 
         function delay(milliseconds: number): Promise<void> {
