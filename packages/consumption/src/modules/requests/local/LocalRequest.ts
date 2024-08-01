@@ -130,6 +130,8 @@ export class LocalRequest extends CoreSynchronizable implements ILocalRequest {
     }
 
     public updateStatusBasedOnTemplateExpiration(templateExpiresAt: CoreDate, comparisonDate: CoreDate = CoreDate.utc()): boolean {
+        if (this.source?.type !== "RelationshipTemplate") return false;
+
         if (this.status === LocalRequestStatus.Completed || this.status === LocalRequestStatus.Expired) return false;
 
         if (comparisonDate.isAfter(templateExpiresAt.add({ seconds: 10 }))) {

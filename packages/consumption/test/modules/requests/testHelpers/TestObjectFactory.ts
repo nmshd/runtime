@@ -109,7 +109,7 @@ export class TestObjectFactory {
         const requestJSON: ILocalRequest = {
             id: CoreId.from("REQ1"),
             isOwn: true,
-            peer: CoreAddress.from("id11"),
+            peer: CoreAddress.from("id1"),
             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
             content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
             source: { type: "Message", reference: CoreId.from("MSG1") },
@@ -119,6 +119,26 @@ export class TestObjectFactory {
                 source: { reference: CoreId.from("MSG2"), type: "Message" }
             },
             status: params.status ?? LocalRequestStatus.Draft,
+            statusLog: params.statusLogEntries ?? []
+        };
+
+        const request = LocalRequest.from(requestJSON);
+        return request;
+    }
+
+    public static createUnrespondedLocalRequestBasedOnTemplateWith(params: {
+        contentProperties?: Partial<Request>;
+        status?: LocalRequestStatus;
+        statusLogEntries?: LocalRequestStatusLogEntry[];
+    }): LocalRequest {
+        const requestJSON: ILocalRequest = {
+            id: CoreId.from("REQ1"),
+            isOwn: false,
+            peer: CoreAddress.from("Sender"),
+            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+            content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
+            source: { type: "RelationshipTemplate", reference: CoreId.from("RLT1") },
+            status: params.status ?? LocalRequestStatus.ManualDecisionRequired,
             statusLog: params.statusLogEntries ?? []
         };
 
