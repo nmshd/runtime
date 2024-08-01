@@ -25,7 +25,7 @@ export class AcceptIncomingRequestUseCase extends UseCase<AcceptIncomingRequestR
 
         if (
             localRequest.source?.type === "RelationshipTemplate" &&
-            [LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired].includes(localRequest.status)
+            ![LocalRequestStatus.Decided, LocalRequestStatus.Completed, LocalRequestStatus.Expired].includes(localRequest.status)
         ) {
             const template = await this.relationshipTemplateController.getRelationshipTemplate(localRequest.source.reference);
 
