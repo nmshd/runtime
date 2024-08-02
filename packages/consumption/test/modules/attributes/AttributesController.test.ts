@@ -1343,6 +1343,34 @@ describe("AttributesController", function () {
                     code: "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo"
                 });
             });
+
+            test("should allow succession if the predecessor has a deletionInfo with status DeletionRequestRejected", async function () {
+                const predecessor = await consumptionController.attributes.createAttributeUnsafe({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: CoreAddress.from("address")
+                    }),
+                    deletionInfo: LocalAttributeDeletionInfo.from({
+                        deletionStatus: DeletionStatus.DeletionRequestRejected,
+                        deletionDate: CoreDate.utc().subtract({ days: 1 })
+                    })
+                });
+                const successorData: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: CoreAddress.from("address")
+                    })
+                };
+
+                const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
+                expect(validationResult.isSuccess()).toBe(true);
+            });
         });
 
         describe("Validator for own shared identity attribute successions", function () {

@@ -1400,12 +1400,17 @@ export class DataViewExpander {
         const matchedAttributeDTOs = await this.consumption.attributes.executeIdentityAttributeQuery({
             query
         });
-        const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOs.value);
+        if (matchedAttributeDTOs.isError) throw matchedAttributeDTOs.error;
+
+        const matchedAttributeDTOsSortedByDefaultFirst = matchedAttributeDTOs.value.sort((attribute1, attribute2) =>
+            attribute1.isDefault === attribute2.isDefault ? 0 : attribute1.isDefault ? -1 : 1
+        );
+        const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOsSortedByDefaultFirst);
 
         return {
             ...this.expandIdentityAttributeQuery(query),
             type: "ProcessedIdentityAttributeQueryDVO",
-            results: matchedAttributeDVOs as (RepositoryAttributeDVO | SharedToPeerAttributeDVO)[],
+            results: matchedAttributeDVOs as RepositoryAttributeDVO[],
             isProcessed: true
         };
     }
