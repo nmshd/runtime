@@ -1,5 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { ShareAttributeRequestItemJSON } from "@nmshd/content";
+import { RelationshipTemplateContent, ShareAttributeRequestItemJSON } from "@nmshd/content";
 import { IncomingRequestStatusChangedEvent, LocalRequestDTO, PeerRelationshipTemplateDVO, RelationshipTemplateDTO } from "../../src";
 import { createTemplate, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
@@ -29,8 +29,7 @@ describe("IdentityDVO after loading a relationship template sharing a DisplayNam
             }
         });
 
-        const templateContent = {
-            "@type": "RelationshipTemplateContent",
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -42,7 +41,7 @@ describe("IdentityDVO after loading a relationship template sharing a DisplayNam
                     } as ShareAttributeRequestItemJSON
                 ]
             }
-        };
+        }).toJSON();
         templatorTemplate = await createTemplate(templator.transport, templateContent);
         requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
         const requestEvent = await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
