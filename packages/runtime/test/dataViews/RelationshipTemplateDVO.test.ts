@@ -10,6 +10,7 @@ import {
     Surname
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
+import { DateTime } from "luxon";
 import {
     IncomingRequestStatusChangedEvent,
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
@@ -17,7 +18,7 @@ import {
     RelationshipTemplateDTO,
     RequestItemGroupDVO
 } from "../../src";
-import { RuntimeServiceProvider, TestRuntimeServices, createTemplate, syncUntilHasRelationships } from "../lib";
+import { RuntimeServiceProvider, TestRuntimeServices, syncUntilHasRelationships } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
@@ -138,7 +139,14 @@ describe("RelationshipTemplateDVO", () => {
                 ]
             }
         ];
-        templatorTemplate = await createTemplate(templator.transport, templateContent);
+        templatorTemplate = (
+            await templator.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                maxNumberOfAllocations: 1,
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: templateContent,
+                forIdentity: requestor.address
+            })
+        ).value;
         templateId = templatorTemplate.id;
     });
 
@@ -155,6 +163,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.name).toStrictEqual(dto.content.title ? dto.content.title : "i18n://dvo.template.outgoing.name");
         expect(dvo.isOwn).toBe(true);
         expect(dvo.maxNumberOfAllocations).toBe(1);
+        expect(dvo.forIdentity).toBe(requestor.address);
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);
@@ -188,6 +197,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.name).toStrictEqual(dto.content.title ? dto.content.title : "i18n://dvo.template.incoming.name");
         expect(dvo.isOwn).toBe(false);
         expect(dvo.maxNumberOfAllocations).toBe(1);
+        expect(dvo.forIdentity).toBe(requestor.address);
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);

@@ -1,13 +1,15 @@
 import { CoreDate } from "@nmshd/transport";
 import { GetTokensQuery, OwnerRestriction, TransportServices } from "../../src";
-import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, uploadOwnToken } from "../lib";
+import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
+let runtimeServices2: TestRuntimeServices;
 let transportServices1: TransportServices;
 let transportServices2: TransportServices;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
+    runtimeServices2 = runtimeServices[1];
     transportServices1 = runtimeServices[0].transport;
     transportServices2 = runtimeServices[1].transport;
 }, 30000);
@@ -61,5 +63,34 @@ describe("Tokens query", () => {
         const token = await exchangeToken(transportServices1, transportServices2);
         const conditions = new QueryParamConditions<GetTokensQuery>(token, transportServices2).addDateSet("expiresAt").addDateSet("createdAt").addStringSet("createdBy");
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Peer }));
+    });
+});
+
+describe("Personalized tokens", () => {
+    test("send and receive a personalized token", async () => {
+        const createResult = await transportServices1.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            forIdentity: runtimeServices2.address
+        });
+        expect(createResult).toBeSuccessful();
+
+        const loadResult = await transportServices2.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
+        expect(loadResult).toBeSuccessful();
+        expect(loadResult.value.forIdentity).toBe(runtimeServices2.address);
+    });
+
+    test("error when loading a token for another identity", async () => {
+        const createResult = await transportServices1.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            forIdentity: "did:e:a-domain:dids:anidentity"
+        });
+        expect(createResult).toBeSuccessful();
+
+        const loadResult = await transportServices2.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
+        expect(loadResult).toBeAnError(`You tried to access personalized content '${createResult.value.id}' that is not for you.`, "error.transport.general.notIntendedForYou");
     });
 });
