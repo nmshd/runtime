@@ -183,6 +183,10 @@ class General {
     public invalidTruncatedReference() {
         return new CoreError("error.transport.files.invalidTruncatedReference", "invalid truncated reference");
     }
+
+    public notIntendedForYou(id: string) {
+        return new CoreError("error.transport.general.notIntendedForYou", `You tried to access personalized content '${id}' that is not for you.`);
+    }
 }
 
 export class CoreErrors {

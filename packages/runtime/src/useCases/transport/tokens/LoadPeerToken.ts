@@ -1,9 +1,20 @@
 import { Result } from "@js-soft/ts-utils";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreId, Token, TokenController } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreId, Token, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { JsonSchema, RuntimeErrors, SchemaRepository, SchemaValidator, TokenIdString, TokenReferenceString, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import {
+    AddressString,
+    JsonSchema,
+    RuntimeErrors,
+    SchemaRepository,
+    SchemaValidator,
+    TokenIdString,
+    TokenReferenceString,
+    UseCase,
+    ValidationFailure,
+    ValidationResult
+} from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
 /**
@@ -21,6 +32,7 @@ export interface LoadPeerTokenViaSecretRequest {
      */
     secretKey: string;
     ephemeral: boolean;
+    forIdentity?: AddressString;
 }
 
 export type LoadPeerTokenRequest = LoadPeerTokenViaReferenceRequest | LoadPeerTokenViaSecretRequest;
@@ -76,7 +88,12 @@ export class LoadPeerTokenUseCase extends UseCase<LoadPeerTokenRequest, TokenDTO
 
         if (isLoadPeerTokenViaSecret(request)) {
             const key = CryptoSecretKey.fromBase64(request.secretKey);
-            createdToken = await this.tokenController.loadPeerToken(CoreId.from(request.id), key, request.ephemeral);
+            createdToken = await this.tokenController.loadPeerToken(
+                CoreId.from(request.id),
+                key,
+                request.ephemeral,
+                request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            );
         } else if (isLoadPeerTokenViaReference(request)) {
             createdToken = await this.tokenController.loadPeerTokenByTruncated(request.reference, request.ephemeral);
         } else {

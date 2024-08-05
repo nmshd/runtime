@@ -1,9 +1,10 @@
 import { Result } from "@js-soft/ts-utils";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreId, RelationshipTemplateController, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreId, RelationshipTemplateController, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
 import {
+    AddressString,
     Base64ForIdPrefix,
     JsonSchema,
     RelationshipTemplateIdString,
@@ -24,6 +25,7 @@ export interface LoadPeerRelationshipTemplateViaSecretRequest {
      * @minLength 10
      */
     secretKey: string;
+    forIdentity?: AddressString;
 }
 
 /**
@@ -88,7 +90,7 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
 
         if (isLoadPeerRelationshipTemplateViaSecret(request)) {
             const key = CryptoSecretKey.fromBase64(request.secretKey);
-            createdTemplateResult = await this.loadTemplate(CoreId.from(request.id), key);
+            createdTemplateResult = await this.loadTemplate(CoreId.from(request.id), key, request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined);
         } else if (isLoadPeerRelationshipTemplateViaReference(request)) {
             createdTemplateResult = await this.loadRelationshipTemplateFromReference(request.reference);
         } else {
@@ -129,11 +131,11 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         }
 
         const content = token.cache.content;
-        return await this.loadTemplate(content.templateId, content.secretKey);
+        return await this.loadTemplate(content.templateId, content.secretKey, content.forIdentity);
     }
 
-    private async loadTemplate(id: CoreId, key: CryptoSecretKey) {
-        const template = await this.templateController.loadPeerRelationshipTemplate(id, key);
+    private async loadTemplate(id: CoreId, key: CryptoSecretKey, forIdentity?: CoreAddress) {
+        const template = await this.templateController.loadPeerRelationshipTemplate(id, key, forIdentity);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
 }

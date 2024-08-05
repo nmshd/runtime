@@ -1,11 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, CoreId, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AddressString, ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface CreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
+    forIdentity?: AddressString;
 }
 
 class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> {
@@ -40,7 +41,8 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
 
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
-            secretKey: template.secretKey
+            secretKey: template.secretKey,
+            forIdentity: template.cache?.forIdentity
         });
 
         const defaultTokenExpiry = template.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
@@ -48,7 +50,8 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
-            ephemeral: true
+            ephemeral: true,
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
         });
 
         const qrCode = await QRCode.forTruncateable(token);

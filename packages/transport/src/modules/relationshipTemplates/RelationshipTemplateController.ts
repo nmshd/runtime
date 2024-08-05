@@ -65,9 +65,11 @@ export class RelationshipTemplateController extends TransportController {
             await this.client.createRelationshipTemplate({
                 expiresAt: parameters.expiresAt.toString(),
                 maxNumberOfAllocations: parameters.maxNumberOfAllocations,
+                forIdentity: parameters.forIdentity?.address.toString(),
                 content: cipher.toBase64()
             })
         ).value;
+        // TODO: error-handling
 
         const templateCache = CachedRelationshipTemplate.from({
             content: parameters.content,
@@ -76,6 +78,7 @@ export class RelationshipTemplateController extends TransportController {
             createdByDevice: this.parent.activeDevice.id,
             expiresAt: parameters.expiresAt,
             identity: this.parent.identity.identity,
+            forIdentity: parameters.forIdentity,
             maxNumberOfAllocations: parameters.maxNumberOfAllocations,
             templateKey: templateKey
         });
@@ -194,6 +197,7 @@ export class RelationshipTemplateController extends TransportController {
             expiresAt: response.expiresAt ? CoreDate.from(response.expiresAt) : undefined,
             identity: templateContent.identity,
             maxNumberOfAllocations: response.maxNumberOfAllocations ?? undefined,
+            forIdentity: response.forIdentity ? CoreAddress.from(response.forIdentity) : undefined,
             templateKey: templateContent.templateKey
         });
 
@@ -229,11 +233,15 @@ export class RelationshipTemplateController extends TransportController {
     }
 
     public async loadPeerRelationshipTemplateByReference(relationshipTemplateReference: RelationshipTemplateReference): Promise<RelationshipTemplate> {
-        return await this.loadPeerRelationshipTemplate(relationshipTemplateReference.id, relationshipTemplateReference.key);
+        return await this.loadPeerRelationshipTemplate(relationshipTemplateReference.id, relationshipTemplateReference.key, relationshipTemplateReference.forIdentity);
     }
 
-    public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey): Promise<RelationshipTemplate> {
+    public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey, forIdentity?: CoreAddress): Promise<RelationshipTemplate> {
         const templateDoc = await this.templates.read(id.toString());
+        if (!templateDoc && !forIdentity?.equals(this.parent.identity.address)) {
+            // if you created the template, it exists already
+            throw CoreErrors.general.notIntendedForYou(id.toString());
+        }
         if (templateDoc) {
             const template = await this.updateCacheOfExistingTemplateInDb(id.toString());
 
