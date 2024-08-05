@@ -29,6 +29,11 @@
     "jest": {
         "maxWorkers": 5,
         "preset": "ts-jest",
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text",
+            "cobertura"
+        ],
         "setupFilesAfterEnv": [
             "jest-expect-message"
         ],

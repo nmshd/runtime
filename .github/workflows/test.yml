@@ -31,6 +31,10 @@ jobs:
           NMSHD_TEST_BASEURL: http://localhost:8090
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4.2.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-consumption-mongodb:
     runs-on: ubuntu-latest
@@ -51,6 +55,10 @@ jobs:
           NMSHD_TEST_BASEURL: http://localhost:8090
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4.2.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-consumption-ferret:
     runs-on: ubuntu-latest
@@ -104,6 +112,10 @@ jobs:
           COMMIT_HASH: ${{ github.sha }}
       - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/content
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4.2.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-runtime-mongodb:
     runs-on: ubuntu-latest
@@ -125,6 +137,10 @@ jobs:
           NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4.2.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-runtime-ferret:
     runs-on: ubuntu-latest
@@ -189,6 +205,10 @@ jobs:
           NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4.2.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-transport-ferret:
     runs-on: ubuntu-latest
@@ -247,3 +267,7 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
           COMMIT_HASH: ${{ github.sha }}
       - run: npm run test:ci --workspace=@nmshd/iql
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4.2.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
