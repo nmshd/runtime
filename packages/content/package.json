@@ -32,6 +32,9 @@
             "text",
             "cobertura"
         ],
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "jest-expect-message"

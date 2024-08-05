@@ -36,6 +36,9 @@
         "setupFilesAfterEnv": [
             "jest-expect-message"
         ],
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {

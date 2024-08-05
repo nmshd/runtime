@@ -40,6 +40,9 @@
             "text",
             "cobertura"
         ],
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
             "jest-expect-message"
