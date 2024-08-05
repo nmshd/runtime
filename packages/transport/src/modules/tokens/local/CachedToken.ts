@@ -32,7 +32,7 @@ export class CachedToken extends CoreSerializable implements ICachedToken {
     @serialize()
     public createdByDevice: CoreId;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
     public forIdentity?: CoreAddress;
 

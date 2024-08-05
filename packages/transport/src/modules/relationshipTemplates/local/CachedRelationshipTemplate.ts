@@ -51,7 +51,7 @@ export class CachedRelationshipTemplate extends CoreSerializable implements ICac
     @serialize()
     public maxNumberOfAllocations?: number;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
     public forIdentity?: CoreAddress;
 
