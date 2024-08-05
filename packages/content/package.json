@@ -23,7 +23,7 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest",
-        "test:ci": "jest -i"
+        "test:ci": "jest -i --coverage=true"
     },
     "jest": {
         "maxWorkers": 5,
