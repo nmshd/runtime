@@ -107,7 +107,7 @@ describe("MessageDVO", () => {
         const recipient = dvo.recipients[0];
         expect(recipient.type).toBe("RecipientDVO");
         expect(recipient.id).toStrictEqual(dto.recipients[0].address);
-        expect(recipient.name).toBe("i18n://dvo.identity.unknown"); // "Barbara"
+        expect(recipient.name).toBe("i18n://dvo.identity.unknown");
         expect(recipient.isSelf).toBe(false);
         expect(dvo.status).toBe("Delivering");
     });
