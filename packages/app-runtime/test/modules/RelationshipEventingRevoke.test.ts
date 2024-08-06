@@ -46,7 +46,7 @@ describe("RelationshipEventingRevokeTest", function () {
         expect(onboardingChangeReceivedEvent.data.auditLogEntry.newStatus).toBe(RelationshipStatus.Pending);
         expect(onboardingChangeReceivedEvent.data.identity).toBeDefined();
 
-        expect(onboardingChangeReceivedEvent.data.identity.name).toBe(sessionB.accountController.identity.address.toString().substring(3, 9));
+        expect(onboardingChangeReceivedEvent.data.identity.name).toBe("i18n://dvo.identity.unknown");
         expect(onboardingChangeReceivedEvent.data.identity.id).toBe(sessionB.accountController.identity.address.toString());
 
         expect(onboardingChangeReceivedEvent.data.identity.hasRelationship).toBe(true);
@@ -88,7 +88,7 @@ describe("RelationshipEventingRevokeTest", function () {
         expect(onboardingChangeReceivedEvent.data.auditLogEntry.newStatus).toBe(RelationshipStatus.Revoked);
         expect(onboardingChangeReceivedEvent.data.identity).toBeDefined();
 
-        expect(onboardingChangeReceivedEvent.data.identity.name).toBe(sessionB.accountController.identity.address.toString().substring(3, 9));
+        expect(onboardingChangeReceivedEvent.data.identity.name).toBe("i18n://dvo.identity.unknown");
         expect(onboardingChangeReceivedEvent.data.identity.id).toBe(sessionB.accountController.identity.address.toString());
         expect(onboardingChangeReceivedEvent.data.identity.hasRelationship).toBe(true);
         expect(onboardingChangeReceivedEvent.data.identity.relationship?.id).toBe(relationshipChangedEvent.data.id);
