@@ -1577,14 +1577,11 @@ export class DataViewExpander {
     }
 
     public expandUnknown(address: string): IdentityDVO {
-        const name = address.substring(3, 9);
-        const initials = (name.match(/\b\w/g) ?? []).join("");
-
         return {
             id: address,
             type: "IdentityDVO",
-            name: name,
-            initials: initials,
+            name: "i18n://dvo.identity.unknown",
+            initials: "",
             description: "i18n://dvo.identity.unknown.description",
             isSelf: false,
             hasRelationship: false
@@ -1639,7 +1636,7 @@ export class DataViewExpander {
     private expandAddressFromRequest(request: LocalRequestDTO): IdentityDVO {
         const sharedAttributesOnNewRelationship = this.getSharedAttributesFromRequest(request);
         const address = request.peer;
-        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship) ?? address.substring(3, 9);
+        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship) ?? "i18n://dvo.identity.unknown";
         const initials = (name.match(/\b\w/g) ?? []).join("");
 
         return {
@@ -1775,7 +1772,7 @@ export class DataViewExpander {
         } else if (stringByType["Surname"]) {
             name = `${stringByType["Surname"]}`;
         } else {
-            name = relationship.peer.substring(3, 9);
+            name = "i18n://dvo.identity.unknown";
         }
 
         return {
@@ -1831,16 +1828,13 @@ export class DataViewExpander {
 
         if (relationshipResult.error.code !== RuntimeErrors.general.recordNotFound(Relationship).code) throw relationshipResult.error;
 
-        const name = address.substring(3, 9);
-        const initials = (name.match(/\b\w/g) ?? []).join("");
-
         return {
             id: address,
             type: "IdentityDVO",
-            name: name,
-            initials: initials,
+            name: "i18n://dvo.identity.unknown",
+            initials: "",
             publicKey: "i18n://dvo.identity.publicKey.unknown",
-            description: "i18n://dvo.identity.unknown",
+            description: "i18n://dvo.identity.unknown.description",
             isSelf: false,
             hasRelationship: false
         };
