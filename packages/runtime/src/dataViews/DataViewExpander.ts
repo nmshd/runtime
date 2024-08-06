@@ -1583,6 +1583,7 @@ export class DataViewExpander {
             name: "i18n://dvo.identity.unknown",
             initials: "",
             description: "i18n://dvo.identity.unknown.description",
+            publicKey: "i18n://dvo.identity.publicKey.unknown",
             isSelf: false,
             hasRelationship: false
         };
@@ -1636,14 +1637,13 @@ export class DataViewExpander {
     private expandAddressFromRequest(request: LocalRequestDTO): IdentityDVO {
         const sharedAttributesOnNewRelationship = this.getSharedAttributesFromRequest(request);
         const address = request.peer;
-        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship) ?? "i18n://dvo.identity.unknown";
-        const initials = (name.match(/\b\w/g) ?? []).join("");
+        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship);
 
         return {
             type: "IdentityDVO",
             id: address,
-            name: name,
-            initials,
+            name: name ?? "i18n://dvo.identity.unknown",
+            initials: name ? (name.match(/\b\w/g) ?? []).join("") : "",
             description: "i18n://dvo.identity.unknown.description",
             isSelf: false,
             hasRelationship: false
