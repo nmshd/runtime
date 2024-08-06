@@ -23,21 +23,23 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest --forceExit",
-        "test:ci": "jest -i --forceExit  --coverage=true"
+        "test:coverage": "npm run test -- --coverage=true",
+        "test:ci": "jest -i --forceExit --coverage=true"
     },
     "jest": {
         "maxWorkers": 5,
         "preset": "ts-jest",
         "coverageProvider": "v8",
         "coverageReporters": [
-            "text",
-            "cobertura"
-        ],
-        "setupFilesAfterEnv": [
-            "jest-expect-message"
+            "text-summary",
+            "cobertura",
+            "lcov"
         ],
         "collectCoverageFrom": [
             "./src/**"
+        ],
+        "setupFilesAfterEnv": [
+            "jest-expect-message"
         ],
         "testEnvironment": "node",
         "testTimeout": 60000,
