@@ -31,6 +31,7 @@ import {
     IRelationshipChange,
     IRelationshipTemplate,
     Message,
+    PeerStatus,
     Realm,
     Relationship,
     RelationshipChangeStatus,
@@ -57,6 +58,7 @@ export class TestObjectFactory {
                     realm: Realm.Prod
                 }),
             status: properties?.status ?? RelationshipStatus.Active,
+            peerStatus: properties?.peerStatus ?? PeerStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
             cache:
                 properties?.cache ??
