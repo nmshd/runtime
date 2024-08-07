@@ -19,9 +19,9 @@ export class ExternalEventProcessorRegistry {
         this.registerProcessor("RelationshipChangeCompleted", RelationshipChangeCompletedExternalEventProcessor);
         this.registerProcessor("IdentityDeletionProcessStarted", IdentityDeletionProcessStartedEventProcessor);
         this.registerProcessor("IdentityDeletionProcessStatusChanged", IdentityDeletionProcessChangedEventProcessor);
-        this.registerProcessor("PeerDeletedEventProcessor", PeerDeletedEventProcessor);
-        this.registerProcessor("PeerDeletionCancelledEventProcessor", PeerDeletionCancelledEventProcessor);
-        this.registerProcessor("PeerToBeDeletedEventProcessor", PeerToBeDeletedEventProcessor);
+        this.registerProcessor("PeerDeleted", PeerDeletedEventProcessor);
+        this.registerProcessor("PeerDeletionCancelled", PeerDeletionCancelledEventProcessor);
+        this.registerProcessor("PeerToBeDeleted", PeerToBeDeletedEventProcessor);
     }
 
     public registerProcessor(externalEventName: string, externalEventProcessor: ExternalEventProcessorConstructor): void {
