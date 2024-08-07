@@ -4,6 +4,9 @@ import { IdentityDeletionProcessChangedEventProcessor } from "./IdentityDeletion
 import { IdentityDeletionProcessStartedEventProcessor } from "./IdentityDeletionProcessStartedEventProcessor";
 import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor";
 import { MessageReceivedExternalEventProcessor } from "./MessageReceivedExternalEventProcessor";
+import { PeerDeletedEventProcessor } from "./PeerDeletedEventProcessor";
+import { PeerDeletionCancelledEventProcessor } from "./PeerDeletionCancelledEventProcessor";
+import { PeerToBeDeletedEventProcessor } from "./PeerToBeDeletedEventProcessor";
 import { RelationshipChangeCompletedExternalEventProcessor } from "./RelationshipChangeCompletedExternalEventProcessor";
 import { RelationshipChangeCreatedExternalEventProcessor } from "./RelationshipChangeCreatedExternalEventProcessor";
 
@@ -16,6 +19,9 @@ export class ExternalEventProcessorRegistry {
         this.registerProcessor("RelationshipChangeCompleted", RelationshipChangeCompletedExternalEventProcessor);
         this.registerProcessor("IdentityDeletionProcessStarted", IdentityDeletionProcessStartedEventProcessor);
         this.registerProcessor("IdentityDeletionProcessStatusChanged", IdentityDeletionProcessChangedEventProcessor);
+        this.registerProcessor("PeerDeletedEventProcessor", PeerDeletedEventProcessor);
+        this.registerProcessor("PeerDeletionCancelledEventProcessor", PeerDeletionCancelledEventProcessor);
+        this.registerProcessor("PeerToBeDeletedEventProcessor", PeerToBeDeletedEventProcessor);
     }
 
     public registerProcessor(externalEventName: string, externalEventProcessor: ExternalEventProcessorConstructor): void {

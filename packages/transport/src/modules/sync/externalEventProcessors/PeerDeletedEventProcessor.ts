@@ -15,6 +15,6 @@ export class PeerDeletedEventProcessor extends ExternalEventProcessor {
     public override async execute(externalEvent: BackboneExternalEvent): Promise<Relationship> {
         const payload = PeerDeletedEventData.fromAny(externalEvent.payload);
 
-        return await this.relationshipsController.setPeerStatus(CoreAddress.from(payload.peerAddress), PeerStatus.Deleted);
+        return await this.accountController.relationships.setPeerStatus(CoreAddress.from(payload.peerAddress), PeerStatus.Deleted);
     }
 }
