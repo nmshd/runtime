@@ -5,7 +5,7 @@ import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
 import {
     FileDTO,
-    MessageContentDTO,
+    MessageContentDerivation,
     MessageDTO,
     RelationshipCreationContentDerivation,
     RelationshipDTO,
@@ -290,7 +290,7 @@ export class TestUtil {
         return syncResult.messages[0];
     }
 
-    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: MessageContentDTO): Promise<MessageDTO> {
+    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: MessageContentDerivation): Promise<MessageDTO> {
         return await this.sendMessagesWithAttachments(from, [to], [], content);
     }
 
@@ -298,7 +298,7 @@ export class TestUtil {
         from: LocalAccountSession,
         recipients: LocalAccountSession[],
         attachments: string[],
-        content?: MessageContentDTO
+        content?: MessageContentDerivation
     ): Promise<MessageDTO> {
         if (!content) {
             content = ArbitraryMessageContent.from({ value: "TestContent" }).toJSON();

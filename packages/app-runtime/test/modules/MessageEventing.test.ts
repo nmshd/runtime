@@ -1,4 +1,3 @@
-import { Mail } from "@nmshd/content";
 import { MessageReceivedEvent } from "@nmshd/runtime";
 import { AppRuntime, LocalAccountSession, MailReceivedEvent } from "../../src";
 import { EventListener, TestUtil } from "../lib";
@@ -27,11 +26,12 @@ describe("MessageEventingTest", function () {
     test("should fire events when mail is received", async function () {
         const createdBy = (await sessionA.transportServices.account.getIdentityInfo()).value.address;
         const recipient = (await sessionB.transportServices.account.getIdentityInfo()).value.address;
-        const mail = Mail.from({
+        const mail = {
+            "@type": "Mail",
             to: [recipient],
             subject: "Hallo Horst",
             body: "Hallo, hier ist eine Mail."
-        }).toJSON();
+        };
         const message = await TestUtil.sendMessage(sessionA, sessionB, mail);
         const eventListener = new EventListener(runtime, [MailReceivedEvent, MessageReceivedEvent]);
         eventListener.start();

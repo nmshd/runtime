@@ -1,11 +1,11 @@
 import { ArbitraryMessageContentJSON, MailJSON, NotificationJSON, RequestJSON, ResponseWrapperJSON } from "@nmshd/content";
 import { RecipientDTO } from "./RecipientDTO";
 
-export type MessageContentDTO = MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON;
+export type MessageContentDerivation = MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON;
 
 export interface MessageDTO {
     id: string;
-    content: MessageContentDTO;
+    content: MessageContentDerivation;
     createdBy: string;
     createdByDevice: string;
     recipients: RecipientDTO[];
