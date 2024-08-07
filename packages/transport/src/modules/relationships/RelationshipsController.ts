@@ -639,13 +639,11 @@ export class RelationshipsController extends TransportController {
         return responseCipher.toBase64();
     }
 
-    public async setPeerStatus(peer: CoreAddress, status: PeerStatus): Promise<Relationship> {
-        const relationship = await this.getRelationshipToIdentity(peer);
-        if (!relationship) throw CoreErrors.general.recordNotFound("Relationship to Address", peer.toString());
+    public async setPeerStatus(relationshipId: CoreId, status: PeerStatus): Promise<Relationship> {
+        const relationshipDoc = await this.relationships.read(relationshipId.toString());
+        if (!relationshipDoc) throw CoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
 
-        const relationshipDoc = await this.relationships.read(relationship.id.toString());
-        if (!relationshipDoc) throw CoreErrors.general.recordNotFound(Relationship, relationship.id.toString());
-
+        const relationship = Relationship.from(relationshipDoc);
         relationship.peerStatus = status;
         await this.relationships.update(relationshipDoc, relationship);
 
