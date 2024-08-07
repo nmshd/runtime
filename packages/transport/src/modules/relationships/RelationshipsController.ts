@@ -16,6 +16,7 @@ import { BackboneGetRelationshipsResponse } from "./backbone/BackboneGetRelation
 import { BackboneGetRelationshipsChangesResponse, BackboneGetRelationshipsChangesSingleChangeResponse } from "./backbone/BackboneGetRelationshipsChanges";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { CachedRelationship } from "./local/CachedRelationship";
+import { PeerStatus } from "./local/PeerStatus";
 import { Relationship } from "./local/Relationship";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
 import { RelationshipSecretController } from "./RelationshipSecretController";
@@ -98,9 +99,10 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
+    public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus, peerStatus?: PeerStatus): Promise<Relationship | undefined> {
         const query: any = { peerAddress: address.toString() };
         if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
+        if (peerStatus) query[`${nameof<Relationship>((r) => r.peerStatus)}`] = peerStatus;
         let relationshipDoc = await this.relationships.findOne(query);
 
         if (!relationshipDoc) {
@@ -120,6 +122,10 @@ export class RelationshipsController extends TransportController {
 
     public async getActiveRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
         return await this.getRelationshipToIdentity(address, RelationshipStatus.Active);
+    }
+
+    public async getActiveRelationshipToActiveIdentity(address: CoreAddress): Promise<Relationship | undefined> {
+        return await this.getRelationshipToIdentity(address, RelationshipStatus.Active, PeerStatus.Active);
     }
 
     public async getRelationship(id: CoreId): Promise<Relationship | undefined> {
@@ -631,6 +637,19 @@ export class RelationshipsController extends TransportController {
         });
 
         return responseCipher.toBase64();
+    }
+
+    public async setPeerStatus(peer: CoreAddress, status: PeerStatus): Promise<Relationship> {
+        const relationship = await this.getRelationshipToIdentity(peer);
+        if (!relationship) throw CoreErrors.general.recordNotFound("Relationship to Address", peer.toString());
+
+        const relationshipDoc = await this.relationships.read(relationship.id.toString());
+        if (!relationshipDoc) throw CoreErrors.general.recordNotFound(Relationship, relationship.id.toString());
+
+        relationship.peerStatus = status;
+        await this.relationships.update(relationshipDoc, relationship);
+
+        return relationship;
     }
 
     private throwWrongChangeType(type: RelationshipChangeType) {

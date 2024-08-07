@@ -1810,6 +1810,7 @@ export class DataViewExpander {
             image: "",
             type: "RelationshipDVO",
             status: relationship.status,
+            peerStatus: relationship.peerStatus,
             statusText: statusText,
             direction: direction,
             isPinned: relationshipSetting.isPinned,

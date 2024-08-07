@@ -248,7 +248,7 @@ export class MessageController extends TransportController {
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
+            const relationship = await this.relationships.getActiveRelationshipToActiveIdentity(recipient);
             if (!relationship) {
                 throw CoreErrors.general.recordNotFound(Relationship, recipient.toString());
             }
@@ -284,7 +284,7 @@ export class MessageController extends TransportController {
         const messageSignatures: MessageSignature[] = [];
         const relationshipIds = [];
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
+            const relationship = await this.relationships.getActiveRelationshipToActiveIdentity(CoreAddress.from(recipient));
             if (!relationship) {
                 throw CoreErrors.general.recordNotFound(Relationship, recipient.toString());
             }

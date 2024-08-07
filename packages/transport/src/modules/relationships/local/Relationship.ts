@@ -8,10 +8,12 @@ import { IRelationshipChange } from "../transmission/changes/RelationshipChange"
 import { RelationshipChangeResponse } from "../transmission/changes/RelationshipChangeResponse";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
+import { PeerStatus } from "./PeerStatus";
 
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;
     peer: IIdentity;
+    peerStatus: PeerStatus;
     status: RelationshipStatus;
 
     cache?: ICachedRelationship;
@@ -28,7 +30,8 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         "@context",
         nameof<Relationship>((r) => r.relationshipSecretId),
         nameof<Relationship>((r) => r.peer),
-        nameof<Relationship>((r) => r.status)
+        nameof<Relationship>((r) => r.status),
+        nameof<Relationship>((r) => r.peerStatus)
     ];
 
     public override readonly metadataProperties = [nameof<Relationship>((r) => r.metadata), nameof<Relationship>((r) => r.metadataModifiedAt)];
@@ -40,6 +43,10 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @validate()
     @serialize()
     public peer: Identity;
+
+    @validate()
+    @serialize()
+    public peerStatus: PeerStatus;
 
     @validate()
     @serialize()
@@ -81,6 +88,7 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         return Relationship.from({
             id: id,
             peer: peer,
+            peerStatus: PeerStatus.Active,
             status: RelationshipStatus.Pending,
             cache: cache,
             cachedAt: CoreDate.utc(),
@@ -103,6 +111,7 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
             id: CoreId.from(response.id),
             relationshipSecretId: relationshipSecretId,
             peer: peer,
+            peerStatus: PeerStatus.Active,
             status: RelationshipStatus.Pending,
             cache: cache,
             cachedAt: CoreDate.utc()
