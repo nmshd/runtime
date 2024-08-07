@@ -62,6 +62,7 @@ Set the following environment variables:
 
 -   a specific database: `npm run test:local:[mongodb|lokijs|ferretdb]`
 -   a specific test suite: `npm run test:local:[mongodb|lokijs|ferretdb] -- testSuiteName`
+-   with code coverage: `npm run test:local:[mongodb|lokijs|ferretdb] -- --coverage`, a result summary is written to the console, a detailed report is accessible via the path coverage/lcov-report/index.html
 
 ### Teardown
 
