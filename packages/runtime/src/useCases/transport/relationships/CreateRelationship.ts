@@ -28,8 +28,17 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
 
     protected async executeInternal(request: CreateRelationshipRequest): Promise<Result<RelationshipDTO>> {
         const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
+
         if (!template) {
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
+        }
+
+        if (template.isExpired()) {
+            return Result.fail(
+                RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
+                    `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
+                )
+            );
         }
 
         const relationship = await this.relationshipsController.sendRelationship({
