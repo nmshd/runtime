@@ -3,5 +3,8 @@ export * from "./MessageDeliveredEvent";
 export * from "./MessageReceivedEvent";
 export * from "./MessageSentEvent";
 export * from "./MessageWasReadAtChangedEvent";
+export * from "./PeerDeletedEvent";
+export * from "./PeerDeletionCancelledEvent";
 export * from "./PeerRelationshipTemplateLoadedEvent";
+export * from "./PeerToBeDeletedEvent";
 export * from "./RelationshipChangedEvent";
