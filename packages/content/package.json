@@ -23,10 +23,19 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest",
-        "test:ci": "jest -i"
+        "test:ci": "jest -i --coverage"
     },
     "jest": {
         "maxWorkers": 5,
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text-summary",
+            "cobertura",
+            "lcov"
+        ],
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "jest-expect-message"
