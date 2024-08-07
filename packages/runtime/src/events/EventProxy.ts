@@ -29,6 +29,9 @@ import {
     PeerRelationshipTemplateLoadedEvent,
     RelationshipChangedEvent
 } from "./transport";
+import { PeerDeletedEvent } from "./transport/PeerDeletedEvent";
+import { PeerDeletionCancelledEvent } from "./transport/PeerDeletionCancelledEvent";
+import { PeerToBeDeletedEvent } from "./transport/PeerToBeDeletedEvent";
 
 export class EventProxy {
     private readonly subscriptionIds: number[] = [];
@@ -75,6 +78,18 @@ export class EventProxy {
             this.targetEventBus.publish(
                 new IdentityDeletionProcessStatusChangedEvent(event.eventTargetAddress, IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(event.data))
             );
+        });
+
+        this.subscribeToSourceEvent(transport.PeerDeletedEvent, (event) => {
+            this.targetEventBus.publish(new PeerDeletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.PeerToBeDeletedEvent, (event) => {
+            this.targetEventBus.publish(new PeerToBeDeletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.PeerDeletionCancelledEvent, (event) => {
+            this.targetEventBus.publish(new PeerDeletionCancelledEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
     }
 

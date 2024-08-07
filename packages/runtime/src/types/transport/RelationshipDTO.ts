@@ -11,11 +11,18 @@ export enum RelationshipStatus {
     Terminated = "Terminated"
 }
 
+export enum PeerStatus {
+    Active = "Active",
+    ToBeDeleted = "ToBeDeleted",
+    Deleted = "Deleted"
+}
+
 export interface RelationshipDTO {
     id: string;
     template: RelationshipTemplateDTO;
     status: RelationshipStatus;
     peer: string;
+    peerStatus: PeerStatus;
     peerIdentity: IdentityDTO;
     changes: RelationshipChangeDTO[];
 }

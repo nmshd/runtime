@@ -66,6 +66,7 @@ export * from "./relationships/backbone/BackboneGetRelationshipsChanges";
 export * from "./relationships/backbone/BackbonePostRelationshipsChanges";
 export * from "./relationships/backbone/RelationshipClient";
 export * from "./relationships/local/CachedRelationship";
+export * from "./relationships/local/PeerStatus";
 export * from "./relationships/local/Relationship";
 export * from "./relationships/local/SendRelationshipParameters";
 export * from "./relationships/RelationshipsController";
