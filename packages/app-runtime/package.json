@@ -23,8 +23,7 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest --forceExit",
-        "test:coverage": "npm run test -- --coverage=true",
-        "test:ci": "jest -i --forceExit --coverage=true"
+        "test:ci": "jest -i --forceExit --coverage"
     },
     "jest": {
         "maxWorkers": 5,

@@ -24,8 +24,7 @@
         "demo": "npm run build && npx webpack --mode production --config ./demo/webpack.config.js && light-server -s ./demo -w 'src/grammar.peggy, demo/app.js, demo/attributes.js, demo/index.html # npx webpack --mode production --config ./demo/webpack.config.js'",
         "lint:tsc": "tsc --noEmit",
         "test": "npm run build && jest",
-        "test:ci": "jest -i  --coverage=true",
-        "test:coverage": "npm run test -- --coverage=true"
+        "test:ci": "jest -i --coverage"
     },
     "jest": {
         "maxWorkers": 5,
