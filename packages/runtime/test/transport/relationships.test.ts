@@ -70,10 +70,12 @@ describe("Create Relationship", () => {
         const relationship1Response = await services1.transport.relationships.getRelationship({ id: relationshipId });
         expect(relationship1Response).toBeSuccessful();
         expect(relationship1Response.value.status).toBe("Active");
+        expect(relationship1Response.value.peerStatus).toBe("Active");
 
         const relationship2Response = await services2.transport.relationships.getRelationship({ id: relationshipId });
         expect(relationship2Response).toBeSuccessful();
         expect(relationship2Response.value.status).toBe("Active");
+        expect(relationship2Response.value.peerStatus).toBe("Active");
     });
 
     describe("Templator with active IdentityDeletionProcess", () => {
