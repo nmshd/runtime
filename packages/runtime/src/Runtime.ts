@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
-import { EventBus, EventEmitter2EventBus } from "@js-soft/ts-utils";
+import { EventBus, EventEmitter2EventBus, Result } from "@js-soft/ts-utils";
 import {
     AttributeListenersController,
     AttributesController,
@@ -189,6 +189,14 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this.logger.debug("Finished initialization of Transport Library.");
 
         this._anonymousServices = Container.get<AnonymousServices>(AnonymousServices);
+    }
+
+    public async validateUsedBackboneVersion(): Promise<Result<void>> {
+        if (!this._accountController) {
+            return Result.fail(RuntimeErrors.startup.noActiveAccount());
+        }
+        const result = await this._accountController.validateUsedBackboneVersion();
+        return result;
     }
 
     private createTransportConfigWithAdditionalHeaders(originalTransportConfig: IConfigOverwrite): IConfigOverwrite {

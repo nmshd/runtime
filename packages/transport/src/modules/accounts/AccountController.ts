@@ -1,6 +1,6 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
-import { log } from "@js-soft/ts-utils";
+import { log, Result } from "@js-soft/ts-utils";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { AbstractAuthenticator, Authenticator, ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
 import { CoreCrypto } from "../../core/CoreCrypto";
@@ -32,6 +32,7 @@ import { SyncController } from "../sync/SyncController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { TokenController } from "../tokens/TokenController";
 import { IdentityClient } from "./backbone/IdentityClient";
+import { VersionClient } from "./backbone/VersionClient";
 import { Identity } from "./data/Identity";
 import { IdentityController } from "./IdentityController";
 import { IdentityDeletionProcessController } from "./IdentityDeletionProcessController";
@@ -48,6 +49,7 @@ export class AccountController {
     public deviceClient: DeviceClient;
     public deviceAuthClient: DeviceAuthClient;
     public identityClient: IdentityClient;
+    public versionClient: VersionClient;
 
     public info: IDatabaseMap;
 
@@ -121,6 +123,7 @@ export class AccountController {
 
         this.deviceClient = new DeviceClient(this.config);
         this.identityClient = new IdentityClient(this.config);
+        this.versionClient = new VersionClient(this.config);
 
         this._identity = new IdentityController(this);
         this._identityDeletionProcess = new IdentityDeletionProcessController(this);
@@ -430,5 +433,18 @@ export class AccountController {
         }
 
         return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, this.unpushedDatawalletModifications);
+    }
+
+    public async validateUsedBackboneVersion(): Promise<Result<void>> {
+        const getBackboneVersionResult = await this.versionClient.getBackboneVersion();
+        if (getBackboneVersionResult.isError) {
+            return Result.fail(getBackboneVersionResult.error);
+        }
+        const usedBackboneVersion = getBackboneVersionResult.value.majorVersion;
+
+        if (this._config.supportedMinBackboneVersion > usedBackboneVersion || this._config.supportedMaxBackboneVersion < usedBackboneVersion) {
+            return Result.fail(CoreErrors.general.runtimeVersionIncompatibleWithBackboneVersion(usedBackboneVersion));
+        }
+        return Result.ok(undefined);
     }
 }
