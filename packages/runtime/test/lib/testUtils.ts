@@ -428,6 +428,24 @@ export async function ensurePendingRelationship(sTransportServices: TransportSer
     return (await sTransportServices.relationships.getRelationships({})).value[0];
 }
 
+export async function mutualDecompositionIfActiveRelationshipExists(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<void> {
+    const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+
+    const activeRelationshipToPeer = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress, status: RelationshipStatus.Active } }))
+        .value;
+
+    if (activeRelationshipToPeer.length !== 0) {
+        const relationshipToPeer = activeRelationshipToPeer[0];
+        await sTransportServices.relationships.terminateRelationship({ relationshipId: relationshipToPeer.id });
+        await syncUntilHasRelationships(rTransportServices, 1);
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationshipToPeer.id });
+        await syncUntilHasRelationships(sTransportServices, 1);
+        await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationshipToPeer.id });
+    }
+
+    return;
+}
+
 export async function exchangeAndAcceptRequestByMessage(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,

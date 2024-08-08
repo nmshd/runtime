@@ -13,7 +13,7 @@ import {
     ResponseItemResult,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
-import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreId, RelationshipStatus, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { AttributeSuccessorParams, DeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
@@ -137,6 +137,33 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                             "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
                         )
                     );
+                }
+
+                const queryForPendingRelationship = {
+                    "peer.address": foundLocalAttribute.shareInfo.peer.address,
+                    status: RelationshipStatus.Pending
+                };
+                const pendingRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForPendingRelationship);
+
+                const queryForActiveOrTerminatedRelationship = {
+                    "peer.address": foundLocalAttribute.shareInfo.peer.address,
+                    $or: [
+                        {
+                            ["status"]: { $eq: RelationshipStatus.Active }
+                        },
+                        {
+                            ["status"]: { $eq: RelationshipStatus.Terminated }
+                        },
+                        {
+                            ["status"]: { $eq: RelationshipStatus.DeletionProposed }
+                        }
+                    ]
+                };
+
+                const activeOrTerminatedRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForActiveOrTerminatedRelationship);
+
+                if (pendingRelationshipToPeer.length !== 0 || activeOrTerminatedRelationshipToPeer.length === 0) {
+                    return ValidationResult.error(CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
                 }
             }
         } else if (parsedParams.isWithNewAttribute()) {
