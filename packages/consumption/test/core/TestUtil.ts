@@ -305,7 +305,7 @@ export class TestUtil {
     public static async ensureActiveRelationship(from: AccountController, to: AccountController): Promise<void> {
         const toAddress = to.identity.address.toString();
 
-        const queryForPendingRelationship: any = {
+        const queryForPendingRelationship = {
             "peer.address": toAddress,
             status: RelationshipStatus.Pending
         };
@@ -317,7 +317,7 @@ export class TestUtil {
             return;
         }
 
-        const queryForActiveRelationship: any = {
+        const queryForActiveRelationship = {
             "peer.address": toAddress,
             status: RelationshipStatus.Active
         };
@@ -358,7 +358,7 @@ export class TestUtil {
         toAccount: AccountController,
         toConsumption: ConsumptionController
     ): Promise<void> {
-        const queryForActiveRelationship: any = {
+        const queryForActiveRelationship = {
             "peer.address": toAccount.identity.address.toString(),
             status: RelationshipStatus.Active
         };

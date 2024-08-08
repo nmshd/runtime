@@ -48,7 +48,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             }
 
             if (typeof recipient !== "undefined") {
-                const query: any = {
+                const query = {
                     "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
                     "shareInfo.peer": recipient.toString(),
                     "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
@@ -102,7 +102,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             }
 
             if (typeof recipient !== "undefined") {
-                const query: any = {
+                const query = {
                     "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
                     "shareInfo.peer": recipient.toString(),
                     "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
@@ -116,13 +116,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 }
             }
 
-            const queryForPendingRelationship: any = {
+            const queryForPendingRelationship = {
                 "peer.address": foundAttribute.shareInfo.peer.address,
                 status: RelationshipStatus.Pending
             };
             const pendingRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForPendingRelationship);
 
-            const queryForActivatedOrTerminatedRelationship: any = {
+            const queryForActiveOrTerminatedRelationship = {
                 "peer.address": foundAttribute.shareInfo.peer.address,
                 $or: [
                     {
@@ -137,14 +137,10 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 ]
             };
 
-            const activatedOrTerminatedRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForActivatedOrTerminatedRelationship);
+            const activeOrTerminatedRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForActiveOrTerminatedRelationship);
 
-            if (pendingRelationshipToPeer.length !== 0 || activatedOrTerminatedRelationshipToPeer.length === 0) {
-                return ValidationResult.error(
-                    CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship(
-                        "The provided RelationshipAttribute exists in the context of a pending Relationship and therefore cannot be shared."
-                    )
-                );
+            if (pendingRelationshipToPeer.length !== 0 || activeOrTerminatedRelationshipToPeer.length === 0) {
+                return ValidationResult.error(CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
             }
         }
 

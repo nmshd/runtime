@@ -139,13 +139,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     );
                 }
 
-                const queryForPendingRelationship: any = {
+                const queryForPendingRelationship = {
                     "peer.address": foundLocalAttribute.shareInfo.peer.address,
                     status: RelationshipStatus.Pending
                 };
                 const pendingRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForPendingRelationship);
 
-                const queryForActivatedOrTerminatedRelationship: any = {
+                const queryForActiveOrTerminatedRelationship = {
                     "peer.address": foundLocalAttribute.shareInfo.peer.address,
                     $or: [
                         {
@@ -160,14 +160,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     ]
                 };
 
-                const activatedOrTerminatedRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForActivatedOrTerminatedRelationship);
+                const activeOrTerminatedRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForActiveOrTerminatedRelationship);
 
-                if (pendingRelationshipToPeer.length !== 0 || activatedOrTerminatedRelationshipToPeer.length === 0) {
-                    return ValidationResult.error(
-                        CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship(
-                            "The provided RelationshipAttribute exists in the context of a pending Relationship and therefore cannot be shared."
-                        )
-                    );
+                if (pendingRelationshipToPeer.length !== 0 || activeOrTerminatedRelationshipToPeer.length === 0) {
+                    return ValidationResult.error(CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
                 }
             }
         } else if (parsedParams.isWithNewAttribute()) {
