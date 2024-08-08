@@ -771,7 +771,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-
             await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
@@ -894,7 +893,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).successfulValidationResult();
         });
-      
+
         test("returns an error when trying to share a RelationshipAttribute of a pending Relationship", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
@@ -902,18 +901,18 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await TestUtil.addPendingRelationship(testAccount, thirdPartyTestAccount);
 
             const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
-              content: RelationshipAttribute.from({
-                  owner: sender,
-                  value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
-                  confidentiality: RelationshipAttributeConfidentiality.Public,
-                  key: "AKey"
-              }),
-              shareInfo: {
-                  peer: aThirdParty,
-                  requestReference: await ConsumptionIds.request.generate()
-              }
+                content: RelationshipAttribute.from({
+                    owner: sender,
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "AKey"
+                }),
+                shareInfo: {
+                    peer: aThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
+                }
             });
-              
+
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: relationshipAttribute.content,
@@ -924,7 +923,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
             expect(result).errorValidationResult({
-               code: "error.consumption.requests.cannotShareRelationshipAttributeOfPendingRelationship",
+                code: "error.consumption.requests.cannotShareRelationshipAttributeOfPendingRelationship",
                 message: "The provided RelationshipAttribute exists in the context of a pending Relationship and therefore cannot be shared."
             });
         });
