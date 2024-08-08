@@ -9,7 +9,6 @@ export * from "./CoreSynchronizable";
 export * from "./CoreUtil";
 export * from "./DbCollectionName";
 export * from "./DependencyOverrides";
-export * from "./ProgressReporter";
 export * from "./Reference";
 export * from "./Transport";
 export * from "./TransportController";

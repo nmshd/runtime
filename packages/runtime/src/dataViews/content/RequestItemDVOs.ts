@@ -9,7 +9,6 @@ export interface RequestItemGroupDVO {
     title?: string;
     description?: string;
     isDecidable: boolean;
-    mustBeAccepted: boolean;
     response?: ResponseItemGroupDVO;
 }
 

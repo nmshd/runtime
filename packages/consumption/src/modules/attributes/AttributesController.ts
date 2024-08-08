@@ -11,7 +11,8 @@ import {
     IThirdPartyRelationshipAttributeQuery,
     RelationshipAttributeJSON,
     RelationshipAttributeQuery,
-    ThirdPartyRelationshipAttributeQuery
+    ThirdPartyRelationshipAttributeQuery,
+    ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
 import * as iql from "@nmshd/iql";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
@@ -33,9 +34,9 @@ import {
     ThirdPartyOwnedRelationshipAttributeSucceededEvent
 } from "./events";
 import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
-import { CreateLocalAttributeParams, ICreateLocalAttributeParams } from "./local/CreateLocalAttributeParams";
-import { ICreatePeerLocalAttributeParams } from "./local/CreatePeerLocalAttributeParams";
+import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } from "./local/CreateRepositoryAttributeParams";
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
+import { ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
 import { DeletionStatus } from "./local/LocalAttributeDeletionInfo";
 import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
@@ -178,6 +179,10 @@ export class AttributesController extends ConsumptionBaseController {
         const dbQuery = RelationshipAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.confidentiality"] = { $ne: "private" };
 
+        if (parsedQuery.owner.equals("")) {
+            dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
+        }
+
         const attributes = await this.attributes.find(dbQuery);
         const attribute = attributes.length > 0 ? LocalAttribute.from(attributes[0]) : undefined;
 
@@ -187,8 +192,30 @@ export class AttributesController extends ConsumptionBaseController {
     public async executeThirdPartyRelationshipAttributeQuery(query: IThirdPartyRelationshipAttributeQuery): Promise<LocalAttribute[]> {
         const parsedQuery = ThirdPartyRelationshipAttributeQuery.from(query);
 
-        const dbQuery = ThirdPartyRelationshipAttributeQueryTranslator.translate(parsedQuery);
+        let dbQuery = ThirdPartyRelationshipAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.confidentiality"] = { $ne: "private" };
+
+        switch (parsedQuery.owner) {
+            case ThirdPartyRelationshipAttributeQueryOwner.Recipient:
+                dbQuery["content.owner"] = { $eq: this.identity.address.toString() };
+                break;
+            case ThirdPartyRelationshipAttributeQueryOwner.ThirdParty:
+                dbQuery["content.owner"] = { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) };
+                break;
+            case ThirdPartyRelationshipAttributeQueryOwner.Empty:
+                const recipientOrThirdPartyIsOwnerQuery = {
+                    $or: [
+                        {
+                            ["content.owner"]: { $eq: this.identity.address.toString() }
+                        },
+                        {
+                            ["content.owner"]: { $in: parsedQuery.thirdParty.map((aThirdParty) => aThirdParty.toString()) }
+                        }
+                    ]
+                };
+                dbQuery = { $and: [dbQuery, recipientOrThirdPartyIsOwnerQuery] };
+                break;
+        }
 
         const attributes = await this.attributes.find(dbQuery);
 
@@ -206,23 +233,24 @@ export class AttributesController extends ConsumptionBaseController {
         return this.parseArray(attributes, LocalAttribute);
     }
 
-    public async createLocalAttribute(params: ICreateLocalAttributeParams): Promise<LocalAttribute> {
-        const parsedParams = CreateLocalAttributeParams.from(params);
-        const localAttribute = LocalAttribute.from({
+    public async createRepositoryAttribute(params: ICreateRepositoryAttributeParams): Promise<LocalAttribute> {
+        if (params.content.owner.toString() !== this.identity.address.toString()) {
+            throw CoreErrors.attributes.wrongOwnerOfRepositoryAttribute();
+        }
+
+        const parsedParams = CreateRepositoryAttributeParams.from(params);
+        let localAttribute = LocalAttribute.from({
             id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
             createdAt: CoreDate.utc(),
             content: parsedParams.content,
-            parentId: parsedParams.parentId,
-            succeeds: parsedParams.succeeds,
-            shareInfo: parsedParams.shareInfo
+            parentId: parsedParams.parentId
         });
 
         await this.attributes.create(localAttribute);
 
-        if (
-            localAttribute.content instanceof IdentityAttribute && // Local Attributes for children should only be created for Identity Attributes
-            localAttribute.content.value instanceof AbstractComplexValue
-        ) {
+        localAttribute = await this.setAsDefaultRepositoryAttribute(localAttribute, true);
+
+        if (localAttribute.content.value instanceof AbstractComplexValue) {
             await this.createLocalAttributesForChildrenOfComplexAttribute(localAttribute);
         }
 
@@ -244,11 +272,56 @@ export class AttributesController extends ConsumptionBaseController {
                 value: propertyValue.toJSON() as AttributeValues.Identity.Json
             });
 
-            await this.createLocalAttribute({
+            await this.createRepositoryAttribute({
                 content: childAttribute,
                 parentId: localAttribute.id
             });
         }
+    }
+
+    public async setAsDefaultRepositoryAttribute(newDefaultAttribute: LocalAttribute, skipOverwrite?: boolean): Promise<LocalAttribute> {
+        if (!newDefaultAttribute.isRepositoryAttribute(this.identity.address)) {
+            throw CoreErrors.attributes.isNotRepositoryAttribute(newDefaultAttribute.id);
+        }
+
+        if (newDefaultAttribute.isDefault) return newDefaultAttribute;
+
+        if (newDefaultAttribute.parentId) {
+            const parentAttribute = await this.getLocalAttribute(newDefaultAttribute.parentId);
+            if (!parentAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, newDefaultAttribute.parentId.toString());
+            if (parentAttribute.isDefault) skipOverwrite = false;
+        }
+
+        const valueType = newDefaultAttribute.content.value.constructor.name;
+        const query = {
+            $and: [
+                {
+                    [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType
+                },
+                {
+                    [nameof<LocalAttribute>((c) => c.isDefault)]: true
+                }
+            ]
+        };
+
+        const currentDefaultAttributeResult = await this.getLocalAttributes(query);
+
+        if (currentDefaultAttributeResult.length > 1) {
+            throw new ConsumptionError(`There are multiple default Attributes for type ${valueType.toString()}, even though only one is expected.`);
+        }
+
+        const currentDefaultAttributeExists = currentDefaultAttributeResult.length === 1;
+        if (skipOverwrite && currentDefaultAttributeExists) return newDefaultAttribute;
+
+        if (!skipOverwrite && currentDefaultAttributeExists) {
+            const currentDefaultAttribute = currentDefaultAttributeResult[0];
+            currentDefaultAttribute.isDefault = undefined;
+            await this.updateAttributeUnsafe(currentDefaultAttribute);
+        }
+
+        newDefaultAttribute.isDefault = true;
+        await this.updateAttributeUnsafe(newDefaultAttribute);
+        return newDefaultAttribute;
     }
 
     public async createSharedLocalAttributeCopy(params: ICreateSharedLocalAttributeCopyParams): Promise<LocalAttribute> {
@@ -271,7 +344,7 @@ export class AttributesController extends ConsumptionBaseController {
         return sharedLocalAttributeCopy;
     }
 
-    public async createPeerLocalAttribute(params: ICreatePeerLocalAttributeParams): Promise<LocalAttribute> {
+    public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
         const shareInfo = LocalAttributeShareInfo.from({
             peer: params.peer,
             requestReference: params.requestReference
@@ -295,6 +368,13 @@ export class AttributesController extends ConsumptionBaseController {
         await this.deleteAttributeUnsafe(attribute.id);
 
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
+    }
+
+    public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
+        const attributes = await this.getLocalAttributes({ "shareInfo.peer": peer.toString() });
+        for (const attribute of attributes) {
+            await this.deleteAttributeUnsafe(attribute.id);
+        }
     }
 
     private async deleteChildAttributesOfComplexAttribute(complexAttribute: LocalAttribute): Promise<void> {
@@ -539,13 +619,24 @@ export class AttributesController extends ConsumptionBaseController {
             shareInfo: successorParams.shareInfo,
             parentId: successorParams.parentId,
             createdAt: successorParams.createdAt,
-            succeededBy: successorParams.succeededBy
+            succeededBy: successorParams.succeededBy,
+            isDefault: predecessor.isDefault
         });
+
+        await this.removeDefault(predecessor);
 
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
 
         return { predecessor, successor };
+    }
+
+    private async removeDefault(attribute: LocalAttribute): Promise<LocalAttribute> {
+        if (!attribute.isDefault) return attribute;
+
+        attribute.isDefault = undefined;
+        await this.updateAttributeUnsafe(attribute);
+        return attribute;
     }
 
     public async validateRepositoryAttributeSuccession(
@@ -908,7 +999,8 @@ export class AttributesController extends ConsumptionBaseController {
             parentId: attributeData.parentId,
             succeededBy: attributeData.succeededBy,
             succeeds: attributeData.succeeds,
-            deletionInfo: attributeData.deletionInfo
+            deletionInfo: attributeData.deletionInfo,
+            isDefault: attributeData.isDefault
         });
         await this.attributes.create(localAttribute);
         return localAttribute;
@@ -930,7 +1022,8 @@ export class AttributesController extends ConsumptionBaseController {
             shareInfo: attributeParams.shareInfo,
             succeededBy: attributeParams.succeededBy,
             succeeds: attributeParams.succeeds,
-            deletionInfo: attributeParams.deletionInfo
+            deletionInfo: attributeParams.deletionInfo,
+            isDefault: attributeParams.isDefault
         };
         const newAttribute = LocalAttribute.from(params);
         await this.attributes.update(doc, newAttribute);
@@ -962,6 +1055,9 @@ export class AttributesController extends ConsumptionBaseController {
         await this.detachAttributeCopies(attributeCopiesToDetach);
 
         await this.deletePredecessorsOfAttribute(attribute.id);
+
+        await this.transferDefault(attribute);
+
         await this.deleteAttribute(attribute);
     }
 
@@ -1021,6 +1117,31 @@ export class AttributesController extends ConsumptionBaseController {
         for (const predecessor of predecessors) {
             await this.deleteAttribute(predecessor);
         }
+    }
+
+    private async transferDefault(attribute: LocalAttribute): Promise<void> {
+        if (!attribute.isDefault) return;
+
+        const valueType = attribute.content.value.constructor.name;
+        const query = {
+            $and: [
+                {
+                    [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType
+                },
+                {
+                    [nameof<LocalAttribute>((c) => c.succeededBy)]: undefined
+                },
+                {
+                    [nameof<LocalAttribute>((c) => c.id)]: { $ne: attribute.id.toString() }
+                }
+            ]
+        };
+
+        const defaultCandidates = await this.getLocalAttributes(query);
+        if (defaultCandidates.length === 0) return;
+
+        defaultCandidates[defaultCandidates.length - 1].isDefault = true;
+        await this.updateAttributeUnsafe(defaultCandidates[defaultCandidates.length - 1]);
     }
 
     public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {

@@ -53,4 +53,13 @@ export class AttributeListenersController extends ConsumptionBaseController {
 
         return listener;
     }
+
+    public async deletePeerAttributeListeners(peerAddress: CoreAddress): Promise<void> {
+        const listenerDocs = await this.attributeListeners.find({ peer: peerAddress.toString() });
+        const listeners = this.parseArray(listenerDocs, LocalAttributeListener);
+
+        for (const listener of listeners) {
+            await this.attributeListeners.delete(listener);
+        }
+    }
 }

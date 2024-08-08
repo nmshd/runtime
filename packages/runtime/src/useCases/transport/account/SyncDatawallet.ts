@@ -3,17 +3,13 @@ import { AccountController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { UseCase } from "../../common";
 
-export interface SyncDatawalletRequest {
-    callback?(percentage: number, syncStep: string): void;
-}
-
-export class SyncDatawalletUseCase extends UseCase<SyncDatawalletRequest, void> {
+export class SyncDatawalletUseCase extends UseCase<void, void> {
     public constructor(@Inject private readonly accountController: AccountController) {
         super();
     }
 
-    protected async executeInternal(request: SyncDatawalletRequest): Promise<Result<void>> {
-        await this.accountController.syncDatawallet(true, request.callback);
+    protected async executeInternal(): Promise<Result<void>> {
+        await this.accountController.syncDatawallet(true);
         return Result.ok(undefined);
     }
 }

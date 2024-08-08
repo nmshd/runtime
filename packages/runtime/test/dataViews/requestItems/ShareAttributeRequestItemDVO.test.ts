@@ -1,5 +1,6 @@
-import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { AttributesController, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import { AbstractStringJSON, DisplayNameJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
+import { CoreId } from "@nmshd/transport";
 import {
     AcceptResponseItemDVO,
     ConsumptionServices,
@@ -56,6 +57,12 @@ beforeAll(async () => {
     sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
+    responseItems = [{ accept: true }];
+}, 30000);
+
+afterAll(() => serviceProvider.stop());
+
+beforeEach(async () => {
     const senderAttribute = await sConsumptionServices.attributes.createRepositoryAttribute({
         content: {
             value: {
@@ -78,15 +85,27 @@ beforeAll(async () => {
         },
         peer: rAddress
     };
-    responseItems = [{ accept: true }];
-}, 30000);
 
-afterAll(() => serviceProvider.stop());
-
-beforeEach(function () {
     rEventBus.reset();
     sEventBus.reset();
 });
+
+afterEach(async () => {
+    await cleanupAttributes();
+});
+
+async function cleanupAttributes() {
+    await Promise.all(
+        [sRuntimeServices, rRuntimeServices].map(async (services) => {
+            const servicesAttributeController = (rRuntimeServices.consumption.attributes as any).getAttributeUseCase.attributeController as AttributesController;
+
+            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
+            for (const attribute of servicesAttributesResult.value) {
+                await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
+            }
+        })
+    );
+}
 
 describe("ShareAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
@@ -301,7 +320,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await sExpander.expandAddress(senderMessage.recipients[0].address);
 
-        expect(dvo.name).toStrictEqual(senderMessage.recipients[0].address.substring(3, 9));
+        expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.items).toHaveLength(0);
     });
 });

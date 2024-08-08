@@ -115,12 +115,20 @@ export class TokenController extends TransportController {
 
         const decryptionPromises = backboneTokens.map(async (t) => {
             const tokenDoc = await this.tokens.read(t.id);
+            if (!tokenDoc) {
+                this._log.error(
+                    `Token '${t.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
+                );
+                return;
+            }
+
             const token = Token.from(tokenDoc);
 
             return { id: CoreId.from(t), cache: await this.decryptToken(t, token.secretKey) };
         });
 
-        return await Promise.all(decryptionPromises);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     @log()
@@ -211,5 +219,13 @@ export class TokenController extends TransportController {
         }
 
         return token;
+    }
+
+    public async cleanupTokensOfDecomposedRelationship(peer: CoreAddress): Promise<void> {
+        const tokenDocs = await this.getTokens({ "cache.createdBy": peer.toString() });
+        const tokens = this.parseArray<Token>(tokenDocs, Token);
+        for await (const token of tokens) {
+            await this.tokens.delete(token);
+        }
     }
 }

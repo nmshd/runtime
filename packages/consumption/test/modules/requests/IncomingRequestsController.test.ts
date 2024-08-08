@@ -1,16 +1,15 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { IRequest, IRequestItemGroup, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
-import { CoreDate, CoreId, RelationshipChangeType, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate, CoreId, TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
     DecideRequestParametersJSON,
-    ErrorValidationResult,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus
 } from "../../../src";
-import { loggerFactory, TestUtil } from "../../core/TestUtil";
+import { TestUtil, loggerFactory } from "../../core/TestUtil";
 import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
@@ -133,7 +132,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -261,7 +259,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -318,7 +315,6 @@ describe("IncomingRequestsController", function () {
                         mustBeAccepted: false
                     }),
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             TestRequestItem.from({
                                 mustBeAccepted: false,
@@ -367,21 +363,29 @@ describe("IncomingRequestsController", function () {
             });
 
             expect(validationResult).errorValidationResult({
-                code: "inheritedFromItem",
-                message: "Some child items have errors."
+                code: "error.consumption.validation.inheritedFromItem",
+                message: "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
             });
             expect(validationResult.items).toHaveLength(2);
 
             expect(validationResult.items[0].isError()).toBe(false);
 
             expect(validationResult.items[1].isError()).toBe(true);
-            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("inheritedFromItem");
-            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe("Some child items have errors.");
+            expect(validationResult.items[1]).errorValidationResult({ code: "error.consumption.validation.inheritedFromItem" });
 
             expect(validationResult.items[1].items).toHaveLength(3);
             expect(validationResult.items[1].items[0].isError()).toBe(true);
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
+        });
+
+        test("returns 'error' on terminated relationship", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus"
+            });
         });
     });
 
@@ -443,7 +447,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -498,7 +501,6 @@ describe("IncomingRequestsController", function () {
                         mustBeAccepted: false
                     }),
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             TestRequestItem.from({
                                 mustBeAccepted: false,
@@ -546,21 +548,29 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanRejectWith(rejectParams);
 
             expect(validationResult).errorValidationResult({
-                code: "inheritedFromItem",
-                message: "Some child items have errors."
+                code: "error.consumption.validation.inheritedFromItem",
+                message: "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
             });
             expect(validationResult.items).toHaveLength(2);
 
             expect(validationResult.items[0].isError()).toBe(false);
 
             expect(validationResult.items[1].isError()).toBe(true);
-            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("inheritedFromItem");
-            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe("Some child items have errors.");
+            expect(validationResult.items[1]).errorValidationResult({ code: "error.consumption.validation.inheritedFromItem" });
 
             expect(validationResult.items[1].items).toHaveLength(3);
             expect(validationResult.items[1].items[0].isError()).toBe(true);
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
+        });
+
+        test("returns 'error' on terminated relationship", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus"
+            });
         });
     });
 
@@ -794,14 +804,14 @@ describe("IncomingRequestsController", function () {
             });
         });
 
-        test("can handle valid input with a RelationshipChange as responseSource", async function () {
+        test("can handle valid input with a Relationship as responseSource", async function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.Decided);
-            const outgoingRelationshipCreationChange = TestObjectFactory.createOutgoingIRelationshipChange(RelationshipChangeType.Creation, context.currentIdentity);
+            const outgoingRelationship = TestObjectFactory.createPendingRelationship();
             await When.iCompleteTheIncomingRequestWith({
-                responseSourceObject: outgoingRelationshipCreationChange
+                responseSourceObject: outgoingRelationship
             });
             await Then.theRequestMovesToStatus(LocalRequestStatus.Completed);
-            await Then.theResponseHasItsSourcePropertySetCorrectly({ responseSourceType: "RelationshipChange" });
+            await Then.theResponseHasItsSourcePropertySetCorrectly({ responseSourceType: "Relationship" });
             await Then.theChangesArePersistedInTheDatabase();
             await Then.eventHasBeenPublished(IncomingRequestStatusChangedEvent, {
                 newStatus: LocalRequestStatus.Completed
@@ -847,6 +857,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("returns undefined when the given id belongs to an outgoing Request", async function () {
+            await Given.anActiveRelationshipToIdentity();
             const outgoingRequest = await Given.anOutgoingRequest();
             await When.iGetTheIncomingRequestWith(outgoingRequest.id);
             await Then.iExpectUndefinedToBeReturned();
@@ -900,6 +911,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("does not return outgoing Requests", async function () {
+            await Given.anActiveRelationshipToIdentity();
             await Given.anIncomingRequest();
             await Given.anOutgoingRequest();
             await When.iGetIncomingRequestsWithTheQuery({});
@@ -981,11 +993,11 @@ describe("IncomingRequestsController", function () {
                 ]
             });
 
-            const relationshipChange = TestObjectFactory.createOutgoingIRelationshipChange(RelationshipChangeType.Creation, context.currentIdentity);
+            const relationship = TestObjectFactory.createPendingRelationship();
 
             cnsRequest = await context.incomingRequestsController.complete({
                 requestId: cnsRequest.id,
-                responseSourceObject: relationshipChange
+                responseSourceObject: relationship
             });
 
             expect(cnsRequest).toBeDefined();

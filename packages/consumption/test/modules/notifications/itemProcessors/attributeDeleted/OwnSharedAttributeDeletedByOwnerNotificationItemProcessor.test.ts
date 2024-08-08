@@ -299,7 +299,7 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
     });
 
     test("runs all processor methods for an unknown attribute", async function () {
-        const unknownAttributeId = CoreId.from("id1xxxxxxxxxxxxxxxxx");
+        const unknownAttributeId = CoreId.from("ATT");
 
         const notificationItem = OwnSharedAttributeDeletedByOwnerNotificationItem.from({
             attributeId: unknownAttributeId

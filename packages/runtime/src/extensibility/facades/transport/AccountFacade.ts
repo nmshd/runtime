@@ -14,9 +14,7 @@ import {
     RegisterPushNotificationTokenRequest,
     RegisterPushNotificationTokenResponse,
     RegisterPushNotificationTokenUseCase,
-    SyncDatawalletRequest,
     SyncDatawalletUseCase,
-    SyncEverythingRequest,
     SyncEverythingResponse,
     SyncEverythingUseCase,
     SyncInfo,
@@ -53,12 +51,12 @@ export class AccountFacade {
         return await this.unregisterPushNotificationTokenUseCase.execute();
     }
 
-    public async syncDatawallet(request: SyncDatawalletRequest = {}): Promise<Result<void, ApplicationError>> {
-        return await this.syncDatawalletUseCase.execute(request);
+    public async syncDatawallet(): Promise<Result<void, ApplicationError>> {
+        return await this.syncDatawalletUseCase.execute();
     }
 
-    public async syncEverything(request: SyncEverythingRequest = {}): Promise<Result<SyncEverythingResponse, ApplicationError>> {
-        return await this.syncEverythingUseCase.execute(request);
+    public async syncEverything(): Promise<Result<SyncEverythingResponse, ApplicationError>> {
+        return await this.syncEverythingUseCase.execute();
     }
 
     public async getSyncInfo(): Promise<Result<SyncInfo, ApplicationError>> {

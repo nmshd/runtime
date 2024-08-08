@@ -26,7 +26,7 @@ export interface GetOwnSharedAttributeRequestQuery {
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];
     "content.key"?: string | string[];
-    "content.isTechnical"?: string | string[];
+    "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
     shareInfo?: string | string[];

@@ -96,6 +96,7 @@ describe("AuthenticationTest", function () {
         expect(requests[0].method).toBe("post");
         expect(requests[0].url).toMatch(/^\/connect\/token/);
     });
+
     test("should throw correct error on authentication issues", async function () {
         setAuthTokenToExpired(testAccount);
 

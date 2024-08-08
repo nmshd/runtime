@@ -166,7 +166,7 @@ import {
     ZipCodeJSON
 } from "./types";
 
-// ################################################ Editable Identity Attribute Value Types ###################################################################
+// ################################################ Editable IdentityAttribute Value Types ###################################################################
 
 export module AttributeValues {
     export module Identity {

@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, CreateLocalAttributeParams } from "@nmshd/consumption";
+import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/consumption";
 import { AttributeValues } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
@@ -32,16 +32,17 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
     }
 
     protected async executeInternal(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        const params = CreateLocalAttributeParams.from({
+        const params = CreateRepositoryAttributeParams.from({
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.accountController.identity.address.toString(),
                 ...request.content
             }
         });
-        const createdAttribute = await this.attributeController.createLocalAttribute(params);
+        const createdLocalAttribute = await this.attributeController.createRepositoryAttribute(params);
+
         await this.accountController.syncDatawallet();
 
-        return Result.ok(AttributeMapper.toAttributeDTO(createdAttribute));
+        return Result.ok(AttributeMapper.toAttributeDTO(createdLocalAttribute));
     }
 }

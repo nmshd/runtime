@@ -82,6 +82,7 @@ describe("File upload", () => {
 
         expect(response).toBeAnError("content must be object", "error.runtime.validation.invalidPropertyValue");
     });
+
     test("can upload same file twice", async () => {
         const request = await makeUploadRequest({ content: await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`) });
 
@@ -121,6 +122,7 @@ describe("Get file", () => {
     beforeAll(async () => {
         file = await uploadFile(transportServices1);
     });
+
     test("can get file by id", async () => {
         const response = await transportServices1.files.getFile({ id: file.id });
 

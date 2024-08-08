@@ -1,56 +1,53 @@
-import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, ICryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreAddress, CoreErrors } from "../../core";
+import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding, ICryptoSignaturePublicKey } from "@nmshd/crypto";
+import { CoreAddress } from "../../core";
+
+const enmeshedAddressDIDPrefix = "did:e:";
 
 export class IdentityUtil {
-    public static async createAddress(publicKey: ICryptoSignaturePublicKey, realm: string): Promise<CoreAddress> {
-        if (realm.length !== 3) throw CoreErrors.general.realmLength();
-
+    public static async createAddress(publicKey: ICryptoSignaturePublicKey, backboneHostname: string): Promise<CoreAddress> {
         const sha512buffer = await CryptoHash.hash(publicKey.publicKey, CryptoHashAlgorithm.SHA512);
         const hash = await CryptoHash.hash(sha512buffer, CryptoHashAlgorithm.SHA256);
-        const hashedPublicKey = new CoreBuffer(hash.buffer.slice(0, 20));
+        const hashedPublicKey = new CoreBuffer(hash.buffer.slice(0, 10));
+        const identityPart = hashedPublicKey.toString(Encoding.Hex);
 
-        const checksumSource = CoreBuffer.fromUtf8(realm);
-        checksumSource.append(hashedPublicKey);
+        const checksumSource = CoreBuffer.fromUtf8(`${enmeshedAddressDIDPrefix}${backboneHostname}:dids:${identityPart}`);
+        const checksumHash = await CryptoHash.hash(checksumSource, CryptoHashAlgorithm.SHA256);
+        const checksum = new CoreBuffer(checksumHash.buffer.slice(0, 1));
 
-        const addressChecksum1 = await CryptoHash.hash(checksumSource, CryptoHashAlgorithm.SHA512);
-        const checksumHash = await CryptoHash.hash(addressChecksum1, CryptoHashAlgorithm.SHA256);
-        const checksum = new CoreBuffer(checksumHash.buffer.slice(0, 4));
-
-        const concatenation = hashedPublicKey;
-        concatenation.append(checksum);
-
-        const addressString = realm + concatenation.toBase58();
+        const addressString = `${enmeshedAddressDIDPrefix}${backboneHostname}:dids:${identityPart}${checksum.toString(Encoding.Hex)}`;
         const addressObj = CoreAddress.from({ address: addressString });
         return addressObj;
     }
 
-    public static async checkAddress(address: CoreAddress, publicKey?: ICryptoSignaturePublicKey, realm = "id1"): Promise<boolean> {
+    public static async checkAddress(address: CoreAddress, backboneHostname: string, publicKey?: ICryptoSignaturePublicKey): Promise<boolean> {
         const str = address.toString();
-        const strRealm = str.substr(0, 3);
-        if (realm && strRealm !== realm) {
+
+        const prefixLength = enmeshedAddressDIDPrefix.length;
+        const strWithoutPrefix = str.substring(prefixLength);
+        if (!strWithoutPrefix.startsWith(backboneHostname)) {
             return false;
         }
 
-        const strAddress = str.substr(3);
+        const strAddress = str.substring(str.length - 22);
+        const strHashedPublicKey = strAddress.substring(0, 20);
+        const strPrefixRealm = str.substring(0, str.length - 22);
 
-        const addressBuffer = CoreBuffer.fromBase58(strAddress).buffer;
+        const addressBuffer = CoreBuffer.fromString(strAddress, Encoding.Hex).buffer;
+        const sha256Array = addressBuffer.slice(0, addressBuffer.byteLength - 1);
+        const checksumArray = addressBuffer.slice(addressBuffer.byteLength - 1, addressBuffer.byteLength);
 
-        const sha256Array = addressBuffer.slice(0, addressBuffer.byteLength - 4);
-        const checksumArray = addressBuffer.slice(addressBuffer.byteLength - 4, addressBuffer.byteLength);
+        const checksumBuffer = CoreBuffer.fromUtf8(strPrefixRealm + strHashedPublicKey);
 
-        const checksumBuffer = CoreBuffer.fromUtf8(strRealm);
-        checksumBuffer.append(new CoreBuffer(sha256Array));
-        const addressChecksum1 = await CryptoHash.hash(checksumBuffer, CryptoHashAlgorithm.SHA512);
-        const addressChecksum2 = await CryptoHash.hash(addressChecksum1, CryptoHashAlgorithm.SHA256);
-        const firstBytesOfChecksum = new CoreBuffer(addressChecksum2.buffer.slice(0, 4));
-        if (!firstBytesOfChecksum.equals(new CoreBuffer(checksumArray))) {
+        const addressChecksum = await CryptoHash.hash(checksumBuffer, CryptoHashAlgorithm.SHA256);
+        const firstByteOfChecksum = new CoreBuffer(addressChecksum.buffer.slice(0, 1));
+        if (!firstByteOfChecksum.equals(new CoreBuffer(checksumArray))) {
             return false;
         }
 
         if (publicKey) {
             const sha512buffer = await CryptoHash.hash(publicKey.publicKey, CryptoHashAlgorithm.SHA512);
             let sha256buffer = await CryptoHash.hash(sha512buffer, CryptoHashAlgorithm.SHA256);
-            sha256buffer = new CoreBuffer(sha256buffer.buffer.slice(0, 20));
+            sha256buffer = new CoreBuffer(sha256buffer.buffer.slice(0, 10));
             if (!sha256buffer.equals(new CoreBuffer(sha256Array))) {
                 // Hash doesn't match with given public key.
                 return false;

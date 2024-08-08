@@ -40,6 +40,7 @@ describe("MessageContent", function () {
             expect(value).toBeInstanceOf(JSONWrapper);
             await TestUtil.sendMessage(sender, recipient1, value);
         });
+
         test("should correctly store the message (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(1);
@@ -94,6 +95,7 @@ describe("MessageContent", function () {
 
             expect(message).toBeDefined();
         });
+
         test("should correctly store the me4ssage (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(2);

@@ -6,6 +6,7 @@ import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { PeerRelationshipTemplateLoadedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
+import { Relationship } from "../relationships/local/Relationship";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetRelationshipTemplatesResponse } from "./backbone/BackboneGetRelationshipTemplates";
@@ -93,7 +94,9 @@ export class RelationshipTemplateController extends TransportController {
     }
 
     public async deleteRelationshipTemplate(template: RelationshipTemplate): Promise<void> {
-        await this.client.deleteRelationshipTemplate(template.id.toString());
+        const response = await this.client.deleteRelationshipTemplate(template.id.toString());
+        if (response.isError) throw response.error;
+
         await this.templates.delete(template);
     }
 
@@ -123,12 +126,20 @@ export class RelationshipTemplateController extends TransportController {
 
         const decryptionPromises = backboneRelationships.map(async (t) => {
             const templateDoc = await this.templates.read(t.id);
+            if (!templateDoc) {
+                this._log.error(
+                    `Template '${t.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
+                );
+                return;
+            }
+
             const template = RelationshipTemplate.from(templateDoc);
 
             return { id: CoreId.from(t.id), cache: await this.decryptRelationshipTemplate(t, template.secretKey) };
         });
 
-        return await Promise.all(decryptionPromises);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     @log()
@@ -245,5 +256,21 @@ export class RelationshipTemplateController extends TransportController {
         this.eventBus.publish(new PeerRelationshipTemplateLoadedEvent(this.parent.identity.address.toString(), relationshipTemplate));
 
         return relationshipTemplate;
+    }
+
+    public async cleanupTemplatesOfDecomposedRelationship(relationship: Relationship): Promise<void> {
+        const templateOfRelationship = relationship.cache!.template;
+
+        if (!templateOfRelationship.isOwn || templateOfRelationship.cache!.maxNumberOfAllocations === 1) {
+            await this.templates.delete(templateOfRelationship);
+        }
+
+        const otherTemplatesOfPeer = await this.getRelationshipTemplates({
+            "cache.createdBy": relationship.peer.address.toString()
+        });
+
+        for (const template of otherTemplatesOfPeer) {
+            await this.templates.delete(template);
+        }
     }
 }

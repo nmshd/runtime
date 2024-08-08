@@ -4,7 +4,7 @@ import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQ
 import { AttributeValues } from "./AttributeValueTypes";
 import { IValueHints, ValueHints, ValueHintsJSON } from "./hints";
 import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality";
-import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "./types/proprietary/ProprietaryAttributeValue";
+import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH } from "./types/proprietary/ProprietaryAttributeValue";
 
 export interface RelationshipAttributeCreationHintsJSON {
     title: string;
@@ -30,7 +30,7 @@ export interface IRelationshipAttributeCreationHints extends ISerializable {
 @type("RelationshipAttributeCreationHints")
 export class RelationshipAttributeCreationHints extends Serializable implements IRelationshipAttributeCreationHints {
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH })
     public title: string;
 
     @serialize()

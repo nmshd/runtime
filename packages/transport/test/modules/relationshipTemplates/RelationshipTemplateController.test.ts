@@ -133,4 +133,18 @@ describe("RelationshipTemplateController", function () {
 
         expectValidRelationshipTemplates(sentRelationshipTemplate, receivedRelationshipTemplate, tempDate);
     });
+
+    test("should clean up relationship templates of a relationship", async function () {
+        const relationship = (await TestUtil.addRelationship(sender, recipient)).acceptedRelationshipFromSelf;
+
+        const tokenReference = await TestUtil.sendRelationshipTemplateAndToken(recipient);
+        const templateId = (await TestUtil.fetchRelationshipTemplateFromTokenReference(sender, tokenReference)).id;
+
+        await sender.relationshipTemplates.cleanupTemplatesOfDecomposedRelationship(relationship);
+
+        const templateForRelationship = await sender.relationshipTemplates.getRelationshipTemplate(relationship.cache!.template.id);
+        const otherTemplate = await sender.relationshipTemplates.getRelationshipTemplate(templateId);
+        expect(templateForRelationship).toBeUndefined();
+        expect(otherTemplate).toBeUndefined();
+    });
 });

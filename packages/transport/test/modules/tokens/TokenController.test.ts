@@ -149,4 +149,20 @@ describe("TokenController", function () {
         testTokens(sentTokens[0], receivedTokens[0], tempDate);
         testTokens(sentTokens[1], receivedTokens[1], tempDate);
     });
+
+    test("should delete a token", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await recipient.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        const tokenId = (await sender.tokens.loadPeerTokenByTruncated(reference, false)).id;
+
+        await sender.tokens.cleanupTokensOfDecomposedRelationship(recipient.identity.address);
+        const token = await sender.tokens.getToken(tokenId);
+        expect(token).toBeUndefined();
+    });
 });

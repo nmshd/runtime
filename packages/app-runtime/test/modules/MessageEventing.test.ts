@@ -54,6 +54,6 @@ describe("MessageEventingTest", function () {
         expect(mailReceivedEvent.data.date).toBe(message.createdAt);
         expect(mailReceivedEvent.data.type).toBe("MailDVO");
         expect(mailReceivedEvent.data.createdBy.type).toBe("IdentityDVO");
-        expect(mailReceivedEvent.data.createdBy.name).toBe(createdBy.substring(3, 9));
+        expect(mailReceivedEvent.data.createdBy.name).toBe("i18n://dvo.identity.unknown");
     });
 });

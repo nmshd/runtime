@@ -216,7 +216,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the sender's dvo for the recipient", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
-        expect(dvo.name).toStrictEqual(senderMessage.createdBy.substring(3, 9));
+        expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.items).toHaveLength(0);
     });
 

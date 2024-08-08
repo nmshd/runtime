@@ -11,8 +11,10 @@ import {
     GetDeviceOnboardingInfoRequest,
     GetDeviceOnboardingInfoUseCase,
     GetDeviceRequest,
-    GetDeviceUseCase,
     GetDevicesUseCase,
+    GetDeviceUseCase,
+    SetCommunicationLanguageRequest,
+    SetCommunicationLanguageUseCase,
     UpdateDeviceRequest,
     UpdateDeviceUseCase
 } from "../../../useCases";
@@ -25,7 +27,8 @@ export class DevicesFacade {
         @Inject private readonly updateDeviceUseCase: UpdateDeviceUseCase,
         @Inject private readonly deleteDeviceUseCase: DeleteDeviceUseCase,
         @Inject private readonly getDeviceOnboardingInfoUseCase: GetDeviceOnboardingInfoUseCase,
-        @Inject private readonly getDeviceOnboardingTokenUseCase: CreateDeviceOnboardingTokenUseCase
+        @Inject private readonly getDeviceOnboardingTokenUseCase: CreateDeviceOnboardingTokenUseCase,
+        @Inject private readonly setCommunicationLanguageUseCase: SetCommunicationLanguageUseCase
     ) {}
 
     public async getDevice(request: GetDeviceRequest): Promise<Result<DeviceDTO, ApplicationError>> {
@@ -54,5 +57,9 @@ export class DevicesFacade {
 
     public async deleteDevice(request: DeleteDeviceRequest): Promise<Result<void, ApplicationError>> {
         return await this.deleteDeviceUseCase.execute(request);
+    }
+
+    public async setCommunicationLanguage(request: SetCommunicationLanguageRequest): Promise<Result<void, ApplicationError>> {
+        return await this.setCommunicationLanguageUseCase.execute(request);
     }
 }

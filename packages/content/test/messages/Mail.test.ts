@@ -5,7 +5,7 @@ describe("Mail", function () {
     test("should create a Mail from JSON", function () {
         const mail = Serializable.fromUnknown({
             "@type": "Mail",
-            to: ["id1PNvUP4jHD74qo6usnWNoaFGFf33MXZi6c"],
+            to: ["did:e:a-domain:dids:anidentity"],
             cc: [],
             subject: "A Subject",
             body: "A Body"
@@ -17,7 +17,7 @@ describe("Mail", function () {
     test("should create a Mail from JSON if cc is missing", function () {
         const mail = Serializable.fromUnknown({
             "@type": "Mail",
-            to: ["id1PNvUP4jHD74qo6usnWNoaFGFf33MXZi6c"],
+            to: ["did:e:a-domain:dids:anidentity"],
             subject: "A Subject",
             body: "A Body"
         });

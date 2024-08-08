@@ -18,26 +18,46 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
         if (requestItem.attribute instanceof IdentityAttribute) {
+            if (recipientIsAttributeOwner || ownerIsEmptyString) {
+                return ValidationResult.success();
+            }
+
             if (senderIsAttributeOwner) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidRequestItem("Cannot create own Attributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead.")
+                    CoreErrors.requests.invalidRequestItem("Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead.")
                 );
             }
 
-            if (recipientIsAttributeOwner || ownerIsEmptyString || !recipient) return ValidationResult.success();
+            if (typeof recipient !== "undefined") {
+                return ValidationResult.error(
+                    CoreErrors.requests.invalidRequestItem(
+                        "The owner of the provided IdentityAttribute for the `attribute` property can only be the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
+                    )
+                );
+            }
 
             return ValidationResult.error(
                 CoreErrors.requests.invalidRequestItem(
-                    "The owner of the given `attribute` can only be the recipient's address or an empty string. The latter will default to the recipient's address."
+                    "The owner of the provided IdentityAttribute for the `attribute` property can only be an empty string. It will default to the Recipient's Address."
                 )
             );
         }
 
-        if (recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString || !recipient) return ValidationResult.success();
+        if (recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString) {
+            return ValidationResult.success();
+        }
+
+        if (typeof recipient !== "undefined") {
+            return ValidationResult.error(
+                CoreErrors.requests.invalidRequestItem(
+                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address, the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
+                )
+            );
+        }
 
         return ValidationResult.error(
             CoreErrors.requests.invalidRequestItem(
-                "The owner of the given 'attribute' can only be the sender's address, the recipient's address or an empty string. The latter will default to the recipient's address."
+                "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
             )
         );
     }
@@ -54,7 +74,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         let sharedAttribute: LocalAttribute;
 
         if (requestItem.attribute instanceof IdentityAttribute) {
-            const repositoryAttribute = await this.consumptionController.attributes.createLocalAttribute({
+            const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
                 content: requestItem.attribute
             });
 
@@ -64,7 +84,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 sourceAttributeId: repositoryAttribute.id
             });
         } else {
-            sharedAttribute = await this.consumptionController.attributes.createPeerLocalAttribute({
+            sharedAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
                 content: requestItem.attribute,
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id
@@ -90,7 +110,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             requestItem.attribute.owner = requestInfo.peer;
         }
 
-        await this.consumptionController.attributes.createPeerLocalAttribute({
+        await this.consumptionController.attributes.createSharedLocalAttribute({
             id: responseItem.attributeId,
             content: requestItem.attribute,
             peer: requestInfo.peer,

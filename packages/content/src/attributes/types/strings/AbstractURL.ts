@@ -19,7 +19,7 @@ export abstract class AbstractURL extends AbstractString {
         return super.valueHints.copyWith({
             min: 3,
             max: 1024,
-            pattern: String(AbstractURL.regExp)
+            pattern: AbstractURL.regExp.toString().slice(1, -1)
         });
     }
 

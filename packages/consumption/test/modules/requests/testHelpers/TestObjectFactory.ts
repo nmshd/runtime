@@ -5,7 +5,6 @@ import {
     IdentityAttribute,
     IIdentityAttribute,
     IRelationshipAttribute,
-    IRelationshipCreationChangeRequestContent,
     IRelationshipTemplateContent,
     IRequest,
     IResponse,
@@ -28,13 +27,10 @@ import {
     Identity,
     IMessage,
     IRelationship,
-    IRelationshipChange,
     IRelationshipTemplate,
     Message,
-    Realm,
     Relationship,
-    RelationshipChangeStatus,
-    RelationshipChangeType,
+    RelationshipAuditLogEntryReason,
     RelationshipStatus,
     RelationshipTemplate,
     RelationshipTemplatePublicKey
@@ -43,36 +39,122 @@ import { ILocalRequest, LocalRequest, LocalRequestStatus, LocalRequestStatusLogE
 import { TestRequestItem } from "./TestRequestItem";
 
 export class TestObjectFactory {
-    public static createRelationship(properties?: Partial<IRelationship>): Relationship {
+    public static createPendingRelationship(properties?: Partial<IRelationship>): Relationship {
         return Relationship.from({
             id: properties?.id ?? CoreId.from("REL1"),
             peer:
                 properties?.peer ??
                 Identity.from({
-                    address: CoreAddress.from("id1"),
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
-                    }),
-                    realm: Realm.Prod
+                    })
                 }),
-            status: properties?.status ?? RelationshipStatus.Active,
+            status: properties?.status ?? RelationshipStatus.Pending,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
-                    changes: [
+                    auditLog: [
                         {
-                            id: CoreId.from("RELCH1"),
-                            type: RelationshipChangeType.Creation,
-                            status: RelationshipChangeStatus.Accepted,
-                            relationshipId: CoreId.from("REL1"),
-                            request: {
-                                createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                                content: {},
-                                createdBy: CoreAddress.from("id1"),
-                                createdByDevice: CoreId.from("DEV1")
-                            }
+                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.Creation,
+                            newStatus: RelationshipStatus.Pending
+                        }
+                    ],
+                    template: this.createIncomingRelationshipTemplate()
+                })
+        });
+    }
+
+    public static createActiveRelationship(properties?: Partial<IRelationship>): Relationship {
+        return Relationship.from({
+            id: properties?.id ?? CoreId.from("REL1"),
+            peer:
+                properties?.peer ??
+                Identity.from({
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    publicKey: CryptoSignaturePublicKey.from({
+                        algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
+                        publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
+                    })
+                }),
+            status: properties?.status ?? RelationshipStatus.Active,
+            relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
+            cache:
+                properties?.cache ??
+                CachedRelationship.from({
+                    auditLog: [
+                        {
+                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.Creation,
+                            newStatus: RelationshipStatus.Pending
+                        },
+
+                        {
+                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
+                            oldStatus: RelationshipStatus.Pending,
+                            newStatus: RelationshipStatus.Active
+                        }
+                    ],
+                    template: this.createIncomingRelationshipTemplate()
+                })
+        });
+    }
+
+    public static createTerminatedRelationship(properties?: Partial<IRelationship>): Relationship {
+        return Relationship.from({
+            id: properties?.id ?? CoreId.from("REL1"),
+            peer:
+                properties?.peer ??
+                Identity.from({
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    publicKey: CryptoSignaturePublicKey.from({
+                        algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
+                        publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
+                    })
+                }),
+            status: properties?.status ?? RelationshipStatus.Terminated,
+            relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
+            cache:
+                properties?.cache ??
+                CachedRelationship.from({
+                    auditLog: [
+                        {
+                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.Creation,
+                            newStatus: RelationshipStatus.Pending
+                        },
+
+                        {
+                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
+                            oldStatus: RelationshipStatus.Pending,
+                            newStatus: RelationshipStatus.Active
+                        },
+
+                        {
+                            createdAt: CoreDate.from("2020-01-03T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.Termination,
+                            oldStatus: RelationshipStatus.Active,
+                            newStatus: RelationshipStatus.Terminated
                         }
                     ],
                     template: this.createIncomingRelationshipTemplate()
@@ -83,17 +165,17 @@ export class TestObjectFactory {
     public static createIdentityAttribute(properties?: Partial<IIdentityAttribute>): IdentityAttribute {
         return IdentityAttribute.from({
             value: properties?.value ?? GivenName.fromAny({ value: "AGivenName" }),
-            owner: properties?.owner ?? CoreAddress.from("id1")
+            owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }
 
     public static createRelationshipAttribute(properties?: Partial<IRelationshipAttribute>): RelationshipAttribute {
         return RelationshipAttribute.from({
-            value: properties?.value ?? ProprietaryString.from({ title: "A Title", value: "AGivenName" }),
+            value: properties?.value ?? ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" }),
             confidentiality: RelationshipAttributeConfidentiality.Public,
-            key: "aKey",
+            key: "AKey",
             isTechnical: false,
-            owner: properties?.owner ?? CoreAddress.from("id1")
+            owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }
 
@@ -109,7 +191,7 @@ export class TestObjectFactory {
         const requestJSON: ILocalRequest = {
             id: CoreId.from("REQ1"),
             isOwn: true,
-            peer: CoreAddress.from("id11"),
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
             content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
             source: { type: "Message", reference: CoreId.from("MSG1") },
@@ -141,8 +223,7 @@ export class TestObjectFactory {
         return Request.from({
             items: [
                 RequestItemGroup.from({
-                    items: [TestRequestItem.from({ mustBeAccepted })],
-                    mustBeAccepted: mustBeAccepted
+                    items: [TestRequestItem.from({ mustBeAccepted })]
                 })
             ],
             ...properties
@@ -207,7 +288,7 @@ export class TestObjectFactory {
             cache: {
                 content: content,
                 createdAt: creationDate,
-                createdBy: CoreAddress.from("id1"),
+                createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 createdByDevice: { id: "senderDeviceId" },
                 receivedByEveryone: false,
                 recipients: [
@@ -262,7 +343,7 @@ export class TestObjectFactory {
                 receivedByEveryone: false,
                 recipients: [
                     {
-                        address: CoreAddress.from("id1"),
+                        address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                         encryptedKey: CryptoCipher.from({
                             cipher: CoreBuffer.fromUtf8("test"),
                             algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
@@ -278,53 +359,6 @@ export class TestObjectFactory {
         return RelationshipTemplate.from(this.createIncomingIRelationshipTemplate());
     }
 
-    public static createIncomingIRelationshipChange(type: RelationshipChangeType, requestId?: string): IRelationshipChange {
-        return {
-            // @ts-expect-error
-            "@type": "RelationshipChange",
-            id: CoreId.from("RCH1"),
-            relationshipId: CoreId.from("REL1"),
-            type: type,
-            status: RelationshipChangeStatus.Pending,
-            request: {
-                createdAt: CoreDate.utc(),
-                createdBy: CoreAddress.from("id1"),
-                createdByDevice: CoreId.from("DVC1"),
-                content: {
-                    "@type": "RelationshipCreationChangeRequestContent",
-                    response: {
-                        "@type": "Response",
-                        result: ResponseResult.Accepted,
-                        items: [
-                            {
-                                // @ts-expect-error
-                                "@type": "AcceptResponseItem",
-                                result: ResponseItemResult.Accepted
-                            }
-                        ],
-                        requestId: CoreId.from(requestId ?? "REQ1")
-                    } as IResponse
-                } as IRelationshipCreationChangeRequestContent
-            }
-        };
-    }
-
-    public static createOutgoingIRelationshipChange(type: RelationshipChangeType, sender: CoreAddress): IRelationshipChange {
-        return {
-            // @ts-expect-error
-            "@type": "RelationshipChange",
-            id: CoreId.from("RCH1"),
-            relationshipId: CoreId.from("REL1"),
-            type: type,
-            status: RelationshipChangeStatus.Pending,
-            request: {
-                createdAt: CoreDate.utc(),
-                createdBy: sender,
-                createdByDevice: CoreId.from("DVC1")
-            }
-        };
-    }
-
     public static createIncomingIRelationshipTemplate(): IRelationshipTemplate {
         return {
             // @ts-expect-error
@@ -338,16 +372,15 @@ export class TestObjectFactory {
             cache: {
                 content: {},
                 createdAt: CoreDate.utc(),
-                createdBy: CoreAddress.from("id1"),
+                createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 createdByDevice: { id: "senderDeviceId" },
                 maxNumberOfAllocations: 1,
                 identity: {
-                    address: CoreAddress.from("id1"),
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
-                    }),
-                    realm: Realm.Prod
+                    })
                 },
                 templateKey: RelationshipTemplatePublicKey.from({
                     id: CoreId.from("b9uMR7u7lsKLzRfVJNYb"),
@@ -383,8 +416,7 @@ export class TestObjectFactory {
                     publicKey: CryptoSignaturePublicKey.from({
                         algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
                         publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
-                    }),
-                    realm: Realm.Prod
+                    })
                 },
                 templateKey: RelationshipTemplatePublicKey.from({
                     id: CoreId.from("b9uMR7u7lsKLzRfVJNYb"),

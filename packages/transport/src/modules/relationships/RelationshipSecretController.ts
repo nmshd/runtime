@@ -17,7 +17,6 @@ import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { TransportIds } from "../../core/TransportIds";
 import { AccountController } from "../accounts/AccountController";
-import { Identity } from "../accounts/data/Identity";
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
 import { RelationshipTemplatePublicKey } from "../relationshipTemplates/transmission/RelationshipTemplatePublicKey";
 import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
@@ -88,7 +87,7 @@ export class RelationshipSecretController extends SecretController {
     }
 
     @log()
-    public async getPublicResponse(relationshipSecretId: CoreId): Promise<CryptoRelationshipPublicResponse> {
+    public async getPublicCreationResponseContentCrypto(relationshipSecretId: CoreId): Promise<CryptoRelationshipPublicResponse> {
         const secret = await this.loadActiveSecretByName(relationshipSecretId.toString());
         if (!secret) {
             throw CoreErrors.general.recordNotFound(CryptoRelationshipSecrets, relationshipSecretId.toString());
@@ -116,8 +115,8 @@ export class RelationshipSecretController extends SecretController {
         return container;
     }
 
-    public async deleteSecretForRequest(peerIdentity: Identity): Promise<boolean> {
-        const secret = await this.loadActiveSecretByName(`request_to_${peerIdentity.address}`);
+    public async deleteSecretForRelationship(relationshipSecretId: CoreId): Promise<boolean> {
+        const secret = await this.loadActiveSecretByName(relationshipSecretId.toString());
         if (!secret) {
             return false;
         }
@@ -134,7 +133,7 @@ export class RelationshipSecretController extends SecretController {
     }
 
     @log()
-    public async encryptRequest(relationshipSecretId: CoreId, content: Serializable | string | CoreBuffer): Promise<CryptoCipher> {
+    public async encryptCreationContent(relationshipSecretId: CoreId, content: Serializable | string | CoreBuffer): Promise<CryptoCipher> {
         const buffer = CoreUtil.toBuffer(content);
         const secrets = await this.getSecret(relationshipSecretId);
 
@@ -158,7 +157,7 @@ export class RelationshipSecretController extends SecretController {
     }
 
     @log()
-    public async decryptRequest(relationshipSecretId: CoreId, cipher: CryptoCipher): Promise<CoreBuffer> {
+    public async decryptCreationContent(relationshipSecretId: CoreId, cipher: CryptoCipher): Promise<CoreBuffer> {
         const secrets = await this.getSecret(relationshipSecretId);
 
         if (!(secrets instanceof CryptoRelationshipRequestSecrets) && !(secrets instanceof CryptoRelationshipSecrets)) {

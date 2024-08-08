@@ -5,7 +5,6 @@ import {
     DevicesFacade,
     FilesFacade,
     IdentityDeletionProcessesFacade,
-    IdentityFacade,
     MessagesFacade,
     RelationshipsFacade,
     RelationshipTemplatesFacade,
@@ -22,7 +21,6 @@ export class TransportServices {
         @Inject public readonly account: AccountFacade,
         @Inject public readonly devices: DevicesFacade,
         @Inject public readonly challenges: ChallengesFacade,
-        @Inject public readonly identity: IdentityFacade,
         @Inject public readonly identityDeletionProcesses: IdentityDeletionProcessesFacade
     ) {}
 }

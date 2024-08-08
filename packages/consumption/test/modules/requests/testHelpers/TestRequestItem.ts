@@ -1,5 +1,14 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { IRequestItem, RequestItem } from "@nmshd/content";
+import { IRequestItem, RequestItem, RequestItemJSON } from "@nmshd/content";
+
+export interface TestRequestItemJSON extends RequestItemJSON {
+    shouldFailAtCanAccept?: true;
+    shouldFailAtCanReject?: true;
+    shouldFailAtCanCreateOutgoingRequestItem?: true;
+    shouldFailAtCanApplyIncomingResponseItem?: true;
+    shouldThrowOnAccept?: true;
+    shouldThrowOnReject?: true;
+}
 
 export interface ITestRequestItem extends IRequestItem {
     shouldFailAtCanAccept?: true;
