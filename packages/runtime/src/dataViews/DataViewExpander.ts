@@ -51,7 +51,7 @@ import {
     ValueHintsJSON,
     isRequestItemDerivation
 } from "@nmshd/content";
-import { CoreAddress, CoreId, IdentityController, Relationship } from "@nmshd/transport";
+import { CoreAddress, CoreId, IdentityController } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import {
@@ -963,7 +963,7 @@ export class DataViewExpander {
 
     public async expandLocalAttributeListenerDTO(attributeListener: LocalAttributeListenerDTO): Promise<LocalAttributeListenerDVO> {
         const query = (await this.expandAttributeQuery(attributeListener.query)) as IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
-        const peer = await this.expandIdentityForAddress(attributeListener.peer);
+        const peer = await this.expandAddress(attributeListener.peer);
         return {
             type: "LocalAttributeListenerDVO",
             name: "dvo.localAttributeListener.name",
@@ -1400,12 +1400,17 @@ export class DataViewExpander {
         const matchedAttributeDTOs = await this.consumption.attributes.executeIdentityAttributeQuery({
             query
         });
-        const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOs.value);
+        if (matchedAttributeDTOs.isError) throw matchedAttributeDTOs.error;
+
+        const matchedAttributeDTOsSortedByDefaultFirst = matchedAttributeDTOs.value.sort((attribute1, attribute2) =>
+            attribute1.isDefault === attribute2.isDefault ? 0 : attribute1.isDefault ? -1 : 1
+        );
+        const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOsSortedByDefaultFirst);
 
         return {
             ...this.expandIdentityAttributeQuery(query),
             type: "ProcessedIdentityAttributeQueryDVO",
-            results: matchedAttributeDVOs as (RepositoryAttributeDVO | SharedToPeerAttributeDVO)[],
+            results: matchedAttributeDVOs as RepositoryAttributeDVO[],
             isProcessed: true
         };
     }
@@ -1572,15 +1577,13 @@ export class DataViewExpander {
     }
 
     public expandUnknown(address: string): IdentityDVO {
-        const name = address.substring(3, 9);
-        const initials = (name.match(/\b\w/g) ?? []).join("");
-
         return {
             id: address,
             type: "IdentityDVO",
-            name: name,
-            initials: initials,
+            name: "i18n://dvo.identity.unknown",
+            initials: "",
             description: "i18n://dvo.identity.unknown.description",
+            publicKey: "i18n://dvo.identity.publicKey.unknown",
             isSelf: false,
             hasRelationship: false
         };
@@ -1634,14 +1637,13 @@ export class DataViewExpander {
     private expandAddressFromRequest(request: LocalRequestDTO): IdentityDVO {
         const sharedAttributesOnNewRelationship = this.getSharedAttributesFromRequest(request);
         const address = request.peer;
-        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship) ?? address.substring(3, 9);
-        const initials = (name.match(/\b\w/g) ?? []).join("");
+        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship);
 
         return {
             type: "IdentityDVO",
             id: address,
-            name: name,
-            initials,
+            name: name ?? "i18n://dvo.identity.unknown",
+            initials: name ? (name.match(/\b\w/g) ?? []).join("") : "",
             description: "i18n://dvo.identity.unknown.description",
             isSelf: false,
             hasRelationship: false
@@ -1770,7 +1772,7 @@ export class DataViewExpander {
         } else if (stringByType["Surname"]) {
             name = `${stringByType["Surname"]}`;
         } else {
-            name = relationship.peer.substring(3, 9);
+            name = "i18n://dvo.identity.unknown";
         }
 
         return {
@@ -1812,37 +1814,8 @@ export class DataViewExpander {
         };
     }
 
-    public async expandIdentityForAddress(address: string): Promise<IdentityDVO> {
-        if (address === this.identityController.address.toString()) {
-            return this.expandSelf();
-        }
-
-        const relationshipResult = await this.transport.relationships.getRelationshipByAddress({
-            address: address
-        });
-        if (relationshipResult.isSuccess) {
-            return await this.expandRelationshipDTO(relationshipResult.value);
-        }
-
-        if (relationshipResult.error.code !== RuntimeErrors.general.recordNotFound(Relationship).code) throw relationshipResult.error;
-
-        const name = address.substring(3, 9);
-        const initials = (name.match(/\b\w/g) ?? []).join("");
-
-        return {
-            id: address,
-            type: "IdentityDVO",
-            name: name,
-            initials: initials,
-            publicKey: "i18n://dvo.identity.publicKey.unknown",
-            description: "i18n://dvo.identity.unknown",
-            isSelf: false,
-            hasRelationship: false
-        };
-    }
-
     public async expandIdentityDTO(identity: IdentityDTO): Promise<IdentityDVO> {
-        return await this.expandIdentityForAddress(identity.address);
+        return await this.expandAddress(identity.address);
     }
 
     public async expandRelationshipDTOs(relationships: RelationshipDTO[]): Promise<IdentityDVO[]> {

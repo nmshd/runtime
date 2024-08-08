@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/app-runtime",
-    "version": "5.0.0-alpha.13",
+    "version": "5.0.0-alpha.16",
     "description": "The App Runtime",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -23,11 +23,20 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest --forceExit",
-        "test:ci": "jest -i --forceExit"
+        "test:ci": "jest -i --forceExit --coverage"
     },
     "jest": {
         "maxWorkers": 5,
         "preset": "ts-jest",
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text-summary",
+            "cobertura",
+            "lcov"
+        ],
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "setupFilesAfterEnv": [
             "jest-expect-message"
         ],
@@ -54,7 +63,7 @@
         "@types/luxon": "^3.4.2"
     },
     "peerDependencies": {
-        "@nmshd/runtime": "^5.0.0-alpha.13"
+        "@nmshd/runtime": "^5.0.0-alpha.16"
     },
     "publishConfig": {
         "access": "public",

@@ -1349,7 +1349,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(updatedPredecessorOwnSharedIdentityAttribute!.succeededBy).toStrictEqual(successorOwnSharedIdentityAttribute!.id);
         });
 
-        test("accept with existing IdentityAttribute whose predecessor was already shared but deleted by peer", async function () {
+        test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
             const sender = CoreAddress.from("Sender");
 
             const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
@@ -1374,6 +1374,66 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: successorRepositoryAttribute.id.toString()
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
+            expect(createdAttribute!.content).toStrictEqual(successorRepositoryAttribute.content);
+            expect(createdAttribute!.deletionInfo).toBeUndefined();
+            expect(createdAttribute!.succeeds).toBeUndefined();
+        });
+
+        test("accept with existing IdentityAttribute whose predecessor was already shared but is ToBeDeletedByPeer", async function () {
+            const sender = CoreAddress.from("Sender");
+
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "A succeeded given name"
+                    },
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            await consumptionController.attributes.createAttributeUnsafe({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                }),
+                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
+                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -1453,7 +1513,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(alreadySharedAttribute.id);
         });
 
-        test("accept with existing IdentityAttribute that is already shared and the latest shared version but deleted by peer", async function () {
+        test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
             const sender = CoreAddress.from("Sender");
 
             const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
@@ -1468,6 +1528,55 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: repositoryAttribute.id.toString()
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
+            expect(createdAttribute!.content).toStrictEqual(alreadySharedAttribute.content);
+            expect(createdAttribute!.deletionInfo).toBeUndefined();
+        });
+
+        test("accept with existing IdentityAttribute that is already shared and the latest shared version but is ToBeDeletedByPeer", async function () {
+            const sender = CoreAddress.from("Sender");
+
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                })
+            });
+
+            const alreadySharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: CoreAddress.from(accountController.identity.address)
+                }),
+                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
+                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 
             const requestItem = ReadAttributeRequestItem.from({

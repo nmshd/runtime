@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/consumption",
-    "version": "5.0.0-alpha.13",
+    "version": "5.0.0-alpha.16",
     "description": "The consumption library extends the transport library.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -24,7 +24,7 @@
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci": "npm run test",
         "test:ci:lokijs": "USE_LOKIJS=true jest -i",
-        "test:ci:mongodb": "jest -i",
+        "test:ci:mongodb": "jest -i --coverage",
         "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://localhost:27022' jest",
         "test:local:lokijs": "USE_LOKIJS=true jest",
         "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
@@ -35,6 +35,15 @@
     "jest": {
         "maxWorkers": 1,
         "preset": "ts-jest",
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text-summary",
+            "cobertura",
+            "lcov"
+        ],
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
             "jest-expect-message"
@@ -58,7 +67,7 @@
     "devDependencies": {
         "@js-soft/docdb-access-loki": "1.1.0",
         "@js-soft/docdb-access-mongo": "1.1.8",
-        "@js-soft/node-logger": "1.1.1",
+        "@js-soft/node-logger": "1.2.0",
         "@js-soft/ts-serval": "2.0.10",
         "@js-soft/ts-utils": "2.3.3",
         "@js-soft/web-logger": "^1.0.4",
