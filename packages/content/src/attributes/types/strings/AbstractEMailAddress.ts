@@ -19,7 +19,7 @@ export abstract class AbstractEMailAddress extends AbstractString {
         return super.valueHints.copyWith({
             min: 3,
             max: 254,
-            pattern: String(AbstractEMailAddress.regExp)
+            pattern: AbstractEMailAddress.regExp.toString().slice(1, -1).replaceAll("/", "\\/")
         });
     }
 
