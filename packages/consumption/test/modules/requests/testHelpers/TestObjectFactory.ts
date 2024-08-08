@@ -57,6 +57,7 @@ export class TestObjectFactory {
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
+                    creationContent: {},
                     auditLog: [
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
@@ -89,6 +90,7 @@ export class TestObjectFactory {
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
+                    creationContent: {},
                     auditLog: [
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
@@ -130,6 +132,7 @@ export class TestObjectFactory {
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
+                    creationContent: {},
                     auditLog: [
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
