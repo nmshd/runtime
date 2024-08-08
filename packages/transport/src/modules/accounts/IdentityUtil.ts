@@ -10,7 +10,7 @@ export class IdentityUtil {
         const hashedPublicKey = new CoreBuffer(hash.buffer.slice(0, 10));
         const identityPart = hashedPublicKey.toString(Encoding.Hex);
 
-        const checksumSource = CoreBuffer.fromUtf8(`${enmeshedAddressDIDPrefix}${backboneHostname}:dids:${hashedPublicKey.toString(Encoding.Hex)}`);
+        const checksumSource = CoreBuffer.fromUtf8(`${enmeshedAddressDIDPrefix}${backboneHostname}:dids:${identityPart}`);
         const checksumHash = await CryptoHash.hash(checksumSource, CryptoHashAlgorithm.SHA256);
         const checksum = new CoreBuffer(checksumHash.buffer.slice(0, 1));
 
