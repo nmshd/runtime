@@ -1,7 +1,7 @@
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { CachedMessageRecipient, File, Message } from "@nmshd/transport";
-import { MessageDTO, MessageWithAttachmentsDTO } from "../../../types";
+import { MessageContentDerivation, MessageDTO, MessageWithAttachmentsDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { FileMapper } from "../files/FileMapper";
 import { DownloadAttachmentResponse } from "./DownloadAttachment";
@@ -23,9 +23,25 @@ export class MessageMapper {
         if (!message.cache) {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
         }
+
+        let messageContent: MessageContentDerivation;
+        if (
+            !(
+                message.cache.content instanceof Mail ||
+                message.cache.content instanceof Request ||
+                message.cache.content instanceof ResponseWrapper ||
+                message.cache.content instanceof Notification ||
+                message.cache.content instanceof ArbitraryMessageContent
+            )
+        ) {
+            messageContent = ArbitraryMessageContent.from({ value: message.cache.content }).toJSON();
+        } else {
+            messageContent = message.cache.content.toJSON();
+        }
+
         return {
             id: message.id.toString(),
-            content: message.cache.content.toJSON(),
+            content: messageContent,
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),
@@ -40,6 +56,8 @@ export class MessageMapper {
         if (!message.cache) {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
         }
+
+        let messageContent: MessageContentDerivation;
         if (
             !(
                 message.cache.content instanceof Mail ||
@@ -49,14 +67,14 @@ export class MessageMapper {
                 message.cache.content instanceof ArbitraryMessageContent
             )
         ) {
-            throw RuntimeErrors.general.invalidPropertyValue(
-                `The content type of message ${message.id} is neither Mail nor Request nor ResponseWrapper nor Notification nor ArbitraryMessageContent.`
-            );
+            messageContent = ArbitraryMessageContent.from({ value: message.cache.content }).toJSON();
+        } else {
+            messageContent = message.cache.content.toJSON();
         }
 
         return {
             id: message.id.toString(),
-            content: message.cache.content.toJSON(),
+            content: messageContent,
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),

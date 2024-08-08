@@ -68,21 +68,25 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
 
     private async validateRelationshipTemplateContent(content: any) {
         const transformedContent = Serializable.fromUnknown(content);
-        if (transformedContent instanceof RelationshipTemplateContent) {
-            const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
-            if (validationResult.isError()) return validationResult.error;
 
-            if (transformedContent.onExistingRelationship) {
-                const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onExistingRelationship });
-                if (validationResult.isError()) return validationResult.error;
-            }
+        if (!(transformedContent instanceof RelationshipTemplateContent || transformedContent instanceof ArbitraryRelationshipTemplateContent)) {
+            return RuntimeErrors.general.invalidPropertyValue(
+                "The content of a RelationshipTemplate must be of type RelationshipTemplateContent or ArbitraryRelationshipTemplateContent."
+            );
+        }
 
-            return;
-        } else if (transformedContent instanceof ArbitraryRelationshipTemplateContent) {
+        if (transformedContent instanceof ArbitraryRelationshipTemplateContent) {
             return;
         }
-        return RuntimeErrors.general.invalidPropertyValue(
-            "The content of a RelationshipTemplate must be of type RelationshipTemplateContent or ArbitraryRelationshipTemplateContent."
-        );
+
+        const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
+        if (validationResult.isError()) return validationResult.error;
+
+        if (transformedContent.onExistingRelationship) {
+            const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onExistingRelationship });
+            if (validationResult.isError()) return validationResult.error;
+        }
+
+        return;
     }
 }

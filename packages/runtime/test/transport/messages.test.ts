@@ -328,26 +328,8 @@ describe("Message query", () => {
         const relationshipToRecipient1 = await client1.transport.relationships.getRelationshipByAddress({ address: addressRecipient1 });
         const relationshipToRecipient2 = await client1.transport.relationships.getRelationshipByAddress({ address: addressRecipient2 });
 
-        await client1.transport.messages.sendMessage({
-            content: {
-                "@type": "Mail",
-                body: "A body",
-                cc: [],
-                subject: "A subject",
-                to: [addressRecipient1]
-            },
-            recipients: [addressRecipient1]
-        });
-        await client1.transport.messages.sendMessage({
-            content: {
-                "@type": "Mail",
-                body: "A body",
-                cc: [],
-                subject: "A subject",
-                to: [addressRecipient2]
-            },
-            recipients: [addressRecipient2]
-        });
+        await sendMessage(client1.transport, addressRecipient1);
+        await sendMessage(client1.transport, addressRecipient2);
 
         const messagesToRecipient1 = await client1.transport.messages.getMessages({ query: { "recipients.relationshipId": relationshipToRecipient1.value.id } });
         const messagesToRecipient2 = await client1.transport.messages.getMessages({ query: { "recipients.relationshipId": relationshipToRecipient2.value.id } });

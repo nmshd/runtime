@@ -1,6 +1,6 @@
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { RelationshipTemplate } from "@nmshd/transport";
-import { RelationshipTemplateDTO } from "../../../types";
+import { RelationshipTemplateContentDerivation, RelationshipTemplateDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 
 export class RelationshipTemplateMapper {
@@ -8,10 +8,12 @@ export class RelationshipTemplateMapper {
         if (!template.cache) {
             throw RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString());
         }
+
+        let templateContent: RelationshipTemplateContentDerivation;
         if (!(template.cache.content instanceof RelationshipTemplateContent || template.cache.content instanceof ArbitraryRelationshipTemplateContent)) {
-            throw RuntimeErrors.general.invalidPropertyValue(
-                `The content type of RelationshipTemplate ${template.id} is neither RelationshipTemplateContent nor ArbitraryRelationshipTemplateContent.`
-            );
+            templateContent = ArbitraryRelationshipTemplateContent.from({ value: template.cache.content }).toJSON();
+        } else {
+            templateContent = template.cache.content.toJSON();
         }
 
         return {
@@ -20,7 +22,7 @@ export class RelationshipTemplateMapper {
             createdBy: template.cache.createdBy.toString(),
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
-            content: template.cache.content.toJSON(),
+            content: templateContent,
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
             secretKey: template.secretKey.toBase64(false),

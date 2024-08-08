@@ -69,6 +69,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         ) {
             return RuntimeErrors.general.invalidPropertyValue("The content type of a Message must be Mail, Request, ResponseWrapper, Notification or ArbitraryMessageContent.");
         }
+
         if (!(transformedContent instanceof Request)) return;
 
         if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");

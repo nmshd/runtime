@@ -128,7 +128,9 @@ export class RequestModule extends RuntimeModule {
                     response: responseWrapper.response
                 });
                 break;
-            default:
+            case "ArbitraryMessageContent":
+            case "Mail":
+            case "Notification":
         }
 
         if (messageContentType !== "Request") {
@@ -283,6 +285,7 @@ export class RequestModule extends RuntimeModule {
         if (template.content["@type"] !== "RelationshipTemplateContent") return;
         if (createdRelationship.creationContent["@type"] !== "RelationshipCreationContent") {
             this.logger.error(`The creation content of relationshipId ${createdRelationship.id} is not of type RelationshipCreationContent.`);
+            return;
         }
 
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
