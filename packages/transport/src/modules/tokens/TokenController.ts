@@ -46,16 +46,20 @@ export class TokenController extends TransportController {
         const response = (
             await this.client.createToken({
                 content: cipher.toBase64(),
-                expiresAt: input.expiresAt.toString()
+                expiresAt: input.expiresAt.toString(),
+                forIdentity: input.forIdentity?.toString()
             })
         ).value;
+
+        // TODO: error handling
 
         const cachedToken = CachedToken.from({
             createdAt: CoreDate.from(response.createdAt),
             expiresAt: input.expiresAt,
             createdBy: this.parent.identity.address,
             createdByDevice: this.parent.activeDevice.id,
-            content: input.content
+            content: input.content,
+            forIdentity: input.forIdentity
         });
 
         const token = Token.from({
@@ -186,11 +190,15 @@ export class TokenController extends TransportController {
     }
 
     public async loadPeerTokenByReference(tokenReference: TokenReference, ephemeral: boolean): Promise<Token> {
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key, ephemeral);
+        return await this.loadPeerToken(tokenReference.id, tokenReference.key, ephemeral, tokenReference.forIdentity);
     }
 
-    public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean): Promise<Token> {
+    public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentity?: CoreAddress): Promise<Token> {
         const tokenDoc = await this.tokens.read(id.toString());
+        if (!tokenDoc && !forIdentity?.equals(this.parent.identity.address)) {
+            // if you created the token, it exists already
+            throw CoreErrors.general.notIntendedForYou(id.toString());
+        }
         if (tokenDoc) {
             let token: Token | undefined = Token.from(tokenDoc);
             if (token.cache) {

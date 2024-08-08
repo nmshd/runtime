@@ -93,7 +93,7 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
         const tokenContent = token.cache.content;
 
         if (tokenContent instanceof TokenContentRelationshipTemplate) {
-            const template = await this.templateController.loadPeerRelationshipTemplate(tokenContent.templateId, tokenContent.secretKey);
+            const template = await this.templateController.loadPeerRelationshipTemplate(tokenContent.templateId, tokenContent.secretKey, tokenContent.forIdentity);
             return Result.ok({
                 type: "RelationshipTemplate",
                 value: RelationshipTemplateMapper.toRelationshipTemplateDTO(template)

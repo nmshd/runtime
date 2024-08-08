@@ -2,12 +2,12 @@ import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { RelationshipTemplateContent } from "@nmshd/content";
-import { AccountController, CoreDate, RelationshipTemplateController } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreDate, RelationshipTemplateController } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
-import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
@@ -17,6 +17,7 @@ export interface CreateOwnRelationshipTemplateRequest {
      * @minimum 1
      */
     maxNumberOfAllocations?: number;
+    forIdentity?: AddressString;
 }
 
 class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
@@ -58,7 +59,8 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
             content: request.content,
             expiresAt: CoreDate.from(request.expiresAt),
-            maxNumberOfAllocations: request.maxNumberOfAllocations
+            maxNumberOfAllocations: request.maxNumberOfAllocations,
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
         });
 
         await this.accountController.syncDatawallet();

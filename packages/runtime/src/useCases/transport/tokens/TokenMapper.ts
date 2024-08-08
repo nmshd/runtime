@@ -18,7 +18,8 @@ export class TokenMapper {
             expiresAt: token.cache.expiresAt.toString(),
             secretKey: token.secretKey.toBase64(false),
             truncatedReference: reference.truncate(),
-            isEphemeral: ephemeral
+            isEphemeral: ephemeral,
+            forIdentity: token.cache.forIdentity?.toString()
         };
     }
 

@@ -11,6 +11,7 @@ export interface PeerRelationshipTemplateDVO extends DataViewObject {
     createdAt: string;
     expiresAt?: string;
     maxNumberOfAllocations?: number;
+    forIdentity?: string;
 
     /**
      * Is optional, as there can be RelationshipTemplates without actual requests in it

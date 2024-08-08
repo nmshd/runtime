@@ -5,13 +5,14 @@ import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
 export interface CreateOwnTokenRequest {
     content: any;
     expiresAt: ISO8601DateTimeString;
     ephemeral: boolean;
+    forIdentity?: AddressString;
 }
 
 class Validator extends SchemaValidator<CreateOwnTokenRequest> {

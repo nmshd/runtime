@@ -1,6 +1,7 @@
 export interface BackbonePostRelationshipTemplatesRequest {
     expiresAt?: string;
     maxNumberOfAllocations?: number;
+    forIdentity?: string;
     content: string;
 }
 

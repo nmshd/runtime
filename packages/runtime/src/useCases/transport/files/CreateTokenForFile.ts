@@ -1,14 +1,15 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreDate, CoreId, File, FileController, TokenContentFile, TokenController } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreDate, CoreId, File, FileController, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { FileIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AddressString, FileIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateTokenForFileRequest {
     fileId: FileIdString;
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
+    forIdentity?: AddressString;
 }
 
 class Validator extends SchemaValidator<CreateTokenForFileRequest> {
@@ -45,7 +46,8 @@ export class CreateTokenForFileUseCase extends UseCase<CreateTokenForFileRequest
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
-            ephemeral
+            ephemeral,
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
         });
 
         if (!ephemeral) {

@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, CoreDate, CoreId, RelationshipTemplate, Transport } from "../../../src";
+import { AccountController, CoreAddress, CoreDate, CoreId, RelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipTemplateController", function () {
@@ -112,6 +112,29 @@ describe("RelationshipTemplateController", function () {
                 maxNumberOfAllocations: 0
             });
         }, /SendRelationshipTemplateParameters.maxNumberOfAllocations/);
+    });
+
+    test("should create a personalized template", async function () {
+        const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            forIdentity: recipient.identity.address
+        });
+        expect(ownTemplate).toBeDefined();
+
+        const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey, recipient.identity.address);
+        expect(peerTemplate).toBeDefined();
+    });
+
+    test("should throw an error if loaded by the wrong identity", async function () {
+        const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
+        });
+        await TestUtil.expectThrowsAsync(async () => {
+            await recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey, ownTemplate.cache!.forIdentity);
+        }, /transport.general.notIntendedForYou/);
     });
 
     test("should send and receive a RelationshipTemplate using a RelationshipTemplateReference", async function () {

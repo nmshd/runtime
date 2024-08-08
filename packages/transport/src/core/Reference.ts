@@ -2,11 +2,13 @@ import { ISerializable, Serializable, serialize, validate, ValidationError } fro
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { CoreErrors } from "./CoreErrors";
 import { CoreIdHelper } from "./CoreIdHelper";
+import { CoreAddress, ICoreAddress } from "./types";
 import { CoreId, ICoreId } from "./types/CoreId";
 
 export interface IReference extends ISerializable {
     id: ICoreId;
     key: ICryptoSecretKey;
+    forIdentity?: ICoreAddress;
 }
 
 export class Reference extends Serializable implements IReference {
@@ -18,8 +20,14 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public key: CryptoSecretKey;
 
+    @validate()
+    @serialize()
+    public forIdentity?: CoreAddress;
+
     public truncate(): string {
-        const truncatedReference = CoreBuffer.fromUtf8(`${this.id.toString()}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}`);
+        let referenceString = `${this.id.toString()}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}`;
+        if (this.forIdentity) referenceString = `${referenceString}|${this.forIdentity.toString()}`;
+        const truncatedReference = CoreBuffer.fromUtf8(referenceString);
         return truncatedReference.toBase64URL();
     }
 
@@ -27,7 +35,7 @@ export class Reference extends Serializable implements IReference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
 
-        if (splitted.length !== 3) {
+        if (![3, 4].includes(splitted.length)) {
             throw CoreErrors.general.invalidTruncatedReference();
         }
 
@@ -35,6 +43,7 @@ export class Reference extends Serializable implements IReference {
             const id = CoreId.from(splitted[0]);
             const alg = parseInt(splitted[1]);
             const key = splitted[2];
+            const forIdentity = splitted[3] ? CoreAddress.from(splitted[3]) : undefined;
             const secretKey = CryptoSecretKey.from({
                 algorithm: alg,
                 secretKey: CoreBuffer.fromBase64URL(key)
@@ -42,7 +51,8 @@ export class Reference extends Serializable implements IReference {
 
             return this.from({
                 id: CoreId.from(id),
-                key: secretKey
+                key: secretKey,
+                forIdentity
             });
         } catch (e) {
             throw CoreErrors.general.invalidTruncatedReference();

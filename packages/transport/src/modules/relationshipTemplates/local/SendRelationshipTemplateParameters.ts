@@ -1,11 +1,12 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreSerializable, ICoreSerializable } from "../../../core";
+import { CoreAddress, CoreDate, CoreSerializable, ICoreAddress, ICoreSerializable } from "../../../core";
 import { validateMaxNumberOfAllocations } from "./CachedRelationshipTemplate";
 
 export interface ISendRelationshipTemplateParameters extends ICoreSerializable {
     content: ISerializable;
     expiresAt: CoreDate;
     maxNumberOfAllocations?: number;
+    forIdentity?: ICoreAddress;
 }
 
 @type("SendRelationshipTemplateParameters")
@@ -21,6 +22,10 @@ export class SendRelationshipTemplateParameters extends CoreSerializable impleme
     @validate({ nullable: true, customValidator: validateMaxNumberOfAllocations })
     @serialize()
     public maxNumberOfAllocations?: number;
+
+    @validate()
+    @serialize()
+    public forIdentity?: CoreAddress;
 
     public static from(value: ISendRelationshipTemplateParameters): SendRelationshipTemplateParameters {
         return this.fromAny(value);

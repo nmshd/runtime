@@ -9,4 +9,5 @@ export interface BackboneGetTokensResponse {
     createdBy: string;
     createdByDevice: string;
     expiresAt: string;
+    forIdentity?: string;
 }

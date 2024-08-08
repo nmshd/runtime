@@ -5,6 +5,7 @@ export interface RelationshipTemplateDTO {
     createdByDevice: string;
     createdAt: string;
     content: any;
+    forIdentity?: string;
     expiresAt?: string;
     maxNumberOfAllocations?: number;
     secretKey: string;
