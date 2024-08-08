@@ -1,5 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipCreationContent, RelationshipCreationContentJSON, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
+import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
 import { RuntimeServices } from "../Runtime";
 import {
     IncomingRequestStatusChangedEvent,
@@ -291,7 +291,7 @@ export class RequestModule extends RuntimeModule {
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,
             responseSourceId: createdRelationship.id,
-            response: (createdRelationship.creationContent as RelationshipCreationContentJSON).response
+            response: createdRelationship.creationContent.response
         });
         if (result.isError) {
             this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${createdRelationship.id}'. Root error:`, result.error);

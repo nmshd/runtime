@@ -1,6 +1,7 @@
+import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
 import { Relationship, RelationshipAuditLogEntry } from "@nmshd/transport";
-import { RelationshipAuditLogEntryDTO, RelationshipCreationContentDerivation, RelationshipDTO } from "../../../types";
+import { RelationshipAuditLogEntryDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
 
@@ -8,13 +9,6 @@ export class RelationshipMapper {
     public static toRelationshipDTO(relationship: Relationship): RelationshipDTO {
         if (!relationship.cache) {
             throw RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString());
-        }
-
-        let creationContent: RelationshipCreationContentDerivation;
-        if (!(relationship.cache.creationContent instanceof RelationshipCreationContent || relationship.cache.creationContent instanceof ArbitraryRelationshipCreationContent)) {
-            creationContent = ArbitraryRelationshipCreationContent.from({ value: relationship.cache.creationContent }).toJSON();
-        } else {
-            creationContent = relationship.cache.creationContent.toJSON();
         }
 
         return {
@@ -27,7 +21,7 @@ export class RelationshipMapper {
                 publicKey: relationship.peer.publicKey.toBase64(false)
             },
             auditLog: relationship.cache.auditLog.map((entry) => this.toAuditLogEntryDTO(entry)),
-            creationContent
+            creationContent: this.toCreationContent(relationship.cache.creationContent)
         };
     }
 
@@ -44,5 +38,12 @@ export class RelationshipMapper {
 
     public static toRelationshipDTOList(relationships: Relationship[]): RelationshipDTO[] {
         return relationships.map((r) => this.toRelationshipDTO(r));
+    }
+
+    private static toCreationContent(content: Serializable) {
+        if (!(content instanceof RelationshipCreationContent || content instanceof ArbitraryRelationshipCreationContent)) {
+            return ArbitraryRelationshipCreationContent.from({ value: content }).toJSON();
+        }
+        return content.toJSON();
     }
 }

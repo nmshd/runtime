@@ -37,7 +37,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
-    MessageContentDTO,
+    MessageContentDerivation,
     MessageDTO,
     MessageSentEvent,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
@@ -239,7 +239,7 @@ export async function exchangeToken(transportServicesCreator: TransportServices,
     return response.value;
 }
 
-export async function sendMessage(transportServices: TransportServices, recipient: string, content?: MessageContentDTO, attachments?: string[]): Promise<MessageDTO> {
+export async function sendMessage(transportServices: TransportServices, recipient: string, content?: MessageContentDerivation, attachments?: string[]): Promise<MessageDTO> {
     const response = await transportServices.messages.sendMessage({
         recipients: [recipient],
         content: content ?? {

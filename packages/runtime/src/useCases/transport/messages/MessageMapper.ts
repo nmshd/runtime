@@ -1,7 +1,8 @@
+import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { CachedMessageRecipient, File, Message } from "@nmshd/transport";
-import { MessageContentDerivation, MessageDTO, MessageWithAttachmentsDTO } from "../../../types";
+import { MessageDTO, MessageWithAttachmentsDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { FileMapper } from "../files/FileMapper";
 import { DownloadAttachmentResponse } from "./DownloadAttachment";
@@ -24,24 +25,9 @@ export class MessageMapper {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
         }
 
-        let messageContent: MessageContentDerivation;
-        if (
-            !(
-                message.cache.content instanceof Mail ||
-                message.cache.content instanceof Request ||
-                message.cache.content instanceof ResponseWrapper ||
-                message.cache.content instanceof Notification ||
-                message.cache.content instanceof ArbitraryMessageContent
-            )
-        ) {
-            messageContent = ArbitraryMessageContent.from({ value: message.cache.content }).toJSON();
-        } else {
-            messageContent = message.cache.content.toJSON();
-        }
-
         return {
             id: message.id.toString(),
-            content: messageContent,
+            content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),
@@ -57,24 +43,9 @@ export class MessageMapper {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
         }
 
-        let messageContent: MessageContentDerivation;
-        if (
-            !(
-                message.cache.content instanceof Mail ||
-                message.cache.content instanceof Request ||
-                message.cache.content instanceof ResponseWrapper ||
-                message.cache.content instanceof Notification ||
-                message.cache.content instanceof ArbitraryMessageContent
-            )
-        ) {
-            messageContent = ArbitraryMessageContent.from({ value: message.cache.content }).toJSON();
-        } else {
-            messageContent = message.cache.content.toJSON();
-        }
-
         return {
             id: message.id.toString(),
-            content: messageContent,
+            content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),
@@ -98,5 +69,21 @@ export class MessageMapper {
                 relationshipId: r.relationshipId?.toString()
             };
         });
+    }
+
+    private static toMessageContent(content: Serializable) {
+        if (
+            !(
+                content instanceof Mail ||
+                content instanceof Request ||
+                content instanceof ResponseWrapper ||
+                content instanceof Notification ||
+                content instanceof ArbitraryMessageContent
+            )
+        ) {
+            return ArbitraryMessageContent.from({ value: content }).toJSON();
+        }
+
+        return content.toJSON();
     }
 }
