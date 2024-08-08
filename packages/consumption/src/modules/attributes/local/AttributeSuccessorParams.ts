@@ -1,4 +1,4 @@
-import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, RelationshipAttribute } from "@nmshd/content";
 import { CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/transport";
 import { ILocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
@@ -14,7 +14,6 @@ export type AttributeSuccessorParamsJSON = Omit<LocalAttributeJSON, "id" | "crea
     createdAt?: string;
 };
 
-@type("AttributeSuccessorParams")
 export class AttributeSuccessorParams extends Serializable implements IAttributeSuccessorParams {
     @validate({ nullable: true })
     @serialize()
