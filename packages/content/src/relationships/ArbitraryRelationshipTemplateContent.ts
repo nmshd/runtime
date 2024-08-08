@@ -5,6 +5,7 @@ export interface ArbitraryRelationshipTemplateContentJSON extends ContentJSON {
     "@type": "ArbitraryRelationshipTemplateContent";
     value: any;
 }
+
 export interface IArbitraryRelationshipTemplateContent extends ISerializable {
     value: any;
 }

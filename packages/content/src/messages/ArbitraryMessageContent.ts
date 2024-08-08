@@ -5,6 +5,7 @@ export interface ArbitraryMessageContentJSON extends ContentJSON {
     "@type": "ArbitraryMessageContent";
     value: any;
 }
+
 export interface IArbitraryMessageContent extends ISerializable {
     value: any;
 }
