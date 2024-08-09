@@ -26,6 +26,7 @@ export interface RandomCharacterBucket {
 }
 
 export interface IRandom {}
+
 export interface IRandomStatic {
     new (): IRandom;
     bytes(length: number): Promise<ICoreBuffer>;

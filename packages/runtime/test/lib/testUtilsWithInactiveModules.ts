@@ -1,4 +1,4 @@
-import { IResponse, RelationshipCreationContent } from "@nmshd/content";
+import { IResponse, RelationshipCreationContent, RelationshipTemplateContentJSON, ResponseWrapperJSON } from "@nmshd/content";
 import { CreateOutgoingRequestRequest, LocalRequestDTO, MessageDTO, RelationshipDTO } from "src";
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { exchangeMessageWithRequest, exchangeTemplate, syncUntilHasMessageWithResponse } from "./testUtils";
@@ -9,8 +9,8 @@ export interface LocalRequestWithSource {
 }
 
 export interface ResponseMessagesForSenderAndRecipient {
-    rResponseMessage: MessageDTO;
-    sResponseMessage: MessageDTO;
+    rResponseMessage: MessageDTO & { content: ResponseWrapperJSON };
+    sResponseMessage: MessageDTO & { content: ResponseWrapperJSON };
 }
 
 export interface RelationshipRequestWithRelationshipIfAccepted {
@@ -24,19 +24,19 @@ export async function exchangeMessageWithRequestAndRequireManualDecision(
     requestForCreate: CreateOutgoingRequestRequest
 ): Promise<LocalRequestWithSource> {
     const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestForCreate);
-    await sRuntimeServices.consumption.outgoingRequests.sent({ requestId: message.content.id, messageId: message.id });
+    await sRuntimeServices.consumption.outgoingRequests.sent({ requestId: message.content.id!, messageId: message.id });
 
     await rRuntimeServices.consumption.incomingRequests.received({
         receivedRequest: message.content,
         requestSourceId: message.id
     });
     await rRuntimeServices.consumption.incomingRequests.checkPrerequisites({
-        requestId: message.content.id
+        requestId: message.content.id!
     });
     return {
         request: (
             await rRuntimeServices.consumption.incomingRequests.requireManualDecision({
-                requestId: message.content.id
+                requestId: message.content.id!
             })
         ).value,
         source: message.id
@@ -70,7 +70,7 @@ export async function exchangeMessageWithRequestAndSendResponse(
             },
             recipients: [(await sRuntimeServices.transport.account.getIdentityInfo()).value.address]
         })
-    ).value;
+    ).value as MessageDTO & { content: ResponseWrapperJSON };
     const sResponseMessage = await syncUntilHasMessageWithResponse(sRuntimeServices.transport, request.id);
     return { rResponseMessage, sResponseMessage };
 }
@@ -84,7 +84,7 @@ export async function exchangeTemplateAndReceiverRequiresManualDecision(
 
     const request = (
         await rRuntimeServices.consumption.incomingRequests.received({
-            receivedRequest: template.content.onNewRelationship,
+            receivedRequest: (template.content as RelationshipTemplateContentJSON).onNewRelationship,
             requestSourceId: template.id
         })
     ).value;
@@ -121,7 +121,7 @@ export async function exchangeTemplateAndReceiverSendsResponse(
 
     if (actionLowerCase !== "accept") return { request, relationship: undefined };
 
-    const creationContent = RelationshipCreationContent.from({ response: decidedRequest.response!.content as unknown as IResponse });
+    const creationContent = RelationshipCreationContent.from({ response: decidedRequest.response!.content as unknown as IResponse }).toJSON();
     const result = await rRuntimeServices.transport.relationships.createRelationship({ creationContent, templateId });
 
     expect(result).toBeSuccessful();

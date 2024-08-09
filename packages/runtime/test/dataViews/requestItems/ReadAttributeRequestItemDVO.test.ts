@@ -106,7 +106,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
 
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
-        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id);
+        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id!);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -174,7 +174,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -236,7 +236,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(displayName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
 
-        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 
@@ -342,7 +342,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
 
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
-        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id);
+        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id!);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -405,7 +405,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -462,7 +462,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(displayName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
 
-        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 
@@ -577,7 +577,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
 
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
-        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id);
+        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id!);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -636,7 +636,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -693,7 +693,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(displayName.value).toStrictEqual((responseItem.attribute.content.value as SurnameJSON).value);
 
-        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 
@@ -829,7 +829,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -907,7 +907,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(responseItem.successorId).toStrictEqual(successorResult.value[0].id);
         expect(successorName.value).toStrictEqual((responseItem.successor.content.value as GivenNameJSON).value);
 
-        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 
@@ -1050,7 +1050,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
         await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await consumptionServices2.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -1100,7 +1100,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("Theodor");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
     });
 

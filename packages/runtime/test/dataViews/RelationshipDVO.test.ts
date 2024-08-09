@@ -1,4 +1,13 @@
-import { GivenName, IdentityAttribute, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
+import {
+    GivenName,
+    IdentityAttribute,
+    ReadAttributeAcceptResponseItem,
+    ReadAttributeRequestItem,
+    RelationshipCreationContent,
+    RelationshipTemplateContent,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, TransportServices } from "../../src";
 import { establishRelationshipWithContents, RuntimeServiceProvider } from "../lib";
@@ -18,7 +27,8 @@ beforeAll(async () => {
     await establishRelationshipWithContents(
         transportServices1,
         transportServices2,
-        {
+
+        RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -31,12 +41,12 @@ beforeAll(async () => {
                     })
                 ]
             }
-        },
-        {
+        }).toJSON(),
+        RelationshipCreationContent.from({
             response: {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
-                requestId: await CoreId.generate(),
+                requestId: (await CoreId.generate()).toString(),
                 items: [
                     ReadAttributeAcceptResponseItem.from({
                         result: ResponseItemResult.Accepted,
@@ -45,10 +55,10 @@ beforeAll(async () => {
                             owner: CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address),
                             value: GivenName.from("AGivenName")
                         })
-                    })
+                    }).toJSON()
                 ]
             }
-        }
+        }).toJSON()
     );
 }, 30000);
 
