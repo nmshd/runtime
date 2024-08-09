@@ -75,9 +75,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             );
         }
 
-        if (transformedContent instanceof ArbitraryRelationshipTemplateContent) {
-            return;
-        }
+        if (!(transformedContent instanceof RelationshipTemplateContent)) return;
 
         const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
         if (validationResult.isError()) return validationResult.error;

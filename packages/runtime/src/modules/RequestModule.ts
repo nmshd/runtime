@@ -1,6 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
-
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
