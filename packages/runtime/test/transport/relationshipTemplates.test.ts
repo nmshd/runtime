@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { QueryParamConditions, RuntimeServiceProvider, emptyRelationshipTemplateContent } from "../lib";
+import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;

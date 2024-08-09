@@ -10,7 +10,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, TransportServices } from "../../src";
-import { RuntimeServiceProvider, establishRelationshipWithContents } from "../lib";
+import { establishRelationshipWithContents, RuntimeServiceProvider } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;

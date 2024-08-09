@@ -1,7 +1,7 @@
 import { CoreDate } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
-import { RuntimeServiceProvider, emptyRelationshipTemplateContent, uploadFile } from "../lib";
+import { emptyRelationshipTemplateContent, RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;

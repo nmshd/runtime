@@ -12,7 +12,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, MailDVO, SendMessageRequest, TransportServices } from "../../src";
-import { RuntimeServiceProvider, establishRelationshipWithContents, getRelationship, syncUntilHasMessage, uploadFile } from "../lib";
+import { establishRelationshipWithContents, getRelationship, RuntimeServiceProvider, syncUntilHasMessage, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;

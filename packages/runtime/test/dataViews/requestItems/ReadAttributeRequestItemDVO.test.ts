@@ -5,7 +5,7 @@ import {
     DecideRequestItemParametersJSON,
     LocalRequestStatus
 } from "@nmshd/consumption";
-import { GivenNameJSON, IQLQuery, IdentityAttributeQuery, ReadAttributeRequestItem, SurnameJSON } from "@nmshd/content";
+import { GivenNameJSON, IdentityAttributeQuery, IQLQuery, ReadAttributeRequestItem, SurnameJSON } from "@nmshd/content";
 import { CoreId } from "@nmshd/transport";
 import {
     AttributeAlreadySharedAcceptResponseItemDVO,
@@ -14,28 +14,28 @@ import {
     CreateOutgoingRequestRequest,
     DataViewExpander,
     DecidableReadAttributeRequestItemDVO,
-    IQLQueryDVO,
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
+    IQLQueryDVO,
     OutgoingRequestStatusChangedEvent,
-    ProcessedIQLQueryDVO,
     ProcessedIdentityAttributeQueryDVO,
+    ProcessedIQLQueryDVO,
     ReadAttributeAcceptResponseItemDVO,
     ReadAttributeRequestItemDVO,
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
 import {
-    MockEventBus,
-    RuntimeServiceProvider,
-    TestRuntimeServices,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     executeFullCreateAndShareRepositoryAttributeFlow,
+    MockEventBus,
+    RuntimeServiceProvider,
     sendMessageWithRequest,
     syncUntilHasMessageWithRequest,
-    syncUntilHasMessageWithResponse
+    syncUntilHasMessageWithResponse,
+    TestRuntimeServices
 } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
