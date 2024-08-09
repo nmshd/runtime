@@ -387,6 +387,15 @@ describe("IncomingRequestsController", function () {
                 code: "error.consumption.requests.wrongRelationshipStatus"
             });
         });
+
+        test("returns 'error' on relationship whose deletion is proposed", async function () {
+            await Given.aDeletionProposedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus"
+            });
+        });
     });
 
     describe("CanReject", function () {
@@ -568,6 +577,15 @@ describe("IncomingRequestsController", function () {
             await Given.aTerminatedRelationshipToIdentity();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus"
+            });
+        });
+
+        test("returns 'error' on relationship whose deletion is proposed", async function () {
+            await Given.aDeletionProposedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.wrongRelationshipStatus"
             });
