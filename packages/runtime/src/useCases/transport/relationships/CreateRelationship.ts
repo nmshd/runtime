@@ -37,7 +37,9 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         const transformedContent = Serializable.fromUnknown(request.creationContent);
         if (!(transformedContent instanceof ArbitraryRelationshipCreationContent || transformedContent instanceof RelationshipCreationContent)) {
             return Result.fail(
-                RuntimeErrors.general.invalidPropertyValue("A relationship creation content must be of type RelationshipCreationContent or ArbitraryRelationshipCreationContent.")
+                RuntimeErrors.general.invalidPropertyValue(
+                    "The creation content of a Relationship must either be a RelationshipCreationContent or an ArbitraryRelationshipCreationContent."
+                )
             );
         }
 
