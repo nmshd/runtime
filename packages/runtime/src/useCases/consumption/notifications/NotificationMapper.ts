@@ -1,5 +1,4 @@
 import { LocalNotification } from "@nmshd/consumption";
-import { NotificationJSON } from "@nmshd/content";
 import { LocalNotificationDTO } from "../../../types";
 
 export class NotificationMapper {
@@ -10,7 +9,7 @@ export class NotificationMapper {
             peer: notification.peer.toString(),
             createdAt: notification.createdAt.toISOString(),
             receivedByDevice: notification.receivedByDevice?.toString(),
-            content: notification.content.toJSON() as NotificationJSON,
+            content: notification.content.toJSON(),
             status: notification.status,
             source: {
                 type: "Message",

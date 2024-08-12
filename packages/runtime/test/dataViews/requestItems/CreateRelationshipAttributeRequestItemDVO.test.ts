@@ -92,7 +92,7 @@ beforeEach(function () {
 describe("CreateRelationshipAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
+        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -159,7 +159,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -216,7 +216,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect(responseItem.attribute.valueType).toBe("ProprietaryString");
         expect(proprietaryString.value).toStrictEqual((responseItem.attribute.content.value as ProprietaryStringJSON).value);
 
-        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 
@@ -331,7 +331,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await sExpander.expandAddress(senderMessage.recipients[0].address);
 
-        expect(dvo.name).toStrictEqual(senderMessage.recipients[0].address.substring(3, 9));
+        expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.items).toHaveLength(0);
     });
 });

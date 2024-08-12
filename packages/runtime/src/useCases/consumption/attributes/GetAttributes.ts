@@ -18,18 +18,19 @@ export interface GetAttributesRequest {
 
 export interface GetAttributesRequestQuery {
     createdAt?: string;
-    parentId?: string;
+    parentId?: string | string[];
+    succeeds?: string | string[];
+    succeededBy?: string | string[];
+    isDefault?: string;
     "content.@type"?: string | string[];
     "content.tags"?: string | string[];
     "content.owner"?: string | string[];
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];
     "content.key"?: string | string[];
-    "content.isTechnical"?: string | string[];
+    "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
-    succeeds?: string | string[];
-    succeededBy?: string | string[];
     shareInfo?: string | string[];
     "shareInfo.requestReference"?: string | string[];
     "shareInfo.notificationReference"?: string | string[];
@@ -47,6 +48,7 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [nameof<LocalAttributeDTO>((x) => x.parentId)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: true,
+            [nameof<LocalAttributeDTO>((x) => x.isDefault)]: true,
 
             // content.abstractAttribute
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`]: true,
@@ -80,6 +82,7 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [nameof<LocalAttributeDTO>((x) => x.parentId)]: nameof<LocalAttribute>((x) => x.parentId),
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: nameof<LocalAttribute>((x) => x.succeeds),
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: nameof<LocalAttribute>((x) => x.succeededBy),
+            [nameof<LocalAttributeDTO>((x) => x.isDefault)]: nameof<LocalAttribute>((x) => x.isDefault),
 
             // content.abstractAttribute
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`,

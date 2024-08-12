@@ -45,7 +45,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSender });
             await Then.theResultShouldBeAnErrorWith({
-                message: /Cannot create own Attributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead./
+                message: "Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
             });
         });
 
@@ -65,65 +65,71 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSomeoneElse });
             await Then.theResultShouldBeAnErrorWith({
-                message: /The owner of the given `attribute` can only be the recipient's address or an empty string. The latter will default to the recipient's address./
+                message:
+                    "The owner of the provided IdentityAttribute for the `attribute` property can only be the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
             });
         });
 
-        test("returns Success when passing an Identity Attribute with owner={{SomeoneElse}}, but no recipient", async function () {
+        test("returns Success when passing an Identity Attribute with owner={{SomeoneElse}}, but no Recipient", async function () {
             const identityAttributeOfSomeoneElse = TestObjectFactory.createIdentityAttribute({
                 owner: TestIdentity.SOMEONE_ELSE
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSomeoneElse }, TestIdentity.UNDEFINED);
-            await Then.theResultShouldBeASuccess();
+            await Then.theResultShouldBeAnErrorWith({
+                message: "The owner of the provided IdentityAttribute for the `attribute` property can only be an empty string. It will default to the Recipient's Address."
+            });
         });
 
         test("returns Success when passing a Relationship Attribute with owner={{Recipient}}", async function () {
-            const identityAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
+            const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.RECIPIENT
             });
 
-            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfRecipient });
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfRecipient });
             await Then.theResultShouldBeASuccess();
         });
 
         test("returns Success when passing a Relationship Attribute with owner={{Sender}}", async function () {
-            const identityAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
+            const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER
             });
 
-            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSender });
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSender });
             await Then.theResultShouldBeASuccess();
         });
 
         test("returns Success when passing a Relationship Attribute with owner={{Empty}}", async function () {
-            const identityAttributeWithEmptyOwner = TestObjectFactory.createRelationshipAttribute({
+            const relationshipAttributeWithEmptyOwner = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.EMPTY
             });
 
-            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeWithEmptyOwner });
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithEmptyOwner });
             await Then.theResultShouldBeASuccess();
         });
 
         test("returns an Error when passing a Relationship Attribute with owner={{SomeoneElse}}", async function () {
-            const identityAttributeOfSomeoneElse = TestObjectFactory.createRelationshipAttribute({
+            const relationshipAttributeOfSomeoneElse = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SOMEONE_ELSE
             });
 
-            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSomeoneElse });
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSomeoneElse });
             await Then.theResultShouldBeAnErrorWith({
                 message:
-                    /The owner of the given 'attribute' can only be the sender's address, the recipient's address or an empty string. The latter will default to the recipient's address./
+                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address, the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
             });
         });
 
-        test("returns Success when passing a Relationship Attribute with owner={{SomeoneElse}}, but no recipient", async function () {
-            const identityAttributeOfSomeoneElse = TestObjectFactory.createRelationshipAttribute({
+        test("returns Success when passing a Relationship Attribute with owner={{SomeoneElse}}, but no Recipient", async function () {
+            const relationshipAttributeOfSomeoneElse = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SOMEONE_ELSE
             });
 
-            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSomeoneElse }, TestIdentity.UNDEFINED);
-            await Then.theResultShouldBeASuccess();
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSomeoneElse }, TestIdentity.UNDEFINED);
+            await Then.theResultShouldBeAnErrorWith({
+                message:
+                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
+            });
         });
     });
 

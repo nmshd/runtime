@@ -87,7 +87,7 @@ beforeEach(function () {
 describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
+        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -154,7 +154,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -209,14 +209,14 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(responseItem.attribute.valueType).toBe("DisplayName");
         expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
 
-        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 
     test("check the sender's dvo for the recipient", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
-        expect(dvo.name).toStrictEqual(senderMessage.createdBy.substring(3, 9));
+        expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.items).toHaveLength(0);
     });
 

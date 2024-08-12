@@ -4,11 +4,12 @@ import {
     IdentityAttribute,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
-    RelationshipCreationChangeRequestContentJSON,
-    RelationshipTemplateContentJSON,
+    RelationshipCreationContentJSON,
+    RelationshipTemplateContent,
     ResponseItemJSON,
     ResponseItemResult,
-    ResponseResult
+    ResponseResult,
+    ResponseWrapperJSON
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import {
@@ -20,7 +21,7 @@ import {
     MessageProcessedEvent,
     MessageSentEvent,
     OutgoingRequestCreatedAndCompletedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     RelationshipDTO,
     RelationshipStatus,
@@ -29,20 +30,20 @@ import {
     RelationshipTemplateProcessedResult
 } from "../../src";
 import {
+    MockEventBus,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     ensureActiveRelationship,
     establishPendingRelationshipWithRequestFlow,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     exchangeTemplate,
     executeFullCreateAndShareRelationshipAttributeFlow,
-    MockEventBus,
-    RuntimeServiceProvider,
     sendMessage,
     sendMessageWithRequest,
-    syncUntilHasMessages,
     syncUntilHasMessageWithResponse,
-    syncUntilHasRelationships,
-    TestRuntimeServices
+    syncUntilHasMessages,
+    syncUntilHasRelationships
 } from "../lib";
 
 describe("RequestModule", () => {
@@ -68,11 +69,10 @@ describe("RequestModule", () => {
         let template: RelationshipTemplateDTO;
 
         const metadata = { aMetadataKey: "aMetadataValue" };
-        const templateContent: RelationshipTemplateContentJSON = {
-            "@type": "RelationshipTemplateContent",
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
             metadata
-        };
+        }).toJSON();
 
         async function getRequestIdOfTemplate(eventBus: MockEventBus, templateId: string) {
             let requests: LocalRequestDTO[];
@@ -90,10 +90,8 @@ describe("RequestModule", () => {
                 const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
                 await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
                 const relationship = (await syncUntilHasRelationships(sRuntimeServices.transport, 1))[0];
-                await sRuntimeServices.transport.relationships.acceptRelationshipChange({
-                    relationshipId: relationship.id,
-                    changeId: relationship.changes[0].id,
-                    content: {}
+                await sRuntimeServices.transport.relationships.acceptRelationship({
+                    relationshipId: relationship.id
                 });
             }
         }
@@ -139,11 +137,10 @@ describe("RequestModule", () => {
         test("triggers RelationshipTemplateProcessedEvent when another Template is loaded and a pending Relationship exists", async () => {
             const requestId = await getRequestIdOfTemplate(rRuntimeServices.eventBus, template.id);
             await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
-            const templateContent: RelationshipTemplateContentJSON = {
-                "@type": "RelationshipTemplateContent",
+            const templateContent = RelationshipTemplateContent.from({
                 onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] },
                 metadata
-            };
+            }).toJSON();
 
             await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
 
@@ -154,7 +151,7 @@ describe("RequestModule", () => {
         });
 
         test("triggers RelationshipTemplateProcessedEvent if there is no request in the template", async () => {
-            await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, {});
+            await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport);
 
             await expect(rRuntimeServices.eventBus).toHavePublished(RelationshipTemplateProcessedEvent, (e) => e.data.result === RelationshipTemplateProcessedResult.NoRequest);
         });
@@ -183,10 +180,10 @@ describe("RequestModule", () => {
 
             const relationship = relationships[0];
 
-            const creationChangeRequestContent = relationship.changes[0].request.content as RelationshipCreationChangeRequestContentJSON;
-            expect(creationChangeRequestContent["@type"]).toBe("RelationshipCreationChangeRequestContent");
+            const creationContent = relationship.creationContent as RelationshipCreationContentJSON;
+            expect(creationContent["@type"]).toBe("RelationshipCreationContent");
 
-            const response = creationChangeRequestContent.response;
+            const response = creationContent.response;
             const responseItems = response.items;
             expect(responseItems).toHaveLength(1);
 
@@ -194,12 +191,12 @@ describe("RequestModule", () => {
             expect(responseItem["@type"]).toBe("AcceptResponseItem");
             expect(responseItem.result).toBe(ResponseItemResult.Accepted);
 
-            await expect(sRuntimeServices.eventBus).toHavePublished(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, (e) => e.data.id === response.requestId);
+            await expect(sRuntimeServices.eventBus).toHavePublished(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent, (e) => e.data.id === response.requestId);
 
             const requestsResult = await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: response.requestId });
             expect(requestsResult).toBeSuccessful();
 
-            await sRuntimeServices.transport.relationships.acceptRelationshipChange({ relationshipId: relationship.id, changeId: relationship.changes[0].id, content: {} });
+            await sRuntimeServices.transport.relationships.acceptRelationship({ relationshipId: relationship.id });
             await syncUntilHasRelationships(rRuntimeServices.transport, 1);
         });
 
@@ -275,7 +272,7 @@ describe("RequestModule", () => {
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 MessageSentEvent,
-                (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId
+                (e) => (e.data.content as ResponseWrapperJSON).response.requestId === requestAfterReject.response!.content.requestId
             );
         });
 
@@ -308,7 +305,7 @@ describe("RequestModule", () => {
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 MessageSentEvent,
-                (e) => e.data.content?.response?.requestId === requestAfterReject.response!.content.requestId
+                (e) => (e.data.content as ResponseWrapperJSON).response.requestId === requestAfterReject.response!.content.requestId
             );
         });
 
@@ -329,8 +326,7 @@ describe("RequestModule", () => {
         });
 
         async function exchangeRelationshipTemplate() {
-            const templateContent: RelationshipTemplateContentJSON = {
-                "@type": "RelationshipTemplateContent",
+            const templateContent = RelationshipTemplateContent.from({
                 onNewRelationship: {
                     "@type": "Request",
                     items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]
@@ -342,13 +338,13 @@ describe("RequestModule", () => {
                             "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
                             attribute: IdentityAttribute.from({
-                                owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address,
+                                owner: CoreAddress.from(""),
                                 value: GivenName.from("AGivenName").toJSON()
                             }).toJSON()
                         }
                     ]
                 }
-            };
+            }).toJSON();
 
             const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
 
@@ -375,7 +371,7 @@ describe("RequestModule", () => {
 
             await sRuntimeServices.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (event) => event.data.newStatus === LocalRequestStatus.Open);
 
-            const requestAfterAction = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: message.content.id })).value;
+            const requestAfterAction = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: message.content.id! })).value;
 
             expect(requestAfterAction.status).toBe(LocalRequestStatus.Open);
         });
@@ -402,12 +398,12 @@ describe("RequestModule", () => {
 
             expect(incomingRequestStatusChangedEvent.data.newStatus).toBe(LocalRequestStatus.DecisionRequired);
 
-            const requestsResult = await rRuntimeServices.consumption.incomingRequests.getRequest({ id: message.content.id });
+            const requestsResult = await rRuntimeServices.consumption.incomingRequests.getRequest({ id: message.content.id! });
             expect(requestsResult).toBeSuccessful();
         });
 
         test("triggers a MessageProcessedEvent when the incoming Message does not contain a Request", async () => {
-            await sendMessage(sRuntimeServices.transport, recipientAddress, {});
+            await sendMessage(sRuntimeServices.transport, recipientAddress);
 
             await syncUntilHasMessages(rRuntimeServices.transport, 1);
 
@@ -417,7 +413,7 @@ describe("RequestModule", () => {
         test("sends a message when the request is accepted", async () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
             await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-            const acceptRequestResult = await rRuntimeServices.consumption.incomingRequests.accept({ requestId: message.content.id, items: [{ accept: true }] });
+            const acceptRequestResult = await rRuntimeServices.consumption.incomingRequests.accept({ requestId: message.content.id!, items: [{ accept: true }] });
             expect(acceptRequestResult).toBeSuccessful();
 
             const incomingRequestStatusChangedEvent = await rRuntimeServices.eventBus.waitForEvent(
@@ -482,11 +478,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
-        await sRuntimeServices.transport.relationships.rejectRelationshipChange({
-            relationshipId: sRelationship.id,
-            changeId: sRelationship.changes[0].id,
-            content: {}
-        });
+        await sRuntimeServices.transport.relationships.rejectRelationship({ relationshipId: sRelationship.id });
         await sRuntimeServices.eventBus.waitForRunningEventHandlers();
         await syncUntilHasRelationships(rRuntimeServices.transport, 1);
         await rRuntimeServices.eventBus.waitForRunningEventHandlers();
@@ -500,11 +492,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
         expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
 
-        await rRuntimeServices.transport.relationships.revokeRelationshipChange({
-            relationshipId: sRelationship.id,
-            changeId: sRelationship.changes[0].id,
-            content: {}
-        });
+        await rRuntimeServices.transport.relationships.revokeRelationship({ relationshipId: sRelationship.id });
         await rRuntimeServices.eventBus.waitForRunningEventHandlers();
         await syncUntilHasRelationships(sRuntimeServices.transport, 1);
         await sRuntimeServices.eventBus.waitForRunningEventHandlers();
@@ -530,7 +518,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                             "@type": "GivenName",
                             value: "AGivenName"
                         },
-                        owner: (await rRuntimeServices.transport.account.getIdentityInfo()).value.address
+                        owner: ""
                     }).toJSON()
                 },
                 {
@@ -543,7 +531,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                             value: "AStringValue",
                             title: "ATitle"
                         },
-                        owner: CoreAddress.from((await rRuntimeServices.transport.account.getIdentityInfo()).value.address),
+                        owner: CoreAddress.from(""),
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }).toJSON()
                 },

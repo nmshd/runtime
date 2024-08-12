@@ -1,5 +1,7 @@
-import { Relationship, RelationshipChange, RelationshipChangeRequest, RelationshipChangeResponse } from "@nmshd/transport";
-import { RelationshipChangeDTO, RelationshipChangeRequestDTO, RelationshipChangeResponseDTO, RelationshipDTO } from "../../../types";
+import { Serializable } from "@js-soft/ts-serval";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
+import { Relationship, RelationshipAuditLogEntry } from "@nmshd/transport";
+import { RelationshipAuditLogEntryDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
 
@@ -16,10 +18,21 @@ export class RelationshipMapper {
             peer: relationship.peer.address.toString(),
             peerIdentity: {
                 address: relationship.peer.address.toString(),
-                publicKey: relationship.peer.publicKey.toBase64(false),
-                realm: relationship.peer.realm
+                publicKey: relationship.peer.publicKey.toBase64(false)
             },
-            changes: relationship.cache.changes.map((c) => this.toRelationshipChangeDTO(c))
+            auditLog: relationship.cache.auditLog.map((entry) => this.toAuditLogEntryDTO(entry)),
+            creationContent: this.toCreationContent(relationship.cache.creationContent)
+        };
+    }
+
+    private static toAuditLogEntryDTO(entry: RelationshipAuditLogEntry): RelationshipAuditLogEntryDTO {
+        return {
+            createdAt: entry.createdAt.toString(),
+            createdBy: entry.createdBy.toString(),
+            createdByDevice: entry.createdByDevice.toString(),
+            reason: entry.reason,
+            oldStatus: entry.oldStatus,
+            newStatus: entry.newStatus
         };
     }
 
@@ -27,31 +40,10 @@ export class RelationshipMapper {
         return relationships.map((r) => this.toRelationshipDTO(r));
     }
 
-    private static toRelationshipChangeRequestDTO(change: RelationshipChangeRequest): RelationshipChangeRequestDTO {
-        return {
-            createdBy: change.createdBy.toString(),
-            createdByDevice: change.createdByDevice.toString(),
-            createdAt: change.createdAt.toString(),
-            content: change.content?.toJSON()
-        };
-    }
-
-    private static toRelationshipChangeResponseDTO(change: RelationshipChangeResponse): RelationshipChangeResponseDTO {
-        return {
-            createdBy: change.createdBy.toString(),
-            createdByDevice: change.createdByDevice.toString(),
-            createdAt: change.createdAt.toString(),
-            content: change.content?.toJSON()
-        };
-    }
-
-    private static toRelationshipChangeDTO(change: RelationshipChange): RelationshipChangeDTO {
-        return {
-            id: change.id.toString(),
-            request: this.toRelationshipChangeRequestDTO(change.request),
-            status: change.status,
-            type: change.type,
-            response: change.response ? this.toRelationshipChangeResponseDTO(change.response) : undefined
-        };
+    private static toCreationContent(content: Serializable) {
+        if (!(content instanceof RelationshipCreationContent || content instanceof ArbitraryRelationshipCreationContent)) {
+            return ArbitraryRelationshipCreationContent.from({ value: content }).toJSON();
+        }
+        return content.toJSON();
     }
 }

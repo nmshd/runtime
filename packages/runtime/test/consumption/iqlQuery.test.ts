@@ -4,7 +4,7 @@ import { IQLQueryJSON, ReadAttributeRequestItemJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
 import { ConsumptionServices, CreateOutgoingRequestRequest, LocalAttributeDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { establishRelationship, exchangeMessageWithRequest, RuntimeServiceProvider, sendMessageWithRequest, TestRuntimeServices } from "../lib";
+import { RuntimeServiceProvider, TestRuntimeServices, establishRelationship, exchangeMessageWithRequest, sendMessageWithRequest } from "../lib";
 import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";
 
 describe("IQL Query", () => {
@@ -110,7 +110,7 @@ describe("IQL Query", () => {
         expect(sLocalRequest.status).toBe(LocalRequestStatus.Draft);
         expect(sLocalRequest.content.items).toHaveLength(1);
         expect(sLocalRequest.content.items[0]["@type"]).toBe("ReadAttributeRequestItem");
-        expect(sLocalRequest.content.items[0].mustBeAccepted).toBe(false);
+        expect((sLocalRequest.content.items[0] as ReadAttributeRequestItemJSON).mustBeAccepted).toBe(false);
     });
 
     test("sender: send the outgoing IQL Request via Message", async () => {
@@ -123,7 +123,7 @@ describe("IQL Query", () => {
             triggeredEvent = event;
         });
         const sRequestMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id, messageId: sRequestMessage.id });
+        const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id!, messageId: sRequestMessage.id });
 
         expect(result).toBeSuccessful();
 
@@ -170,7 +170,7 @@ describe("IQL Query", () => {
         });
 
         const result = await rConsumptionServices.incomingRequests.checkPrerequisites({
-            requestId: message.content.id
+            requestId: message.content.id!
         });
 
         expect(result).toBeSuccessful();
@@ -193,7 +193,7 @@ describe("IQL Query", () => {
             requestSourceId: message.id
         });
         await rConsumptionServices.incomingRequests.checkPrerequisites({
-            requestId: message.content.id
+            requestId: message.content.id!
         });
         let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
@@ -201,7 +201,7 @@ describe("IQL Query", () => {
         });
 
         const result = await rConsumptionServices.incomingRequests.requireManualDecision({
-            requestId: message.content.id
+            requestId: message.content.id!
         });
 
         expect(result).toBeSuccessful();

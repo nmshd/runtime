@@ -1,51 +1,56 @@
 import { ClientResult } from "../../../core/backbone/ClientResult";
 import { Paginator } from "../../../core/backbone/Paginator";
 import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
-import { BackboneGetRelationshipsRequest, BackboneGetRelationshipsResponse } from "./BackboneGetRelationships";
-import { BackboneGetRelationshipsChangesRequest, BackboneGetRelationshipsChangesResponse } from "./BackboneGetRelationshipsChanges";
-import { BackbonePostRelationshipsChangesRequest, BackbonePostRelationshipsRequest } from "./BackbonePostRelationshipsChanges";
+import { BackboneGetRelationshipResponse, BackboneGetRelationshipsRequest } from "./BackboneGetRelationships";
+import { BackbonePostRelationshipsRequest, BackbonePostRelationshipsResponse } from "./BackbonePostRelationship";
+import { BackboneAcceptRelationshipsRequest, BackbonePutRelationshipsResponse } from "./BackbonePutRelationship";
 
 export class RelationshipClient extends RESTClientAuthenticate {
-    public async createRelationship(request: BackbonePostRelationshipsRequest): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.post<BackboneGetRelationshipsResponse>("/api/v1/Relationships", request);
+    public async createRelationship(request: BackbonePostRelationshipsRequest): Promise<ClientResult<BackbonePostRelationshipsResponse>> {
+        return await this.post<BackbonePostRelationshipsResponse>("/api/v1/Relationships", request);
     }
 
-    public async createRelationshipChange(id: string, request: BackbonePostRelationshipsChangesRequest): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.post<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${id}/Changes`, request);
+    public async acceptRelationship(relationshipId: string, request: BackboneAcceptRelationshipsRequest): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Accept`, request);
     }
 
-    public async acceptRelationshipChange(relationshipId: string, changeId: string, content?: any): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Changes/${changeId}/Accept`, {
-            content: content
-        });
+    public async rejectRelationship(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reject`, {});
     }
 
-    public async rejectRelationshipChange(relationshipId: string, changeId: string, content?: any): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Changes/${changeId}/Reject`, {
-            content: content
-        });
+    public async revokeRelationship(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Revoke`, {});
     }
 
-    public async revokeRelationshipChange(relationshipId: string, changeId: string, content?: any): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.put<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Changes/${changeId}/Revoke`, {
-            content: content
-        });
+    public async terminateRelationship(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Terminate`, {});
     }
 
-    public async getRelationships(request?: BackboneGetRelationshipsRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipsResponse>>> {
-        return await this.getPaged<BackboneGetRelationshipsResponse>("/api/v1/Relationships", request);
+    public async reactivateRelationship(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reactivate`, {});
     }
 
-    public async getRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipsResponse>> {
-        return await this.get<BackboneGetRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}`);
+    public async acceptRelationshipReactivation(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reactivate/Accept`, {});
     }
 
-    public async getRelationshipChanges(request?: BackboneGetRelationshipsChangesRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipsChangesResponse>>> {
-        return await this.getPaged<BackboneGetRelationshipsChangesResponse>("/api/v1/Relationships/Changes", request);
+    public async rejectRelationshipReactivation(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reactivate/Reject`, {});
     }
 
-    public async getRelationshipChange(relationshipChangeId: string): Promise<ClientResult<BackboneGetRelationshipsChangesResponse>> {
-        const change = await this.get<BackboneGetRelationshipsChangesResponse>(`/api/v1/Relationships/Changes/${relationshipChangeId}`);
-        return change;
+    public async revokeRelationshipReactivation(relationshipId: string): Promise<ClientResult<BackbonePutRelationshipsResponse>> {
+        return await this.put<BackbonePutRelationshipsResponse>(`/api/v1/Relationships/${relationshipId}/Reactivate/Revoke`, {});
+    }
+
+    public async decomposeRelationship(relationshipId: string): Promise<ClientResult<void>> {
+        return await this.put<void>(`/api/v1/Relationships/${relationshipId}/Decompose`, {});
+    }
+
+    public async getRelationships(request?: BackboneGetRelationshipsRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipResponse>>> {
+        return await this.getPaged<BackboneGetRelationshipResponse>("/api/v1/Relationships", request);
+    }
+
+    public async getRelationship(relationshipId: string): Promise<ClientResult<BackboneGetRelationshipResponse>> {
+        return await this.get<BackboneGetRelationshipResponse>(`/api/v1/Relationships/${relationshipId}`);
     }
 }
