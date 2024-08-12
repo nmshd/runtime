@@ -156,7 +156,7 @@ export class RelationshipsController extends TransportController {
         }
 
         const queryForExistingRelationship = {
-            "peer.address": template.cache.createdBy,
+            "peer.address": template.cache.createdBy.toString(),
             status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
         };
 
