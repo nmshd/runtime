@@ -1595,7 +1595,7 @@ export class DataViewExpander {
         }
 
         const result = await this.transport.relationships.getRelationshipByAddress({ address });
-        // revoked relationships should be handled like not existant as the will never have attributes attached
+        // revoked relationships should be handled like not existing as they will never have attributes attached
         if (result.isSuccess && result.value.status !== RelationshipStatus.Rejected && result.value.status !== RelationshipStatus.Revoked) {
             return await this.expandRelationshipDTO(result.value);
         }
