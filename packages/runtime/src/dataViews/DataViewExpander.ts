@@ -1595,7 +1595,8 @@ export class DataViewExpander {
         }
 
         const result = await this.transport.relationships.getRelationshipByAddress({ address });
-        if (result.isSuccess) {
+        // revoked relationships should be handled like not existant as the will never have attributes attached
+        if (result.isSuccess && result.value.status !== RelationshipStatus.Rejected && result.value.status !== RelationshipStatus.Revoked) {
             return await this.expandRelationshipDTO(result.value);
         }
 
@@ -1608,7 +1609,8 @@ export class DataViewExpander {
             })
         ).value;
         if (requestResult.length > 0) {
-            return this.expandAddressFromRequest(requestResult[0]); // with no relationship max 1 request available
+            // with no relationship max 1 request available
+            return this.expandAddressFromRequest(requestResult[0]);
         }
 
         return this.expandUnknown(address);
