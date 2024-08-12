@@ -57,6 +57,7 @@ export class TestObjectFactory {
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
+                    creationContent: {},
                     auditLog: [
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
@@ -89,6 +90,7 @@ export class TestObjectFactory {
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
+                    creationContent: {},
                     auditLog: [
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
@@ -130,6 +132,7 @@ export class TestObjectFactory {
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
+                    creationContent: {},
                     auditLog: [
                         {
                             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
@@ -395,7 +398,7 @@ export class TestObjectFactory {
         return RelationshipTemplate.from(this.createOutgoingIRelationshipTemplate(creator));
     }
 
-    public static createOutgoingIRelationshipTemplate(creator: CoreAddress, content?: IRequest | IRelationshipTemplateContent): IRelationshipTemplate {
+    public static createOutgoingIRelationshipTemplate(creator: CoreAddress, content?: IRelationshipTemplateContent): IRelationshipTemplate {
         return {
             // @ts-expect-error
             "@type": "RelationshipTemplate",

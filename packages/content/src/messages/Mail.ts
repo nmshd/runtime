@@ -9,6 +9,7 @@ export interface MailJSON extends ContentJSON {
     subject: string;
     body: string;
 }
+
 export interface IMail extends ISerializable {
     to: ICoreAddress[];
     cc?: ICoreAddress[];
