@@ -5,6 +5,7 @@ import { CoreId, ICoreId } from "../../../core";
 export interface IRelationshipTemplatePublicKey extends ICryptoExchangePublicKey {
     id: ICoreId;
 }
+
 export interface IRelationshipTemplatePublicKeySerialized extends ICryptoExchangePublicKeySerialized, ISerialized {
     id: string;
 }

@@ -123,7 +123,7 @@ describe("IQL Query", () => {
             triggeredEvent = event;
         });
         const sRequestMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id, messageId: sRequestMessage.id });
+        const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id!, messageId: sRequestMessage.id });
 
         expect(result).toBeSuccessful();
 
@@ -170,7 +170,7 @@ describe("IQL Query", () => {
         });
 
         const result = await rConsumptionServices.incomingRequests.checkPrerequisites({
-            requestId: message.content.id
+            requestId: message.content.id!
         });
 
         expect(result).toBeSuccessful();
@@ -193,7 +193,7 @@ describe("IQL Query", () => {
             requestSourceId: message.id
         });
         await rConsumptionServices.incomingRequests.checkPrerequisites({
-            requestId: message.content.id
+            requestId: message.content.id!
         });
         let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
@@ -201,7 +201,7 @@ describe("IQL Query", () => {
         });
 
         const result = await rConsumptionServices.incomingRequests.requireManualDecision({
-            requestId: message.content.id
+            requestId: message.content.id!
         });
 
         expect(result).toBeSuccessful();
