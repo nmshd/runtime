@@ -3,18 +3,18 @@ import { ContentJSON } from "../ContentJSON";
 
 export interface ArbitraryRelationshipTemplateContentJSON extends ContentJSON {
     "@type": "ArbitraryRelationshipTemplateContent";
-    value: any;
+    value: unknown;
 }
 
 export interface IArbitraryRelationshipTemplateContent extends ISerializable {
-    value: any;
+    value: unknown;
 }
 
 @type("ArbitraryRelationshipTemplateContent")
 export class ArbitraryRelationshipTemplateContent extends Serializable implements IArbitraryRelationshipTemplateContent {
     @serialize({ any: true })
     @validate()
-    public value: any;
+    public value: unknown;
 
     public static from(value: IArbitraryRelationshipTemplateContent | Omit<ArbitraryRelationshipTemplateContentJSON, "@type">): ArbitraryRelationshipTemplateContent {
         return this.fromAny(value);
