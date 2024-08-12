@@ -57,6 +57,7 @@ export class TestUtil {
         this.oldLogger = (TransportLoggerFactory as any).instance;
         TransportLoggerFactory.init(this.fatalLogger);
     }
+
     public static useTestLoggerFactory(): void {
         TransportLoggerFactory.init(this.oldLogger);
     }
@@ -83,9 +84,7 @@ export class TestUtil {
 
         expect(error).toBeInstanceOf(Error);
 
-        if (typeof errorMessageRegexp === "undefined") {
-            return;
-        }
+        if (!errorMessageRegexp) return;
 
         if (typeof errorMessageRegexp === "function") {
             errorMessageRegexp(error!);
@@ -124,9 +123,7 @@ export class TestUtil {
 
         expect(error).toBeInstanceOf(Error);
 
-        if (typeof errorMessageRegexp === "undefined") {
-            return;
-        }
+        if (!errorMessageRegexp) return;
 
         if (typeof errorMessageRegexp === "function") {
             errorMessageRegexp(error!);
@@ -244,7 +241,7 @@ export class TestUtil {
 
         const relRequest = await to.relationships.sendRelationship({
             template: templateTo,
-            content: requestContent ?? {
+            creationContent: requestContent ?? {
                 metadata: { mycontent: "request" }
             }
         });
@@ -255,7 +252,7 @@ export class TestUtil {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        const acceptedRelationshipFromSelf = await from.relationships.acceptChange(pendingRelationship.cache!.creationChange, {});
+        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         // Get accepted relationship
@@ -271,6 +268,27 @@ export class TestUtil {
         expect(relRequest.id.toString()).toStrictEqual(acceptedRelationshipPeer.id.toString());
 
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
+    }
+
+    public static async terminateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
+        const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
+        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
+    }
+
+    public static async decomposeRelationship(fromAccount: AccountController, fromConsumption: ConsumptionController, to: AccountController): Promise<Relationship> {
+        const relationship = (await fromAccount.relationships.getRelationshipToIdentity(to.identity.address))!;
+        await fromAccount.relationships.decompose(relationship.id);
+        await fromAccount.cleanupDataOfDecomposedRelationship(relationship);
+        await fromConsumption.cleanupDataOfDecomposedRelationship(to.identity.address, relationship.id);
+        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return decomposedRelationshipPeer;
     }
 
     /**
@@ -350,7 +368,7 @@ export class TestUtil {
             content: "request"
         };
 
-        return await account.relationships.sendRelationship({ template, content });
+        return await account.relationships.sendRelationship({ template, creationContent: content });
     }
 
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {

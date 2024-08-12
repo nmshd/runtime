@@ -26,9 +26,9 @@ describe("AuthenticationTest", function () {
         };
 
         if (config.baseUrl) {
-            const authenticatorAsAny = controller.parent.authenticator as any;
-            oldBaseUrl = authenticatorAsAny.authClient.requestConfig.baseURL;
-            authenticatorAsAny.authClient.requestConfig.baseURL = config.baseUrl;
+            const authenticator = controller.parent.authenticator;
+            oldBaseUrl = authenticator["authClient"]["axiosInstance"].defaults.baseURL!;
+            authenticator["authClient"]["axiosInstance"].defaults.baseURL = config.baseUrl;
         }
     }
 
@@ -36,7 +36,7 @@ describe("AuthenticationTest", function () {
         const anyC = controller as any;
         anyC.parent.activeDevice.getCredentials = oldGetCredentials;
         if (oldBaseUrl) {
-            (controller.parent.authenticator as any).authClient.requestConfig.baseURL = oldBaseUrl;
+            controller.parent.authenticator["authClient"]["axiosInstance"].defaults.baseURL = oldBaseUrl;
             oldBaseUrl = "";
         }
         anyC.client._logger = oldLogger;
@@ -96,6 +96,7 @@ describe("AuthenticationTest", function () {
         expect(requests[0].method).toBe("post");
         expect(requests[0].url).toMatch(/^\/connect\/token/);
     });
+
     test("should throw correct error on authentication issues", async function () {
         setAuthTokenToExpired(testAccount);
 

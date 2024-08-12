@@ -1,4 +1,15 @@
-import { GivenName, IdentityAttribute, MailJSON, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
+import {
+    ArbitraryMessageContent,
+    GivenName,
+    IdentityAttribute,
+    MailJSON,
+    ReadAttributeAcceptResponseItem,
+    ReadAttributeRequestItem,
+    RelationshipCreationContent,
+    RelationshipTemplateContent,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, MailDVO, SendMessageRequest, TransportServices } from "../../src";
 import { establishRelationshipWithContents, getRelationship, RuntimeServiceProvider, syncUntilHasMessage, uploadFile } from "../lib";
@@ -18,7 +29,7 @@ beforeAll(async () => {
     await establishRelationshipWithContents(
         transportServices1,
         transportServices2,
-        {
+        RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -31,12 +42,12 @@ beforeAll(async () => {
                     })
                 ]
             }
-        },
-        {
+        }).toJSON(),
+        RelationshipCreationContent.from({
             response: {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
-                requestId: await CoreId.generate(),
+                requestId: (await CoreId.generate()).toString(),
                 items: [
                     ReadAttributeAcceptResponseItem.from({
                         result: ResponseItemResult.Accepted,
@@ -45,10 +56,10 @@ beforeAll(async () => {
                             owner: CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address),
                             value: GivenName.from("AGivenName")
                         })
-                    })
+                    }).toJSON()
                 ]
             }
-        }
+        }).toJSON()
     );
 }, 30000);
 
@@ -70,9 +81,11 @@ describe("MessageDVO", () => {
 
         messageRequest = {
             recipients: [transportService2Address],
-            content: {
-                arbitraryValue: true
-            },
+            content: ArbitraryMessageContent.from({
+                value: {
+                    arbitraryValue: true
+                }
+            }).toJSON(),
             attachments: [fileId]
         };
         mailRequest = {
@@ -107,7 +120,7 @@ describe("MessageDVO", () => {
         const recipient = dvo.recipients[0];
         expect(recipient.type).toBe("RecipientDVO");
         expect(recipient.id).toStrictEqual(dto.recipients[0].address);
-        expect(recipient.name).toBe(recipient.id.substring(3, 9)); // "Barbara"
+        expect(recipient.name).toBe("i18n://dvo.identity.unknown");
         expect(recipient.isSelf).toBe(false);
         expect(dvo.status).toBe("Delivering");
     });
@@ -129,7 +142,7 @@ describe("MessageDVO", () => {
         expect(dvo.isOwn).toBe(false);
         expect(dvo.createdBy.type).toBe("IdentityDVO");
         expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.createdBy.name).toBe(dvo.createdBy.id.substring(3, 9)); // "Jürgen"
+        expect(dvo.createdBy.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.createdBy.isSelf).toBe(false);
         const recipient = dvo.recipients[0];
         expect(recipient.type).toBe("RecipientDVO");
@@ -164,14 +177,14 @@ describe("MessageDVO", () => {
         const recipient = dvo.recipients[0];
         expect(recipient.type).toBe("RecipientDVO");
         expect(recipient.id).toStrictEqual(dto.recipients[0].address);
-        expect(recipient.name).toBe(recipient.id.substring(3, 9)); // "Barbara"
+        expect(recipient.name).toBe("i18n://dvo.identity.unknown");
         expect(recipient.isSelf).toBe(false);
 
         expect(dvo.to).toHaveLength(1);
         const to = dvo.to[0];
         expect(to.type).toBe("RecipientDVO");
         expect(to.id).toStrictEqual(mail.to[0]);
-        expect(to.name).toBe(to.id.substring(3, 9)); // "Barbara"
+        expect(to.name).toBe("i18n://dvo.identity.unknown");
         expect(to.isSelf).toBe(false);
         expect(dvo.toCount).toStrictEqual(mail.to.length);
         expect(dvo.ccCount).toStrictEqual(mail.cc!.length);
@@ -198,7 +211,7 @@ describe("MessageDVO", () => {
         expect(dvo.isOwn).toBe(false);
         expect(dvo.createdBy.type).toBe("IdentityDVO");
         expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.createdBy.name).toBe(dvo.createdBy.id.substring(3, 9)); // "Jürgen"
+        expect(dvo.createdBy.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.createdBy.isSelf).toBe(false);
         const recipient = dvo.recipients[0];
         expect(recipient.type).toBe("RecipientDVO");

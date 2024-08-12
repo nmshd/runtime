@@ -24,11 +24,20 @@
         "demo": "npm run build && npx webpack --mode production --config ./demo/webpack.config.js && light-server -s ./demo -w 'src/grammar.peggy, demo/app.js, demo/attributes.js, demo/index.html # npx webpack --mode production --config ./demo/webpack.config.js'",
         "lint:tsc": "tsc --noEmit",
         "test": "npm run build && jest",
-        "test:ci": "jest -i"
+        "test:ci": "jest -i --coverage"
     },
     "jest": {
         "maxWorkers": 5,
         "preset": "ts-jest",
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text-summary",
+            "cobertura",
+            "lcov"
+        ],
+        "collectCoverageFrom": [
+            "./dist/**"
+        ],
         "setupFilesAfterEnv": [
             "jest-expect-message"
         ],
@@ -45,7 +54,8 @@
     },
     "devDependencies": {
         "light-server": "^2.9.1",
-        "peggy": "^4.0.2"
+        "peggy": "^4.0.3",
+        "webpack": "^5.93.0"
     },
     "publishConfig": {
         "access": "public",

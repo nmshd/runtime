@@ -31,15 +31,12 @@ import {
     MessageEnvelopeRecipient,
     MessageSigned,
     Relationship,
-    RelationshipChange,
-    RelationshipChangeRequest,
-    RelationshipChangeResponse,
-    RelationshipCreationChangeRequestCipher,
-    RelationshipCreationChangeRequestContentWrapper,
-    RelationshipCreationChangeRequestSigned,
-    RelationshipCreationChangeResponseCipher,
-    RelationshipCreationChangeResponseContentWrapper,
-    RelationshipCreationChangeResponseSigned,
+    RelationshipCreationContentCipher,
+    RelationshipCreationContentSigned,
+    RelationshipCreationContentWrapper,
+    RelationshipCreationResponseContentCipher,
+    RelationshipCreationResponseContentSigned,
+    RelationshipCreationResponseContentWrapper,
     RelationshipTemplate,
     RelationshipTemplateContentWrapper,
     RelationshipTemplatePublicKey,
@@ -83,16 +80,13 @@ const transportClassNames: string[] = [
     `${Message.name}@1`,
     `${CachedRelationshipTemplate.name}@1`,
     `${Relationship.name}@1`,
-    `${RelationshipChange.name}@1`,
-    `${RelationshipChangeRequest.name}@1`,
-    `${RelationshipChangeResponse.name}@1`,
     `${RelationshipTemplate.name}@1`,
-    `${RelationshipCreationChangeRequestCipher.name}@1`,
-    `${RelationshipCreationChangeRequestContentWrapper.name}@1`,
-    `${RelationshipCreationChangeRequestSigned.name}@1`,
-    `${RelationshipCreationChangeResponseCipher.name}@1`,
-    `${RelationshipCreationChangeResponseContentWrapper.name}@1`,
-    `${RelationshipCreationChangeResponseSigned.name}@1`,
+    `${RelationshipCreationContentCipher.name}@1`,
+    `${RelationshipCreationContentWrapper.name}@1`,
+    `${RelationshipCreationContentSigned.name}@1`,
+    `${RelationshipCreationResponseContentCipher.name}@1`,
+    `${RelationshipCreationResponseContentWrapper.name}@1`,
+    `${RelationshipCreationResponseContentSigned.name}@1`,
     `${RelationshipTemplateContentWrapper.name}@1`,
     `${RelationshipTemplatePublicKey.name}@1`,
     `${RelationshipTemplateSigned.name}@1`,
@@ -105,7 +99,7 @@ describe("ReflectionTest", function () {
         const reflectionKeys = Reflect.getMetadataKeys(Serializable, "types");
         const notFoundClasses: string[] = [];
         for (const className of cryptoClassNames) {
-            // eslint-disable-next-line jest/no-if
+            // eslint-disable-next-line jest/no-conditional-in-test
             if (!reflectionKeys.includes(className)) {
                 notFoundClasses.push(className);
             }
@@ -118,7 +112,7 @@ describe("ReflectionTest", function () {
         const notFoundClasses: string[] = [];
 
         for (const className of transportClassNames) {
-            // eslint-disable-next-line jest/no-if
+            // eslint-disable-next-line jest/no-conditional-in-test
             if (!reflectionKeys.includes(className)) {
                 notFoundClasses.push(className);
             }

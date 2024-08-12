@@ -2,6 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
+    ChangeDefaultRepositoryAttributeRequest,
+    ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
@@ -14,29 +16,31 @@ import {
     DeletePeerSharedAttributeAndNotifyOwnerUseCase,
     DeleteRepositoryAttributeRequest,
     DeleteRepositoryAttributeUseCase,
+    DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest,
+    DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerResponse,
     DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
-    ExecuteIdentityAttributeQueryRequest,
-    ExecuteIdentityAttributeQueryUseCase,
     ExecuteIQLQueryRequest,
     ExecuteIQLQueryUseCase,
+    ExecuteIdentityAttributeQueryRequest,
+    ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryRequest,
     ExecuteRelationshipAttributeQueryUseCase,
     ExecuteThirdPartyRelationshipAttributeQueryRequest,
     ExecuteThirdPartyRelationshipAttributeQueryUseCase,
     GetAttributeRequest,
+    GetAttributeUseCase,
     GetAttributesRequest,
     GetAttributesUseCase,
-    GetAttributeUseCase,
     GetOwnSharedAttributesRequest,
     GetOwnSharedAttributesUseCase,
     GetPeerSharedAttributesRequest,
     GetPeerSharedAttributesUseCase,
     GetRepositoryAttributesRequest,
     GetRepositoryAttributesUseCase,
-    GetSharedVersionsOfRepositoryAttributeRequest,
-    GetSharedVersionsOfRepositoryAttributeUseCase,
+    GetSharedVersionsOfAttributeRequest,
+    GetSharedVersionsOfAttributeUseCase,
     GetVersionsOfAttributeRequest,
     GetVersionsOfAttributeUseCase,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
@@ -58,27 +62,29 @@ import {
 export class AttributesFacade {
     public constructor(
         @Inject private readonly createRepositoryAttributeUseCase: CreateRepositoryAttributeUseCase,
-        @Inject private readonly shareRepositoryAttributeUseCase: ShareRepositoryAttributeUseCase,
         @Inject private readonly getPeerSharedAttributesUseCase: GetPeerSharedAttributesUseCase,
         @Inject private readonly getOwnSharedAttributesUseCase: GetOwnSharedAttributesUseCase,
         @Inject private readonly getRepositoryAttributesUseCase: GetRepositoryAttributesUseCase,
         @Inject private readonly getAttributeUseCase: GetAttributeUseCase,
         @Inject private readonly getAttributesUseCase: GetAttributesUseCase,
         @Inject private readonly getVersionsOfAttributeUseCase: GetVersionsOfAttributeUseCase,
-        @Inject private readonly getSharedVersionsOfRepositoryAttributeUseCase: GetSharedVersionsOfRepositoryAttributeUseCase,
-        @Inject private readonly succeedRepositoryAttributeUseCase: SucceedRepositoryAttributeUseCase,
+        @Inject private readonly getSharedVersionsOfAttributeUseCase: GetSharedVersionsOfAttributeUseCase,
         @Inject private readonly executeIdentityAttributeQueryUseCase: ExecuteIdentityAttributeQueryUseCase,
         @Inject private readonly executeRelationshipAttributeQueryUseCase: ExecuteRelationshipAttributeQueryUseCase,
-        @Inject private readonly succeedRelationshipAttributeAndNotifyPeerUseCase: SucceedRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly executeThirdPartyRelationshipAttributeQueryUseCase: ExecuteThirdPartyRelationshipAttributeQueryUseCase,
         @Inject private readonly executeIQLQueryUseCase: ExecuteIQLQueryUseCase,
         @Inject private readonly validateIQLQueryUseCase: ValidateIQLQueryUseCase,
-        @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
+        @Inject private readonly succeedRepositoryAttributeUseCase: SucceedRepositoryAttributeUseCase,
+        @Inject private readonly shareRepositoryAttributeUseCase: ShareRepositoryAttributeUseCase,
         @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+        @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
+        @Inject private readonly succeedRelationshipAttributeAndNotifyPeerUseCase: SucceedRelationshipAttributeAndNotifyPeerUseCase,
+        @Inject private readonly changeDefaultRepositoryAttributeUseCase: ChangeDefaultRepositoryAttributeUseCase,
         @Inject private readonly deleteOwnSharedAttributeAndNotifyPeerUseCase: DeleteOwnSharedAttributeAndNotifyPeerUseCase,
         @Inject private readonly deletePeerSharedAttributeAndNotifyOwnerUseCase: DeletePeerSharedAttributeAndNotifyOwnerUseCase,
         @Inject private readonly deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerUseCase,
-        @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase
+        @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
+        @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase
     ) {}
 
     public async createRepositoryAttribute(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
@@ -109,8 +115,8 @@ export class AttributesFacade {
         return await this.getVersionsOfAttributeUseCase.execute(request);
     }
 
-    public async getSharedVersionsOfRepositoryAttribute(request: GetSharedVersionsOfRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
-        return await this.getSharedVersionsOfRepositoryAttributeUseCase.execute(request);
+    public async getSharedVersionsOfAttribute(request: GetSharedVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
+        return await this.getSharedVersionsOfAttributeUseCase.execute(request);
     }
 
     public async executeIdentityAttributeQuery(request: ExecuteIdentityAttributeQueryRequest): Promise<Result<LocalAttributeDTO[]>> {
@@ -119,12 +125,6 @@ export class AttributesFacade {
 
     public async executeRelationshipAttributeQuery(request: ExecuteRelationshipAttributeQueryRequest): Promise<Result<LocalAttributeDTO>> {
         return await this.executeRelationshipAttributeQueryUseCase.execute(request);
-    }
-
-    public async succeedRelationshipAttributeAndNotifyPeer(
-        request: SucceedRelationshipAttributeAndNotifyPeerRequest
-    ): Promise<Result<SucceedRelationshipAttributeAndNotifyPeerResponse>> {
-        return await this.succeedRelationshipAttributeAndNotifyPeerUseCase.execute(request);
     }
 
     public async executeThirdPartyRelationshipAttributeQuery(request: ExecuteThirdPartyRelationshipAttributeQueryRequest): Promise<Result<LocalAttributeDTO[]>> {
@@ -147,14 +147,24 @@ export class AttributesFacade {
         return await this.shareRepositoryAttributeUseCase.execute(request);
     }
 
-    public async createAndShareRelationshipAttribute(request: CreateAndShareRelationshipAttributeRequest): Promise<Result<LocalRequestDTO>> {
-        return await this.createAndShareRelationshipAttributeUseCase.execute(request);
-    }
-
     public async notifyPeerAboutRepositoryAttributeSuccession(
         request: NotifyPeerAboutRepositoryAttributeSuccessionRequest
     ): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
         return await this.notifyPeerAboutRepositoryAttributeSuccessionUseCase.execute(request);
+    }
+
+    public async createAndShareRelationshipAttribute(request: CreateAndShareRelationshipAttributeRequest): Promise<Result<LocalRequestDTO>> {
+        return await this.createAndShareRelationshipAttributeUseCase.execute(request);
+    }
+
+    public async succeedRelationshipAttributeAndNotifyPeer(
+        request: SucceedRelationshipAttributeAndNotifyPeerRequest
+    ): Promise<Result<SucceedRelationshipAttributeAndNotifyPeerResponse>> {
+        return await this.succeedRelationshipAttributeAndNotifyPeerUseCase.execute(request);
+    }
+
+    public async changeDefaultRepositoryAttribute(request: ChangeDefaultRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.changeDefaultRepositoryAttributeUseCase.execute(request);
     }
 
     public async deleteOwnSharedAttributeAndNotifyPeer(request: DeleteOwnSharedAttributeAndNotifyPeerRequest): Promise<Result<DeleteOwnSharedAttributeAndNotifyPeerResponse>> {
@@ -175,5 +185,9 @@ export class AttributesFacade {
 
     public async deleteRepositoryAttribute(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
         return await this.deleteRepositoryAttributeUseCase.execute(request);
+    }
+
+    public async deleteSharedAttributesForRejectedOrRevokedRelationship(request: DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest): Promise<Result<void>> {
+        return await this.deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase.execute(request);
     }
 }

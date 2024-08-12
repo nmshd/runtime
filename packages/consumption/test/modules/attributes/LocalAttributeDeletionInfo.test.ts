@@ -33,12 +33,12 @@ describe("LocalAttributeDeletionInfo", function () {
     });
 
     beforeEach(async function () {
-        repositoryAttribute = await consumptionController.attributes.createLocalAttribute({
+        repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
             content: IdentityAttribute.from({
                 value: EMailAddress.from({
                     value: "my@email.com"
                 }),
-                owner: CoreAddress.from(testAccount.identity.address)
+                owner: testAccount.identity.address
             })
         });
 
@@ -48,7 +48,7 @@ describe("LocalAttributeDeletionInfo", function () {
             requestReference: CoreId.from("request")
         });
 
-        peerSharedIdentityAttribute = await consumptionController.attributes.createPeerLocalAttribute({
+        peerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
             content: IdentityAttribute.from({
                 value: EMailAddress.from({
                     value: "peer@email.com"
@@ -59,7 +59,7 @@ describe("LocalAttributeDeletionInfo", function () {
             requestReference: CoreId.from("request")
         });
 
-        thirdPartyOwnedRelationshipAttribute = await consumptionController.attributes.createPeerLocalAttribute({
+        thirdPartyOwnedRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
             content: RelationshipAttribute.from({
                 value: ProprietaryEMailAddress.from({
                     value: "thirdParty@email.com",
@@ -83,6 +83,26 @@ describe("LocalAttributeDeletionInfo", function () {
     });
 
     describe("DeletionInfo of own shared Attributes", function () {
+        test("should set the deletionInfo of an own shared Attribute to DeletionRequestSent", async function () {
+            const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletionRequestSent, deletionDate: CoreDate.utc() });
+
+            ownSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            await consumptionController.attributes.updateAttributeUnsafe(ownSharedIdentityAttribute);
+
+            const updatedOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute.id);
+            expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toBe(DeletionStatus.DeletionRequestSent);
+        });
+
+        test("should set the deletionInfo of an own shared Attribute to DeletionRequestRejected", async function () {
+            const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletionRequestRejected, deletionDate: CoreDate.utc() });
+
+            ownSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            await consumptionController.attributes.updateAttributeUnsafe(ownSharedIdentityAttribute);
+
+            const updatedOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute.id);
+            expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toBe(DeletionStatus.DeletionRequestRejected);
+        });
+
         test("should set the deletionInfo of an own shared Attribute to ToBeDeletedByPeer", async function () {
             const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc() });
 
@@ -108,7 +128,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 ownSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatuses for own shared Attributes are 'DeletedByPeer' or 'ToBeDeletedByPeer'.");
+            }).toThrow("The only valid deletionStatuses for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'.");
         });
 
         test("should throw trying to set the deletionInfo of an own shared Attribute to DeletedByOwner", function () {
@@ -116,7 +136,7 @@ describe("LocalAttributeDeletionInfo", function () {
 
             expect(() => {
                 ownSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatuses for own shared Attributes are 'DeletedByPeer' or 'ToBeDeletedByPeer'.");
+            }).toThrow("The only valid deletionStatuses for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'.");
         });
     });
 
@@ -139,6 +159,22 @@ describe("LocalAttributeDeletionInfo", function () {
 
             const updatedPeerSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(peerSharedIdentityAttribute.id);
             expect(updatedPeerSharedIdentityAttribute!.deletionInfo!.deletionStatus).toBe(DeletionStatus.DeletedByOwner);
+        });
+
+        test("should throw trying to set the deletionInfo of a peer shared Attribute to DeletionRequestSent", function () {
+            const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletionRequestSent, deletionDate: CoreDate.utc() });
+
+            expect(() => {
+                peerSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
+        });
+
+        test("should throw trying to set the deletionInfo of a peer shared Attribute to DeletionRequestRejected", function () {
+            const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletionRequestRejected, deletionDate: CoreDate.utc() });
+
+            expect(() => {
+                peerSharedIdentityAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'.");
         });
 
         test("should throw trying to set the deletionInfo of a peer shared Attribute to ToBeDeletedByPeer", function () {
@@ -177,6 +213,22 @@ describe("LocalAttributeDeletionInfo", function () {
             }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
         });
 
+        test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to DeletionRequestSent", function () {
+            const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletionRequestSent, deletionDate: CoreDate.utc() });
+
+            expect(() => {
+                thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+        });
+
+        test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to DeletionRequestRejected", function () {
+            const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletionRequestRejected, deletionDate: CoreDate.utc() });
+
+            expect(() => {
+                thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+        });
+
         test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to ToBeDeletedByPeer", function () {
             const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc() });
 
@@ -195,6 +247,22 @@ describe("LocalAttributeDeletionInfo", function () {
     });
 
     describe("DeletionInfo of RepositoryAttributes", function () {
+        test("should throw trying to set the deletionInfo of a RepositoryAttribute to DeletionRequestSent", function () {
+            const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletionRequestSent, deletionDate: CoreDate.utc() });
+
+            expect(() => {
+                repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
+        });
+
+        test("should throw trying to set the deletionInfo of a RepositoryAttribute to DeletionRequestRejected", function () {
+            const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletionRequestRejected, deletionDate: CoreDate.utc() });
+
+            expect(() => {
+                repositoryAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly.");
+        });
+
         test("should throw trying to set the deletionInfo of a RepositoryAttribute to DeletedByPeer", function () {
             const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc() });
 

@@ -1,4 +1,13 @@
-import { GivenName, IdentityAttribute, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
+import {
+    GivenName,
+    IdentityAttribute,
+    ReadAttributeAcceptResponseItem,
+    ReadAttributeRequestItem,
+    RelationshipCreationContent,
+    RelationshipTemplateContent,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/transport";
 import { DataViewExpander, TransportServices } from "../../src";
 import { establishRelationshipWithContents, RuntimeServiceProvider } from "../lib";
@@ -18,7 +27,8 @@ beforeAll(async () => {
     await establishRelationshipWithContents(
         transportServices1,
         transportServices2,
-        {
+
+        RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -31,12 +41,12 @@ beforeAll(async () => {
                     })
                 ]
             }
-        },
-        {
+        }).toJSON(),
+        RelationshipCreationContent.from({
             response: {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
-                requestId: await CoreId.generate(),
+                requestId: (await CoreId.generate()).toString(),
                 items: [
                     ReadAttributeAcceptResponseItem.from({
                         result: ResponseItemResult.Accepted,
@@ -45,10 +55,10 @@ beforeAll(async () => {
                             owner: CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address),
                             value: GivenName.from("AGivenName")
                         })
-                    })
+                    }).toJSON()
                 ]
             }
-        }
+        }).toJSON()
     );
 }, 30000);
 
@@ -62,35 +72,19 @@ describe("RelationshipDVO", () => {
         const dvo = dvos[0];
         expect(dvo).toBeDefined();
         expect(dvo.id).toBe(dto.peer);
-        expect(dvo.name).toBe(dto.peer.substring(3, 9));
+        expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.description).toBe("i18n://dvo.relationship.Active");
         expect(dvo.type).toBe("IdentityDVO");
-        expect(dvo.date).toBe(dto.changes[0].request.createdAt);
+
         expect(dvo.isSelf).toBe(false);
         expect(dvo.relationship!.id).toBe(dto.id);
         expect(dvo.relationship!.direction).toBe("Incoming");
         expect(dvo.relationship!.status).toBe("Active");
         expect(dvo.relationship!.statusText).toBe("i18n://dvo.relationship.Active");
-        expect(dvo.relationship!.changeCount).toBe(1);
-        const change = dvo.relationship!.changes[0];
-        expect(change.id).toBe(dto.changes[0].id);
-        expect(change.type).toBe("RelationshipChangeDVO");
-        expect(change.status).toBe(dto.changes[0].status);
-        expect(change.statusText).toBe("i18n://dvo.relationshipChange.Accepted");
-        expect(change.request.type).toBe("RelationshipChangeRequestDVO");
-        expect(change.request.createdAt).toBe(dto.changes[0].request.createdAt);
-        expect(change.request.createdBy).toBe(dto.changes[0].request.createdBy);
-        expect(change.request.createdByDevice).toBe(dto.changes[0].request.createdByDevice);
-        expect(change.request.content).toBe(dto.changes[0].request.content);
-        expect(change.isOwn).toBe(false);
-        expect(change.response!.type).toBe("RelationshipChangeResponseDVO");
-        expect(change.response!.createdAt).toBe(dto.changes[0].response!.createdAt);
-        expect(change.response!.createdBy).toBe(dto.changes[0].response!.createdBy);
-        expect(change.response!.createdByDevice).toBe(dto.changes[0].response!.createdByDevice);
-        expect(change.response!.content).toBe(dto.changes[0].response!.content);
-        expect(change.date).toBe(dto.changes[0].response!.createdAt);
+
         expect(dvo.relationship!.templateId).toBe(dto.template.id);
     });
+
     test("check the relationship dvo for the requestor", async () => {
         const dtos = (await transportServices2.relationships.getRelationships({})).value;
         const dvos = await expander2.expandRelationshipDTOs(dtos);
@@ -98,33 +92,16 @@ describe("RelationshipDVO", () => {
         const dvo = dvos[0];
         expect(dvo).toBeDefined();
         expect(dvo.id).toBe(dto.peer);
-        expect(dvo.name).toBe(dto.peer.substring(3, 9));
+        expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.description).toBe("i18n://dvo.relationship.Active");
         expect(dvo.type).toBe("IdentityDVO");
-        expect(dvo.date).toBe(dto.changes[0].request.createdAt);
+
         expect(dvo.isSelf).toBe(false);
         expect(dvo.relationship!.id).toBe(dto.id);
         expect(dvo.relationship!.direction).toBe("Outgoing");
         expect(dvo.relationship!.status).toBe("Active");
         expect(dvo.relationship!.statusText).toBe("i18n://dvo.relationship.Active");
-        expect(dvo.relationship!.changeCount).toBe(1);
-        const change = dvo.relationship!.changes[0];
-        expect(change.id).toBe(dto.changes[0].id);
-        expect(change.type).toBe("RelationshipChangeDVO");
-        expect(change.status).toBe(dto.changes[0].status);
-        expect(change.statusText).toBe("i18n://dvo.relationshipChange.Accepted");
-        expect(change.request.type).toBe("RelationshipChangeRequestDVO");
-        expect(change.request.createdAt).toBe(dto.changes[0].request.createdAt);
-        expect(change.request.createdBy).toBe(dto.changes[0].request.createdBy);
-        expect(change.request.createdByDevice).toBe(dto.changes[0].request.createdByDevice);
-        expect(change.request.content).toBe(dto.changes[0].request.content);
-        expect(change.isOwn).toBe(true);
-        expect(change.response!.type).toBe("RelationshipChangeResponseDVO");
-        expect(change.response!.createdAt).toBe(dto.changes[0].response!.createdAt);
-        expect(change.response!.createdBy).toBe(dto.changes[0].response!.createdBy);
-        expect(change.response!.createdByDevice).toBe(dto.changes[0].response!.createdByDevice);
-        expect(change.response!.content).toBe(dto.changes[0].response!.content);
-        expect(change.date).toBe(dto.changes[0].response!.createdAt);
+
         expect(dvo.relationship!.templateId).toBe(dto.template.id);
     });
 });

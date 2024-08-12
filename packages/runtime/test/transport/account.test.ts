@@ -1,7 +1,7 @@
 import { CoreDate } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
-import { RuntimeServiceProvider, uploadFile } from "../lib";
+import { emptyRelationshipTemplateContent, RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
@@ -72,9 +72,7 @@ describe("IdentityInfo", () => {
         expect(identityInfoResult).toBeSuccessful();
 
         const identityInfo = identityInfoResult.value;
-        expect(identityInfo.address.length).toBeLessThanOrEqual(36);
-        expect(identityInfo.address.length).toBeGreaterThanOrEqual(35);
-        expect(identityInfo.address).toMatch(/^id1/);
+        expect(identityInfo.address).toMatch(/^did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}$/);
         expect(identityInfo.publicKey).toHaveLength(82);
     });
 });
@@ -110,7 +108,7 @@ describe("LoadItemFromTruncatedReference", () => {
         beforeAll(async () => {
             const relationshipTemplate = (
                 await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                    content: {},
+                    content: emptyRelationshipTemplateContent,
                     expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
                 })
             ).value;
@@ -191,13 +189,14 @@ describe("Un-/RegisterPushNotificationToken", () => {
 
     test.each(["Development", "Production"])("register with valid enviroment", async (environment: any) => {
         const result = await sTransportServices.account.registerPushNotificationToken({
-            handle: "handle",
-            platform: "platform",
+            handle: "handleLongerThan10Characters",
+            platform: "dummy",
             appId: "appId",
             environment: environment
         });
 
         expect(result).toBeSuccessful();
+        expect(result.value.devicePushIdentifier).toMatch(/^DPI[a-zA-Z0-9]{17}$/);
     });
 
     test("unregister", async () => {

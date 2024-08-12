@@ -40,6 +40,7 @@ describe("MessageContent", function () {
             expect(value).toBeInstanceOf(JSONWrapper);
             await TestUtil.sendMessage(sender, recipient1, value);
         });
+
         test("should correctly store the message (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(1);
@@ -94,6 +95,7 @@ describe("MessageContent", function () {
 
             expect(message).toBeDefined();
         });
+
         test("should correctly store the me4ssage (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(2);
@@ -149,10 +151,9 @@ class Mail extends Serializable implements IMail {
     public body: string;
 
     protected static override preFrom(value: any): any {
-        if (typeof value.cc === "undefined") {
-            value.cc = [];
-        }
-        if (typeof value.body === "undefined" && value.content) {
+        if (!value.cc) value.cc = [];
+
+        if (!value.body && value.content) {
             value.body = value.content;
             delete value.content;
         }

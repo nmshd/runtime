@@ -1,6 +1,7 @@
 import { RESTClientAuthenticate, RESTClientLogDirective } from "../../../core";
 import { ClientResult } from "../../../core/backbone/ClientResult";
 import { BackbonePostDevicesRequest, BackbonePostDevicesResponse } from "./BackbonePostDevices";
+import { BackboneUpdateDeviceRequest } from "./BackboneUpdateDevice";
 
 export interface BackbonePutDevicesPasswordRequest {
     oldPassword: string;
@@ -12,6 +13,10 @@ export interface BackbonePutDevicesPushNotificationRequest {
     handle: string;
     appId: string;
     environment?: "Development" | "Production";
+}
+
+export interface BackbonePutDevicesPushNotificationResponse {
+    devicePushIdentifier: string;
 }
 
 export class DeviceAuthClient extends RESTClientAuthenticate {
@@ -29,11 +34,15 @@ export class DeviceAuthClient extends RESTClientAuthenticate {
         return await this.delete<void>(`/api/v1/Devices/${deviceId}`);
     }
 
-    public async registerPushNotificationToken(input: BackbonePutDevicesPushNotificationRequest): Promise<ClientResult<void>> {
-        return await this.put<void>("/api/v1/Devices/Self/PushNotifications", input);
+    public async registerPushNotificationToken(input: BackbonePutDevicesPushNotificationRequest): Promise<ClientResult<BackbonePutDevicesPushNotificationResponse>> {
+        return await this.put<BackbonePutDevicesPushNotificationResponse>("/api/v1/Devices/Self/PushNotifications", input);
     }
 
     public async unregisterPushNotificationToken(): Promise<ClientResult<void>> {
         return await this.delete<void>("/api/v1/Devices/Self/PushNotifications");
+    }
+
+    public async updateCurrentDevice(value: BackboneUpdateDeviceRequest): Promise<ClientResult<void>> {
+        return await this.put<void>("/api/v1/Devices/Self", value);
     }
 }

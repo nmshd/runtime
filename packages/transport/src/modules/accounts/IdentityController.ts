@@ -3,7 +3,7 @@ import { CoreBuffer, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignature
 import { ControllerName, CoreAddress, CoreCrypto, CoreErrors, TransportController } from "../../core";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
-import { Identity, Realm } from "./data/Identity";
+import { Identity } from "./data/Identity";
 
 export class IdentityController extends TransportController {
     public get address(): CoreAddress {
@@ -12,10 +12,6 @@ export class IdentityController extends TransportController {
 
     public get publicKey(): CryptoSignaturePublicKey {
         return this._identity.publicKey;
-    }
-
-    public get realm(): Realm {
-        return this._identity.realm;
     }
 
     public get identity(): Identity {

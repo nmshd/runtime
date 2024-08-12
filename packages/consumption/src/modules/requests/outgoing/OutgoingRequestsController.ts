@@ -1,14 +1,13 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
+import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
 import {
     CoreAddress,
     CoreDate,
     CoreId,
-    ICoreAddress,
     ICoreId,
     Message,
     Relationship,
-    RelationshipChange,
+    RelationshipStatus,
     RelationshipTemplate,
     SynchronizedCollection,
     CoreErrors as TransportCoreErrors
@@ -18,6 +17,8 @@ import { ConsumptionController } from "../../../consumption/ConsumptionControlle
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
+import { CoreErrors } from "../../../consumption/CoreErrors";
+import { DeletionStatus, LocalAttributeDeletionInfo } from "../../attributes";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -41,7 +42,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         private readonly eventBus: EventBus,
         private readonly identity: { address: CoreAddress },
         private readonly relationshipResolver: {
-            getActiveRelationshipToIdentity(id: ICoreAddress): Promise<Relationship | undefined>;
+            getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
         }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
@@ -49,6 +50,24 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     public async canCreate(params: ICanCreateOutgoingRequestParameters): Promise<ValidationResult> {
         const parsedParams = CanCreateOutgoingRequestParameters.from(params);
+        if (parsedParams.peer) {
+            const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
+
+            // there should at minimum be a Pending relationship to the peer
+            if (!relationship) {
+                return ValidationResult.error(
+                    CoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
+                );
+            }
+
+            if (!(relationship.status === RelationshipStatus.Pending || relationship.status === RelationshipStatus.Active)) {
+                return ValidationResult.error(
+                    CoreErrors.requests.wrongRelationshipStatus(
+                        `You cannot create a request to '${parsedParams.peer.toString()}' since the relationship is in status '${relationship.status}'.`
+                    )
+                );
+            }
+        }
 
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
 
@@ -106,9 +125,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     private async _create(id: CoreId, content: Request, peer: CoreAddress) {
         const canCreateResult = await this.canCreate({ content, peer });
 
-        if (canCreateResult.isError()) {
-            throw canCreateResult.error;
-        }
+        if (canCreateResult.isError()) throw canCreateResult.error;
 
         const request = LocalRequest.from({
             id: id,
@@ -127,17 +144,17 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     public async createAndCompleteFromRelationshipTemplateResponse(params: ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters): Promise<LocalRequest> {
         const parsedParams = CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters.from(params);
 
-        const peer = parsedParams.responseSource instanceof RelationshipChange ? parsedParams.responseSource.request.createdBy : parsedParams.responseSource.cache!.createdBy;
+        const peer = parsedParams.responseSource instanceof Relationship ? parsedParams.responseSource.peer.address : parsedParams.responseSource.cache!.createdBy;
         const response = parsedParams.response;
         const requestId = response.requestId;
 
         const templateContent = parsedParams.template.cache!.content;
         if (!(templateContent instanceof RelationshipTemplateContent)) {
-            throw new ConsumptionError("The content of the template is not supported as it is not type of RelationshipTemplateContent.");
+            throw new ConsumptionError("The content of the template is not of type RelationshipTemplateContent hence it's not possible to create a request from it.");
         }
 
         // checking for an active relationship is not secure as in the meantime the relationship could have been accepted
-        const isFromNewRelationship = parsedParams.responseSource instanceof RelationshipChange && parsedParams.responseSource.type === "Creation";
+        const isFromNewRelationship = parsedParams.responseSource instanceof Relationship && parsedParams.responseSource.cache!.auditLog.length === 1;
 
         const requestContent = isFromNewRelationship ? templateContent.onNewRelationship : templateContent.onExistingRelationship;
 
@@ -160,6 +177,8 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const parsedParams = SentOutgoingRequestParameters.from(params);
         const request = await this._sent(parsedParams.requestId, parsedParams.requestSourceObject);
 
+        await this._setDeletionInfo(request.content);
+
         this.eventBus.publish(
             new OutgoingRequestStatusChangedEvent(this.identity.address.toString(), {
                 request: request,
@@ -169,6 +188,13 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         );
 
         return request;
+    }
+
+    public async deleteRequestsToPeer(peer: CoreAddress): Promise<void> {
+        const requests = await this.getOutgoingRequests({ peer: peer.toString() });
+        for (const request of requests) {
+            await this.localRequests.delete(request);
+        }
     }
 
     private async _sent(requestId: CoreId, requestSourceObject: Message | RelationshipTemplate): Promise<LocalRequest> {
@@ -185,6 +211,36 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
         await this.update(request);
         return request;
+    }
+
+    private async _setDeletionInfo(request: Request) {
+        const requestItemsFromRequest = request.items.filter((item) => item instanceof RequestItem) as RequestItem[];
+        const requestItemGroupsFromRequest = request.items.filter((item) => item instanceof RequestItemGroup);
+        const requestItemsFromGroups = requestItemGroupsFromRequest.map((group) => group.items).flat();
+        const requestItems = [...requestItemsFromRequest, ...requestItemsFromGroups];
+        const deleteAttributeRequestItems = requestItems.filter((item) => item instanceof DeleteAttributeRequestItem);
+        if (deleteAttributeRequestItems.length === 0) return;
+
+        const ownSharedAttributeIds = deleteAttributeRequestItems.map((item) => item.attributeId);
+        for (const ownSharedAttributeId of ownSharedAttributeIds) {
+            const ownSharedAttribute = await this.parent.attributes.getLocalAttribute(ownSharedAttributeId);
+            if (!ownSharedAttribute) {
+                throw new ConsumptionError(`The own shared Attribute ${ownSharedAttributeId} of a created DeleteAttributeRequestItem was not found.`);
+            }
+
+            const deletionInfo = LocalAttributeDeletionInfo.from({
+                deletionStatus: DeletionStatus.DeletionRequestSent,
+                deletionDate: CoreDate.utc()
+            });
+
+            const predecessors = await this.parent.attributes.getPredecessorsOfAttribute(ownSharedAttributeId);
+            for (const attr of [ownSharedAttribute, ...predecessors]) {
+                if (attr.deletionInfo?.deletionStatus !== DeletionStatus.ToBeDeletedByPeer && attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                    attr.setDeletionInfo(deletionInfo, this.identity.address);
+                    await this.parent.attributes.updateAttributeUnsafe(attr);
+                }
+            }
+        }
     }
 
     private getSourceType(sourceObject: Message | RelationshipTemplate): "Message" | "RelationshipTemplate" {
@@ -220,30 +276,29 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    private async _complete(requestId: CoreId, responseSourceObject: Message | RelationshipChange, receivedResponse: Response): Promise<LocalRequest> {
+    private async _complete(requestId: CoreId, responseSourceObject: Message | Relationship, receivedResponse: Response): Promise<LocalRequest> {
         const request = await this.getOrThrow(requestId);
 
         this.assertRequestStatus(request, LocalRequestStatus.Open, LocalRequestStatus.Expired);
 
-        const responseSourceObjectCreationDate = responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.request.createdAt;
+        const responseSourceObjectCreationDate =
+            responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.cache!.auditLog[0].createdAt;
         if (request.status === LocalRequestStatus.Expired && request.isExpired(responseSourceObjectCreationDate)) {
             throw new ConsumptionError("Cannot complete an expired request with a response that was created before the expiration date");
         }
 
         const canComplete = await this.canComplete(request, receivedResponse);
 
-        if (canComplete.isError()) {
-            throw canComplete.error;
-        }
+        if (canComplete.isError()) throw canComplete.error;
 
         await this.applyItems(request.content.items, receivedResponse.items, request);
 
-        let responseSource: "Message" | "RelationshipChange";
+        let responseSource: "Message" | "Relationship";
 
         if (responseSourceObject instanceof Message) {
             responseSource = "Message";
-        } else if (responseSourceObject instanceof RelationshipChange) {
-            responseSource = "RelationshipChange";
+        } else if (responseSourceObject instanceof Relationship) {
+            responseSource = "Relationship";
         } else {
             throw new ConsumptionError("Invalid responseSourceObject");
         }

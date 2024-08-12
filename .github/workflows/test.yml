@@ -1,8 +1,13 @@
 name: Test
 
 on:
+  pull_request:
   push:
-    branches-ignore: [main]
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   run-checks:
@@ -19,7 +24,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22.4.1
       - run: npm ci
       - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/app-runtime
@@ -27,6 +32,11 @@ jobs:
           NMSHD_TEST_BASEURL: http://localhost:8090
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4
+        env:
+          fail_ci_if_error: true
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-consumption-mongodb:
     runs-on: ubuntu-latest
@@ -36,7 +46,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - run: npm ci
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@v1
@@ -47,6 +57,11 @@ jobs:
           NMSHD_TEST_BASEURL: http://localhost:8090
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4
+        env:
+          fail_ci_if_error: true
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-consumption-ferret:
     runs-on: ubuntu-latest
@@ -56,7 +71,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - run: npm ci
       - uses: js-soft/ferretdb-github-action@1.1.0
         with:
@@ -78,7 +93,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - run: npm ci
       - run: npm run build:node
       - run: npm run test:ci:lokijs --workspace=@nmshd/consumption
@@ -93,13 +108,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - run: npm ci
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           COMMIT_HASH: ${{ github.sha }}
       - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/content
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4
+        env:
+          fail_ci_if_error: true
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-runtime-mongodb:
     runs-on: ubuntu-latest
@@ -109,7 +129,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - uses: supercharge/mongodb-github-action@v1
       - run: npm ci
       - run: npm run build:node
@@ -118,8 +138,14 @@ jobs:
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
           NMSHD_TEST_BASEURL: http://localhost:8090
+          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4
+        env:
+          fail_ci_if_error: true
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-runtime-ferret:
     runs-on: ubuntu-latest
@@ -129,7 +155,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - uses: js-soft/ferretdb-github-action@1.1.0
         with:
           ferretdb-telemetry: "enabled"
@@ -141,6 +167,7 @@ jobs:
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
           NMSHD_TEST_BASEURL: http://localhost:8090
+          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
@@ -152,13 +179,14 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - run: npm ci
       - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
       - run: npm run test:ci:lokijs --workspace=@nmshd/runtime
         env:
           NMSHD_TEST_BASEURL: http://localhost:8090
+          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
@@ -170,7 +198,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - run: npm ci
       - run: npm run build:node
       - name: Start MongoDB
@@ -179,8 +207,14 @@ jobs:
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
           NMSHD_TEST_BASEURL: http://localhost:8090
+          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4
+        env:
+          fail_ci_if_error: true
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-transport-ferret:
     runs-on: ubuntu-latest
@@ -190,7 +224,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - run: npm ci
       - run: npm run build:node
       - uses: js-soft/ferretdb-github-action@1.1.0
@@ -201,6 +235,7 @@ jobs:
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
           NMSHD_TEST_BASEURL: http://localhost:8090
+          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
@@ -212,7 +247,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - run: npm ci
       - run: npm run build:node
         env:
@@ -221,6 +256,7 @@ jobs:
       - run: npm run test:ci:lokijs --workspace=@nmshd/transport
         env:
           NMSHD_TEST_BASEURL: http://localhost:8090
+          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
@@ -230,10 +266,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.4.1
       - run: npm ci
       - run: npm run build:node
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           COMMIT_HASH: ${{ github.sha }}
       - run: npm run test:ci --workspace=@nmshd/iql
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v4
+        env:
+          fail_ci_if_error: true
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

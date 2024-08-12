@@ -14,7 +14,7 @@ export class DecideRequestParametersValidator {
         }
 
         if (params.items.length !== request.content.items.length) {
-            return ValidationResult.error(CoreErrors.requests.decideValidation.invalidNumberOfItems("Number of items in Request and Response do not match"));
+            return ValidationResult.error(CoreErrors.requests.decideValidation.invalidNumberOfItems("The number of items in the Request and the Response do not match."));
         }
 
         const validationResults = request.content.items.map((requestItem, index) => this.checkItemOrGroup(requestItem, params.items[index], params.accept));
@@ -24,25 +24,27 @@ export class DecideRequestParametersValidator {
     private checkItemOrGroup(
         requestItem: RequestItem | RequestItemGroup,
         responseItem: DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON,
-        isParentAccepted: boolean
+        isRequestAccepted: boolean
     ): ValidationResult {
         if (requestItem instanceof RequestItem) {
-            return this.checkItem(requestItem, responseItem, isParentAccepted);
+            return this.checkItem(requestItem, responseItem, isRequestAccepted);
         }
 
-        return this.checkItemGroup(requestItem, responseItem, isParentAccepted);
+        return this.checkItemGroup(requestItem, responseItem, isRequestAccepted);
     }
 
-    private checkItem(requestItem: RequestItem, response: DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON, isParentAccepted: boolean): ValidationResult {
+    private checkItem(requestItem: RequestItem, response: DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON, isRequestAccepted: boolean): ValidationResult {
         if (isDecideRequestItemGroupParametersJSON(response)) {
             return ValidationResult.error(CoreErrors.requests.decideValidation.requestItemAnsweredAsRequestItemGroup());
         }
 
-        if (!isParentAccepted && response.accept) {
-            return ValidationResult.error(CoreErrors.requests.decideValidation.itemAcceptedButParentNotAccepted("The RequestItem was accepted, but the parent was not accepted."));
+        if (!isRequestAccepted && response.accept) {
+            return ValidationResult.error(
+                CoreErrors.requests.decideValidation.itemAcceptedButRequestNotAccepted("The RequestItem was accepted, but the Request was not accepted.")
+            );
         }
 
-        if (isParentAccepted && requestItem.mustBeAccepted && !response.accept) {
+        if (isRequestAccepted && requestItem.mustBeAccepted && !response.accept) {
             return ValidationResult.error(
                 CoreErrors.requests.decideValidation.mustBeAcceptedItemNotAccepted("The RequestItem is flagged as 'mustBeAccepted', but it was not accepted.")
             );
@@ -54,33 +56,19 @@ export class DecideRequestParametersValidator {
     private checkItemGroup(
         requestItemGroup: RequestItemGroup,
         responseItemGroup: DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON,
-        isParentAccepted: boolean
+        isRequestAccepted: boolean
     ): ValidationResult {
         if (isDecideRequestItemParametersJSON(responseItemGroup)) {
             return ValidationResult.error(CoreErrors.requests.decideValidation.requestItemGroupAnsweredAsRequestItem());
         }
 
         if (responseItemGroup.items.length !== requestItemGroup.items.length) {
-            return ValidationResult.error(CoreErrors.requests.decideValidation.invalidNumberOfItems("Number of items in RequestItemGroup and ResponseItemGroup do not match"));
-        }
-
-        const isGroupAccepted = responseItemGroup.items.some((value) => value.accept);
-
-        if (!isParentAccepted && isGroupAccepted) {
             return ValidationResult.error(
-                CoreErrors.requests.decideValidation.itemAcceptedButParentNotAccepted("The RequestItemGroup was accepted, but the parent was not accepted.")
+                CoreErrors.requests.decideValidation.invalidNumberOfItems("The number of items in the RequestItemGroup and the ResponseItemGroup do not match.")
             );
         }
 
-        if (isParentAccepted && requestItemGroup.mustBeAccepted && !isGroupAccepted) {
-            return ValidationResult.error(
-                CoreErrors.requests.decideValidation.mustBeAcceptedItemNotAccepted(
-                    "The RequestItemGroup is flagged as 'mustBeAccepted', but it was not accepted. Please accept all 'mustBeAccepted' items in this group."
-                )
-            );
-        }
-
-        const validationResults = requestItemGroup.items.map((requestItem, index) => this.checkItem(requestItem, responseItemGroup.items[index], isGroupAccepted));
+        const validationResults = requestItemGroup.items.map((requestItem, index) => this.checkItem(requestItem, responseItemGroup.items[index], isRequestAccepted));
         return ValidationResult.fromItems(validationResults);
     }
 }

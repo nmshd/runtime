@@ -19,7 +19,10 @@ import {
     DependencyOverrides,
     DeviceSharedSecret,
     File,
+    IChangedItems,
     IConfigOverwrite,
+    IdentityDeletionProcess,
+    IdentityUtil,
     ISendFileParameters,
     Message,
     Relationship,
@@ -61,6 +64,7 @@ export class TestUtil {
         this.oldLogger = (TransportLoggerFactory as any).instance;
         TransportLoggerFactory.init(this.fatalLogger);
     }
+
     public static useTestLoggerFactory(): void {
         TransportLoggerFactory.init(this.oldLogger);
     }
@@ -315,7 +319,7 @@ export class TestUtil {
 
         await to.relationships.sendRelationship({
             template: templateTo,
-            content: {
+            creationContent: {
                 mycontent: "request"
             }
         });
@@ -326,7 +330,7 @@ export class TestUtil {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        const rejectedRelationshipFromSelf = await from.relationships.rejectChange(pendingRelationship.cache!.creationChange, {});
+        const rejectedRelationshipFromSelf = await from.relationships.reject(pendingRelationship.id);
         expect(rejectedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Rejected);
 
         // Get accepted relationship
@@ -336,7 +340,10 @@ export class TestUtil {
         expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
     }
 
-    public static async addRelationship(from: AccountController, to: AccountController): Promise<Relationship[]> {
+    public static async addRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
         const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
             content: {
                 mycontent: "template"
@@ -349,7 +356,7 @@ export class TestUtil {
 
         const relRequest = await to.relationships.sendRelationship({
             template: templateTo,
-            content: {
+            creationContent: {
                 mycontent: "request"
             }
         });
@@ -360,7 +367,7 @@ export class TestUtil {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        const acceptedRelationshipFromSelf = await from.relationships.acceptChange(pendingRelationship.cache!.creationChange, {});
+        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         // Get accepted relationship
@@ -375,7 +382,34 @@ export class TestUtil {
         expect(relRequest.id.toString()).toBe(acceptedRelationshipFromSelf.id.toString());
         expect(relRequest.id.toString()).toBe(acceptedRelationshipPeer.id.toString());
 
-        return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
+        return { acceptedRelationshipFromSelf, acceptedRelationshipPeer };
+    }
+
+    public static async terminateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
+        const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
+        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
+    }
+
+    public static async decomposeRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
+        const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
+        await from.relationships.decompose(relationship.id);
+        await from.cleanupDataOfDecomposedRelationship(relationship);
+        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return decomposedRelationshipPeer;
+    }
+
+    public static async generateAddressPseudonym(backboneBaseUrl: string): Promise<CoreAddress> {
+        const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
+        const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, new URL(backboneBaseUrl).hostname);
+
+        return pseudonym;
     }
 
     /**
@@ -385,43 +419,58 @@ export class TestUtil {
      * the `until` callback is met.
      */
     public static async syncUntil(accountController: AccountController, until: (syncResult: ChangedItems) => boolean): Promise<ChangedItems> {
-        const { messages, relationships } = await accountController.syncEverything();
-        const syncResult = new ChangedItems([...relationships], [...messages]);
+        const syncResult = new ChangedItems();
 
         let iterationNumber = 0;
-        while (!until(syncResult) && iterationNumber < 20) {
+        do {
             await sleep(150 * iterationNumber);
             const newSyncResult = await accountController.syncEverything();
             syncResult.messages.push(...newSyncResult.messages);
             syncResult.relationships.push(...newSyncResult.relationships);
+            syncResult.identityDeletionProcesses.push(...newSyncResult.identityDeletionProcesses);
             iterationNumber++;
-        }
+        } while (!until(syncResult) && iterationNumber < 20);
 
         if (!until(syncResult)) {
             throw new Error("syncUntil condition was not met");
         }
-
         return syncResult;
     }
 
-    public static async syncUntilHasRelationships(accountController: AccountController): Promise<Relationship[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.relationships.length > 0);
-        return syncResult.relationships;
+    public static async syncUntilHas<T extends keyof IChangedItems>(accountController: AccountController, id: CoreId, key: T): Promise<ChangedItems[T]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].some((r) => r.id.equals(id)));
+
+        return syncResult[key];
+    }
+
+    public static async syncUntilHasMany<T extends keyof IChangedItems>(accountController: AccountController, key: T, expectedNumberOfItems = 1): Promise<ChangedItems[T]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].length >= expectedNumberOfItems);
+
+        return syncResult[key];
+    }
+
+    public static async syncUntilHasIdentityDeletionProcess(accountController: AccountController, id: CoreId): Promise<IdentityDeletionProcess[]> {
+        return await TestUtil.syncUntilHas(accountController, id, "identityDeletionProcesses");
+    }
+
+    public static async syncUntilHasIdentityDeletionProcesses(accountController: AccountController): Promise<IdentityDeletionProcess[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "identityDeletionProcesses");
+    }
+
+    public static async syncUntilHasRelationships(accountController: AccountController, expectedNumberOfRelationships?: number): Promise<Relationship[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "relationships", expectedNumberOfRelationships);
     }
 
     public static async syncUntilHasRelationship(accountController: AccountController, id: CoreId): Promise<Relationship[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.relationships.some((r) => r.id.equals(id)));
-        return syncResult.relationships;
+        return await TestUtil.syncUntilHas(accountController, id, "relationships");
     }
 
     public static async syncUntilHasMessages(accountController: AccountController, expectedNumberOfMessages = 1): Promise<Message[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.messages.length >= expectedNumberOfMessages);
-        return syncResult.messages;
+        return await TestUtil.syncUntilHasMany(accountController, "messages", expectedNumberOfMessages);
     }
 
     public static async syncUntilHasMessage(accountController: AccountController, id: CoreId): Promise<Message[]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.messages.some((m) => m.id.equals(id)));
-        return syncResult.messages;
+        return await TestUtil.syncUntilHas(accountController, id, "messages");
     }
 
     public static async syncUntilHasError(accountController: AccountController): Promise<any> {
@@ -481,7 +530,7 @@ export class TestUtil {
         }
         return await account.relationships.sendRelationship({
             template: template,
-            content: body
+            creationContent: body
         });
     }
 
@@ -496,8 +545,8 @@ export class TestUtil {
         return template;
     }
 
-    public static async sendMessage(from: AccountController, to: AccountController, content?: Serializable): Promise<Message> {
-        return await this.sendMessagesWithFiles(from, [to], [], content);
+    public static async sendMessage(from: AccountController, to: AccountController | AccountController[], content?: Serializable): Promise<Message> {
+        return await this.sendMessagesWithFiles(from, Array.isArray(to) ? to : [to], [], content);
     }
 
     public static async sendMessageWithFile(from: AccountController, to: AccountController, file: File, content?: Serializable): Promise<Message> {

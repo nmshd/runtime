@@ -1,7 +1,7 @@
 import { EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import * as consumption from "@nmshd/consumption";
 import * as transport from "@nmshd/transport";
-import { AttributeListenerMapper, AttributeMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
+import { AttributeListenerMapper, AttributeMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
@@ -10,22 +10,27 @@ import {
     IncomingRequestStatusChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestCreatedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeDeletedByOwnerEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeDeletedByPeerEvent,
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent
+    ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent,
+    ThirdPartyOwnedRelationshipAttributeSucceededEvent
 } from "./consumption";
 import {
+    IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
     PeerRelationshipTemplateLoadedEvent,
-    RelationshipChangedEvent
+    RelationshipChangedEvent,
+    RelationshipDecomposedBySelfEvent,
+    RelationshipReactivationCompletedEvent,
+    RelationshipReactivationRequestedEvent
 } from "./transport";
 
 export class EventProxy {
@@ -68,6 +73,24 @@ export class EventProxy {
         this.subscribeToSourceEvent(transport.RelationshipChangedEvent, (event) => {
             this.targetEventBus.publish(new RelationshipChangedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
+
+        this.subscribeToSourceEvent(transport.RelationshipReactivationRequestedEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipReactivationRequestedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipReactivationCompletedEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipReactivationCompletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipDecomposedBySelfEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipDecomposedBySelfEvent(event.eventTargetAddress, { relationshipId: event.data.relationshipId.toString() }));
+        });
+
+        this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {
+            this.targetEventBus.publish(
+                new IdentityDeletionProcessStatusChangedEvent(event.eventTargetAddress, IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(event.data))
+            );
+        });
     }
 
     private proxyConsumptionEvents() {
@@ -109,6 +132,15 @@ export class EventProxy {
             );
         });
 
+        this.subscribeToSourceEvent(consumption.ThirdPartyOwnedRelationshipAttributeSucceededEvent, (event) => {
+            this.targetEventBus.publish(
+                new ThirdPartyOwnedRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
+                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
+                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
+                })
+            );
+        });
+
         this.subscribeToSourceEvent(consumption.RepositoryAttributeSucceededEvent, (event) => {
             this.targetEventBus.publish(
                 new RepositoryAttributeSucceededEvent(event.eventTargetAddress, {
@@ -141,8 +173,8 @@ export class EventProxy {
 
             this.targetEventBus.publish(new OutgoingRequestCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
 
-            if (event.data.response?.source?.type === "RelationshipChange") {
-                this.targetEventBus.publish(new OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
+            if (event.data.response?.source?.type === "Relationship") {
+                this.targetEventBus.publish(new OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
             }
         });
 

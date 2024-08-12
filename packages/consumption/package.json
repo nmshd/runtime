@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/consumption",
-    "version": "3.10.0",
+    "version": "5.0.0",
     "description": "The consumption library extends the transport library.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -13,27 +13,18 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
-        "dist",
-        "lib-web/nmshd.consumption.js",
-        "lib-web/nmshd.consumption.min.js",
-        "lib-web/nmshd.consumption.js.map",
-        "lib-web/nmshd.consumption.min.js.map",
-        "ui5.yaml"
+        "dist"
     ],
     "scripts": {
-        "build": "npm run build:node && npm run bundle",
-        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh && npm run bundle",
+        "build": "npm run build:node",
+        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
         "build:node": "tsc -p tsconfig.json && madge --circular dist",
-        "build:notest": "npm run build:node && npm run bundle:notest",
-        "bundle": "npm run bundle:lib && npm run bundle:min",
-        "bundle:lib": "webpack --stats-all --config webpack.config.js",
-        "bundle:min": "webpack --stats-all --config webpack.min.config.js",
-        "bundle:notest": "npm run bundle:lib && npm run bundle:min",
+        "build:notest": "npm run build:node",
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci": "npm run test",
         "test:ci:lokijs": "USE_LOKIJS=true jest -i",
-        "test:ci:mongodb": "jest -i",
+        "test:ci:mongodb": "jest -i --coverage",
         "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://localhost:27022' jest",
         "test:local:lokijs": "USE_LOKIJS=true jest",
         "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
@@ -44,6 +35,15 @@
     "jest": {
         "maxWorkers": 1,
         "preset": "ts-jest",
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text-summary",
+            "cobertura",
+            "lcov"
+        ],
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
             "jest-expect-message"
@@ -67,12 +67,12 @@
     "devDependencies": {
         "@js-soft/docdb-access-loki": "1.1.0",
         "@js-soft/docdb-access-mongo": "1.1.8",
-        "@js-soft/node-logger": "1.1.1",
+        "@js-soft/node-logger": "1.2.0",
         "@js-soft/ts-serval": "2.0.10",
         "@js-soft/ts-utils": "2.3.3",
         "@js-soft/web-logger": "^1.0.4",
         "@nmshd/crypto": "2.0.6",
-        "@types/lodash": "^4.17.0",
+        "@types/lodash": "^4.17.7",
         "@types/luxon": "^3.4.2",
         "leaked-handles": "^5.2.0"
     },

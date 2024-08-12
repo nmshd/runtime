@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/app-runtime",
-    "version": "3.2.0",
+    "version": "5.0.0",
     "description": "The App Runtime",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -13,28 +13,30 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
-        "dist",
-        "lib-web/nmshd.app-runtime.js",
-        "lib-web/nmshd.app-runtime.min.js",
-        "ui5.yaml"
+        "dist"
     ],
     "scripts": {
-        "build": "npm run build:node && npm run bundle",
-        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh && npm run bundle",
+        "build": "npm run build:node",
+        "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
         "build:node": "tsc -p tsconfig.json",
-        "build:notest": "npm run build:node && npm run bundle:notest",
-        "bundle": "npm run bundle:lib && npm run bundle:min",
-        "bundle:lib": "webpack --stats-all --config webpack.config.js",
-        "bundle:min": "webpack --stats-all --config webpack.min.config.js",
-        "bundle:notest": "npm run bundle:lib && npm run bundle:min",
+        "build:notest": "npm run build:node",
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest --forceExit",
-        "test:ci": "jest -i --forceExit"
+        "test:ci": "jest -i --forceExit --coverage"
     },
     "jest": {
         "maxWorkers": 5,
         "preset": "ts-jest",
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text-summary",
+            "cobertura",
+            "lcov"
+        ],
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "setupFilesAfterEnv": [
             "jest-expect-message"
         ],
@@ -56,12 +58,12 @@
     },
     "devDependencies": {
         "@js-soft/web-logger": "^1.0.4",
-        "@types/lodash": "^4.17.0",
+        "@types/lodash": "^4.17.7",
         "@types/lokijs": "^1.5.14",
         "@types/luxon": "^3.4.2"
     },
     "peerDependencies": {
-        "@nmshd/runtime": "^4.4.1"
+        "@nmshd/runtime": "^5.0.0"
     },
     "publishConfig": {
         "access": "public",
