@@ -64,7 +64,7 @@ describe("Create Relationship", () => {
             templateId: templateId,
             creationContent: {}
         });
-        expect(createRelationshipResponse).toBeAnError("A relationship creation content", "error.runtime.validation.invalidPropertyValue");
+        expect(createRelationshipResponse).toBeAnError("The creation content of a Relationship", "error.runtime.validation.invalidPropertyValue");
     });
 
     test("create pending relationship", async () => {

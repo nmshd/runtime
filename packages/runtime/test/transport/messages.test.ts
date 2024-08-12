@@ -170,7 +170,7 @@ describe("Message errors", () => {
             recipients: [client2.address],
             content: {}
         });
-        expect(result).toBeAnError("The content type", "error.runtime.validation.invalidPropertyValue");
+        expect(result).toBeAnError("The content of a Message", "error.runtime.validation.invalidPropertyValue");
     });
 
     test("should throw correct error for missing Request ID in a Message with Request content", async () => {
