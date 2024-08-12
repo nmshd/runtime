@@ -1,5 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { ShareAttributeRequestItemJSON } from "@nmshd/content";
+import { RelationshipTemplateContentJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
 import {
     AttributeDeletedEvent,
     IncomingRequestStatusChangedEvent,
@@ -36,7 +36,7 @@ describe("IdentityDVO after loading a relationship template sharing a DisplayNam
             }
         });
 
-        const templateContent = {
+        const templateContent: RelationshipTemplateContentJSON = {
             "@type": "RelationshipTemplateContent",
             onNewRelationship: {
                 "@type": "Request",

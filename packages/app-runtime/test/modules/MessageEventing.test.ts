@@ -1,3 +1,4 @@
+import { MailJSON } from "@nmshd/content";
 import { MessageReceivedEvent } from "@nmshd/runtime";
 import { AppRuntime, LocalAccountSession, MailReceivedEvent } from "../../src";
 import { EventListener, TestUtil } from "../lib";
@@ -26,7 +27,7 @@ describe("MessageEventingTest", function () {
     test("should fire events when mail is received", async function () {
         const createdBy = (await sessionA.transportServices.account.getIdentityInfo()).value.address;
         const recipient = (await sessionB.transportServices.account.getIdentityInfo()).value.address;
-        const mail = {
+        const mail: MailJSON = {
             "@type": "Mail",
             to: [recipient],
             subject: "Hallo Horst",

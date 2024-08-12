@@ -7,6 +7,10 @@ import {
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
     RelationshipAttributeConfidentiality,
+    RelationshipAttributeJSON,
+    RelationshipTemplateContent,
+    RelationshipTemplateContentJSON,
+    RequestItemGroupJSON,
     Surname
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
@@ -22,7 +26,7 @@ import { RuntimeServiceProvider, TestRuntimeServices, createTemplate, syncUntilH
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
 let requestor: TestRuntimeServices;
-let templatorTemplate: RelationshipTemplateDTO;
+let templatorTemplate: RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
 let templateId: string;
 let responseItems: DecideRequestItemGroupParametersJSON[];
 
@@ -41,7 +45,7 @@ beforeEach(function () {
 
 describe("RelationshipTemplateDVO", () => {
     beforeAll(async () => {
-        const relationshipAttributeContent1 = {
+        const relationshipAttributeContent1: RelationshipAttributeJSON = {
             "@type": "RelationshipAttribute",
             owner: templator.address,
             value: {
@@ -52,7 +56,7 @@ describe("RelationshipTemplateDVO", () => {
             key: "givenName",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-        const relationshipAttributeContent2 = {
+        const relationshipAttributeContent2: RelationshipAttributeJSON = {
             "@type": "RelationshipAttribute",
             owner: templator.address,
             value: {
@@ -63,8 +67,7 @@ describe("RelationshipTemplateDVO", () => {
             key: "surname",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-        const templateContent = {
-            "@type": "RelationshipTemplateContent",
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -97,7 +100,7 @@ describe("RelationshipTemplateDVO", () => {
                                     owner: CoreAddress.from(""),
                                     value: GivenName.from("Theo")
                                 })
-                            }),
+                            }).toJSON(),
                             ProposeAttributeRequestItem.from({
                                 mustBeAccepted: true,
                                 query: IdentityAttributeQuery.from({
@@ -107,17 +110,17 @@ describe("RelationshipTemplateDVO", () => {
                                     owner: CoreAddress.from(""),
                                     value: Surname.from("Templator")
                                 })
-                            })
+                            }).toJSON()
                         ]
                     }
                 ]
             }
-        };
+        }).toJSON();
         const newIdentityAttribute1 = IdentityAttribute.from(
-            (templateContent.onNewRelationship.items[1].items[0] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
+            ((templateContent.onNewRelationship.items[1] as RequestItemGroupJSON).items[0] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
         ).toJSON();
         const newIdentityAttribute2 = IdentityAttribute.from(
-            (templateContent.onNewRelationship.items[1].items[1] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
+            ((templateContent.onNewRelationship.items[1] as RequestItemGroupJSON).items[1] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
         ).toJSON();
         responseItems = [
             { items: [{ accept: true }, { accept: true }] },
@@ -138,7 +141,7 @@ describe("RelationshipTemplateDVO", () => {
                 ]
             }
         ];
-        templatorTemplate = await createTemplate(templator.transport, templateContent);
+        templatorTemplate = (await createTemplate(templator.transport, templateContent)) as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         templateId = templatorTemplate.id;
     });
 
@@ -173,7 +176,8 @@ describe("RelationshipTemplateDVO", () => {
     });
 
     test("TemplateDVO for requestor", async () => {
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference }))
+            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
         const dto = requestorTemplate;
@@ -245,7 +249,8 @@ describe("RelationshipTemplateDVO", () => {
                 "source.reference": templateId
             }
         });
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference }))
+            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         if (requestResult.value.length === 0) {
             await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             requestResult = await requestor.consumption.incomingRequests.getRequests({
