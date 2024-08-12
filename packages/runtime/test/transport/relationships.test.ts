@@ -62,7 +62,7 @@ describe("Create Relationship", () => {
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
-            creationContent: {}
+            creationContent: emptyRelationshipCreationContent
         });
         expect(createRelationshipResponse).toBeAnError("The creation content of a Relationship", "error.runtime.validation.invalidPropertyValue");
     });
@@ -87,7 +87,7 @@ describe("Create Relationship", () => {
 
             const result = await services2.transport.relationships.createRelationship({
                 templateId: templateId,
-                creationContent: { a: "b" }
+                creationContent: emptyRelationshipCreationContent
             });
 
             expect(result).toBeAnError(
@@ -149,7 +149,7 @@ describe("Relationship status validations on active relationship", () => {
 
         const result = await services1.transport.relationships.createRelationship({
             templateId: templateId,
-            creationContent: { a: "b" }
+            creationContent: emptyRelationshipCreationContent
         });
 
         expect(result).toBeAnError(
@@ -534,7 +534,7 @@ describe("RelationshipTermination", () => {
 
             const result = await services1.transport.relationships.createRelationship({
                 templateId: templateId,
-                creationContent: { a: "b" }
+                creationContent: emptyRelationshipCreationContent
             });
 
             expect(result).toBeAnError(
@@ -844,7 +844,7 @@ describe("RelationshipDecomposition", () => {
 
         const result = await services2.transport.relationships.createRelationship({
             templateId: templateId,
-            creationContent: { a: "b" }
+            creationContent: emptyRelationshipCreationContent
         });
 
         expect(result).toBeAnError(
@@ -858,7 +858,7 @@ describe("RelationshipDecomposition", () => {
 
         const result = await services1.transport.relationships.createRelationship({
             templateId: templateId,
-            creationContent: { a: "b" }
+            creationContent: emptyRelationshipCreationContent
         });
 
         expect(result).toBeAnError(
