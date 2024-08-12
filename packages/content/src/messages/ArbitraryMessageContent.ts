@@ -3,18 +3,18 @@ import { ContentJSON } from "../ContentJSON";
 
 export interface ArbitraryMessageContentJSON extends ContentJSON {
     "@type": "ArbitraryMessageContent";
-    value: unknown;
+    value: any;
 }
 
 export interface IArbitraryMessageContent extends ISerializable {
-    value: unknown;
+    value: any;
 }
 
 @type("ArbitraryMessageContent")
 export class ArbitraryMessageContent extends Serializable implements IArbitraryMessageContent {
-    @serialize()
+    @serialize({ any: true })
     @validate()
-    public value: unknown;
+    public value: any;
 
     public static from(value: IArbitraryMessageContent | Omit<ArbitraryMessageContentJSON, "@type">): ArbitraryMessageContent {
         return this.fromAny(value);
