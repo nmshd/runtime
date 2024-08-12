@@ -155,6 +155,17 @@ export class RelationshipsController extends TransportController {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
 
+        const queryForExistingRelationship = {
+            "peer.address": template.cache.createdBy,
+            status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
+        };
+
+        const existingRelationshipToPeer = await this.getRelationships(queryForExistingRelationship);
+
+        if (existingRelationshipToPeer.length !== 0) {
+            throw CoreErrors.relationships.alreadyExists(existingRelationshipToPeer[0].status);
+        }
+
         const secretId = await TransportIds.relationshipSecret.generate();
 
         const creationContentCipher = await this.prepareCreationContent(secretId, template, parameters.creationContent);
@@ -170,30 +181,6 @@ export class RelationshipsController extends TransportController {
             }
 
             if (result.error.code === "error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists") {
-                const queryForExistingRelationship = {
-                    "peer.address": template.cache.createdBy,
-                    $or: [
-                        {
-                            ["status"]: { $eq: RelationshipStatus.Pending }
-                        },
-                        {
-                            ["status"]: { $eq: RelationshipStatus.Active }
-                        },
-                        {
-                            ["status"]: { $eq: RelationshipStatus.Terminated }
-                        },
-                        {
-                            ["status"]: { $eq: RelationshipStatus.DeletionProposed }
-                        }
-                    ]
-                };
-
-                const existingRelationshipToPeer = await this.getRelationships(queryForExistingRelationship);
-
-                if (existingRelationshipToPeer.length !== 0) {
-                    throw CoreErrors.relationships.alreadyExists(existingRelationshipToPeer[0].status);
-                }
-
                 throw CoreErrors.relationships.notYetDecomposedByPeer();
             }
 
