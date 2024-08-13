@@ -62,7 +62,7 @@ describe("Create Relationship", () => {
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
-            creationContent: emptyRelationshipCreationContent
+            creationContent: {}
         });
         expect(createRelationshipResponse).toBeAnError("The creation content of a Relationship", "error.runtime.validation.invalidPropertyValue");
     });
