@@ -417,13 +417,32 @@ export async function establishPendingRelationshipWithRequestFlow(
 
 export async function ensureActiveRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<RelationshipDTO> {
     const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
-    const relationships = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress } })).value;
-    if (relationships.length === 0) {
+    const sRelationships = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress } })).value;
+
+    const sTransportServicesAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
+    const rRelationships = (await rTransportServices.relationships.getRelationships({ query: { peer: sTransportServicesAddress } })).value;
+
+    if (sRelationships.length === 0 && rRelationships.length === 0) {
         await establishRelationship(sTransportServices, rTransportServices);
-    } else if (relationships[0].status === RelationshipStatus.Pending) {
-        const relationship = relationships[0];
+    } else if (sRelationships.length === 0 && rRelationships.length !== 0) {
+        const relationship = rRelationships[0];
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await establishRelationship(sTransportServices, rTransportServices);
+    } else if (sRelationships[0].status === RelationshipStatus.Pending) {
+        const relationship = sRelationships[0];
         await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
         await syncUntilHasRelationships(rTransportServices, 1);
+    } else if (sRelationships[0].status === RelationshipStatus.Terminated) {
+        const relationship = sRelationships[0];
+        await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await syncUntilHasRelationships(rTransportServices, 1);
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await syncUntilHasRelationships(sTransportServices, 1);
+        await establishRelationship(sTransportServices, rTransportServices);
+    } else if (sRelationships[0].status === RelationshipStatus.DeletionProposed) {
+        const relationship = sRelationships[0];
+        await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await establishRelationship(sTransportServices, rTransportServices);
     }
 
     return (await sTransportServices.relationships.getRelationships({})).value[0];

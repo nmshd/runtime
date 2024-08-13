@@ -226,9 +226,7 @@ describe("RequestModule", () => {
 
         test("triggers RelationshipTemplateProcessedEvent if a terminated Relationship exists", async () => {
             await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
-            const relationshipId = (
-                await rRuntimeServices.transport.relationships.getRelationships({ query: { peer: sRuntimeServices.address, status: RelationshipStatus.Active } })
-            ).value[0].id;
+            const relationshipId = (await rRuntimeServices.transport.relationships.getRelationships({})).value[0].id;
 
             await rRuntimeServices.transport.relationships.terminateRelationship({ relationshipId });
 
@@ -243,9 +241,7 @@ describe("RequestModule", () => {
 
         test("triggers RelationshipTemplateProcessedEvent if a Relationship whose deletion is proposed exists", async () => {
             await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
-            const relationshipId = (
-                await rRuntimeServices.transport.relationships.getRelationships({ query: { peer: sRuntimeServices.address, status: RelationshipStatus.Active } })
-            ).value[0].id;
+            const relationshipId = (await rRuntimeServices.transport.relationships.getRelationships({})).value[0].id;
 
             await rRuntimeServices.transport.relationships.terminateRelationship({ relationshipId });
             await syncUntilHasRelationships(sRuntimeServices.transport, 1);
