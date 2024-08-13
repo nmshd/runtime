@@ -187,7 +187,7 @@ class General {
     public runtimeVersionIncompatibleWithBackboneVersion(backboneVersion: number) {
         return new CoreError(
             "error.transport.files.runtimeVersionIncompatibleWithBackboneVersion",
-            `The runtime version is incompatible with the backbone version. The backbone is on version ${backboneVersion}.`
+            `The Runtime version is incompatible with the Backbone version. The Backbone is on version ${backboneVersion}.`
         );
     }
 }
