@@ -1,8 +1,7 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "../../../core";
 import { PeerToBeDeletedEvent } from "../../../events";
-import { PeerStatus } from "../../relationships/local/PeerStatus";
-import { Relationship } from "../../relationships/local/Relationship";
+import { PeerStatus, Relationship } from "../../relationships/local/Relationship";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
 

@@ -6,8 +6,13 @@ import { IRelationshipTemplate } from "../../relationshipTemplates/local/Relatio
 import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
-import { PeerStatus } from "./PeerStatus";
 import { RelationshipAuditLog } from "./RelationshipAuditLog";
+
+export enum PeerStatus {
+    Active = "Active",
+    ToBeDeleted = "ToBeDeleted",
+    Deleted = "Deleted"
+}
 
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;

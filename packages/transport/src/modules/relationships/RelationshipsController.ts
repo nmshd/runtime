@@ -16,8 +16,7 @@ import { BackbonePutRelationshipsResponse } from "./backbone/BackbonePutRelation
 import { BackboneRelationship } from "./backbone/BackboneRelationship";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { CachedRelationship } from "./local/CachedRelationship";
-import { PeerStatus } from "./local/PeerStatus";
-import { Relationship } from "./local/Relationship";
+import { PeerStatus, Relationship } from "./local/Relationship";
 import { RelationshipAuditLog } from "./local/RelationshipAuditLog";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
 import { RelationshipAuditLogEntryReason } from "./transmission/RelationshipAuditLog";
