@@ -24,7 +24,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
       - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/app-runtime
@@ -46,7 +46,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@v1
@@ -71,7 +71,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
       - uses: js-soft/ferretdb-github-action@1.1.0
         with:
@@ -93,7 +93,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
       - run: npm run build:node
       - run: npm run test:ci:lokijs --workspace=@nmshd/consumption
@@ -108,7 +108,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
         env:
           BUILD_NUMBER: ${{ github.run_number }}
@@ -129,7 +129,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - uses: supercharge/mongodb-github-action@v1
       - run: npm ci
       - run: npm run build:node
@@ -155,7 +155,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - uses: js-soft/ferretdb-github-action@1.1.0
         with:
           ferretdb-telemetry: "enabled"
@@ -179,7 +179,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
       - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
@@ -198,7 +198,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
       - run: npm run build:node
       - name: Start MongoDB
@@ -224,7 +224,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
       - run: npm run build:node
       - uses: js-soft/ferretdb-github-action@1.1.0
@@ -247,7 +247,7 @@ jobs:
         run: npm run start:backbone
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
       - run: npm run build:node
         env:
@@ -266,7 +266,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
       - run: npm ci
       - run: npm run build:node
         env:
