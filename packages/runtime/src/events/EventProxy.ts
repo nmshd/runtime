@@ -10,7 +10,7 @@ import {
     IncomingRequestStatusChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestCreatedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeDeletedByOwnerEvent,
     OwnSharedAttributeSucceededEvent,
@@ -27,7 +27,10 @@ import {
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
     PeerRelationshipTemplateLoadedEvent,
-    RelationshipChangedEvent
+    RelationshipChangedEvent,
+    RelationshipDecomposedBySelfEvent,
+    RelationshipReactivationCompletedEvent,
+    RelationshipReactivationRequestedEvent
 } from "./transport";
 import { PeerDeletedEvent } from "./transport/PeerDeletedEvent";
 import { PeerDeletionCancelledEvent } from "./transport/PeerDeletionCancelledEvent";
@@ -72,6 +75,18 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(transport.RelationshipChangedEvent, (event) => {
             this.targetEventBus.publish(new RelationshipChangedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipReactivationRequestedEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipReactivationRequestedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipReactivationCompletedEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipReactivationCompletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipDecomposedBySelfEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipDecomposedBySelfEvent(event.eventTargetAddress, { relationshipId: event.data.relationshipId.toString() }));
         });
 
         this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {
@@ -173,8 +188,8 @@ export class EventProxy {
 
             this.targetEventBus.publish(new OutgoingRequestCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
 
-            if (event.data.response?.source?.type === "RelationshipChange") {
-                this.targetEventBus.publish(new OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
+            if (event.data.response?.source?.type === "Relationship") {
+                this.targetEventBus.publish(new OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
             }
         });
 

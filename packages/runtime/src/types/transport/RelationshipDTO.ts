@@ -1,5 +1,5 @@
+import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentJSON } from "@nmshd/content";
 import { IdentityDTO } from "./IdentityDTO";
-import { RelationshipChangeDTO } from "./RelationshipChangeDTO";
 import { RelationshipTemplateDTO } from "./RelationshipTemplateDTO";
 
 export enum RelationshipStatus {
@@ -7,8 +7,8 @@ export enum RelationshipStatus {
     Active = "Active",
     Rejected = "Rejected",
     Revoked = "Revoked",
-    Terminating = "Terminating",
-    Terminated = "Terminated"
+    Terminated = "Terminated",
+    DeletionProposed = "DeletionProposed"
 }
 
 export enum PeerStatus {
@@ -17,6 +17,32 @@ export enum PeerStatus {
     Deleted = "Deleted"
 }
 
+export enum RelationshipAuditLogEntryReason {
+    Creation = "Creation",
+    AcceptanceOfCreation = "AcceptanceOfCreation",
+    RejectionOfCreation = "RejectionOfCreation",
+    RevocationOfCreation = "RevocationOfCreation",
+    Termination = "Termination",
+    ReactivationRequested = "ReactivationRequested",
+    AcceptanceOfReactivation = "AcceptanceOfReactivation",
+    RejectionOfReactivation = "RejectionOfReactivation",
+    RevocationOfReactivation = "RevocationOfReactivation",
+    Decomposition = "Decomposition"
+}
+
+export interface RelationshipAuditLogEntryDTO {
+    createdAt: string;
+    createdBy: string;
+    createdByDevice: string;
+    reason: RelationshipAuditLogEntryReason;
+    oldStatus?: RelationshipStatus;
+    newStatus: RelationshipStatus;
+}
+
+export interface RelationshipAuditLogDTO extends Array<RelationshipAuditLogEntryDTO> {}
+
+export type RelationshipCreationContentDerivation = RelationshipCreationContentJSON | ArbitraryRelationshipCreationContentJSON;
+
 export interface RelationshipDTO {
     id: string;
     template: RelationshipTemplateDTO;
@@ -24,5 +50,6 @@ export interface RelationshipDTO {
     peer: string;
     peerStatus: PeerStatus;
     peerIdentity: IdentityDTO;
-    changes: RelationshipChangeDTO[];
+    creationContent: RelationshipCreationContentDerivation;
+    auditLog: RelationshipAuditLogDTO;
 }

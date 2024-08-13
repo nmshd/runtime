@@ -14,10 +14,10 @@ import {
     FreeTextAcceptResponseItemJSON,
     FreeTextRequestItemJSON,
     GivenNameJSON,
+    IQLQueryJSON,
     IdentityAttribute,
     IdentityAttributeJSON,
     IdentityAttributeQueryJSON,
-    IQLQueryJSON,
     MailJSON,
     MiddleNameJSON,
     ProposeAttributeAcceptResponseItemJSON,
@@ -48,17 +48,18 @@ import {
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
     ValueHints,
-    ValueHintsJSON
+    ValueHintsJSON,
+    isRequestItemDerivation
 } from "@nmshd/content";
-import { CoreAddress, CoreId, IdentityController, Realm, Relationship, RelationshipStatus } from "@nmshd/transport";
+import { CoreAddress, CoreId, IdentityController } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import {
     AuthenticationRequestItemDVO,
     ConsentRequestItemDVO,
     CreateAttributeRequestItemDVO,
-    DeleteAttributeRequestItemDVO,
     DVOError,
+    DeleteAttributeRequestItemDVO,
     FileDVO,
     FreeTextRequestItemDVO,
     IdentityDVO,
@@ -83,11 +84,13 @@ import {
     MessageDTO,
     MessageWithAttachmentsDTO,
     RecipientDTO,
-    RelationshipChangeDTO,
     RelationshipDTO,
+    RelationshipStatus,
     RelationshipTemplateDTO
 } from "../types";
 import { RuntimeErrors } from "../useCases";
+import { DataViewObject } from "./DataViewObject";
+import { DataViewTranslateable } from "./DataViewTranslateable";
 import {
     LocalAttributeDVO,
     LocalAttributeListenerDVO,
@@ -97,8 +100,8 @@ import {
     PeerAttributeDVO,
     PeerRelationshipAttributeDVO,
     ProcessedAttributeQueryDVO,
-    ProcessedIdentityAttributeQueryDVO,
     ProcessedIQLQueryDVO,
+    ProcessedIdentityAttributeQueryDVO,
     ProcessedRelationshipAttributeQueryDVO,
     ProcessedThirdPartyRelationshipAttributeQueryDVO,
     RelationshipSettingDVO,
@@ -121,8 +124,8 @@ import {
     AttributeQueryDVO,
     DraftIdentityAttributeDVO,
     DraftRelationshipAttributeDVO,
-    IdentityAttributeQueryDVO,
     IQLQueryDVO,
+    IdentityAttributeQueryDVO,
     RelationshipAttributeQueryDVO,
     ThirdPartyRelationshipAttributeQueryDVO
 } from "./content/AttributeDVOs";
@@ -143,10 +146,8 @@ import {
     ResponseItemGroupDVO,
     ShareAttributeAcceptResponseItemDVO
 } from "./content/ResponseItemDVOs";
-import { DataViewObject } from "./DataViewObject";
-import { DataViewTranslateable } from "./DataViewTranslateable";
 import { MessageDVO, MessageStatus, RecipientDVO } from "./transport/MessageDVO";
-import { RelationshipChangeDVO, RelationshipChangeResponseDVO, RelationshipDirection, RelationshipDVO } from "./transport/RelationshipDVO";
+import { RelationshipDVO, RelationshipDirection } from "./transport/RelationshipDVO";
 
 export class DataViewExpander {
     public constructor(
@@ -286,7 +287,7 @@ export class DataViewExpander {
             wasReadAt: message.wasReadAt
         };
 
-        if (message.content["@type"] === "Mail" || message.content["@type"] === "RequestMail") {
+        if (message.content["@type"] === "Mail") {
             const mailContent = message.content as MailJSON;
 
             const to: RecipientDVO[] = mailContent.to.map((value) => addressMap[value]);
@@ -345,7 +346,7 @@ export class DataViewExpander {
             return requestMessageDVO;
         }
 
-        if (message.content["@type"] === "Response") {
+        if (message.content["@type"] === "ResponseWrapper") {
             let localRequest: LocalRequestDTO;
             if (isOwn) {
                 const localRequestsResult = await this.consumption.incomingRequests.getRequests({
@@ -803,10 +804,14 @@ export class DataViewExpander {
                 isDecidable,
                 title: requestGroupOrItem.title,
                 description: requestGroupOrItem.description,
-                mustBeAccepted: requestGroupOrItem.mustBeAccepted,
                 response: responseGroup
             };
         }
+
+        if (!isRequestItemDerivation(requestGroupOrItem)) {
+            throw new Error("A derivation of a RequestItem was expected.");
+        }
+
         return await this.expandRequestItem(requestGroupOrItem, localRequestDTO, responseGroupOrItemDVO as ResponseItemDVO);
     }
 
@@ -958,7 +963,7 @@ export class DataViewExpander {
 
     public async expandLocalAttributeListenerDTO(attributeListener: LocalAttributeListenerDTO): Promise<LocalAttributeListenerDVO> {
         const query = (await this.expandAttributeQuery(attributeListener.query)) as IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
-        const peer = await this.expandIdentityForAddress(attributeListener.peer);
+        const peer = await this.expandAddress(attributeListener.peer);
         return {
             type: "LocalAttributeListenerDVO",
             name: "dvo.localAttributeListener.name",
@@ -1211,7 +1216,8 @@ export class DataViewExpander {
             isDraft: false,
             sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
             tags: identityAttribute.tags,
-            valueType
+            valueType,
+            isDefault: attribute.isDefault
         };
     }
 
@@ -1394,12 +1400,17 @@ export class DataViewExpander {
         const matchedAttributeDTOs = await this.consumption.attributes.executeIdentityAttributeQuery({
             query
         });
-        const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOs.value);
+        if (matchedAttributeDTOs.isError) throw matchedAttributeDTOs.error;
+
+        const matchedAttributeDTOsSortedByDefaultFirst = matchedAttributeDTOs.value.sort((attribute1, attribute2) =>
+            attribute1.isDefault === attribute2.isDefault ? 0 : attribute1.isDefault ? -1 : 1
+        );
+        const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOsSortedByDefaultFirst);
 
         return {
             ...this.expandIdentityAttributeQuery(query),
             type: "ProcessedIdentityAttributeQueryDVO",
-            results: matchedAttributeDVOs as (RepositoryAttributeDVO | SharedToPeerAttributeDVO)[],
+            results: matchedAttributeDVOs as RepositoryAttributeDVO[],
             isProcessed: true
         };
     }
@@ -1559,7 +1570,6 @@ export class DataViewExpander {
             type: "IdentityDVO",
             name: name,
             initials: initials,
-            realm: Realm.Prod,
             description: "i18n://dvo.identity.self.description",
             isSelf: true,
             hasRelationship: false
@@ -1567,16 +1577,13 @@ export class DataViewExpander {
     }
 
     public expandUnknown(address: string): IdentityDVO {
-        const name = address.substring(3, 9);
-        const initials = (name.match(/\b\w/g) ?? []).join("");
-
         return {
             id: address,
             type: "IdentityDVO",
-            name: name,
-            initials: initials,
-            realm: Realm.Prod,
+            name: "i18n://dvo.identity.unknown",
+            initials: "",
             description: "i18n://dvo.identity.unknown.description",
+            publicKey: "i18n://dvo.identity.publicKey.unknown",
             isSelf: false,
             hasRelationship: false
         };
@@ -1588,7 +1595,8 @@ export class DataViewExpander {
         }
 
         const result = await this.transport.relationships.getRelationshipByAddress({ address });
-        if (result.isSuccess) {
+        // revoked relationships should be treated as non-existent as they will never have attributes attached
+        if (result.isSuccess && result.value.status !== RelationshipStatus.Rejected && result.value.status !== RelationshipStatus.Revoked) {
             return await this.expandRelationshipDTO(result.value);
         }
 
@@ -1601,7 +1609,8 @@ export class DataViewExpander {
             })
         ).value;
         if (requestResult.length > 0) {
-            return this.expandAddressFromRequest(requestResult[0]); // with no relationship max 1 request available
+            // with no relationship max 1 request available
+            return this.expandAddressFromRequest(requestResult[0]);
         }
 
         return this.expandUnknown(address);
@@ -1627,60 +1636,16 @@ export class DataViewExpander {
         return await Promise.all(relationshipPromises);
     }
 
-    public expandRelationshipChangeDTO(relationship: RelationshipDTO, change: RelationshipChangeDTO): Promise<RelationshipChangeDVO> {
-        const date = change.response ? change.response.createdAt : change.request.createdAt;
-        let isOwn = false;
-        if (this.identityController.isMe(CoreAddress.from(change.request.createdBy))) {
-            isOwn = true;
-        }
-
-        let response: RelationshipChangeResponseDVO | undefined;
-        if (change.response) {
-            response = {
-                ...change.response,
-                id: `${change.id}_response`,
-                name: "i18n://dvo.relationshipChange.response.name",
-                type: "RelationshipChangeResponseDVO"
-            };
-        }
-
-        return Promise.resolve({
-            type: "RelationshipChangeDVO",
-            id: change.id,
-            name: "",
-            date: date,
-            status: change.status,
-            statusText: `i18n://dvo.relationshipChange.${change.status}`,
-            changeType: change.type,
-            changeTypeText: `i18n://dvo.relationshipChange.${change.type}`,
-            isOwn: isOwn,
-            request: {
-                ...change.request,
-                id: `${change.id}_request`,
-                name: "i18n://dvo.relationshipChange.request.name",
-                type: "RelationshipChangeRequestDVO"
-            },
-            response: response
-        });
-    }
-
-    public async expandRelationshipChangeDTOs(relationship: RelationshipDTO): Promise<RelationshipChangeDVO[]> {
-        const changePromises = relationship.changes.map((change) => this.expandRelationshipChangeDTO(relationship, change));
-        return await Promise.all(changePromises);
-    }
-
     private expandAddressFromRequest(request: LocalRequestDTO): IdentityDVO {
         const sharedAttributesOnNewRelationship = this.getSharedAttributesFromRequest(request);
         const address = request.peer;
-        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship) ?? address.substring(3, 9);
-        const initials = (name.match(/\b\w/g) ?? []).join("");
+        const name = this.getNameFromAttributeContents(sharedAttributesOnNewRelationship);
 
         return {
             type: "IdentityDVO",
             id: address,
-            name: name,
-            realm: Realm.Prod,
-            initials,
+            name: name ?? "i18n://dvo.identity.unknown",
+            initials: name ? (name.match(/\b\w/g) ?? []).join("") : "",
             description: "i18n://dvo.identity.unknown.description",
             isSelf: false,
             hasRelationship: false
@@ -1768,24 +1733,34 @@ export class DataViewExpander {
         }
 
         let direction = RelationshipDirection.Incoming;
-        if (this.identityController.isMe(CoreAddress.from(relationship.changes[0].request.createdBy))) {
+        if (!relationship.template.isOwn) {
             direction = RelationshipDirection.Outgoing;
         }
 
         let statusText = "";
-        if (relationship.status === RelationshipStatus.Pending && direction === RelationshipDirection.Outgoing) {
-            statusText = DataViewTranslateable.transport.relationshipOutgoing;
-        } else if (relationship.status === RelationshipStatus.Pending) {
-            statusText = DataViewTranslateable.transport.relationshipIncoming;
-        } else if (relationship.status === RelationshipStatus.Rejected) {
-            statusText = DataViewTranslateable.transport.relationshipRejected;
-        } else if (relationship.status === RelationshipStatus.Revoked) {
-            statusText = DataViewTranslateable.transport.relationshipRevoked;
-        } else if (relationship.status === RelationshipStatus.Active) {
-            statusText = DataViewTranslateable.transport.relationshipActive;
+        switch (relationship.status) {
+            case RelationshipStatus.Pending:
+                statusText =
+                    direction === RelationshipDirection.Outgoing ? DataViewTranslateable.transport.relationshipOutgoing : DataViewTranslateable.transport.relationshipIncoming;
+                break;
+            case RelationshipStatus.Rejected:
+                statusText = DataViewTranslateable.transport.relationshipRejected;
+                break;
+            case RelationshipStatus.Revoked:
+                statusText = DataViewTranslateable.transport.relationshipRevoked;
+                break;
+            case RelationshipStatus.Active:
+                statusText = DataViewTranslateable.transport.relationshipActive;
+                break;
+            case RelationshipStatus.Terminated:
+                statusText = DataViewTranslateable.transport.relationshipTerminated;
+                break;
+            case RelationshipStatus.DeletionProposed:
+                statusText = DataViewTranslateable.transport.relationshipDeletionProposed;
+                break;
         }
 
-        const changes = await this.expandRelationshipChangeDTOs(relationship);
+        const creationDate = relationship.auditLog[0].createdAt;
 
         let name;
         if (stringByType["DisplayName"]) {
@@ -1799,14 +1774,14 @@ export class DataViewExpander {
         } else if (stringByType["Surname"]) {
             name = `${stringByType["Surname"]}`;
         } else {
-            name = relationship.peer.substring(3, 9);
+            name = "i18n://dvo.identity.unknown";
         }
 
         return {
             id: relationship.id,
             name: relationshipSetting.userTitle ?? name,
             description: relationshipSetting.userDescription ?? statusText,
-            date: relationship.changes[0].request.createdAt,
+            date: creationDate,
             image: "",
             type: "RelationshipDVO",
             status: relationship.status,
@@ -1817,9 +1792,9 @@ export class DataViewExpander {
             attributeMap: attributesByType,
             items: expandedAttributes,
             nameMap: stringByType,
-            changes: changes,
-            changeCount: changes.length,
-            templateId: relationship.template.id
+            templateId: relationship.template.id,
+            auditLog: relationship.auditLog,
+            creationContent: relationship.creationContent
         };
     }
 
@@ -1834,7 +1809,6 @@ export class DataViewExpander {
             date: relationshipDVO.date,
             description: relationshipDVO.description,
             publicKey: relationship.peerIdentity.publicKey,
-            realm: relationship.peerIdentity.realm,
             initials,
             isSelf: false,
             hasRelationship: true,
@@ -1843,38 +1817,8 @@ export class DataViewExpander {
         };
     }
 
-    public async expandIdentityForAddress(address: string): Promise<IdentityDVO> {
-        if (address === this.identityController.address.toString()) {
-            return this.expandSelf();
-        }
-
-        const relationshipResult = await this.transport.relationships.getRelationshipByAddress({
-            address: address
-        });
-        if (relationshipResult.isSuccess) {
-            return await this.expandRelationshipDTO(relationshipResult.value);
-        }
-
-        if (relationshipResult.error.code !== RuntimeErrors.general.recordNotFound(Relationship).code) throw relationshipResult.error;
-
-        const name = address.substring(3, 9);
-        const initials = (name.match(/\b\w/g) ?? []).join("");
-
-        return {
-            id: address,
-            type: "IdentityDVO",
-            name: name,
-            initials: initials,
-            publicKey: "i18n://dvo.identity.publicKey.unknown",
-            realm: this.identityController.realm.toString(),
-            description: "i18n://dvo.identity.unknown",
-            isSelf: false,
-            hasRelationship: false
-        };
-    }
-
     public async expandIdentityDTO(identity: IdentityDTO): Promise<IdentityDVO> {
-        return await this.expandIdentityForAddress(identity.address);
+        return await this.expandAddress(identity.address);
     }
 
     public async expandRelationshipDTOs(relationships: RelationshipDTO[]): Promise<IdentityDVO[]> {

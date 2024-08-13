@@ -1,5 +1,6 @@
-import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { AttributesController, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import { AbstractStringJSON, DisplayNameJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
+import { CoreId } from "@nmshd/transport";
 import {
     AcceptResponseItemDVO,
     ConsumptionServices,
@@ -56,6 +57,12 @@ beforeAll(async () => {
     sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
+    responseItems = [{ accept: true }];
+}, 30000);
+
+afterAll(() => serviceProvider.stop());
+
+beforeEach(async () => {
     const senderAttribute = await sConsumptionServices.attributes.createRepositoryAttribute({
         content: {
             value: {
@@ -78,20 +85,32 @@ beforeAll(async () => {
         },
         peer: rAddress
     };
-    responseItems = [{ accept: true }];
-}, 30000);
 
-afterAll(() => serviceProvider.stop());
-
-beforeEach(function () {
     rEventBus.reset();
     sEventBus.reset();
 });
 
+afterEach(async () => {
+    await cleanupAttributes();
+});
+
+async function cleanupAttributes() {
+    await Promise.all(
+        [sRuntimeServices, rRuntimeServices].map(async (services) => {
+            const servicesAttributeController = (rRuntimeServices.consumption.attributes as any).getAttributeUseCase.attributeController as AttributesController;
+
+            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
+            for (const attribute of servicesAttributesResult.value) {
+                await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
+            }
+        })
+    );
+}
+
 describe("ShareAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id);
+        await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
@@ -158,7 +177,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         const recipientMessage = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         await rEventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const acceptResult = await rConsumptionServices.incomingRequests.accept({
-            requestId: recipientMessage.content.id,
+            requestId: recipientMessage.content.id!,
             items: responseItems
         });
         expect(acceptResult).toBeSuccessful();
@@ -210,7 +229,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(attributeResult.value[0].id).toBeDefined();
         expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
 
-        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id);
+        await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
     });
 
@@ -301,7 +320,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await sExpander.expandAddress(senderMessage.recipients[0].address);
 
-        expect(dvo.name).toStrictEqual(senderMessage.recipients[0].address.substring(3, 9));
+        expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.items).toHaveLength(0);
     });
 });

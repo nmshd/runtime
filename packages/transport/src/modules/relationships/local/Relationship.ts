@@ -1,14 +1,13 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
 import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
-import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
-import { IRelationshipChange } from "../transmission/changes/RelationshipChange";
-import { RelationshipChangeResponse } from "../transmission/changes/RelationshipChangeResponse";
+import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 import { PeerStatus } from "./PeerStatus";
+import { RelationshipAuditLog } from "./RelationshipAuditLog";
 
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;
@@ -79,33 +78,17 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         return json;
     }
 
-    public static fromRequestSent(id: CoreId, template: IRelationshipTemplate, peer: IIdentity, creationChange: IRelationshipChange, relationshipSecretId: CoreId): Relationship {
-        const cache = CachedRelationship.from({
-            changes: [creationChange],
-            template: template
-        });
-
-        return Relationship.from({
-            id: id,
-            peer: peer,
-            peerStatus: PeerStatus.Active,
-            status: RelationshipStatus.Pending,
-            cache: cache,
-            cachedAt: CoreDate.utc(),
-            relationshipSecretId: relationshipSecretId
-        });
-    }
-
-    public static fromCreationChangeReceived(
-        response: BackboneGetRelationshipsResponse,
+    public static fromBackboneAndCreationContent(
+        response: BackboneGetRelationshipResponse,
         template: IRelationshipTemplate,
         peer: IIdentity,
-        creationChange: IRelationshipChange,
+        creationContent: ISerializable,
         relationshipSecretId: CoreId
     ): Relationship {
         const cache = CachedRelationship.from({
-            changes: [creationChange],
-            template: template
+            creationContent,
+            template: template,
+            auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
         return Relationship.from({
             id: CoreId.from(response.id),
@@ -116,27 +99,6 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
             cache: cache,
             cachedAt: CoreDate.utc()
         });
-    }
-
-    public toActive(response: RelationshipChangeResponse): void {
-        if (!this.cache) throw this.newCacheEmptyError();
-
-        this.cache.changes[0].response = response;
-        this.status = RelationshipStatus.Active;
-    }
-
-    public toRejected(response: RelationshipChangeResponse): void {
-        if (!this.cache) throw this.newCacheEmptyError();
-
-        this.cache.changes[0].response = response;
-        this.status = RelationshipStatus.Rejected;
-    }
-
-    public toRevoked(response: RelationshipChangeResponse): void {
-        if (!this.cache) throw this.newCacheEmptyError();
-
-        this.cache.changes[0].response = response;
-        this.status = RelationshipStatus.Revoked;
     }
 
     public static from(value: IRelationship): Relationship {

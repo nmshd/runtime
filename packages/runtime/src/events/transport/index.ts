@@ -8,3 +8,6 @@ export * from "./PeerDeletionCancelledEvent";
 export * from "./PeerRelationshipTemplateLoadedEvent";
 export * from "./PeerToBeDeletedEvent";
 export * from "./RelationshipChangedEvent";
+export * from "./RelationshipDecomposedBySelfEvent";
+export * from "./RelationshipReactivationCompletedEvent";
+export * from "./RelationshipReactivationRequestedEvent";

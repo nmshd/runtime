@@ -4,9 +4,9 @@ import { DataEvent, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
     AcceptResponseItem,
     DeleteAttributeRequestItem,
-    IdentityAttribute,
     IRequest,
     IResponse,
+    IdentityAttribute,
     RelationshipTemplateContent,
     Request,
     RequestItemGroup,
@@ -23,7 +23,6 @@ import {
     IRelationshipTemplate,
     Message,
     Relationship,
-    RelationshipChangeType,
     RelationshipTemplate,
     SynchronizedCollection,
     Transport
@@ -40,10 +39,10 @@ import {
     ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters,
     ICreateOutgoingRequestParameters,
     ILocalRequestSource,
-    IncomingRequestsController,
     IReceivedIncomingRequestParameters,
     IRequireManualDecisionOfIncomingRequestParameters,
     ISentOutgoingRequestParameters,
+    IncomingRequestsController,
     LocalRequest,
     LocalRequestSource,
     LocalRequestStatus,
@@ -68,7 +67,7 @@ export class RequestsTestsContext {
     public outgoingRequestsController: OutgoingRequestsController;
     public currentIdentity: CoreAddress;
     public mockEventBus = new MockEventBus();
-    public relationshipToReturnFromGetActiveRelationshipToIdentity: Relationship | undefined;
+    public relationshipToReturnFromGetRelationshipToIdentity: Relationship | undefined;
     public consumptionController: ConsumptionController;
 
     private constructor() {
@@ -109,13 +108,23 @@ export class RequestsTestsContext {
             context.mockEventBus,
             { address: account.accountController.identity.address },
             {
-                getActiveRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetActiveRelationshipToIdentity)
+                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
             }
         );
 
-        context.incomingRequestsController = new IncomingRequestsController(collection, processorRegistry, context.consumptionController, context.mockEventBus, {
-            address: account.accountController.identity.address
-        });
+        context.incomingRequestsController = new IncomingRequestsController(
+            collection,
+            processorRegistry,
+            context.consumptionController,
+            context.mockEventBus,
+            {
+                address: account.accountController.identity.address
+            },
+            {
+                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
+            }
+        );
+
         context.requestsCollection = context.incomingRequestsController["localRequests"];
 
         const originalCanCreate = context.outgoingRequestsController.canCreate;
@@ -133,7 +142,7 @@ export class RequestsTestsContext {
         this.localRequestAfterAction = undefined;
         this.validationResult = undefined;
         this.actionToTry = undefined;
-        this.relationshipToReturnFromGetActiveRelationshipToIdentity = undefined;
+        this.relationshipToReturnFromGetRelationshipToIdentity = undefined;
 
         TestRequestItemProcessor.numberOfApplyIncomingResponseItemCalls = 0;
 
@@ -157,7 +166,19 @@ export class RequestsGiven {
     }
 
     public anActiveRelationshipToIdentity(): Promise<void> {
-        this.context.relationshipToReturnFromGetActiveRelationshipToIdentity = TestObjectFactory.createRelationship();
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createActiveRelationship();
+
+        return Promise.resolve();
+    }
+
+    public aPendingRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createPendingRelationship();
+
+        return Promise.resolve();
+    }
+
+    public aTerminatedRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createTerminatedRelationship();
 
         return Promise.resolve();
     }
@@ -172,7 +193,6 @@ export class RequestsGiven {
                     }
                 }),
                 RequestItemGroup.from({
-                    mustBeAccepted: false,
                     metadata: {
                         groupMetaKey: "groupMetaValue"
                     },
@@ -282,7 +302,7 @@ export class RequestsGiven {
 
         this.context.givenLocalRequest = await this.context.outgoingRequestsController.create({
             content: params.content,
-            peer: CoreAddress.from("id1")
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
 
         await this.moveOutgoingRequestToStatus(this.context.givenLocalRequest, params.status);
@@ -303,8 +323,8 @@ export class RequestsGiven {
 }
 
 export class RequestsWhen {
-    public async iCallCanAccept(): Promise<void> {
-        await this.iCallCanAcceptWith({});
+    public async iCallCanAccept(): Promise<ValidationResult> {
+        return await this.iCallCanAcceptWith({});
     }
 
     public async iTryToCallCanAccept(): Promise<void> {
@@ -338,8 +358,8 @@ export class RequestsWhen {
         return this.context.validationResult;
     }
 
-    public async iCallCanReject(): Promise<void> {
-        await this.iCallCanRejectWith({});
+    public async iCallCanReject(): Promise<ValidationResult> {
+        return await this.iCallCanRejectWith({});
     }
 
     public async iTryToCallCanReject(): Promise<void> {
@@ -575,7 +595,7 @@ export class RequestsWhen {
                     })
                 ]
             },
-            peer: params?.peer ?? CoreAddress.from("id1")
+            peer: params?.peer ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         };
 
         this.context.validationResult = await this.context.outgoingRequestsController.canCreate(realParams);
@@ -594,26 +614,24 @@ export class RequestsWhen {
                     })
                 ]
             },
-            peer: CoreAddress.from("id1")
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
         };
 
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.create(params);
     }
 
-    public async iCreateAnOutgoingRequestFromRelationshipCreationChange(): Promise<void> {
-        await this.iCreateAnOutgoingRequestFromRelationshipCreationChangeWith({});
+    public async iCreateAnOutgoingRequestFromRelationshipCreation(): Promise<void> {
+        await this.iCreateAnOutgoingRequestFromRelationshipCreationWith({});
     }
 
-    public async iCreateAnOutgoingRequestFromRelationshipCreationChangeWhenRelationshipExistsWith(
+    public async iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith(
         params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>
     ): Promise<void> {
-        this.context.relationshipToReturnFromGetActiveRelationshipToIdentity = TestObjectFactory.createRelationship();
-        await this.iCreateAnOutgoingRequestFromRelationshipCreationChangeWith(params);
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createActiveRelationship();
+        await this.iCreateAnOutgoingRequestFromRelationshipCreationWith(params);
     }
 
-    public async iCreateAnOutgoingRequestFromRelationshipCreationChangeWith(
-        params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>
-    ): Promise<void> {
+    public async iCreateAnOutgoingRequestFromRelationshipCreationWith(params: Partial<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters>): Promise<void> {
         params.template ??= TestObjectFactory.createOutgoingIRelationshipTemplate(
             this.context.currentIdentity,
             RelationshipTemplateContent.from({
@@ -621,9 +639,11 @@ export class RequestsWhen {
                 onExistingRelationship: TestObjectFactory.createRequestWithTwoItems()
             })
         );
-        params.responseSource ??= TestObjectFactory.createIncomingIRelationshipChange(RelationshipChangeType.Creation);
+        const relationship = TestObjectFactory.createPendingRelationship();
+        params.responseSource ??= relationship;
         params.response ??= TestObjectFactory.createResponse();
 
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = relationship;
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.createAndCompleteFromRelationshipTemplateResponse(
             params as ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters
         );
@@ -641,7 +661,7 @@ export class RequestsWhen {
                 onExistingRelationship: TestObjectFactory.createRequestWithOneItem()
             })
         );
-        params.responseSource ??= TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("id1"), CoreId.from("REQ1"));
+        params.responseSource ??= TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("did:e:a-domain:dids:anidentity"), CoreId.from("REQ1"));
         params.response ??= TestObjectFactory.createResponse();
 
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.createAndCompleteFromRelationshipTemplateResponse(
@@ -700,7 +720,6 @@ export class RequestsWhen {
             content: {
                 items: [
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             DeleteAttributeRequestItem.from({
                                 attributeId: sOwnSharedIdentityAttribute1.id.toString(),
@@ -900,7 +919,7 @@ export class RequestsWhen {
                     })
                 ]
             },
-            peer: CoreAddress.from("id1")
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
         };
 
         this.context.actionToTry = async () => {
@@ -912,7 +931,7 @@ export class RequestsWhen {
 
     public iTryToCreateAnOutgoingRequestWithoutContent(): Promise<void> {
         const paramsWithoutItems: Omit<ICreateOutgoingRequestParameters, "content"> = {
-            peer: CoreAddress.from("id1")
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
         };
 
         this.context.actionToTry = async () => {

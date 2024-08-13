@@ -5,5 +5,6 @@ export * from "./MessageReceivedExternalEventProcessor";
 export * from "./PeerDeletedEventProcessor";
 export * from "./PeerDeletionCancelledEventProcessor";
 export * from "./PeerToBeDeletedEventProcessor";
-export * from "./RelationshipChangeCompletedExternalEventProcessor";
-export * from "./RelationshipChangeCreatedExternalEventProcessor";
+export * from "./RelationshipReactivationCompletedExternalEventProcessor";
+export * from "./RelationshipReactivationRequestedExternalEventProcessor";
+export * from "./RelationshipStatusChangedExternalEventProcessor";

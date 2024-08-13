@@ -88,7 +88,9 @@ export class Device extends CoreSynchronizable implements IDevice {
     @serialize()
     public lastLoginAt?: CoreDate;
 
-    @validate()
+    @validate({
+        customValidator: (v) => (!Object.values(DeviceType).includes(v) ? `must be one of: ${Object.values(DeviceType)}` : undefined)
+    })
     @serialize()
     public type: DeviceType;
 

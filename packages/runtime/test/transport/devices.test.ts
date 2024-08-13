@@ -1,3 +1,4 @@
+import { LanguageISO639 } from "@nmshd/content";
 import { DeviceMapper, TransportServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
@@ -18,5 +19,15 @@ describe("Devices", () => {
 
         const sharedSecret = DeviceMapper.toDeviceSharedSecret(onboardingInfo);
         expect(sharedSecret).toBeDefined();
+    });
+
+    test("should set the communication language", async () => {
+        const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: LanguageISO639.fr });
+        expect(result).toBeSuccessful();
+    });
+
+    test("should not set the communication language with an invalid language", async () => {
+        const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: "fra" as any as LanguageISO639 });
+        expect(result).toBeAnError("communicationLanguage must be equal to one of the allowed values", "error.runtime.validation.invalidPropertyValue");
     });
 });

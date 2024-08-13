@@ -1,16 +1,16 @@
 import { ConsentRequestItemJSON } from "@nmshd/content";
-import { CoreDate, CoreId } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/transport";
 import { GetMessagesQuery, MessageReceivedEvent, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
 import {
+    QueryParamConditions,
+    RuntimeServiceProvider,
+    TestRuntimeServices,
     ensureActiveRelationship,
     establishRelationship,
     exchangeMessage,
     exchangeMessageWithAttachment,
-    QueryParamConditions,
-    RuntimeServiceProvider,
     sendMessage,
     syncUntilHasMessage,
-    TestRuntimeServices,
     uploadFile
 } from "../lib";
 
@@ -139,6 +139,7 @@ describe("Message errors", () => {
         });
         requestId = createRequestResult.value.id;
     });
+
     test("should throw correct error for empty 'to' in the Message", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
@@ -164,6 +165,14 @@ describe("Message errors", () => {
         expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
     });
 
+    test("should throw correct error for false content type", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {}
+        });
+        expect(result).toBeAnError("The content of a Message", "error.runtime.validation.invalidPropertyValue");
+    });
+
     test("should throw correct error for missing Request ID in a Message with Request content", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
@@ -180,7 +189,7 @@ describe("Message errors", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Request",
-                id: CoreId.from("REQxxxxxxxxxxxxxxxxx"),
+                id: "REQxxxxxxxxxxxxxxxxx",
                 items: [requestItem]
             }
         });
@@ -298,7 +307,7 @@ describe("Message query", () => {
             .addStringSet("recipients.relationshipId")
             .addSingleCondition({
                 key: "participant",
-                value: [updatedMessage.createdBy, "id111111111111111111111111111111111"],
+                value: [updatedMessage.createdBy, "did:e:a-domain:dids:0000000000000000000000"],
                 expectedResult: true
             });
 
@@ -319,14 +328,8 @@ describe("Message query", () => {
         const relationshipToRecipient1 = await client1.transport.relationships.getRelationshipByAddress({ address: addressRecipient1 });
         const relationshipToRecipient2 = await client1.transport.relationships.getRelationshipByAddress({ address: addressRecipient2 });
 
-        await client1.transport.messages.sendMessage({
-            content: {},
-            recipients: [addressRecipient1]
-        });
-        await client1.transport.messages.sendMessage({
-            content: {},
-            recipients: [addressRecipient2]
-        });
+        await sendMessage(client1.transport, addressRecipient1);
+        await sendMessage(client1.transport, addressRecipient2);
 
         const messagesToRecipient1 = await client1.transport.messages.getMessages({ query: { "recipients.relationshipId": relationshipToRecipient1.value.id } });
         const messagesToRecipient2 = await client1.transport.messages.getMessages({ query: { "recipients.relationshipId": relationshipToRecipient2.value.id } });
