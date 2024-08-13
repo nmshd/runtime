@@ -223,6 +223,44 @@ describe("RequestModule", () => {
                 (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
             );
         });
+
+        test("triggers RelationshipTemplateProcessedEvent if a terminated Relationship exists", async () => {
+            await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
+            const relationshipId = (
+                await rRuntimeServices.transport.relationships.getRelationships({ query: { peer: sRuntimeServices.address, status: RelationshipStatus.Active } })
+            ).value[0].id;
+
+            await rRuntimeServices.transport.relationships.terminateRelationship({ relationshipId });
+
+            rRuntimeServices.eventBus.reset();
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
+            );
+        });
+
+        test("triggers RelationshipTemplateProcessedEvent if a Relationship whose deletion is proposed exists", async () => {
+            await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
+            const relationshipId = (
+                await rRuntimeServices.transport.relationships.getRelationships({ query: { peer: sRuntimeServices.address, status: RelationshipStatus.Active } })
+            ).value[0].id;
+
+            await rRuntimeServices.transport.relationships.terminateRelationship({ relationshipId });
+            await syncUntilHasRelationships(sRuntimeServices.transport, 1);
+
+            await sRuntimeServices.transport.relationships.decomposeRelationship({ relationshipId });
+            await syncUntilHasRelationships(rRuntimeServices.transport, 1);
+
+            rRuntimeServices.eventBus.reset();
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
+            );
+        });
     });
 
     describe("Relationships / RelationshipTemplates (onExistingRelationship)", () => {
