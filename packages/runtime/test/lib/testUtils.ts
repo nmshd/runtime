@@ -1,4 +1,4 @@
-import { EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { Event, EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     ConsumptionIds,
@@ -130,6 +130,32 @@ export async function syncUntilHasMessageWithNotification(transportServices: Tra
 
 export async function syncUntilHasIdentityDeletionProcess(transportServices: TransportServices, identityDeletionProcessId: string | CoreId): Promise<IdentityDeletionProcessDTO> {
     return await syncUntilHas(transportServices, "identityDeletionProcesses", (m) => m.id === identityDeletionProcessId.toString());
+}
+
+export async function resetEventBusAndSyncUntilHasEvent<TEvent extends Event>(
+    runtimeServices: TestRuntimeServices,
+    subscriptionTarget: SubscriptionTarget<TEvent> & { namespace: string },
+    predicate?: (event: TEvent) => boolean
+): Promise<Event> {
+    runtimeServices.eventBus.reset();
+
+    let iterationNumber = 0;
+    let event: Event | undefined;
+    do {
+        await sleep(iterationNumber * 25);
+
+        await runtimeServices.transport.account.syncEverything();
+        event = runtimeServices.eventBus.publishedEvents.find(
+            (e) =>
+                e.namespace === subscriptionTarget.namespace &&
+                (typeof subscriptionTarget === "string" || e instanceof subscriptionTarget) &&
+                (!predicate || predicate(e as TEvent))
+        ) as TEvent | undefined;
+
+        iterationNumber++;
+    } while (!event && iterationNumber < 15);
+    if (!event) throw new Error("syncUntil timed out.");
+    return event;
 }
 
 export async function uploadOwnToken(transportServices: TransportServices): Promise<TokenDTO> {
