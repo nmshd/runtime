@@ -585,7 +585,7 @@ describe("IncomingRequestsController", function () {
         test("returns 'error' on relationship whose deletion is proposed", async function () {
             await Given.aDeletionProposedRelationshipToIdentity();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
-            const validationResult = await When.iCallCanAccept();
+            const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.wrongRelationshipStatus"
             });

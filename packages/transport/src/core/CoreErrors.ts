@@ -15,7 +15,10 @@ class Relationships {
     }
 
     public alreadyExists(status: RelationshipStatus) {
-        return new CoreError("error.transport.relationships.alreadyExists", `No new Relationship can be created as a Relationship in status '${status}' currently exists.`);
+        return new CoreError(
+            "error.transport.relationships.alreadyExists",
+            `No new Relationship to the peer can be created as a Relationship in status '${status}' currently exists.`
+        );
     }
 
     public notYetDecomposedByPeer() {

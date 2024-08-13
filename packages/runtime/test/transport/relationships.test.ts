@@ -91,7 +91,7 @@ describe("Create Relationship", () => {
             });
 
             expect(result).toBeAnError(
-                `No new Relationship can be created as a Relationship in status '${RelationshipStatus.Pending}' currently exists.`,
+                `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Pending}' currently exists.`,
                 "error.transport.relationships.alreadyExists"
             );
         });
@@ -153,7 +153,7 @@ describe("Relationship status validations on active relationship", () => {
         });
 
         expect(result).toBeAnError(
-            `No new Relationship can be created as a Relationship in status '${RelationshipStatus.Active}' currently exists.`,
+            `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Active}' currently exists.`,
             "error.transport.relationships.alreadyExists"
         );
     });
@@ -538,7 +538,7 @@ describe("RelationshipTermination", () => {
             });
 
             expect(result).toBeAnError(
-                `No new Relationship can be created as a Relationship in status '${RelationshipStatus.Terminated}' currently exists.`,
+                `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Terminated}' currently exists.`,
                 "error.transport.relationships.alreadyExists"
             );
         });
@@ -848,7 +848,7 @@ describe("RelationshipDecomposition", () => {
         });
 
         expect(result).toBeAnError(
-            `No new Relationship can be created as a Relationship in status '${RelationshipStatus.DeletionProposed}' currently exists.`,
+            `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.DeletionProposed}' currently exists.`,
             "error.transport.relationships.alreadyExists"
         );
     });

@@ -53,7 +53,7 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.Pending,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-01T00:00:00.000Z"),
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
@@ -128,7 +128,7 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.Terminated,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-03T00:00:00.000Z"),
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
@@ -179,7 +179,7 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.DeletionProposed,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-04T00:00:00.000Z"),
             cache:
                 properties?.cache ??
                 CachedRelationship.from({

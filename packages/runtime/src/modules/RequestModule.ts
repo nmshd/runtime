@@ -72,10 +72,10 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        const terminatedOrDeletionProposedRelationships = relationshipsToPeer.filter(
+        const terminatedOrDeletionProposedRelationship = relationshipsToPeer.filter(
             (r) => r.status === RelationshipStatus.Terminated || r.status === RelationshipStatus.DeletionProposed
         );
-        if (terminatedOrDeletionProposedRelationships.length !== 0) {
+        if (terminatedOrDeletionProposedRelationship.length !== 0) {
             this.logger.info(
                 `There is still a Relationship with status 'Terminated' or 'DeletionProposed' to the creator of the RelationshipTemplate '${template.id}'. Skipping creation of a new Request.`
             );
@@ -83,7 +83,7 @@ export class RequestModule extends RuntimeModule {
                 new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
                     template,
                     result: RelationshipTemplateProcessedResult.RelationshipExists,
-                    relationshipId: terminatedOrDeletionProposedRelationships[0].id
+                    relationshipId: terminatedOrDeletionProposedRelationship[0].id
                 })
             );
             return;
