@@ -7,23 +7,27 @@ import {
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
     RelationshipAttributeConfidentiality,
+    RelationshipAttributeJSON,
+    RelationshipTemplateContent,
+    RelationshipTemplateContentJSON,
+    RequestItemGroupJSON,
     Surname
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/transport";
 import {
     IncomingRequestStatusChangedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     PeerRelationshipTemplateDVO,
-    PeerRelationshipTemplateLoadedEvent,
     RelationshipTemplateDTO,
     RequestItemGroupDVO
 } from "../../src";
-import { createTemplate, RuntimeServiceProvider, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
+import { RuntimeServiceProvider, TestRuntimeServices, createTemplate, syncUntilHasRelationships } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
 let requestor: TestRuntimeServices;
-let templatorTemplate: RelationshipTemplateDTO;
+let templatorTemplate: RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
+let templateId: string;
 let responseItems: DecideRequestItemGroupParametersJSON[];
 
 beforeAll(async () => {
@@ -41,36 +45,34 @@ beforeEach(function () {
 
 describe("RelationshipTemplateDVO", () => {
     beforeAll(async () => {
-        const relationshipAttributeContent1 = {
+        const relationshipAttributeContent1: RelationshipAttributeJSON = {
             "@type": "RelationshipAttribute",
             owner: templator.address,
             value: {
                 "@type": "ProprietaryString",
-                title: "aTitle",
-                value: "aProprietaryStringValue"
+                title: "ATitle",
+                value: "AProprietaryStringValue"
             },
             key: "givenName",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-        const relationshipAttributeContent2 = {
+        const relationshipAttributeContent2: RelationshipAttributeJSON = {
             "@type": "RelationshipAttribute",
             owner: templator.address,
             value: {
                 "@type": "ProprietaryString",
-                title: "aTitle",
-                value: "aProprietaryStringValue"
+                title: "ATitle",
+                value: "AProprietaryStringValue"
             },
             key: "surname",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-        const templateContent = {
-            "@type": "RelationshipTemplateContent",
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
                     {
                         "@type": "RequestItemGroup",
-                        mustBeAccepted: true,
                         title: "Templator Attributes",
                         items: [
                             {
@@ -87,7 +89,6 @@ describe("RelationshipTemplateDVO", () => {
                     },
                     {
                         "@type": "RequestItemGroup",
-                        mustBeAccepted: true,
                         title: "Proposed Attributes",
                         items: [
                             ProposeAttributeRequestItem.from({
@@ -99,7 +100,7 @@ describe("RelationshipTemplateDVO", () => {
                                     owner: CoreAddress.from(""),
                                     value: GivenName.from("Theo")
                                 })
-                            }),
+                            }).toJSON(),
                             ProposeAttributeRequestItem.from({
                                 mustBeAccepted: true,
                                 query: IdentityAttributeQuery.from({
@@ -109,17 +110,17 @@ describe("RelationshipTemplateDVO", () => {
                                     owner: CoreAddress.from(""),
                                     value: Surname.from("Templator")
                                 })
-                            })
+                            }).toJSON()
                         ]
                     }
                 ]
             }
-        };
+        }).toJSON();
         const newIdentityAttribute1 = IdentityAttribute.from(
-            (templateContent.onNewRelationship.items[1].items[0] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
+            ((templateContent.onNewRelationship.items[1] as RequestItemGroupJSON).items[0] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
         ).toJSON();
         const newIdentityAttribute2 = IdentityAttribute.from(
-            (templateContent.onNewRelationship.items[1].items[1] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
+            ((templateContent.onNewRelationship.items[1] as RequestItemGroupJSON).items[1] as ProposeAttributeRequestItemJSON).attribute as IdentityAttributeJSON
         ).toJSON();
         responseItems = [
             { items: [{ accept: true }, { accept: true }] },
@@ -140,7 +141,8 @@ describe("RelationshipTemplateDVO", () => {
                 ]
             }
         ];
-        templatorTemplate = await createTemplate(templator.transport, templateContent);
+        templatorTemplate = (await createTemplate(templator.transport, templateContent)) as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
+        templateId = templatorTemplate.id;
     });
 
     test("TemplateDVO for templator", async () => {
@@ -174,7 +176,9 @@ describe("RelationshipTemplateDVO", () => {
     });
 
     test("TemplateDVO for requestor", async () => {
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference }))
+            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
+        await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
         const dto = requestorTemplate;
         const dvo = (await requestor.expander.expandRelationshipTemplateDTO(dto)) as PeerRelationshipTemplateDVO;
@@ -206,13 +210,21 @@ describe("RelationshipTemplateDVO", () => {
     });
 
     test("RequestDVO for requestor", async () => {
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
-        await requestor.eventBus.waitForEvent(PeerRelationshipTemplateLoadedEvent);
-        const requestResult = await requestor.consumption.incomingRequests.getRequests({
+        let requestResult;
+        requestResult = await requestor.consumption.incomingRequests.getRequests({
             query: {
-                "source.reference": requestorTemplate.id
+                "source.reference": templateId
             }
         });
+        await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference });
+        if (requestResult.value.length === 0) {
+            await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            requestResult = await requestor.consumption.incomingRequests.getRequests({
+                query: {
+                    "source.reference": templateId
+                }
+            });
+        }
         expect(requestResult).toBeSuccessful();
         expect(requestResult.value).toHaveLength(1);
 
@@ -232,17 +244,18 @@ describe("RelationshipTemplateDVO", () => {
         let dto;
         let dvo;
         let requestResult;
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
         requestResult = await requestor.consumption.incomingRequests.getRequests({
             query: {
-                "source.reference": requestorTemplate.id
+                "source.reference": templateId
             }
         });
+        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference }))
+            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         if (requestResult.value.length === 0) {
             await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             requestResult = await requestor.consumption.incomingRequests.getRequests({
                 query: {
-                    "source.reference": requestorTemplate.id
+                    "source.reference": templateId
                 }
             });
         }
@@ -253,7 +266,7 @@ describe("RelationshipTemplateDVO", () => {
 
         const requestResultAfterAcceptance = await requestor.consumption.incomingRequests.getRequests({
             query: {
-                "source.reference": requestorTemplate.id
+                "source.reference": templateId
             }
         });
         expect(acceptResult).toBeSuccessful();
@@ -323,10 +336,10 @@ describe("RelationshipTemplateDVO", () => {
         expect(attributeResult.value).toHaveLength(4);
 
         await syncUntilHasRelationships(templator.transport);
-        await templator.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent);
+        await templator.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent);
         const requestResultTemplator = await templator.consumption.outgoingRequests.getRequests({
             query: {
-                "source.reference": requestorTemplate.id
+                "source.reference": templateId
             }
         });
         expect(requestResultTemplator).toBeSuccessful();

@@ -35,7 +35,7 @@ describe("SyncController.error", function () {
 
         await requestorDevice.relationships.sendRelationship({
             template: templateOnRequestorDevice,
-            content: { someMessageContent: "someMessageContent" }
+            creationContent: { someMessageContent: "someMessageContent" }
         });
 
         const error = await TestUtil.syncUntilHasError(templatorDevice2);

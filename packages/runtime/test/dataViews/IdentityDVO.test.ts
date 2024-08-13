@@ -1,6 +1,13 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { ShareAttributeRequestItemJSON } from "@nmshd/content";
-import { IncomingRequestStatusChangedEvent, LocalRequestDTO, PeerRelationshipTemplateDVO, RelationshipTemplateDTO } from "../../src";
+import { RelationshipTemplateContentJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
+import {
+    AttributeDeletedEvent,
+    IncomingRequestStatusChangedEvent,
+    LocalRequestDTO,
+    PeerRelationshipTemplateDVO,
+    RelationshipChangedEvent,
+    RelationshipTemplateDTO
+} from "../../src";
 import { createTemplate, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -29,7 +36,7 @@ describe("IdentityDVO after loading a relationship template sharing a DisplayNam
             }
         });
 
-        const templateContent = {
+        const templateContent: RelationshipTemplateContentJSON = {
             "@type": "RelationshipTemplateContent",
             onNewRelationship: {
                 "@type": "Request",
@@ -57,6 +64,25 @@ describe("IdentityDVO after loading a relationship template sharing a DisplayNam
     });
 
     test("IdentityDVO should use the DisplayName when expanding a request", async () => {
+        const dvo = await requestor.expander.expandLocalRequestDTO(request);
+        expect(dvo).toBeDefined();
+        expect(dvo.createdBy.name).toBe("A Display Name");
+        expect(dvo.createdBy.initials).toBe("ADN");
+
+        expect(dvo.peer.name).toBe("A Display Name");
+        expect(dvo.peer.initials).toBe("ADN");
+    });
+
+    test("IdentityDVO should use the DisplayName if a revoked relationship exists", async () => {
+        await requestor.consumption.incomingRequests.accept({ requestId: request.id, items: [{ accept: true }] });
+        const relationshipId = (await requestor.eventBus.waitForEvent(RelationshipChangedEvent)).data.id;
+        await requestor.transport.relationships.revokeRelationship({ relationshipId });
+        await requestor.eventBus.waitForEvent(AttributeDeletedEvent);
+
+        requestor.eventBus.reset();
+        requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+
         const dvo = await requestor.expander.expandLocalRequestDTO(request);
         expect(dvo).toBeDefined();
         expect(dvo.createdBy.name).toBe("A Display Name");

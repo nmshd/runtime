@@ -6,7 +6,6 @@ import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { Realm } from "../modules/accounts/data/Realm";
 import { CoreErrors } from "./CoreErrors";
 import { TransportError } from "./TransportError";
 import { TransportLoggerFactory } from "./TransportLoggerFactory";
@@ -27,7 +26,7 @@ export interface IConfig {
     platformMaxUnencryptedFileSize: number;
     platformAdditionalHeaders?: Record<string, string>;
     baseUrl: string;
-    realm: Realm;
+    addressGenerationHostnameOverride?: string;
     datawalletEnabled: boolean;
     httpAgentOptions: AgentOptions;
     httpsAgentOptions: HTTPSAgentOptions;
@@ -46,7 +45,7 @@ export interface IConfigOverwrite {
     platformMaxUnencryptedFileSize?: number;
     platformAdditionalHeaders?: Record<string, string>;
     baseUrl: string;
-    realm?: Realm;
+    addressGenerationHostnameOverride?: string;
     datawalletEnabled?: boolean;
     httpAgentOptions?: AgentOptions;
     httpsAgentOptions?: HTTPSAgentOptions;
@@ -73,7 +72,6 @@ export class Transport {
         platformMaxRedirects: 10,
         platformMaxUnencryptedFileSize: 10 * 1024 * 1024,
         baseUrl: "",
-        realm: Realm.Prod,
         datawalletEnabled: false,
         httpAgentOptions: {
             keepAlive: true,
@@ -115,10 +113,6 @@ export class Transport {
 
         if (this._config.supportedIdentityVersion < 1) {
             throw new TransportError("The given supported identity version is invalid. The value must be 1 or higher.");
-        }
-
-        if (this._config.realm.length !== 3) {
-            throw CoreErrors.general.realmLength();
         }
     }
 

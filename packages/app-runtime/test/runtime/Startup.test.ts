@@ -1,4 +1,3 @@
-import { Realm } from "@nmshd/transport";
 import { AppRuntime, LocalAccountDTO } from "../../src";
 import { EventListener, TestUtil } from "../lib";
 
@@ -54,7 +53,7 @@ describe("Runtime Startup", function () {
     });
 
     test("should create an account", async function () {
-        localAccount = await runtime.accountServices.createAccount(Realm.Prod, "Profil 1");
+        localAccount = await runtime.accountServices.createAccount("Profil 1");
 
         expect(localAccount).toBeDefined();
     });

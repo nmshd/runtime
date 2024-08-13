@@ -71,6 +71,29 @@ export const GetAttributeListenerRequest: any = {
     }
 }
 
+export const ChangeDefaultRepositoryAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ChangeDefaultRepositoryAttributeRequest",
+    "definitions": {
+        "ChangeDefaultRepositoryAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const AcceptIncomingRequestRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/AcceptIncomingRequestRequest",
@@ -241,10 +264,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string",
                     "description": "The human-readable description of this group."
                 },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not."
-                },
                 "metadata": {
                     "type": "object",
                     "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
@@ -259,11 +278,10 @@ export const CanCreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "items",
-                "mustBeAccepted"
+                "items"
             ],
             "additionalProperties": false,
-            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to\n* make sure that the items in the group can only be accepted together\n\n  Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single   Request where the latter one targets an attribute created by the first one, it it should be impossible to   reject the first item, while accepting the second one.\n* visually group items on the UI and give the a common title/description"
+            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to visually group RequestItems on the UI and give them a common `title` or `description`."
         },
         "RequestItemJSONDerivations": {
             "anyOf": [
@@ -321,11 +339,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -361,11 +379,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2322,11 +2340,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2366,11 +2384,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2421,11 +2439,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2709,11 +2727,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2806,11 +2824,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2853,11 +2871,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2893,11 +2911,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2937,11 +2955,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -2967,7 +2985,7 @@ export const CanCreateOutgoingRequestRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -3101,7 +3119,7 @@ export const CompleteIncomingRequestRequest: any = {
                             "$ref": "#/definitions/MessageIdString"
                         },
                         {
-                            "$ref": "#/definitions/RelationshipChangeIdString"
+                            "$ref": "#/definitions/RelationshipIdString"
                         }
                     ]
                 }
@@ -3119,9 +3137,9 @@ export const CompleteIncomingRequestRequest: any = {
             "type": "string",
             "pattern": "MSG[A-Za-z0-9]{17}"
         },
-        "RelationshipChangeIdString": {
+        "RelationshipIdString": {
             "type": "string",
-            "pattern": "RCH[A-Za-z0-9]{17}"
+            "pattern": "REL[A-Za-z0-9]{17}"
         }
     }
 }
@@ -5546,7 +5564,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "responseSourceId": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/RelationshipChangeIdString"
+                            "$ref": "#/definitions/RelationshipIdString"
                         },
                         {
                             "$ref": "#/definitions/MessageIdString"
@@ -5568,9 +5586,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "type": "string",
             "pattern": "RLT[A-Za-z0-9]{17}"
         },
-        "RelationshipChangeIdString": {
+        "RelationshipIdString": {
             "type": "string",
-            "pattern": "RCH[A-Za-z0-9]{17}"
+            "pattern": "REL[A-Za-z0-9]{17}"
         },
         "MessageIdString": {
             "type": "string",
@@ -8040,10 +8058,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string",
                     "description": "The human-readable description of this group."
                 },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not."
-                },
                 "metadata": {
                     "type": "object",
                     "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
@@ -8058,11 +8072,10 @@ export const CreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "items",
-                "mustBeAccepted"
+                "items"
             ],
             "additionalProperties": false,
-            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to\n* make sure that the items in the group can only be accepted together\n\n  Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single   Request where the latter one targets an attribute created by the first one, it it should be impossible to   reject the first item, while accepting the second one.\n* visually group items on the UI and give the a common title/description"
+            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to visually group RequestItems on the UI and give them a common `title` or `description`."
         },
         "RequestItemJSONDerivations": {
             "anyOf": [
@@ -8120,11 +8133,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -8160,11 +8173,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10121,11 +10134,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10165,11 +10178,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10220,11 +10233,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10508,11 +10521,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10605,11 +10618,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10652,11 +10665,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10692,11 +10705,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10736,11 +10749,11 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -10766,7 +10779,7 @@ export const CreateOutgoingRequestRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -11350,10 +11363,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string",
                     "description": "The human-readable description of this group."
                 },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not."
-                },
                 "metadata": {
                     "type": "object",
                     "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
@@ -11368,11 +11377,10 @@ export const ReceivedIncomingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "items",
-                "mustBeAccepted"
+                "items"
             ],
             "additionalProperties": false,
-            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to\n* make sure that the items in the group can only be accepted together\n\n  Example: when sending a `CreateRelationshipAttributeRequestItem` **and** a `ShareAttributeRequestItem` in a single   Request where the latter one targets an attribute created by the first one, it it should be impossible to   reject the first item, while accepting the second one.\n* visually group items on the UI and give the a common title/description"
+            "description": "A RequestItemGroup can be used to group one or more RequestItems. This is useful if you want to visually group RequestItems on the UI and give them a common `title` or `description`."
         },
         "RequestItemJSONDerivations": {
             "anyOf": [
@@ -11430,11 +11438,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -11470,11 +11478,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13431,11 +13439,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13475,11 +13483,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13530,11 +13538,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13818,11 +13826,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13915,11 +13923,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -13962,11 +13970,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -14002,11 +14010,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -14046,11 +14054,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "metadata": {
                     "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this group if he wants to accept the Request. If set to `false`, the recipient can decide whether he wants to accept it or not.\n\nCaution: this setting does not take effect in case it is inside of a  {@link  RequestItemGroupJSON RequestItemGroup } , which is not accepted by the recipient, since a  {@link  RequestItemJSON RequestItem }  can only be accepted if the parent group is accepted as well."
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
@@ -14851,7 +14859,7 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -16174,6 +16182,29 @@ export const DeleteRepositoryAttributeRequest: any = {
     }
 }
 
+export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest",
+    "definitions": {
+        "DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest",
@@ -16197,15 +16228,37 @@ export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any
     }
 }
 
-export const ExecuteIdentityAttributeQueryRequest: any = {
+export const ExecuteIQLQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",
+    "$ref": "#/definitions/ExecuteIQLQueryRequest",
     "definitions": {
-        "ExecuteIdentityAttributeQueryRequest": {
+        "ExecuteIQLQueryRequest": {
             "type": "object",
             "properties": {
                 "query": {
-                    "$ref": "#/definitions/IdentityAttributeQueryJSON"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "@type": {
+                            "type": "string",
+                            "const": "IQLQuery"
+                        },
+                        "queryString": {
+                            "type": "string"
+                        },
+                        "attributeCreationHints": {
+                            "$ref": "#/definitions/IQLQueryCreationHintsJSON"
+                        },
+                        "@context": {
+                            "type": "string"
+                        },
+                        "@version": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "queryString"
+                    ]
                 }
             },
             "required": [
@@ -16213,19 +16266,9 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
             ],
             "additionalProperties": false
         },
-        "IdentityAttributeQueryJSON": {
+        "IQLQueryCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttributeQuery"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
@@ -16234,16 +16277,9 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
-                "@type",
                 "valueType"
             ],
             "additionalProperties": false
@@ -16313,37 +16349,15 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
     }
 }
 
-export const ExecuteIQLQueryRequest: any = {
+export const ExecuteIdentityAttributeQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ExecuteIQLQueryRequest",
+    "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",
     "definitions": {
-        "ExecuteIQLQueryRequest": {
+        "ExecuteIdentityAttributeQueryRequest": {
             "type": "object",
             "properties": {
                 "query": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "@type": {
-                            "type": "string",
-                            "const": "IQLQuery"
-                        },
-                        "queryString": {
-                            "type": "string"
-                        },
-                        "attributeCreationHints": {
-                            "$ref": "#/definitions/IQLQueryCreationHintsJSON"
-                        },
-                        "@context": {
-                            "type": "string"
-                        },
-                        "@version": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "queryString"
-                    ]
+                    "$ref": "#/definitions/IdentityAttributeQueryJSON"
                 }
             },
             "required": [
@@ -16351,9 +16365,19 @@ export const ExecuteIQLQueryRequest: any = {
             ],
             "additionalProperties": false
         },
-        "IQLQueryCreationHintsJSON": {
+        "IdentityAttributeQueryJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttributeQuery"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
@@ -16362,9 +16386,16 @@ export const ExecuteIQLQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
+                },
+                "validFrom": {
+                    "type": "string"
+                },
+                "validTo": {
+                    "type": "string"
                 }
             },
             "required": [
+                "@type",
                 "valueType"
             ],
             "additionalProperties": false
@@ -16721,6 +16752,45 @@ export const GetAttributesRequest: any = {
                     "type": "string"
                 },
                 "parentId": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "succeeds": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "succeededBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "isDefault": {
                     "type": "string"
                 },
                 "content.@type": {
@@ -16802,17 +16872,7 @@ export const GetAttributesRequest: any = {
                     ]
                 },
                 "content.isTechnical": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
+                    "type": "string"
                 },
                 "content.confidentiality": {
                     "anyOf": [
@@ -16828,32 +16888,6 @@ export const GetAttributesRequest: any = {
                     ]
                 },
                 "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "succeeds": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "succeededBy": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17007,7 +17041,7 @@ export const GetOwnSharedAttributesRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         },
         "GetOwnSharedAttributeRequestQuery": {
             "type": "object",
@@ -17081,17 +17115,7 @@ export const GetOwnSharedAttributesRequest: any = {
                     ]
                 },
                 "content.isTechnical": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
+                    "type": "string"
                 },
                 "content.confidentiality": {
                     "anyOf": [
@@ -17247,7 +17271,7 @@ export const GetPeerSharedAttributesRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         },
         "GetPeerSharedAttributesRequestQuery": {
             "type": "object",
@@ -17321,17 +17345,7 @@ export const GetPeerSharedAttributesRequest: any = {
                     ]
                 },
                 "content.isTechnical": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
+                    "type": "string"
                 },
                 "content.confidentiality": {
                     "anyOf": [
@@ -17466,6 +17480,9 @@ export const GetRepositoryAttributesRequest: any = {
                 "createdAt": {
                     "type": "string"
                 },
+                "isDefault": {
+                    "type": "string"
+                },
                 "content.tags": {
                     "anyOf": [
                         {
@@ -17556,44 +17573,7 @@ export const GetSharedVersionsOfAttributeRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
-        }
-    }
-}
-
-export const GetSharedVersionsOfRepositoryAttributeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetSharedVersionsOfRepositoryAttributeRequest",
-    "definitions": {
-        "GetSharedVersionsOfRepositoryAttributeRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                },
-                "peers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/AddressString"
-                    }
-                },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -17647,7 +17627,7 @@ export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -17714,7 +17694,7 @@ export const ShareRepositoryAttributeRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         },
         "ISO8601DateTimeString": {
             "type": "string",
@@ -20379,17 +20359,6 @@ export const RegisterPushNotificationTokenRequest: any = {
     }
 }
 
-export const SyncDatawalletRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SyncDatawalletRequest",
-    "definitions": {
-        "SyncDatawalletRequest": {
-            "type": "object",
-            "additionalProperties": false
-        }
-    }
-}
-
 export const GetIdentityDeletionProcessRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetIdentityDeletionProcessRequest",
@@ -20440,17 +20409,6 @@ export const DownloadAttachmentRequest: any = {
         "FileIdString": {
             "type": "string",
             "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const SyncEverythingRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SyncEverythingRequest",
-    "definitions": {
-        "SyncEverythingRequest": {
-            "type": "object",
-            "additionalProperties": false
         }
     }
 }
@@ -20806,6 +20764,213 @@ export const GetDeviceOnboardingInfoRequest: any = {
         "GenericIdString": {
             "type": "string",
             "pattern": "[A-Za-z0-9]{20}"
+        }
+    }
+}
+
+export const SetCommunicationLanguageRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SetCommunicationLanguageRequest",
+    "definitions": {
+        "SetCommunicationLanguageRequest": {
+            "type": "object",
+            "properties": {
+                "communicationLanguage": {
+                    "$ref": "#/definitions/LanguageISO639"
+                }
+            },
+            "required": [
+                "communicationLanguage"
+            ],
+            "additionalProperties": false
+        },
+        "LanguageISO639": {
+            "type": "string",
+            "enum": [
+                "aa",
+                "ab",
+                "ae",
+                "af",
+                "ak",
+                "am",
+                "an",
+                "ar",
+                "as",
+                "av",
+                "ay",
+                "az",
+                "ba",
+                "be",
+                "bg",
+                "bi",
+                "bm",
+                "bn",
+                "bo",
+                "br",
+                "bs",
+                "ca",
+                "ce",
+                "ch",
+                "co",
+                "cr",
+                "cs",
+                "cu",
+                "cv",
+                "cy",
+                "da",
+                "de",
+                "dv",
+                "dz",
+                "ee",
+                "el",
+                "en",
+                "eo",
+                "es",
+                "et",
+                "eu",
+                "fa",
+                "ff",
+                "fi",
+                "fj",
+                "fo",
+                "fr",
+                "fy",
+                "ga",
+                "gd",
+                "gl",
+                "gn",
+                "gu",
+                "gv",
+                "ha",
+                "he",
+                "hi",
+                "ho",
+                "hr",
+                "ht",
+                "hu",
+                "hy",
+                "hz",
+                "ia",
+                "id",
+                "ie",
+                "ig",
+                "ii",
+                "ik",
+                "io",
+                "is",
+                "it",
+                "iu",
+                "ja",
+                "jv",
+                "ka",
+                "kg",
+                "ki",
+                "kj",
+                "kk",
+                "kl",
+                "km",
+                "kn",
+                "ko",
+                "kr",
+                "ks",
+                "ku",
+                "kv",
+                "kw",
+                "ky",
+                "la",
+                "lb",
+                "lg",
+                "li",
+                "ln",
+                "lo",
+                "lt",
+                "lu",
+                "lv",
+                "mg",
+                "mh",
+                "mi",
+                "mk",
+                "ml",
+                "mn",
+                "mr",
+                "ms",
+                "mt",
+                "my",
+                "na",
+                "nb",
+                "nd",
+                "ne",
+                "ng",
+                "nl",
+                "nn",
+                "no",
+                "nr",
+                "nv",
+                "ny",
+                "oc",
+                "oj",
+                "om",
+                "or",
+                "os",
+                "pa",
+                "pi",
+                "pl",
+                "ps",
+                "pt",
+                "qu",
+                "rm",
+                "rn",
+                "ro",
+                "ru",
+                "rw",
+                "sa",
+                "sc",
+                "sd",
+                "se",
+                "sg",
+                "si",
+                "sk",
+                "sl",
+                "sm",
+                "sn",
+                "so",
+                "sq",
+                "sr",
+                "ss",
+                "st",
+                "su",
+                "sv",
+                "sw",
+                "ta",
+                "te",
+                "tg",
+                "th",
+                "ti",
+                "tk",
+                "tl",
+                "tn",
+                "to",
+                "tr",
+                "ts",
+                "tt",
+                "tw",
+                "ty",
+                "ug",
+                "uk",
+                "ur",
+                "uz",
+                "ve",
+                "vi",
+                "vo",
+                "wa",
+                "wo",
+                "xh",
+                "yi",
+                "yo",
+                "za",
+                "zh",
+                "zu"
+            ]
         }
     }
 }
@@ -21361,29 +21526,6 @@ export const UploadOwnFileValidatableRequest: any = {
     }
 }
 
-export const CheckIdentityRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CheckIdentityRequest",
-    "definitions": {
-        "CheckIdentityRequest": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "$ref": "#/definitions/AddressString"
-                }
-            },
-            "required": [
-                "address"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
-        }
-    }
-}
-
 export const GetAttachmentMetadataRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetAttachmentMetadataRequest",
@@ -21679,272 +21821,11 @@ export const SendMessageRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         },
         "FileIdString": {
             "type": "string",
             "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const AcceptRelationshipChangeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptRelationshipChangeRequest",
-    "definitions": {
-        "AcceptRelationshipChangeRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                },
-                "changeId": {
-                    "$ref": "#/definitions/RelationshipChangeIdString"
-                },
-                "content": {}
-            },
-            "required": [
-                "relationshipId",
-                "changeId",
-                "content"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        },
-        "RelationshipChangeIdString": {
-            "type": "string",
-            "pattern": "RCH[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CreateRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateRelationshipRequest",
-    "definitions": {
-        "CreateRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "content": {}
-            },
-            "required": [
-                "templateId",
-                "content"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetAttributesForRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetAttributesForRelationshipRequest",
-    "definitions": {
-        "GetAttributesForRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                },
-                "hideTechnical": {
-                    "type": "boolean"
-                },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipRequest",
-    "definitions": {
-        "GetRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetRelationshipByAddressRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipByAddressRequest",
-    "definitions": {
-        "GetRelationshipByAddressRequest": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "$ref": "#/definitions/AddressString"
-                }
-            },
-            "required": [
-                "address"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "id1[A-Za-z0-9]{32,33}"
-        }
-    }
-}
-
-export const GetRelationshipsRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipsRequest",
-    "definitions": {
-        "GetRelationshipsRequest": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetRelationshipsQuery"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetRelationshipsQuery": {
-            "type": "object",
-            "properties": {
-                "peer": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "status": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "template.id": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const RejectRelationshipChangeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RejectRelationshipChangeRequest",
-    "definitions": {
-        "RejectRelationshipChangeRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                },
-                "changeId": {
-                    "$ref": "#/definitions/RelationshipChangeIdString"
-                },
-                "content": {}
-            },
-            "required": [
-                "relationshipId",
-                "changeId",
-                "content"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        },
-        "RelationshipChangeIdString": {
-            "type": "string",
-            "pattern": "RCH[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const RevokeRelationshipChangeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RevokeRelationshipChangeRequest",
-    "definitions": {
-        "RevokeRelationshipChangeRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                },
-                "changeId": {
-                    "$ref": "#/definitions/RelationshipChangeIdString"
-                },
-                "content": {}
-            },
-            "required": [
-                "relationshipId",
-                "changeId",
-                "content"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        },
-        "RelationshipChangeIdString": {
-            "type": "string",
-            "pattern": "RCH[A-Za-z0-9]{17}"
         }
     }
 }
@@ -22329,6 +22210,375 @@ export const LoadPeerRelationshipTemplateRequest: any = {
     }
 }
 
+export const AcceptRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptRelationshipRequest",
+    "definitions": {
+        "AcceptRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const AcceptRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptRelationshipReactivationRequest",
+    "definitions": {
+        "AcceptRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const CreateRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateRelationshipRequest",
+    "definitions": {
+        "CreateRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                },
+                "creationContent": {}
+            },
+            "required": [
+                "templateId",
+                "creationContent"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const DecomposeRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DecomposeRelationshipRequest",
+    "definitions": {
+        "DecomposeRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetAttributesForRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetAttributesForRelationshipRequest",
+    "definitions": {
+        "GetAttributesForRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                },
+                "hideTechnical": {
+                    "type": "boolean"
+                },
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipRequest",
+    "definitions": {
+        "GetRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetRelationshipByAddressRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipByAddressRequest",
+    "definitions": {
+        "GetRelationshipByAddressRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "$ref": "#/definitions/AddressString"
+                }
+            },
+            "required": [
+                "address"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const GetRelationshipsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipsRequest",
+    "definitions": {
+        "GetRelationshipsRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetRelationshipsQuery"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetRelationshipsQuery": {
+            "type": "object",
+            "properties": {
+                "peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "status": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "template.id": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const RejectRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RejectRelationshipRequest",
+    "definitions": {
+        "RejectRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RejectRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RejectRelationshipReactivationRequest",
+    "definitions": {
+        "RejectRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RequestRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RequestRelationshipReactivationRequest",
+    "definitions": {
+        "RequestRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RevokeRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RevokeRelationshipRequest",
+    "definitions": {
+        "RevokeRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RevokeRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RevokeRelationshipReactivationRequest",
+    "definitions": {
+        "RevokeRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const TerminateRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/TerminateRelationshipRequest",
+    "definitions": {
+        "TerminateRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const CreateOwnTokenRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateOwnTokenRequest",
@@ -22608,29 +22858,6 @@ export const LoadPeerTokenRequest: any = {
         "TokenIdString": {
             "type": "string",
             "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest",
-    "definitions": {
-        "DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
         }
     }
 }

@@ -12,31 +12,31 @@ import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
 import { CertificateValidator } from "../certificates/CertificateValidator";
 import { ChallengeController } from "../challenges/ChallengeController";
+import { DeviceController } from "../devices/DeviceController";
+import { DeviceSecretType } from "../devices/DeviceSecretController";
+import { DevicesController } from "../devices/DevicesController";
 import { BackbonePutDevicesPushNotificationRequest, DeviceAuthClient } from "../devices/backbone/DeviceAuthClient";
 import { DeviceClient } from "../devices/backbone/DeviceClient";
-import { DeviceController } from "../devices/DeviceController";
-import { DevicesController } from "../devices/DevicesController";
-import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { Device, DeviceInfo, DeviceType } from "../devices/local/Device";
 import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredentials";
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
-import { RelationshipsController } from "../relationships/RelationshipsController";
-import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
+import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
+import { RelationshipsController } from "../relationships/RelationshipsController";
+import { Relationship } from "../relationships/local/Relationship";
 import { SecretController } from "../secrets/SecretController";
 import { ChangedItems } from "../sync/ChangedItems";
-import { SyncProgressCallback, SyncProgressReporter } from "../sync/SyncCallback";
 import { SyncController } from "../sync/SyncController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { TokenController } from "../tokens/TokenController";
-import { IdentityClient } from "./backbone/IdentityClient";
-import { VersionClient } from "./backbone/VersionClient";
-import { Identity } from "./data/Identity";
 import { IdentityController } from "./IdentityController";
 import { IdentityDeletionProcessController } from "./IdentityDeletionProcessController";
 import { IdentityUtil } from "./IdentityUtil";
+import { IdentityClient } from "./backbone/IdentityClient";
+import { VersionClient } from "./backbone/VersionClient";
+import { Identity } from "./data/Identity";
 
 export class AccountController {
     private readonly _authenticator: AbstractAuthenticator;
@@ -228,18 +228,16 @@ export class AccountController {
         await this.syncDatawallet();
     }
 
-    public async syncDatawallet(force = false, syncProgressCallback?: SyncProgressCallback): Promise<void> {
+    public async syncDatawallet(force = false): Promise<void> {
         if (!force && !this.autoSync) {
             return;
         }
 
-        const reporter = SyncProgressReporter.fromCallback(syncProgressCallback);
-        return await this.synchronization.sync("OnlyDatawallet", reporter);
+        return await this.synchronization.sync("OnlyDatawallet");
     }
 
-    public async syncEverything(syncProgressCallback?: SyncProgressCallback): Promise<ChangedItems> {
-        const reporter = SyncProgressReporter.fromCallback(syncProgressCallback);
-        return await this.synchronization.sync("Everything", reporter);
+    public async syncEverything(): Promise<ChangedItems> {
+        return await this.synchronization.sync("Everything");
     }
 
     public async getLastCompletedSyncTime(): Promise<CoreDate | undefined> {
@@ -284,7 +282,7 @@ export class AccountController {
             CoreCrypto.generateSecretKey(),
 
             // Generate address locally
-            IdentityUtil.createAddress(identityKeypair.publicKey, this._config.realm),
+            IdentityUtil.createAddress(identityKeypair.publicKey, this._config.addressGenerationHostnameOverride ?? new URL(this._config.baseUrl).hostname),
             this.fetchDeviceInfo()
         ]);
 
@@ -300,12 +298,11 @@ export class AccountController {
         this._log.trace(`Registered identity with address ${deviceResponse.address}, device id is ${deviceResponse.device.id}.`);
 
         if (!localAddress.equals(deviceResponse.address)) {
-            throw new TransportError("The backbone address does not match the local address.");
+            throw new TransportError(`The backbone address '${deviceResponse.address}' does not match the local address '${localAddress.toString()}'.`);
         }
 
         const identity = Identity.from({
             address: CoreAddress.from(deviceResponse.address),
-            realm: this._config.realm,
             publicKey: identityKeypair.publicKey
         });
 
@@ -446,5 +443,11 @@ export class AccountController {
             return Result.fail(CoreErrors.general.runtimeVersionIncompatibleWithBackboneVersion(usedBackboneVersion));
         }
         return Result.ok(undefined);
+    }
+
+    public async cleanupDataOfDecomposedRelationship(relationship: Relationship): Promise<void> {
+        await this.messages.cleanupMessagesOfDecomposedRelationship(relationship);
+        await this.relationshipTemplates.cleanupTemplatesOfDecomposedRelationship(relationship);
+        await this.tokens.cleanupTokensOfDecomposedRelationship(relationship.peer.address);
     }
 }

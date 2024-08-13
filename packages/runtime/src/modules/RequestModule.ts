@@ -1,14 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import {
-    RelationshipCreationChangeRequestContent,
-    RelationshipCreationChangeRequestContentJSON,
-    RelationshipTemplateContentJSON,
-    RequestJSON,
-    ResponseJSON,
-    ResponseResult,
-    ResponseWrapper,
-    ResponseWrapperJSON
-} from "@nmshd/content";
+import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -47,7 +38,7 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        const body = template.content as RelationshipTemplateContentJSON;
+        const body = template.content;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
 
@@ -120,17 +111,11 @@ export class RequestModule extends RuntimeModule {
         const messageContentType = message.content["@type"];
         switch (messageContentType) {
             case "Request":
-                await this.createIncomingRequest(services, message.content as RequestJSON, message.id);
-                break;
-
-            // Handle responses directly sent via messages. This is only for backwards compatibility and
-            // not viable for responding to Requests from RelationshipTemplates' onExistingRelationship.
-            case "Response":
-                await this.completeExistingRequestWithResponseReceivedByMessage(services, message.id, message.content as ResponseJSON);
+                await this.createIncomingRequest(services, message.content, message.id);
                 break;
 
             case "ResponseWrapper":
-                const responseWrapper = message.content as ResponseWrapperJSON;
+                const responseWrapper = message.content;
 
                 if (responseWrapper.requestSourceType === "Message") {
                     await this.completeExistingRequestWithResponseReceivedByMessage(services, message.id, responseWrapper.response);
@@ -142,6 +127,8 @@ export class RequestModule extends RuntimeModule {
                     templateId: responseWrapper.requestSourceReference,
                     response: responseWrapper.response
                 });
+                break;
+            default:
                 break;
         }
 
@@ -162,7 +149,7 @@ export class RequestModule extends RuntimeModule {
         if (message.content["@type"] !== "Request") return;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
-        const request = message.content as RequestJSON;
+        const request = message.content;
 
         const requestResult = await services.consumptionServices.outgoingRequests.sent({ requestId: request.id!, messageId: message.id });
         if (requestResult.isError) {
@@ -226,8 +213,8 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        const creationChangeContent = RelationshipCreationChangeRequestContent.from({ response: request.response!.content });
-        const createRelationshipResult = await services.transportServices.relationships.createRelationship({ templateId, content: creationChangeContent });
+        const creationContent = RelationshipCreationContent.from({ response: request.response!.content }).toJSON();
+        const createRelationshipResult = await services.transportServices.relationships.createRelationship({ templateId, creationContent });
         if (createRelationshipResult.isError) {
             this.logger.error(`Could not create relationship for templateId '${templateId}'. Root error:`, createRelationshipResult.error);
             return;
@@ -236,7 +223,7 @@ export class RequestModule extends RuntimeModule {
         const requestId = request.id;
         const completeRequestResult = await services.consumptionServices.incomingRequests.complete({
             requestId,
-            responseSourceId: createRelationshipResult.value.changes[0].id
+            responseSourceId: createRelationshipResult.value.id
         });
         if (completeRequestResult.isError) {
             this.logger.error(`Could not complete the request '${requestId}'. Root error:`, completeRequestResult.error);
@@ -295,20 +282,18 @@ export class RequestModule extends RuntimeModule {
         const templateId = template.id;
         // do not trigger for templates without the correct content type
         if (template.content["@type"] !== "RelationshipTemplateContent") return;
+        if (createdRelationship.creationContent["@type"] !== "RelationshipCreationContent") {
+            this.logger.error(`The creation content of relationshipId ${createdRelationship.id} is not of type RelationshipCreationContent.`);
+            return;
+        }
 
-        const relationshipCreationChange = createdRelationship.changes[0];
-        const relationshipChangeId = relationshipCreationChange.id;
-        // do not trigger for creation changes without the correct content type
-        if (relationshipCreationChange.request.content["@type"] !== "RelationshipCreationChangeRequestContent") return;
-
-        const relationshipCreationChangeContent = relationshipCreationChange.request.content as RelationshipCreationChangeRequestContentJSON;
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,
-            responseSourceId: relationshipChangeId,
-            response: relationshipCreationChangeContent.response
+            responseSourceId: createdRelationship.id,
+            response: createdRelationship.creationContent.response
         });
         if (result.isError) {
-            this.logger.error(`Could not create and complete request for templateId '${templateId}' and changeId '${relationshipChangeId}'. Root error:`, result.error);
+            this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${createdRelationship.id}'. Root error:`, result.error);
             return;
         }
     }
