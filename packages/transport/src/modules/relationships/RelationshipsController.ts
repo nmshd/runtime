@@ -106,12 +106,11 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus, peerStatus?: PeerStatus): Promise<Relationship | undefined> {
+    public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
         const query: any = { peerAddress: address.toString() };
         if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
-        if (peerStatus) query[`${nameof<Relationship>((r) => r.peerStatus)}`] = peerStatus;
-
         const relationships = await this.relationships.find(query);
+
         if (relationships.length === 0) return undefined;
         if (relationships.length === 1) return Relationship.from(relationships[0]);
 
@@ -124,10 +123,6 @@ export class RelationshipsController extends TransportController {
 
     public async getActiveRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
         return await this.getRelationshipToIdentity(address, RelationshipStatus.Active);
-    }
-
-    public async getActiveRelationshipToActiveIdentity(address: CoreAddress): Promise<Relationship | undefined> {
-        return await this.getRelationshipToIdentity(address, RelationshipStatus.Active, PeerStatus.Active);
     }
 
     public async getRelationship(id: CoreId): Promise<Relationship | undefined> {
