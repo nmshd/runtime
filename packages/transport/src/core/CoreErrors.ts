@@ -24,7 +24,7 @@ class Relationships {
     public notYetDecomposedByPeer() {
         return new CoreError(
             "error.transport.relationships.notYetDecomposedByPeer",
-            "No new Relationship can be created as the former Relationship is not yet fully decomposed by the peer."
+            "No new Relationship can be created as the former Relationship is not yet decomposed by the peer."
         );
     }
 

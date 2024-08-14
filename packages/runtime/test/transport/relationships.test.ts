@@ -862,7 +862,7 @@ describe("RelationshipDecomposition", () => {
         });
 
         expect(result).toBeAnError(
-            "No new Relationship can be created as the former Relationship is not yet fully decomposed by the peer.",
+            "No new Relationship can be created as the former Relationship is not yet decomposed by the peer.",
             "error.transport.relationships.notYetDecomposedByPeer"
         );
     });
