@@ -29,7 +29,6 @@ import {
     IRelationship,
     IRelationshipTemplate,
     Message,
-    PeerStatus,
     Relationship,
     RelationshipAuditLogEntryReason,
     RelationshipStatus,
@@ -53,7 +52,6 @@ export class TestObjectFactory {
                     })
                 }),
             status: properties?.status ?? RelationshipStatus.Pending,
-            peerStatus: properties?.peerStatus ?? PeerStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
             cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
             cache:
@@ -87,7 +85,6 @@ export class TestObjectFactory {
                     })
                 }),
             status: properties?.status ?? RelationshipStatus.Active,
-            peerStatus: properties?.peerStatus ?? PeerStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
             cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
             cache:
@@ -130,7 +127,6 @@ export class TestObjectFactory {
                     })
                 }),
             status: properties?.status ?? RelationshipStatus.Terminated,
-            peerStatus: properties?.peerStatus ?? PeerStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
             cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
             cache:
