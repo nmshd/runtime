@@ -6,7 +6,6 @@ import {
     CoreId,
     ICoreId,
     Message,
-    PeerStatus,
     Relationship,
     RelationshipStatus,
     RelationshipTemplate,
@@ -58,14 +57,6 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             if (!relationship) {
                 return ValidationResult.error(
                     CoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
-                );
-            }
-
-            if (relationship.peerStatus !== PeerStatus.Active) {
-                return ValidationResult.error(
-                    CoreErrors.requests.peerInDeletion(
-                        `You cannot decide a request from '${parsedParams.peer.toString()}' since the peer is in status '${relationship.peerStatus}'.`
-                    )
                 );
             }
 
