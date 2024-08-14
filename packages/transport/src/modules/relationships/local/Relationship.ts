@@ -6,6 +6,7 @@ import { IRelationshipTemplate } from "../../relationshipTemplates/local/Relatio
 import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
+import { IPeerDeletionInfo, PeerDeletionInfo } from "./PeerDeletionInfo";
 import { RelationshipAuditLog } from "./RelationshipAuditLog";
 
 export enum PeerStatus {
@@ -17,7 +18,7 @@ export enum PeerStatus {
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;
     peer: IIdentity;
-    peerStatus: PeerStatus;
+    peerDeletionInfo?: IPeerDeletionInfo;
     status: RelationshipStatus;
 
     cache?: ICachedRelationship;
@@ -35,7 +36,7 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         nameof<Relationship>((r) => r.relationshipSecretId),
         nameof<Relationship>((r) => r.peer),
         nameof<Relationship>((r) => r.status),
-        nameof<Relationship>((r) => r.peerStatus)
+        nameof<Relationship>((r) => r.peerDeletionInfo)
     ];
 
     public override readonly metadataProperties = [nameof<Relationship>((r) => r.metadata), nameof<Relationship>((r) => r.metadataModifiedAt)];
@@ -48,9 +49,9 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @serialize()
     public peer: Identity;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
-    public peerStatus: PeerStatus;
+    public peerDeletionInfo?: PeerDeletionInfo;
 
     @validate()
     @serialize()
@@ -99,7 +100,6 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
             id: CoreId.from(response.id),
             relationshipSecretId: relationshipSecretId,
             peer: peer,
-            peerStatus: PeerStatus.Active,
             status: RelationshipStatus.Pending,
             cache: cache,
             cachedAt: CoreDate.utc()

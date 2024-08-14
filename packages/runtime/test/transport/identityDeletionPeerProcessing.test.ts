@@ -38,7 +38,7 @@ describe("IdentityDeletionProcess", () => {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
         const event = (await resetEventBusAndSyncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId)) as PeerToBeDeletedEvent;
-        expect(event.data.peerStatus).toBe(PeerStatus.ToBeDeleted);
+        expect(event.data.peerDeletionInfo!.deletionStatus).toBe(PeerStatus.ToBeDeleted);
     });
 
     test("peer should be notified about cancelled deletion process", async function () {
@@ -47,7 +47,7 @@ describe("IdentityDeletionProcess", () => {
 
         await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
         const event = (await resetEventBusAndSyncUntilHasEvent(services2, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId)) as PeerDeletionCancelledEvent;
-        expect(event.data.peerStatus).toBe(PeerStatus.Active);
+        expect(event.data.peerDeletionInfo).toBeUndefined();
     });
 
     // eslint-disable-next-line jest/no-disabled-tests
@@ -55,6 +55,6 @@ describe("IdentityDeletionProcess", () => {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
         const event = (await resetEventBusAndSyncUntilHasEvent(services2, PeerDeletedEvent, (e) => e.data.id === relationshipId)) as PeerDeletedEvent;
-        expect(event.data.peerStatus).toBe(PeerStatus.Active);
+        expect(event.data.peerDeletionInfo!.deletionStatus).toBe(PeerStatus.Deleted);
     });
 });

@@ -1,7 +1,7 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "../../../core";
 import { PeerDeletionCancelledEvent } from "../../../events";
-import { PeerStatus, Relationship } from "../../relationships/local/Relationship";
+import { Relationship } from "../../relationships/local/Relationship";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
@@ -15,7 +15,7 @@ export class PeerDeletionCancelledEventProcessor extends ExternalEventProcessor 
     public override async execute(externalEvent: BackboneExternalEvent): Promise<Relationship> {
         const payload = PeerDeletionCancelledEventData.fromAny(externalEvent.payload);
 
-        const relationship = await this.accountController.relationships.setPeerStatus(CoreId.from(payload.relationshipId), PeerStatus.Active);
+        const relationship = await this.accountController.relationships.setPeerDeletionInfo(CoreId.from(payload.relationshipId), undefined);
 
         this.eventBus.publish(new PeerDeletionCancelledEvent(this.ownAddress, relationship));
 
