@@ -14,16 +14,16 @@ class Relationships {
         );
     }
 
-    public alreadyExists(status: RelationshipStatus) {
+    public relationshipAlreadyExists(status: RelationshipStatus) {
         return new CoreError(
-            "error.transport.relationships.alreadyExists",
+            "error.transport.relationships.relationshipAlreadyExists",
             `No new Relationship to the peer can be created as a Relationship in status '${status}' currently exists.`
         );
     }
 
-    public notYetDecomposedByPeer() {
+    public relationshipNotYetDecomposedByPeer() {
         return new CoreError(
-            "error.transport.relationships.notYetDecomposedByPeer",
+            "error.transport.relationships.relationshipNotYetDecomposedByPeer",
             "No new Relationship can be created as the former Relationship is not yet decomposed by the peer."
         );
     }

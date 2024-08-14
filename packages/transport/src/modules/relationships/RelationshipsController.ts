@@ -163,7 +163,7 @@ export class RelationshipsController extends TransportController {
         const existingRelationshipToPeer = await this.getRelationships(queryForExistingRelationship);
 
         if (existingRelationshipToPeer.length !== 0) {
-            throw CoreErrors.relationships.alreadyExists(existingRelationshipToPeer[0].status);
+            throw CoreErrors.relationships.relationshipAlreadyExists(existingRelationshipToPeer[0].status);
         }
 
         const secretId = await TransportIds.relationshipSecret.generate();
@@ -181,7 +181,7 @@ export class RelationshipsController extends TransportController {
             }
 
             if (result.error.code === "error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists") {
-                throw CoreErrors.relationships.notYetDecomposedByPeer();
+                throw CoreErrors.relationships.relationshipNotYetDecomposedByPeer();
             }
 
             throw result.error;

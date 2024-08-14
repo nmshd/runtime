@@ -92,7 +92,7 @@ describe("Create Relationship", () => {
 
             expect(result).toBeAnError(
                 `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Pending}' currently exists.`,
-                "error.transport.relationships.alreadyExists"
+                "error.transport.relationships.relationshipAlreadyExists"
             );
         });
 
@@ -154,7 +154,7 @@ describe("Relationship status validations on active relationship", () => {
 
         expect(result).toBeAnError(
             `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Active}' currently exists.`,
-            "error.transport.relationships.alreadyExists"
+            "error.transport.relationships.relationshipAlreadyExists"
         );
     });
 
@@ -539,7 +539,7 @@ describe("RelationshipTermination", () => {
 
             expect(result).toBeAnError(
                 `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Terminated}' currently exists.`,
-                "error.transport.relationships.alreadyExists"
+                "error.transport.relationships.relationshipAlreadyExists"
             );
         });
 
@@ -849,7 +849,7 @@ describe("RelationshipDecomposition", () => {
 
         expect(result).toBeAnError(
             `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.DeletionProposed}' currently exists.`,
-            "error.transport.relationships.alreadyExists"
+            "error.transport.relationships.relationshipAlreadyExists"
         );
     });
 
@@ -863,7 +863,7 @@ describe("RelationshipDecomposition", () => {
 
         expect(result).toBeAnError(
             "No new Relationship can be created as the former Relationship is not yet decomposed by the peer.",
-            "error.transport.relationships.notYetDecomposedByPeer"
+            "error.transport.relationships.relationshipNotYetDecomposedByPeer"
         );
     });
 

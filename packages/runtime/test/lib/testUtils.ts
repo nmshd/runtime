@@ -424,10 +424,20 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
 
     if (sRelationships.length === 0 && rRelationships.length === 0) {
         await establishRelationship(sTransportServices, rTransportServices);
+    } else if (sRelationships.length === 0 && rRelationships.length !== 0) {
+        const relationship = rRelationships[0];
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await establishRelationship(sTransportServices, rTransportServices);
     } else if (sRelationships[0].status === RelationshipStatus.Pending) {
-        const relationship = sRelationships[0];
-        await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
-        await syncUntilHasRelationships(rTransportServices, 1);
+        if (sRelationships[0].template.isOwn) {
+            const relationship = sRelationships[0];
+            await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
+            await syncUntilHasRelationships(rTransportServices, 1);
+        } else if (rRelationships[0].template.isOwn) {
+            const relationship = rRelationships[0];
+            await rTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
+            await syncUntilHasRelationships(sTransportServices, 1);
+        }
     } else if (sRelationships[0].status === RelationshipStatus.Terminated) {
         const relationship = sRelationships[0];
         await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
@@ -438,10 +448,6 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
     } else if (sRelationships[0].status === RelationshipStatus.DeletionProposed) {
         const relationship = sRelationships[0];
         await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
-        await establishRelationship(sTransportServices, rTransportServices);
-    } else if (rRelationships[0].status === RelationshipStatus.DeletionProposed) {
-        const relationship = rRelationships[0];
-        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
         await establishRelationship(sTransportServices, rTransportServices);
     }
 
