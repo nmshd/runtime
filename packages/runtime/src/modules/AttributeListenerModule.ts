@@ -25,7 +25,7 @@ export class AttributeListenerModule extends RuntimeModule {
 
         const getAttributeListenersResult = await services.consumptionServices.attributeListeners.getAttributeListeners();
         if (getAttributeListenersResult.isError) {
-            this.logger.error("Could not get LocalAttributeListeners", getAttributeListenersResult.error);
+            this.logger.error("Could not get attribute listeners", getAttributeListenersResult.error);
             return;
         }
 
@@ -68,7 +68,7 @@ export class AttributeListenerModule extends RuntimeModule {
 
                 const getAttributeListenersResult = await services.consumptionServices.attributeListeners.getAttributeListeners();
                 if (getAttributeListenersResult.isError) {
-                    this.logger.error("Could not get LocalAttributeListeners", getAttributeListenersResult.error);
+                    this.logger.error("Could not get attribute listeners", getAttributeListenersResult.error);
                     return;
                 }
 

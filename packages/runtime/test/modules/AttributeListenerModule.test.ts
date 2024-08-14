@@ -5,7 +5,7 @@ import {
     ensureActiveRelationship,
     establishPendingRelationshipWithRequestFlow,
     exchangeAndAcceptRequestByMessage,
-    mutualDecompositionIfActiveRelationshipExists,
+    mutualDecomposeIfActiveRelationshipExists,
     RuntimeServiceProvider,
     syncUntilHasRelationships,
     TestRuntimeServices
@@ -171,7 +171,7 @@ describe("Handling of delayed sharing of RelationshipAttributes during the ongoi
         recipient.eventBus.reset();
         thirdParty.eventBus.reset();
 
-        await mutualDecompositionIfActiveRelationshipExists(sender.transport, recipient.transport);
+        await mutualDecomposeIfActiveRelationshipExists(sender.transport, recipient.transport);
     });
 
     afterAll(async () => await runtimeServiceProvider.stop());

@@ -352,7 +352,7 @@ export class TestUtil {
         return decomposedRelationshipPeer;
     }
 
-    public static async mutualDecompositionIfActiveRelationshipExists(
+    public static async mutualDecomposeIfActiveRelationshipExists(
         fromAccount: AccountController,
         fromConsumption: ConsumptionController,
         toAccount: AccountController,

@@ -933,12 +933,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             test("returns an error when trying to share a RelationshipAttribute of a pending Relationship", async function () {
                 const sender = CoreAddress.from("Sender");
                 const recipient = accountController.identity.address;
-                await TestUtil.mutualDecompositionIfActiveRelationshipExists(
-                    accountController,
-                    consumptionController,
-                    thirdPartyAccountController,
-                    thirdPartyConsumptionController
-                );
+                await TestUtil.mutualDecomposeIfActiveRelationshipExists(accountController, consumptionController, thirdPartyAccountController, thirdPartyConsumptionController);
                 await TestUtil.addPendingRelationship(accountController, thirdPartyAccountController);
 
                 const requestItem = ReadAttributeRequestItem.from({

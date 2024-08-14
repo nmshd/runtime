@@ -124,22 +124,12 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
             const queryForActiveOrTerminatedRelationship = {
                 "peer.address": foundAttribute.shareInfo.peer.address,
-                $or: [
-                    {
-                        ["status"]: { $eq: RelationshipStatus.Active }
-                    },
-                    {
-                        ["status"]: { $eq: RelationshipStatus.Terminated }
-                    },
-                    {
-                        ["status"]: { $eq: RelationshipStatus.DeletionProposed }
-                    }
-                ]
+                status: { $in: [RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
             };
 
-            const activeOrTerminatedRelationshipToPeer = await this.accountController.relationships.getRelationships(queryForActiveOrTerminatedRelationship);
+            const activeOrTerminatedRelationshipsToPeer = await this.accountController.relationships.getRelationships(queryForActiveOrTerminatedRelationship);
 
-            if (pendingRelationshipToPeer.length !== 0 || activeOrTerminatedRelationshipToPeer.length === 0) {
+            if (pendingRelationshipToPeer.length !== 0 || activeOrTerminatedRelationshipsToPeer.length === 0) {
                 return ValidationResult.error(CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
             }
         }
