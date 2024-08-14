@@ -291,6 +291,10 @@ class Requests {
         return new CoreError("error.consumption.requests.wrongRelationshipStatus", message);
     }
 
+    public peerInDeletion(message: string) {
+        return new CoreError("error.consumption.requests.peerInDeletion", message);
+    }
+
     public missingRelationship(message: string) {
         return new CoreError("error.consumption.requests.missingRelationship", message);
     }
