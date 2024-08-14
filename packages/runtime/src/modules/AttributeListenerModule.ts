@@ -21,7 +21,7 @@ export class AttributeListenerModule extends RuntimeModule {
         const createdAttribute = event.data;
         if (createdAttribute.content["@type"] === "IdentityAttribute" && createdAttribute.shareInfo) return;
         if (createdAttribute.content["@type"] === "RelationshipAttribute" && createdAttribute.content.confidentiality === RelationshipAttributeConfidentiality.Private) return;
-        if (await AttributeListenerModule.relationshipAttributeOfInactiveRelationship(services, createdAttribute)) return;
+        if (await this.detectedRelationshipAttributeOfInactiveRelationship(services, createdAttribute)) return;
 
         const getAttributeListenersResult = await services.consumptionServices.attributeListeners.getAttributeListeners();
         if (getAttributeListenersResult.isError) {
@@ -36,7 +36,7 @@ export class AttributeListenerModule extends RuntimeModule {
         await Promise.all(promises);
     }
 
-    private static async relationshipAttributeOfInactiveRelationship(services: RuntimeServices, attribute: LocalAttributeDTO): Promise<boolean> {
+    private async detectedRelationshipAttributeOfInactiveRelationship(services: RuntimeServices, attribute: LocalAttributeDTO): Promise<boolean> {
         if (attribute.content["@type"] !== "RelationshipAttribute") {
             return false;
         }
