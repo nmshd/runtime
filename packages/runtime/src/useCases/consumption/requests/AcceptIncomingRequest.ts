@@ -34,21 +34,14 @@ export class AcceptIncomingRequestUseCase extends UseCase<AcceptIncomingRequestR
                 return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
             }
 
-            const queryForExistingRelationship: any = {
-                "peer.address": localRequest.peer,
-                $and: [
-                    {
-                        ["status"]: { $neq: RelationshipStatus.Rejected }
-                    },
-                    {
-                        ["status"]: { $neq: RelationshipStatus.Revoked }
-                    }
-                ]
+            const queryForExistingRelationships: any = {
+                "peer.address": localRequest.peer.toString(),
+                status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
             };
 
-            const existingRelationshipToPeer = await this.relationshipController.getRelationships(queryForExistingRelationship);
+            const existingRelationshipsToPeer = await this.relationshipController.getRelationships(queryForExistingRelationships);
 
-            if (existingRelationshipToPeer.length === 0 && template.cache?.expiresAt && template.isExpired()) {
+            if (existingRelationshipsToPeer.length === 0 && template.cache?.expiresAt && template.isExpired()) {
                 await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
 
                 return Result.fail(
