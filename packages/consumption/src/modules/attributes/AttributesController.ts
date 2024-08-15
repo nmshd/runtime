@@ -1063,16 +1063,23 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async validateFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<ValidationResult> {
         const childAttributes = await this.getLocalAttributes({ parentId: attribute.id.toString() });
-        for (const attr of [attribute, ...childAttributes]) {
+        const parentAndChildAttributes = [attribute, ...childAttributes];
+        for (const attr of parentAndChildAttributes) {
             const validateSuccessorResult = await this.validateSuccessor(attr);
             if (validateSuccessorResult.isError()) {
                 return validateSuccessorResult;
             }
         }
 
-        const attributeCopies = await this.getLocalAttributes({ "shareInfo.sourceAttribute": attribute.id.toString() });
-        const attributePredecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
-        const attributeCopiesToDetach = [...attributeCopies, ...attributePredecessorCopies];
+        const copiesOfParentAndChildAttributes = await this.getLocalAttributes({
+            ["shareInfo.sourceAttribute"]: { $in: parentAndChildAttributes.map((attribute) => attribute.id.toString()) }
+        });
+        const predecessorCopiesOfParentAndChildAttributes = [];
+        for (const attr of parentAndChildAttributes) {
+            const predecessorCopies = await this.getSharedPredecessorsOfAttribute(attr);
+            predecessorCopiesOfParentAndChildAttributes.push(...predecessorCopies);
+        }
+        const attributeCopiesToDetach = [...copiesOfParentAndChildAttributes, ...predecessorCopiesOfParentAndChildAttributes];
 
         const validateSharedAttributesResult = this.validateSharedAttributes(attributeCopiesToDetach);
         return validateSharedAttributesResult;
