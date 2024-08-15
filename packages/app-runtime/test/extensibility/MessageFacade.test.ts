@@ -1,4 +1,3 @@
-import { Realm } from "@nmshd/transport";
 import { AppRuntime, LocalAccountDTO } from "../../src";
 import { TestUtil } from "../lib";
 
@@ -11,7 +10,7 @@ describe("MessageFacade", function () {
         runtime = await TestUtil.createRuntime();
         await runtime.start();
 
-        localAccount = await runtime.accountServices.createAccount(Realm.Prod, "Profil 1");
+        localAccount = await runtime.accountServices.createAccount("Profil 1");
         await runtime.selectAccount(localAccount.id);
     });
 

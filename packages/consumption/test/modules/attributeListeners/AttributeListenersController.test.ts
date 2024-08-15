@@ -12,8 +12,8 @@ describe("AttributeListenersController", function () {
     let transport: Transport;
 
     const dummyQuery = ThirdPartyRelationshipAttributeQuery.from({
-        key: "aKey",
-        owner: "anOwner",
+        key: "AKey",
+        owner: "",
         thirdParty: ["aThirdParty"]
     });
     const dummyPeer = CoreAddress.from("aPeer");
@@ -81,5 +81,16 @@ describe("AttributeListenersController", function () {
 
         expect(listeners).toHaveLength(1);
         expect(listeners.map((l) => l.toJSON())).toContainEqual(expect.objectContaining({ id: listener.id.toString() }));
+    });
+
+    test("should delete peer attribute listeners", async function () {
+        const listener = await consumptionController.attributeListeners.createAttributeListener({
+            peer: dummyPeer,
+            query: dummyQuery
+        });
+
+        await consumptionController.attributeListeners.deletePeerAttributeListeners(dummyPeer);
+        const retrievedListener = await consumptionController.attributeListeners.getAttributeListener(listener.id);
+        expect(retrievedListener).toBeUndefined();
     });
 });

@@ -1,5 +1,7 @@
+import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreId, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
+import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -7,7 +9,7 @@ import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface CreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
-    content: any;
+    creationContent: any;
 }
 
 class Validator extends SchemaValidator<CreateRelationshipRequest> {
@@ -41,10 +43,16 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             );
         }
 
-        const relationship = await this.relationshipsController.sendRelationship({
-            template: template,
-            content: request.content
-        });
+        const transformedContent = Serializable.fromUnknown(request.creationContent);
+        if (!(transformedContent instanceof ArbitraryRelationshipCreationContent || transformedContent instanceof RelationshipCreationContent)) {
+            return Result.fail(
+                RuntimeErrors.general.invalidPropertyValue(
+                    "The creation content of a Relationship must either be a RelationshipCreationContent or an ArbitraryRelationshipCreationContent."
+                )
+            );
+        }
+
+        const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: transformedContent.toJSON() });
 
         await this.accountController.syncDatawallet();
 
