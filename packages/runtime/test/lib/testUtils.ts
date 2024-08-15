@@ -424,7 +424,7 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
 
     if (sRelationships.length === 0 && rRelationships.length === 0) {
         await establishRelationship(sTransportServices, rTransportServices);
-    } else if (sRelationships.length === 0 && rRelationships.length !== 0) {
+    } else if (sRelationships.length === 0 && rRelationships.length !== 0 && rRelationships[0].status === RelationshipStatus.DeletionProposed) {
         const relationship = rRelationships[0];
         await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
         await establishRelationship(sTransportServices, rTransportServices);
@@ -433,7 +433,7 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
             const relationship = sRelationships[0];
             await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
             await syncUntilHasRelationships(rTransportServices, 1);
-        } else if (rRelationships[0].template.isOwn) {
+        } else {
             const relationship = rRelationships[0];
             await rTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
             await syncUntilHasRelationships(sTransportServices, 1);
