@@ -958,6 +958,8 @@ describe("AttributesController", function () {
             let predecessorChildAttribute: LocalAttribute;
             let successorChildAttribute: LocalAttribute;
 
+            let predecessorChildOwnSharedIdentityAttribute: LocalAttribute;
+
             beforeEach(async () => {
                 predecessorComplexAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -997,6 +999,12 @@ describe("AttributesController", function () {
                         "content.value.@type": "BirthDay"
                     })
                 )[0];
+
+                predecessorChildOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: predecessorChildAttribute.id,
+                    peer: CoreAddress.from("peer"),
+                    requestReference: CoreId.from("reqRef")
+                });
             });
 
             test("should return validation success for full attribute deletion process of valid succeeded child attribute", async function () {
@@ -1040,6 +1048,15 @@ describe("AttributesController", function () {
                 expect(updatedSuccessorChildAttribute!.succeeds).toBeUndefined();
             });
 
+            test("should detach shared attribute copies of deleted child attribute", async function () {
+                const sharedChildAttributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorChildOwnSharedIdentityAttribute.id);
+                expect(sharedChildAttributeBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorChildAttribute.id);
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(predecessorComplexAttribute);
+                const updatedChildPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorChildOwnSharedIdentityAttribute.id);
+                expect(updatedChildPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+            });
+
             test("should delete predecessors of deleted child attribute", async function () {
                 const predecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorChildAttribute.id);
                 expect(JSON.stringify(predecessorBeforeDeletion)).toStrictEqual(JSON.stringify(predecessorChildAttribute));
@@ -1047,6 +1064,15 @@ describe("AttributesController", function () {
                 await consumptionController.attributes.executeFullAttributeDeletionProcess(successorComplexAttribute);
                 const result = await consumptionController.attributes.getLocalAttribute(predecessorChildAttribute.id);
                 expect(result).toBeUndefined();
+            });
+
+            test("should detach shared attribute copies of predecessors of deleted child attribute", async function () {
+                const sharedChildPredecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorChildOwnSharedIdentityAttribute.id);
+                expect(sharedChildPredecessorBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorChildAttribute.id);
+
+                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorComplexAttribute);
+                const updatedChildPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorChildOwnSharedIdentityAttribute.id);
+                expect(updatedChildPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             });
         });
     });
