@@ -1,4 +1,4 @@
-import { IResponse, RelationshipCreationChangeRequestContent, RelationshipCreationContent, RelationshipTemplateContentJSON, ResponseWrapperJSON } from "@nmshd/content";
+import { IResponse, RelationshipCreationContent, RelationshipTemplateContentJSON, ResponseWrapperJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
 import { CreateOutgoingRequestRequest, LocalRequestDTO, MessageDTO, RelationshipDTO } from "src";
 import { TestRuntimeServices } from "./RuntimeServiceProvider";

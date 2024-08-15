@@ -184,11 +184,7 @@ export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateCont
 
 export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON();
 
-export async function createTemplate(
-    transportServices: TransportServices,
-    body?: RelationshipTemplateContentJSON,
-    templateExpiresAt?: DateTime
-): Promise<RelationshipTemplateDTO> {
+export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON, templateExpiresAt?: DateTime): Promise<RelationshipTemplateDTO> {
     const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
     let expirationDateTime = defaultExpirationDateTime;
 

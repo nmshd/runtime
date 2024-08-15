@@ -1,7 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { DateTime } from "luxon";
-import { GetRelationshipsQuery, LocalAttributeDTO, OwnSharedAttributeSucceededEvent, PeerSharedAttributeSucceededEvent } from "../../src";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
@@ -178,56 +177,56 @@ describe("Relationship status validations on active relationship", () => {
 });
 
 describe("Cannot create Relationship", () => {
-  const serviceProvider = new RuntimeServiceProvider();
-  let services1: TestRuntimeServices;
-  let services2: TestRuntimeServices;
+    const serviceProvider = new RuntimeServiceProvider();
+    let services1: TestRuntimeServices;
+    let services2: TestRuntimeServices;
 
-  beforeAll(async () => {
-      const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
-      services1 = runtimeServices[0];
-      services2 = runtimeServices[1];
-  }, 30000);
+    beforeAll(async () => {
+        const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+        services1 = runtimeServices[0];
+        services2 = runtimeServices[1];
+    }, 30000);
 
-  afterAll(() => serviceProvider.stop());
-  
-  test("cannot create Relationship if RelationshipTemplate is already expired", async () => {
-      const template = await createTemplate(services1.transport, {}, DateTime.utc().plus({ seconds: 1 }));
-      await services2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+    afterAll(() => serviceProvider.stop());
 
-      await delay(12000);
+    test("cannot create Relationship if RelationshipTemplate is already expired", async () => {
+        const template = await createTemplate(services1.transport, undefined, DateTime.utc().plus({ seconds: 1 }));
+        await services2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
 
-      const createRelationshipResponse = await services2.transport.relationships.createRelationship({
-          templateId: template.id,
-          content: { a: "b" }
-      });
+        await delay(12000);
 
-      expect(createRelationshipResponse).toBeAnError(
-          `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`,
-          "error.runtime.relationshipTemplates.expiredRelationshipTemplate"
-      );
-  });
+        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
+            templateId: template.id,
+            creationContent: emptyRelationshipCreationContent
+        });
 
-  test("cannot create Relationship if templator has active IdentityDeletionProcess", async () => {
-      const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
-      await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        expect(createRelationshipResponse).toBeAnError(
+            `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`,
+            "error.runtime.relationshipTemplates.expiredRelationshipTemplate"
+        );
+    });
 
-      const createRelationshipResponse = await services2.transport.relationships.createRelationship({
-          templateId: templateId,
-          creationContent: emptyRelationshipCreationContent
-      });
-    
-      expect(createRelationshipResponse).toBeAnError(
-          "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
-          "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
-      );
-   });
-  
-   function delay(milliseconds: number): Promise<void> {
-      if (milliseconds <= 0) {
-          throw new Error("The specified delay time must be positive.");
-      }
+    test("cannot create Relationship if templator has active IdentityDeletionProcess", async () => {
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
-      return new Promise((resolve) => setTimeout(resolve, milliseconds));
+        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: emptyRelationshipCreationContent
+        });
+
+        expect(createRelationshipResponse).toBeAnError(
+            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
+            "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
+        );
+    });
+
+    function delay(milliseconds: number): Promise<void> {
+        if (milliseconds <= 0) {
+            throw new Error("The specified delay time must be positive.");
+        }
+
+        return new Promise((resolve) => setTimeout(resolve, milliseconds));
     }
 });
 

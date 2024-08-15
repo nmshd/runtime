@@ -4,23 +4,16 @@ import { TestRequestItemJSON } from "@nmshd/consumption/test/modules/requests/te
 import { RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import { DateTime } from "luxon";
-import {
-    ConsumptionServices,
-    CreateOutgoingRequestRequest,
-    OutgoingRequestCreatedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
-    OutgoingRequestStatusChangedEvent,
-    TransportServices
-} from "../../src";
+import { ConsumptionServices, CreateOutgoingRequestRequest, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import {
-    RuntimeServiceProvider,
-    TestRuntimeServices,
     establishRelationship,
     exchangeMessageWithRequest,
     exchangeTemplate,
+    RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncUntilHasRelationships
+    syncUntilHasRelationships,
+    TestRuntimeServices
 } from "../lib";
 import {
     exchangeMessageWithRequestAndRequireManualDecision,
