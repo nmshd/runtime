@@ -6,6 +6,11 @@ export enum PeerDeletionStatus {
     Deleted = "Deleted"
 }
 
+export interface PeerDeletionInfoJSON {
+    deletionStatus: string;
+    deletionDate: string;
+}
+
 export interface IPeerDeletionInfo extends ICoreSerializable {
     deletionStatus: PeerDeletionStatus;
     deletionDate: ICoreDate;
@@ -22,7 +27,7 @@ export class PeerDeletionInfo extends CoreSerializable implements IPeerDeletionI
     @validate()
     public deletionDate: CoreDate;
 
-    public static from(value: IPeerDeletionInfo): PeerDeletionInfo {
+    public static from(value: IPeerDeletionInfo | PeerDeletionInfoJSON): PeerDeletionInfo {
         return this.fromAny(value);
     }
 }

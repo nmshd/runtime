@@ -9,12 +9,6 @@ import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 import { IPeerDeletionInfo, PeerDeletionInfo } from "./PeerDeletionInfo";
 import { RelationshipAuditLog } from "./RelationshipAuditLog";
 
-export enum PeerStatus {
-    Active = "Active",
-    ToBeDeleted = "ToBeDeleted",
-    Deleted = "Deleted"
-}
-
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;
     peer: IIdentity;
