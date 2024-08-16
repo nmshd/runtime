@@ -37,8 +37,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        const transformedTemplateContent = Serializable.fromUnknown(template.cache?.content);
-        if (transformedTemplateContent instanceof RelationshipTemplateContent) {
+        if (template.cache?.content instanceof RelationshipTemplateContent) {
             RuntimeErrors.relationshipTemplates.wrongContentType();
         }
 

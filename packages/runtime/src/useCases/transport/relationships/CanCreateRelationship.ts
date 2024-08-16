@@ -1,4 +1,3 @@
-import { Serializable } from "@js-soft/ts-serval";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
@@ -53,18 +52,16 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
             return Result.ok(errorResult);
         }
 
-        const transformedTemplateContent = Serializable.fromUnknown(template.cache?.content);
-
-        if (transformedTemplateContent instanceof RelationshipTemplateContent) {
-            const existingRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests({ query: { "source.reference": template.id } });
-            const relevantRequestsFromTemplate = existingRequestsFromTemplate.filter(
-                (r) => r.status !== LocalRequestStatus.Decided && r.status !== LocalRequestStatus.Completed && r.status !== LocalRequestStatus.Expired
-            );
+        if (template.cache?.content instanceof RelationshipTemplateContent) {
+            const dbQuery: any = {};
+            dbQuery["source.reference"] = { $eq: template.id.toString() };
+            dbQuery["status"] = { $nin: [LocalRequestStatus.Decided, LocalRequestStatus.Completed, LocalRequestStatus.Expired] };
+            const relevantRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
 
             if (relevantRequestsFromTemplate.length !== 0) {
                 const localRequest = relevantRequestsFromTemplate[0];
 
-                if (template.cache?.expiresAt && template.isExpired()) {
+                if (template.cache.expiresAt && template.isExpired()) {
                     await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
 
                     const errorResult: CanCreateRelationshipErrorResult = {
@@ -79,7 +76,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
             }
         }
 
-        if (transformedTemplateContent instanceof ArbitraryRelationshipTemplateContent) {
+        if (template.cache?.content instanceof ArbitraryRelationshipTemplateContent) {
             if (template.isExpired()) {
                 const errorResult: CanCreateRelationshipErrorResult = {
                     isSuccess: false,
