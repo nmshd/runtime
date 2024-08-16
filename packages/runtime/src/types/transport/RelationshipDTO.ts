@@ -11,8 +11,7 @@ export enum RelationshipStatus {
     DeletionProposed = "DeletionProposed"
 }
 
-export enum PeerStatus {
-    Active = "Active",
+export enum PeerDeletionStatus {
     ToBeDeleted = "ToBeDeleted",
     Deleted = "Deleted"
 }
@@ -44,7 +43,7 @@ export interface RelationshipAuditLogDTO extends Array<RelationshipAuditLogEntry
 export type RelationshipCreationContentDerivation = RelationshipCreationContentJSON | ArbitraryRelationshipCreationContentJSON;
 
 export interface PeerDeletionInfoDTO {
-    deletionStatus: string;
+    deletionStatus: PeerDeletionStatus;
     deletionDate: string;
 }
 

@@ -7,7 +7,7 @@ export enum PeerDeletionStatus {
 }
 
 export interface PeerDeletionInfoJSON {
-    deletionStatus: string;
+    deletionStatus: PeerDeletionStatus;
     deletionDate: string;
 }
 
