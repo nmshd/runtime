@@ -1,5 +1,5 @@
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
-import { PeerDeletedEvent, PeerDeletionCancelledEvent, PeerStatus, PeerToBeDeletedEvent } from "../../src";
+import { PeerDeletedEvent, PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "../../src";
 import { establishRelationship, resetEventBusAndSyncUntilHasEvent, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -38,7 +38,7 @@ describe("IdentityDeletionProcess", () => {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
         const event = (await resetEventBusAndSyncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId)) as PeerToBeDeletedEvent;
-        expect(event.data.peerDeletionInfo!.deletionStatus).toBe(PeerStatus.ToBeDeleted);
+        expect(event.data.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.ToBeDeleted);
     });
 
     test("peer should be notified about cancelled deletion process", async function () {
@@ -55,6 +55,6 @@ describe("IdentityDeletionProcess", () => {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
         const event = (await resetEventBusAndSyncUntilHasEvent(services2, PeerDeletedEvent, (e) => e.data.id === relationshipId)) as PeerDeletedEvent;
-        expect(event.data.peerDeletionInfo!.deletionStatus).toBe(PeerStatus.Deleted);
+        expect(event.data.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.Deleted);
     });
 });
