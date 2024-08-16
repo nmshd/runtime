@@ -57,7 +57,6 @@ export class TestUtil {
 
         return runtime_createAppConfig({
             transportLibrary: transportOverride,
-            logging: {},
             applicationId: "eu.enmeshed.test",
             ...configOverride
         });
