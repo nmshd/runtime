@@ -1,10 +1,11 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
 import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { CanCreateRelationshipUseCase } from "./CanCreateRelationship";
 import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface CreateRelationshipRequest {
@@ -23,6 +24,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly canCreateRelationshipUseCase: CanCreateRelationshipUseCase,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -35,16 +37,18 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        if (template.isExpired()) {
-            return Result.fail(
-                RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
-                    `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
-                )
-            );
+        const transformedTemplateContent = Serializable.fromUnknown(template.cache?.content);
+        if (transformedTemplateContent instanceof RelationshipTemplateContent) {
+            RuntimeErrors.relationshipTemplates.wrongContentType();
         }
 
-        const transformedContent = Serializable.fromUnknown(request.creationContent);
-        if (!(transformedContent instanceof ArbitraryRelationshipCreationContent || transformedContent instanceof RelationshipCreationContent)) {
+        const canCreateRelationshipResult = (await this.canCreateRelationshipUseCase.execute({ templateId: request.templateId })).value;
+        if (!canCreateRelationshipResult.isSuccess) {
+            return Result.fail(canCreateRelationshipResult.error);
+        }
+
+        const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
+        if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
             return Result.fail(
                 RuntimeErrors.general.invalidPropertyValue(
                     "The creation content of a Relationship must either be a RelationshipCreationContent or an ArbitraryRelationshipCreationContent."
@@ -52,7 +56,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             );
         }
 
-        const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: transformedContent.toJSON() });
+        const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
 
         await this.accountController.syncDatawallet();
 

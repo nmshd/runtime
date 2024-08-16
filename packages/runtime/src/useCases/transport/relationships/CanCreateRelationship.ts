@@ -4,8 +4,11 @@ import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumpti
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreErrors, CoreId, RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { RuntimeErrors, UseCase } from "../../common";
-import { CreateRelationshipRequest } from "./CreateRelationship";
+import { RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
+
+export interface CanCreateRelationshipRequest {
+    templateId: RelationshipTemplateIdString;
+}
 
 export type CanCreateRelationshipResult = CanCreateRelationshipSuccessResult | CanCreateRelationshipErrorResult;
 
@@ -18,7 +21,7 @@ interface CanCreateRelationshipErrorResult {
     error: ApplicationError;
 }
 
-export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequest, CanCreateRelationshipResult> {
+export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipRequest, CanCreateRelationshipResult> {
     public constructor(
         @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject private readonly relationshipController: RelationshipsController,
@@ -27,7 +30,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
         super();
     }
 
-    protected async executeInternal(request: CreateRelationshipRequest): Promise<Result<CanCreateRelationshipResult, ApplicationError>> {
+    protected async executeInternal(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResult, ApplicationError>> {
         const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
 
         if (!template) {
@@ -50,9 +53,9 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
             return Result.ok(errorResult);
         }
 
-        const transformedContent = Serializable.fromUnknown(template.cache?.content);
+        const transformedTemplateContent = Serializable.fromUnknown(template.cache?.content);
 
-        if (transformedContent instanceof RelationshipTemplateContent) {
+        if (transformedTemplateContent instanceof RelationshipTemplateContent) {
             const existingRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests({ query: { "source.reference": template.id } });
             const relevantRequestsFromTemplate = existingRequestsFromTemplate.filter(
                 (r) => r.status !== LocalRequestStatus.Decided && r.status !== LocalRequestStatus.Completed && r.status !== LocalRequestStatus.Expired
@@ -76,7 +79,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
             }
         }
 
-        if (transformedContent instanceof ArbitraryRelationshipTemplateContent) {
+        if (transformedTemplateContent instanceof ArbitraryRelationshipTemplateContent) {
             if (template.isExpired()) {
                 const errorResult: CanCreateRelationshipErrorResult = {
                     isSuccess: false,
