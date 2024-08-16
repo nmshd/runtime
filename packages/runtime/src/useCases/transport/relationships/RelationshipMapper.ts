@@ -19,8 +19,7 @@ export class RelationshipMapper {
             peerDeletionInfo: !relationship.peerDeletionInfo
                 ? undefined
                 : {
-                      deletionStatus: relationship.peerDeletionInfo.deletionStatus,
-                      deletionDate: relationship.peerDeletionInfo.deletionDate.toString()
+                      deletionStatus: relationship.peerDeletionInfo.deletionStatus
                   },
             peerIdentity: {
                 address: relationship.peer.address.toString(),

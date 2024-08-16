@@ -11,7 +11,6 @@ export interface RelationshipDVO extends DataViewObject {
     type: "RelationshipDVO";
     status: string;
     peerDeletionStatus?: PeerDeletionStatus;
-    peerDeletionDate?: string;
     direction: RelationshipDirection;
     statusText: string;
     isPinned: boolean;

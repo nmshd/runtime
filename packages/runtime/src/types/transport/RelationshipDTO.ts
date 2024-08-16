@@ -44,7 +44,6 @@ export type RelationshipCreationContentDerivation = RelationshipCreationContentJ
 
 export interface PeerDeletionInfoDTO {
     deletionStatus: PeerDeletionStatus;
-    deletionDate: string;
 }
 
 export interface RelationshipDTO {

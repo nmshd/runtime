@@ -1786,7 +1786,6 @@ export class DataViewExpander {
             type: "RelationshipDVO",
             status: relationship.status,
             peerDeletionStatus: relationship.peerDeletionInfo?.deletionStatus,
-            peerDeletionDate: relationship.peerDeletionInfo?.deletionDate,
             statusText: statusText,
             direction: direction,
             isPinned: relationshipSetting.isPinned,

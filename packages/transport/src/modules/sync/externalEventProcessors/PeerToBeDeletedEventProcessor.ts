@@ -1,5 +1,5 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "../../../core";
+import { CoreId } from "../../../core";
 import { PeerToBeDeletedEvent } from "../../../events";
 import { PeerDeletionInfo, PeerDeletionStatus } from "../../relationships/local/PeerDeletionInfo";
 import { Relationship } from "../../relationships/local/Relationship";
@@ -10,17 +10,13 @@ class PeerToBeDeletedEventData extends Serializable {
     @serialize()
     @validate()
     public relationshipId: string;
-
-    @serialize()
-    @validate()
-    public gracePeriodEndsAt: string;
 }
 
 export class PeerToBeDeletedEventProcessor extends ExternalEventProcessor {
     public override async execute(externalEvent: BackboneExternalEvent): Promise<Relationship> {
         const payload = PeerToBeDeletedEventData.fromAny(externalEvent.payload);
 
-        const peerDeletionInfo = PeerDeletionInfo.from({ deletionStatus: PeerDeletionStatus.ToBeDeleted, deletionDate: CoreDate.from(payload.gracePeriodEndsAt) });
+        const peerDeletionInfo = PeerDeletionInfo.from({ deletionStatus: PeerDeletionStatus.ToBeDeleted });
         const relationship = await this.accountController.relationships.setPeerDeletionInfo(CoreId.from(payload.relationshipId), peerDeletionInfo);
 
         this.eventBus.publish(new PeerToBeDeletedEvent(this.ownAddress, relationship));
