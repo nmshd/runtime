@@ -14,6 +14,13 @@ class Relationships {
         );
     }
 
+    public relationshipAlreadyExists(status: RelationshipStatus) {
+        return new CoreError(
+            "error.transport.relationships.relationshipAlreadyExists",
+            `No new Relationship to the peer can be created as a Relationship in status '${status}' currently exists.`
+        );
+    }
+
     public reactivationNotRequested(relationshipId: string) {
         return new CoreError("error.transport.relationships.reactivationNotRequested", `The Relationship '${relationshipId}' has no reactivation Request to respond to.`);
     }
