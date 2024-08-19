@@ -417,14 +417,28 @@ export async function establishPendingRelationshipWithRequestFlow(
 
 export async function ensureActiveRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<RelationshipDTO> {
     const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
-    const sRelationships = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress } })).value;
+    const sRelationships = (
+        await sTransportServices.relationships.getRelationships({
+            query: {
+                peer: rTransportServicesAddress,
+                status: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed]
+            }
+        })
+    ).value;
 
     const sTransportServicesAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
-    const rRelationships = (await rTransportServices.relationships.getRelationships({ query: { peer: sTransportServicesAddress } })).value;
+    const rRelationships = (
+        await rTransportServices.relationships.getRelationships({
+            query: {
+                peer: sTransportServicesAddress,
+                status: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed]
+            }
+        })
+    ).value;
 
     if (sRelationships.length === 0 && rRelationships.length === 0) {
         await establishRelationship(sTransportServices, rTransportServices);
-    } else if (sRelationships.length === 0 && rRelationships.length !== 0 && rRelationships[0].status === RelationshipStatus.DeletionProposed) {
+    } else if (sRelationships.length === 0 && rRelationships[0].status === RelationshipStatus.DeletionProposed) {
         const relationship = rRelationships[0];
         await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
         await establishRelationship(sTransportServices, rTransportServices);
