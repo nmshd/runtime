@@ -3,24 +3,26 @@ import { IConfigOverwrite } from "@nmshd/transport";
 import { defaultsDeep } from "lodash";
 
 export interface AppConfig extends RuntimeConfig {
-    logging: any;
     accountsDbName: string;
     applicationId: string;
     applePushEnvironment?: "Development" | "Production";
     allowMultipleAccountsWithSameAddress: boolean;
+    dataFolder: string;
 }
 
 export interface AppConfigOverwrite {
     transportLibrary?: Omit<IConfigOverwrite, "supportedIdentityVersion">;
-    logging?: any;
     accountsDbName?: string;
     applicationId: string;
     applePushEnvironment?: "Development" | "Production";
     allowMultipleAccountsWithSameAddress?: boolean;
+    dataFolder?: string;
 }
 
 export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
-    const appConfig = {
+    const appConfig: Omit<AppConfig, "transportLibrary" | "applicationId"> & {
+        transportLibrary: Omit<IConfigOverwrite, "supportedIdentityVersion" | "platformClientId" | "platformClientSecret" | "baseUrl">;
+    } = {
         accountsDbName: "accounts",
         transportLibrary: {
             datawalletEnabled: true
@@ -93,7 +95,8 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
                 location: "@nmshd/runtime:NotificationModule"
             }
         },
-        allowMultipleAccountsWithSameAddress: false
+        allowMultipleAccountsWithSameAddress: false,
+        dataFolder: "./data"
     };
 
     const mergedConfig = defaultsDeep({}, ...configs, appConfig);
