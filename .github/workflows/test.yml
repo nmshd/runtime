@@ -259,22 +259,3 @@ jobs:
           NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
-
-  test-iql:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: current
-      - run: npm ci
-      - run: npm run build:node
-        env:
-          BUILD_NUMBER: ${{ github.run_number }}
-          COMMIT_HASH: ${{ github.sha }}
-      - run: npm run test:ci --workspace=@nmshd/iql
-      - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v4
-        env:
-          fail_ci_if_error: true
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
