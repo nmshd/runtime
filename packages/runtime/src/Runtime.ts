@@ -4,6 +4,7 @@ import { EventBus, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
     AttributeListenersController,
     AttributesController,
+    Consumption,
     ConsumptionController,
     DraftsController,
     IncomingRequestsController,
@@ -55,6 +56,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     }
 
     protected transport: Transport;
+    protected consumption: Consumption;
 
     private _anonymousServices: AnonymousServices;
     public get anonymousServices(): AnonymousServices {
@@ -137,6 +139,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         await this.initTransportLibrary();
         await this.initAccount();
 
+        this.initConsumptionLibrary();
+
         this._modules = new RuntimeModuleRegistry();
         await this.loadModules();
         await this.initInfrastructure();
@@ -149,6 +153,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     }
 
     protected initInfrastructure(): void | Promise<void> {
+        // TODO: well this seems redundant
         return;
     }
 
@@ -197,6 +202,12 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         platformAdditionalHeaders["X-RUNTIME-VERSION"] = buildInformation.version;
 
         return { ...originalTransportConfig, platformAdditionalHeaders };
+    }
+
+    private initConsumptionLibrary() {
+        this.logger.debug("Initializing Consumption Library... "); // TODO: maybe unnecessary
+
+        this.consumption = new Consumption(this.runtimeConfig.consumptionLibrary);
     }
 
     private async initDIContainer() {
@@ -391,6 +402,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     }
 
     protected startInfrastructure(): void | Promise<void> {
+        // TODO: ???
         return;
     }
 
@@ -420,6 +432,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     }
 
     protected stopInfrastructure(): void | Promise<void> {
+        // TODO: ???
         return;
     }
 
