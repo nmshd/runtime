@@ -6,6 +6,11 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
+if printf -- "$VERSION" | grep -q " "; then
+    echo '$VERSION must not contain whitespaces'
+    exit 1
+fi
+
 # set the version of all packages in the workspace to $VERSION
 npm version -ws $VERSION
 
