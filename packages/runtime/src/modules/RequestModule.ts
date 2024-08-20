@@ -61,12 +61,29 @@ export class RequestModule extends RuntimeModule {
 
         const pendingRelationships = relationshipsToPeer.filter((r) => r.status === RelationshipStatus.Pending);
         if (pendingRelationships.length !== 0) {
-            this.logger.info(`There is already a pending Relationship for the RelationshipTemplate '${template.id}'. Skipping creation of a new request.`);
+            this.logger.info(`There is already a pending Relationship to the creator of the RelationshipTemplate '${template.id}'. Skipping creation of a new Request.`);
             this.runtime.eventBus.publish(
                 new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
                     template,
                     result: RelationshipTemplateProcessedResult.RelationshipExists,
                     relationshipId: pendingRelationships[0].id
+                })
+            );
+            return;
+        }
+
+        const terminatedOrDeletionProposedRelationships = relationshipsToPeer.filter(
+            (r) => r.status === RelationshipStatus.Terminated || r.status === RelationshipStatus.DeletionProposed
+        );
+        if (terminatedOrDeletionProposedRelationships.length !== 0) {
+            this.logger.info(
+                `There is still a Relationship with status 'Terminated' or 'DeletionProposed' to the creator of the RelationshipTemplate '${template.id}'. Skipping creation of a new Request.`
+            );
+            this.runtime.eventBus.publish(
+                new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
+                    template,
+                    result: RelationshipTemplateProcessedResult.RelationshipExists,
+                    relationshipId: terminatedOrDeletionProposedRelationships[0].id
                 })
             );
             return;
