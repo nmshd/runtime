@@ -1,5 +1,5 @@
-import { UrlOpenEvent } from "@js-soft/native-abstractions";
 import { AppRuntimeError } from "../../AppRuntimeError";
+import { UrlOpenEvent } from "../../natives";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface AppLaunchModuleConfig extends AppRuntimeModuleConfiguration {}
