@@ -155,15 +155,15 @@ export class RelationshipsController extends TransportController {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
 
-        const queryForExistingRelationship = {
+        const queryForExistingRelationships = {
             "peer.address": template.cache.createdBy.toString(),
             status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
         };
 
-        const existingRelationshipToPeer = await this.getRelationships(queryForExistingRelationship);
+        const existingRelationshipsToPeer = await this.getRelationships(queryForExistingRelationships);
 
-        if (existingRelationshipToPeer.length !== 0) {
-            throw CoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipToPeer[0].status);
+        if (existingRelationshipsToPeer.length !== 0) {
+            throw CoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
         }
 
         const secretId = await TransportIds.relationshipSecret.generate();
