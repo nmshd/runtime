@@ -46,7 +46,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         if (existingRelationshipsToPeer.length !== 0) {
             const errorResult: CanCreateRelationshipErrorResult = {
                 isSuccess: false,
-                error: CoreErrors.relationships.relationshipAlreadyExists(existingRelationshipsToPeer[0].status)
+                error: CoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status)
             };
 
             return Result.ok(errorResult);
