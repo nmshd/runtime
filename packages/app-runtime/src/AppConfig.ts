@@ -7,7 +7,7 @@ export interface AppConfig extends RuntimeConfig {
     applicationId: string;
     applePushEnvironment?: "Development" | "Production";
     allowMultipleAccountsWithSameAddress: boolean;
-    dataFolder: string;
+    databaseFolder: string;
 }
 
 export interface AppConfigOverwrite {
@@ -16,7 +16,7 @@ export interface AppConfigOverwrite {
     applicationId: string;
     applePushEnvironment?: "Development" | "Production";
     allowMultipleAccountsWithSameAddress?: boolean;
-    dataFolder?: string;
+    databaseFolder?: string;
 }
 
 export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
@@ -96,7 +96,7 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
             }
         },
         allowMultipleAccountsWithSameAddress: false,
-        dataFolder: "./data"
+        databaseFolder: "./data"
     };
 
     const mergedConfig = defaultsDeep({}, ...configs, appConfig);
