@@ -152,8 +152,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this.eventBus.publish(new RuntimeInitializedEvent());
     }
 
+    // TODO: well this seems redundant
     protected initInfrastructure(): void | Promise<void> {
-        // TODO: well this seems redundant
         return;
     }
 

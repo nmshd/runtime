@@ -18,7 +18,7 @@ export class Consumption {
         setDefaultRepositoryAttributes: false
     };
 
-    public constructor(customConfig: IConfigOverwrite) {
+    public constructor(customConfig?: IConfigOverwrite) {
         this._config = _.defaultsDeep({}, customConfig, Consumption.defaultConfig);
     }
 }

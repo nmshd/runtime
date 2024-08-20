@@ -48,7 +48,8 @@ export class AttributesController extends ConsumptionBaseController {
     public constructor(
         parent: ConsumptionController,
         private readonly eventBus: EventBus,
-        private readonly identity: { address: CoreAddress }
+        private readonly identity: { address: CoreAddress },
+        private readonly setDefaultRepositoryAttributes: boolean
     ) {
         super(ConsumptionControllerName.AttributesController, parent);
     }
@@ -248,7 +249,9 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.attributes.create(localAttribute);
 
-        localAttribute = await this.setAsDefaultRepositoryAttribute(localAttribute, true);
+        if (this.setDefaultRepositoryAttributes) {
+            localAttribute = await this.setAsDefaultRepositoryAttribute(localAttribute, true);
+        }
 
         if (localAttribute.content.value instanceof AbstractComplexValue) {
             await this.createLocalAttributesForChildrenOfComplexAttribute(localAttribute);
@@ -279,7 +282,10 @@ export class AttributesController extends ConsumptionBaseController {
         }
     }
 
+    // TODO: should it be allowed to set a default manually if the automated setting of isDefault is disabled? -> no
     public async setAsDefaultRepositoryAttribute(newDefaultAttribute: LocalAttribute, skipOverwrite?: boolean): Promise<LocalAttribute> {
+        if (!this.setDefaultRepositoryAttributes) throw new ConsumptionError(); // TODO:
+
         if (!newDefaultAttribute.isRepositoryAttribute(this.identity.address)) {
             throw CoreErrors.attributes.isNotRepositoryAttribute(newDefaultAttribute.id);
         }

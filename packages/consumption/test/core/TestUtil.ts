@@ -26,7 +26,15 @@ import {
     TransportLoggerFactory
 } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
-import { ConsumptionController, NotificationItemConstructor, NotificationItemProcessorConstructor, RequestItemConstructor, RequestItemProcessorConstructor } from "../../src";
+import {
+    Consumption,
+    ConsumptionController,
+    IConfigOverwrite as IConsumptionConfigOverwrite,
+    NotificationItemConstructor,
+    NotificationItemProcessorConstructor,
+    RequestItemConstructor,
+    RequestItemProcessorConstructor
+} from "../../src";
 
 export const loggerFactory = new NodeLoggerFactory({
     appenders: {
@@ -173,8 +181,13 @@ export class TestUtil {
         return new Transport(connection, this.createConfig(), eventBus, loggerFactory);
     }
 
+    public static createConsumption(customConfig?: IConsumptionConfigOverwrite): Consumption {
+        return new Consumption(customConfig);
+    }
+
     public static async provideAccounts(
         transport: Transport,
+        consumption: Consumption,
         count: number,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
@@ -182,7 +195,7 @@ export class TestUtil {
         const accounts = [];
 
         for (let i = 0; i < count; i++) {
-            const account = await this.createAccount(transport, requestItemProcessors, notificationItemProcessors);
+            const account = await this.createAccount(transport, consumption, requestItemProcessors, notificationItemProcessors);
             accounts.push(account);
         }
 
@@ -191,6 +204,7 @@ export class TestUtil {
 
     private static async createAccount(
         transport: Transport,
+        consumption: Consumption,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
     ): Promise<{ accountController: AccountController; consumptionController: ConsumptionController }> {
@@ -198,7 +212,7 @@ export class TestUtil {
         const accountController = new AccountController(transport, db, transport.config);
         await accountController.init();
 
-        const consumptionController = await new ConsumptionController(transport, accountController).init(requestItemProcessors, notificationItemProcessors);
+        const consumptionController = await new ConsumptionController(transport, accountController, consumption).init(requestItemProcessors, notificationItemProcessors);
 
         return { accountController, consumptionController };
     }

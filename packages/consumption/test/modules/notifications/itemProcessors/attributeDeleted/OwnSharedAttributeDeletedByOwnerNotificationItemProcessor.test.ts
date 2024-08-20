@@ -25,10 +25,11 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection, mockEventBus);
-
         await transport.init();
 
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
+        const consumption = TestUtil.createConsumption();
+
+        const account = (await TestUtil.provideAccounts(transport, consumption, 1))[0];
         ({ accountController: testAccount, consumptionController } = account);
     });
 

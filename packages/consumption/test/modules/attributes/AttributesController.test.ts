@@ -48,10 +48,11 @@ describe("AttributesController", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection, mockEventBus);
-
         await transport.init();
 
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
+        const consumption = TestUtil.createConsumption();
+
+        const account = (await TestUtil.provideAccounts(transport, consumption, 1))[0];
         ({ accountController: testAccount, consumptionController } = account);
     });
 
@@ -159,7 +160,8 @@ describe("AttributesController", function () {
             );
         });
 
-        test("should set an Attribute as default if it is the only of its value type", async function () {
+        // TODO:
+        test("should set an Attribute as default if it is the only of its value type and setDefaultRepositoryAttributes is true", async function () {
             const attributeParams: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
                     value: EMailAddress.from({
@@ -172,7 +174,8 @@ describe("AttributesController", function () {
             expect(attribute.isDefault).toBe(true);
         });
 
-        test("should not set an Attribute as default if already another exists with that value type", async function () {
+        // TODO:
+        test("should not set an Attribute as default if already another exists with that value type and setDefaultRepositoryAttributes is true", async function () {
             const attributeParams: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
                     value: EMailAddress.from({
@@ -186,6 +189,20 @@ describe("AttributesController", function () {
 
             const secondAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
             expect(secondAttribute.isDefault).toBeUndefined();
+        });
+
+        // TODO:
+        test("should not set an Attribute as default if it is the only of its value type but setDefaultRepositoryAttributes is false", async function () {
+            const attributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: EMailAddress.from({
+                        value: "my@email.address"
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const attribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            expect(attribute.isDefault).toBeUndefined();
         });
 
         test("should set a child Attribute of a complex default attribute as default", async function () {

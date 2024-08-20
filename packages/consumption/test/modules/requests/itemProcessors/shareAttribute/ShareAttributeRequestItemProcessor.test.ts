@@ -34,10 +34,11 @@ describe("ShareAttributeRequestItemProcessor", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
-
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const consumption = TestUtil.createConsumption();
+
+        const accounts = await TestUtil.provideAccounts(transport, consumption, 2);
         ({ accountController: testAccount, consumptionController } = accounts[0]);
 
         ({ accountController: thirdPartyTestAccount, consumptionController: thirdPartyConsumptionController } = accounts[1]);

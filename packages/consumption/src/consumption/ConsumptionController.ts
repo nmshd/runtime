@@ -41,11 +41,13 @@ import {
     ShareAttributeRequestItemProcessor,
     ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor
 } from "../modules";
+import { Consumption } from "./Consumption";
 
 export class ConsumptionController {
     public constructor(
         public readonly transport: Transport,
-        public readonly accountController: AccountController
+        public readonly accountController: AccountController,
+        public readonly consumption: Consumption
     ) {}
 
     private _attributes: AttributesController;
@@ -87,7 +89,12 @@ export class ConsumptionController {
         requestItemProcessorOverrides = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessorOverrides = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
     ): Promise<ConsumptionController> {
-        this._attributes = await new AttributesController(this, this.transport.eventBus, this.accountController.identity).init();
+        this._attributes = await new AttributesController(
+            this,
+            this.transport.eventBus,
+            this.accountController.identity,
+            this.consumption.config.setDefaultRepositoryAttributes
+        ).init();
         this._drafts = await new DraftsController(this).init();
 
         const requestItemProcessorRegistry = new RequestItemProcessorRegistry(this, this.getDefaultRequestItemProcessors());

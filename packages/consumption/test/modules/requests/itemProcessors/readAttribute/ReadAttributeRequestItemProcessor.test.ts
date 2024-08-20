@@ -49,10 +49,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
-
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const consumption = TestUtil.createConsumption();
+
+        const accounts = await TestUtil.provideAccounts(transport, consumption, 2);
         ({ accountController, consumptionController } = accounts[0]);
 
         processor = new ReadAttributeRequestItemProcessor(consumptionController);
