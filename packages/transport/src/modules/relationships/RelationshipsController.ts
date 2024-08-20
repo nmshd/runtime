@@ -163,7 +163,7 @@ export class RelationshipsController extends TransportController {
         const existingRelationshipToPeer = await this.getRelationships(queryForExistingRelationship);
 
         if (existingRelationshipToPeer.length !== 0) {
-            throw CoreErrors.relationships.relationshipAlreadyExists(existingRelationshipToPeer[0].status);
+            throw CoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipToPeer[0].status);
         }
 
         const secretId = await TransportIds.relationshipSecret.generate();

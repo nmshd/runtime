@@ -14,9 +14,9 @@ class Relationships {
         );
     }
 
-    public relationshipAlreadyExists(status: RelationshipStatus) {
+    public relationshipCurrentlyExists(status: RelationshipStatus) {
         return new CoreError(
-            "error.transport.relationships.relationshipAlreadyExists",
+            "error.transport.relationships.relationshipCurrentlyExists",
             `No new Relationship to the peer can be created as a Relationship in status '${status}' currently exists.`
         );
     }
