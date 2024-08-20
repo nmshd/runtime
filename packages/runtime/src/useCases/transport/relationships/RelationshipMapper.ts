@@ -16,11 +16,11 @@ export class RelationshipMapper {
             template: RelationshipTemplateMapper.toRelationshipTemplateDTO(relationship.cache.template),
             status: relationship.status,
             peer: relationship.peer.address.toString(),
-            peerDeletionInfo: !relationship.peerDeletionInfo
-                ? undefined
-                : {
+            peerDeletionInfo: relationship.peerDeletionInfo
+                ? {
                       deletionStatus: relationship.peerDeletionInfo.deletionStatus
-                  },
+                  }
+                : undefined,
             peerIdentity: {
                 address: relationship.peer.address.toString(),
                 publicKey: relationship.peer.publicKey.toBase64(false)
