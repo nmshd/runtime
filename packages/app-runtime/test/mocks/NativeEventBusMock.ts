@@ -1,5 +1,5 @@
-import { INativeEventBus } from "@js-soft/native-abstractions";
 import { Event, EventBus, EventEmitter2EventBus, Result } from "@js-soft/ts-utils";
+import { INativeEventBus } from "../../src";
 
 export class NativeEventBusMock implements INativeEventBus {
     private eventBus: EventBus;

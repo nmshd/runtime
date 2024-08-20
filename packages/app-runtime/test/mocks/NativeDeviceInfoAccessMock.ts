@@ -1,5 +1,5 @@
-import { INativeDeviceInfo, INativeDeviceInfoAccess, PushServices } from "@js-soft/native-abstractions";
 import { Result } from "@js-soft/ts-utils";
+import { INativeDeviceInfo, INativeDeviceInfoAccess, PushServices } from "../../src";
 
 export class NativeDeviceInfoAccessMock implements INativeDeviceInfoAccess {
     public get deviceInfo(): INativeDeviceInfo {
