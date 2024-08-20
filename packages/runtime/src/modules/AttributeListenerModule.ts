@@ -41,11 +41,11 @@ export class AttributeListenerModule extends RuntimeModule {
             return false;
         }
 
-        const activeRelationshipToPeer = (
+        const activeRelationshipsToPeer = (
             await services.transportServices.relationships.getRelationships({ query: { peer: attribute.shareInfo?.peer, status: RelationshipStatus.Active } })
         ).value;
 
-        if (activeRelationshipToPeer.length === 0) {
+        if (activeRelationshipsToPeer.length === 0) {
             return true;
         }
 

@@ -305,25 +305,25 @@ export class TestUtil {
     public static async ensureActiveRelationship(from: AccountController, to: AccountController): Promise<void> {
         const toAddress = to.identity.address.toString();
 
-        const queryForPendingRelationship = {
+        const queryForPendingRelationships = {
             "peer.address": toAddress,
             status: RelationshipStatus.Pending
         };
-        const pendingRelationship = await from.relationships.getRelationships(queryForPendingRelationship);
+        const pendingRelationships = await from.relationships.getRelationships(queryForPendingRelationships);
 
-        if (pendingRelationship.length !== 0) {
-            await from.relationships.accept(pendingRelationship[0].id);
+        if (pendingRelationships.length !== 0) {
+            await from.relationships.accept(pendingRelationships[0].id);
             await TestUtil.syncUntilHasRelationships(to);
             return;
         }
 
-        const queryForActiveRelationship = {
+        const queryForActiveRelationships = {
             "peer.address": toAddress,
             status: RelationshipStatus.Active
         };
-        const activeRelationship = await from.relationships.getRelationships(queryForActiveRelationship);
+        const activeRelationships = await from.relationships.getRelationships(queryForActiveRelationships);
 
-        if (activeRelationship.length === 0) {
+        if (activeRelationships.length === 0) {
             await TestUtil.addRelationship(from, to);
             return;
         }
@@ -358,13 +358,13 @@ export class TestUtil {
         toAccount: AccountController,
         toConsumption: ConsumptionController
     ): Promise<void> {
-        const queryForActiveRelationship = {
+        const queryForActiveRelationships = {
             "peer.address": toAccount.identity.address.toString(),
             status: RelationshipStatus.Active
         };
-        const activeRelationshipToPeer = await fromAccount.relationships.getRelationships(queryForActiveRelationship);
+        const activeRelationshipsToPeer = await fromAccount.relationships.getRelationships(queryForActiveRelationships);
 
-        if (activeRelationshipToPeer.length !== 0) {
+        if (activeRelationshipsToPeer.length !== 0) {
             await TestUtil.terminateRelationship(fromAccount, toAccount);
             await TestUtil.decomposeRelationship(fromAccount, fromConsumption, toAccount);
             await TestUtil.decomposeRelationship(toAccount, toConsumption, fromAccount);
