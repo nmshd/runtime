@@ -282,7 +282,7 @@ export class AppRuntime extends Runtime<AppConfig> {
 
     protected createDatabaseConnection(): Promise<IDatabaseConnection> {
         this.logger.trace("Creating DatabaseConnection to LokiJS");
-        this.lokiConnection = new LokiJsConnection(this.config.dataFolder, this.nativeEnvironment.databaseFactory);
+        this.lokiConnection = new LokiJsConnection(this.config.databaseFolder, this.nativeEnvironment.databaseFactory);
         this.logger.trace("Finished initialization of LokiJS connection.");
 
         return Promise.resolve(this.lokiConnection);
