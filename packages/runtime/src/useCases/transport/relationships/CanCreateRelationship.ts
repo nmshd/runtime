@@ -9,18 +9,18 @@ export interface CanCreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
 }
 
-export type CanCreateRelationshipResult = CanCreateRelationshipSuccessResult | CanCreateRelationshipErrorResult;
+export type CanCreateRelationshipResponse = CanCreateRelationshipSuccessResponse | CanCreateRelationshipErrorResponse;
 
-interface CanCreateRelationshipSuccessResult {
+interface CanCreateRelationshipSuccessResponse {
     isSuccess: true;
 }
 
-interface CanCreateRelationshipErrorResult {
+interface CanCreateRelationshipErrorResponse {
     isSuccess: false;
     error: ApplicationError;
 }
 
-export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipRequest, CanCreateRelationshipResult> {
+export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipRequest, CanCreateRelationshipResponse> {
     public constructor(
         @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject private readonly relationshipController: RelationshipsController,
@@ -29,7 +29,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         super();
     }
 
-    protected async executeInternal(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResult, ApplicationError>> {
+    protected async executeInternal(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse, ApplicationError>> {
         const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
 
         if (!template) {
@@ -44,12 +44,12 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         const existingRelationshipsToPeer = await this.relationshipController.getRelationships(queryForExistingRelationships);
 
         if (existingRelationshipsToPeer.length !== 0) {
-            const errorResult: CanCreateRelationshipErrorResult = {
+            const errorResponse: CanCreateRelationshipErrorResponse = {
                 isSuccess: false,
                 error: CoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status)
             };
 
-            return Result.ok(errorResult);
+            return Result.ok(errorResponse);
         }
 
         if (template.cache?.content instanceof RelationshipTemplateContent) {
@@ -64,32 +64,32 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
                 if (template.cache.expiresAt && template.isExpired()) {
                     await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
 
-                    const errorResult: CanCreateRelationshipErrorResult = {
+                    const errorResponse: CanCreateRelationshipErrorResponse = {
                         isSuccess: false,
                         error: RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
                             `The LocalRequest has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to in order to accept or to reject the creation of a Relationship.`
                         )
                     };
 
-                    return Result.ok(errorResult);
+                    return Result.ok(errorResponse);
                 }
             }
         }
 
         if (template.cache?.content instanceof ArbitraryRelationshipTemplateContent) {
             if (template.isExpired()) {
-                const errorResult: CanCreateRelationshipErrorResult = {
+                const errorResponse: CanCreateRelationshipErrorResponse = {
                     isSuccess: false,
                     error: RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
                         `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
                     )
                 };
 
-                return Result.ok(errorResult);
+                return Result.ok(errorResponse);
             }
         }
 
-        const successResult: CanCreateRelationshipSuccessResult = { isSuccess: true };
-        return Result.ok(successResult);
+        const successResponse: CanCreateRelationshipSuccessResponse = { isSuccess: true };
+        return Result.ok(successResponse);
     }
 }

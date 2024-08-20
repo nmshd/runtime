@@ -41,9 +41,9 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             RuntimeErrors.relationshipTemplates.wrongContentType();
         }
 
-        const canCreateRelationshipResult = (await this.canCreateRelationshipUseCase.execute({ templateId: request.templateId })).value;
-        if (!canCreateRelationshipResult.isSuccess) {
-            return Result.fail(canCreateRelationshipResult.error);
+        const canCreateRelationshipResponse = (await this.canCreateRelationshipUseCase.execute({ templateId: request.templateId })).value;
+        if (!canCreateRelationshipResponse.isSuccess) {
+            return Result.fail(canCreateRelationshipResponse.error);
         }
 
         const transformedCreationContent = Serializable.fromUnknown(request.creationContent);

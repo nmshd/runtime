@@ -40,9 +40,9 @@ export class CanAcceptIncomingRequestUseCase extends UseCase<AcceptIncomingReque
             const existingRelationshipsToPeer = await this.relationshipController.getRelationships(queryForExistingRelationships);
 
             if (existingRelationshipsToPeer.length === 0) {
-                const canCreateRelationshipResult = (await this.canCreateRelationshipUseCase.execute({ templateId: template.id.toString() })).value;
-                if (!canCreateRelationshipResult.isSuccess) {
-                    return Result.fail(canCreateRelationshipResult.error);
+                const canCreateRelationshipResponse = (await this.canCreateRelationshipUseCase.execute({ templateId: template.id.toString() })).value;
+                if (!canCreateRelationshipResponse.isSuccess) {
+                    return Result.fail(canCreateRelationshipResponse.error);
                 }
             }
         }
