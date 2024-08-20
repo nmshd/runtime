@@ -56,7 +56,7 @@ export class AttributeListenerModule extends RuntimeModule {
         const changedRelationship = event.data;
 
         const lastAuditLogEntry = changedRelationship.auditLog.at(-1);
-        if (lastAuditLogEntry && lastAuditLogEntry.reason === RelationshipAuditLogEntryReason.AcceptanceOfCreation) {
+        if (lastAuditLogEntry!.reason === RelationshipAuditLogEntryReason.AcceptanceOfCreation) {
             const services = await this.runtime.getServices(event.eventTargetAddress);
             const relationshipAttributesWithPeer = (
                 await services.consumptionServices.attributes.getAttributes({ query: { "content.@type": "RelationshipAttribute", "shareInfo.peer": changedRelationship.peer } })
