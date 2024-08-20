@@ -45,19 +45,26 @@ describe("AttributesController", function () {
     let consumptionController: ConsumptionController;
     let testAccount: AccountController;
 
+    let appConsumptionController: ConsumptionController;
+    let appTestAccount: AccountController;
+
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection, mockEventBus);
         await transport.init();
 
-        const consumption = TestUtil.createConsumption();
+        const defaultConsumption = TestUtil.createConsumption();
+        const connectorAccount = (await TestUtil.provideAccounts(transport, defaultConsumption, 1))[0];
+        ({ accountController: testAccount, consumptionController } = connectorAccount);
 
-        const account = (await TestUtil.provideAccounts(transport, consumption, 1))[0];
-        ({ accountController: testAccount, consumptionController } = account);
+        const appConsumption = TestUtil.createConsumption({ setDefaultRepositoryAttributes: true });
+        const appAccount = (await TestUtil.provideAccounts(transport, appConsumption, 1))[0];
+        ({ accountController: appTestAccount, consumptionController: appConsumptionController } = appAccount);
     });
 
     afterAll(async function () {
         await testAccount.close();
+        await appTestAccount.close();
         await connection.close();
     });
 
@@ -67,9 +74,13 @@ describe("AttributesController", function () {
 
     afterEach(async function () {
         const attributes = await consumptionController.attributes.getLocalAttributes();
-
         for (const attribute of attributes) {
             await consumptionController.attributes.deleteAttribute(attribute);
+        }
+
+        const appAttributes = await appConsumptionController.attributes.getLocalAttributes();
+        for (const attribute of appAttributes) {
+            await appConsumptionController.attributes.deleteAttribute(attribute);
         }
     });
 
@@ -160,38 +171,35 @@ describe("AttributesController", function () {
             );
         });
 
-        // TODO:
         test("should set an Attribute as default if it is the only of its value type and setDefaultRepositoryAttributes is true", async function () {
             const attributeParams: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
                     value: EMailAddress.from({
                         value: "my@email.address"
                     }),
-                    owner: consumptionController.accountController.identity.address
+                    owner: appConsumptionController.accountController.identity.address
                 })
             };
-            const attribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            const attribute = await appConsumptionController.attributes.createRepositoryAttribute(attributeParams);
             expect(attribute.isDefault).toBe(true);
         });
 
-        // TODO:
         test("should not set an Attribute as default if already another exists with that value type and setDefaultRepositoryAttributes is true", async function () {
             const attributeParams: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
                     value: EMailAddress.from({
                         value: "my@email.address"
                     }),
-                    owner: consumptionController.accountController.identity.address
+                    owner: appConsumptionController.accountController.identity.address
                 })
             };
-            const firstAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            const firstAttribute = await appConsumptionController.attributes.createRepositoryAttribute(attributeParams);
             expect(firstAttribute.isDefault).toBe(true);
 
-            const secondAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            const secondAttribute = await appConsumptionController.attributes.createRepositoryAttribute(attributeParams);
             expect(secondAttribute.isDefault).toBeUndefined();
         });
 
-        // TODO:
         test("should not set an Attribute as default if it is the only of its value type but setDefaultRepositoryAttributes is false", async function () {
             const attributeParams: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
@@ -205,20 +213,20 @@ describe("AttributesController", function () {
             expect(attribute.isDefault).toBeUndefined();
         });
 
-        test("should set a child Attribute of a complex default attribute as default", async function () {
-            const complexBirthDate = await consumptionController.attributes.createRepositoryAttribute({
+        test("should set a child Attribute of a complex default attribute as default if setDefaultRepositoryAttributes is true", async function () {
+            const complexBirthDate = await appConsumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: BirthDate.from({
                         day: 28,
                         month: 2,
                         year: 2000
                     }),
-                    owner: consumptionController.accountController.identity.address
+                    owner: appConsumptionController.accountController.identity.address
                 })
             });
             expect(complexBirthDate.isDefault).toBe(true);
 
-            const childBirthYear = await consumptionController.attributes.getLocalAttributes({
+            const childBirthYear = await appConsumptionController.attributes.getLocalAttributes({
                 parentId: complexBirthDate.id.toString(),
                 "content.value.@type": "BirthYear"
             });
@@ -226,34 +234,37 @@ describe("AttributesController", function () {
             expect(childBirthYear[0].isDefault).toBe(true);
         });
 
-        test("should set a child Attribute of a complex default attribute as default even if already another attribute with that value type exists", async function () {
-            const independentBirthYear = await consumptionController.attributes.createRepositoryAttribute({
+        test("should set a child Attribute of a complex default attribute as default if setDefaultRepositoryAttributes is true, even if already another attribute with that value type exists", async function () {
+            const independentBirthYear = await appConsumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: BirthYear.from({
                         value: 2000
                     }),
-                    owner: consumptionController.accountController.identity.address
+                    owner: appConsumptionController.accountController.identity.address
                 })
             });
             expect(independentBirthYear.isDefault).toBe(true);
 
-            const complexBirthDate = await consumptionController.attributes.createRepositoryAttribute({
+            const complexBirthDate = await appConsumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: BirthDate.from({
                         day: 28,
                         month: 2,
                         year: 2000
                     }),
-                    owner: consumptionController.accountController.identity.address
+                    owner: appConsumptionController.accountController.identity.address
                 })
             });
             expect(complexBirthDate.isDefault).toBe(true);
 
-            const childBirthYear = await consumptionController.attributes.getLocalAttributes({ parentId: complexBirthDate.id.toString(), "content.value.@type": "BirthYear" });
+            const childBirthYear = await appConsumptionController.attributes.getLocalAttributes({
+                parentId: complexBirthDate.id.toString(),
+                "content.value.@type": "BirthYear"
+            });
             expect(childBirthYear).toHaveLength(1);
             expect(childBirthYear[0].isDefault).toBe(true);
 
-            const updatedIndependentBirthYear = await consumptionController.attributes.getLocalAttribute(independentBirthYear.id);
+            const updatedIndependentBirthYear = await appConsumptionController.attributes.getLocalAttribute(independentBirthYear.id);
             expect(updatedIndependentBirthYear!.isDefault).toBeUndefined();
         });
 
@@ -931,39 +942,69 @@ describe("AttributesController", function () {
                 expect(updatedPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             });
 
-            test("should change default from deleted attribute to newest of the same value type if another exists", async function () {
-                const otherRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            test("should change default from deleted attribute to newest of the same value type if another exists and setDefaultRepositoryAttributes is true", async function () {
+                const defaultRepositoryAttribute = await appConsumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: EMailAddress.from({
+                            value: "my@email.address"
+                        }),
+                        owner: appConsumptionController.accountController.identity.address
+                    })
+                });
+
+                const otherRepositoryAttribute = await appConsumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: EMailAddress.from({
                             value: "my2@email.address"
                         }),
-                        owner: consumptionController.accountController.identity.address
+                        owner: appConsumptionController.accountController.identity.address
                     })
                 });
 
-                const otherNewerRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                const otherNewerRepositoryAttribute = await appConsumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: EMailAddress.from({
                             value: "my3@email.address"
                         }),
-                        owner: consumptionController.accountController.identity.address
+                        owner: appConsumptionController.accountController.identity.address
                     })
                 });
 
-                expect(successorRepositoryAttribute.isDefault).toBe(true);
+                expect(defaultRepositoryAttribute.isDefault).toBe(true);
                 expect(otherRepositoryAttribute.isDefault).toBeUndefined();
                 expect(otherNewerRepositoryAttribute.isDefault).toBeUndefined();
 
-                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
-                const updatedOtherRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(otherNewerRepositoryAttribute.id);
+                await appConsumptionController.attributes.executeFullAttributeDeletionProcess(defaultRepositoryAttribute);
+                const updatedOtherRepositoryAttribute = await appConsumptionController.attributes.getLocalAttribute(otherNewerRepositoryAttribute.id);
                 expect(updatedOtherRepositoryAttribute!.isDefault).toBe(true);
             });
 
-            test("should not set a default if the deleted default attribute had predecessors but no other candidate exists", async function () {
-                expect(successorRepositoryAttribute.isDefault).toBe(true);
-                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+            test("should not set a default if the deleted default attribute had predecessors but no other candidate exists and setDefaultRepositoryAttributes is true", async function () {
+                const predecessorRepositoryAttribute = await appConsumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: EMailAddress.from({
+                            value: "my@email.address"
+                        }),
+                        owner: appConsumptionController.accountController.identity.address
+                    })
+                });
 
-                const defaultAttributes = await consumptionController.attributes.getLocalAttributes({ isDefault: "true" });
+                const repositorySuccessorParams: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "EMailAddress",
+                            value: "my-new@email.address"
+                        },
+                        owner: appConsumptionController.accountController.identity.address
+                    })
+                };
+                const successionResult = await appConsumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, repositorySuccessorParams);
+                const { successor: successorRepositoryAttribute } = successionResult;
+
+                expect(successorRepositoryAttribute.isDefault).toBe(true);
+                await appConsumptionController.attributes.executeFullAttributeDeletionProcess(successorRepositoryAttribute);
+
+                const defaultAttributes = await appConsumptionController.attributes.getLocalAttributes({ isDefault: "true" });
                 expect(defaultAttributes).toHaveLength(0);
             });
         });
@@ -1657,13 +1698,13 @@ describe("AttributesController", function () {
             });
 
             test("should make successor default succeeding a default repository attribute", async function () {
-                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                const predecessor = await appConsumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
                             value: "DE"
                         },
-                        owner: consumptionController.accountController.identity.address
+                        owner: appConsumptionController.accountController.identity.address
                     })
                 });
                 expect(predecessor.isDefault).toBe(true);
@@ -1674,11 +1715,11 @@ describe("AttributesController", function () {
                             "@type": "Nationality",
                             value: "US"
                         },
-                        owner: consumptionController.accountController.identity.address
+                        owner: appConsumptionController.accountController.identity.address
                     })
                 };
 
-                const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
+                const { predecessor: updatedPredecessor, successor } = await appConsumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
                 expect(successor.isDefault).toBe(true);
                 expect(updatedPredecessor.isDefault).toBeUndefined();
             });
@@ -2358,58 +2399,58 @@ describe("AttributesController", function () {
     });
 
     describe("change default Attributes", function () {
-        test("should change default RepositoryAttribute", async function () {
-            const firstAttribute = await consumptionController.attributes.createRepositoryAttribute({
+        test("should change default RepositoryAttribute if setDefaultRepositoryAttributes is true", async function () {
+            const firstAttribute = await appConsumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "GivenName",
                         value: "My default given name"
                     },
-                    owner: consumptionController.accountController.identity.address
+                    owner: appConsumptionController.accountController.identity.address
                 })
             });
 
-            const secondAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const secondAttribute = await appConsumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "GivenName",
                         value: "My other given name"
                     },
-                    owner: consumptionController.accountController.identity.address
+                    owner: appConsumptionController.accountController.identity.address
                 })
             });
             expect(secondAttribute.isDefault).toBeUndefined();
 
-            const updatedSecondAttribute = await consumptionController.attributes.setAsDefaultRepositoryAttribute(secondAttribute);
+            const updatedSecondAttribute = await appConsumptionController.attributes.setAsDefaultRepositoryAttribute(secondAttribute);
             expect(updatedSecondAttribute.isDefault).toBe(true);
 
-            const updatedFirstAttribute = await consumptionController.attributes.getLocalAttribute(firstAttribute.id);
+            const updatedFirstAttribute = await appConsumptionController.attributes.getLocalAttribute(firstAttribute.id);
             expect(updatedFirstAttribute!.isDefault).toBeUndefined();
         });
 
-        test("should not change default RepositoryAttribute if candidate is already default", async function () {
-            const firstAttribute = await consumptionController.attributes.createRepositoryAttribute({
+        test("should not change default RepositoryAttribute if candidate is already default and setDefaultRepositoryAttributes is true", async function () {
+            const firstAttribute = await appConsumptionController.attributes.createRepositoryAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "GivenName",
                         value: "My default given name"
                     },
-                    owner: consumptionController.accountController.identity.address
+                    owner: appConsumptionController.accountController.identity.address
                 })
             });
             expect(firstAttribute.isDefault).toBe(true);
-            const updatedFirstAttribute = await consumptionController.attributes.setAsDefaultRepositoryAttribute(firstAttribute);
+            const updatedFirstAttribute = await appConsumptionController.attributes.setAsDefaultRepositoryAttribute(firstAttribute);
             expect(updatedFirstAttribute.isDefault).toBe(true);
         });
 
-        test("should throw an error if the new default Attribute is not a RepositoryAttribute", async function () {
-            const sharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
+        test("should throw an error if the new default Attribute is not a RepositoryAttribute and setDefaultRepositoryAttributes is true", async function () {
+            const sharedAttribute = await appConsumptionController.attributes.createAttributeUnsafe({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "GivenName",
                         value: "My shared given name"
                     },
-                    owner: consumptionController.accountController.identity.address
+                    owner: appConsumptionController.accountController.identity.address
                 }),
                 shareInfo: LocalAttributeShareInfo.from({
                     peer: CoreAddress.from("peer"),
@@ -2418,8 +2459,26 @@ describe("AttributesController", function () {
             });
 
             await TestUtil.expectThrowsAsync(
-                consumptionController.attributes.setAsDefaultRepositoryAttribute(sharedAttribute),
+                appConsumptionController.attributes.setAsDefaultRepositoryAttribute(sharedAttribute),
                 "error.consumption.attributes.isNotRepositoryAttribute"
+            );
+        });
+
+        test("should throw an error trying to change the default RepositoryAttribute if setDefaultRepositoryAttributes is false", async function () {
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "My default given name"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            expect(repositoryAttribute.isDefault).toBeUndefined();
+
+            await TestUtil.expectThrowsAsync(
+                consumptionController.attributes.setAsDefaultRepositoryAttribute(repositoryAttribute),
+                "error.consumption.attributes.setDefaultRepositoryAttributesIsDisabled"
             );
         });
     });

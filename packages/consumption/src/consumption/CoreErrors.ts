@@ -252,6 +252,10 @@ class Attributes {
             `The sender (id: '${senderId}') of the Notification is not the peer you shared the Attribute (id: '${attributeId}') with.`
         );
     }
+
+    public setDefaultRepositoryAttributesIsDisabled() {
+        return new CoreError("error.consumption.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
+    }
 }
 
 class Requests {
