@@ -191,7 +191,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this._anonymousServices = Container.get<AnonymousServices>(AnonymousServices);
     }
 
-    public async validateUsedBackboneVersion(): Promise<Result<void>> {
+    public async checkBackboneCompatibility(): Promise<Result<void>> {
         if (!this._accountController) {
             return Result.fail(RuntimeErrors.startup.noActiveAccount());
         }

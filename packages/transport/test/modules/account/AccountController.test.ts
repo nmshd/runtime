@@ -41,7 +41,7 @@ describe("AccountController", function () {
     });
 
     test("should catch a too low backbone version", async function () {
-        const transport = TestUtil.createTransport(connection, { supportedMinBackboneVersion: 51, supportedMaxBackboneVersion: 60 });
+        const transport = TestUtil.createTransport(connection, { supportedMinBackboneVersion: 5000, supportedMaxBackboneVersion: 6000 });
         await transport.init();
         const accounts = await TestUtil.provideAccounts(transport, 1);
         account = accounts[0];
