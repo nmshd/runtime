@@ -5,7 +5,6 @@ import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateCo
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { CanCreateRelationshipUseCase } from "./CanCreateRelationship";
 import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface CreateRelationshipRequest {
@@ -24,7 +23,6 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
         @Inject private readonly accountController: AccountController,
-        @Inject private readonly canCreateRelationshipUseCase: CanCreateRelationshipUseCase,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -41,9 +39,12 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             RuntimeErrors.relationshipTemplates.wrongContentType();
         }
 
-        const canCreateRelationshipResponse = (await this.canCreateRelationshipUseCase.execute({ templateId: request.templateId })).value;
-        if (!canCreateRelationshipResponse.isSuccess) {
-            return Result.fail(canCreateRelationshipResponse.error);
+        if (template.isExpired()) {
+            return Result.fail(
+                RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
+                    `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
+                )
+            );
         }
 
         const transformedCreationContent = Serializable.fromUnknown(request.creationContent);

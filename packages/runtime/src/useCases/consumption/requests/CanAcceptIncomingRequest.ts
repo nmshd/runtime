@@ -1,10 +1,9 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { IncomingRequestsController, LocalRequest } from "@nmshd/consumption";
+import { IncomingRequestsController, LocalRequest, LocalRequestStatus } from "@nmshd/consumption";
 import { CoreId, RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RequestValidationResultDTO } from "../../../types";
 import { RuntimeErrors, UseCase } from "../../common";
-import { CanCreateRelationshipUseCase } from "../../transport/relationships/CanCreateRelationship";
 import { AcceptIncomingRequestRequest } from "./AcceptIncomingRequest";
 import { RequestValidationResultMapper } from "./RequestValidationResultMapper";
 
@@ -12,8 +11,7 @@ export class CanAcceptIncomingRequestUseCase extends UseCase<AcceptIncomingReque
     public constructor(
         @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject private readonly relationshipController: RelationshipsController,
-        @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
-        @Inject private readonly canCreateRelationshipUseCase: CanCreateRelationshipUseCase
+        @Inject private readonly relationshipTemplateController: RelationshipTemplateController
     ) {
         super();
     }
@@ -25,7 +23,10 @@ export class CanAcceptIncomingRequestUseCase extends UseCase<AcceptIncomingReque
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalRequest));
         }
 
-        if (localRequest.source?.type === "RelationshipTemplate") {
+        if (
+            localRequest.source?.type === "RelationshipTemplate" &&
+            ![LocalRequestStatus.Decided, LocalRequestStatus.Completed, LocalRequestStatus.Expired].includes(localRequest.status)
+        ) {
             const template = await this.relationshipTemplateController.getRelationshipTemplate(localRequest.source.reference);
 
             if (!template) {
@@ -39,11 +40,14 @@ export class CanAcceptIncomingRequestUseCase extends UseCase<AcceptIncomingReque
 
             const existingRelationshipsToPeer = await this.relationshipController.getRelationships(queryForExistingRelationships);
 
-            if (existingRelationshipsToPeer.length === 0) {
-                const canCreateRelationshipResponse = (await this.canCreateRelationshipUseCase.execute({ templateId: template.id.toString() })).value;
-                if (!canCreateRelationshipResponse.isSuccess) {
-                    return Result.fail(canCreateRelationshipResponse.error);
-                }
+            if (existingRelationshipsToPeer.length === 0 && template.cache?.expiresAt && template.isExpired()) {
+                await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
+
+                return Result.fail(
+                    RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
+                        `The LocalRequest has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to in order to accept or to reject the creation of a Relationship.`
+                    )
+                );
             }
         }
 
