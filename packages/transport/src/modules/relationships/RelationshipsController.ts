@@ -156,6 +156,17 @@ export class RelationshipsController extends TransportController {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
 
+        const queryForExistingRelationships = {
+            "peer.address": template.cache.createdBy.toString(),
+            status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
+        };
+
+        const existingRelationshipsToPeer = await this.getRelationships(queryForExistingRelationships);
+
+        if (existingRelationshipsToPeer.length !== 0) {
+            throw CoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
+        }
+
         const secretId = await TransportIds.relationshipSecret.generate();
 
         const creationContentCipher = await this.prepareCreationContent(secretId, template, parameters.creationContent);
@@ -169,6 +180,11 @@ export class RelationshipsController extends TransportController {
             if (result.error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
                 throw CoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate();
             }
+
+            if (result.error.code === "error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists") {
+                throw CoreErrors.relationships.relationshipNotYetDecomposedByPeer();
+            }
+
             throw result.error;
         }
 
