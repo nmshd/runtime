@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
-import { EventBus, EventEmitter2EventBus, Result } from "@js-soft/ts-utils";
+import { EventBus, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
     AttributeListenersController,
     AttributesController,
@@ -26,7 +26,8 @@ import {
     RelationshipsController,
     RelationshipTemplateController,
     TokenController,
-    Transport
+    Transport,
+    VersionController
 } from "@nmshd/transport";
 import { Container, Scope } from "typescript-ioc";
 import { buildInformation } from "./buildInformation";
@@ -191,14 +192,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this._anonymousServices = Container.get<AnonymousServices>(AnonymousServices);
     }
 
-    public async checkBackboneCompatibility(): Promise<Result<void>> {
-        if (!this._accountController) {
-            return Result.fail(RuntimeErrors.startup.noActiveAccount());
-        }
-        const result = await this._accountController.validateUsedBackboneVersion();
-        return result;
-    }
-
     private createTransportConfigWithAdditionalHeaders(originalTransportConfig: IConfigOverwrite): IConfigOverwrite {
         const platformAdditionalHeaders = originalTransportConfig.platformAdditionalHeaders ?? {};
 
@@ -294,6 +287,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(AnonymousTokenController)
             .factory(() => new AnonymousTokenController(this.transport.config))
+            .scope(Scope.Singleton);
+
+        Container.bind(VersionController)
+            .factory(() => new VersionController(this.transport.config))
             .scope(Scope.Singleton);
 
         const schemaRepository = new SchemaRepository();
