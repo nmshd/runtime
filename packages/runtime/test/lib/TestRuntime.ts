@@ -88,7 +88,10 @@ export class TestRuntime extends Runtime {
 
         const requestItemProcessorOverrides = new Map([[TestRequestItem, GenericRequestItemProcessor]]);
         const notificationItemProcessorOverrides = new Map([[TestNotificationItem, TestNotificationItemProcessor]]);
-        const consumptionController = await new ConsumptionController(this.transport, accountController).init(requestItemProcessorOverrides, notificationItemProcessorOverrides);
+        const consumptionController = await new ConsumptionController(this.transport, accountController, this.consumption).init(
+            requestItemProcessorOverrides,
+            notificationItemProcessorOverrides
+        );
 
         ({
             transportServices: this._transportServices,

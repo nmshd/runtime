@@ -17,6 +17,7 @@ export interface LaunchConfiguration {
     enableRequestModule?: boolean;
     enableAttributeListenerModule?: boolean;
     enableNotificationModule?: boolean;
+    enableDefaultRepositoryAttributes?: boolean;
 }
 
 export class RuntimeServiceProvider {
@@ -28,6 +29,9 @@ export class RuntimeServiceProvider {
             platformClientId: process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: process.env.NMSHD_TEST_CLIENTSECRET!,
             debug: true
+        },
+        consumptionLibrary: {
+            setDefaultRepositoryAttributes: false
         },
         modules: {
             decider: {
@@ -76,6 +80,10 @@ export class RuntimeServiceProvider {
 
             if (launchConfiguration.enableDatawallet) {
                 config.transportLibrary.datawalletEnabled = true;
+            }
+
+            if (launchConfiguration.enableDefaultRepositoryAttributes) {
+                config.consumptionLibrary.setDefaultRepositoryAttributes = true;
             }
 
             if (launchConfiguration.enableRequestModule) config.modules.request.enabled = true;

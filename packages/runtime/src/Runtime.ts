@@ -137,9 +137,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         await this.initDIContainer();
 
         await this.initTransportLibrary();
-        await this.initAccount();
-
         this.initConsumptionLibrary();
+        await this.initAccount();
 
         this._modules = new RuntimeModuleRegistry();
         await this.loadModules();
