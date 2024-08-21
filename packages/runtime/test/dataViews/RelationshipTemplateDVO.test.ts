@@ -154,7 +154,7 @@ describe("RelationshipTemplateDVO", () => {
     });
 
     test("TemplateDVO for templator", async () => {
-        const dto = templatorTemplate;
+        const dto = templatorTemplate as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         const dvo = await templator.expander.expandRelationshipTemplateDTO(dto);
         expect(dvo).toBeDefined();
         expect(dvo.id).toBe(dto.id);
