@@ -16,7 +16,6 @@ export class RelationshipTemplateMapper {
             createdBy: template.cache.createdBy.toString(),
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
-            forIdentity: template.cache.forIdentity?.toString(),
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,

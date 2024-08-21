@@ -107,12 +107,11 @@ describe("TokenController", function () {
         expect((receivedToken.cache?.content as TokenContentFile).secretKey.toBase64()).toBe((sentToken.cache?.content as TokenContentFile).secretKey.toBase64());
     });
 
-    test("should send and receive a personalized TokenContentRelationshipTemplate", async function () {
+    test("should send and receive a TokenContentRelationshipTemplate", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = TokenContentRelationshipTemplate.from({
             templateId: await CoreId.generate(),
-            secretKey: await CryptoEncryption.generateKey(),
-            forIdentity: recipient.identity.address
+            secretKey: await CryptoEncryption.generateKey()
         });
         const sentToken = await sender.tokens.sendToken({
             content,
@@ -137,9 +136,6 @@ describe("TokenController", function () {
         );
         expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).secretKey.toBase64()).toBe(
             (sentToken.cache?.content as TokenContentRelationshipTemplate).secretKey.toBase64()
-        );
-        expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).forIdentity!.toString()).toBe(
-            (sentToken.cache?.content as TokenContentRelationshipTemplate).forIdentity!.toString()
         );
     });
 
