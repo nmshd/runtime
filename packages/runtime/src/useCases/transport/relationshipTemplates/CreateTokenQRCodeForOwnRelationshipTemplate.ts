@@ -41,8 +41,7 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
 
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
-            secretKey: template.secretKey,
-            forIdentity: template.cache?.forIdentity
+            secretKey: template.secretKey
         });
 
         const defaultTokenExpiry = template.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });

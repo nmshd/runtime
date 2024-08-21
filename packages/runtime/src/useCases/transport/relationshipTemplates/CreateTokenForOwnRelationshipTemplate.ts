@@ -50,8 +50,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
 
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
-            secretKey: template.secretKey,
-            forIdentity: template.cache?.forIdentity
+            secretKey: template.secretKey
         });
 
         const ephemeral = request.ephemeral ?? true;

@@ -8,7 +8,6 @@ export interface RelationshipTemplateDTO {
     createdBy: string;
     createdByDevice: string;
     createdAt: string;
-    forIdentity?: string;
     content: RelationshipTemplateContentDerivation;
     expiresAt?: string;
     maxNumberOfAllocations?: number;

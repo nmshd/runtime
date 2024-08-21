@@ -14,7 +14,6 @@ export interface ICachedRelationshipTemplate extends ICoreSerializable {
     createdAt: ICoreDate;
     expiresAt?: ICoreDate;
     maxNumberOfAllocations?: number;
-    forIdentity?: ICoreAddress;
 }
 
 @type("CachedRelationshipTemplate")
@@ -50,10 +49,6 @@ export class CachedRelationshipTemplate extends CoreSerializable implements ICac
     @validate({ nullable: true, customValidator: validateMaxNumberOfAllocations })
     @serialize()
     public maxNumberOfAllocations?: number;
-
-    @validate({ nullable: true })
-    @serialize()
-    public forIdentity?: CoreAddress;
 
     public static from(value: ICachedRelationshipTemplate): CachedRelationshipTemplate {
         return this.fromAny(value);
