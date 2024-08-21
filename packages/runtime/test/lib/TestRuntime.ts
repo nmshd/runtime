@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
-import { ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
+import { ConsumptionConfig, ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
 import { AccountController, ICoreAddress } from "@nmshd/transport";
 import { ConsumptionServices, DataViewExpander, ModuleConfiguration, Runtime, RuntimeConfig, RuntimeHealth, RuntimeServices, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
@@ -16,7 +16,10 @@ export class TestRuntime extends Runtime {
     private _consumptionServices: ConsumptionServices;
     private _dataViewExpander: DataViewExpander;
 
-    public constructor(runtimeConfig: RuntimeConfig) {
+    public constructor(
+        runtimeConfig: RuntimeConfig,
+        private readonly consumptionConfig: Partial<ConsumptionConfig> = {}
+    ) {
         super(
             runtimeConfig,
             new NodeLoggerFactory({
@@ -88,7 +91,7 @@ export class TestRuntime extends Runtime {
 
         const requestItemProcessorOverrides = new Map([[TestRequestItem, GenericRequestItemProcessor]]);
         const notificationItemProcessorOverrides = new Map([[TestNotificationItem, TestNotificationItemProcessor]]);
-        const consumptionController = await new ConsumptionController(this.transport, accountController, this.consumption).init(
+        const consumptionController = await new ConsumptionController(this.transport, accountController, this.consumptionConfig).init(
             requestItemProcessorOverrides,
             notificationItemProcessorOverrides
         );

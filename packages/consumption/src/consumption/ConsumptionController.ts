@@ -41,14 +41,21 @@ import {
     ShareAttributeRequestItemProcessor,
     ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor
 } from "../modules";
-import { Consumption } from "./Consumption";
+import { ConsumptionConfig } from "./ConsumptionConfig";
 
 export class ConsumptionController {
+    public readonly consumptionConfig: ConsumptionConfig;
+
     public constructor(
         public readonly transport: Transport,
         public readonly accountController: AccountController,
-        public readonly consumption: Consumption
-    ) {}
+        consumptionConfig?: Partial<ConsumptionConfig>
+    ) {
+        this.consumptionConfig = {
+            setDefaultRepositoryAttributes: false,
+            ...consumptionConfig
+        };
+    }
 
     private _attributes: AttributesController;
     public get attributes(): AttributesController {
@@ -93,7 +100,7 @@ export class ConsumptionController {
             this,
             this.transport.eventBus,
             this.accountController.identity,
-            this.consumption.config.setDefaultRepositoryAttributes
+            this.consumptionConfig.setDefaultRepositoryAttributes
         ).init();
         this._drafts = await new DraftsController(this).init();
 

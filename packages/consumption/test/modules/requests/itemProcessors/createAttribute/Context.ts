@@ -27,8 +27,7 @@ export class Context {
 
     public static async init(transport: Transport): Promise<Context> {
         await transport.init();
-        const consumption = TestUtil.createConsumption();
-        const account = (await TestUtil.provideAccounts(transport, consumption, 1))[0];
+        const account = (await TestUtil.provideAccounts(transport, 1))[0];
         return new Context(account.consumptionController);
     }
 

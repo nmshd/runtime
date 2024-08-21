@@ -53,12 +53,10 @@ describe("AttributesController", function () {
         transport = TestUtil.createTransport(connection, mockEventBus);
         await transport.init();
 
-        const defaultConsumption = TestUtil.createConsumption();
-        const connectorAccount = (await TestUtil.provideAccounts(transport, defaultConsumption, 1))[0];
+        const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
         ({ accountController: testAccount, consumptionController } = connectorAccount);
 
-        const appConsumption = TestUtil.createConsumption({ setDefaultRepositoryAttributes: true });
-        const appAccount = (await TestUtil.provideAccounts(transport, appConsumption, 1))[0];
+        const appAccount = (await TestUtil.provideAccounts(transport, 1))[0];
         ({ accountController: appTestAccount, consumptionController: appConsumptionController } = appAccount);
     });
 

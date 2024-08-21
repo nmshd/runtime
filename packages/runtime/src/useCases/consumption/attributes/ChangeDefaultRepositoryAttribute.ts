@@ -26,7 +26,7 @@ export class ChangeDefaultRepositoryAttributeUseCase extends UseCase<ChangeDefau
     }
 
     protected async executeInternal(request: ChangeDefaultRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        if (!this.attributesController.parent.consumption.config.setDefaultRepositoryAttributes) {
+        if (!this.attributesController.parent.consumptionConfig.setDefaultRepositoryAttributes) {
             return Result.fail(RuntimeErrors.attributes.setDefaultRepositoryAttributesIsDisabled());
         }
 

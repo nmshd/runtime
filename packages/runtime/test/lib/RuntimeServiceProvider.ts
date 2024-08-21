@@ -30,9 +30,6 @@ export class RuntimeServiceProvider {
             platformClientSecret: process.env.NMSHD_TEST_CLIENTSECRET!,
             debug: true
         },
-        consumptionLibrary: {
-            setDefaultRepositoryAttributes: false
-        },
         modules: {
             decider: {
                 enabled: false,
@@ -82,16 +79,12 @@ export class RuntimeServiceProvider {
                 config.transportLibrary.datawalletEnabled = true;
             }
 
-            if (launchConfiguration.enableDefaultRepositoryAttributes) {
-                config.consumptionLibrary.setDefaultRepositoryAttributes = true;
-            }
-
             if (launchConfiguration.enableRequestModule) config.modules.request.enabled = true;
             if (launchConfiguration.enableDeciderModule) config.modules.decider.enabled = true;
             if (launchConfiguration.enableAttributeListenerModule) config.modules.attributeListener.enabled = true;
             if (launchConfiguration.enableNotificationModule) config.modules.notification.enabled = true;
 
-            const runtime = new TestRuntime(config);
+            const runtime = new TestRuntime(config, { setDefaultRepositoryAttributes: launchConfiguration.enableDefaultRepositoryAttributes });
             this.runtimes.push(runtime);
 
             await runtime.init();

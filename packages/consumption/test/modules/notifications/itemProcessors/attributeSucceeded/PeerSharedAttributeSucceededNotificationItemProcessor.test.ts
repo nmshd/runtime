@@ -26,9 +26,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
         transport = TestUtil.createTransport(connection, mockEventBus);
         await transport.init();
 
-        const consumption = TestUtil.createConsumption();
-
-        const account = (await TestUtil.provideAccounts(transport, consumption, 1))[0];
+        const account = (await TestUtil.provideAccounts(transport, 1))[0];
         ({ accountController: testAccount, consumptionController } = account);
     });
 
