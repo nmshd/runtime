@@ -203,6 +203,38 @@ export class TestUtil {
         return { accountController, consumptionController };
     }
 
+    public static async addPendingRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ pendingRelationshipFromSelf: Relationship; pendingRelationshipPeer: Relationship }> {
+        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
+            content: {
+                mycontent: "template"
+            },
+            expiresAt: CoreDate.utc().add({ minutes: 5 }),
+            maxNumberOfAllocations: 1
+        });
+
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(templateFrom.id, templateFrom.secretKey);
+
+        await to.relationships.sendRelationship({
+            template: templateTo,
+            creationContent: {
+                mycontent: "request"
+            }
+        });
+
+        const pendingRelationshipPeer = (await to.relationships.getRelationshipToIdentity(from.identity.address))!;
+        expect(pendingRelationshipPeer.status).toStrictEqual(RelationshipStatus.Pending);
+
+        const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
+        expect(syncedRelationships).toHaveLength(1);
+        const pendingRelationshipFromSelf = syncedRelationships[0];
+        expect(pendingRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Pending);
+
+        return { pendingRelationshipFromSelf, pendingRelationshipPeer };
+    }
+
     public static async addRelationship(from: AccountController, to: AccountController, templateContent?: any, requestContent?: any): Promise<Relationship[]> {
         if (!templateContent) {
             templateContent = {
@@ -270,6 +302,35 @@ export class TestUtil {
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
     }
 
+    public static async ensureActiveRelationship(from: AccountController, to: AccountController): Promise<void> {
+        const toAddress = to.identity.address.toString();
+
+        const queryForPendingRelationships = {
+            "peer.address": toAddress,
+            status: RelationshipStatus.Pending
+        };
+        const pendingRelationships = await from.relationships.getRelationships(queryForPendingRelationships);
+
+        if (pendingRelationships.length !== 0) {
+            await from.relationships.accept(pendingRelationships[0].id);
+            await TestUtil.syncUntilHasRelationships(to);
+            return;
+        }
+
+        const queryForActiveRelationships = {
+            "peer.address": toAddress,
+            status: RelationshipStatus.Active
+        };
+        const activeRelationships = await from.relationships.getRelationships(queryForActiveRelationships);
+
+        if (activeRelationships.length === 0) {
+            await TestUtil.addRelationship(from, to);
+            return;
+        }
+
+        return;
+    }
+
     public static async terminateRelationship(
         from: AccountController,
         to: AccountController
@@ -289,6 +350,27 @@ export class TestUtil {
         const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
 
         return decomposedRelationshipPeer;
+    }
+
+    public static async mutualDecomposeIfActiveRelationshipExists(
+        fromAccount: AccountController,
+        fromConsumption: ConsumptionController,
+        toAccount: AccountController,
+        toConsumption: ConsumptionController
+    ): Promise<void> {
+        const queryForActiveRelationships = {
+            "peer.address": toAccount.identity.address.toString(),
+            status: RelationshipStatus.Active
+        };
+        const activeRelationshipsToPeer = await fromAccount.relationships.getRelationships(queryForActiveRelationships);
+
+        if (activeRelationshipsToPeer.length !== 0) {
+            await TestUtil.terminateRelationship(fromAccount, toAccount);
+            await TestUtil.decomposeRelationship(fromAccount, fromConsumption, toAccount);
+            await TestUtil.decomposeRelationship(toAccount, toConsumption, fromAccount);
+        }
+
+        return;
     }
 
     /**

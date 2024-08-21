@@ -27,14 +27,21 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
     let processor: ShareAttributeRequestItemProcessor;
 
+    let thirdPartyConsumptionController: ConsumptionController;
+    let thirdPartyTestAccount: AccountController;
+    let aThirdParty: CoreAddress;
+
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
 
         await transport.init();
 
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
-        ({ accountController: testAccount, consumptionController } = account);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
+        ({ accountController: testAccount, consumptionController } = accounts[0]);
+
+        ({ accountController: thirdPartyTestAccount, consumptionController: thirdPartyConsumptionController } = accounts[1]);
+        aThirdParty = thirdPartyTestAccount.identity.address;
     });
 
     afterAll(async function () {
@@ -46,6 +53,10 @@ describe("ShareAttributeRequestItemProcessor", function () {
     });
 
     describe("canCreateOutgoingRequestItem", function () {
+        beforeEach(async function () {
+            await TestUtil.ensureActiveRelationship(testAccount, thirdPartyTestAccount);
+        });
+
         test.each([
             {
                 scenario: "an Identity Attribute with owner=sender",
@@ -136,7 +147,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
         ])("returns ${value.result} when passing ${value.scenario}", async function (testParams) {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
-            const aThirdParty = CoreAddress.from("AThirdParty");
 
             if (testParams.attribute.owner.address === "Sender") {
                 testParams.attribute.owner = sender;
@@ -239,7 +249,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
         test("returns error when the IdentityAttribute is a shared copy of a RepositoryAttribute", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
-            const aThirdParty = CoreAddress.from("AThirdParty");
 
             const localAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: IdentityAttribute.from({
@@ -687,7 +696,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
         test("returns error when the RelationshipAttribute is a copy of another RelationshipAttribute", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
-            const aThirdParty = CoreAddress.from("AThirdParty");
 
             const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
@@ -749,7 +757,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
         test("returns error when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
-            const aThirdParty = CoreAddress.from("AThirdParty");
 
             const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
@@ -796,7 +803,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
         test("returns success when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer but is ToBeDeletedByPeer", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
-            const aThirdParty = CoreAddress.from("AThirdParty");
 
             const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
@@ -844,7 +850,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
         test("returns success when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer but is DeletedByPeer", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
-            const aThirdParty = CoreAddress.from("AThirdParty");
 
             const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
@@ -887,6 +892,40 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
             expect(result).successfulValidationResult();
+        });
+
+        test("returns an error when trying to share a RelationshipAttribute of a pending Relationship", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+            await TestUtil.mutualDecomposeIfActiveRelationshipExists(testAccount, consumptionController, thirdPartyTestAccount, thirdPartyConsumptionController);
+            await TestUtil.addPendingRelationship(testAccount, thirdPartyTestAccount);
+
+            const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    owner: sender,
+                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    key: "AKey"
+                }),
+                shareInfo: {
+                    peer: aThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
+                }
+            });
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: relationshipAttribute.content,
+                sourceAttributeId: relationshipAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.cannotShareRelationshipAttributeOfPendingRelationship",
+                message: "The provided RelationshipAttribute exists in the context of a pending Relationship and therefore cannot be shared."
+            });
         });
     });
 
