@@ -151,7 +151,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this.eventBus.publish(new RuntimeInitializedEvent());
     }
 
-    // TODO: well this seems redundant
     protected initInfrastructure(): void | Promise<void> {
         return;
     }
@@ -400,7 +399,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this._isStarted = true;
     }
 
-    // TODO: ???
     protected startInfrastructure(): void | Promise<void> {
         return;
     }
@@ -430,7 +428,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this._isStarted = false;
     }
 
-    // TODO: ???
     protected stopInfrastructure(): void | Promise<void> {
         return;
     }
