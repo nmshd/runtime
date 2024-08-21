@@ -1,4 +1,5 @@
 import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentJSON } from "@nmshd/content";
+import { PeerDeletionInfoJSON } from "@nmshd/transport";
 import { IdentityDTO } from "./IdentityDTO";
 import { RelationshipTemplateDTO } from "./RelationshipTemplateDTO";
 
@@ -42,17 +43,13 @@ export interface RelationshipAuditLogDTO extends Array<RelationshipAuditLogEntry
 
 export type RelationshipCreationContentDerivation = RelationshipCreationContentJSON | ArbitraryRelationshipCreationContentJSON;
 
-export interface PeerDeletionInfoDTO {
-    deletionStatus: PeerDeletionStatus;
-}
-
 export interface RelationshipDTO {
     id: string;
     template: RelationshipTemplateDTO;
     status: RelationshipStatus;
     peer: string;
     peerIdentity: IdentityDTO;
-    peerDeletionInfo?: PeerDeletionInfoDTO;
+    peerDeletionInfo?: PeerDeletionInfoJSON;
     creationContent: RelationshipCreationContentDerivation;
     auditLog: RelationshipAuditLogDTO;
 }
