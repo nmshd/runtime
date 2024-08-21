@@ -1,8 +1,9 @@
 import { RelationshipAttributeConfidentiality, ShareAttributeRequestItemJSON } from "@nmshd/content";
-import { AttributeCreatedEvent, AttributeListenerTriggeredEvent } from "../events";
+import { RelationshipAuditLogEntryReason } from "@nmshd/transport";
+import { AttributeCreatedEvent, AttributeListenerTriggeredEvent, RelationshipChangedEvent } from "../events";
 import { RuntimeModule } from "../extensibility";
 import { RuntimeServices } from "../Runtime";
-import { LocalAttributeDTO, LocalAttributeListenerDTO } from "../types";
+import { LocalAttributeDTO, LocalAttributeListenerDTO, RelationshipStatus } from "../types";
 
 export class AttributeListenerModule extends RuntimeModule {
     public init(): void {
@@ -11,6 +12,7 @@ export class AttributeListenerModule extends RuntimeModule {
 
     public start(): void {
         this.subscribeToEvent(AttributeCreatedEvent, this.handleAttributeCreated.bind(this));
+        this.subscribeToEvent(RelationshipChangedEvent, this.handleRelationshipChanged.bind(this));
     }
 
     private async handleAttributeCreated(event: AttributeCreatedEvent) {
@@ -19,6 +21,7 @@ export class AttributeListenerModule extends RuntimeModule {
         const createdAttribute = event.data;
         if (createdAttribute.content["@type"] === "IdentityAttribute" && createdAttribute.shareInfo) return;
         if (createdAttribute.content["@type"] === "RelationshipAttribute" && createdAttribute.content.confidentiality === RelationshipAttributeConfidentiality.Private) return;
+        if (await this.detectedRelationshipAttributeOfInactiveRelationship(services, createdAttribute)) return;
 
         const getAttributeListenersResult = await services.consumptionServices.attributeListeners.getAttributeListeners();
         if (getAttributeListenersResult.isError) {
@@ -28,9 +31,56 @@ export class AttributeListenerModule extends RuntimeModule {
 
         const attributeListeners = getAttributeListenersResult.value;
         const promises = attributeListeners.map((attributeListener) =>
-            this.createRequestIfAttributeMatchesQuery(services, attributeListener, event.data, event.eventTargetAddress)
+            this.createRequestIfAttributeMatchesQuery(services, attributeListener, createdAttribute, event.eventTargetAddress)
         );
         await Promise.all(promises);
+    }
+
+    private async detectedRelationshipAttributeOfInactiveRelationship(services: RuntimeServices, attribute: LocalAttributeDTO): Promise<boolean> {
+        if (attribute.content["@type"] !== "RelationshipAttribute") {
+            return false;
+        }
+
+        const activeRelationshipsToPeer = (
+            await services.transportServices.relationships.getRelationships({ query: { peer: attribute.shareInfo?.peer, status: RelationshipStatus.Active } })
+        ).value;
+
+        if (activeRelationshipsToPeer.length === 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private async handleRelationshipChanged(event: RelationshipChangedEvent) {
+        const changedRelationship = event.data;
+
+        const lastAuditLogEntry = changedRelationship.auditLog.at(-1);
+        if (lastAuditLogEntry!.reason === RelationshipAuditLogEntryReason.AcceptanceOfCreation) {
+            const services = await this.runtime.getServices(event.eventTargetAddress);
+            const relationshipAttributesWithPeer = (
+                await services.consumptionServices.attributes.getAttributes({ query: { "content.@type": "RelationshipAttribute", "shareInfo.peer": changedRelationship.peer } })
+            ).value;
+
+            for (const relationshipAttribute of relationshipAttributesWithPeer) {
+                if (relationshipAttribute.content["@type"] !== "RelationshipAttribute") return;
+                if (relationshipAttribute.content.confidentiality === RelationshipAttributeConfidentiality.Private) return;
+
+                const getAttributeListenersResult = await services.consumptionServices.attributeListeners.getAttributeListeners();
+                if (getAttributeListenersResult.isError) {
+                    this.logger.error("Could not get attribute listeners", getAttributeListenersResult.error);
+                    return;
+                }
+
+                const attributeListeners = getAttributeListenersResult.value;
+                const promises = attributeListeners.map((attributeListener) =>
+                    this.createRequestIfAttributeMatchesQuery(services, attributeListener, relationshipAttribute, event.eventTargetAddress)
+                );
+                await Promise.all(promises);
+            }
+        }
+
+        return;
     }
 
     private async createRequestIfAttributeMatchesQuery(
@@ -55,7 +105,7 @@ export class AttributeListenerModule extends RuntimeModule {
             peer: attributeListener.peer
         });
         if (!validationResult.value.isSuccess) {
-            this.logger.error("Could not validate outgoing request", validationResult.value);
+            this.logger.error("Could not validate outgoing Request", validationResult.value);
             return;
         }
 
@@ -65,7 +115,7 @@ export class AttributeListenerModule extends RuntimeModule {
         });
 
         if (requestCreatedResult.isError) {
-            this.logger.error("Could not create request", requestCreatedResult.error);
+            this.logger.error("Could not create Request", requestCreatedResult.error);
             return;
         }
 

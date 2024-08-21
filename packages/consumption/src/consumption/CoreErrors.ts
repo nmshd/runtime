@@ -287,6 +287,13 @@ class Requests {
         return new CoreError("error.consumption.requests.attributeQueryMismatch", message);
     }
 
+    public cannotShareRelationshipAttributeOfPendingRelationship() {
+        return new CoreError(
+            "error.consumption.requests.cannotShareRelationshipAttributeOfPendingRelationship",
+            "The provided RelationshipAttribute exists in the context of a pending Relationship and therefore cannot be shared."
+        );
+    }
+
     public wrongRelationshipStatus(message: string) {
         return new CoreError("error.consumption.requests.wrongRelationshipStatus", message);
     }

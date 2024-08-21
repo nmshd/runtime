@@ -42,16 +42,23 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
     let processor: ReadAttributeRequestItemProcessor;
 
+    let thirdPartyConsumptionController: ConsumptionController;
+    let thirdPartyAccountController: AccountController;
+    let aThirdParty: CoreAddress;
+
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
         ({ accountController, consumptionController } = accounts[0]);
 
         processor = new ReadAttributeRequestItemProcessor(consumptionController);
+
+        ({ accountController: thirdPartyAccountController, consumptionController: thirdPartyConsumptionController } = accounts[1]);
+        aThirdParty = thirdPartyAccountController.identity.address;
     });
 
     afterAll(async function () {
@@ -245,6 +252,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
     });
 
     describe("canAccept", function () {
+        beforeEach(async function () {
+            await TestUtil.ensureActiveRelationship(accountController, thirdPartyAccountController);
+        });
+
         test("can be called with the id of an existing own LocalAttribute", async function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
@@ -325,7 +336,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
         test("can be called with an existing RelationshipAttribute by a third party", async function () {
             const sender = CoreAddress.from("Sender");
-            const aThirdParty = CoreAddress.from("AThirdParty");
 
             const attribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
@@ -812,7 +822,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
             test("returns an error when a RelationshipAttribute is a copy of a sourceAttribute that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
                 const sender = CoreAddress.from("Sender");
                 const recipient = accountController.identity.address;
-                const aThirdParty = CoreAddress.from("AThirdParty");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -870,7 +879,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
             test("returns an error when a RelationshipAttribute is not shared with one of the third parties that were queried using a ThirdPartyRelationshipAttributeQuery", async function () {
                 const sender = CoreAddress.from("Sender");
                 const recipient = accountController.identity.address;
-                const aThirdParty = CoreAddress.from("AThirdParty");
                 const anUninvolvedThirdParty = CoreAddress.from("AnUninvolvedThirdParty");
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -922,9 +930,63 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 });
             });
 
+            test("returns an error when trying to share a RelationshipAttribute of a pending Relationship", async function () {
+                const sender = CoreAddress.from("Sender");
+                const recipient = accountController.identity.address;
+                await TestUtil.mutualDecomposeIfActiveRelationshipExists(accountController, consumptionController, thirdPartyAccountController, thirdPartyConsumptionController);
+                await TestUtil.addPendingRelationship(accountController, thirdPartyAccountController);
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: ThirdPartyRelationshipAttributeQuery.from({
+                        owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                        key: "AKey",
+                        thirdParty: [aThirdParty.toString()]
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "AKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: recipient,
+                        value: ProprietaryString.from({
+                            title: "ATitle",
+                            value: "AStringValue"
+                        })
+                    }),
+                    peer: aThirdParty,
+                    requestReference: await ConsumptionIds.request.generate()
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: localAttribute.id.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "cannotShareRelationshipAttributeOfPendingRelationship",
+                    message: "The provided RelationshipAttribute exists in the context of a pending Relationship and therefore cannot be shared."
+                });
+            });
+
             test("returns an error when a RelationshipAttribute was queried using a ThirdPartyRelationshipAttributeQuery and the Recipient tries to respond with a new RelationshipAttribute", async function () {
                 const sender = CoreAddress.from("Sender");
-                const aThirdParty = CoreAddress.from("AThirdParty");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -973,15 +1035,14 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             test("can be called with an arbitrary third party if the thirdParty string array of the ThirdPartyRelationshipAttributeQuery contains an empty string", async function () {
                 const sender = CoreAddress.from("Sender");
-                const aThirdParty = CoreAddress.from("AThirdParty");
-                const anUninvolvedThirdParty = CoreAddress.from("AnUninvolvedThirdParty");
+                const aQueriedThirdParty = CoreAddress.from("AQueriedThirdParty");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
                         owner: "",
                         key: "AKey",
-                        thirdParty: ["", aThirdParty.toString()]
+                        thirdParty: ["", aQueriedThirdParty.toString()]
                     })
                 });
 
@@ -1003,13 +1064,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: RelationshipAttribute.from({
                         key: "AKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
-                        owner: anUninvolvedThirdParty,
+                        owner: aThirdParty,
                         value: ProprietaryString.from({
                             title: "ATitle",
                             value: "AStringValue"
                         })
                     }),
-                    peer: anUninvolvedThirdParty,
+                    peer: aThirdParty,
                     requestReference: await ConsumptionIds.request.generate()
                 });
 
@@ -1026,7 +1087,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
             test("returns an error when the confidentiality of the existing RelationshipAttribute to be shared is private", async function () {
                 const sender = CoreAddress.from("Sender");
                 const recipient = accountController.identity.address;
-                const aThirdParty = CoreAddress.from("AThirdParty");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
