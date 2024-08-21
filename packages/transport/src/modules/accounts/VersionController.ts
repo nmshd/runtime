@@ -15,10 +15,10 @@ export class VersionController {
         if (getBackboneVersionResult.isError) {
             return Result.fail(getBackboneVersionResult.error);
         }
-        const usedBackboneVersion = getBackboneVersionResult.value.majorVersion;
+        const backboneVersion = getBackboneVersionResult.value.majorVersion;
 
-        if (this.config.supportedMinBackboneVersion > usedBackboneVersion || this.config.supportedMaxBackboneVersion < usedBackboneVersion) {
-            return Result.fail(CoreErrors.general.runtimeVersionIncompatibleWithBackboneVersion(usedBackboneVersion));
+        if (this.config.supportedMinBackboneVersion > backboneVersion || this.config.supportedMaxBackboneVersion < backboneVersion) {
+            return Result.fail(CoreErrors.general.runtimeVersionIncompatibleWithBackboneVersion(backboneVersion));
         }
         return Result.ok(undefined);
     }
