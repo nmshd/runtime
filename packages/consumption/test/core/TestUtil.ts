@@ -199,7 +199,7 @@ export class TestUtil {
         await accountController.init();
 
         const consumptionController = await new ConsumptionController(transport, accountController, {
-            setDefaultRepositoryAttributes: false
+            setDefaultRepositoryAttributes: true
         }).init(requestItemProcessors, notificationItemProcessors);
 
         return { accountController, consumptionController };
