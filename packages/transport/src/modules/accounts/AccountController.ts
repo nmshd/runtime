@@ -1,6 +1,6 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
-import { log, Result } from "@js-soft/ts-utils";
+import { log } from "@js-soft/ts-utils";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { AbstractAuthenticator, Authenticator, ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
 import { CoreCrypto } from "../../core/CoreCrypto";
@@ -430,19 +430,6 @@ export class AccountController {
         }
 
         return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, this.unpushedDatawalletModifications);
-    }
-
-    public async validateUsedBackboneVersion(): Promise<Result<void>> {
-        const getBackboneVersionResult = await this.versionClient.getBackboneVersion();
-        if (getBackboneVersionResult.isError) {
-            return Result.fail(getBackboneVersionResult.error);
-        }
-        const usedBackboneVersion = getBackboneVersionResult.value.majorVersion;
-
-        if (this._config.supportedMinBackboneVersion > usedBackboneVersion || this._config.supportedMaxBackboneVersion < usedBackboneVersion) {
-            return Result.fail(CoreErrors.general.runtimeVersionIncompatibleWithBackboneVersion(usedBackboneVersion));
-        }
-        return Result.ok(undefined);
     }
 
     public async cleanupDataOfDecomposedRelationship(relationship: Relationship): Promise<void> {

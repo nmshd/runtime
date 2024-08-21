@@ -9,6 +9,7 @@ export * from "./accounts/data/IdentityDeletionProcessStatus";
 export * from "./accounts/IdentityController";
 export * from "./accounts/IdentityDeletionProcessController";
 export * from "./accounts/IdentityUtil";
+export * from "./accounts/VersionController";
 export * from "./certificates/CertificateController";
 export * from "./certificates/CertificateIssuer";
 export * from "./certificates/CertificateValidator";
