@@ -7,7 +7,9 @@ let consumptionServices1: ConsumptionServices;
 let expander1: DataViewExpander;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(1);
+    const runtimeServices = await serviceProvider.launch(1, {
+        enableDefaultRepositoryAttributes: true
+    });
     consumptionServices1 = runtimeServices[0].consumption;
     expander1 = runtimeServices[0].expander;
 }, 30000);
@@ -81,7 +83,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(givenName["@type"]).toBe("GivenName");
         expect(givenName.value).toBe("A second given name");
         expect(dvo.tags).toStrictEqual(["default"]);
-        expect(dvo.isDefault).toBe(true); // TODO: this will need adjustment disabling the automated setting of default attributes
+        expect(dvo.isDefault).toBe(true);
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);
