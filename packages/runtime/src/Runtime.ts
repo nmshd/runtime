@@ -204,7 +204,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     }
 
     private initConsumptionLibrary() {
-        this.logger.debug("Initializing Consumption Library... "); // TODO: maybe unnecessary
+        this.logger.debug("Initializing Consumption Library... ");
 
         this.consumption = new Consumption(this.runtimeConfig.consumptionLibrary);
     }
@@ -400,8 +400,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this._isStarted = true;
     }
 
+    // TODO: ???
     protected startInfrastructure(): void | Promise<void> {
-        // TODO: ???
         return;
     }
 
@@ -430,8 +430,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this._isStarted = false;
     }
 
+    // TODO: ???
     protected stopInfrastructure(): void | Promise<void> {
-        // TODO: ???
         return;
     }
 
