@@ -38,8 +38,6 @@ export interface IConfigOverwrite {
     platformClientId: string;
     platformClientSecret: string;
     supportedIdentityVersion: number;
-    supportedMinBackboneVersion?: number;
-    supportedMaxBackboneVersion?: number;
     platformTimeout?: number;
     platformMaxRedirects?: number;
     platformMaxUnencryptedFileSize?: number;
