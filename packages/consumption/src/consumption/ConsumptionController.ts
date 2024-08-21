@@ -41,7 +41,7 @@ import {
     ShareAttributeRequestItemProcessor,
     ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor
 } from "../modules";
-import { ConsumptionConfig } from "./ConsumptionConfig";
+import { ConsumptionConfig, ConsumptionConfigOverride } from "./ConsumptionConfig";
 
 export class ConsumptionController {
     public readonly consumptionConfig: ConsumptionConfig;
@@ -49,7 +49,7 @@ export class ConsumptionController {
     public constructor(
         public readonly transport: Transport,
         public readonly accountController: AccountController,
-        consumptionConfig?: Partial<ConsumptionConfig>
+        consumptionConfig?: ConsumptionConfigOverride
     ) {
         this.consumptionConfig = {
             setDefaultRepositoryAttributes: false,

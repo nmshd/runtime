@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
-import { ConsumptionConfig, ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
+import { ConsumptionConfigOverride, ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
 import { AccountController, ICoreAddress } from "@nmshd/transport";
 import { ConsumptionServices, DataViewExpander, ModuleConfiguration, Runtime, RuntimeConfig, RuntimeHealth, RuntimeServices, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
@@ -18,7 +18,7 @@ export class TestRuntime extends Runtime {
 
     public constructor(
         runtimeConfig: RuntimeConfig,
-        private readonly consumptionConfig: Partial<ConsumptionConfig> = {}
+        private readonly consumptionConfig: ConsumptionConfigOverride = {}
     ) {
         super(
             runtimeConfig,
