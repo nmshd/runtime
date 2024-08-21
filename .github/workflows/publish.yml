@@ -2,7 +2,8 @@ name: Publish
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "*"
 
 jobs:
   run-checks:
@@ -20,14 +21,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.4.1
+          node-version: current
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run build:ci -ws
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           COMMIT_HASH: ${{ github.sha }}
-      - run: npm exec -ws -c 'enhanced-publish --if-possible --use-preid-as-tag'
+      - run: bash .ci/publishNpm.sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ github.ref_name }}
     needs: ["run-checks"]

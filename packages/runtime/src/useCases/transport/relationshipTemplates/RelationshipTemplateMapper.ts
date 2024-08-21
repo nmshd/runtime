@@ -1,3 +1,5 @@
+import { Serializable } from "@js-soft/ts-serval";
+import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { RelationshipTemplate } from "@nmshd/transport";
 import { RelationshipTemplateDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
@@ -14,8 +16,8 @@ export class RelationshipTemplateMapper {
             createdBy: template.cache.createdBy.toString(),
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
-            content: template.cache.content.toJSON(),
             forIdentity: template.cache.forIdentity?.toString(),
+            content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
             secretKey: template.secretKey.toBase64(false),
@@ -25,5 +27,12 @@ export class RelationshipTemplateMapper {
 
     public static toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {
         return responseItems.map((i) => this.toRelationshipTemplateDTO(i));
+    }
+
+    private static toTemplateContent(content: Serializable) {
+        if (!(content instanceof RelationshipTemplateContent || content instanceof ArbitraryRelationshipTemplateContent)) {
+            return ArbitraryRelationshipTemplateContent.from({ value: content }).toJSON();
+        }
+        return content.toJSON();
     }
 }

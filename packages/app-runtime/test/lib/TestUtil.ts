@@ -1,9 +1,18 @@
 /* eslint-disable jest/no-standalone-expect */
 import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
-import { Serializable } from "@js-soft/ts-serval";
 import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
-import { FileDTO, MessageDTO, RelationshipDTO, RelationshipTemplateDTO, SyncEverythingResponse } from "@nmshd/runtime";
+import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
+import {
+    FileDTO,
+    MessageContentDerivation,
+    MessageDTO,
+    RelationshipCreationContentDerivation,
+    RelationshipDTO,
+    RelationshipTemplateContentDerivation,
+    RelationshipTemplateDTO,
+    SyncEverythingResponse
+} from "@nmshd/runtime";
 import { CoreDate, IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
@@ -48,7 +57,6 @@ export class TestUtil {
 
         return runtime_createAppConfig({
             transportLibrary: transportOverride,
-            logging: {},
             applicationId: "eu.enmeshed.test",
             ...configOverride
         });
@@ -166,9 +174,7 @@ export class TestUtil {
     public static async createAndLoadPeerTemplate(
         from: LocalAccountSession,
         to: LocalAccountSession,
-        content: any = {
-            mycontent: "template"
-        }
+        content: RelationshipTemplateContentDerivation = ArbitraryRelationshipTemplateContent.from({ value: {} }).toJSON()
     ): Promise<RelationshipTemplateDTO> {
         const templateFrom = (
             await from.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
@@ -195,9 +201,7 @@ export class TestUtil {
     public static async requestRelationshipForTemplate(
         from: LocalAccountSession,
         templateId: string,
-        content: any = {
-            mycontent: "request"
-        }
+        content: RelationshipCreationContentDerivation = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON()
     ): Promise<RelationshipDTO> {
         const relRequest = await from.transportServices.relationships.createRelationship({ templateId, creationContent: content });
         return relRequest.value;
@@ -285,13 +289,18 @@ export class TestUtil {
         return syncResult.messages[0];
     }
 
-    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: any): Promise<MessageDTO> {
+    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: MessageContentDerivation): Promise<MessageDTO> {
         return await this.sendMessagesWithAttachments(from, [to], [], content);
     }
 
-    public static async sendMessagesWithAttachments(from: LocalAccountSession, recipients: LocalAccountSession[], attachments: string[], content?: any): Promise<MessageDTO> {
+    public static async sendMessagesWithAttachments(
+        from: LocalAccountSession,
+        recipients: LocalAccountSession[],
+        attachments: string[],
+        content?: MessageContentDerivation
+    ): Promise<MessageDTO> {
         if (!content) {
-            content = Serializable.fromUnknown({ content: "TestContent" });
+            content = ArbitraryMessageContent.from({ value: "TestContent" }).toJSON();
         }
 
         const result = await from.transportServices.messages.sendMessage({

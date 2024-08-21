@@ -8,7 +8,7 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress, RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { DeletionStatus } from "../../../attributes";
@@ -48,7 +48,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             }
 
             if (typeof recipient !== "undefined") {
-                const query: any = {
+                const query = {
                     "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
                     "shareInfo.peer": recipient.toString(),
                     "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
@@ -102,7 +102,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             }
 
             if (typeof recipient !== "undefined") {
-                const query: any = {
+                const query = {
                     "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
                     "shareInfo.peer": recipient.toString(),
                     "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
@@ -114,6 +114,17 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                         CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
                     );
                 }
+            }
+
+            const queryForNonPendingRelationships = {
+                "peer.address": foundAttribute.shareInfo.peer.address,
+                status: { $in: [RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
+            };
+
+            const nonPendingRelationshipsToPeer = await this.accountController.relationships.getRelationships(queryForNonPendingRelationships);
+
+            if (nonPendingRelationshipsToPeer.length === 0) {
+                return ValidationResult.error(CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
             }
         }
 

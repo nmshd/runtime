@@ -183,6 +183,12 @@ export class RequestsGiven {
         return Promise.resolve();
     }
 
+    public aDeletionProposedRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createDeletionProposedRelationship();
+
+        return Promise.resolve();
+    }
+
     public async anIncomingRequestWithAnItemAndAGroupInStatus(status: LocalRequestStatus): Promise<void> {
         const content = Request.from({
             items: [

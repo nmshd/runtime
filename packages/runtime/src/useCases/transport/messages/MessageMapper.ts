@@ -1,3 +1,5 @@
+import { Serializable } from "@js-soft/ts-serval";
+import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { CachedMessageRecipient, File, Message } from "@nmshd/transport";
 import { MessageDTO, MessageWithAttachmentsDTO } from "../../../types";
@@ -22,9 +24,10 @@ export class MessageMapper {
         if (!message.cache) {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
         }
+
         return {
             id: message.id.toString(),
-            content: message.cache.content.toJSON(),
+            content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),
@@ -39,9 +42,10 @@ export class MessageMapper {
         if (!message.cache) {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
         }
+
         return {
             id: message.id.toString(),
-            content: message.cache.content.toJSON(),
+            content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),
@@ -65,5 +69,21 @@ export class MessageMapper {
                 relationshipId: r.relationshipId?.toString()
             };
         });
+    }
+
+    private static toMessageContent(content: Serializable) {
+        if (
+            !(
+                content instanceof Mail ||
+                content instanceof Request ||
+                content instanceof ResponseWrapper ||
+                content instanceof Notification ||
+                content instanceof ArbitraryMessageContent
+            )
+        ) {
+            return ArbitraryMessageContent.from({ value: content }).toJSON();
+        }
+
+        return content.toJSON();
     }
 }

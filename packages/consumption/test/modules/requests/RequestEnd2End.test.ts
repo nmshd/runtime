@@ -109,7 +109,7 @@ describe("End2End Request/Response via Relationship Template", function () {
     });
 
     test("sender: create Local Request and Response from Relationship Change", async function () {
-        sCreationContent = sRelationship.cache!.creationContent! as RelationshipCreationContent;
+        sCreationContent = sRelationship.cache!.creationContent as RelationshipCreationContent;
         const response = sCreationContent.response;
 
         sLocalRequest = await sConsumptionController.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({

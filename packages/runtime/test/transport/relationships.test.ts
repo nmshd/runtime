@@ -19,6 +19,7 @@ import {
     RuntimeServiceProvider,
     TestRuntimeServices,
     createTemplate,
+    emptyRelationshipCreationContent,
     ensureActiveRelationship,
     establishRelationship,
     exchangeMessageWithRequest,
@@ -56,12 +57,22 @@ describe("Create Relationship", () => {
         expect(response).toBeSuccessful();
     });
 
+    test("should not create a relationship with a false creation content type", async () => {
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+
+        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: {}
+        });
+        expect(createRelationshipResponse).toBeAnError("The creation content of a Relationship", "error.runtime.validation.invalidPropertyValue");
+    });
+
     test("create pending relationship", async () => {
         const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
-            creationContent: { a: "b" }
+            creationContent: emptyRelationshipCreationContent
         });
         expect(createRelationshipResponse).toBeSuccessful();
 
@@ -71,6 +82,20 @@ describe("Create Relationship", () => {
     });
 
     describe("tests on pending relationship", () => {
+        test("should not be able to create a new relationship if a pending relationship already exists", async () => {
+            const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+
+            const result = await services2.transport.relationships.createRelationship({
+                templateId: templateId,
+                creationContent: emptyRelationshipCreationContent
+            });
+
+            expect(result).toBeAnError(
+                `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Pending}' currently exists.`,
+                "error.transport.relationships.relationshipCurrentlyExists"
+            );
+        });
+
         test("should not accept relationship sent by yourself", async () => {
             expect(await services2.transport.relationships.acceptRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.operationOnlyAllowedForPeer");
         });
@@ -117,6 +142,20 @@ describe("Relationship status validations on active relationship", () => {
         await ensureActiveRelationship(services1.transport, services2.transport);
         const relationship = await getRelationship(services1.transport);
         relationshipId = relationship.id;
+    });
+
+    test("should not be able to create a new relationship if an active relationship already exists", async () => {
+        const templateId = (await exchangeTemplate(services2.transport, services1.transport)).id;
+
+        const result = await services1.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: emptyRelationshipCreationContent
+        });
+
+        expect(result).toBeAnError(
+            `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Active}' currently exists.`,
+            "error.transport.relationships.relationshipCurrentlyExists"
+        );
     });
 
     test("should not request a relationship reactivation", async () => {
@@ -183,7 +222,7 @@ describe("Templator with active IdentityDeletionProcess", () => {
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
-            creationContent: { a: "b" }
+            creationContent: emptyRelationshipCreationContent
         });
         expect(createRelationshipResponse).toBeAnError(
             "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
@@ -490,6 +529,20 @@ describe("RelationshipTermination", () => {
     });
 
     describe("Validating relationship operations on terminated relationship", () => {
+        test("should not be able to create a new relationship if a terminated relationship currently exists", async () => {
+            const templateId = (await exchangeTemplate(services2.transport, services1.transport)).id;
+
+            const result = await services1.transport.relationships.createRelationship({
+                templateId: templateId,
+                creationContent: emptyRelationshipCreationContent
+            });
+
+            expect(result).toBeAnError(
+                `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Terminated}' currently exists.`,
+                "error.transport.relationships.relationshipCurrentlyExists"
+            );
+        });
+
         test("should not terminate a relationship in status terminated again", async () => {
             expect(await services1.transport.relationships.terminateRelationship({ relationshipId })).toBeAnError(/.*/, "error.transport.relationships.wrongRelationshipStatus");
         });
@@ -784,6 +837,34 @@ describe("RelationshipDecomposition", () => {
         await services1.transport.relationships.decomposeRelationship({ relationshipId: relationshipId2 });
         const messages = (await services1.transport.messages.getMessages({})).value;
         expect(messages).toHaveLength(0);
+    });
+
+    test("should not be able to create a new relationship if a relationship whose deletion is proposed currently exists", async () => {
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+
+        const result = await services2.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: emptyRelationshipCreationContent
+        });
+
+        expect(result).toBeAnError(
+            `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.DeletionProposed}' currently exists.`,
+            "error.transport.relationships.relationshipCurrentlyExists"
+        );
+    });
+
+    test("no new relationship can be created if former relationship is not yet mutually decomposed", async () => {
+        const templateId = (await exchangeTemplate(services2.transport, services1.transport)).id;
+
+        const result = await services1.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: emptyRelationshipCreationContent
+        });
+
+        expect(result).toBeAnError(
+            "No new Relationship can be created as the former Relationship is not yet decomposed by the peer.",
+            "error.transport.relationships.relationshipNotYetDecomposedByPeer"
+        );
     });
 
     async function createRelationshipData(services1: TestRuntimeServices, services2: TestRuntimeServices) {

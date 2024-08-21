@@ -7,16 +7,19 @@ import {
     LocalRequestStatus
 } from "@nmshd/consumption";
 import {
+    ArbitraryRelationshipCreationContent,
+    ArbitraryRelationshipCreationContentJSON,
+    ArbitraryRelationshipTemplateContent,
+    ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
-    IRelationshipCreationContent,
-    IRelationshipTemplateContent,
     Notification,
-    RelationshipCreationContent,
     RelationshipCreationContentJSON,
-    RelationshipTemplateContent,
     RelationshipTemplateContentJSON,
     RequestItemGroupJSON,
-    RequestItemJSONDerivations
+    RequestItemJSONDerivations,
+    RequestJSON,
+    ResponseWrapperJSON,
+    ShareAttributeAcceptResponseItemJSON
 } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { CoreAddress, CoreId, IdentityUtil } from "@nmshd/transport";
@@ -34,6 +37,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
+    MessageContentDerivation,
     MessageDTO,
     MessageSentEvent,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
@@ -108,12 +112,16 @@ export async function syncUntilHasMessage(transportServices: TransportServices, 
     return await syncUntilHas(transportServices, "messages", (m) => m.id === messageId.toString());
 }
 
-export async function syncUntilHasMessageWithRequest(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
-    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "Request" && m.content.id === requestId.toString());
+export async function syncUntilHasMessageWithRequest(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO & { content: RequestJSON }> {
+    return (await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "Request" && m.content.id === requestId.toString())) as MessageDTO & {
+        content: RequestJSON;
+    };
 }
 
-export async function syncUntilHasMessageWithResponse(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO> {
-    return await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "ResponseWrapper" && m.content.requestId === requestId.toString());
+export async function syncUntilHasMessageWithResponse(transportServices: TransportServices, requestId: string | CoreId): Promise<MessageDTO & { content: ResponseWrapperJSON }> {
+    return (await syncUntilHas(transportServices, "messages", (m) => m.content["@type"] === "ResponseWrapper" && m.content.requestId === requestId.toString())) as MessageDTO & {
+        content: ResponseWrapperJSON;
+    };
 }
 
 export async function syncUntilHasMessageWithNotification(transportServices: TransportServices, notificationId: string | CoreId): Promise<MessageDTO> {
@@ -172,11 +180,15 @@ export async function makeUploadRequest(values: object = {}): Promise<UploadOwnF
     };
 }
 
-export async function createTemplate(transportServices: TransportServices, body: RelationshipTemplateDTO | {} = {}): Promise<RelationshipTemplateDTO> {
+export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateContentJSON = ArbitraryRelationshipTemplateContent.from({ value: {} }).toJSON();
+
+export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON();
+
+export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON): Promise<RelationshipTemplateDTO> {
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
         expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
-        content: body
+        content: body ?? emptyRelationshipTemplateContent
     });
 
     expect(response).toBeSuccessful();
@@ -196,7 +208,7 @@ export async function getFileToken(transportServices: TransportServices): Promis
 export async function exchangeTemplate(
     transportServicesCreator: TransportServices,
     transportServicesRecipient: TransportServices,
-    content: RelationshipTemplateContent | {} = {}
+    content?: RelationshipTemplateContentJSON
 ): Promise<RelationshipTemplateDTO> {
     const template = await createTemplate(transportServicesCreator, content);
 
@@ -227,7 +239,7 @@ export async function exchangeToken(transportServicesCreator: TransportServices,
     return response.value;
 }
 
-export async function sendMessage(transportServices: TransportServices, recipient: string, content?: any, attachments?: string[]): Promise<MessageDTO> {
+export async function sendMessage(transportServices: TransportServices, recipient: string, content?: MessageContentDerivation, attachments?: string[]): Promise<MessageDTO> {
     const response = await transportServices.messages.sendMessage({
         recipients: [recipient],
         content: content ?? {
@@ -261,7 +273,11 @@ export async function sendMessageToMultipleRecipients(transportServices: Transpo
     return response.value;
 }
 
-export async function sendMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
+export async function sendMessageWithRequest(
+    sender: TestRuntimeServices,
+    recipient: TestRuntimeServices,
+    request: CreateOutgoingRequestRequest
+): Promise<MessageDTO & { content: RequestJSON }> {
     const createRequestResult = await sender.consumption.outgoingRequests.create(request);
     expect(createRequestResult).toBeSuccessful();
     const sendMessageResult = await sender.transport.messages.sendMessage({
@@ -270,7 +286,7 @@ export async function sendMessageWithRequest(sender: TestRuntimeServices, recipi
     });
     expect(sendMessageResult).toBeSuccessful();
 
-    return sendMessageResult.value;
+    return sendMessageResult.value as MessageDTO & { content: RequestJSON };
 }
 
 export async function exchangeMessage(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices, attachments?: string[]): Promise<MessageDTO> {
@@ -285,9 +301,13 @@ export async function exchangeMessage(transportServicesCreator: TransportService
     return message;
 }
 
-export async function exchangeMessageWithRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, request: CreateOutgoingRequestRequest): Promise<MessageDTO> {
+export async function exchangeMessageWithRequest(
+    sender: TestRuntimeServices,
+    recipient: TestRuntimeServices,
+    request: CreateOutgoingRequestRequest
+): Promise<MessageDTO & { content: RequestJSON }> {
     const sentMessage = await sendMessageWithRequest(sender, recipient, request);
-    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id);
+    return await syncUntilHasMessageWithRequest(recipient.transport, sentMessage.content.id!);
 }
 
 export async function exchangeMessageWithAttachment(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<MessageDTO> {
@@ -306,11 +326,11 @@ export async function getRelationship(transportServices: TransportServices): Pro
 }
 
 export async function establishRelationship(transportServices1: TransportServices, transportServices2: TransportServices): Promise<RelationshipDTO> {
-    const template = await exchangeTemplate(transportServices1, transportServices2, {});
+    const template = await exchangeTemplate(transportServices1, transportServices2);
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
         templateId: template.id,
-        creationContent: { a: "b" }
+        creationContent: emptyRelationshipCreationContent
     });
     expect(createRelationshipResponse).toBeSuccessful();
 
@@ -330,14 +350,14 @@ export async function establishRelationship(transportServices1: TransportService
 export async function establishRelationshipWithContents(
     transportServices1: TransportServices,
     transportServices2: TransportServices,
-    templateContent: RelationshipTemplateContentJSON | RelationshipTemplateContent | IRelationshipTemplateContent,
-    creationContent: RelationshipCreationContentJSON | RelationshipCreationContent | IRelationshipCreationContent
+    templateContent?: RelationshipTemplateContentJSON,
+    creationContent?: RelationshipCreationContentJSON
 ): Promise<void> {
     const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
 
     const createRelationshipResponse = await transportServices2.relationships.createRelationship({
         templateId: template.id,
-        creationContent: creationContent
+        creationContent: creationContent ?? emptyRelationshipCreationContent
     });
     expect(createRelationshipResponse).toBeSuccessful();
 
@@ -397,13 +417,52 @@ export async function establishPendingRelationshipWithRequestFlow(
 
 export async function ensureActiveRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<RelationshipDTO> {
     const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
-    const relationships = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress } })).value;
-    if (relationships.length === 0) {
+    const sRelationships = (
+        await sTransportServices.relationships.getRelationships({
+            query: {
+                peer: rTransportServicesAddress,
+                status: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed]
+            }
+        })
+    ).value;
+
+    const sTransportServicesAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
+    const rRelationships = (
+        await rTransportServices.relationships.getRelationships({
+            query: {
+                peer: sTransportServicesAddress,
+                status: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed]
+            }
+        })
+    ).value;
+
+    if (sRelationships.length === 0 && rRelationships.length === 0) {
         await establishRelationship(sTransportServices, rTransportServices);
-    } else if (relationships[0].status === RelationshipStatus.Pending) {
-        const relationship = relationships[0];
-        await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
+    } else if (sRelationships.length === 0 && rRelationships[0].status === RelationshipStatus.DeletionProposed) {
+        const relationship = rRelationships[0];
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await establishRelationship(sTransportServices, rTransportServices);
+    } else if (sRelationships[0].status === RelationshipStatus.Pending) {
+        if (sRelationships[0].template.isOwn) {
+            const relationship = sRelationships[0];
+            await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
+            await syncUntilHasRelationships(rTransportServices, 1);
+        } else {
+            const relationship = rRelationships[0];
+            await rTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
+            await syncUntilHasRelationships(sTransportServices, 1);
+        }
+    } else if (sRelationships[0].status === RelationshipStatus.Terminated) {
+        const relationship = sRelationships[0];
+        await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
         await syncUntilHasRelationships(rTransportServices, 1);
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await syncUntilHasRelationships(sTransportServices, 1);
+        await establishRelationship(sTransportServices, rTransportServices);
+    } else if (sRelationships[0].status === RelationshipStatus.DeletionProposed) {
+        const relationship = sRelationships[0];
+        await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await establishRelationship(sTransportServices, rTransportServices);
     }
 
     return (await sTransportServices.relationships.getRelationships({})).value[0];
@@ -413,11 +472,11 @@ export async function ensurePendingRelationship(sTransportServices: TransportSer
     const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
     const relationships = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress } })).value;
     if (relationships.length === 0) {
-        const template = await exchangeTemplate(sTransportServices, rTransportServices, {});
+        const template = await exchangeTemplate(sTransportServices, rTransportServices);
 
         const createRelationshipResponse = await rTransportServices.relationships.createRelationship({
             templateId: template.id,
-            creationContent: { a: "b" }
+            creationContent: emptyRelationshipCreationContent
         });
         expect(createRelationshipResponse).toBeSuccessful();
 
@@ -426,6 +485,24 @@ export async function ensurePendingRelationship(sTransportServices: TransportSer
     }
 
     return (await sTransportServices.relationships.getRelationships({})).value[0];
+}
+
+export async function mutualDecomposeIfActiveRelationshipExists(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<void> {
+    const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+
+    const activeRelationshipsToPeer = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress, status: RelationshipStatus.Active } }))
+        .value;
+
+    if (activeRelationshipsToPeer.length !== 0) {
+        const relationshipToPeer = activeRelationshipsToPeer[0];
+        await sTransportServices.relationships.terminateRelationship({ relationshipId: relationshipToPeer.id });
+        await syncUntilHasRelationships(rTransportServices, 1);
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationshipToPeer.id });
+        await syncUntilHasRelationships(sTransportServices, 1);
+        await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationshipToPeer.id });
+    }
+
+    return;
 }
 
 export async function exchangeAndAcceptRequestByMessage(
@@ -513,7 +590,7 @@ export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeSer
     await recipient.consumption.incomingRequests.accept({ requestId: requestId, items: [{ accept: true }] });
 
     const responseMessage = await syncUntilHasMessageWithResponse(sender.transport, requestId);
-    const sharedAttributeId = responseMessage.content.response.items[0].attributeId;
+    const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
     await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.Completed;
     });
@@ -621,7 +698,7 @@ export async function executeFullRequestAndShareThirdPartyRelationshipAttributeF
     });
 
     const responseMessage = await syncUntilHasMessageWithResponse(peer.transport, localRequest.id);
-    const sharedAttributeId = responseMessage.content.response.items[0].attributeId;
+    const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
     await peer.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });

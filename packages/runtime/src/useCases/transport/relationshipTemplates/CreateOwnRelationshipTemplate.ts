@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
-import { RelationshipTemplateContent } from "@nmshd/content";
+import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, RelationshipTemplateController } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -70,6 +70,13 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
 
     private async validateRelationshipTemplateContent(content: any) {
         const transformedContent = Serializable.fromUnknown(content);
+
+        if (!(transformedContent instanceof RelationshipTemplateContent || transformedContent instanceof ArbitraryRelationshipTemplateContent)) {
+            return RuntimeErrors.general.invalidPropertyValue(
+                "The content of a RelationshipTemplate must either be a RelationshipTemplateContent or an ArbitraryRelationshipTemplateContent."
+            );
+        }
+
         if (!(transformedContent instanceof RelationshipTemplateContent)) return;
 
         const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
