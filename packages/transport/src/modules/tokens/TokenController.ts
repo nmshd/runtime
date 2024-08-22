@@ -51,8 +51,6 @@ export class TokenController extends TransportController {
             })
         ).value;
 
-        // TODO: error handling
-
         const cachedToken = CachedToken.from({
             createdAt: CoreDate.from(response.createdAt),
             expiresAt: input.expiresAt,
@@ -158,6 +156,7 @@ export class TokenController extends TransportController {
         }
 
         const cachedToken = await this.decryptToken(response, token.secretKey);
+        cachedToken.forIdentity = response.forIdentity ? CoreAddress.from(response.forIdentity) : undefined;
         token.setCache(cachedToken);
 
         // Update isOwn, as it is possible that the identity receives an own token
@@ -195,7 +194,7 @@ export class TokenController extends TransportController {
 
     public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentity?: CoreAddress): Promise<Token> {
         const tokenDoc = await this.tokens.read(id.toString());
-        if (!tokenDoc && !forIdentity?.equals(this.parent.identity.address)) {
+        if (!tokenDoc && forIdentity && !forIdentity.equals(this.parent.identity.address)) {
             // if you created the token, it exists already
             throw CoreErrors.general.notIntendedForYou(id.toString());
         }

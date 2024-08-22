@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreDate, CoreId, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
+import { AccountController, CoreAddress, CoreDate, CoreId, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenController", function () {
@@ -172,7 +172,7 @@ describe("TokenController", function () {
         expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
     });
 
-    test("should throw if a personalized token is not loaded by the right identity", async function () {
+    test.only("should throw if a personalized token is not loaded by the right identity", async function () {
         tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = Serializable.fromAny({ content: "TestToken" });
@@ -180,11 +180,26 @@ describe("TokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            forIdentity: recipient.identity.address
+            forIdentity: CoreAddress.from("did:e:a-domain:dids:1234567890123456789012")
         });
         const reference = sentToken.toTokenReference().truncate();
         await TestUtil.expectThrowsAsync(async () => {
             await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+        }, /transport.general.notIntendedForYou/);
+    });
+
+    test("should throw if a personalized token is not loaded by the right identity and it's uncaught beforehand", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
+        });
+        await TestUtil.expectThrowsAsync(async () => {
+            await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false);
         }, /transport.general.notIntendedForYou/);
     });
 

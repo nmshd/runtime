@@ -18,10 +18,13 @@ export class AnonymousTokenController {
     }
 
     public async loadPeerTokenByReference(tokenReference: TokenReference): Promise<Token> {
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key);
+        return await this.loadPeerToken(tokenReference.id, tokenReference.key, tokenReference.forIdentity);
     }
 
-    public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey): Promise<Token> {
+    public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentity?: CoreAddress): Promise<Token> {
+        if (forIdentity) {
+            throw CoreErrors.general.notIntendedForYou(id.toString());
+        }
         const response = (await this.client.getToken(id.toString())).value;
 
         const cipher = CryptoCipher.fromBase64(response.content);

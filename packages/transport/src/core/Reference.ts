@@ -20,7 +20,7 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public key: CryptoSecretKey;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
     public forIdentity?: CoreAddress;
 

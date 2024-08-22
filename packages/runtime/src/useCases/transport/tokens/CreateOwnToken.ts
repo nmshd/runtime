@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreDate, TokenController } from "@nmshd/transport";
+import { AccountController, CoreAddress, CoreDate, TokenController } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
@@ -57,7 +57,8 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
         const response = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: CoreDate.from(request.expiresAt),
-            ephemeral: request.ephemeral
+            ephemeral: request.ephemeral,
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
         });
 
         if (!request.ephemeral) {

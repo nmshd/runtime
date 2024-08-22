@@ -86,7 +86,7 @@ describe("Personalized tokens", () => {
             content: { key: "value" },
             expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
             ephemeral: true,
-            forIdentity: "did:e:a-domain:dids:anidentity"
+            forIdentity: "did:e:a-domain:dids:1234567890123456789012"
         });
         expect(createResult).toBeSuccessful();
 

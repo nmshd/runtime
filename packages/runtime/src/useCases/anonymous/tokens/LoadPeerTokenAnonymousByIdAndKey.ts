@@ -1,14 +1,15 @@
 import { Result } from "@js-soft/ts-utils";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AnonymousTokenController, CoreId } from "@nmshd/transport";
+import { AnonymousTokenController, CoreAddress, CoreId } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common";
+import { AddressString, SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common";
 import { TokenMapper } from "../../transport/tokens/TokenMapper";
 
 export interface LoadPeerTokenAnonymousByIdAndKeyRequest {
     id: TokenIdString;
     secretKey: string;
+    forIdentity?: AddressString;
 }
 
 class Validator extends SchemaValidator<LoadPeerTokenAnonymousByIdAndKeyRequest> {
@@ -27,7 +28,12 @@ export class LoadPeerTokenAnonymousByIdAndKeyUseCase extends UseCase<LoadPeerTok
 
     protected async executeInternal(request: LoadPeerTokenAnonymousByIdAndKeyRequest): Promise<Result<TokenDTO>> {
         const key = CryptoSecretKey.fromBase64(request.secretKey);
-        const createdToken = await this.anonymousTokenController.loadPeerToken(CoreId.from(request.id), key);
+
+        const createdToken = await this.anonymousTokenController.loadPeerToken(
+            CoreId.from(request.id),
+            key,
+            request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+        );
 
         return Result.ok(TokenMapper.toTokenDTO(createdToken, true));
     }

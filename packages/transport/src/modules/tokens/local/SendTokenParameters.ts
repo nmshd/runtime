@@ -22,7 +22,7 @@ export class SendTokenParameters extends CoreSerializable implements ISendTokenP
     @serialize()
     public ephemeral: boolean;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
     public forIdentity?: CoreAddress;
 

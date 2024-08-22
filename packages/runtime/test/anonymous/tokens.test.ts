@@ -44,4 +44,13 @@ describe("Anonymous tokens", () => {
         const token = result.value;
         expect(token.content).toStrictEqual(uploadedToken.content);
     });
+
+    test("should catch a personalized token", async () => {
+        const result = await noLoginRuntime.anonymousServices.tokens.loadPeerTokenByIdAndKey({
+            id: uploadedToken.id,
+            secretKey: uploadedToken.secretKey,
+            forIdentity: "did:e:a-domain:dids:1234567890123456789012"
+        });
+        expect(result).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
+    });
 });
