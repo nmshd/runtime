@@ -4,7 +4,7 @@ import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent } from "../../../attributes";
-import { DeletionStatus, LocalAttributeDeletionInfo } from "../../../attributes/local/LocalAttributeDeletionInfo";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionInfoStatus } from "../../../attributes/local/LocalAttributeDeletionInfo";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
@@ -45,7 +45,7 @@ export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemPr
 
         const deletionDate = CoreDate.utc();
         const deletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: DeletionStatus.DeletedByPeer,
+            deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
             deletionDate: deletionDate
         });
 

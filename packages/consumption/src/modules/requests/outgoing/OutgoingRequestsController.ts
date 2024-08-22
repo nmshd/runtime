@@ -18,7 +18,7 @@ import { ConsumptionControllerName } from "../../../consumption/ConsumptionContr
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
 import { CoreErrors } from "../../../consumption/CoreErrors";
-import { DeletionStatus, LocalAttributeDeletionInfo } from "../../attributes";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionInfoStatus } from "../../attributes";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -229,13 +229,16 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             }
 
             const deletionInfo = LocalAttributeDeletionInfo.from({
-                deletionStatus: DeletionStatus.DeletionRequestSent,
+                deletionStatus: LocalAttributeDeletionInfoStatus.DeletionRequestSent,
                 deletionDate: CoreDate.utc()
             });
 
             const predecessors = await this.parent.attributes.getPredecessorsOfAttribute(ownSharedAttributeId);
             for (const attr of [ownSharedAttribute, ...predecessors]) {
-                if (attr.deletionInfo?.deletionStatus !== DeletionStatus.ToBeDeletedByPeer && attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                if (
+                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer &&
+                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionInfoStatus.DeletedByPeer
+                ) {
                     attr.setDeletionInfo(deletionInfo, this.identity.address);
                     await this.parent.attributes.updateAttributeUnsafe(attr);
                 }

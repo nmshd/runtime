@@ -11,7 +11,7 @@ import {
 import { CoreAddress, RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { DeletionStatus } from "../../../attributes";
+import { LocalAttributeDeletionInfoStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -51,7 +51,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 const query = {
                     "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
                     "shareInfo.peer": recipient.toString(),
-                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
+                    "deletionInfo.deletionStatus": { $nin: [LocalAttributeDeletionInfoStatus.DeletedByPeer, LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer] }
                 };
 
                 if ((await this.consumptionController.attributes.getLocalAttributes(query)).length > 0) {
@@ -64,7 +64,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
                 const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, {
                     "shareInfo.peer": recipient.toString(),
-                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
+                    "deletionInfo.deletionStatus": { $nin: [LocalAttributeDeletionInfoStatus.DeletedByPeer, LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer] }
                 });
 
                 if (ownSharedIdentityAttributeSuccessors.length > 0) {
@@ -77,7 +77,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
                 const ownSharedIdentityAttributePredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfAttribute(foundAttribute, {
                     "shareInfo.peer": recipient.toString(),
-                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
+                    "deletionInfo.deletionStatus": { $nin: [LocalAttributeDeletionInfoStatus.DeletedByPeer, LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer] }
                 });
 
                 if (ownSharedIdentityAttributePredecessors.length > 0) {
@@ -105,7 +105,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 const query = {
                     "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
                     "shareInfo.peer": recipient.toString(),
-                    "deletionInfo.deletionStatus": { $nin: [DeletionStatus.DeletedByPeer, DeletionStatus.ToBeDeletedByPeer] }
+                    "deletionInfo.deletionStatus": { $nin: [LocalAttributeDeletionInfoStatus.DeletedByPeer, LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer] }
                 };
                 const thirdPartyRelationshipAttribute = await this.consumptionController.attributes.getLocalAttributes(query);
 

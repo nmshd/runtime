@@ -3,7 +3,7 @@ import { OwnSharedAttributeDeletedByOwnerNotificationItem } from "@nmshd/content
 import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { DeletionStatus, LocalAttributeDeletionInfo, OwnSharedAttributeDeletedByOwnerEvent } from "../../../attributes";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionInfoStatus, OwnSharedAttributeDeletedByOwnerEvent } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
@@ -43,7 +43,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
         if (!attribute) return;
 
         const deletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: DeletionStatus.DeletedByOwner,
+            deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByOwner,
             deletionDate: CoreDate.utc()
         });
 
