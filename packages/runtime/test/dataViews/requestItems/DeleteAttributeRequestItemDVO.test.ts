@@ -1,4 +1,4 @@
-import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { AbstractStringJSON, DeleteAttributeRequestItemJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
@@ -9,6 +9,7 @@ import {
     DecidableDeleteAttributeRequestItemDVO,
     DeleteAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
+    LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
     RequestMessageDVO,
     TransportServices

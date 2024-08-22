@@ -3,8 +3,7 @@ import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
-    DecideRequestItemParametersJSON,
-    LocalRequestStatus
+    DecideRequestItemParametersJSON
 } from "@nmshd/consumption";
 import {
     ArbitraryRelationshipCreationContent,
@@ -37,6 +36,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
+    LocalRequestStatus,
     MessageContentDerivation,
     MessageDTO,
     MessageSentEvent,

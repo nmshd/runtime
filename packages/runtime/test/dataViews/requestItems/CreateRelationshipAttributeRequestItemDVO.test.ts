@@ -1,4 +1,4 @@
-import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { AbstractStringJSON, ProprietaryStringJSON, RelationshipAttributeConfidentiality } from "@nmshd/content";
 import {
     ConsumptionServices,
@@ -8,6 +8,7 @@ import {
     DataViewExpander,
     DecidableCreateAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
+    LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
     RequestMessageDVO,
     TransportServices
