@@ -35,7 +35,6 @@ import { IdentityController } from "./IdentityController";
 import { IdentityDeletionProcessController } from "./IdentityDeletionProcessController";
 import { IdentityUtil } from "./IdentityUtil";
 import { IdentityClient } from "./backbone/IdentityClient";
-import { VersionClient } from "./backbone/VersionClient";
 import { Identity } from "./data/Identity";
 
 export class AccountController {
@@ -49,7 +48,6 @@ export class AccountController {
     public deviceClient: DeviceClient;
     public deviceAuthClient: DeviceAuthClient;
     public identityClient: IdentityClient;
-    public versionClient: VersionClient;
 
     public info: IDatabaseMap;
 
@@ -123,7 +121,6 @@ export class AccountController {
 
         this.deviceClient = new DeviceClient(this.config);
         this.identityClient = new IdentityClient(this.config);
-        this.versionClient = new VersionClient(this.config);
 
         this._identity = new IdentityController(this);
         this._identityDeletionProcess = new IdentityDeletionProcessController(this);
