@@ -22,9 +22,7 @@ describe("End2End Notification via Messages", function () {
         transport = TestUtil.createTransport(connection);
         await transport.init();
 
-        const consumption = TestUtil.createConsumption();
-
-        const accounts = await TestUtil.provideAccounts(transport, consumption, 2);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
 
         ({ accountController: sAccountController, consumptionController: sConsumptionController } = accounts[0]);
         sConsumptionController.notifications["processorRegistry"].registerProcessor(TestNotificationItem, TestNotificationItemProcessor);

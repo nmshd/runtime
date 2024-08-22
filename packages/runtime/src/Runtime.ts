@@ -4,7 +4,6 @@ import { EventBus, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
     AttributeListenersController,
     AttributesController,
-    Consumption,
     ConsumptionController,
     DraftsController,
     IncomingRequestsController,
@@ -56,7 +55,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     }
 
     protected transport: Transport;
-    protected consumption: Consumption;
 
     private _anonymousServices: AnonymousServices;
     public get anonymousServices(): AnonymousServices {
@@ -137,7 +135,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         await this.initDIContainer();
 
         await this.initTransportLibrary();
-        this.initConsumptionLibrary();
         await this.initAccount();
 
         this._modules = new RuntimeModuleRegistry();
@@ -200,12 +197,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         platformAdditionalHeaders["X-RUNTIME-VERSION"] = buildInformation.version;
 
         return { ...originalTransportConfig, platformAdditionalHeaders };
-    }
-
-    private initConsumptionLibrary() {
-        this.logger.debug("Initializing Consumption Library... ");
-
-        this.consumption = new Consumption(this.runtimeConfig.consumptionLibrary);
     }
 
     private async initDIContainer() {

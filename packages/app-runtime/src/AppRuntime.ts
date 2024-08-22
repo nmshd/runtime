@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { INativeTranslationProvider } from "@js-soft/native-abstractions";
 import { Result } from "@js-soft/ts-utils";
-import { Consumption, ConsumptionController } from "@nmshd/consumption";
+import { ConsumptionController } from "@nmshd/consumption";
 import { ModuleConfiguration, Runtime, RuntimeHealth } from "@nmshd/runtime";
 import { AccountController, CoreId, ICoreAddress } from "@nmshd/transport";
 import { AppConfig, AppConfigOverwrite, createAppConfig } from "./AppConfig";
@@ -172,9 +172,7 @@ export class AppRuntime extends Runtime<AppConfig> {
             throw AppRuntimeErrors.general.addressUnavailable().logWith(this.logger);
         }
 
-        const appConfig = createAppConfig();
-        const consumption = new Consumption(appConfig.consumptionLibrary);
-        const consumptionController = await new ConsumptionController(this.transport, accountController, consumption).init();
+        const consumptionController = await new ConsumptionController(this.transport, accountController, { setDefaultRepositoryAttributes: true }).init();
 
         const services = await this.login(accountController, consumptionController);
 

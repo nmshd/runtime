@@ -27,9 +27,6 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
         transportLibrary: {
             datawalletEnabled: true
         },
-        consumptionLibrary: {
-            setDefaultRepositoryAttributes: true
-        },
         modules: {
             appLaunch: {
                 name: "appLaunch",

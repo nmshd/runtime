@@ -88,9 +88,7 @@ export class RequestsTestsContext {
         const database = await dbConnection.getDatabase(`x${Math.random().toString(36).substring(7)}`);
         const collection = new SynchronizedCollection(await database.getCollection("Requests"), 0);
 
-        const consumption = TestUtil.createConsumption();
-
-        const account = (await TestUtil.provideAccounts(transport, consumption, 1))[0];
+        const account = (await TestUtil.provideAccounts(transport, 1))[0];
         context.consumptionController = account.consumptionController;
 
         const processorRegistry = new RequestItemProcessorRegistry(

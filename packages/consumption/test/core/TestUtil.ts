@@ -27,9 +27,8 @@ import {
 } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
 import {
-    Consumption,
+    ConsumptionConfigOverride,
     ConsumptionController,
-    IConfigOverwrite as IConsumptionConfigOverwrite,
     NotificationItemConstructor,
     NotificationItemProcessorConstructor,
     RequestItemConstructor,
@@ -181,21 +180,17 @@ export class TestUtil {
         return new Transport(connection, this.createConfig(), eventBus, loggerFactory);
     }
 
-    public static createConsumption(customConfig?: IConsumptionConfigOverwrite): Consumption {
-        return new Consumption(customConfig);
-    }
-
     public static async provideAccounts(
         transport: Transport,
-        consumption: Consumption,
         count: number,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
-        notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
+        notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>(),
+        customConsumptionConfig?: ConsumptionConfigOverride
     ): Promise<{ accountController: AccountController; consumptionController: ConsumptionController }[]> {
         const accounts = [];
 
         for (let i = 0; i < count; i++) {
-            const account = await this.createAccount(transport, consumption, requestItemProcessors, notificationItemProcessors);
+            const account = await this.createAccount(transport, requestItemProcessors, notificationItemProcessors, customConsumptionConfig);
             accounts.push(account);
         }
 
@@ -204,15 +199,18 @@ export class TestUtil {
 
     private static async createAccount(
         transport: Transport,
-        consumption: Consumption,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
-        notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
+        notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>(),
+        customConsumptionConfig?: ConsumptionConfigOverride
     ): Promise<{ accountController: AccountController; consumptionController: ConsumptionController }> {
         const db = await transport.createDatabase(`x${Math.random().toString(36).substring(7)}`);
         const accountController = new AccountController(transport, db, transport.config);
         await accountController.init();
 
-        const consumptionController = await new ConsumptionController(transport, accountController, consumption).init(requestItemProcessors, notificationItemProcessors);
+        const consumptionController = await new ConsumptionController(transport, accountController, customConsumptionConfig).init(
+            requestItemProcessors,
+            notificationItemProcessors
+        );
 
         return { accountController, consumptionController };
     }

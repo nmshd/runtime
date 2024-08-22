@@ -31,9 +31,7 @@ describe("End2End Request/Response via Relationship Template", function () {
         transport = TestUtil.createTransport(connection);
         await transport.init();
 
-        const consumption = TestUtil.createConsumption();
-
-        const accounts = await TestUtil.provideAccounts(transport, consumption, 2);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
 
         ({ accountController: sAccountController, consumptionController: sConsumptionController } = accounts[0]);
         sConsumptionController.incomingRequests["processorRegistry"].registerProcessor(TestRequestItem, TestRequestItemProcessor);
@@ -165,9 +163,7 @@ describe("End2End Request/Response via Messages", function () {
         transport = TestUtil.createTransport(connection);
         await transport.init();
 
-        const consumption = TestUtil.createConsumption();
-
-        const accounts = await TestUtil.provideAccounts(transport, consumption, 2);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
 
         ({ accountController: sAccountController, consumptionController: sConsumptionController } = accounts[0]);
         sConsumptionController.incomingRequests["processorRegistry"].registerProcessor(TestRequestItem, TestRequestItemProcessor);
@@ -317,9 +313,7 @@ describe("End2End Request via Template and Response via Message", function () {
         transport = TestUtil.createTransport(connection);
         await transport.init();
 
-        const consumption = TestUtil.createConsumption();
-
-        const accounts = await TestUtil.provideAccounts(transport, consumption, 2);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
 
         ({ accountController: sAccountController, consumptionController: sConsumptionController } = accounts[0]);
         sConsumptionController.incomingRequests["processorRegistry"].registerProcessor(TestRequestItem, TestRequestItemProcessor);

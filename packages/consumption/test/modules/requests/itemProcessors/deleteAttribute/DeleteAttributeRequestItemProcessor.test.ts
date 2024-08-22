@@ -38,9 +38,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         transport = TestUtil.createTransport(connection);
         await transport.init();
 
-        const consumption = TestUtil.createConsumption();
-
-        const accounts = await TestUtil.provideAccounts(transport, consumption, 2);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
         ({ accountController, consumptionController } = accounts[0]);
 
         peerAddress = CoreAddress.from("peerAddress");
