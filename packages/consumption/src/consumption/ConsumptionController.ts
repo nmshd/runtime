@@ -41,21 +41,14 @@ import {
     ShareAttributeRequestItemProcessor,
     ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor
 } from "../modules";
-import { ConsumptionConfig, ConsumptionConfigOverride } from "./ConsumptionConfig";
+import { ConsumptionConfig } from "./ConsumptionConfig";
 
 export class ConsumptionController {
-    public readonly consumptionConfig: ConsumptionConfig;
-
     public constructor(
         public readonly transport: Transport,
         public readonly accountController: AccountController,
-        consumptionConfig?: ConsumptionConfigOverride
-    ) {
-        this.consumptionConfig = {
-            setDefaultRepositoryAttributes: false,
-            ...consumptionConfig
-        };
-    }
+        public readonly consumptionConfig: ConsumptionConfig
+    ) {}
 
     private _attributes: AttributesController;
     public get attributes(): AttributesController {

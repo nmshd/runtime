@@ -27,7 +27,7 @@ import {
 } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
 import {
-    ConsumptionConfigOverride,
+    ConsumptionConfig,
     ConsumptionController,
     NotificationItemConstructor,
     NotificationItemProcessorConstructor,
@@ -185,7 +185,7 @@ export class TestUtil {
         count: number,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>(),
-        customConsumptionConfig?: ConsumptionConfigOverride
+        customConsumptionConfig?: ConsumptionConfig
     ): Promise<{ accountController: AccountController; consumptionController: ConsumptionController }[]> {
         const accounts = [];
 
@@ -201,13 +201,13 @@ export class TestUtil {
         transport: Transport,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>(),
-        customConsumptionConfig?: ConsumptionConfigOverride
+        customConsumptionConfig?: ConsumptionConfig
     ): Promise<{ accountController: AccountController; consumptionController: ConsumptionController }> {
         const db = await transport.createDatabase(`x${Math.random().toString(36).substring(7)}`);
         const accountController = new AccountController(transport, db, transport.config);
         await accountController.init();
 
-        const consumptionController = await new ConsumptionController(transport, accountController, customConsumptionConfig).init(
+        const consumptionController = await new ConsumptionController(transport, accountController, customConsumptionConfig ?? { setDefaultRepositoryAttributes: false }).init(
             requestItemProcessors,
             notificationItemProcessors
         );

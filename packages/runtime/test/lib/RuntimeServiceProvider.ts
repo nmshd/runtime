@@ -84,7 +84,9 @@ export class RuntimeServiceProvider {
             if (launchConfiguration.enableAttributeListenerModule) config.modules.attributeListener.enabled = true;
             if (launchConfiguration.enableNotificationModule) config.modules.notification.enabled = true;
 
-            const runtime = new TestRuntime(config, { setDefaultRepositoryAttributes: launchConfiguration.enableDefaultRepositoryAttributes });
+            const runtime = new TestRuntime(config, {
+                setDefaultRepositoryAttributes: launchConfiguration.enableDefaultRepositoryAttributes ?? false
+            });
             this.runtimes.push(runtime);
 
             await runtime.init();
