@@ -1,10 +1,10 @@
 import { Result } from "@js-soft/ts-utils";
-import { VersionController } from "@nmshd/transport";
+import { BackboneCompatibilityController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { UseCase } from "../common";
 
 export class CheckBackboneCompatibilityUseCase extends UseCase<void, void> {
-    public constructor(@Inject private readonly anonymousVersionController: VersionController) {
+    public constructor(@Inject private readonly anonymousVersionController: BackboneCompatibilityController) {
         super();
     }
 

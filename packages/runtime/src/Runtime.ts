@@ -14,6 +14,7 @@ import {
 import {
     AccountController,
     AnonymousTokenController,
+    BackboneCompatibilityController,
     ChallengeController,
     DeviceController,
     DevicesController,
@@ -26,8 +27,7 @@ import {
     RelationshipsController,
     RelationshipTemplateController,
     TokenController,
-    Transport,
-    VersionController
+    Transport
 } from "@nmshd/transport";
 import { Container, Scope } from "typescript-ioc";
 import { buildInformation } from "./buildInformation";
@@ -289,8 +289,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             .factory(() => new AnonymousTokenController(this.transport.config))
             .scope(Scope.Singleton);
 
-        Container.bind(VersionController)
-            .factory(() => new VersionController(this.transport.config))
+        Container.bind(BackboneCompatibilityController)
+            .factory(() => new BackboneCompatibilityController(this.transport.config))
             .scope(Scope.Singleton);
 
         const schemaRepository = new SchemaRepository();

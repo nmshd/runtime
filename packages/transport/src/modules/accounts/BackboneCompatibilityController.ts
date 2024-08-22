@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreErrors, IConfig } from "../../core";
 import { VersionClient } from "./backbone/VersionClient";
 
-export class VersionController {
+export class BackboneCompatibilityController {
     private readonly client: VersionClient;
     private readonly config: IConfig;
     public constructor(config: IConfig) {

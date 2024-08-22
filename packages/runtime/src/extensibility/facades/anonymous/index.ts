@@ -1,2 +1,2 @@
 export * from "./AnonymousTokensFacade";
-export * from "./VersionFacade";
+export * from "./BackboneCompatibilityFacade";
