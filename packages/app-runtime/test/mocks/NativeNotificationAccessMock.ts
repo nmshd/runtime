@@ -1,6 +1,6 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { INativeNotificationAccess, INativeNotificationScheduleOptions } from "@js-soft/native-abstractions";
 import { Result } from "@js-soft/ts-utils";
+import { INativeNotificationAccess, INativeNotificationScheduleOptions } from "../../src";
 
 export class NativeNotificationAccessMock implements INativeNotificationAccess {
     public constructor(private readonly logger: ILogger) {}
