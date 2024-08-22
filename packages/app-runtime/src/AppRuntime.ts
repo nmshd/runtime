@@ -250,6 +250,8 @@ export class AppRuntime extends Runtime<AppConfig> {
 
         const applicationId = nativeBootstrapper.nativeEnvironment.configAccess.get("applicationId").value;
         const transportConfig = nativeBootstrapper.nativeEnvironment.configAccess.get("transport").value;
+        const databaseFolder = nativeBootstrapper.nativeEnvironment.configAccess.get("databaseFolder").value;
+
         const mergedConfig = appConfig
             ? createAppConfig(
                   {
@@ -262,7 +264,8 @@ export class AppRuntime extends Runtime<AppConfig> {
             : createAppConfig({
                   transportLibrary: transportConfig,
                   applicationId: applicationId,
-                  applePushEnvironment: applePushEnvironment
+                  applePushEnvironment: applePushEnvironment,
+                  databaseFolder: databaseFolder
               });
 
         const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig);
