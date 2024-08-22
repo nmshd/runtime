@@ -1,6 +1,5 @@
-import { INativeTranslationProvider } from "@js-soft/native-abstractions";
 import { Result } from "@js-soft/ts-utils";
-import { AppRuntime } from "../../src";
+import { AppRuntime, INativeTranslationProvider } from "../../src";
 import { TestUtil } from "../lib";
 
 describe("TranslationProvider", function () {

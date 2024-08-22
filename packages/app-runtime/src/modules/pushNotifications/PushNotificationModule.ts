@@ -1,7 +1,7 @@
-import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "@js-soft/native-abstractions";
 import { Result } from "@js-soft/ts-utils";
 import { AppRuntimeErrors } from "../../AppRuntimeErrors";
 import { AccountSelectedEvent, DatawalletSynchronizedEvent, ExternalEventReceivedEvent } from "../../events";
+import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../../natives";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 import { BackboneEventName, IBackboneEventContent } from "./IBackboneEventContent";
 
