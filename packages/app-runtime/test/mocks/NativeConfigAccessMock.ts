@@ -1,5 +1,5 @@
-import { INativeConfigAccess } from "@js-soft/native-abstractions";
 import { Result } from "@js-soft/ts-utils";
+import { INativeConfigAccess } from "../../src";
 
 export class NativeConfigAccessMock implements INativeConfigAccess {
     public config: Record<string, any> = {};
