@@ -170,7 +170,8 @@ export class AppRuntime extends Runtime<AppConfig> {
         if (!localAccount.address) {
             throw AppRuntimeErrors.general.addressUnavailable().logWith(this.logger);
         }
-        const consumptionController = await new ConsumptionController(this.transport, accountController).init();
+
+        const consumptionController = await new ConsumptionController(this.transport, accountController, { setDefaultRepositoryAttributes: true }).init();
 
         const services = await this.login(accountController, consumptionController);
 
