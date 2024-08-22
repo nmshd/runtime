@@ -1,6 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
-import { INativeTranslationProvider } from "@js-soft/native-abstractions";
 import { Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
 import { ModuleConfiguration, Runtime, RuntimeHealth } from "@nmshd/runtime";
@@ -24,13 +23,13 @@ import {
     RelationshipTemplateProcessedModule
 } from "./modules";
 import { AccountServices, LocalAccountDTO, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
-import { RuntimeNativeBootstrapper, RuntimeNativeEnvironment } from "./runtimeNatives";
+import { INativeBootstrapper, INativeEnvironment, INativeTranslationProvider } from "./natives";
 import { SessionStorage } from "./SessionStorage";
 import { UserfriendlyResult } from "./UserfriendlyResult";
 
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(
-        private readonly _nativeEnvironment: RuntimeNativeEnvironment,
+        private readonly _nativeEnvironment: INativeEnvironment,
         appConfig: AppConfig
     ) {
         super(appConfig, _nativeEnvironment.loggerFactory);
@@ -80,7 +79,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         return this._accountServices;
     }
 
-    public get nativeEnvironment(): RuntimeNativeEnvironment {
+    public get nativeEnvironment(): INativeEnvironment {
         return this._nativeEnvironment;
     }
 
@@ -171,7 +170,8 @@ export class AppRuntime extends Runtime<AppConfig> {
         if (!localAccount.address) {
             throw AppRuntimeErrors.general.addressUnavailable().logWith(this.logger);
         }
-        const consumptionController = await new ConsumptionController(this.transport, accountController).init();
+
+        const consumptionController = await new ConsumptionController(this.transport, accountController, { setDefaultRepositoryAttributes: true }).init();
 
         const services = await this.login(accountController, consumptionController);
 
@@ -236,7 +236,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         this._accountServices = new AccountServices(this._multiAccountController);
     }
 
-    public static async create(nativeBootstrapper: RuntimeNativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
+    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
         // TODO: JSSNMSHDD-2524 (validate app config)
 
         if (!nativeBootstrapper.isInitialized) {
@@ -273,7 +273,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         return runtime;
     }
 
-    public static async createAndStart(nativeBootstrapper: RuntimeNativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
+    public static async createAndStart(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
         const runtime = await this.create(nativeBootstrapper, appConfig);
         await runtime.start();
         runtime.logger.trace("Runtime started");

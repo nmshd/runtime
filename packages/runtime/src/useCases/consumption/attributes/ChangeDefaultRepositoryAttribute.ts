@@ -26,6 +26,10 @@ export class ChangeDefaultRepositoryAttributeUseCase extends UseCase<ChangeDefau
     }
 
     protected async executeInternal(request: ChangeDefaultRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+        if (!this.attributesController.parent.consumptionConfig.setDefaultRepositoryAttributes) {
+            return Result.fail(RuntimeErrors.attributes.setDefaultRepositoryAttributesIsDisabled());
+        }
+
         const newDefaultAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!newDefaultAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
