@@ -3,7 +3,7 @@ import { Notification, RelationshipAttribute, RelationshipAttributeConfidentiali
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
-    DeletionStatus,
+    LocalAttributeDeletionInfoStatus,
     LocalNotification,
     LocalNotificationSource,
     LocalNotificationStatus,
@@ -101,10 +101,10 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
         expect(event).toBeInstanceOf(ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent);
         const updatedAttribute = (event as ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent).data;
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.deletionInfo!.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
+        expect(updatedAttribute.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.DeletedByPeer);
 
         const databaseAttribute = await consumptionController.attributes.getLocalAttribute(updatedAttribute.id);
-        expect(databaseAttribute!.deletionInfo!.deletionStatus).toStrictEqual(DeletionStatus.DeletedByPeer);
+        expect(databaseAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.DeletedByPeer);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);

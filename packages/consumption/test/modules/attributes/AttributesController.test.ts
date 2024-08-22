@@ -23,13 +23,13 @@ import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
     ConsumptionController,
-    DeletionStatus,
     IAttributeSuccessorParams,
     ICreateRepositoryAttributeParams,
     ICreateSharedLocalAttributeCopyParams,
     ICreateSharedLocalAttributeParams,
     LocalAttribute,
     LocalAttributeDeletionInfo,
+    LocalAttributeDeletionInfoStatus,
     LocalAttributeShareInfo,
     SharedAttributeCopyCreatedEvent
 } from "../../../src";
@@ -1350,7 +1350,7 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
-                        deletionStatus: DeletionStatus.ToBeDeleted,
+                        deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeleted,
                         deletionDate: CoreDate.utc().add({ days: 1 })
                     })
                 });
@@ -1380,7 +1380,7 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("address")
                     }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
-                        deletionStatus: DeletionStatus.DeletionRequestRejected,
+                        deletionStatus: LocalAttributeDeletionInfoStatus.DeletionRequestRejected,
                         deletionDate: CoreDate.utc().subtract({ days: 1 })
                     })
                 });

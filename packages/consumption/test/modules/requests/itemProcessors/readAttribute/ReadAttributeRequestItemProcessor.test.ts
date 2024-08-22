@@ -22,8 +22,8 @@ import {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionController,
     ConsumptionIds,
-    DeletionStatus,
     LocalAttributeDeletionInfo,
+    LocalAttributeDeletionInfoStatus,
     LocalAttributeShareInfo,
     LocalRequest,
     LocalRequestStatus,
@@ -1368,7 +1368,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: accountController.identity.address
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
+                deletionInfo: LocalAttributeDeletionInfo.from({
+                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionDate: CoreDate.utc().subtract({ days: 1 })
+                })
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -1428,7 +1431,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: CoreAddress.from(accountController.identity.address)
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
+                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -1522,7 +1525,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: accountController.identity.address
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
+                deletionInfo: LocalAttributeDeletionInfo.from({
+                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionDate: CoreDate.utc().subtract({ days: 1 })
+                })
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -1571,7 +1577,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: CoreAddress.from(accountController.identity.address)
                 }),
                 shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
+                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 
             const requestItem = ReadAttributeRequestItem.from({

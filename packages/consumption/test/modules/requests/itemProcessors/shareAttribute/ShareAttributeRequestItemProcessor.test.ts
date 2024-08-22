@@ -14,7 +14,15 @@ import {
     Surname
 } from "@nmshd/content";
 import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
-import { ConsumptionController, ConsumptionIds, DeletionStatus, LocalAttribute, LocalRequest, LocalRequestStatus, ShareAttributeRequestItemProcessor } from "../../../../../src";
+import {
+    ConsumptionController,
+    ConsumptionIds,
+    LocalAttribute,
+    LocalAttributeDeletionInfoStatus,
+    LocalRequest,
+    LocalRequestStatus,
+    ShareAttributeRequestItemProcessor
+} from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 
@@ -339,7 +347,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: localAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: DeletionStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }
             });
@@ -383,7 +391,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: localAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: DeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }
             });
@@ -477,7 +485,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: successorOfRepositoryAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: DeletionStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }
             });
@@ -528,7 +536,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: successorOfRepositoryAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: DeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }
             });
@@ -625,7 +633,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: repositoryAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: DeletionStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }
             });
@@ -676,7 +684,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: repositoryAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: DeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }
             });
@@ -830,7 +838,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: initialRelationshipAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: DeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ day: 1 })
                 }
             });
@@ -877,7 +885,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: initialRelationshipAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: DeletionStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ day: 1 })
                 }
             });
