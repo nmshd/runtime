@@ -24,7 +24,6 @@ describe("AttributeListenersController", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection, mockEventBus);
-
         await transport.init();
 
         const account = (await TestUtil.provideAccounts(transport, 1))[0];

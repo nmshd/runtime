@@ -207,6 +207,10 @@ class Attributes {
             `Attribute '${attributeId.toString()}' is a child of a complex Attribute. If you want to delete it, you must delete its parent.`
         );
     }
+
+    public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
+    }
 }
 
 class IdentityDeletionProcess {

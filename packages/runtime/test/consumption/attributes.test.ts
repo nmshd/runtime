@@ -68,6 +68,8 @@ let services1: TestRuntimeServices;
 let services2: TestRuntimeServices;
 let services3: TestRuntimeServices;
 
+let appService: TestRuntimeServices;
+
 beforeAll(async () => {
     const numberOfServices = 3;
     [services1, services2, services3] = await runtimeServiceProvider.launch(numberOfServices, {
@@ -79,6 +81,15 @@ beforeAll(async () => {
     await establishRelationship(services1.transport, services2.transport);
     await establishRelationship(services1.transport, services3.transport);
     await establishRelationship(services2.transport, services3.transport);
+
+    appService = (
+        await runtimeServiceProvider.launch(1, {
+            enableDefaultRepositoryAttributes: true,
+            enableRequestModule: true
+        })
+    )[0];
+
+    await establishRelationship(appService.transport, services2.transport);
 }, 30000);
 afterAll(async () => await runtimeServiceProvider.stop());
 
@@ -90,7 +101,7 @@ beforeEach(() => {
 
 async function cleanupAttributes() {
     await Promise.all(
-        [services1, services2, services3].map(async (services) => {
+        [services1, services2, services3, appService].map(async (services) => {
             const servicesAttributeController = (services.consumption.attributes as any).getAttributeUseCase.attributeController as AttributesController;
 
             const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
@@ -104,7 +115,7 @@ async function cleanupAttributes() {
 describe("get attribute(s)", () => {
     let relationshipAttributeId: string;
     let identityAttributeIds: string[];
-
+    let appAttributeIds: string[];
     beforeAll(async function () {
         const senderRequests: CreateRepositoryAttributeRequest[] = [
             {
@@ -152,6 +163,12 @@ describe("get attribute(s)", () => {
             }
         });
         relationshipAttributeId = relationshipAttribute.id;
+
+        appAttributeIds = [];
+        for (const request of senderRequests) {
+            const appAttribute = (await appService.consumption.attributes.createRepositoryAttribute(request)).value;
+            appAttributeIds.push(appAttribute.id);
+        }
     });
 
     afterAll(async function () {
@@ -226,7 +243,7 @@ describe("get attribute(s)", () => {
         });
 
         test("should allow to get only default attributes", async function () {
-            const result = await services1.consumption.attributes.getAttributes({
+            const result = await appService.consumption.attributes.getAttributes({
                 query: { isDefault: "true" }
             });
             expect(result).toBeSuccessful();
@@ -235,24 +252,21 @@ describe("get attribute(s)", () => {
             expect(attributes).toHaveLength(2);
 
             const attributeIds = attributes.map((attr) => attr.id);
-            expect(attributeIds).toContain(identityAttributeIds[0]);
-            expect(attributeIds).toContain(identityAttributeIds[1]);
-            expect(attributeIds).not.toContain(identityAttributeIds[2]);
-            expect(attributeIds).not.toContain(relationshipAttributeId);
+            expect(attributeIds).toContain(appAttributeIds[0]);
+            expect(attributeIds).toContain(appAttributeIds[1]);
+            expect(attributeIds).not.toContain(appAttributeIds[2]);
         });
 
         test("should allow not to get default attributes", async function () {
-            const result = await services1.consumption.attributes.getAttributes({
+            const result = await appService.consumption.attributes.getAttributes({
                 query: { isDefault: "!true" }
             });
             expect(result).toBeSuccessful();
 
             const attributes = result.value;
-            expect(attributes).toHaveLength(2);
+            expect(attributes).toHaveLength(1);
 
-            const attributeIds = attributes.map((attr) => attr.id);
-            expect(attributeIds).toContain(relationshipAttributeId);
-            expect(attributeIds).toContain(identityAttributeIds[2]);
+            expect(attributes[0].id).toBe(appAttributeIds[2]);
         });
     });
 });
@@ -496,7 +510,40 @@ describe("get repository, own shared and peer shared attributes", () => {
         });
 
         test("should allow to get only default attributes", async function () {
-            const result = await services1.consumption.attributes.getRepositoryAttributes({
+            const defaultGivenName = (
+                await appService.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "GivenName",
+                            value: "AGivenName"
+                        }
+                    }
+                })
+            ).value;
+
+            const defaultSurname = (
+                await appService.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "Surname",
+                            value: "ASurname"
+                        }
+                    }
+                })
+            ).value;
+
+            const otherSurname = (
+                await appService.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "Surname",
+                            value: "AnotherSurname"
+                        }
+                    }
+                })
+            ).value;
+
+            const result = await appService.consumption.attributes.getRepositoryAttributes({
                 query: {
                     isDefault: "true"
                 }
@@ -507,8 +554,9 @@ describe("get repository, own shared and peer shared attributes", () => {
             expect(attributes).toHaveLength(2);
 
             const attributeIds = attributes.map((attr) => attr.id);
-            expect(attributeIds).toContain(services1RepoSurnameV1.id);
-            expect(attributeIds).toContain(services1RepoGivenNameV1.id);
+            expect(attributeIds).toContain(defaultGivenName.id);
+            expect(attributeIds).toContain(defaultSurname.id);
+            expect(attributeIds).not.toContain(otherSurname.id);
         });
     });
 
@@ -679,7 +727,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 }
             }
         };
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await appService.consumption.attributes.createRepositoryAttribute(request);
         const attribute = result.value;
         expect(attribute.isDefault).toBe(true);
     });
@@ -693,8 +741,8 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 }
             }
         };
-        await services1.consumption.attributes.createRepositoryAttribute(request);
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        await appService.consumption.attributes.createRepositoryAttribute(request);
+        const result = await appService.consumption.attributes.createRepositoryAttribute(request);
         const attribute = result.value;
         expect(attribute.isDefault).toBeUndefined();
     });
@@ -1352,7 +1400,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
 
     test("should change default RepositoryAttribute", async () => {
         const defaultAttribute = (
-            await services1.consumption.attributes.createRepositoryAttribute({
+            await appService.consumption.attributes.createRepositoryAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -1364,7 +1412,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         expect(defaultAttribute.isDefault).toBe(true);
 
         const desiredDefaultAttribute = (
-            await services1.consumption.attributes.createRepositoryAttribute({
+            await appService.consumption.attributes.createRepositoryAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -1375,20 +1423,20 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         ).value;
         expect(desiredDefaultAttribute.isDefault).toBeUndefined();
 
-        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredDefaultAttribute.id });
+        const result = await appService.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredDefaultAttribute.id });
         expect(result.isSuccess).toBe(true);
         const newDefaultAttribute = result.value;
         expect(newDefaultAttribute.isDefault).toBe(true);
 
-        const updatedFormerDesiredDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: desiredDefaultAttribute.id })).value;
+        const updatedFormerDesiredDefaultAttribute = (await appService.consumption.attributes.getAttribute({ id: desiredDefaultAttribute.id })).value;
         expect(updatedFormerDesiredDefaultAttribute.isDefault).toBe(true);
 
-        const updatedFormerDefaultAttribute = (await services1.consumption.attributes.getAttribute({ id: defaultAttribute.id })).value;
+        const updatedFormerDefaultAttribute = (await appService.consumption.attributes.getAttribute({ id: defaultAttribute.id })).value;
         expect(updatedFormerDefaultAttribute.isDefault).toBeUndefined();
     });
 
     test("should return an error if the new default attribute is not a RepositoryAttribute", async () => {
-        await services1.consumption.attributes.createRepositoryAttribute({
+        await appService.consumption.attributes.createRepositoryAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1397,7 +1445,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
             }
         });
 
-        const desiredSharedDefaultAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+        const desiredSharedDefaultAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(appService, services2, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1405,12 +1453,12 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
                 }
             }
         });
-        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredSharedDefaultAttribute.id });
+        const result = await appService.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredSharedDefaultAttribute.id });
         expect(result).toBeAnError(`Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not a RepositoryAttribute.`, "error.runtime.attributes.isNotRepositoryAttribute");
     });
 
     test("should return an error if the new default attribute has a successor", async () => {
-        await services1.consumption.attributes.createRepositoryAttribute({
+        await appService.consumption.attributes.createRepositoryAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1420,7 +1468,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         });
 
         const desiredDefaultAttribute = (
-            await services1.consumption.attributes.createRepositoryAttribute({
+            await appService.consumption.attributes.createRepositoryAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -1431,7 +1479,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         ).value;
 
         const successionResult = (
-            await services1.consumption.attributes.succeedRepositoryAttribute({
+            await appService.consumption.attributes.succeedRepositoryAttribute({
                 predecessorId: desiredDefaultAttribute.id,
                 successorContent: {
                     value: {
@@ -1445,11 +1493,28 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         const updatedDesiredDefaultAttribute = successionResult.predecessor;
         const desiredDefaultAttributeSuccessor = successionResult.successor;
 
-        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: updatedDesiredDefaultAttribute.id });
+        const result = await appService.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: updatedDesiredDefaultAttribute.id });
         expect(result).toBeAnError(
             `Attribute '${updatedDesiredDefaultAttribute.id.toString()}' already has a successor ${desiredDefaultAttributeSuccessor.id.toString()}.`,
             "error.runtime.attributes.hasSuccessor"
         );
+    });
+
+    test("should return an error trying to set a default attribute if setDefaultRepositoryAttributes is false", async () => {
+        const attribute = (
+            await services1.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "My default name"
+                    }
+                }
+            })
+        ).value;
+        expect(attribute.isDefault).toBeUndefined();
+
+        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: attribute.id });
+        expect(result).toBeAnError("Setting default RepositoryAttributes is disabled for this Account.", "error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled");
     });
 });
 
