@@ -9,10 +9,10 @@ describe("IdentityGeneratorTest", function () {
         });
 
         test("should create a correct address object", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "prod.enmeshed.eu");
+            const address = await IdentityUtil.createAddress(kp.publicKey, "example.com");
             expect(address).toBeDefined();
             expect(address.address).toBeDefined();
-            expect(address.address.startsWith("did:e:prod.enmeshed.eu:dids:")).toBe(true);
+            expect(address.address.startsWith("did:e:example.com:dids:")).toBe(true);
         });
 
         test("should create a correct address object (test 0)", async function () {
@@ -22,63 +22,63 @@ describe("IdentityGeneratorTest", function () {
                 publicKey: buf,
                 algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519
             });
-            const address = await IdentityUtil.createAddress(pk, "prod.enmeshed.eu");
+            const address = await IdentityUtil.createAddress(pk, "example.com");
             expect(address).toBeDefined();
             expect(address.address).toBeDefined();
-            expect(address.address).toBe("did:e:prod.enmeshed.eu:dids:56b3f2a0c202e27229aa87");
+            expect(address.address).toBe("did:e:example.com:dids:56b3f2a0c202e27229aab6");
         });
 
         test("should create a correct address object (testcases)", async function () {
             const addresses = [
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "fj0o9eOiPRswTZL6j9lE9TRvpDDnPRMF0gJeahz/W2c=",
-                    address: "did:e:prod.enmeshed.eu:dids:fef1992c5e529adc413288"
+                    address: "did:e:example.com:dids:fef1992c5e529adc41328d"
                 },
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "jRxGfZtQ8a90TmKCGk+dhuX1CBjgoXuldhNPwrjpWsw=",
-                    address: "did:e:prod.enmeshed.eu:dids:b9d25bd0a2bbd3aa48437c"
+                    address: "did:e:example.com:dids:b9d25bd0a2bbd3aa4843ed"
                 },
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "PEODpwvi7KxIVa4qeUXia9apMFvPMktdDHiDitlfbjE=",
-                    address: "did:e:prod.enmeshed.eu:dids:d459ff2144f0eac7aff554"
+                    address: "did:e:example.com:dids:d459ff2144f0eac7aff5f7"
                 },
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "mJGmNbxiVZAPToRuk9O3NvdfsWl6V+7wzIc+/57bU08=",
-                    address: "did:e:prod.enmeshed.eu:dids:e2208784ee2769c5d9684d"
+                    address: "did:e:example.com:dids:e2208784ee2769c5d9686a"
                 },
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "l68K/zdNp1VLoswcHAqN6QUFwCMU6Yvzf7XiW2m1hRY=",
-                    address: "did:e:prod.enmeshed.eu:dids:5845cf29fbda2897892a9a"
+                    address: "did:e:example.com:dids:5845cf29fbda2897892a66"
                 },
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "Gl8XTo8qFuUM+ksXixwp4g/jf3H/hU1F8ETuYaHCM5I=",
-                    address: "did:e:prod.enmeshed.eu:dids:01f4bab09d757578bb4994"
+                    address: "did:e:example.com:dids:01f4bab09d757578bb49ac"
                 },
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "rIS4kAzHXT7GgCA6Qm1ANlwM3x12QMSkeprHb6tjPyc=",
-                    address: "did:e:prod.enmeshed.eu:dids:ee5966a158f1dc4de5bd5c"
+                    address: "did:e:example.com:dids:ee5966a158f1dc4de5bdc9"
                 },
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "hg/cbeBvfNrMiJ0dW1AtWC4IQwG4gkuhzG2+z6bAoRU=",
-                    address: "did:e:prod.enmeshed.eu:dids:ab7475ba4070f29ce286fd"
+                    address: "did:e:example.com:dids:ab7475ba4070f29ce2861c"
                 },
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "kId+qWen/lKeTdyxcIQhkzvvvTU8wIJECfWUWbmRQRY=",
-                    address: "did:e:prod.enmeshed.eu:dids:4664f42d7ca6480db07fdb"
+                    address: "did:e:example.com:dids:4664f42d7ca6480db07f18"
                 },
                 {
-                    backboneHostname: "prod.enmeshed.eu",
+                    backboneHostname: "example.com",
                     publicKey: "NcqlzTEpSlKX9gmNBv41EjPRHpaNYwt0bxqh1bgyJzA=",
-                    address: "did:e:prod.enmeshed.eu:dids:60326ff5075e0d7378990c"
+                    address: "did:e:example.com:dids:60326ff5075e0d73789973"
                 }
             ];
 
@@ -95,31 +95,31 @@ describe("IdentityGeneratorTest", function () {
         });
 
         test("should positively check a correct address object (without giving public key)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "prod.enmeshed.eu");
-            const valid = await IdentityUtil.checkAddress(address, "prod.enmeshed.eu");
+            const address = await IdentityUtil.createAddress(kp.publicKey, "example.com");
+            const valid = await IdentityUtil.checkAddress(address, "example.com");
             expect(valid).toBe(true);
         });
 
         test("should positively check a correct address object (giving public key)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "prod.enmeshed.eu");
-            const valid = await IdentityUtil.checkAddress(address, "prod.enmeshed.eu", kp.publicKey);
+            const address = await IdentityUtil.createAddress(kp.publicKey, "example.com");
+            const valid = await IdentityUtil.checkAddress(address, "example.com", kp.publicKey);
             expect(valid).toBe(true);
         });
 
         test("should positively check a correct address object (giving public key and backboneHostname)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "prod.enmeshed.eu");
-            const valid = await IdentityUtil.checkAddress(address, "prod.enmeshed.eu", kp.publicKey);
+            const address = await IdentityUtil.createAddress(kp.publicKey, "example.com");
+            const valid = await IdentityUtil.checkAddress(address, "example.com", kp.publicKey);
             expect(valid).toBe(true);
         });
 
         test("should negatively check an incorrect address object (wrong backboneHostname)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "prod.enmeshed.eu");
+            const address = await IdentityUtil.createAddress(kp.publicKey, "example.com");
             const valid = await IdentityUtil.checkAddress(address, "dev.enmeshed.eu", kp.publicKey);
             expect(valid).toBe(false);
         });
 
         test("should negatively check an incorrect address object (wrong checksum)", async function () {
-            const address = await IdentityUtil.createAddress(kp.publicKey, "prod.enmeshed.eu");
+            const address = await IdentityUtil.createAddress(kp.publicKey, "example.com");
             const index = 5;
             let replaceWith = "b";
             const currentString = address.address.substr(index, replaceWith.length);
@@ -128,14 +128,14 @@ describe("IdentityGeneratorTest", function () {
             }
             const wrongaddress = address.address.substr(0, index) + replaceWith + address.address.substr(index + replaceWith.length);
             address.address = wrongaddress;
-            const valid = await IdentityUtil.checkAddress(address, "prod.enmeshed.eu", kp.publicKey);
+            const valid = await IdentityUtil.checkAddress(address, "example.com", kp.publicKey);
             expect(valid).toBe(false);
         });
 
         test("should negatively check an incorrect address object (wrong publicKey)", async function () {
             const kp2 = await CoreCrypto.generateSignatureKeypair();
-            const address = await IdentityUtil.createAddress(kp.publicKey, "prod.enmeshed.eu");
-            const valid = await IdentityUtil.checkAddress(address, "prod.enmeshed.eu", kp2.publicKey);
+            const address = await IdentityUtil.createAddress(kp.publicKey, "example.com");
+            const valid = await IdentityUtil.checkAddress(address, "example.com", kp2.publicKey);
             expect(valid).toBe(false);
         });
         // eslint-disable-next-line jest/no-commented-out-tests
