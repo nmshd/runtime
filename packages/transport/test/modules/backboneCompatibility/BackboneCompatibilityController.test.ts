@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { BackboneCompatibilityController, Transport } from "src";
 import { TestUtil } from "test/testHelpers/TestUtil";
+import { BackboneCompatibilityController, Transport } from "../../../src";
 
 describe("AccountController", function () {
     let connection: IDatabaseConnection;
