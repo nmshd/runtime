@@ -29,7 +29,7 @@ import {
     ICreateSharedLocalAttributeParams,
     LocalAttribute,
     LocalAttributeDeletionInfo,
-    LocalAttributeDeletionInfoStatus,
+    LocalAttributeDeletionStatus,
     LocalAttributeShareInfo,
     SharedAttributeCopyCreatedEvent
 } from "../../../src";
@@ -1406,7 +1406,7 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
-                        deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeleted,
+                        deletionStatus: LocalAttributeDeletionStatus.ToBeDeleted,
                         deletionDate: CoreDate.utc().add({ days: 1 })
                     })
                 });
@@ -1436,7 +1436,7 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("address")
                     }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
-                        deletionStatus: LocalAttributeDeletionInfoStatus.DeletionRequestRejected,
+                        deletionStatus: LocalAttributeDeletionStatus.DeletionRequestRejected,
                         deletionDate: CoreDate.utc().subtract({ days: 1 })
                     })
                 });

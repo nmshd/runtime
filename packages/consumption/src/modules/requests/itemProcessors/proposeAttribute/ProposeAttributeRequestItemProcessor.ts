@@ -14,7 +14,7 @@ import {
 import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { AttributeSuccessorParams, LocalAttributeDeletionInfoStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -175,10 +175,10 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             const wasSharedBefore = latestSharedVersion.length > 0;
             const wasDeletedByPeerOrOwner =
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionInfoStatus.DeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionInfoStatus.DeletedByOwner ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionInfoStatus.ToBeDeleted;
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByOwner ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeleted;
             const isLatestSharedVersion = latestSharedVersion[0]?.shareInfo?.sourceAttribute?.toString() === existingSourceAttribute.id.toString();
             const predecessorWasSharedBefore = wasSharedBefore && !isLatestSharedVersion;
 

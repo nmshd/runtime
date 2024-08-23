@@ -42,7 +42,7 @@ import {
     IRequireManualDecisionOfIncomingRequestParameters,
     ISentOutgoingRequestParameters,
     IncomingRequestsController,
-    LocalAttributeDeletionInfoStatus,
+    LocalAttributeDeletionStatus,
     LocalRequest,
     LocalRequestSource,
     LocalRequestStatus,
@@ -1048,7 +1048,7 @@ export class RequestsThen {
         expect(sUpdatedOwnSharedIdentityAttributes).toHaveLength(3);
         for (const sUpdatedOwnSharedIdentityAttribute of sUpdatedOwnSharedIdentityAttributes) {
             expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo).toBeDefined();
-            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionInfoStatus.DeletionRequestSent);
+            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletionRequestSent);
         }
     }
 

@@ -7,7 +7,7 @@ export interface LocalAttributeShareInfoDTO {
     sourceAttribute?: string;
 }
 
-export enum LocalAttributeDeletionInfoStatus {
+export enum LocalAttributeDeletionStatus {
     DeletionRequestSent = "DeletionRequestSent",
     DeletionRequestRejected = "DeletionRequestRejected",
     ToBeDeleted = "ToBeDeleted",
@@ -17,7 +17,7 @@ export enum LocalAttributeDeletionInfoStatus {
 }
 
 export interface LocalAttributeDeletionInfoDTO {
-    deletionStatus: LocalAttributeDeletionInfoStatus;
+    deletionStatus: LocalAttributeDeletionStatus;
     deletionDate: string;
 }
 

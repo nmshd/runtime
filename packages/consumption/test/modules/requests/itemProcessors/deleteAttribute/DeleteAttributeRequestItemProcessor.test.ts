@@ -16,7 +16,7 @@ import {
     ConsumptionController,
     ConsumptionIds,
     DeleteAttributeRequestItemProcessor,
-    LocalAttributeDeletionInfoStatus,
+    LocalAttributeDeletionStatus,
     LocalRequest,
     LocalRequestStatus
 } from "../../../../../src";
@@ -262,7 +262,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     sourceAttribute: CoreId.from("repositoryAttribute")
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc()
                 }
             });
@@ -295,7 +295,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     sourceAttribute: CoreId.from("repositoryAttribute")
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }
             });
@@ -595,7 +595,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedPeerSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(rPeerSharedIdentityAttribute.id);
             expect(updatedPeerSharedIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPeerSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.ToBeDeleted);
+            expect(updatedPeerSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeleted);
             expect(updatedPeerSharedIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
         });
 
@@ -646,7 +646,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedPeerSharedRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(rPeerSharedRelationshipAttribute.id);
             expect(updatedPeerSharedRelationshipAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPeerSharedRelationshipAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.ToBeDeleted);
+            expect(updatedPeerSharedRelationshipAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeleted);
             expect(updatedPeerSharedRelationshipAttribute!.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
         });
 
@@ -699,7 +699,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     requestReference: CoreId.from("reqRef")
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: deletionDate
                 }
             });
@@ -729,7 +729,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const unchangedAttribute = await consumptionController.attributes.getLocalAttribute(deletedByPeerAttribute.id);
             expect(unchangedAttribute!.deletionInfo).toBeDefined();
-            expect(unchangedAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.DeletedByPeer);
+            expect(unchangedAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
             expect(unchangedAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
@@ -748,7 +748,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     requestReference: CoreId.from("reqRef")
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: deletionDate
                 }
             });
@@ -782,7 +782,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const unchangedAttribute = await consumptionController.attributes.getLocalAttribute(deletedByPeerAttribute.id);
             expect(unchangedAttribute!.deletionInfo).toBeDefined();
-            expect(unchangedAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.DeletedByPeer);
+            expect(unchangedAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
             expect(unchangedAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
@@ -830,7 +830,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sOwnSharedIdentityAttribute.id);
             expect(updatedOwnSharedIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer);
+            expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeletedByPeer);
             expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
@@ -881,7 +881,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedOwnSharedRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(sOwnSharedRelationshipAttribute.id);
             expect(updatedOwnSharedRelationshipAttribute!.deletionInfo).toBeDefined();
-            expect(updatedOwnSharedRelationshipAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer);
+            expect(updatedOwnSharedRelationshipAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeletedByPeer);
             expect(updatedOwnSharedRelationshipAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
@@ -947,7 +947,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnSharedIdentityAttribute.id);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer);
+            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeletedByPeer);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
@@ -969,7 +969,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 },
                 succeededBy: sOwnSharedIdentityAttributeId,
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: predecessorDeletionDate
                 }
             });
@@ -1019,7 +1019,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnSharedIdentityAttribute.id);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.DeletedByPeer);
+            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(predecessorDeletionDate);
         });
 
@@ -1067,7 +1067,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sOwnSharedIdentityAttribute.id);
             expect(updatedOwnSharedIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.DeletionRequestRejected);
+            expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletionRequestRejected);
             expect(updatedOwnSharedIdentityAttribute!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(true);
         });
 
@@ -1133,7 +1133,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnSharedIdentityAttribute.id);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.DeletionRequestRejected);
+            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletionRequestRejected);
             expect(
                 updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")
             ).toBe(true);
@@ -1157,7 +1157,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 },
                 succeededBy: sOwnSharedIdentityAttributeId,
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: deletionDate
                 }
             });
@@ -1205,7 +1205,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnSharedIdentityAttribute.id);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer);
+            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeletedByPeer);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
@@ -1227,7 +1227,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 },
                 succeededBy: sOwnSharedIdentityAttributeId,
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: deletionDate
                 }
             });
@@ -1275,7 +1275,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnSharedIdentityAttribute.id);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionInfoStatus.DeletedByPeer);
+            expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
     });

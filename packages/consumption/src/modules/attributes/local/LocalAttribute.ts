@@ -12,7 +12,7 @@ import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, 
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
 import { CoreErrors } from "../../../consumption/CoreErrors";
-import { ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttributeDeletionInfoJSON, LocalAttributeDeletionInfoStatus } from "./LocalAttributeDeletionInfo";
+import { ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttributeDeletionInfoJSON, LocalAttributeDeletionStatus } from "./LocalAttributeDeletionInfo";
 import { ILocalAttributeShareInfo, LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "./LocalAttributeShareInfo";
 
 export interface LocalAttributeJSON {
@@ -218,20 +218,20 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     }
 
     private isPeerSharedAttributeDeletionInfo(deletionInfo: LocalAttributeDeletionInfo): boolean {
-        return deletionInfo.deletionStatus === LocalAttributeDeletionInfoStatus.DeletedByOwner || deletionInfo.deletionStatus === LocalAttributeDeletionInfoStatus.ToBeDeleted;
+        return deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletedByOwner || deletionInfo.deletionStatus === LocalAttributeDeletionStatus.ToBeDeleted;
     }
 
     private isOwnSharedAttributeDeletionInfo(deletionInfo: LocalAttributeDeletionInfo): boolean {
         return (
-            deletionInfo.deletionStatus === LocalAttributeDeletionInfoStatus.DeletedByPeer ||
-            deletionInfo.deletionStatus === LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer ||
-            deletionInfo.deletionStatus === LocalAttributeDeletionInfoStatus.DeletionRequestSent ||
-            deletionInfo.deletionStatus === LocalAttributeDeletionInfoStatus.DeletionRequestRejected
+            deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer ||
+            deletionInfo.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer ||
+            deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletionRequestSent ||
+            deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletionRequestRejected
         );
     }
 
     private isThirdPartyOwnedRelationshipAttributeDeletionInfo(deletionInfo: LocalAttributeDeletionInfo): boolean {
-        return deletionInfo.deletionStatus === LocalAttributeDeletionInfoStatus.DeletedByPeer;
+        return deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer;
     }
 
     public hasDeletionInfo(): this is LocalAttribute & { deletionInfo: LocalAttributeDeletionInfo } {

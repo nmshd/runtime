@@ -18,7 +18,7 @@ import {
     ConsumptionController,
     ConsumptionIds,
     LocalAttribute,
-    LocalAttributeDeletionInfoStatus,
+    LocalAttributeDeletionStatus,
     LocalRequest,
     LocalRequestStatus,
     ShareAttributeRequestItemProcessor
@@ -346,7 +346,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: localAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }
             });
@@ -390,7 +390,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: localAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }
             });
@@ -484,7 +484,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: successorOfRepositoryAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }
             });
@@ -535,7 +535,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: successorOfRepositoryAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }
             });
@@ -632,7 +632,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: repositoryAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }
             });
@@ -683,7 +683,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: repositoryAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }
             });
@@ -837,7 +837,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: initialRelationshipAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.ToBeDeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ day: 1 })
                 }
             });
@@ -884,7 +884,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     sourceAttribute: initialRelationshipAttribute.id
                 },
                 deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionInfoStatus.DeletedByPeer,
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ day: 1 })
                 }
             });
