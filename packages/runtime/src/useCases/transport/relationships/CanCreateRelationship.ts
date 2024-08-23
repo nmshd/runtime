@@ -75,7 +75,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
                 const errorResponse: CanCreateRelationshipErrorResponse = {
                     isSuccess: false,
                     error: RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
-                        `The LocalRequest has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to in order to accept or to reject the creation of a Relationship.`
+                        `The incoming Request has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to in order to accept or to reject the creation of a Relationship.`
                     )
                 };
 
