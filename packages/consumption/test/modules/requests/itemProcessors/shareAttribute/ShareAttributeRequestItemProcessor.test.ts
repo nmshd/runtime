@@ -245,6 +245,39 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
+        test("returns error when an empty string is specified for the owner of the IdentityAttribute instead of the explicit address", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+
+            const sourceAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    owner: sender,
+                    value: GivenName.from({
+                        value: "AGivenName"
+                    })
+                })
+            });
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: IdentityAttribute.from({
+                    owner: CoreAddress.from(""),
+                    value: GivenName.from({
+                        value: "AGivenName"
+                    })
+                }),
+                sourceAttributeId: sourceAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: `The Attribute with the given sourceAttributeId '${sourceAttribute.id.toString()}' does not match the given Attribute.`
+            });
+        });
+
         test("returns error when the IdentityAttribute is a shared copy of a RepositoryAttribute", async function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
