@@ -28,9 +28,6 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         }
 
         const requestItemAttributeJSON = requestItem.attribute.toJSON();
-        if (requestItemAttributeJSON.owner === "") {
-            requestItemAttributeJSON.owner = this.currentIdentityAddress.toString();
-        }
 
         if (!_.isEqual(foundAttribute.content.toJSON(), requestItemAttributeJSON)) {
             return ValidationResult.error(
