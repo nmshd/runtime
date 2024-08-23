@@ -170,7 +170,8 @@ export class AppRuntime extends Runtime<AppConfig> {
         if (!localAccount.address) {
             throw AppRuntimeErrors.general.addressUnavailable().logWith(this.logger);
         }
-        const consumptionController = await new ConsumptionController(this.transport, accountController).init();
+
+        const consumptionController = await new ConsumptionController(this.transport, accountController, { setDefaultRepositoryAttributes: true }).init();
 
         const services = await this.login(accountController, consumptionController);
 
@@ -250,6 +251,8 @@ export class AppRuntime extends Runtime<AppConfig> {
 
         const applicationId = nativeBootstrapper.nativeEnvironment.configAccess.get("applicationId").value;
         const transportConfig = nativeBootstrapper.nativeEnvironment.configAccess.get("transport").value;
+        const databaseFolder = nativeBootstrapper.nativeEnvironment.configAccess.get("databaseFolder").value;
+
         const mergedConfig = appConfig
             ? createAppConfig(
                   {
@@ -262,7 +265,8 @@ export class AppRuntime extends Runtime<AppConfig> {
             : createAppConfig({
                   transportLibrary: transportConfig,
                   applicationId: applicationId,
-                  applePushEnvironment: applePushEnvironment
+                  applePushEnvironment: applePushEnvironment,
+                  databaseFolder: databaseFolder
               });
 
         const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig);

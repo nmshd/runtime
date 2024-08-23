@@ -42,7 +42,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
-
         await transport.init();
 
         const accounts = await TestUtil.provideAccounts(transport, 2);

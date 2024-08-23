@@ -15,7 +15,6 @@ describe("CreateAttributeRequestItemProcessor", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
-
         await transport.init();
 
         const account = (await TestUtil.provideAccounts(transport, 1))[0];

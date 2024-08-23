@@ -48,7 +48,8 @@ export class AttributesController extends ConsumptionBaseController {
     public constructor(
         parent: ConsumptionController,
         private readonly eventBus: EventBus,
-        private readonly identity: { address: CoreAddress }
+        private readonly identity: { address: CoreAddress },
+        private readonly setDefaultRepositoryAttributes: boolean
     ) {
         super(ConsumptionControllerName.AttributesController, parent);
     }
@@ -248,7 +249,9 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.attributes.create(localAttribute);
 
-        localAttribute = await this.setAsDefaultRepositoryAttribute(localAttribute, true);
+        if (this.setDefaultRepositoryAttributes) {
+            localAttribute = await this.setAsDefaultRepositoryAttribute(localAttribute, true);
+        }
 
         if (localAttribute.content.value instanceof AbstractComplexValue) {
             await this.createLocalAttributesForChildrenOfComplexAttribute(localAttribute);
@@ -280,6 +283,8 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async setAsDefaultRepositoryAttribute(newDefaultAttribute: LocalAttribute, skipOverwrite?: boolean): Promise<LocalAttribute> {
+        if (!this.setDefaultRepositoryAttributes) throw CoreErrors.attributes.setDefaultRepositoryAttributesIsDisabled();
+
         if (!newDefaultAttribute.isRepositoryAttribute(this.identity.address)) {
             throw CoreErrors.attributes.isNotRepositoryAttribute(newDefaultAttribute.id);
         }
@@ -1063,7 +1068,9 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.deletePredecessorsOfAttribute(attribute.id);
 
-        await this.transferDefault(attribute);
+        if (this.setDefaultRepositoryAttributes) {
+            await this.transferDefault(attribute);
+        }
 
         await this.deleteAttribute(attribute);
     }
@@ -1134,6 +1141,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async transferDefault(attribute: LocalAttribute): Promise<void> {
+        if (!this.setDefaultRepositoryAttributes) throw CoreErrors.attributes.setDefaultRepositoryAttributesIsDisabled();
         if (!attribute.isDefault) return;
 
         const valueType = attribute.content.value.constructor.name;

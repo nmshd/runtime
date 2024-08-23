@@ -57,7 +57,7 @@ beforeAll(async () => {
     const db = await transport.createDatabase(`acc-${randomAccountName}`);
 
     accountController = await new AccountController(transport, db, transport.config).init();
-    consumptionController = await new ConsumptionController(transport, accountController).init();
+    consumptionController = await new ConsumptionController(transport, accountController, { setDefaultRepositoryAttributes: false }).init();
 }, 30000);
 
 afterAll(async () => {
