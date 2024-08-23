@@ -36,7 +36,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         }
 
         if (template.cache?.content instanceof RelationshipTemplateContent) {
-            RuntimeErrors.relationshipTemplates.wrongContentType();
+            return Result.fail(RuntimeErrors.relationshipTemplates.wrongContentType());
         }
 
         if (template.isExpired()) {
