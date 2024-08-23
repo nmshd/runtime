@@ -7,10 +7,23 @@ import {
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
 } from "../events";
-import { RuntimeModule } from "../extensibility";
+import { ModuleConfiguration, RuntimeModule } from "../extensibility";
 import { RuntimeServices } from "../Runtime";
+import { LocalRequestDTO } from "../types";
+import { RequestConfig, ResponseConfig } from "./decide";
 
-export class DeciderModule extends RuntimeModule {
+// TODO: maybe this should be more flexible than an OR-list of AND-elements -> simple for now
+export interface DeciderModuleConfiguration extends ModuleConfiguration {
+    automationConfig?: AutomationConfig[];
+}
+
+// TODO: add validation for fitting requestConfig-responseConfig combination
+export interface AutomationConfig {
+    requestConfig: RequestConfig;
+    responseConfig: ResponseConfig;
+}
+
+export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     public init(): void {
         // Nothing to do here
     }
@@ -22,9 +35,22 @@ export class DeciderModule extends RuntimeModule {
     private async handleIncomingRequestStatusChanged(event: IncomingRequestStatusChangedEvent) {
         if (event.data.newStatus !== LocalRequestStatus.DecisionRequired) return;
 
+        // TODO: before changing the status of the Request, as many RequestItems as possible should be automatically processed
         if (event.data.request.content.items.some(flaggedAsManualDecisionRequired)) return await this.requireManualDecision(event);
 
+        // TODO: this is the same as above??
         return await this.requireManualDecision(event);
+    }
+
+    private async automaticallyDecideRequest(request: LocalRequestDTO) {
+        if (!this.configuration.automationConfig) return;
+
+        for (const configElement of this.configuration.automationConfig) {
+            // check if configElement.requestConfig matches (a part of) the Request (where manualDecisionRequired is not set)
+            // if so apply configElement.responseConfig
+        }
+
+        return;
     }
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {
@@ -33,7 +59,7 @@ export class DeciderModule extends RuntimeModule {
 
         const requireManualDecisionResult = await services.consumptionServices.incomingRequests.requireManualDecision({ requestId: request.id });
         if (requireManualDecisionResult.isError) {
-            this.logger.error(`Could not require manual decision for request ${request.id}`, requireManualDecisionResult.error);
+            this.logger.error(`Could not require manual decision for Request ${request.id}`, requireManualDecisionResult.error);
             await this.publishEvent(event, services, "Error");
             return;
         }
