@@ -29,7 +29,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         super();
     }
 
-    protected async executeInternal(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse, ApplicationError>> {
+    protected async executeInternal(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse>> {
         const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
 
         if (!template) {
