@@ -1948,16 +1948,19 @@ describe("DeleteAttributeUseCases", () => {
             expect(updatedOwnSharedIdentityAttributeVersion0.shareInfo!.sourceAttribute).toBeUndefined();
         });
 
-        // test("should not change type of own shared identity attribute if 'shareInfo.sourceAttribute' is undefined", async () => {
-        //     await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: repositoryAttributeVersion0.id });
+        test("should not change type of own shared identity attribute if 'shareInfo.sourceAttribute' is undefined", async () => {
+            await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: repositoryAttributeVersion0.id });
 
-        //     const updatedOwnSharedIdentityAttributeVersion0 = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.id })).value;
-        //     expect(updatedOwnSharedIdentityAttributeVersion0.shareInfo!.sourceAttribute).toBeUndefined();
+            const updatedOwnSharedIdentityAttributeVersion0 = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.id })).value;
+            expect(updatedOwnSharedIdentityAttributeVersion0.shareInfo!.sourceAttribute).toBeUndefined();
 
-        // TODO: we should test this without needing LocalAttribute here
-        //     const localOwnSharedIdentityAttributeVersion0 = LocalAttribute.from(updatedOwnSharedIdentityAttributeVersion0);
-        //     expect(localOwnSharedIdentityAttributeVersion0.isOwnSharedIdentityAttribute(CoreAddress.from(services1.address))).toBe(true);
-        // });
+            // isOwnSharedIdentityAttribute
+            expect(updatedOwnSharedIdentityAttributeVersion0.content["@type"]).toBe("IdentityAttribute");
+            expect(updatedOwnSharedIdentityAttributeVersion0.shareInfo).toBeDefined();
+            expect(updatedOwnSharedIdentityAttributeVersion0.content.owner).toBe(services1.address);
+            expect(updatedOwnSharedIdentityAttributeVersion0.shareInfo!.peer).toBe(services1.address);
+            expect(updatedOwnSharedIdentityAttributeVersion0.isDefault).toBeUndefined();
+        });
 
         test("should set 'succeeds' of successor repository attribute to undefined if predecessor repository attribute is deleted", async () => {
             expect(repositoryAttributeVersion1.succeeds).toBeDefined();
