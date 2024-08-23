@@ -1,0 +1,60 @@
+import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { Serializable } from "@js-soft/ts-serval";
+import { AccountController, AnonymousTokenController, CoreAddress, CoreDate, Transport } from "../../../src";
+import { TestUtil } from "../../testHelpers/TestUtil";
+
+describe("TokenController", function () {
+    let connection: IDatabaseConnection;
+
+    let transport: Transport;
+
+    let sender: AccountController;
+    let anonymousTokenController: AnonymousTokenController;
+
+    beforeAll(async function () {
+        connection = await TestUtil.createDatabaseConnection();
+        transport = TestUtil.createTransport(connection);
+
+        await transport.init();
+
+        const accounts = await TestUtil.provideAccounts(transport, 1);
+        sender = accounts[0];
+
+        anonymousTokenController = new AnonymousTokenController(transport.config);
+    });
+
+    afterAll(async function () {
+        await sender.close();
+        await connection.close();
+    });
+
+    test("should throw when loading a personalized token", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            forIdentity: CoreAddress.from("did:e:a-domain:dids:1234567890123456789012")
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        await TestUtil.expectThrowsAsync(async () => {
+            await anonymousTokenController.loadPeerTokenByTruncated(reference);
+        }, /transport.general.notIntendedForYou/);
+    });
+
+    test("should throw when loading a personalized token and it's uncaught before reaching the BB", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
+        });
+
+        await TestUtil.expectThrowsAsync(async () => {
+            await anonymousTokenController.loadPeerToken(sentToken.id, sentToken.secretKey);
+        }, /transport.general.notIntendedForYou/);
+    });
+});

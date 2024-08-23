@@ -167,13 +167,14 @@ describe("TokenController", function () {
         testTokens(sentToken, receivedToken, tempDate);
         expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
         expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
+        expect(sentToken.cache?.forIdentity).toBe(recipient.identity.address);
         expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
         expect((sentToken.cache?.content.toJSON() as any).content).toBe("TestToken");
         expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
+        expect(receivedToken.cache?.forIdentity).toBe(recipient.identity.address);
     });
 
-    test.only("should throw if a personalized token is not loaded by the right identity", async function () {
-        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+    test("should throw if a personalized token is not loaded by the right identity", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = Serializable.fromAny({ content: "TestToken" });
         const sentToken = await sender.tokens.sendToken({
@@ -188,8 +189,7 @@ describe("TokenController", function () {
         }, /transport.general.notIntendedForYou/);
     });
 
-    test("should throw if a personalized token is not loaded by the right identity and it's uncaught beforehand", async function () {
-        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+    test("should throw if a personalized token is not loaded by the right identity and it's uncaught before reaching the BB", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = Serializable.fromAny({ content: "TestToken" });
         const sentToken = await sender.tokens.sendToken({
@@ -198,6 +198,7 @@ describe("TokenController", function () {
             ephemeral: false,
             forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
+
         await TestUtil.expectThrowsAsync(async () => {
             await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false);
         }, /transport.general.notIntendedForYou/);
