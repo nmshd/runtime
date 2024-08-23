@@ -58,16 +58,6 @@ describe("Create Relationship", () => {
         expect(response).toBeSuccessful();
     });
 
-    test("should not create a relationship with a false creation content type", async () => {
-        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
-
-        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
-            templateId: templateId,
-            creationContent: {}
-        });
-        expect(createRelationshipResponse).toBeAnError("The creation content of a Relationship", "error.runtime.validation.invalidPropertyValue");
-    });
-
     test("should not create a Relationship if the RelationshipTemplate contains a RelationshipTemplateContent", async () => {
         const templateContent: RelationshipTemplateContentJSON = {
             "@type": "RelationshipTemplateContent",
@@ -90,6 +80,19 @@ describe("Create Relationship", () => {
         expect(createRelationshipResponse).toBeAnError(
             "To create a Relationship from a RelationshipTemplate whose content is a RelationshipTemplateContent, the associated incoming Request must be accepted.",
             "error.runtime.relationshipTemplates.wrongContentType"
+        );
+    });
+
+    test("should not create a relationship with a false creation content type", async () => {
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
+
+        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: {}
+        });
+        expect(createRelationshipResponse).toBeAnError(
+            "An ArbitraryRelationshipCreationContent must be provided as the creationContent of the Relationship.",
+            "error.runtime.validation.invalidPropertyValue"
         );
     });
 

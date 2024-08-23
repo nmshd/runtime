@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { ArbitraryRelationshipCreationContent, RelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
+import { ArbitraryRelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
 import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
@@ -48,12 +48,8 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         }
 
         const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
-        if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
-            return Result.fail(
-                RuntimeErrors.general.invalidPropertyValue(
-                    "The creation content of a Relationship must either be a RelationshipCreationContent or an ArbitraryRelationshipCreationContent."
-                )
-            );
+        if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent)) {
+            return Result.fail(RuntimeErrors.general.invalidPropertyValue("An ArbitraryRelationshipCreationContent must be provided as the creationContent of the Relationship."));
         }
 
         const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
