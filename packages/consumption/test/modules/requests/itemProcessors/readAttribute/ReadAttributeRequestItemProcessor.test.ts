@@ -212,7 +212,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 let query: RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery;
                 if (testParams.input.thirdParty !== undefined) {
                     query = ThirdPartyRelationshipAttributeQuery.from({
-                        owner: translateTestIdentityToAddress(testParams.input.owner),
+                        owner: translateTestIdentityToAddress(testParams.input.owner) as any,
                         key: "AKey",
                         thirdParty: [translateTestIdentityToAddress(testParams.input.thirdParty)]
                     });
