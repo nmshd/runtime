@@ -1883,6 +1883,7 @@ describe("DeleteAttributeUseCases", () => {
     let repositoryAttributeVersion1: LocalAttributeDTO;
     let ownSharedIdentityAttributeVersion0: LocalAttributeDTO;
     let ownSharedIdentityAttributeVersion1: LocalAttributeDTO;
+
     beforeEach(async () => {
         ownSharedIdentityAttributeVersion0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
@@ -1958,7 +1959,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(updatedOwnSharedIdentityAttributeVersion0.content["@type"]).toBe("IdentityAttribute");
             expect(updatedOwnSharedIdentityAttributeVersion0.shareInfo).toBeDefined();
             expect(updatedOwnSharedIdentityAttributeVersion0.content.owner).toBe(services1.address);
-            expect(updatedOwnSharedIdentityAttributeVersion0.shareInfo!.peer).toBe(services1.address);
+            expect(updatedOwnSharedIdentityAttributeVersion0.shareInfo!.peer).toBe(services2.address);
             expect(updatedOwnSharedIdentityAttributeVersion0.isDefault).toBeUndefined();
         });
 
