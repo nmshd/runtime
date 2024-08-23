@@ -1,6 +1,5 @@
-import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "@js-soft/native-abstractions";
 import { sleep } from "@js-soft/ts-utils";
-import { AppRuntime, DatawalletSynchronizedEvent, ExternalEventReceivedEvent, LocalAccountSession } from "../../src";
+import { AppRuntime, DatawalletSynchronizedEvent, ExternalEventReceivedEvent, LocalAccountSession, RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../../src";
 import { TestUtil } from "../lib";
 
 describe("PushNotificationModuleTest", function () {

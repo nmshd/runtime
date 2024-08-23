@@ -1,5 +1,5 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { Event, EventHandler } from "@js-soft/ts-utils";
+import { EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import { ModuleConfiguration, RuntimeModule } from "@nmshd/runtime";
 import { AppRuntime } from "../AppRuntime";
 
@@ -12,14 +12,9 @@ export interface AppRuntimeModuleConfiguration extends ModuleConfiguration {}
 export abstract class AppRuntimeModule<TConfig extends AppRuntimeModuleConfiguration = AppRuntimeModuleConfiguration> extends RuntimeModule<TConfig, AppRuntime> {
     private readonly nativeEventSubscriptionIds: number[] = [];
 
-    protected subscribeToNativeEvent<TEvent>(event: Event, handler: EventHandler<TEvent>): void {
+    protected subscribeToNativeEvent<TEvent>(event: SubscriptionTarget<TEvent>, handler: EventHandler<TEvent>): void {
         const subscriptionResult = this.runtime.nativeEnvironment.eventBus.subscribe(event, handler);
-        if (subscriptionResult.isError) {
-            this.logger.error(subscriptionResult.error);
-            throw subscriptionResult.error;
-        }
-
-        this.nativeEventSubscriptionIds.push(subscriptionResult.value);
+        this.nativeEventSubscriptionIds.push(subscriptionResult);
     }
 
     protected override unsubscribeFromAllEvents(): void {

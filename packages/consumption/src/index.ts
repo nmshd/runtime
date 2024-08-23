@@ -1,5 +1,6 @@
 export * from "./buildInformation";
 export * from "./consumption/ConsumptionBaseController";
+export * from "./consumption/ConsumptionConfig";
 export * from "./consumption/ConsumptionController";
 export * from "./consumption/ConsumptionControllerName";
 export * from "./consumption/ConsumptionError";
