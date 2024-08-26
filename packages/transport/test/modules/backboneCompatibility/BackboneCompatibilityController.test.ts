@@ -14,7 +14,7 @@ describe("BackboneCompatibility", function () {
 
         await transport.init();
 
-        actualBackboneVersion = (await new BackboneCompatibilityController({ ...transport.config }).getBackboneMajorVersion()).value;
+        actualBackboneVersion = (await new BackboneCompatibilityController({ ...transport.config })["client"].getBackboneVersion()).value.majorVersion;
     });
 
     afterAll(async function () {

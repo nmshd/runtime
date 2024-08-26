@@ -10,13 +10,6 @@ export class BackboneCompatibilityController {
         this.config = config;
     }
 
-    public async getBackboneMajorVersion(): Promise<Result<number>> {
-        const getBackboneVersionResult = await this.client.getBackboneVersion();
-        if (getBackboneVersionResult.isError) return Result.fail(getBackboneVersionResult.error);
-
-        return Result.ok(getBackboneVersionResult.value.majorVersion);
-    }
-
     public async checkBackboneCompatibility(): Promise<Result<void>> {
         const getBackboneVersionResult = await this.client.getBackboneVersion();
         if (getBackboneVersionResult.isError) return Result.fail(getBackboneVersionResult.error);
