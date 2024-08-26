@@ -29,7 +29,8 @@ describe("BackboneCompatibility", function () {
         });
 
         const versionCheckResult = await versionController.checkBackboneCompatibility();
-        expect(versionCheckResult.isSuccess).toBe(true);
+
+        expect(versionCheckResult.value.isCompatible).toBe(true);
     });
 
     test("should correctly check a valid backbone version with version in bounds of min and max", async function () {
@@ -40,7 +41,8 @@ describe("BackboneCompatibility", function () {
         });
 
         const versionCheckResult = await versionController.checkBackboneCompatibility();
-        expect(versionCheckResult.isSuccess).toBe(true);
+
+        expect(versionCheckResult.value.isCompatible).toBe(true);
     });
 
     test("should catch a too low backbone version", async function () {
@@ -51,7 +53,8 @@ describe("BackboneCompatibility", function () {
         });
 
         const versionCheckResult = await versionController.checkBackboneCompatibility();
-        expect(versionCheckResult.error.code).toBe("error.transport.files.runtimeVersionIncompatibleWithBackboneVersion");
+
+        expect(versionCheckResult.value.isCompatible).toBe(false);
     });
 
     test("should catch a too high backbone version", async function () {
@@ -62,6 +65,7 @@ describe("BackboneCompatibility", function () {
         });
 
         const versionCheckResult = await versionController.checkBackboneCompatibility();
-        expect(versionCheckResult.error.code).toBe("error.transport.files.runtimeVersionIncompatibleWithBackboneVersion");
+
+        expect(versionCheckResult.value.isCompatible).toBe(false);
     });
 });
