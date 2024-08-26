@@ -17,9 +17,7 @@ export class CheckBackboneCompatibilityUseCase extends UseCase<void, CheckBackbo
 
     protected async executeInternal(): Promise<Result<CheckBackboneCompatibilityResponse>> {
         const result = await this.anonymousVersionController.checkBackboneCompatibility();
-        if (result.isError) {
-            return Result.fail(result.error);
-        }
+        if (result.isError) return Result.fail(result.error);
 
         return Result.ok(result.value);
     }
