@@ -16,6 +16,8 @@ export interface IConfig {
     allowIdentityCreation: boolean;
     supportedDatawalletVersion: number;
     supportedIdentityVersion: number;
+    supportedMinBackboneVersion: number;
+    supportedMaxBackboneVersion: number;
     debug: boolean;
     platformClientId: string;
     platformClientSecret: string;
@@ -59,6 +61,8 @@ export class Transport {
         allowIdentityCreation: true,
         supportedDatawalletVersion: 1,
         supportedIdentityVersion: -1,
+        supportedMinBackboneVersion: 6,
+        supportedMaxBackboneVersion: 6,
         debug: false,
         platformClientId: "",
         platformClientSecret: "",
