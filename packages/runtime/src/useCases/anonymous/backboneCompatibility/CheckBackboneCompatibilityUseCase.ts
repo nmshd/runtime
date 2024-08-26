@@ -3,13 +3,24 @@ import { BackboneCompatibilityController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { UseCase } from "../../common";
 
-export class CheckBackboneCompatibilityUseCase extends UseCase<void, void> {
+export interface CheckBackboneCompatibilityResponse {
+    isCompatible: boolean;
+    backboneVersion: number;
+    supportedMinBackboneVersion: number;
+    supportedMaxBackboneVersion: number;
+}
+
+export class CheckBackboneCompatibilityUseCase extends UseCase<void, CheckBackboneCompatibilityResponse> {
     public constructor(@Inject private readonly anonymousVersionController: BackboneCompatibilityController) {
         super();
     }
 
-    protected async executeInternal(): Promise<Result<void>> {
+    protected async executeInternal(): Promise<Result<CheckBackboneCompatibilityResponse>> {
         const result = await this.anonymousVersionController.checkBackboneCompatibility();
-        return result;
+        if (result.isError) {
+            return Result.fail(result.error);
+        }
+
+        return Result.ok(result.value);
     }
 }

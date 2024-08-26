@@ -1,6 +1,13 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreErrors, IConfig } from "../../core";
+import { IConfig } from "../../core";
 import { VersionClient } from "./backbone/VersionClient";
+
+export interface BackboneCompatibility {
+    isCompatible: boolean;
+    backboneVersion: number;
+    supportedMinBackboneVersion: number;
+    supportedMaxBackboneVersion: number;
+}
 
 export class BackboneCompatibilityController {
     private readonly client: VersionClient;
@@ -10,15 +17,20 @@ export class BackboneCompatibilityController {
         this.config = config;
     }
 
-    public async checkBackboneCompatibility(): Promise<Result<void>> {
+    public async checkBackboneCompatibility(): Promise<Result<BackboneCompatibility>> {
         const getBackboneVersionResult = await this.client.getBackboneVersion();
         if (getBackboneVersionResult.isError) return Result.fail(getBackboneVersionResult.error);
 
         const backboneVersion = getBackboneVersionResult.value.majorVersion;
 
-        if (this.config.supportedMinBackboneVersion > backboneVersion || this.config.supportedMaxBackboneVersion < backboneVersion) {
-            return Result.fail(CoreErrors.general.runtimeVersionIncompatibleWithBackboneVersion(backboneVersion));
-        }
-        return Result.ok(undefined);
+        const supportedMinBackboneVersion = this.config.supportedMinBackboneVersion;
+        const supportedMaxBackboneVersion = this.config.supportedMaxBackboneVersion;
+
+        return Result.ok({
+            isCompatible: supportedMinBackboneVersion > backboneVersion || supportedMaxBackboneVersion < backboneVersion,
+            backboneVersion: backboneVersion,
+            supportedMinBackboneVersion,
+            supportedMaxBackboneVersion
+        });
     }
 }
