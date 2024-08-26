@@ -28,9 +28,6 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         }
 
         const requestItemAttributeJSON = requestItem.attribute.toJSON();
-        if (requestItemAttributeJSON.owner === "") {
-            requestItemAttributeJSON.owner = this.currentIdentityAddress.toString();
-        }
 
         if (!_.isEqual(foundAttribute.content.toJSON(), requestItemAttributeJSON)) {
             return ValidationResult.error(
@@ -165,10 +162,6 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<ShareAttributeAcceptResponseItem> {
-        if (requestItem.attribute.owner.toString() === "") {
-            requestItem.attribute.owner = requestInfo.peer;
-        }
-
         const localAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
             content: requestItem.attribute,
             peer: requestInfo.peer,
