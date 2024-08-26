@@ -4,6 +4,6 @@ import { AnonymousTokensFacade, BackboneCompatibilityFacade } from "./facades/an
 export class AnonymousServices {
     public constructor(
         @Inject public readonly tokens: AnonymousTokensFacade,
-        @Inject public readonly version: BackboneCompatibilityFacade
+        @Inject public readonly backboneCompatibility: BackboneCompatibilityFacade
     ) {}
 }
