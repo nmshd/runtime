@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { BackboneCompatibilityController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { UseCase } from "../common";
+import { UseCase } from "../../common";
 
 export class CheckBackboneCompatibilityUseCase extends UseCase<void, void> {
     public constructor(@Inject private readonly anonymousVersionController: BackboneCompatibilityController) {

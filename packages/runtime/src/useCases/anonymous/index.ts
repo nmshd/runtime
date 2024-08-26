@@ -1,2 +1,2 @@
-export * from "./CheckBackboneCompatibilityUseCase";
+export * from "./backboneCompatibility";
 export * from "./tokens";
