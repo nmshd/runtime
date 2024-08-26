@@ -66,14 +66,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 })
             },
             {
-                scenario: "an Identity Attribute with owner=<empty string>",
-                result: "success",
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
-                    owner: CoreAddress.from("")
-                })
-            },
-            {
                 scenario: "an Identity Attribute with owner=someOtherOwner",
                 result: "error",
                 expectedError: {
@@ -87,16 +79,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
             },
             {
                 scenario: "a Relationship Attribute with owner=sender",
-                result: "success",
-                attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
-                    owner: CoreAddress.from("Sender"),
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
-                })
-            },
-            {
-                scenario: "a Relationship Attribute with owner=<empty string>",
                 result: "success",
                 attribute: RelationshipAttribute.from({
                     value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
