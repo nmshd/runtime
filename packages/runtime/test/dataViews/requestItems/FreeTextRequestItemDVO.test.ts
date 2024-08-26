@@ -1,4 +1,4 @@
-import { AcceptFreeTextRequestItemParametersJSON, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { AcceptFreeTextRequestItemParametersJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { FreeTextRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
@@ -7,6 +7,7 @@ import {
     FreeTextAcceptResponseItemDVO,
     FreeTextRequestItemDVO,
     IncomingRequestStatusChangedEvent,
+    LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
     RequestMessageDVO,
     TransportServices

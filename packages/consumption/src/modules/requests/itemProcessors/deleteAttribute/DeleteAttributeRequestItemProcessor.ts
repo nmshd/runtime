@@ -1,7 +1,7 @@
 import { AcceptResponseItem, DeleteAttributeAcceptResponseItem, DeleteAttributeRequestItem, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/transport";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { DeletionStatus, LocalAttributeDeletionInfo } from "../../../attributes";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
@@ -20,11 +20,11 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             );
         }
 
-        if (attribute.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer) {
+        if (attribute.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer) {
             return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The Attribute was already deleted by the peer."));
         }
 
-        if (attribute.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeletedByPeer) {
+        if (attribute.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer) {
             return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The peer already accepted the deletion of the Attribute."));
         }
 
@@ -69,7 +69,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const deletionDate = CoreDate.from(params.deletionDate);
         const deletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: DeletionStatus.ToBeDeleted,
+            deletionStatus: LocalAttributeDeletionStatus.ToBeDeleted,
             deletionDate: deletionDate
         });
 
@@ -97,18 +97,18 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
         if (!attribute) return;
 
-        if (attribute.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer) return;
+        if (attribute.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer) return;
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
 
         if (responseItem instanceof DeleteAttributeAcceptResponseItem) {
             const deletionInfo = LocalAttributeDeletionInfo.from({
-                deletionStatus: DeletionStatus.ToBeDeletedByPeer,
+                deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
                 deletionDate: responseItem.deletionDate
             });
 
             for (const attr of [attribute, ...predecessors]) {
-                if (attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                if (attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.DeletedByPeer) {
                     attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
                     await this.consumptionController.attributes.updateAttributeUnsafe(attr);
                 }
@@ -117,12 +117,15 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (responseItem instanceof RejectResponseItem) {
             const deletionInfo = LocalAttributeDeletionInfo.from({
-                deletionStatus: DeletionStatus.DeletionRequestRejected,
+                deletionStatus: LocalAttributeDeletionStatus.DeletionRequestRejected,
                 deletionDate: CoreDate.utc()
             });
 
             for (const attr of [attribute, ...predecessors]) {
-                if (attr.deletionInfo?.deletionStatus !== DeletionStatus.ToBeDeletedByPeer && attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                if (
+                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.ToBeDeletedByPeer &&
+                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.DeletedByPeer
+                ) {
                     attr.setDeletionInfo(deletionInfo, this.accountController.identity.address);
                     await this.consumptionController.attributes.updateAttributeUnsafe(attr);
                 }

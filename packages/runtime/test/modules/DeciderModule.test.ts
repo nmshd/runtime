@@ -1,9 +1,9 @@
-import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipTemplateContent, Request } from "@nmshd/content";
 import { CoreDate } from "@nmshd/transport";
 import {
     ConsumptionServices,
     IncomingRequestStatusChangedEvent,
+    LocalRequestStatus,
     MessageProcessedEvent,
     MessageProcessedResult,
     RelationshipTemplateProcessedEvent,
