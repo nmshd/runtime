@@ -32,7 +32,6 @@ import {
     ConsumptionIds,
     DecideRequestParametersJSON,
     DeleteAttributeRequestItemProcessor,
-    DeletionStatus,
     ICheckPrerequisitesOfIncomingRequestParameters,
     ICompleteIncomingRequestParameters,
     ICompleteOutgoingRequestParameters,
@@ -43,6 +42,7 @@ import {
     IRequireManualDecisionOfIncomingRequestParameters,
     ISentOutgoingRequestParameters,
     IncomingRequestsController,
+    LocalAttributeDeletionStatus,
     LocalRequest,
     LocalRequestSource,
     LocalRequestStatus,
@@ -1048,7 +1048,7 @@ export class RequestsThen {
         expect(sUpdatedOwnSharedIdentityAttributes).toHaveLength(3);
         for (const sUpdatedOwnSharedIdentityAttribute of sUpdatedOwnSharedIdentityAttributes) {
             expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo).toBeDefined();
-            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo!.deletionStatus).toBe(DeletionStatus.DeletionRequestSent);
+            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletionRequestSent);
         }
     }
 

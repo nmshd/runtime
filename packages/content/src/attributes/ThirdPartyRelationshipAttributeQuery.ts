@@ -4,7 +4,7 @@ import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQ
 export interface ThirdPartyRelationshipAttributeQueryJSON extends AbstractAttributeQueryJSON {
     "@type": "ThirdPartyRelationshipAttributeQuery";
     key: string;
-    owner: string;
+    owner: ThirdPartyRelationshipAttributeQueryOwner | `${ThirdPartyRelationshipAttributeQueryOwner}`;
     thirdParty: string[];
     validFrom?: string;
     validTo?: string;

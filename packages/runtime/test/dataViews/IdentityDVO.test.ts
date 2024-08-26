@@ -1,9 +1,9 @@
-import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipTemplateContentJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
 import {
     AttributeDeletedEvent,
     IncomingRequestStatusChangedEvent,
     LocalRequestDTO,
+    LocalRequestStatus,
     PeerRelationshipTemplateDVO,
     RelationshipChangedEvent,
     RelationshipTemplateDTO
