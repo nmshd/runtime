@@ -66,14 +66,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 })
             },
             {
-                scenario: "an Identity Attribute with owner=<empty string>",
-                result: "success",
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
-                    owner: CoreAddress.from("")
-                })
-            },
-            {
                 scenario: "an Identity Attribute with owner=someOtherOwner",
                 result: "error",
                 expectedError: {
@@ -87,16 +79,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
             },
             {
                 scenario: "a Relationship Attribute with owner=sender",
-                result: "success",
-                attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
-                    owner: CoreAddress.from("Sender"),
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
-                })
-            },
-            {
-                scenario: "a Relationship Attribute with owner=<empty string>",
                 result: "success",
                 attribute: RelationshipAttribute.from({
                     value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
@@ -232,6 +214,39 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 attribute: IdentityAttribute.from({
                     ...sourceAttribute.content.toJSON(),
                     value: Surname.from("ASurname").toJSON()
+                }),
+                sourceAttributeId: sourceAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: `The Attribute with the given sourceAttributeId '${sourceAttribute.id.toString()}' does not match the given Attribute.`
+            });
+        });
+
+        test("returns error when an empty string is specified for the owner of the IdentityAttribute instead of the explicit address", async function () {
+            const sender = testAccount.identity.address;
+            const recipient = CoreAddress.from("Recipient");
+
+            const sourceAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    owner: sender,
+                    value: GivenName.from({
+                        value: "AGivenName"
+                    })
+                })
+            });
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: IdentityAttribute.from({
+                    owner: CoreAddress.from(""),
+                    value: GivenName.from({
+                        value: "AGivenName"
+                    })
                 }),
                 sourceAttributeId: sourceAttribute.id
             });
@@ -929,14 +944,14 @@ describe("ShareAttributeRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        test("in case of an IdentityAttribute with 'owner=<empty>', creates a Local Attribute for the Sender of the Request", async function () {
+        test("returns success when accepting a shared IdentityAttribute", async function () {
             const sender = CoreAddress.from("Sender");
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 sourceAttributeId: CoreId.from("aSourceAttributeId"),
                 attribute: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from("")
+                    owner: sender
                 })
             });
             const incomingRequest = LocalRequest.from({
@@ -965,14 +980,14 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.content.owner.toString()).toStrictEqual(sender.toString());
         });
 
-        test("in case of a RelationshipAttribute with 'owner=<empty>', creates a Local Attribute for the Sender of the Request", async function () {
+        test("returns success when accepting a shared RelationshipAttribute", async function () {
             const sender = CoreAddress.from("Sender");
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 sourceAttributeId: CoreId.from("aSourceAttributeId"),
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    owner: CoreAddress.from("")
+                    owner: sender
                 })
             });
             const incomingRequest = LocalRequest.from({
@@ -1006,15 +1021,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
         test.each([
             {
                 attributeType: "IdentityAttribute",
-                attributeOwner: ""
-            },
-            {
-                attributeType: "IdentityAttribute",
                 attributeOwner: "Sender"
-            },
-            {
-                attributeType: "RelationshipAttribute",
-                attributeOwner: ""
             },
             {
                 attributeType: "RelationshipAttribute",
@@ -1024,18 +1031,16 @@ describe("ShareAttributeRequestItemProcessor", function () {
             "in case of a ${value.attributeType}, creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the Request",
 
             async function (testParams) {
+                testParams.attributeOwner = testParams.attributeOwner.replace("Sender", testAccount.identity.address.toString());
+
                 const sourceAttributeContent =
                     testParams.attributeType === "IdentityAttribute"
-                        ? TestObjectFactory.createIdentityAttribute({ owner: testAccount.identity.address })
-                        : TestObjectFactory.createRelationshipAttribute({ owner: testAccount.identity.address });
+                        ? TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from(testParams.attributeOwner) })
+                        : TestObjectFactory.createRelationshipAttribute({ owner: CoreAddress.from(testParams.attributeOwner) });
 
                 const sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
                     content: sourceAttributeContent
                 });
-
-                testParams.attributeOwner = testParams.attributeOwner.replace("Sender", testAccount.identity.address.toString());
-
-                sourceAttribute.content.owner = CoreAddress.from(testParams.attributeOwner);
 
                 const { localRequest, requestItem } = await createLocalRequest({ sourceAttribute });
 
