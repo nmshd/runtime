@@ -4,8 +4,8 @@ import { VersionClient } from "./backbone/VersionClient";
 
 export class BackboneCompatibilityController {
     private readonly client: VersionClient;
-    private readonly config: IConfig;
-    public constructor(config: IConfig) {
+
+    public constructor(private readonly config: IConfig) {
         this.client = new VersionClient(config);
         this.config = config;
     }
