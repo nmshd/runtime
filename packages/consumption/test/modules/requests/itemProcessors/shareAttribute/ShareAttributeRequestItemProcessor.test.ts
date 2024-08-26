@@ -944,14 +944,14 @@ describe("ShareAttributeRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        test("in case of an IdentityAttribute with 'owner=<empty>', creates a Local Attribute for the Sender of the Request", async function () {
+        test("returns success when accepting a shared IdentityAttribute", async function () {
             const sender = CoreAddress.from("Sender");
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 sourceAttributeId: CoreId.from("aSourceAttributeId"),
                 attribute: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from("")
+                    owner: sender
                 })
             });
             const incomingRequest = LocalRequest.from({
@@ -980,14 +980,14 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.content.owner.toString()).toStrictEqual(sender.toString());
         });
 
-        test("in case of a RelationshipAttribute with 'owner=<empty>', creates a Local Attribute for the Sender of the Request", async function () {
+        test("returns success when accepting a shared RelationshipAttribute", async function () {
             const sender = CoreAddress.from("Sender");
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 sourceAttributeId: CoreId.from("aSourceAttributeId"),
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    owner: CoreAddress.from("")
+                    owner: sender
                 })
             });
             const incomingRequest = LocalRequest.from({
