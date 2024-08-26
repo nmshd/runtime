@@ -47,7 +47,7 @@ describe("BackboneCompatibility", function () {
         const versionController = new BackboneCompatibilityController({
             ...transport.config,
             supportedMinBackboneVersion: actualBackboneVersion + 1,
-            supportedMaxBackboneVersion: actualBackboneVersion + 2
+            supportedMaxBackboneVersion: actualBackboneVersion + 1
         });
 
         const versionCheckResult = await versionController.checkBackboneCompatibility();
