@@ -27,7 +27,7 @@ export class BackboneCompatibilityController {
         const supportedMaxBackboneVersion = this.config.supportedMaxBackboneVersion;
 
         return Result.ok({
-            isCompatible: supportedMinBackboneVersion > backboneVersion || supportedMaxBackboneVersion < backboneVersion,
+            isCompatible: backboneVersion >= supportedMinBackboneVersion && backboneVersion <= supportedMaxBackboneVersion,
             backboneVersion: backboneVersion,
             supportedMinBackboneVersion,
             supportedMaxBackboneVersion
