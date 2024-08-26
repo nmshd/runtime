@@ -11,12 +11,12 @@ export interface CheckBackboneCompatibilityResponse {
 }
 
 export class CheckBackboneCompatibilityUseCase extends UseCase<void, CheckBackboneCompatibilityResponse> {
-    public constructor(@Inject private readonly anonymousVersionController: BackboneCompatibilityController) {
+    public constructor(@Inject private readonly backboneCompatibilityController: BackboneCompatibilityController) {
         super();
     }
 
     protected async executeInternal(): Promise<Result<CheckBackboneCompatibilityResponse>> {
-        const result = await this.anonymousVersionController.checkBackboneCompatibility();
+        const result = await this.backboneCompatibilityController.checkBackboneCompatibility();
         if (result.isError) return Result.fail(result.error);
 
         return Result.ok(result.value);
