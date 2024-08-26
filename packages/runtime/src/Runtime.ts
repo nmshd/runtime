@@ -14,6 +14,7 @@ import {
 import {
     AccountController,
     AnonymousTokenController,
+    BackboneCompatibilityController,
     ChallengeController,
     DeviceController,
     DevicesController,
@@ -286,6 +287,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(AnonymousTokenController)
             .factory(() => new AnonymousTokenController(this.transport.config))
+            .scope(Scope.Singleton);
+
+        Container.bind(BackboneCompatibilityController)
+            .factory(() => new BackboneCompatibilityController(this.transport.config))
             .scope(Scope.Singleton);
 
         const schemaRepository = new SchemaRepository();
