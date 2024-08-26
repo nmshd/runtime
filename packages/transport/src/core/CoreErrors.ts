@@ -197,13 +197,6 @@ class General {
     public invalidTruncatedReference() {
         return new CoreError("error.transport.files.invalidTruncatedReference", "invalid truncated reference");
     }
-
-    public runtimeVersionIncompatibleWithBackboneVersion(backboneVersion: number) {
-        return new CoreError(
-            "error.transport.files.runtimeVersionIncompatibleWithBackboneVersion",
-            `The Runtime version is incompatible with the Backbone version. The Backbone is on version ${backboneVersion}.`
-        );
-    }
 }
 
 export class CoreErrors {
