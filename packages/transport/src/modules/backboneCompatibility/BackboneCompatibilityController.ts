@@ -22,15 +22,10 @@ export class BackboneCompatibilityController {
         if (getBackboneVersionResult.isError) return Result.fail(getBackboneVersionResult.error);
 
         const backboneVersion = getBackboneVersionResult.value.majorVersion;
-
         const supportedMinBackboneVersion = this.config.supportedMinBackboneVersion;
         const supportedMaxBackboneVersion = this.config.supportedMaxBackboneVersion;
+        const isCompatible = backboneVersion >= supportedMinBackboneVersion && backboneVersion <= supportedMaxBackboneVersion;
 
-        return Result.ok({
-            isCompatible: backboneVersion >= supportedMinBackboneVersion && backboneVersion <= supportedMaxBackboneVersion,
-            backboneVersion: backboneVersion,
-            supportedMinBackboneVersion,
-            supportedMaxBackboneVersion
-        });
+        return Result.ok({ isCompatible, backboneVersion, supportedMinBackboneVersion, supportedMaxBackboneVersion });
     }
 }
