@@ -1,5 +1,5 @@
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
-import { PeerDeletedEvent, PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "../../src";
+import { PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "../../src";
 import { establishRelationship, resetEventBusAndSyncUntilHasEvent, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -48,13 +48,5 @@ describe("IdentityDeletionProcess", () => {
         await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
         const event = (await resetEventBusAndSyncUntilHasEvent(services2, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId)) as PeerDeletionCancelledEvent;
         expect(event.data.peerDeletionInfo).toBeUndefined();
-    });
-
-    // eslint-disable-next-line jest/no-disabled-tests
-    test.skip("peer should be notified about completed deletion process", async function () {
-        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-
-        const event = (await resetEventBusAndSyncUntilHasEvent(services2, PeerDeletedEvent, (e) => e.data.id === relationshipId)) as PeerDeletedEvent;
-        expect(event.data.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.Deleted);
     });
 });
