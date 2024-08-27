@@ -15,7 +15,7 @@ export class PeerDeletionCancelledEventProcessor extends ExternalEventProcessor 
     public override async execute(externalEvent: BackboneExternalEvent): Promise<Relationship> {
         const payload = PeerDeletionCancelledEventData.fromAny(externalEvent.payload);
 
-        const relationship = await this.accountController.relationships.setPeerDeletionInfo(CoreId.from(payload.relationshipId), undefined);
+        const relationship = await this.accountController.relationships.setPeerDeletionInfo(CoreId.from(payload.relationshipId));
 
         this.eventBus.publish(new PeerDeletionCancelledEvent(this.ownAddress, relationship));
 
