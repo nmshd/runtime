@@ -1,7 +1,7 @@
 import { TransportError } from "../../../core";
 import { ExternalEventProcessorConstructor } from "./ExternalEventProcessor";
-import { IdentityDeletionProcessChangedEventProcessor } from "./IdentityDeletionProcessChangedEventProcessor";
-import { IdentityDeletionProcessStartedEventProcessor } from "./IdentityDeletionProcessStartedEventProcessor";
+import { IdentityDeletionProcessChangedExternalEventProcessor } from "./IdentityDeletionProcessChangedExternalEventProcessor";
+import { IdentityDeletionProcessStartedExternalEventProcessor } from "./IdentityDeletionProcessStartedExternalEventProcessor";
 import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor";
 import { MessageReceivedExternalEventProcessor } from "./MessageReceivedExternalEventProcessor";
 import { PeerDeletedEventProcessor } from "./PeerDeletedEventProcessor";
@@ -19,8 +19,8 @@ export class ExternalEventProcessorRegistry {
         this.registerProcessor("RelationshipStatusChanged", RelationshipStatusChangedExternalEventProcessor);
         this.registerProcessor("RelationshipReactivationRequested", RelationshipReactivationRequestedExternalEventProcessor);
         this.registerProcessor("RelationshipReactivationCompleted", RelationshipReactivationCompletedExternalEventProcessor);
-        this.registerProcessor("IdentityDeletionProcessStarted", IdentityDeletionProcessStartedEventProcessor);
-        this.registerProcessor("IdentityDeletionProcessStatusChanged", IdentityDeletionProcessChangedEventProcessor);
+        this.registerProcessor("IdentityDeletionProcessStarted", IdentityDeletionProcessStartedExternalEventProcessor);
+        this.registerProcessor("IdentityDeletionProcessStatusChanged", IdentityDeletionProcessChangedExternalEventProcessor);
         this.registerProcessor("PeerDeleted", PeerDeletedEventProcessor);
         this.registerProcessor("PeerDeletionCancelled", PeerDeletionCancelledEventProcessor);
         this.registerProcessor("PeerToBeDeleted", PeerToBeDeletedEventProcessor);
