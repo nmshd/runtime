@@ -26,15 +26,15 @@ import {
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
+    PeerDeletedEvent,
+    PeerDeletionCancelledEvent,
     PeerRelationshipTemplateLoadedEvent,
+    PeerToBeDeletedEvent,
     RelationshipChangedEvent,
     RelationshipDecomposedBySelfEvent,
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent
 } from "./transport";
-import { PeerDeletedEvent } from "./transport/PeerDeletedEvent";
-import { PeerDeletionCancelledEvent } from "./transport/PeerDeletionCancelledEvent";
-import { PeerToBeDeletedEvent } from "./transport/PeerToBeDeletedEvent";
 
 export class EventProxy {
     private readonly subscriptionIds: number[] = [];
