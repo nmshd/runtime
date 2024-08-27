@@ -3,7 +3,7 @@ import { AccountController, CoreId, PeerDeletionStatus, Transport } from "../../
 import { PeerDeletedEventProcessor } from "../../../src/modules/sync/externalEventProcessors";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
-describe("RelationshipTemplateController", function () {
+describe("PeerDeletedEventProcessor", function () {
     let connection: IDatabaseConnection;
 
     let transport: Transport;
