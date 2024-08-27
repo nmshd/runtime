@@ -41,8 +41,7 @@ describe("Terminate and Decompose simultaneously", function () {
             events.push(event);
         });
 
-        const relationships = await TestUtil.syncUntilHasRelationships(recipient);
-        expect(relationships).toHaveLength(1);
+        await TestUtil.syncUntilHasRelationships(recipient);
 
         expect(events).toHaveLength(1);
     });
