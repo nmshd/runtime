@@ -5,15 +5,15 @@ import { Relationship } from "../../relationships/local/Relationship";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
-class PeerDeletionCancelledEventData extends Serializable {
+class PeerDeletionCancelledExternalEventData extends Serializable {
     @serialize()
     @validate()
     public relationshipId: string;
 }
 
-export class PeerDeletionCancelledEventProcessor extends ExternalEventProcessor {
+export class PeerDeletionCancelledExternalEventProcessor extends ExternalEventProcessor {
     public override async execute(externalEvent: BackboneExternalEvent): Promise<Relationship> {
-        const payload = PeerDeletionCancelledEventData.fromAny(externalEvent.payload);
+        const payload = PeerDeletionCancelledExternalEventData.fromAny(externalEvent.payload);
 
         const relationship = await this.accountController.relationships.setPeerDeletionInfo(CoreId.from(payload.relationshipId));
 

@@ -41,6 +41,7 @@ export enum PeerDeletionStatus {
     ToBeDeleted = "ToBeDeleted",
     Deleted = "Deleted"
 }
+
 export interface PeerDeletionInfoDTO {
     deletionStatus: PeerDeletionStatus;
 }

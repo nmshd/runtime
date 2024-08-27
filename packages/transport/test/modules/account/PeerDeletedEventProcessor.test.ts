@@ -1,9 +1,9 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { PeerDeletedExternalEventProcessor } from "src/modules/sync/externalEventProcessors/PeerDeletedExternalEventProcessor";
 import { AccountController, CoreId, PeerDeletionStatus, Transport } from "../../../src";
-import { PeerDeletedEventProcessor } from "../../../src/modules/sync/externalEventProcessors";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
-describe("PeerDeletedEventProcessor", function () {
+describe("PeerDeletedExternalEventProcessor", function () {
     let connection: IDatabaseConnection;
 
     let transport: Transport;
@@ -33,7 +33,7 @@ describe("PeerDeletedEventProcessor", function () {
     });
 
     test("PeerDeletedEventProcessor should mark peer as deleted", async function () {
-        const eventProcessor = new PeerDeletedEventProcessor(recipient.identityDeletionProcess.eventBus, recipient);
+        const eventProcessor = new PeerDeletedExternalEventProcessor(recipient.identityDeletionProcess.eventBus, recipient);
         await eventProcessor.execute({ id: "anId", createdAt: "aDate", index: 1, syncErrorCount: 0, type: "PeerDeleted", payload: { relationshipId: relationshipId.toString() } });
         const relationship = await recipient.relationships.getRelationship(relationshipId);
         expect(relationship!.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.Deleted);
