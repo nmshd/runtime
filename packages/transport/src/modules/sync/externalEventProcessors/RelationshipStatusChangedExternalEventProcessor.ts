@@ -13,9 +13,10 @@ export class RelationshipStatusChangedExternalEventProcessor extends Relationshi
     public override async execute(externalEvent: ExternalEvent): Promise<Relationship | undefined> {
         const payload = RelationshipStatusChangedExternalEventData.fromAny(externalEvent.payload);
         const result = await this.accountController.relationships.applyRelationshipChangedEvent(payload.relationshipId);
+        const changedRelationship = result.changedRelationship;
 
-        this.triggerRelationshipChangedEvent(result.changedRelationship, result.oldRelationship);
+        this.triggerRelationshipChangedEvent(changedRelationship, result.oldRelationship);
 
-        return result.changedRelationship;
+        return changedRelationship;
     }
 }
