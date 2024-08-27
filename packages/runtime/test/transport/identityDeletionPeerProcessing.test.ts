@@ -1,6 +1,6 @@
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "../../src";
-import { establishRelationship, resetEventBusAndSyncUntilHasEvent, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { establishRelationship, RuntimeServiceProvider, syncUntilHasEvent, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;
@@ -13,6 +13,11 @@ beforeAll(async () => {
     services2 = runtimeServices[1];
     relationshipId = (await establishRelationship(services1.transport, services2.transport)).id;
 }, 30000);
+
+beforeEach(() => {
+    services1.eventBus.reset();
+    services2.eventBus.reset();
+});
 
 afterAll(async () => {
     return await serviceProvider.stop();
@@ -37,16 +42,19 @@ describe("IdentityDeletionProcess", () => {
     test("peer should be notified about started deletion process", async function () {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
-        const event = (await resetEventBusAndSyncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId)) as PeerToBeDeletedEvent;
-        expect(event.data.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.ToBeDeleted);
+        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
+
+        const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
+        expect(updatedRelationship.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.ToBeDeleted);
     });
 
     test("peer should be notified about cancelled deletion process", async function () {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-        await resetEventBusAndSyncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
-
         await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
-        const event = (await resetEventBusAndSyncUntilHasEvent(services2, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId)) as PeerDeletionCancelledEvent;
-        expect(event.data.peerDeletionInfo).toBeUndefined();
+
+        await syncUntilHasEvent(services2, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
+
+        const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
+        expect(updatedRelationship.peerDeletionInfo).toBeUndefined();
     });
 });

@@ -132,13 +132,11 @@ export async function syncUntilHasIdentityDeletionProcess(transportServices: Tra
     return await syncUntilHas(transportServices, "identityDeletionProcesses", (m) => m.id === identityDeletionProcessId.toString());
 }
 
-export async function resetEventBusAndSyncUntilHasEvent<TEvent extends Event>(
+export async function syncUntilHasEvent<TEvent extends Event>(
     runtimeServices: TestRuntimeServices,
     subscriptionTarget: SubscriptionTarget<TEvent> & { namespace: string },
     predicate?: (event: TEvent) => boolean
 ): Promise<Event> {
-    runtimeServices.eventBus.reset();
-
     let iterationNumber = 0;
     let event: Event | undefined;
     do {
