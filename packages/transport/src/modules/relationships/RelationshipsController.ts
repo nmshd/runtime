@@ -487,18 +487,21 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async applyRelationshipChangedEvent(relationshipId: string): Promise<Relationship> {
-        let relationshipDoc = await this.relationships.read(relationshipId);
+    public async applyRelationshipChangedEvent(relationshipId: string): Promise<{ oldRelationship?: Relationship; changedRelationship: Relationship }> {
+        const relationshipDoc = await this.relationships.read(relationshipId);
         if (!relationshipDoc) {
-            const newRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
-            if (newRelationship.status === RelationshipStatus.Pending) {
-                return newRelationship;
-            }
-            // this path is for a revocation that is processed before its corresponding creation
-            relationshipDoc = await this.relationships.read(relationshipId);
+            const changedRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
+            if (changedRelationship.status === RelationshipStatus.Pending) return { changedRelationship };
+
+            const relationshipDoc = await this.relationships.read(relationshipId);
+            const updatedRelationship = await this.updateRelationshipWithPeerResponse(relationshipDoc);
+            return { changedRelationship: updatedRelationship };
         }
 
-        return await this.updateRelationshipWithPeerResponse(relationshipDoc);
+        const oldRelationship = Relationship.from(relationshipDoc);
+        const changedRelationship = await this.updateRelationshipWithPeerResponse(relationshipDoc);
+
+        return { oldRelationship, changedRelationship };
     }
 
     private async prepareCreationResponseContent(relationship: Relationship) {
