@@ -1,7 +1,6 @@
-import { serialize, serializeOnly, type, validate } from "@js-soft/ts-serval";
-import { CoreSerializable, ICoreSerializable } from "./CoreSerializable";
+import { ISerializable, Serializable, serialize, serializeOnly, type, validate } from "@js-soft/ts-serval";
 
-export interface ICoreAddress extends ICoreSerializable {
+export interface ICoreAddress extends ISerializable {
     address: string;
 }
 
@@ -10,7 +9,7 @@ export interface ICoreAddress extends ICoreSerializable {
  */
 @type("CoreAddress")
 @serializeOnly("address", "string")
-export class CoreAddress extends CoreSerializable {
+export class CoreAddress extends Serializable {
     @validate()
     @serialize()
     public address: string;

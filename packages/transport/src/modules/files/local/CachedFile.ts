@@ -1,6 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreHash, CoreId, ICoreAddress, ICoreDate, ICoreHash, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, CryptoSignature, ICryptoSecretKey, ICryptoSignature } from "@nmshd/crypto";
+import { CoreHash, ICoreHash } from "../../../core";
 import { BackboneGetFilesResponse } from "../backbone/BackboneGetFiles";
 import { FileMetadata } from "../transmission/FileMetadata";
 
@@ -10,7 +11,7 @@ export interface ICachedFile extends ISerializable {
     filesize: number;
     filemodified?: CoreDate;
     mimetype: string;
-    cipherHash: CoreHash;
+    cipherHash: ICoreHash;
     createdAt: ICoreDate;
     expiresAt: ICoreDate;
     cipherKey: ICryptoSecretKey;

@@ -11,7 +11,7 @@ import {
     RelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
-import { DateTime } from "luxon";
+import { CoreDate } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { LocalAttribute } from "./LocalAttribute";
@@ -58,7 +58,7 @@ export class IdentityAttributeQueryTranslator {
                 if (!input) {
                     return;
                 }
-                const validFromUtcString = DateTime.fromISO(input).toUTC().toString();
+                const validFromUtcString = CoreDate.from(input).toISOString();
                 query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`] = {
                     $gte: validFromUtcString
                 };
@@ -68,7 +68,7 @@ export class IdentityAttributeQueryTranslator {
                 if (!input) {
                     return;
                 }
-                const validToUtcString = DateTime.fromISO(input).toUTC().toString();
+                const validToUtcString = CoreDate.from(input).toISOString();
                 query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`] = {
                     $lte: validToUtcString
                 };
@@ -104,7 +104,7 @@ export class RelationshipAttributeQueryTranslator {
                 if (!input) {
                     return;
                 }
-                const validFromUtcString = DateTime.fromISO(input).toUTC().toString();
+                const validFromUtcString = CoreDate.from(input).toISOString();
                 query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`] = {
                     $gte: validFromUtcString
                 };
@@ -114,7 +114,7 @@ export class RelationshipAttributeQueryTranslator {
                 if (!input) {
                     return;
                 }
-                const validToUtcString = DateTime.fromISO(input).toUTC().toString();
+                const validToUtcString = CoreDate.from(input).toISOString();
                 query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`] = {
                     $lte: validToUtcString
                 };
@@ -153,7 +153,7 @@ export class ThirdPartyRelationshipAttributeQueryTranslator {
                 if (!input) {
                     return;
                 }
-                const validFromUtcString = DateTime.fromISO(input).toUTC().toString();
+                const validFromUtcString = CoreDate.from(input).toISOString();
                 query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`] = {
                     $gte: validFromUtcString
                 };
@@ -163,7 +163,7 @@ export class ThirdPartyRelationshipAttributeQueryTranslator {
                 if (!input) {
                     return;
                 }
-                const validToUtcString = DateTime.fromISO(input).toUTC().toString();
+                const validToUtcString = CoreDate.from(input).toISOString();
                 query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`] = {
                     $lte: validToUtcString
                 };

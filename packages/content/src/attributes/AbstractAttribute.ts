@@ -1,5 +1,5 @@
-import { serialize, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreSerializable, ICoreAddress, ICoreDate, ICoreSerializable } from "@nmshd/core-types";
+import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
 import { ContentJSON } from "../ContentJSON";
 
 export interface AbstractAttributeJSON extends ContentJSON {
@@ -8,13 +8,13 @@ export interface AbstractAttributeJSON extends ContentJSON {
     validTo?: string;
 }
 
-export interface IAbstractAttribute extends ICoreSerializable {
+export interface IAbstractAttribute extends ISerializable {
     owner: ICoreAddress;
     validFrom?: ICoreDate;
     validTo?: ICoreDate;
 }
 
-export abstract class AbstractAttribute extends CoreSerializable implements IAbstractAttribute {
+export abstract class AbstractAttribute extends Serializable implements IAbstractAttribute {
     @validate()
     @serialize()
     public owner: CoreAddress;

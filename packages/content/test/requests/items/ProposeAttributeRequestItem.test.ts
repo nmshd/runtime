@@ -1,8 +1,7 @@
 import { ValidationError } from "@js-soft/ts-serval";
-import { TestObjectFactory } from "@nmshd/consumption/test/modules/requests/testHelpers/TestObjectFactory";
-import { IdentityAttributeQuery, IQLQuery, ProposeAttributeRequestItem, RelationshipAttributeConfidentiality, RelationshipAttributeQuery } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
+import { IdentityAttributeQuery, IQLQuery, ProposeAttributeRequestItem, RelationshipAttributeConfidentiality, RelationshipAttributeQuery } from "../../../src";
 
 describe("creation of ProposeAttributeRequestItem", () => {
     describe("creation of ProposeAttributeRequestItem with IdentityAttributeQuery", () => {

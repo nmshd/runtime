@@ -1,6 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreHash, ICoreDate, ICoreHash } from "@nmshd/core-types";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
+import { CoreHash, ICoreHash } from "../../../core";
 
 export interface IFileMetadata extends ISerializable {
     title?: string;

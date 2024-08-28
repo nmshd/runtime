@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreHash, ICoreHash } from "@nmshd/core-types";
+import { CoreHash, ICoreHash } from "../../../../core";
 import { CertificateItem, ICertificateItem } from "../CertificateItem";
 
 export interface ICertificatePrivateAttributeItem extends ICertificateItem {

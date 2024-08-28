@@ -1,8 +1,8 @@
-import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreSerializable } from "@nmshd/core-types";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoCipher, CryptoRelationshipPublicResponse, ICryptoCipher, ICryptoRelationshipPublicResponse } from "@nmshd/crypto";
+import { CoreSerializable, ICoreSerializable } from "../../../../core";
 
-export interface IRelationshipCreationResponseContentCipher extends ISerializable {
+export interface IRelationshipCreationResponseContentCipher extends ICoreSerializable {
     cipher: ICryptoCipher;
     publicCreationResponseContentCrypto: ICryptoRelationshipPublicResponse;
 }

@@ -1,13 +1,12 @@
-import { type } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, type } from "@js-soft/ts-serval";
 import { DateTime, DateTimeUnit, Duration, DurationLike, Interval } from "luxon";
-import { CoreSerializable, ICoreSerializable } from "./CoreSerializable";
 
-export interface ICoreDate extends ICoreSerializable {
+export interface ICoreDate extends ISerializable {
     date: string;
 }
 
 @type("CoreDate")
-export class CoreDate extends CoreSerializable {
+export class CoreDate extends Serializable {
     private readonly _dateTime: DateTime;
     public get dateTime(): DateTime {
         return this._dateTime;
