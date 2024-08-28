@@ -1,5 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
-import { CoreAddress, CoreError, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CoreError } from "@nmshd/transport";
 
 class Attributes {
     public successorIsNotAValidAttribute(error: any) {

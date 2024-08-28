@@ -1,4 +1,5 @@
 import { ILogger } from "@js-soft/logging-abstractions";
+import { CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
@@ -6,7 +7,6 @@ import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
-import { CoreId } from "../types";
 import { ClientResult } from "./ClientResult";
 import { IPaginationDataSource, Paginator, PaginatorPercentageCallback } from "./Paginator";
 import { PlatformParameters } from "./PlatformParameters";

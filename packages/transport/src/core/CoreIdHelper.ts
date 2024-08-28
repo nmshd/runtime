@@ -1,6 +1,6 @@
-import { RandomCharacterRange } from "../util/Random";
+import { CoreId } from "@nmshd/core-types";
+import { RandomCharacterRange } from "@nmshd/utils";
 import { TransportError } from "./TransportError";
-import { CoreId } from "./types/CoreId";
 
 export class CoreIdHelper {
     private readonly coreIdRegex: RegExp;

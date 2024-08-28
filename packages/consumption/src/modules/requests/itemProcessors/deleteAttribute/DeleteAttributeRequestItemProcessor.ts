@@ -1,5 +1,5 @@
 import { AcceptResponseItem, DeleteAttributeAcceptResponseItem, DeleteAttributeRequestItem, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
-import { CoreAddress, CoreDate } from "@nmshd/transport";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";

@@ -1,7 +1,8 @@
-import { CoreDate, CoreErrors, CoreId } from "../../core";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { PasswordGenerator } from "@nmshd/utils";
+import { CoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
-import { PasswordGenerator } from "../../util";
 import { AccountController } from "../accounts/AccountController";
 import { ChallengeType } from "../challenges/data/Challenge";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";

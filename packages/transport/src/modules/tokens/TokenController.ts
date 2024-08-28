@@ -1,7 +1,8 @@
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId, CoreSerializable, TransportError } from "../../core";
+import { CoreCrypto, CoreErrors, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
@@ -164,7 +165,7 @@ export class TokenController extends TransportController {
     private async decryptToken(response: BackboneGetTokensResponse, secretKey: CryptoSecretKey) {
         const cipher = CryptoCipher.fromBase64(response.content);
         const plaintextTokenBuffer = await CoreCrypto.decrypt(cipher, secretKey);
-        const plaintextTokenContent = CoreSerializable.deserializeUnknown(plaintextTokenBuffer.toUtf8());
+        const plaintextTokenContent = Serializable.deserializeUnknown(plaintextTokenBuffer.toUtf8());
 
         if (!(plaintextTokenContent instanceof Serializable)) {
             throw CoreErrors.tokens.invalidTokenContent(response.id);

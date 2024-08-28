@@ -1,6 +1,6 @@
 import { IdentityAttributeQuery, IQLQuery, RelationshipAttributeQuery, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
+import { CoreAddress } from "@nmshd/core-types";
 import { validate as iqlValidate } from "@nmshd/iql";
-import { CoreAddress } from "@nmshd/transport";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
 

@@ -1,10 +1,10 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreHash, CoreId, ICoreAddress, ICoreDate, ICoreHash, ICoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, CryptoSignature, ICryptoSecretKey, ICryptoSignature } from "@nmshd/crypto";
-import { CoreAddress, CoreDate, CoreHash, CoreId, CoreSerializable, ICoreAddress, ICoreDate, ICoreHash, ICoreId, ICoreSerializable } from "../../../core";
 import { BackboneGetFilesResponse } from "../backbone/BackboneGetFiles";
 import { FileMetadata } from "../transmission/FileMetadata";
 
-export interface ICachedFile extends ICoreSerializable {
+export interface ICachedFile extends ISerializable {
     title?: string;
     filename: string;
     filesize: number;
@@ -27,7 +27,7 @@ export interface ICachedFile extends ICoreSerializable {
 }
 
 @type("CachedFile")
-export class CachedFile extends CoreSerializable implements ICachedFile {
+export class CachedFile extends Serializable implements ICachedFile {
     @validate({ nullable: true })
     @serialize()
     public title?: string;

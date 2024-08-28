@@ -1,8 +1,8 @@
 import { ISerializable, Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { CoreErrors } from "./CoreErrors";
 import { CoreIdHelper } from "./CoreIdHelper";
-import { CoreId, ICoreId } from "./types/CoreId";
 
 export interface IReference extends ISerializable {
     id: ICoreId;

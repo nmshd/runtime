@@ -1,6 +1,7 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
-import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
+import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent } from "../../../attributes";

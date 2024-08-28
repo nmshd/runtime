@@ -1,4 +1,4 @@
-import { CoreSerializable, ICoreSerializable } from "@nmshd/transport";
+import { CoreSerializable, ICoreSerializable } from "@nmshd/core-types";
 import { ContentJSON } from "../ContentJSON";
 
 export interface AbstractAttributeQueryJSON extends ContentJSON {}

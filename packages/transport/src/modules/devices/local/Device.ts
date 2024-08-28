@@ -1,9 +1,8 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSignaturePublicKey, ICryptoSignaturePublicKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { CoreDate } from "../../../core/types/CoreDate";
-import { CoreId } from "../../../core/types/CoreId";
 
 export enum DeviceType {
     "Unknown",

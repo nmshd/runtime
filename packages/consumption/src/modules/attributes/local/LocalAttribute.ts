@@ -8,7 +8,8 @@ import {
     RelationshipAttribute,
     RelationshipAttributeJSON
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
 import { CoreErrors } from "../../../consumption/CoreErrors";

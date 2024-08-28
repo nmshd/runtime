@@ -14,8 +14,9 @@ import {
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import * as iql from "@nmshd/iql";
-import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";

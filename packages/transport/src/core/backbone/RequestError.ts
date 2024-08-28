@@ -1,7 +1,7 @@
 import { ApplicationError } from "@js-soft/ts-utils";
+import { CoreDate } from "@nmshd/core-types";
 import { AxiosError } from "axios";
 import stringify from "json-stringify-safe";
-import { CoreDate } from "../types/CoreDate";
 import { PlatformError } from "./PlatformError";
 import { PlatformParameters } from "./PlatformParameters";
 

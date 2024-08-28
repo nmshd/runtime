@@ -1,9 +1,9 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreSerializable, ICoreDate, ICoreSerializable } from "../../../core";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { IRelationshipTemplate, RelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { IRelationshipAuditLogEntry, RelationshipAuditLogEntry } from "./RelationshipAuditLogEntry";
 
-export interface ICachedRelationship extends ICoreSerializable {
+export interface ICachedRelationship extends ISerializable {
     template: IRelationshipTemplate;
     creationContent: ISerializable;
 
@@ -13,7 +13,7 @@ export interface ICachedRelationship extends ICoreSerializable {
 }
 
 @type("CachedRelationship")
-export class CachedRelationship extends CoreSerializable implements ICachedRelationship {
+export class CachedRelationship extends Serializable implements ICachedRelationship {
     @validate()
     @serialize()
     public template: RelationshipTemplate;

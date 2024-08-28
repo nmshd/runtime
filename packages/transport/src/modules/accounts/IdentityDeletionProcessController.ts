@@ -1,5 +1,6 @@
 import { log } from "@js-soft/ts-utils";
-import { ClientResult, ControllerName, CoreId, DbCollectionName, TransportController } from "../../core";
+import { CoreId } from "@nmshd/core-types";
+import { ClientResult, ControllerName, DbCollectionName, TransportController } from "../../core";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";

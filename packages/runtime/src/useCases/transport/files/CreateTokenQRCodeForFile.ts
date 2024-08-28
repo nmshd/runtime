@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, CoreId, File, FileController, TokenContentFile, TokenController } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { File, FileController, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { FileIdString, ISO8601DateTimeString, QRCode, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 

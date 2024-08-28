@@ -1,7 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, AttributeSuccessorParams, ConsumptionIds, CoreErrors } from "@nmshd/consumption";
 import { AttributeValues, Notification, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
-import { AccountController, CoreId, MessageController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { AttributeIdString, ISO8601DateTimeString, NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";

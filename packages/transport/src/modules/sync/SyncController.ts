@@ -1,6 +1,7 @@
 import { IDatabaseCollection, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { log } from "@js-soft/ts-utils";
-import { ControllerName, CoreDate, CoreError, CoreErrors, CoreId, RequestError, TransportController, TransportError, TransportLoggerFactory } from "../../core";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { ControllerName, CoreError, CoreErrors, RequestError, TransportController, TransportError, TransportLoggerFactory } from "../../core";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { AccountController } from "../accounts/AccountController";
 import { ChangedItems } from "./ChangedItems";
@@ -405,17 +406,9 @@ export class SyncController extends TransportController {
             } catch (e: any) {
                 this.log.error("There was an error while trying to apply an external event: ", e);
 
-                let errorCode;
-                if (e.code) {
-                    errorCode = e.code;
-                } else if (e.message) {
-                    errorCode = e.message;
-                } else {
-                    errorCode = JSON.stringify(e);
-                }
                 results.push({
                     externalEventId: externalEvent.id,
-                    errorCode: errorCode
+                    errorCode: e instanceof CoreError ? e.code : "error.transport.unknown"
                 });
             }
         }

@@ -1,5 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { CoreDate, CoreId, SynchronizedCollection } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { SynchronizedCollection } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";

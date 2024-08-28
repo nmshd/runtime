@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreId, Relationship, RelationshipsController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";

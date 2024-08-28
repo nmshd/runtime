@@ -13,7 +13,8 @@ import {
     ResponseItemResult,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
-import { CoreAddress, CoreId, RelationshipStatus, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { RelationshipStatus, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { AttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";

@@ -1,5 +1,5 @@
 import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, IdentityAttribute, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { LocalAttribute } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";

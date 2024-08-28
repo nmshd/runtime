@@ -1,5 +1,5 @@
 import { serialize, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreSerializable, ICoreAddress, ICoreDate, ICoreSerializable } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreSerializable, ICoreAddress, ICoreDate, ICoreSerializable } from "@nmshd/core-types";
 import { ContentJSON } from "../ContentJSON";
 
 export interface AbstractAttributeJSON extends ContentJSON {

@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { IIdentityAttribute, IdentityAttribute, IdentityAttributeJSON, RelationshipAttribute } from "@nmshd/content";
-import { CoreId, ICoreId } from "@nmshd/transport";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 
 export interface CreateRepositoryAttributeParamsJSON {
     id?: string;

@@ -1,13 +1,14 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
 import { log } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AbstractAuthenticator, Authenticator, ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
+import { PasswordGenerator } from "@nmshd/utils";
+import { AbstractAuthenticator, Authenticator, ControllerName, CoreErrors, IConfig, Transport, TransportError } from "../../core";
 import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
-import { PasswordGenerator } from "../../util";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
 import { CertificateValidator } from "../certificates/CertificateValidator";

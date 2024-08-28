@@ -1,5 +1,5 @@
 import { RequestItem, RequestItemGroup } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import { CoreErrors } from "../../../consumption/CoreErrors";
 import { ValidationResult } from "../../common/ValidationResult";
 import { LocalRequest } from "../local/LocalRequest";

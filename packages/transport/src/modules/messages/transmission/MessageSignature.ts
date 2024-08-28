@@ -1,14 +1,14 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 import { CryptoSignature, ICryptoSignature } from "@nmshd/crypto";
-import { CoreAddress, CoreSerializable, ICoreAddress, ICoreSerializable } from "../../../core";
 
-export interface IMessageSignature extends ICoreSerializable {
+export interface IMessageSignature extends ISerializable {
     recipient: ICoreAddress;
     signature: ICryptoSignature;
 }
 
 @type("MessageSignature")
-export class MessageSignature extends CoreSerializable implements IMessageSignature {
+export class MessageSignature extends Serializable implements IMessageSignature {
     @validate()
     @serialize()
     public recipient: CoreAddress;

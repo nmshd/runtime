@@ -1,17 +1,7 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
-import {
-    CoreAddress,
-    CoreDate,
-    CoreId,
-    ICoreId,
-    Message,
-    Relationship,
-    RelationshipStatus,
-    RelationshipTemplate,
-    SynchronizedCollection,
-    CoreErrors as TransportCoreErrors
-} from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
+import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";

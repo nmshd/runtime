@@ -1,8 +1,10 @@
 import { IDatabaseCollectionProvider } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
+import { Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
+import { CoreId } from "@nmshd/core-types";
 import _ from "lodash";
-import { CoreErrors, CoreId, CoreSerializable, TransportError, TransportIds } from "../../core";
+import { CoreErrors, TransportError, TransportIds } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ICacheable } from "../../core/ICacheable";
 import { CachedIdentityDeletionProcess } from "../accounts/data/CachedIdentityDeletionProcess";
@@ -84,11 +86,11 @@ export class DatawalletModificationsProcessor {
                 mergedPayload = { ...mergedPayload, ...create.payload };
             }
 
-            const newObject = CoreSerializable.fromUnknown(mergedPayload);
+            const newObject = Serializable.fromUnknown(mergedPayload);
 
             const oldDoc = await targetCollection.read(objectIdentifier);
             if (oldDoc) {
-                const oldObject = CoreSerializable.fromUnknown(oldDoc);
+                const oldObject = Serializable.fromUnknown(oldDoc);
                 const updatedObject = { ...oldObject.toJSON(), ...newObject.toJSON() };
                 await targetCollection.update(oldDoc, updatedObject);
             } else {
@@ -128,7 +130,7 @@ export class DatawalletModificationsProcessor {
                 throw new TransportError("Document to update was not found.");
             }
 
-            const oldObject = CoreSerializable.fromUnknown(oldDoc);
+            const oldObject = Serializable.fromUnknown(oldDoc);
             const newObject = { ...oldObject.toJSON(), ...updateModification.payload };
 
             await targetCollection.update(oldDoc, newObject);

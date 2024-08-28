@@ -8,7 +8,8 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, RelationshipStatus } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { CoreErrors } from "../../../../consumption/CoreErrors";
 import { LocalAttributeDeletionStatus } from "../../../attributes";

@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
+import { CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreId, Token, TokenController } from "@nmshd/transport";
+import { AccountController, Token, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { JsonSchema, RuntimeErrors, SchemaRepository, SchemaValidator, TokenIdString, TokenReferenceString, UseCase, ValidationFailure, ValidationResult } from "../../common";

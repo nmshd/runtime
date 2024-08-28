@@ -1,5 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
+import { CoreId } from "@nmshd/core-types";
 import {
     CoreBuffer,
     CryptoCipher,
@@ -12,7 +13,7 @@ import {
     CryptoSignature,
     CryptoSignaturePublicKey
 } from "@nmshd/crypto";
-import { ControllerName, CoreCrypto, CoreId } from "../../core";
+import { ControllerName, CoreCrypto } from "../../core";
 import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
 import { TransportIds } from "../../core/TransportIds";

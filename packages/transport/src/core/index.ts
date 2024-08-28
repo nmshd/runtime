@@ -3,8 +3,6 @@ export * from "./CoreCrypto";
 export * from "./CoreError";
 export * from "./CoreErrors";
 export * from "./CoreIdHelper";
-export * from "./CoreSerializable";
-export * from "./CoreSerializableAsync";
 export * from "./CoreSynchronizable";
 export * from "./CoreUtil";
 export * from "./DbCollectionName";

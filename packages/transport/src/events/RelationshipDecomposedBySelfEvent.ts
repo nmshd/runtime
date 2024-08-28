@@ -1,4 +1,4 @@
-import { CoreId } from "../core";
+import { CoreId } from "@nmshd/core-types";
 import { TransportDataEvent } from "./TransportDataEvent";
 
 export interface RelationshipDecomposedBySelfEventData {

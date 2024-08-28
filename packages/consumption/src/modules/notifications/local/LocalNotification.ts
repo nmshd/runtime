@@ -1,6 +1,7 @@
 import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
 import { INotification, Notification } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreAddress, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ILocalNotificationSource, LocalNotificationSource } from "./LocalNotificationSource";

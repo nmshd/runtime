@@ -1,6 +1,6 @@
+import { CoreDate } from "@nmshd/core-types";
 import { AxiosResponse } from "axios";
 import qs from "qs";
-import { CoreDate } from "../types";
 import { ClientResult } from "./ClientResult";
 import { PlatformParameters } from "./PlatformParameters";
 import { RequestError } from "./RequestError";

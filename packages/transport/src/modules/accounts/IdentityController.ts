@@ -1,6 +1,7 @@
 import { log } from "@js-soft/ts-utils";
+import { CoreAddress } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { ControllerName, CoreAddress, CoreCrypto, CoreErrors, TransportController } from "../../core";
+import { ControllerName, CoreCrypto, CoreErrors, TransportController } from "../../core";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { Identity } from "./data/Identity";
