@@ -10,8 +10,9 @@ import { AcceptDeleteAttributeRequestItemParameters, AcceptDeleteAttributeReques
 export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProcessor<DeleteAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: DeleteAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-        if (!attribute)
+        if (!attribute) {
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(`The Attribute '${requestItem.attributeId.toString()}' could not be found.`));
+        }
 
         if (!attribute.isOwnSharedAttribute(this.accountController.identity.address)) {
             return ValidationResult.error(
