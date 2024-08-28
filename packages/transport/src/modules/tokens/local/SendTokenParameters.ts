@@ -1,14 +1,14 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreSerializable, ICoreDate, ICoreSerializable } from "../../../core";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 
-export interface ISendTokenParameters extends ICoreSerializable {
+export interface ISendTokenParameters extends ISerializable {
     content: ISerializable;
     expiresAt: ICoreDate;
     ephemeral: boolean;
 }
 
 @type("SendTokenParameters")
-export class SendTokenParameters extends CoreSerializable implements ISendTokenParameters {
+export class SendTokenParameters extends Serializable implements ISendTokenParameters {
     @validate()
     @serialize()
     public content: Serializable;

@@ -10,7 +10,8 @@ import {
     Request,
     ResponseItemResult
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, CoreIdHelper, Transport } from "@nmshd/transport";
 import {
     AcceptDeleteAttributeRequestItemParametersJSON,
     ConsumptionController,
@@ -332,7 +333,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         test("returns success when called with any deletionDate if Attribute doesn't exist", async function () {
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attributeId: await CoreId.generate()
+                attributeId: await CoreIdHelper.notPrefixed.generate()
             });
 
             const requestId = await ConsumptionIds.request.generate();
@@ -653,7 +654,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         test("returns an AcceptResponseItem", async function () {
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attributeId: (await CoreId.generate()).toString()
+                attributeId: (await CoreIdHelper.notPrefixed.generate()).toString()
             });
 
             const requestId = await ConsumptionIds.request.generate();

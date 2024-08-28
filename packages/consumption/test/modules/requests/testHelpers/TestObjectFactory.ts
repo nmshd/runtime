@@ -17,13 +17,10 @@ import {
     ResponseJSON,
     ResponseResult
 } from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoEncryptionAlgorithm, CryptoExchangeAlgorithm, CryptoSecretKey, CryptoSignatureAlgorithm, CryptoSignaturePublicKey } from "@nmshd/crypto";
 import {
     CachedRelationship,
-    CoreAddress,
-    CoreDate,
-    CoreId,
-    ICoreId,
     Identity,
     IMessage,
     IRelationship,

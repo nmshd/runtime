@@ -1,5 +1,5 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { SettingScope } from "./Setting";
 
 export interface ICreateSettingParameters {

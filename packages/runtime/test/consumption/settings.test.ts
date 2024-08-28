@@ -1,5 +1,6 @@
 import { ConsumptionIds } from "@nmshd/consumption";
-import { CoreDate, TransportIds } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
+import { TransportIds } from "@nmshd/transport";
 import { ConsumptionServices, GetSettingsQuery } from "../../src";
 import { QueryParamConditions, RuntimeServiceProvider } from "../lib";
 

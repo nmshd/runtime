@@ -25,17 +25,17 @@
         "test:ci": "jest -i --forceExit --coverage"
     },
     "jest": {
-        "maxWorkers": 5,
-        "preset": "ts-jest",
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "coverageProvider": "v8",
         "coverageReporters": [
             "text-summary",
             "cobertura",
             "lcov"
         ],
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
+        "maxWorkers": 5,
+        "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "jest-expect-message"
         ],
@@ -52,6 +52,7 @@
     },
     "dependencies": {
         "@js-soft/docdb-access-loki": "^1.1.0",
+        "@nmshd/runtime": "*",
         "lodash": "^4.17.21"
     },
     "devDependencies": {
@@ -59,9 +60,6 @@
         "@types/lodash": "^4.17.7",
         "@types/lokijs": "^1.5.14",
         "@types/luxon": "^3.4.2"
-    },
-    "peerDependencies": {
-        "@nmshd/runtime": "*"
     },
     "publishConfig": {
         "access": "public",

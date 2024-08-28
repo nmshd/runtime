@@ -1,6 +1,6 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { AbstractStringJSON, DisplayNameJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import {
     AcceptResponseItemDVO,
     ConsumptionServices,

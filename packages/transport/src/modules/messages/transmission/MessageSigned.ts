@@ -1,8 +1,7 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreSerializable, ICoreSerializable } from "../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { IMessageSignature, MessageSignature } from "./MessageSignature";
 
-export interface IMessageSigned extends ICoreSerializable {
+export interface IMessageSigned extends ISerializable {
     signatures: IMessageSignature[];
     message: string;
 }
@@ -11,7 +10,7 @@ export interface IMessageSigned extends ICoreSerializable {
  * MessageSigned encapsulates the actual message with the senders digital signature.
  */
 @type("MessageSigned")
-export class MessageSigned extends CoreSerializable {
+export class MessageSigned extends Serializable {
     @validate()
     @serialize({ type: MessageSignature })
     public signatures: MessageSignature[];

@@ -1,5 +1,5 @@
+import { CoreId } from "@nmshd/core-types";
 import { DeviceMapper, DeviceOnboardingInfoDTO } from "@nmshd/runtime";
-import { CoreId } from "@nmshd/transport";
 import { MultiAccountController } from "./MultiAccountController";
 import { LocalAccountDTO } from "./data/LocalAccountDTO";
 import { LocalAccountMapper } from "./data/LocalAccountMapper";

@@ -1,6 +1,5 @@
 import { CryptoRandom, ICoreBuffer } from "@nmshd/crypto";
 import { v4 as uuidv4 } from "uuid";
-import { TransportError } from "../core/TransportError";
 
 export enum RandomCharacterRange {
     Digit = "0123456789",
@@ -48,7 +47,7 @@ export class Random implements IRandom {
     }
     public static async int(length: number): Promise<number> {
         if (length > 21 || length <= 0) {
-            throw new TransportError("Length must be between 1 and 21.");
+            throw new Error("Length must be between 1 and 21.");
         }
         return parseInt(await this.string(length, RandomCharacterRange.Digit));
     }
@@ -74,12 +73,12 @@ export class Random implements IRandom {
 
     public static async intBetween(min: number, max: number): Promise<number> {
         if (max <= min) {
-            throw new TransportError("Max must be larger than min.");
+            throw new Error("Max must be larger than min.");
         }
         const diff = max - min + 1;
         const bitLength = Math.abs(Math.ceil(Math.log2(diff)));
         if (bitLength > 32) {
-            throw new TransportError("The range between the numbers is too big, 32 bit is the maximum -> 4294967296");
+            throw new Error("The range between the numbers is too big, 32 bit is the maximum -> 4294967296");
         }
         const byteLength = Math.ceil(bitLength / 8);
         const bitMask = Math.pow(2, bitLength) - 1;
@@ -100,7 +99,7 @@ export class Random implements IRandom {
 
     public static async intRandomLength(minLength: number, maxLength: number): Promise<number> {
         if (maxLength > 21) {
-            throw new TransportError("Max must be below 22.");
+            throw new Error("Max must be below 22.");
         }
         return parseInt(await this.stringRandomLength(minLength, maxLength, RandomCharacterRange.Digit));
     }
@@ -121,7 +120,7 @@ export class Random implements IRandom {
     public static async string(length: number, allowedChars: string | string[] = RandomCharacterRange.Alphanumeric): Promise<string> {
         if (length <= 0) return "";
         if (allowedChars.length > 256) {
-            throw new TransportError("Input exceeds maximum length of 256.");
+            throw new Error("Input exceeds maximum length of 256.");
         }
         const ar = [];
         const inputLength = allowedChars.length;
@@ -145,11 +144,11 @@ export class Random implements IRandom {
 
     public static async stringRandomLength(minLength: number, maxLength: number, allowedChars?: string | string[]): Promise<string> {
         if (minLength > maxLength) {
-            throw new TransportError("maxLength must be larger than minLength.");
+            throw new Error("maxLength must be larger than minLength.");
         }
 
         if (minLength < 0) {
-            throw new TransportError("minlength must not be less than zero.");
+            throw new Error("minlength must not be less than zero.");
         }
 
         const length = maxLength > minLength ? await this.intBetween(minLength, maxLength) : maxLength;

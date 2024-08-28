@@ -51,7 +51,8 @@ import {
     ValueHintsJSON,
     isRequestItemDerivation
 } from "@nmshd/content";
-import { CoreAddress, CoreId, IdentityController } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { IdentityController } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import {

@@ -1,12 +1,11 @@
-import { serialize, validate } from "@js-soft/ts-serval";
-import { CoreSerializable, ICoreSerializable } from "./CoreSerializable";
-import { CoreId, ICoreId } from "./types/CoreId";
+import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 
-export interface ICoreSynchronizable extends ICoreSerializable {
+export interface ICoreSynchronizable extends ISerializable {
     id: ICoreId;
 }
 
-export abstract class CoreSynchronizable extends CoreSerializable implements ICoreSynchronizable {
+export abstract class CoreSynchronizable extends Serializable implements ICoreSynchronizable {
     public readonly technicalProperties: string[] = [];
     public readonly userdataProperties: string[] = [];
     public readonly metadataProperties: string[] = [];

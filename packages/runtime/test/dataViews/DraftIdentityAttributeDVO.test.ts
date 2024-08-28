@@ -11,7 +11,7 @@ import {
     PersonName,
     Sex
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import { DataViewExpander, TransportServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 

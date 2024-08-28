@@ -1,5 +1,6 @@
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreAddress, CoreDate, CoreId, Device, DeviceSharedSecret } from "@nmshd/transport";
+import { Device, DeviceSharedSecret } from "@nmshd/transport";
 import { DeviceDTO, DeviceOnboardingInfoDTO } from "../../../types";
 
 export class DeviceMapper {

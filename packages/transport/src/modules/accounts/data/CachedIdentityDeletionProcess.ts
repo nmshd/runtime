@@ -1,5 +1,5 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreId, CoreSerializable } from "../../../core";
+import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
 
 export interface CachedIdentityDeletionProcessJSON {
@@ -31,7 +31,7 @@ export interface ICachedIdentityDeletionProcess {
 }
 
 @type("CachedIdentityDeletionProcess")
-export class CachedIdentityDeletionProcess extends CoreSerializable implements ICachedIdentityDeletionProcess {
+export class CachedIdentityDeletionProcess extends Serializable implements ICachedIdentityDeletionProcess {
     @validate()
     @serialize()
     public status: IdentityDeletionProcessStatus;

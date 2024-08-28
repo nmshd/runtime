@@ -2,7 +2,7 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { IdentityAttribute, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { LocalAttribute, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
@@ -21,7 +21,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
         notification: LocalNotification
     ): Promise<ValidationResult> {
         if (!notification.peer.equals(notificationItem.successorContent.owner)) {
-            return ValidationResult.error(CoreErrors.attributes.successionPeerIsNotOwner());
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionPeerIsNotOwner());
         }
 
         const successorParams = {

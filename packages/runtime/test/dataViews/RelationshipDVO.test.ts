@@ -8,7 +8,8 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { CoreIdHelper } from "@nmshd/transport";
 import { DataViewExpander, TransportServices } from "../../src";
 import { establishRelationshipWithContents, RuntimeServiceProvider } from "../lib";
 
@@ -46,11 +47,11 @@ beforeAll(async () => {
             response: {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
-                requestId: (await CoreId.generate()).toString(),
+                requestId: (await CoreIdHelper.notPrefixed.generate()).toString(),
                 items: [
                     ReadAttributeAcceptResponseItem.from({
                         result: ResponseItemResult.Accepted,
-                        attributeId: await CoreId.generate(),
+                        attributeId: await CoreIdHelper.notPrefixed.generate(),
                         attribute: IdentityAttribute.from({
                             owner: CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address),
                             value: GivenName.from("AGivenName")

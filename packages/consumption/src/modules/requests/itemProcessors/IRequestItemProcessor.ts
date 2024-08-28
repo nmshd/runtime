@@ -1,6 +1,6 @@
 import { Event } from "@js-soft/ts-utils";
 import { AcceptResponseItem, RejectResponseItem, Request, RequestItem, ResponseItem } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { ValidationResult } from "../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../incoming/decide/AcceptRequestItemParameters";
 import { RejectRequestItemParametersJSON } from "../incoming/decide/RejectRequestItemParameters";

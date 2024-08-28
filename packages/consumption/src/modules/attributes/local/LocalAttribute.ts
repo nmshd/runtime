@@ -8,10 +8,11 @@ import {
     RelationshipAttribute,
     RelationshipAttributeJSON
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreId, ICoreSynchronizable } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { CoreErrors } from "../../../consumption/CoreErrors";
 import { ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttributeDeletionInfoJSON, LocalAttributeDeletionStatus } from "./LocalAttributeDeletionInfo";
 import { ILocalAttributeShareInfo, LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "./LocalAttributeShareInfo";
 
@@ -198,19 +199,19 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
     public setDeletionInfo(deletionInfo: LocalAttributeDeletionInfo, ownAddress: CoreAddress): this {
         if (this.isRepositoryAttribute(ownAddress)) {
-            throw CoreErrors.attributes.cannotSetDeletionInfoOfRepositoryAttributes();
+            throw ConsumptionCoreErrors.attributes.cannotSetDeletionInfoOfRepositoryAttributes();
         }
 
         if (this.isOwnSharedAttribute(ownAddress) && !this.isOwnSharedAttributeDeletionInfo(deletionInfo)) {
-            throw CoreErrors.attributes.invalidDeletionInfoOfOwnSharedAttribute();
+            throw ConsumptionCoreErrors.attributes.invalidDeletionInfoOfOwnSharedAttribute();
         }
 
         if (this.isPeerSharedAttribute() && !this.isPeerSharedAttributeDeletionInfo(deletionInfo)) {
-            throw CoreErrors.attributes.invalidDeletionInfoOfPeerSharedAttribute();
+            throw ConsumptionCoreErrors.attributes.invalidDeletionInfoOfPeerSharedAttribute();
         }
 
         if (this.isThirdPartyOwnedRelationshipAttribute(ownAddress) && !this.isThirdPartyOwnedRelationshipAttributeDeletionInfo(deletionInfo)) {
-            throw CoreErrors.attributes.invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute();
+            throw ConsumptionCoreErrors.attributes.invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute();
         }
 
         this.deletionInfo = deletionInfo;

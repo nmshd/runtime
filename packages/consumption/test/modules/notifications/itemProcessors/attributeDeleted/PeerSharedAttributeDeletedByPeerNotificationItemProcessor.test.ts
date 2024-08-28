@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { IdentityAttribute, Notification, PeerSharedAttributeDeletedByPeerNotificationItem, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
     IAttributeSuccessorParams,

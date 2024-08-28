@@ -3,7 +3,7 @@ import { FreeTextAcceptResponseItem, FreeTextRequestItem, ResponseItemResult } f
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
-import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { AcceptFreeTextRequestItemParameters, AcceptFreeTextRequestItemParametersJSON } from "./AcceptFreeTextRequestItemParameters";
 
 export class FreeTextRequestItemProcessor extends GenericRequestItemProcessor<FreeTextRequestItem, AcceptFreeTextRequestItemParametersJSON> {
@@ -13,7 +13,7 @@ export class FreeTextRequestItemProcessor extends GenericRequestItemProcessor<Fr
         } catch (error) {
             if (!(error instanceof ParsingError)) throw error;
 
-            return ValidationResult.error(CoreErrors.requests.invalidAcceptParameters("The RequestItem was answered with incorrect parameters."));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The RequestItem was answered with incorrect parameters."));
         }
 
         return ValidationResult.success();

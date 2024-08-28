@@ -1,15 +1,15 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreSerializable, ICoreSerializable } from "../../../core";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { validateMaxNumberOfAllocations } from "./CachedRelationshipTemplate";
 
-export interface ISendRelationshipTemplateParameters extends ICoreSerializable {
+export interface ISendRelationshipTemplateParameters extends ISerializable {
     content: ISerializable;
-    expiresAt: CoreDate;
+    expiresAt: ICoreDate;
     maxNumberOfAllocations?: number;
 }
 
 @type("SendRelationshipTemplateParameters")
-export class SendRelationshipTemplateParameters extends CoreSerializable implements ISendRelationshipTemplateParameters {
+export class SendRelationshipTemplateParameters extends Serializable implements ISendRelationshipTemplateParameters {
     @validate()
     @serialize()
     public content: Serializable;

@@ -1,10 +1,8 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreSerializable, ICoreSerializable } from "../../../core";
-import { CoreAddress, ICoreAddress } from "../../../core/types/CoreAddress";
-import { CoreDate, ICoreDate } from "../../../core/types/CoreDate";
+import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
 import { FileReference, IFileReference } from "../../files/transmission/FileReference";
 
-export interface IMessageContentWrapper extends ICoreSerializable {
+export interface IMessageContentWrapper extends ISerializable {
     attachments?: IFileReference[];
     content: ISerializable;
     createdAt?: ICoreDate;
@@ -22,7 +20,7 @@ export interface IMessageContentWrapper extends ICoreSerializable {
  * ignored (as the whole message could have been forwarded by bad party to a wrong recipient).
  */
 @type("MessageContentWrapper")
-export class MessageContentWrapper extends CoreSerializable implements IMessageContentWrapper {
+export class MessageContentWrapper extends Serializable implements IMessageContentWrapper {
     @validate()
     @serialize({ type: FileReference })
     public attachments: FileReference[] = [];

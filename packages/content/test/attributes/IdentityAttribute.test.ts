@@ -1,4 +1,4 @@
-import { CoreAddress, CoreDate } from "@nmshd/transport";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import {
     Affiliation,
     AffiliationOrganization,

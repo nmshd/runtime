@@ -1,17 +1,8 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { ILogger } from "@js-soft/logging-abstractions";
-import {
-    AccountController,
-    CoreAddress,
-    CoreDate,
-    CoreError,
-    CoreId,
-    DeviceSharedSecret,
-    Transport,
-    CoreErrors as TransportCoreErrors,
-    TransportLoggerFactory
-} from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
+import { AccountController, CoreIdHelper, DeviceSharedSecret, Transport, TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
 import { AppConfig } from "../AppConfig";
 import { SessionStorage } from "../SessionStorage";
 import { LocalAccount } from "./data/LocalAccount";
@@ -155,7 +146,7 @@ export class MultiAccountController {
 
         this._log.trace(`Onboarding device ${deviceSharedSecret.id} for identity ${deviceSharedSecret.identity.address}...`);
 
-        const id = await CoreId.generate();
+        const id = await CoreIdHelper.notPrefixed.generate();
 
         const localAccount = LocalAccount.from({
             id,
@@ -184,7 +175,7 @@ export class MultiAccountController {
     }
 
     public async createAccount(name: string): Promise<[LocalAccount, AccountController]> {
-        const id = await CoreId.generate();
+        const id = await CoreIdHelper.notPrefixed.generate();
 
         let localAccount = LocalAccount.from({
             id,

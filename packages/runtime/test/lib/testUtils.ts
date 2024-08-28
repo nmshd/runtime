@@ -20,8 +20,9 @@ import {
     ResponseWrapperJSON,
     ShareAttributeAcceptResponseItemJSON
 } from "@nmshd/content";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { CoreAddress, CoreId, IdentityUtil } from "@nmshd/transport";
+import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
 import {

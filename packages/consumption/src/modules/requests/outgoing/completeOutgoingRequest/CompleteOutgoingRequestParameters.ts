@@ -1,6 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { IResponse, Response } from "@nmshd/content";
-import { CoreId, ICoreId, IMessage, Message } from "@nmshd/transport";
+import { CoreId, ICoreId } from "@nmshd/core-types";
+import { IMessage, Message } from "@nmshd/transport";
 
 export interface ICompleteOutgoingRequestParameters extends ISerializable {
     requestId: ICoreId;

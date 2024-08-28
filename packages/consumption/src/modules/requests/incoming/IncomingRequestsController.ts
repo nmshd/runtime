@@ -1,25 +1,14 @@
 import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
 import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
-import {
-    CoreAddress,
-    CoreDate,
-    CoreId,
-    ICoreAddress,
-    ICoreId,
-    Message,
-    Relationship,
-    RelationshipStatus,
-    RelationshipTemplate,
-    SynchronizedCollection,
-    CoreErrors as TransportCoreErrors
-} from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
+import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { CoreErrors } from "../../../consumption/CoreErrors";
 import { ValidationResult } from "../../common/ValidationResult";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -189,7 +178,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         if (relationship && !possibleStatuses.includes(relationship.status)) {
             return ValidationResult.error(
-                CoreErrors.requests.wrongRelationshipStatus(
+                ConsumptionCoreErrors.requests.wrongRelationshipStatus(
                     `You cannot decide a request from '${request.peer.toString()}' since the relationship is in status '${relationship.status}'.`
                 )
             );
@@ -242,10 +231,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             return await processor.canReject(requestItem, params, request);
         } catch (e) {
             if (e instanceof ServalError) {
-                return ValidationResult.error(CoreErrors.requests.servalErrorDuringRequestItemProcessing(e));
+                return ValidationResult.error(ConsumptionCoreErrors.requests.servalErrorDuringRequestItemProcessing(e));
             }
 
-            return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(e));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(e));
         }
     }
 

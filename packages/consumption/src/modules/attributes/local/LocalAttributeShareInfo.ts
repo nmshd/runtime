@@ -1,5 +1,5 @@
-import { Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
-import { CoreAddress, CoreId, CoreSerializable, ICoreAddress, ICoreId } from "@nmshd/transport";
+import { ISerializable, Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
+import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 
@@ -13,7 +13,7 @@ export interface LocalAttributeShareInfoJSON {
 }
 
 /* Either of requestReference or noticicationReference must be set, but not both. */
-export interface ILocalAttributeShareInfo {
+export interface ILocalAttributeShareInfo extends ISerializable {
     requestReference?: ICoreId;
     notificationReference?: ICoreId;
 
@@ -21,7 +21,7 @@ export interface ILocalAttributeShareInfo {
     sourceAttribute?: ICoreId;
 }
 
-export class LocalAttributeShareInfo extends CoreSerializable implements ILocalAttributeShareInfo {
+export class LocalAttributeShareInfo extends Serializable implements ILocalAttributeShareInfo {
     @serialize()
     @validate({ nullable: true })
     public requestReference?: CoreId;

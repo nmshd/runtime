@@ -1,6 +1,7 @@
 import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
+import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";

@@ -13,7 +13,8 @@ import {
     ShareAttributeRequestItem,
     ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import {
     AttributeListenersController,
     AttributesController,

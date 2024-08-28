@@ -8,9 +8,10 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, RelationshipStatus } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { LocalAttributeDeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
@@ -23,7 +24,9 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
         if (typeof foundAttribute === "undefined") {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(`The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' could not be found.`)
+                ConsumptionCoreErrors.requests.invalidRequestItem(
+                    `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' could not be found.`
+                )
             );
         }
 
@@ -31,7 +34,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
         if (!_.isEqual(foundAttribute.content.toJSON(), requestItemAttributeJSON)) {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' does not match the given Attribute.`
                 )
             );
@@ -40,7 +43,9 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         if (requestItem.attribute instanceof IdentityAttribute && this.accountController.identity.isMe(requestItem.attribute.owner)) {
             if (foundAttribute.isShared()) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidRequestItem("The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes.")
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+                    )
                 );
             }
 
@@ -53,7 +58,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
                 if ((await this.consumptionController.attributes.getLocalAttributes(query)).length > 0) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidRequestItem(
+                        ConsumptionCoreErrors.requests.invalidRequestItem(
                             `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' is already shared with the peer.`
                         )
                     );
@@ -66,7 +71,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
                 if (ownSharedIdentityAttributeSuccessors.length > 0) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidRequestItem(
+                        ConsumptionCoreErrors.requests.invalidRequestItem(
                             `The provided IdentityAttribute is outdated. Its successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute}' is already shared with the peer.`
                         )
                     );
@@ -79,7 +84,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
                 if (ownSharedIdentityAttributePredecessors.length > 0) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidRequestItem(
+                        ConsumptionCoreErrors.requests.invalidRequestItem(
                             `The predecessor '${ownSharedIdentityAttributePredecessors[0].shareInfo?.sourceAttribute}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
                         )
                     );
@@ -95,7 +100,9 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             }
 
             if (typeof foundAttribute.shareInfo.sourceAttribute !== "undefined") {
-                return ValidationResult.error(CoreErrors.requests.invalidRequestItem("You can only share RelationshipAttributes that are not a copy of a sourceAttribute."));
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem("You can only share RelationshipAttributes that are not a copy of a sourceAttribute.")
+                );
             }
 
             if (typeof recipient !== "undefined") {
@@ -108,7 +115,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
                 if (foundAttribute.shareInfo.peer.equals(recipient) || thirdPartyRelationshipAttribute.length > 0) {
                     return ValidationResult.error(
-                        CoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
+                        ConsumptionCoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
                     );
                 }
             }
@@ -121,7 +128,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             const nonPendingRelationshipsToPeer = await this.accountController.relationships.getRelationships(queryForNonPendingRelationships);
 
             if (nonPendingRelationshipsToPeer.length === 0) {
-                return ValidationResult.error(CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
+                return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
             }
         }
 
@@ -136,7 +143,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         const ownerIsCurrentIdentity = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         if (!ownerIsCurrentIdentity) {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+                ConsumptionCoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
             );
         }
 
@@ -145,12 +152,12 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
     private static canCreateWithRelationshipAttribute(attribute: RelationshipAttribute, recipient?: CoreAddress) {
         if (attribute.owner.equals(recipient)) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("It doesn't make sense to share a RelationshipAttribute with its owner."));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("It doesn't make sense to share a RelationshipAttribute with its owner."));
         }
 
         if (attribute.confidentiality === RelationshipAttributeConfidentiality.Private) {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem("The confidentiality of the given `attribute` is private. Therefore you are not allowed to share it.")
+                ConsumptionCoreErrors.requests.invalidRequestItem("The confidentiality of the given `attribute` is private. Therefore you are not allowed to share it.")
             );
         }
 

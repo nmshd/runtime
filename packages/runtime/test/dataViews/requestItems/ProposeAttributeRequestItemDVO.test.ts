@@ -14,7 +14,7 @@ import {
     Surname,
     SurnameJSON
 } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import {
     AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeSuccessionAcceptResponseItemDVO,

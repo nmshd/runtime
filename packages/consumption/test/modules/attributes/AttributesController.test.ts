@@ -18,7 +18,8 @@ import {
     ThirdPartyRelationshipAttributeQueryOwner,
     ZipCode
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,

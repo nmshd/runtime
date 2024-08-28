@@ -1,5 +1,5 @@
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import _ from "lodash";
-import { CoreAddress, CoreDate, CoreId } from "../../../core";
 import { BackboneRelationshipAuditLog as BackboneAuditLog } from "../transmission/RelationshipAuditLog";
 import { RelationshipAuditLogEntry } from "./RelationshipAuditLogEntry";
 

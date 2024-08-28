@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import { IResponse, Response, ResponseJSON } from "./response";
 
 export interface ResponseWrapperJSON {

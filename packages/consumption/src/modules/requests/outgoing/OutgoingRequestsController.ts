@@ -1,23 +1,13 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
-import {
-    CoreAddress,
-    CoreDate,
-    CoreId,
-    ICoreId,
-    Message,
-    Relationship,
-    RelationshipStatus,
-    RelationshipTemplate,
-    SynchronizedCollection,
-    CoreErrors as TransportCoreErrors
-} from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
+import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { CoreErrors } from "../../../consumption/CoreErrors";
 import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../attributes";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
@@ -56,13 +46,13 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             // there should at minimum be a Pending relationship to the peer
             if (!relationship) {
                 return ValidationResult.error(
-                    CoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
+                    ConsumptionCoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
                 );
             }
 
             if (!(relationship.status === RelationshipStatus.Pending || relationship.status === RelationshipStatus.Active)) {
                 return ValidationResult.error(
-                    CoreErrors.requests.wrongRelationshipStatus(
+                    ConsumptionCoreErrors.requests.wrongRelationshipStatus(
                         `You cannot create a request to '${parsedParams.peer.toString()}' since the relationship is in status '${relationship.status}'.`
                     )
                 );

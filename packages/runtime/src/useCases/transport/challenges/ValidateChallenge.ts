@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
+import { CoreError } from "@nmshd/core-types";
 import { CryptoSignature } from "@nmshd/crypto";
-import { Challenge, ChallengeController, ChallengeSigned, CoreError } from "@nmshd/transport";
+import { Challenge, ChallengeController, ChallengeSigned } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";

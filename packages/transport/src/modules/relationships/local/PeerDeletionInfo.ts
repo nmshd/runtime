@@ -1,5 +1,4 @@
-import { serialize, validate } from "@js-soft/ts-serval";
-import { CoreSerializable, ICoreSerializable } from "../../../core";
+import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 
 export enum PeerDeletionStatus {
     ToBeDeleted = "ToBeDeleted",
@@ -10,11 +9,11 @@ export interface PeerDeletionInfoJSON {
     deletionStatus: PeerDeletionStatus;
 }
 
-export interface IPeerDeletionInfo extends ICoreSerializable {
+export interface IPeerDeletionInfo extends ISerializable {
     deletionStatus: PeerDeletionStatus;
 }
 
-export class PeerDeletionInfo extends CoreSerializable implements IPeerDeletionInfo {
+export class PeerDeletionInfo extends Serializable implements IPeerDeletionInfo {
     @serialize()
     @validate({
         customValidator: (v) => (!Object.values(PeerDeletionStatus).includes(v) ? `must be one of: ${Object.values(PeerDeletionStatus).map((o) => `"${o}"`)}` : undefined)

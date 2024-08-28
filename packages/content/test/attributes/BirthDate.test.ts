@@ -1,5 +1,5 @@
-import { BirthDate, ValidationErrorWithoutProperty } from "@nmshd/content";
 import { DateTime } from "luxon";
+import { BirthDate, ValidationErrorWithoutProperty } from "../../src";
 
 describe("creation of RepositoryAttributes of Attribute value type BirthDate", () => {
     test("can create a RepositoryAttribute of Attribute value type BirthDate", function () {

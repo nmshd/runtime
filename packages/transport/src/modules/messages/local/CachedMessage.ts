@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreId, CoreSerializable, ICoreAddress, ICoreId, ICoreSerializable } from "../../../core";
-import { CoreDate, ICoreDate } from "../../../core/types/CoreDate";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CachedMessageRecipient, ICachedMessageRecipient } from "./CachedMessageRecipient";
 
-export interface ICachedMessage extends ICoreSerializable {
+export interface ICachedMessage extends ISerializable {
     createdBy: ICoreAddress;
     createdByDevice: ICoreId;
 
@@ -19,7 +18,7 @@ export interface ICachedMessage extends ICoreSerializable {
 }
 
 @type("CachedMessage")
-export class CachedMessage extends CoreSerializable implements ICachedMessage {
+export class CachedMessage extends Serializable implements ICachedMessage {
     @validate()
     @serialize()
     public createdBy: CoreAddress;

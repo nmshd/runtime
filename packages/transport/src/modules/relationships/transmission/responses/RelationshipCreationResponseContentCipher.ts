@@ -1,14 +1,13 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CryptoCipher, CryptoRelationshipPublicResponse, ICryptoCipher, ICryptoRelationshipPublicResponse } from "@nmshd/crypto";
-import { CoreSerializable, ICoreSerializable } from "../../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreBuffer, CryptoCipher, CryptoRelationshipPublicResponse, ICryptoCipher, ICryptoRelationshipPublicResponse } from "@nmshd/crypto";
 
-export interface IRelationshipCreationResponseContentCipher extends ICoreSerializable {
+export interface IRelationshipCreationResponseContentCipher extends ISerializable {
     cipher: ICryptoCipher;
     publicCreationResponseContentCrypto: ICryptoRelationshipPublicResponse;
 }
 
 @type("RelationshipCreationResponseContentCipher")
-export class RelationshipCreationResponseContentCipher extends CoreSerializable implements IRelationshipCreationResponseContentCipher {
+export class RelationshipCreationResponseContentCipher extends Serializable implements IRelationshipCreationResponseContentCipher {
     @validate()
     @serialize()
     public cipher: CryptoCipher;
@@ -21,7 +20,12 @@ export class RelationshipCreationResponseContentCipher extends CoreSerializable 
         return this.fromAny(value);
     }
 
+    public toBase64(): string {
+        return CoreBuffer.fromUtf8(this.serialize()).toBase64URL();
+    }
+
     public static fromBase64(value: string): RelationshipCreationResponseContentCipher {
-        return super.fromBase64T(value);
+        const serialized = CoreBuffer.fromBase64URL(value).toUtf8();
+        return (this as any).deserialize(serialized);
     }
 }

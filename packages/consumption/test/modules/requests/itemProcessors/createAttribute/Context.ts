@@ -1,6 +1,7 @@
 /* eslint-disable jest/no-standalone-expect */
 import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, ResponseItemResult } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, CreateAttributeRequestItemProcessor, LocalAttribute, ValidationResult } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";

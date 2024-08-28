@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId, ICoreId } from "@nmshd/transport";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 import { ContentJSON } from "../../ContentJSON";
 import { IResponseItemDerivations, ResponseItemDerivations, ResponseItemJSONDerivations } from "./ResponseItem";
 import { IResponseItemGroup, ResponseItemGroup, ResponseItemGroupJSON } from "./ResponseItemGroup";

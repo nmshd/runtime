@@ -1,7 +1,8 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
-import { AccountController, CoreId, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
