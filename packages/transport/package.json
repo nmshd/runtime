@@ -35,17 +35,17 @@
         "test:performance:kube:stop": "kubectl delete -f ./test/performance/k8s.yaml"
     },
     "jest": {
-        "maxWorkers": 5,
-        "preset": "ts-jest",
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "coverageProvider": "v8",
         "coverageReporters": [
             "text-summary",
             "cobertura",
             "lcov"
         ],
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
+        "maxWorkers": 5,
+        "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
             "jest-expect-message"
@@ -89,7 +89,6 @@
         "@js-soft/docdb-access-mongo": "1.1.8",
         "@js-soft/node-logger": "1.2.0",
         "@js-soft/ts-serval": "2.0.10",
-        "@js-soft/web-logger": "^1.0.4",
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.17.7",
         "@types/luxon": "^3.4.2",

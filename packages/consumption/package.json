@@ -32,17 +32,17 @@
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv"
     },
     "jest": {
-        "maxWorkers": 1,
-        "preset": "ts-jest",
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "coverageProvider": "v8",
         "coverageReporters": [
             "text-summary",
             "cobertura",
             "lcov"
         ],
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
+        "maxWorkers": 1,
+        "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
             "jest-expect-message"
@@ -60,20 +60,21 @@
     },
     "dependencies": {
         "@js-soft/docdb-querytranslator": "^1.1.4",
+        "@js-soft/ts-serval": "2.0.10",
+        "@js-soft/ts-utils": "2.3.3",
+        "@nmshd/content": "*",
+        "@nmshd/core-types": "*",
         "@nmshd/iql": "^1.0.2",
+        "@nmshd/transport": "*",
+        "lodash": "^4.17.21",
         "ts-simple-nameof": "^1.3.1"
     },
     "devDependencies": {
         "@js-soft/docdb-access-loki": "1.1.0",
         "@js-soft/docdb-access-mongo": "1.1.8",
         "@js-soft/node-logger": "1.2.0",
-        "@js-soft/ts-serval": "2.0.10",
-        "@js-soft/ts-utils": "2.3.3",
-        "@js-soft/web-logger": "^1.0.4",
         "@nmshd/crypto": "2.0.6",
-        "@types/lodash": "^4.17.7",
-        "@types/luxon": "^3.4.2",
-        "leaked-handles": "^5.2.0"
+        "@types/lodash": "^4.17.7"
     },
     "publishConfig": {
         "access": "public",

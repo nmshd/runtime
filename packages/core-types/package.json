@@ -23,17 +23,17 @@
         "test:ci": "jest -i --coverage"
     },
     "jest": {
-        "maxWorkers": 1,
-        "preset": "ts-jest",
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
         "coverageProvider": "v8",
         "coverageReporters": [
             "text-summary",
             "cobertura",
             "lcov"
         ],
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
+        "maxWorkers": 1,
+        "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "jest-expect-message"
         ],
@@ -49,7 +49,9 @@
         }
     },
     "dependencies": {
+        "@js-soft/logging-abstractions": "^1.0.1",
         "@js-soft/ts-serval": "2.0.10",
+        "json-stringify-safe": "^5.0.1",
         "luxon": "^3.5.0"
     },
     "devDependencies": {
