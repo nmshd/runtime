@@ -3,13 +3,13 @@ import {
     BackboneDatawalletModification,
     BackboneExternalEvent,
     ClientResult,
+    CoreIdHelper,
     CreateDatawalletModificationsRequest,
     CreateDatawalletModificationsResponse,
     FinalizeDatawalletVersionUpgradeRequest,
     FinalizeDatawalletVersionUpgradeResponse,
     FinalizeExternalEventSyncRequest,
     FinalizeExternalEventSyncResponse,
-    GeneratableCoreId,
     GetDatawalletModificationsRequest,
     GetDatawalletResponse,
     ISyncClient,
@@ -91,7 +91,7 @@ export class FakeSyncClient implements ISyncClient {
         // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let i = 0; i < request.modifications.length; i++) {
             response.modifications.push({
-                id: (await GeneratableCoreId.generate()).serialize(),
+                id: (await CoreIdHelper.notPrefixed.generate()).serialize(),
                 index: response.modifications.length,
                 createdAt: CoreDate.utc().toISOString()
             });

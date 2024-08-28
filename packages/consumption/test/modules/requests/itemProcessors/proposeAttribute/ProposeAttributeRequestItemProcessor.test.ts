@@ -14,8 +14,8 @@ import {
     Request,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, GeneratableCoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, CoreIdHelper, Transport } from "@nmshd/transport";
 import {
     AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON,
@@ -557,7 +557,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: successorRepositoryAttribute.id,
                 peer: sender,
-                requestReference: await GeneratableCoreId.generate()
+                requestReference: await CoreIdHelper.notPrefixed.generate()
             });
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -792,7 +792,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: predecessorRepositoryAttribute.id,
                 peer: sender,
-                requestReference: GeneratableCoreId.from("initialRequest")
+                requestReference: CoreId.from("initialRequest")
             });
 
             const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
@@ -870,7 +870,11 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await GeneratableCoreId.generate() }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    sourceAttribute: predecessorRepositoryAttribute.id,
+                    peer: sender,
+                    requestReference: await CoreIdHelper.notPrefixed.generate()
+                }),
                 deletionInfo: LocalAttributeDeletionInfo.from({
                     deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -937,7 +941,11 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await GeneratableCoreId.generate() }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    sourceAttribute: predecessorRepositoryAttribute.id,
+                    peer: sender,
+                    requestReference: await CoreIdHelper.notPrefixed.generate()
+                }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 
@@ -990,7 +998,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const alreadySharedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttribute.id,
                 peer: sender,
-                requestReference: await GeneratableCoreId.generate()
+                requestReference: await CoreIdHelper.notPrefixed.generate()
             });
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -1039,7 +1047,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await GeneratableCoreId.generate() }),
+                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({
                     deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -1095,7 +1103,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await GeneratableCoreId.generate() }),
+                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 
@@ -1185,7 +1193,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: sender
                 }),
                 peer: sender,
-                requestReference: GeneratableCoreId.from("oldReqRef")
+                requestReference: CoreId.from("oldReqRef")
             });
 
             const requestItem = ProposeAttributeRequestItem.from({

@@ -1,4 +1,4 @@
-import { GeneratableCoreId, IdentityDeletionProcessStatus } from "@nmshd/transport";
+import { CoreIdHelper, IdentityDeletionProcessStatus } from "@nmshd/transport";
 import {
     ApproveIdentityDeletionProcessUseCase,
     CancelIdentityDeletionProcessUseCase,
@@ -131,7 +131,7 @@ describe("IdentityDeletionProcess", () => {
         });
 
         test("should return an error trying to get an IdentityDeletionProcess specifying an unknown ID", async function () {
-            const unknownId = (await GeneratableCoreId.generate("IDP")).toString();
+            const unknownId = (await new CoreIdHelper("IDP").generate()).toString();
             const result = await transportService.identityDeletionProcesses.getIdentityDeletionProcess({ id: unknownId });
             expect(result).toBeAnError("IdentityDeletionProcess not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });

@@ -12,7 +12,7 @@ import {
     ZipCodeJSON
 } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { GeneratableCoreId } from "@nmshd/transport";
+import { CoreIdHelper } from "@nmshd/transport";
 import {
     AttributeCreatedEvent,
     ChangeDefaultRepositoryAttributeUseCase,
@@ -974,7 +974,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
 
     test("should throw if repository attribute doesn't exist", async () => {
         const shareRequest: ShareRepositoryAttributeRequest = {
-            attributeId: (await GeneratableCoreId.generate("ATT")).toString(),
+            attributeId: (await new CoreIdHelper("ATT").generate()).toString(),
             peer: services1.address
         };
         const shareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute(shareRequest);
@@ -1041,7 +1041,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
 
     test("should throw if predecessor doesn't exist", async () => {
         const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
-            predecessorId: (await GeneratableCoreId.generate("ATT")).toString(),
+            predecessorId: (await new CoreIdHelper("ATT").generate()).toString(),
             successorContent: {
                 value: {
                     "@type": "GivenName",
