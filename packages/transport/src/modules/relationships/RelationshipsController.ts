@@ -616,7 +616,7 @@ export class RelationshipsController extends TransportController {
 
     public async setPeerDeletionInfo(relationshipId: CoreId, deletionInfo?: PeerDeletionInfo): Promise<Relationship> {
         const relationshipDoc = await this.relationships.read(relationshipId.toString());
-        if (!relationshipDoc) throw CoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
+        if (!relationshipDoc) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
 
         const relationship = Relationship.from(relationshipDoc);
         relationship.peerDeletionInfo = deletionInfo;

@@ -1,5 +1,5 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreId } from "../../../core";
+import { CoreId } from "@nmshd/core-types";
 import { PeerDeletionCancelledEvent } from "../../../events";
 import { Relationship } from "../../relationships/local/Relationship";
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";

@@ -1,5 +1,5 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreId } from "../../../core";
+import { CoreId } from "@nmshd/core-types";
 import { PeerToBeDeletedEvent } from "../../../events";
 import { PeerDeletionInfo, PeerDeletionStatus } from "../../relationships/local/PeerDeletionInfo";
 import { Relationship } from "../../relationships/local/Relationship";

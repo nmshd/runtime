@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, CoreId, PeerDeletionStatus, Transport } from "../../../../src";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, PeerDeletionStatus, Transport } from "../../../../src";
 import { PeerToBeDeletedExternalEventProcessor } from "../../../../src/modules/sync/externalEventProcessors/PeerToBeDeletedExternalEventProcessor";
 import { TestUtil } from "../../../testHelpers/TestUtil";
 
