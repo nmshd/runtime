@@ -16,6 +16,7 @@ import { BackbonePutRelationshipsResponse } from "./backbone/BackbonePutRelation
 import { BackboneRelationship } from "./backbone/BackboneRelationship";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { CachedRelationship } from "./local/CachedRelationship";
+import { PeerDeletionInfo } from "./local/PeerDeletionInfo";
 import { Relationship } from "./local/Relationship";
 import { RelationshipAuditLog } from "./local/RelationshipAuditLog";
 import { ISendRelationshipParameters, SendRelationshipParameters } from "./local/SendRelationshipParameters";
@@ -606,5 +607,16 @@ export class RelationshipsController extends TransportController {
                 break;
             default:
         }
+    }
+
+    public async setPeerDeletionInfo(relationshipId: CoreId, deletionInfo?: PeerDeletionInfo): Promise<Relationship> {
+        const relationshipDoc = await this.relationships.read(relationshipId.toString());
+        if (!relationshipDoc) throw CoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
+
+        const relationship = Relationship.from(relationshipDoc);
+        relationship.peerDeletionInfo = deletionInfo;
+        await this.relationships.update(relationshipDoc, relationship);
+
+        return relationship;
     }
 }

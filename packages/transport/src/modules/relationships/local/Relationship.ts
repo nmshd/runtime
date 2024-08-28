@@ -6,11 +6,13 @@ import { IRelationshipTemplate } from "../../relationshipTemplates/local/Relatio
 import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
+import { IPeerDeletionInfo, PeerDeletionInfo } from "./PeerDeletionInfo";
 import { RelationshipAuditLog } from "./RelationshipAuditLog";
 
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;
     peer: IIdentity;
+    peerDeletionInfo?: IPeerDeletionInfo;
     status: RelationshipStatus;
 
     cache?: ICachedRelationship;
@@ -27,7 +29,8 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         "@context",
         nameof<Relationship>((r) => r.relationshipSecretId),
         nameof<Relationship>((r) => r.peer),
-        nameof<Relationship>((r) => r.status)
+        nameof<Relationship>((r) => r.status),
+        nameof<Relationship>((r) => r.peerDeletionInfo)
     ];
 
     public override readonly metadataProperties = [nameof<Relationship>((r) => r.metadata), nameof<Relationship>((r) => r.metadataModifiedAt)];
@@ -39,6 +42,10 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @validate()
     @serialize()
     public peer: Identity;
+
+    @validate({ nullable: true })
+    @serialize()
+    public peerDeletionInfo?: PeerDeletionInfo;
 
     @validate()
     @serialize()
