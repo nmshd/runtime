@@ -1,0 +1,11 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "baseUrl": "../",
+        "noEmit": true,
+        "composite": false
+    },
+    "files": ["../../../node_modules/jest-expect-message/types/index.d.ts"],
+    "include": ["**/*.ts", "../src/**/*.ts", "../../core-types/src/CoreHash.ts"],
+    "exclude": []
+}

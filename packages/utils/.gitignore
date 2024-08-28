@@ -1,0 +1,12 @@
+node_modules
+tmp-browser
+dist-test
+lib-web
+dist
+docs
+*.log
+*.log.*
+_archive
+.idea
+coverage
+.nyc_output

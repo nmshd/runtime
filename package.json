@@ -6,6 +6,8 @@
     "license": "MIT",
     "author": "j&s-soft GmbH",
     "workspaces": [
+        "packages/utils",
+        "packages/core-types",
         "packages/transport",
         "packages/content",
         "packages/consumption",
