@@ -1,6 +1,6 @@
 import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, IdentityAttribute, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { LocalAttribute } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
@@ -24,20 +24,22 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
             if (senderIsAttributeOwner) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidRequestItem("Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead.")
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
+                    )
                 );
             }
 
             if (typeof recipient !== "undefined") {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidRequestItem(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
                         "The owner of the provided IdentityAttribute for the `attribute` property can only be the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
                     )
                 );
             }
 
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     "The owner of the provided IdentityAttribute for the `attribute` property can only be an empty string. It will default to the Recipient's Address."
                 )
             );
@@ -49,14 +51,14 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (typeof recipient !== "undefined") {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address, the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
                 )
             );
         }
 
         return ValidationResult.error(
-            CoreErrors.requests.invalidRequestItem(
+            ConsumptionCoreErrors.requests.invalidRequestItem(
                 "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
             )
         );

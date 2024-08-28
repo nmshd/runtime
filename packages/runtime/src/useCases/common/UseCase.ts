@@ -1,6 +1,7 @@
 import { ParsingError, ServalError, ValidationError } from "@js-soft/ts-serval";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { CoreError, RequestError } from "@nmshd/transport";
+import { CoreError } from "@nmshd/core-types";
+import { RequestError } from "@nmshd/transport";
 import stringifySafe from "json-stringify-safe";
 import { PlatformErrorCodes } from "./PlatformErrorCodes";
 import { RuntimeErrors } from "./RuntimeErrors";

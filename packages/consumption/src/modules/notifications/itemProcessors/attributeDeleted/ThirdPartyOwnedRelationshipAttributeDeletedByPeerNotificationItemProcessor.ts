@@ -3,7 +3,7 @@ import { ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem } fro
 import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent } from "../../../attributes";
 import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../../attributes/local/LocalAttributeDeletionInfo";
 import { ValidationResult } from "../../../common";
@@ -27,11 +27,11 @@ export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemPr
         if (!attribute) return ValidationResult.success();
 
         if (!attribute.isThirdPartyOwnedRelationshipAttribute(this.currentIdentityAddress)) {
-            return ValidationResult.error(CoreErrors.attributes.isNotThirdPartyOwnedRelationshipAttribute(notificationItem.attributeId));
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotThirdPartyOwnedRelationshipAttribute(notificationItem.attributeId));
         }
 
         if (!notification.peer.equals(attribute.shareInfo.peer)) {
-            return ValidationResult.error(CoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
         }
 
         return ValidationResult.success();

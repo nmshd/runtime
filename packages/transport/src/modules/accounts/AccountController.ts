@@ -4,7 +4,7 @@ import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { PasswordGenerator } from "@nmshd/utils";
-import { AbstractAuthenticator, Authenticator, ControllerName, CoreErrors, IConfig, Transport, TransportError } from "../../core";
+import { AbstractAuthenticator, Authenticator, ControllerName, IConfig, Transport, TransportCoreErrors, TransportError } from "../../core";
 import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
@@ -155,7 +155,7 @@ export class AccountController {
         } else if (!deviceSharedSecret && availableIdentityDoc && availableDeviceDoc) {
             // Login
             if (!availableBaseKeyDoc) {
-                throw CoreErrors.secrets.secretNotFound("BaseKey");
+                throw TransportCoreErrors.secrets.secretNotFound("BaseKey");
             }
 
             const availableIdentity = Identity.from(availableIdentityDoc);
@@ -287,7 +287,7 @@ export class AccountController {
         if (deviceResponseResult.isError) {
             const error = deviceResponseResult.error;
             if (error.code === "error.platform.unauthorized") {
-                throw CoreErrors.general.platformClientInvalid();
+                throw TransportCoreErrors.general.platformClientInvalid();
             }
         }
 

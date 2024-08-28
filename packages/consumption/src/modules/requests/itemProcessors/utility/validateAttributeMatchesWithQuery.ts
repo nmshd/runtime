@@ -8,7 +8,7 @@ import {
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
 
 export default function validateAttributeMatchesWithQuery(
@@ -31,7 +31,7 @@ export default function validateAttributeMatchesWithQuery(
         if (result.isError()) return result;
     } else {
         return ValidationResult.error(
-            CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(
+            ConsumptionCoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(
                 "The query is not of a known type. Only the IdentityAttributeQuery, IQLQuery, RelationshipAttributeQuery or ThirdPartyRelationshipAttributeQuery can be used."
             )
         );
@@ -42,14 +42,14 @@ export default function validateAttributeMatchesWithQuery(
             (typeof query.validFrom === "undefined" && typeof attribute.validFrom !== "undefined") ||
             (typeof query.validFrom !== "undefined" && typeof attribute.validFrom !== "undefined" && query.validFrom.isBefore(attribute.validFrom))
         ) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
         }
 
         if (
             (typeof query.validTo === "undefined" && typeof attribute.validTo !== "undefined") ||
             (typeof query.validTo !== "undefined" && typeof attribute.validTo !== "undefined" && query.validTo.isAfter(attribute.validTo))
         ) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
         }
     }
 
@@ -62,24 +62,28 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
     recipient: CoreAddress
 ): ValidationResult {
     if (!(attribute instanceof IdentityAttribute)) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried."));
+        return ValidationResult.error(
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not an IdentityAttribute, but an IdentityAttribute was queried.")
+        );
     }
 
     const recipientIsAttributeOwner = recipient.equals(attribute.owner);
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
         );
     }
 
     if (query.valueType !== attribute.value.constructor.name) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute value type."));
+        return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute value type."));
     }
 
     if (typeof query.tags !== "undefined" && query.tags.length !== 0) {
         if (attribute.tags === undefined || attribute.tags.length === 0 || !query.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag."));
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag.")
+            );
         }
     }
 
@@ -89,7 +93,9 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
 function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: IdentityAttribute | RelationshipAttribute, recipient: CoreAddress): ValidationResult {
     if (!(attribute instanceof IdentityAttribute)) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes can be queried by an IQLQuery.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch(
+                "The provided Attribute is not an IdentityAttribute. Currently, only IdentityAttributes can be queried by an IQLQuery."
+            )
         );
     }
 
@@ -97,7 +103,7 @@ function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: Identi
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
         );
     }
 
@@ -111,7 +117,7 @@ function validateAttributeMatchesWithRelationshipAttributeQuery(
 ): ValidationResult {
     if (!(attribute instanceof RelationshipAttribute)) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried.")
         );
     }
 
@@ -119,34 +125,38 @@ function validateAttributeMatchesWithRelationshipAttributeQuery(
     const queriedOwnerIsEmpty = query.owner.equals("");
 
     if (!queriedOwnerIsEmpty && !query.owner.equals(attribute.owner)) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not belong to the queried owner."));
+        return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not belong to the queried owner."));
     }
 
     if (queriedOwnerIsEmpty && !recipientIsAttributeOwner) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch("You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch(
+                "You are not the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
+            )
         );
     }
 
     if (query.key !== attribute.key) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried key."));
+        return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried key."));
     }
 
     if (query.attributeCreationHints.confidentiality !== attribute.confidentiality) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried confidentiality."));
+        return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried confidentiality."));
     }
 
     if (query.attributeCreationHints.valueType !== attribute.value.constructor.name) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute is not of the queried RelationshipAttribute value type."));
+        return ValidationResult.error(
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute is not of the queried RelationshipAttribute value type.")
+        );
     }
 
     if (!(attribute.value instanceof Consent)) {
         if (query.attributeCreationHints.title !== attribute.value.title) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried title."));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried title."));
         }
 
         if (query.attributeCreationHints.description !== attribute.value.description) {
-            return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried description."));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried description."));
         }
     }
 
@@ -161,7 +171,7 @@ function validateAttributeMatchesWithThirdPartyRelationshipAttributeQuery(
 ): ValidationResult {
     if (!(attribute instanceof RelationshipAttribute)) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch("The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not a RelationshipAttribute, but a RelationshipAttribute was queried.")
         );
     }
 
@@ -177,19 +187,19 @@ function validateAttributeMatchesWithThirdPartyRelationshipAttributeQuery(
             !queriedThirdParties.includes(attribute.owner.toString()) &&
             (!queriedThirdParties.includes("") || (recipientIsAttributeOwner && !queriedThirdParties.includes(recipient.toString()))))
     ) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not belong to a queried owner."));
+        return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not belong to a queried owner."));
     }
 
     if (query.owner === "" && !recipientIsAttributeOwner && !queriedThirdParties.includes("") && !queriedThirdParties.includes(attribute.owner.toString())) {
         return ValidationResult.error(
-            CoreErrors.requests.attributeQueryMismatch(
+            ConsumptionCoreErrors.requests.attributeQueryMismatch(
                 "Neither you nor one of the involved third parties is the owner of the provided RelationshipAttribute, but an empty string was specified for the owner of the query."
             )
         );
     }
 
     if (query.key !== attribute.key) {
-        return ValidationResult.error(CoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried key."));
+        return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided RelationshipAttribute does not have the queried key."));
     }
 
     return ValidationResult.success();

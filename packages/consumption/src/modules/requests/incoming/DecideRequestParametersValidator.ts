@@ -1,6 +1,6 @@
 import { RequestItem, RequestItemGroup } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { CoreErrors } from "../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ValidationResult } from "../../common/ValidationResult";
 import { LocalRequest } from "../local/LocalRequest";
 import { DecideRequestItemGroupParametersJSON, isDecideRequestItemGroupParametersJSON } from "./decide/DecideRequestItemGroupParameters";
@@ -14,7 +14,9 @@ export class DecideRequestParametersValidator {
         }
 
         if (params.items.length !== request.content.items.length) {
-            return ValidationResult.error(CoreErrors.requests.decideValidation.invalidNumberOfItems("The number of items in the Request and the Response do not match."));
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.decideValidation.invalidNumberOfItems("The number of items in the Request and the Response do not match.")
+            );
         }
 
         const validationResults = request.content.items.map((requestItem, index) => this.checkItemOrGroup(requestItem, params.items[index], params.accept));
@@ -35,18 +37,18 @@ export class DecideRequestParametersValidator {
 
     private checkItem(requestItem: RequestItem, response: DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON, isRequestAccepted: boolean): ValidationResult {
         if (isDecideRequestItemGroupParametersJSON(response)) {
-            return ValidationResult.error(CoreErrors.requests.decideValidation.requestItemAnsweredAsRequestItemGroup());
+            return ValidationResult.error(ConsumptionCoreErrors.requests.decideValidation.requestItemAnsweredAsRequestItemGroup());
         }
 
         if (!isRequestAccepted && response.accept) {
             return ValidationResult.error(
-                CoreErrors.requests.decideValidation.itemAcceptedButRequestNotAccepted("The RequestItem was accepted, but the Request was not accepted.")
+                ConsumptionCoreErrors.requests.decideValidation.itemAcceptedButRequestNotAccepted("The RequestItem was accepted, but the Request was not accepted.")
             );
         }
 
         if (isRequestAccepted && requestItem.mustBeAccepted && !response.accept) {
             return ValidationResult.error(
-                CoreErrors.requests.decideValidation.mustBeAcceptedItemNotAccepted("The RequestItem is flagged as 'mustBeAccepted', but it was not accepted.")
+                ConsumptionCoreErrors.requests.decideValidation.mustBeAcceptedItemNotAccepted("The RequestItem is flagged as 'mustBeAccepted', but it was not accepted.")
             );
         }
 
@@ -59,12 +61,12 @@ export class DecideRequestParametersValidator {
         isRequestAccepted: boolean
     ): ValidationResult {
         if (isDecideRequestItemParametersJSON(responseItemGroup)) {
-            return ValidationResult.error(CoreErrors.requests.decideValidation.requestItemGroupAnsweredAsRequestItem());
+            return ValidationResult.error(ConsumptionCoreErrors.requests.decideValidation.requestItemGroupAnsweredAsRequestItem());
         }
 
         if (responseItemGroup.items.length !== requestItemGroup.items.length) {
             return ValidationResult.error(
-                CoreErrors.requests.decideValidation.invalidNumberOfItems("The number of items in the RequestItemGroup and the ResponseItemGroup do not match.")
+                ConsumptionCoreErrors.requests.decideValidation.invalidNumberOfItems("The number of items in the RequestItemGroup and the ResponseItemGroup do not match.")
             );
         }
 

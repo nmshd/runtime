@@ -14,8 +14,8 @@ import {
     CryptoSignaturePublicKey
 } from "@nmshd/crypto";
 import { ControllerName, CoreCrypto } from "../../core";
-import { CoreErrors } from "../../core/CoreErrors";
 import { CoreUtil } from "../../core/CoreUtil";
+import { TransportCoreErrors } from "../../core/TransportCoreErrors";
 import { TransportIds } from "../../core/TransportIds";
 import { AccountController } from "../accounts/AccountController";
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
@@ -43,11 +43,11 @@ export class RelationshipSecretController extends SecretController {
 
         const secretContainer = await this.loadActiveSecretByName(secretIdAsString);
         if (!secretContainer) {
-            throw CoreErrors.general.recordNotFound("CryptoRelationshipRequestSecrets | CryptoRelationshipSecrets", secretIdAsString);
+            throw TransportCoreErrors.general.recordNotFound("CryptoRelationshipRequestSecrets | CryptoRelationshipSecrets", secretIdAsString);
         }
 
         if (!(secretContainer.secret instanceof CryptoRelationshipRequestSecrets) && !(secretContainer.secret instanceof CryptoRelationshipSecrets)) {
-            throw CoreErrors.secrets.wrongSecretType(secretIdAsString);
+            throw TransportCoreErrors.secrets.wrongSecretType(secretIdAsString);
         }
         const secret = secretContainer.secret;
         this.cache.set(relationshipSecretId, secret);
@@ -72,11 +72,11 @@ export class RelationshipSecretController extends SecretController {
         const exchangeKeypairContainer = await this.loadActiveSecretByName(templateKeyId);
 
         if (!exchangeKeypairContainer) {
-            throw CoreErrors.general.recordNotFound(CryptoExchangeKeypair, templateKeyId);
+            throw TransportCoreErrors.general.recordNotFound(CryptoExchangeKeypair, templateKeyId);
         }
 
         if (!(exchangeKeypairContainer.secret instanceof CryptoExchangeKeypair)) {
-            throw CoreErrors.secrets.wrongSecretType(templateKeyId);
+            throw TransportCoreErrors.secrets.wrongSecretType(templateKeyId);
         }
 
         const exchangeKeypair = exchangeKeypairContainer.secret;
@@ -91,11 +91,11 @@ export class RelationshipSecretController extends SecretController {
     public async getPublicCreationResponseContentCrypto(relationshipSecretId: CoreId): Promise<CryptoRelationshipPublicResponse> {
         const secret = await this.loadActiveSecretByName(relationshipSecretId.toString());
         if (!secret) {
-            throw CoreErrors.general.recordNotFound(CryptoRelationshipSecrets, relationshipSecretId.toString());
+            throw TransportCoreErrors.general.recordNotFound(CryptoRelationshipSecrets, relationshipSecretId.toString());
         }
 
         if (!(secret.secret instanceof CryptoRelationshipSecrets)) {
-            throw CoreErrors.secrets.wrongSecretType(secret.id.toString());
+            throw TransportCoreErrors.secrets.wrongSecretType(secret.id.toString());
         }
         const publicResponse = secret.secret.toPublicResponse();
         return publicResponse;
@@ -105,7 +105,7 @@ export class RelationshipSecretController extends SecretController {
     public async convertSecrets(relationshipSecretId: CoreId, response: CryptoRelationshipPublicResponse): Promise<SecretContainerCipher> {
         const request = await this.getSecret(relationshipSecretId);
         if (request instanceof CryptoRelationshipSecrets) {
-            throw CoreErrors.secrets.wrongSecretType();
+            throw TransportCoreErrors.secrets.wrongSecretType();
         }
 
         const secrets = await CryptoRelationshipSecrets.fromRelationshipResponse(response, request);
@@ -139,7 +139,7 @@ export class RelationshipSecretController extends SecretController {
         const secrets = await this.getSecret(relationshipSecretId);
 
         if (!(secrets instanceof CryptoRelationshipRequestSecrets)) {
-            throw CoreErrors.secrets.wrongSecretType(secrets.id);
+            throw TransportCoreErrors.secrets.wrongSecretType(secrets.id);
         }
 
         return await secrets.encryptRequest(buffer);
@@ -151,7 +151,7 @@ export class RelationshipSecretController extends SecretController {
         const secrets = await this.getSecret(relationshipSecretId);
 
         if (!(secrets instanceof CryptoRelationshipSecrets)) {
-            throw CoreErrors.secrets.wrongSecretType(secrets.id);
+            throw TransportCoreErrors.secrets.wrongSecretType(secrets.id);
         }
 
         return await secrets.encrypt(buffer);
@@ -162,7 +162,7 @@ export class RelationshipSecretController extends SecretController {
         const secrets = await this.getSecret(relationshipSecretId);
 
         if (!(secrets instanceof CryptoRelationshipRequestSecrets) && !(secrets instanceof CryptoRelationshipSecrets)) {
-            throw CoreErrors.secrets.wrongSecretType(relationshipSecretId.toString());
+            throw TransportCoreErrors.secrets.wrongSecretType(relationshipSecretId.toString());
         }
 
         return await secrets.decryptRequest(cipher);
@@ -184,7 +184,7 @@ export class RelationshipSecretController extends SecretController {
         const secrets = await this.getSecret(relationshipSecretId);
 
         if (!(secrets instanceof CryptoRelationshipSecrets)) {
-            throw CoreErrors.secrets.wrongSecretType(secrets.id);
+            throw TransportCoreErrors.secrets.wrongSecretType(secrets.id);
         }
 
         return await secrets.decryptPeer(cipher, omitCounterCheck);
@@ -200,7 +200,7 @@ export class RelationshipSecretController extends SecretController {
         const secrets = await this.getSecret(relationshipSecretId);
 
         if (!(secrets instanceof CryptoRelationshipSecrets)) {
-            throw CoreErrors.secrets.wrongSecretType(secrets.id);
+            throw TransportCoreErrors.secrets.wrongSecretType(secrets.id);
         }
 
         return await secrets.decryptOwn(cipher);
@@ -224,7 +224,7 @@ export class RelationshipSecretController extends SecretController {
 
         const secrets = await this.getSecret(relationshipSecretId);
         if (secrets instanceof CryptoRelationshipRequestSecrets) {
-            throw CoreErrors.secrets.wrongSecretType(secrets.id);
+            throw TransportCoreErrors.secrets.wrongSecretType(secrets.id);
         }
 
         const valid = await secrets.verifyPeer(bufferToVerify, signature);

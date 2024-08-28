@@ -1,7 +1,7 @@
 import { IdentityAttributeQuery, IQLQuery, RelationshipAttributeQuery, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { validate as iqlValidate } from "@nmshd/iql";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
 
 export default function validateQuery(
@@ -17,7 +17,7 @@ export default function validateQuery(
     } else if (query instanceof IQLQuery) {
         const validationResult = iqlValidate(query.queryString);
         if (!validationResult.isValid) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem(`IQL query syntax error at character ${validationResult.error.location.start.column}`));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(`IQL query syntax error at character ${validationResult.error.location.start.column}`));
         }
     }
 
@@ -26,11 +26,11 @@ export default function validateQuery(
 
 function validateThirdParty(thirdParty: CoreAddress, sender: CoreAddress, recipient?: CoreAddress): ValidationResult {
     if (thirdParty.equals(sender)) {
-        return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Cannot query an Attribute with the own address as third party."));
+        return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("Cannot query an Attribute with the own address as third party."));
     }
 
     if (thirdParty.equals(recipient)) {
-        return ValidationResult.error(CoreErrors.requests.invalidRequestItem("Cannot query an Attribute with the recipient's address as third party."));
+        return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("Cannot query an Attribute with the recipient's address as third party."));
     }
 
     return ValidationResult.success();

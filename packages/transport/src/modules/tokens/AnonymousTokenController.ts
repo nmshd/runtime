@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreCrypto, CoreErrors, IConfig } from "../../core";
+import { CoreCrypto, IConfig, TransportCoreErrors } from "../../core";
 import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
 import { CachedToken } from "./local/CachedToken";
 import { Token } from "./local/Token";
@@ -30,7 +30,7 @@ export class AnonymousTokenController {
         const plaintextTokenContent = Serializable.deserializeUnknown(plaintextTokenBuffer.toUtf8());
 
         if (!(plaintextTokenContent instanceof Serializable)) {
-            throw CoreErrors.tokens.invalidTokenContent(id.toString());
+            throw TransportCoreErrors.tokens.invalidTokenContent(id.toString());
         }
         const token = Token.from({
             id: id,

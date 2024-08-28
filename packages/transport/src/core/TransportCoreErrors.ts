@@ -1,6 +1,6 @@
+import { CoreError } from "@nmshd/core-types";
 import stringify from "json-stringify-safe";
 import { RelationshipStatus } from "../modules";
-import { CoreError } from "./CoreError";
 
 class Relationships {
     public operationOnlyAllowedForPeer(message: string) {
@@ -199,7 +199,7 @@ class General {
     }
 }
 
-export class CoreErrors {
+export class TransportCoreErrors {
     public static readonly relationships = new Relationships();
     public static readonly general = new General();
     public static readonly messages = new Messages();

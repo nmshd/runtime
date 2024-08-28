@@ -1,6 +1,5 @@
 import { ApplicationError } from "@js-soft/ts-utils";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { CoreError } from "@nmshd/transport";
+import { CoreAddress, CoreError, CoreId } from "@nmshd/core-types";
 
 class Attributes {
     public successorIsNotAValidAttribute(error: any) {
@@ -338,7 +337,7 @@ class Requests {
     public readonly decideValidation = new Requests._decideValidation();
 }
 
-export class CoreErrors {
+export class ConsumptionCoreErrors {
     public static attributes = new Attributes();
     public static requests = new Requests();
 }

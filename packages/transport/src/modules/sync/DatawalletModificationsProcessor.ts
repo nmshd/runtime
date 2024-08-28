@@ -4,7 +4,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
 import _ from "lodash";
-import { CoreErrors, TransportError, TransportIds } from "../../core";
+import { TransportCoreErrors, TransportError, TransportIds } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ICacheable } from "../../core/ICacheable";
 import { CachedIdentityDeletionProcess } from "../accounts/data/CachedIdentityDeletionProcess";
@@ -177,7 +177,7 @@ export class DatawalletModificationsProcessor {
         const collectionsWithUncacheableItems = uniqueCollections.filter((c) => !this.collectionsWithCacheableItems.includes(c));
 
         if (collectionsWithUncacheableItems.length > 0) {
-            throw CoreErrors.datawallet.unsupportedModification("unsupportedCacheChangedModificationCollection", collectionsWithUncacheableItems);
+            throw TransportCoreErrors.datawallet.unsupportedModification("unsupportedCacheChangedModificationCollection", collectionsWithUncacheableItems);
         }
     }
 

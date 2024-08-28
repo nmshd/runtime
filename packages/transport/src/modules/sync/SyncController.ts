@@ -1,7 +1,7 @@
 import { IDatabaseCollection, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { log } from "@js-soft/ts-utils";
-import { CoreDate, CoreId } from "@nmshd/core-types";
-import { ControllerName, CoreError, CoreErrors, RequestError, TransportController, TransportError, TransportLoggerFactory } from "../../core";
+import { CoreDate, CoreError, CoreId } from "@nmshd/core-types";
+import { ControllerName, RequestError, TransportController, TransportCoreErrors, TransportError, TransportLoggerFactory } from "../../core";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { AccountController } from "../accounts/AccountController";
 import { ChangedItems } from "./ChangedItems";
@@ -159,7 +159,7 @@ export class SyncController extends TransportController {
         if (this.config.supportedDatawalletVersion < identityDatawalletVersion) {
             // This means that the datawallet of the identity was upgraded by another device with a higher version.
             // It is necessary to update the current device.
-            throw CoreErrors.datawallet.insufficientSupportedDatawalletVersion(this.config.supportedDatawalletVersion, identityDatawalletVersion);
+            throw TransportCoreErrors.datawallet.insufficientSupportedDatawalletVersion(this.config.supportedDatawalletVersion, identityDatawalletVersion);
         }
 
         this.log.trace("Synchronization of Datawallet events started...");
@@ -173,7 +173,7 @@ export class SyncController extends TransportController {
             const outdatedErrorCode = "error.platform.validation.datawallet.insufficientSupportedDatawalletVersion";
             if (!(e instanceof RequestError) || e.code !== outdatedErrorCode) throw e;
 
-            throw CoreErrors.datawallet.insufficientSupportedDatawalletVersion(this.config.supportedDatawalletVersion, identityDatawalletVersion);
+            throw TransportCoreErrors.datawallet.insufficientSupportedDatawalletVersion(this.config.supportedDatawalletVersion, identityDatawalletVersion);
         }
 
         this.log.trace("Synchronization of Datawallet events ended...");
@@ -184,7 +184,7 @@ export class SyncController extends TransportController {
     @log()
     private async checkDatawalletVersion(identityDatawalletVersion: number) {
         if (this.config.supportedDatawalletVersion < identityDatawalletVersion) {
-            throw CoreErrors.datawallet.insufficientSupportedDatawalletVersion(this.config.supportedDatawalletVersion, identityDatawalletVersion);
+            throw TransportCoreErrors.datawallet.insufficientSupportedDatawalletVersion(this.config.supportedDatawalletVersion, identityDatawalletVersion);
         }
 
         if (this.config.supportedDatawalletVersion > identityDatawalletVersion) {
@@ -202,11 +202,11 @@ export class SyncController extends TransportController {
         if (identityDatawalletVersion === targetDatawalletVersion) return;
 
         if (this.config.supportedDatawalletVersion < targetDatawalletVersion) {
-            throw CoreErrors.datawallet.insufficientSupportedDatawalletVersion(targetDatawalletVersion, identityDatawalletVersion);
+            throw TransportCoreErrors.datawallet.insufficientSupportedDatawalletVersion(targetDatawalletVersion, identityDatawalletVersion);
         }
 
         if (identityDatawalletVersion > targetDatawalletVersion) {
-            throw CoreErrors.datawallet.currentBiggerThanTarget(identityDatawalletVersion, targetDatawalletVersion);
+            throw TransportCoreErrors.datawallet.currentBiggerThanTarget(identityDatawalletVersion, targetDatawalletVersion);
         }
 
         while (identityDatawalletVersion < targetDatawalletVersion) {
@@ -230,11 +230,11 @@ export class SyncController extends TransportController {
         if (deviceDatawalletVersion === targetDatawalletVersion) return;
 
         if (this.config.supportedDatawalletVersion < targetDatawalletVersion) {
-            throw CoreErrors.datawallet.insufficientSupportedDatawalletVersion(targetDatawalletVersion, deviceDatawalletVersion);
+            throw TransportCoreErrors.datawallet.insufficientSupportedDatawalletVersion(targetDatawalletVersion, deviceDatawalletVersion);
         }
 
         if (deviceDatawalletVersion > targetDatawalletVersion) {
-            throw CoreErrors.datawallet.currentBiggerThanTarget(deviceDatawalletVersion, targetDatawalletVersion);
+            throw TransportCoreErrors.datawallet.currentBiggerThanTarget(deviceDatawalletVersion, targetDatawalletVersion);
         }
 
         while (deviceDatawalletVersion < targetDatawalletVersion) {

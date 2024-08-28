@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, AttributeSuccessorParams, ConsumptionIds, CoreErrors } from "@nmshd/consumption";
+import { AttributesController, AttributeSuccessorParams, ConsumptionCoreErrors, ConsumptionIds } from "@nmshd/consumption";
 import { AttributeValues, Notification, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, MessageController } from "@nmshd/transport";
@@ -41,10 +41,10 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
 
     protected async executeInternal(request: SucceedRelationshipAttributeAndNotifyPeerRequest): Promise<Result<SucceedRelationshipAttributeAndNotifyPeerResponse>> {
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
-        if (!predecessor) return Result.fail(CoreErrors.attributes.predecessorDoesNotExist());
+        if (!predecessor) return Result.fail(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
         if (!predecessor.isOwnSharedRelationshipAttribute(this.accountController.identity.address, predecessor.shareInfo?.peer)) {
-            return Result.fail(CoreErrors.attributes.predecessorIsNotOwnSharedRelationshipAttribute());
+            return Result.fail(ConsumptionCoreErrors.attributes.predecessorIsNotOwnSharedRelationshipAttribute());
         }
 
         const notificationId = await ConsumptionIds.notification.generate();

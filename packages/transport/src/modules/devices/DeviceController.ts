@@ -1,7 +1,7 @@
 import { log } from "@js-soft/ts-utils";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { ControllerName, CoreCrypto, CoreErrors, CredentialsBasic, TransportController, TransportError } from "../../core";
+import { ControllerName, CoreCrypto, CredentialsBasic, TransportController, TransportCoreErrors, TransportError } from "../../core";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretController, DeviceSecretType } from "./DeviceSecretController";
 import { Device, DeviceType } from "./local/Device";
@@ -103,7 +103,7 @@ export class DeviceController extends TransportController {
     public async sign(content: CoreBuffer): Promise<CryptoSignature> {
         const privateKeyContainer = await this.secrets.loadSecret(DeviceSecretType.DeviceSignature);
         if (!privateKeyContainer || !(privateKeyContainer.secret instanceof CryptoSignaturePrivateKey)) {
-            throw CoreErrors.secrets.secretNotFound(DeviceSecretType.DeviceSignature);
+            throw TransportCoreErrors.secrets.secretNotFound(DeviceSecretType.DeviceSignature);
         }
         const privateKey = privateKeyContainer.secret;
         const signature = await CoreCrypto.sign(content, privateKey);
@@ -126,16 +126,16 @@ export class DeviceController extends TransportController {
         const credentialContainer = await this.secrets.loadSecret(DeviceSecretType.DeviceCredentials);
 
         if (!credentialContainer) {
-            throw CoreErrors.secrets.secretNotFound(DeviceSecretType.DeviceCredentials);
+            throw TransportCoreErrors.secrets.secretNotFound(DeviceSecretType.DeviceCredentials);
         }
 
         if (!(credentialContainer.secret instanceof DeviceSecretCredentials)) {
-            throw CoreErrors.secrets.wrongSecretType(DeviceSecretType.DeviceCredentials);
+            throw TransportCoreErrors.secrets.wrongSecretType(DeviceSecretType.DeviceCredentials);
         }
 
         const credentials = credentialContainer.secret;
         if (!credentials.username || !credentials.password) {
-            throw CoreErrors.secrets.wrongSecretType(DeviceSecretType.DeviceCredentials);
+            throw TransportCoreErrors.secrets.wrongSecretType(DeviceSecretType.DeviceCredentials);
         }
 
         return {

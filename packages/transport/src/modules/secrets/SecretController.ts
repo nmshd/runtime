@@ -12,7 +12,7 @@ import {
     CryptoSignatureKeypair,
     CryptoSignaturePrivateKey
 } from "@nmshd/crypto";
-import { CoreCrypto, CoreErrors, TransportIds } from "../../core";
+import { CoreCrypto, TransportCoreErrors, TransportIds } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
@@ -217,7 +217,7 @@ export class SecretController extends TransportController {
         if (baseKey) {
             this.baseKey = baseKey.secret as CryptoSecretKey;
         } else {
-            throw CoreErrors.general.recordNotFound(CryptoSecretKey, DeviceSecretType.SharedSecretBaseKey);
+            throw TransportCoreErrors.general.recordNotFound(CryptoSecretKey, DeviceSecretType.SharedSecretBaseKey);
         }
 
         return this.baseKey;

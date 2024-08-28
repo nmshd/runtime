@@ -2,7 +2,7 @@ import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreCrypto, CoreErrors, TransportError } from "../../core";
+import { CoreCrypto, TransportCoreErrors, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
@@ -79,7 +79,7 @@ export class TokenController extends TransportController {
         const id = idOrToken instanceof CoreId ? idOrToken.toString() : idOrToken.id.toString();
         const tokenDoc = await this.tokens.read(id);
         if (!tokenDoc) {
-            throw CoreErrors.general.recordNotFound(Token, id.toString());
+            throw TransportCoreErrors.general.recordNotFound(Token, id.toString());
         }
 
         const token = Token.from(tokenDoc);
@@ -136,7 +136,7 @@ export class TokenController extends TransportController {
     private async updateCacheOfExistingTokenInDb(id: string, response?: BackboneGetTokensResponse) {
         const tokenDoc = await this.tokens.read(id);
         if (!tokenDoc) {
-            CoreErrors.general.recordNotFound(Token, id);
+            TransportCoreErrors.general.recordNotFound(Token, id);
             return;
         }
 
@@ -168,7 +168,7 @@ export class TokenController extends TransportController {
         const plaintextTokenContent = Serializable.deserializeUnknown(plaintextTokenBuffer.toUtf8());
 
         if (!(plaintextTokenContent instanceof Serializable)) {
-            throw CoreErrors.tokens.invalidTokenContent(response.id);
+            throw TransportCoreErrors.tokens.invalidTokenContent(response.id);
         }
 
         const cachedToken = CachedToken.from({
