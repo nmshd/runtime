@@ -1,5 +1,6 @@
 import { Request, RequestItemGroup } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { GeneratableCoreId } from "@nmshd/transport";
 import {
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,
@@ -284,7 +285,7 @@ describe("DecideRequestParametersValidator", function () {
             createdAt: CoreDate.utc(),
             isOwn: true,
             peer: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-            source: { reference: await CoreId.generate(), type: "Message" },
+            source: { reference: await GeneratableCoreId.generate(), type: "Message" },
             status: LocalRequestStatus.Open,
             statusLog: []
         });

@@ -72,11 +72,11 @@ describe("Response", function () {
         expect(responseItemGroup.items).toHaveLength(1);
     });
 
-    test("creates a Response and items from interface object", async function () {
+    test("creates a Response and items from interface object", function () {
         const responseInterface = {
             "@type": "Response",
             result: ResponseResult.Accepted,
-            requestId: await CoreId.generate(),
+            requestId: CoreId.from("RES1"),
             items: [
                 {
                     "@type": "AcceptResponseItem",

@@ -15,7 +15,17 @@ import {
     ResponseResult
 } from "@nmshd/content";
 import { CoreAddress, CoreId, ICoreId } from "@nmshd/core-types";
-import { IConfigOverwrite, IMessage, IRelationshipTemplate, Message, Relationship, RelationshipTemplate, SynchronizedCollection, Transport } from "@nmshd/transport";
+import {
+    GeneratableCoreId,
+    IConfigOverwrite,
+    IMessage,
+    IRelationshipTemplate,
+    Message,
+    Relationship,
+    RelationshipTemplate,
+    SynchronizedCollection,
+    Transport
+} from "@nmshd/transport";
 import {
     ConsumptionController,
     ConsumptionIds,
@@ -854,7 +864,7 @@ export class RequestsWhen {
     }
 
     public async iTryToGetARequestWithANonExistentId(): Promise<void> {
-        this.context.localRequestAfterAction = (await this.context.incomingRequestsController.getIncomingRequest(await CoreId.generate()))!;
+        this.context.localRequestAfterAction = (await this.context.incomingRequestsController.getIncomingRequest(await GeneratableCoreId.generate()))!;
     }
 
     public iTryToCompleteTheIncomingRequestWith(params: Partial<ICompleteIncomingRequestParameters>): Promise<void> {

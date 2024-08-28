@@ -1,14 +1,26 @@
 import { ValidationError } from "@js-soft/ts-serval";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { IdentityAttributeQuery, IQLQuery, ProposeAttributeRequestItem, RelationshipAttributeConfidentiality, RelationshipAttributeQuery } from "../../../src";
+import {
+    GivenName,
+    IdentityAttribute,
+    IdentityAttributeQuery,
+    IIdentityAttribute,
+    IQLQuery,
+    IRelationshipAttribute,
+    ProposeAttributeRequestItem,
+    ProprietaryString,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    RelationshipAttributeQuery
+} from "../../../src";
 
 describe("creation of ProposeAttributeRequestItem", () => {
     describe("creation of ProposeAttributeRequestItem with IdentityAttributeQuery", () => {
         test("can create a ProposeAttributeRequestItem with IdentityAttributeQuery", function () {
             const validProposeAttributeRequestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
-                attribute: TestObjectFactory.createIdentityAttribute({
+                attribute: createIdentityAttribute({
                     owner: CoreAddress.from("")
                 }),
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" })
@@ -24,7 +36,7 @@ describe("creation of ProposeAttributeRequestItem", () => {
             const invalidProposeAttributeRequestItemCall = () => {
                 ProposeAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    attribute: TestObjectFactory.createRelationshipAttribute({
+                    attribute: createRelationshipAttribute({
                         owner: CoreAddress.from("")
                     }),
                     query: IdentityAttributeQuery.from({ valueType: "GivenName" })
@@ -39,7 +51,7 @@ describe("creation of ProposeAttributeRequestItem", () => {
             const invalidProposeAttributeRequestItemCall = () => {
                 ProposeAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    attribute: TestObjectFactory.createIdentityAttribute({
+                    attribute: createIdentityAttribute({
                         owner: CoreAddress.from("")
                     }),
                     query: IdentityAttributeQuery.from({ valueType: "DisplayName" })
@@ -60,7 +72,7 @@ describe("creation of ProposeAttributeRequestItem", () => {
             const invalidProposeAttributeRequestItemCall = () => {
                 ProposeAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    attribute: TestObjectFactory.createIdentityAttribute({
+                    attribute: createIdentityAttribute({
                         owner: CoreAddress.from("")
                     }),
                     query: IQLQuery.from({ queryString: "DisplayName", attributeCreationHints: { valueType: "DisplayName" } })
@@ -80,7 +92,7 @@ describe("creation of ProposeAttributeRequestItem", () => {
         test("can create a ProposeAttributeRequestItem with RelationshipAttributeQuery", function () {
             const validProposeAttributeRequestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
-                attribute: TestObjectFactory.createRelationshipAttribute({
+                attribute: createRelationshipAttribute({
                     owner: CoreAddress.from("")
                 }),
                 query: RelationshipAttributeQuery.from({
@@ -104,7 +116,7 @@ describe("creation of ProposeAttributeRequestItem", () => {
             const invalidProposeAttributeRequestItemCall = () => {
                 ProposeAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    attribute: TestObjectFactory.createIdentityAttribute({
+                    attribute: createIdentityAttribute({
                         owner: CoreAddress.from("")
                     }),
                     query: RelationshipAttributeQuery.from({
@@ -131,7 +143,7 @@ describe("creation of ProposeAttributeRequestItem", () => {
             const invalidProposeAttributeRequestItemCall = () => {
                 ProposeAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    attribute: TestObjectFactory.createRelationshipAttribute({
+                    attribute: createRelationshipAttribute({
                         owner: CoreAddress.from("")
                     }),
                     query: RelationshipAttributeQuery.from({
@@ -155,3 +167,20 @@ describe("creation of ProposeAttributeRequestItem", () => {
         });
     });
 });
+
+function createIdentityAttribute(properties?: Partial<IIdentityAttribute>): IdentityAttribute {
+    return IdentityAttribute.from({
+        value: properties?.value ?? GivenName.fromAny({ value: "AGivenName" }),
+        owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
+    });
+}
+
+function createRelationshipAttribute(properties?: Partial<IRelationshipAttribute>): RelationshipAttribute {
+    return RelationshipAttribute.from({
+        value: properties?.value ?? ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" }),
+        confidentiality: RelationshipAttributeConfidentiality.Public,
+        key: "AKey",
+        isTechnical: false,
+        owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
+    });
+}

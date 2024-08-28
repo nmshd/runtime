@@ -47,10 +47,10 @@ describe("Request", function () {
         expect(requestItemGroup.items).toHaveLength(1);
     });
 
-    test("creates a Request and items from serval interface", async function () {
+    test("creates a Request and items from serval interface", function () {
         const requestInterface = {
             "@type": "Request",
-            id: await CoreId.generate(),
+            id: CoreId.from("REQ1"),
             items: [
                 {
                     "@type": "TestRequestItem",

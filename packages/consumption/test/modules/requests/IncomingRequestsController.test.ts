@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { IRequest, IRequestItemGroup, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { TransportLoggerFactory } from "@nmshd/transport";
+import { GeneratableCoreId, TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
@@ -66,7 +66,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("uses the ID of the given Request if it exists", async function () {
-            const request = TestObjectFactory.createRequestWithOneItem({ id: await CoreId.generate() });
+            const request = TestObjectFactory.createRequestWithOneItem({ id: await GeneratableCoreId.generate() });
 
             await When.iCreateAnIncomingRequestWith({ receivedRequest: request });
             await Then.theRequestHasTheId(request.id!);
@@ -1032,7 +1032,7 @@ describe("IncomingRequestsController", function () {
 
         test("Incoming Request via Message", async function () {
             const request = Request.from({
-                id: await CoreId.generate(),
+                id: await GeneratableCoreId.generate(),
                 items: [TestRequestItem.from({ mustBeAccepted: false })]
             });
             const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity);

@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId, GeneratableCoreId } from "@nmshd/core-types";
 import { CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
 import { AccountController, DeviceSharedSecret, TokenContentDeviceSharedSecret, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
@@ -64,7 +64,7 @@ describe("TokenContent", function () {
         test("should serialize and deserialize correctly (verbose)", async function () {
             const token = TokenContentRelationshipTemplate.from({
                 secretKey: await CryptoEncryption.generateKey(),
-                templateId: await CoreId.generate()
+                templateId: await GeneratableCoreId.generate()
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -85,7 +85,7 @@ describe("TokenContent", function () {
         test("should serialize and deserialize correctly (no type information)", async function () {
             const token = TokenContentRelationshipTemplate.from({
                 secretKey: await CryptoEncryption.generateKey(),
-                templateId: await CoreId.generate()
+                templateId: await GeneratableCoreId.generate()
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -105,7 +105,7 @@ describe("TokenContent", function () {
         test("should serialize and deserialize correctly (from unknown type)", async function () {
             const token = TokenContentRelationshipTemplate.from({
                 secretKey: await CryptoEncryption.generateKey(),
-                templateId: await CoreId.generate()
+                templateId: await GeneratableCoreId.generate()
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -201,7 +201,7 @@ describe("TokenContent", function () {
         test("should serialize and deserialize correctly (verbose)", async function () {
             const token = TokenContentFile.from({
                 secretKey: await CryptoEncryption.generateKey(),
-                fileId: await CoreId.generate()
+                fileId: await GeneratableCoreId.generate()
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentFile);
@@ -222,7 +222,7 @@ describe("TokenContent", function () {
         test("should serialize and deserialize correctly (no type information)", async function () {
             const token = TokenContentFile.from({
                 secretKey: await CryptoEncryption.generateKey(),
-                fileId: await CoreId.generate()
+                fileId: await GeneratableCoreId.generate()
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentFile);
@@ -242,7 +242,7 @@ describe("TokenContent", function () {
         test("should serialize and deserialize correctly (from unknown type)", async function () {
             const token = TokenContentFile.from({
                 secretKey: await CryptoEncryption.generateKey(),
-                fileId: await CoreId.generate()
+                fileId: await GeneratableCoreId.generate()
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentFile);

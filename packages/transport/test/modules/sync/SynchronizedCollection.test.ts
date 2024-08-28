@@ -1,5 +1,5 @@
 import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreDate, GeneratableCoreId } from "@nmshd/core-types";
 import { instance, mock, verify } from "ts-mockito";
 import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType, SynchronizedCollection } from "../../../src";
 import { ACacheableSynchronizedCollectionItem, CachedACacheableSynchronizedCollectionItem } from "../../testHelpers/ACacheableSynchronizedCollectionItem";
@@ -22,7 +22,7 @@ describe("SynchronizedCollection", function () {
 
     test("when inserting a new item, datawallet modifications are created for each category of data", async function () {
         const newItem = ASynchronizedCollectionItem.from({
-            id: await CoreId.generate(),
+            id: await GeneratableCoreId.generate(),
             someTechnicalStringProperty: "SomeValue",
             someMetadataStringProperty: "SomeValue",
             someUserdataStringProperty: "SomeValue"
@@ -66,7 +66,7 @@ describe("SynchronizedCollection", function () {
 
     test("when inserting a new non-cacheable item, no CacheChanged modification is created", async function () {
         const newItem = ASynchronizedCollectionItem.from({
-            id: await CoreId.generate(),
+            id: await GeneratableCoreId.generate(),
             someTechnicalStringProperty: "SomeValue"
         });
 
@@ -85,7 +85,7 @@ describe("SynchronizedCollection", function () {
 
     test("when updating a cacheable item with a changed cache, a CacheChanged modification is created", async function () {
         const item = ACacheableSynchronizedCollectionItem.from({
-            id: await CoreId.generate(),
+            id: await GeneratableCoreId.generate(),
             someTechnicalProperty: "SomeValue",
             cache: { someCacheProperty: "cachedValue" },
             cachedAt: CoreDate.utc()
@@ -112,7 +112,7 @@ describe("SynchronizedCollection", function () {
 
     test("when updating a cacheable item without a changed cache, no CacheChanged modification is created", async function () {
         const item = ACacheableSynchronizedCollectionItem.from({
-            id: await CoreId.generate(),
+            id: await GeneratableCoreId.generate(),
             someTechnicalProperty: "SomeValue",
             cache: { someCacheProperty: "cachedValue" },
             cachedAt: CoreDate.utc()
@@ -137,7 +137,7 @@ describe("SynchronizedCollection", function () {
 
     test("when updating a non-cacheable item, no CacheChanged modification is created", async function () {
         const item = ASynchronizedCollectionItem.from({
-            id: await CoreId.generate(),
+            id: await GeneratableCoreId.generate(),
             someTechnicalStringProperty: "SomeValue"
         });
 
@@ -160,7 +160,7 @@ describe("SynchronizedCollection", function () {
 
     test("when a inserting a new item, a datawallet modification for technical data is created", async function () {
         const newItem = ASynchronizedCollectionItem.from({
-            id: await CoreId.generate(),
+            id: await GeneratableCoreId.generate(),
             someTechnicalStringProperty: "SomeValue",
             someTechnicalNumberProperty: 1,
             someTechnicalBooleanProperty: true
@@ -183,7 +183,7 @@ describe("SynchronizedCollection", function () {
 
     test("when a inserting a new item, a datawallet modification for metadata is created", async function () {
         const newItem = ASynchronizedCollectionItem.from({
-            id: await CoreId.generate(),
+            id: await GeneratableCoreId.generate(),
             someMetadataStringProperty: "SomeValue",
             someMetadataNumberProperty: 1,
             someMetadataBooleanProperty: true
@@ -206,7 +206,7 @@ describe("SynchronizedCollection", function () {
 
     test("when inserting a new item, a datawallet modification for userdata is created", async function () {
         const newItem = ASynchronizedCollectionItem.from({
-            id: await CoreId.generate(),
+            id: await GeneratableCoreId.generate(),
             someUserdataStringProperty: "SomeValue",
             someUserdataNumberProperty: 1,
             someUserdataBooleanProperty: true
@@ -228,7 +228,7 @@ describe("SynchronizedCollection", function () {
     });
 
     test("when updating an item, should add every property of a category to the payload even if only one was changed", async function () {
-        const itemId = await CoreId.generate();
+        const itemId = await GeneratableCoreId.generate();
         await synchronizedCollection.create(
             ASynchronizedCollectionItem.from({
                 id: itemId,
@@ -273,7 +273,7 @@ describe("SynchronizedCollection", function () {
         }
     ])("$payloadCategory datawallet modifications with type 'Create' have all necessary properties set", async function (params) {
         const newItem = ASynchronizedCollectionItem.from({
-            id: await CoreId.generate()
+            id: await GeneratableCoreId.generate()
         });
 
         (newItem as any)[params.payloadCategory] = "someValue";
