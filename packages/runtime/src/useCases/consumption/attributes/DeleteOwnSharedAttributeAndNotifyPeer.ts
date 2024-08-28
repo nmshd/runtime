@@ -1,7 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
 import { Notification, OwnSharedAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
-import { AccountController, CoreId, MessageController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 

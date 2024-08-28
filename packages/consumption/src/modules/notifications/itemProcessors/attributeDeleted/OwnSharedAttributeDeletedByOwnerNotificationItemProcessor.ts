@@ -1,9 +1,10 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { OwnSharedAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
-import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
+import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { DeletionStatus, LocalAttributeDeletionInfo, OwnSharedAttributeDeletedByOwnerEvent } from "../../../attributes";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus, OwnSharedAttributeDeletedByOwnerEvent } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
@@ -25,11 +26,11 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
         if (!attribute) return ValidationResult.success();
 
         if (!attribute.isPeerSharedAttribute()) {
-            return ValidationResult.error(CoreErrors.attributes.isNotPeerSharedAttribute(notificationItem.attributeId));
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotPeerSharedAttribute(notificationItem.attributeId));
         }
 
         if (!notification.peer.equals(attribute.shareInfo.peer)) {
-            return ValidationResult.error(CoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
         }
 
         return ValidationResult.success();
@@ -43,7 +44,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
         if (!attribute) return;
 
         const deletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: DeletionStatus.DeletedByOwner,
+            deletionStatus: LocalAttributeDeletionStatus.DeletedByOwner,
             deletionDate: CoreDate.utc()
         });
 

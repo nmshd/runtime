@@ -51,7 +51,8 @@ import {
     ValueHintsJSON,
     isRequestItemDerivation
 } from "@nmshd/content";
-import { CoreAddress, CoreId, IdentityController } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { IdentityController } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import {
@@ -1785,6 +1786,7 @@ export class DataViewExpander {
             image: "",
             type: "RelationshipDVO",
             status: relationship.status,
+            peerDeletionStatus: relationship.peerDeletionInfo?.deletionStatus,
             statusText: statusText,
             direction: direction,
             isPinned: relationshipSetting.isPinned,

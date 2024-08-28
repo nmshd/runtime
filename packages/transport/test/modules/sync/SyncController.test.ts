@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
-import { AccountController, CoreDate, Transport } from "../../../src";
+import { CoreDate } from "@nmshd/core-types";
+import { AccountController, Transport } from "../../../src";
 import { FakeSyncClient } from "../../testHelpers/FakeSyncClient";
 import { TestUtil } from "../../testHelpers/TestUtil";
 

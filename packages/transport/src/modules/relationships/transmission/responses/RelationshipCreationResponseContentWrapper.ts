@@ -1,12 +1,12 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId, CoreSerializable, ICoreId, ICoreSerializable } from "../../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 
-export interface IRelationshipCreationResponseContentWrapper extends ICoreSerializable {
+export interface IRelationshipCreationResponseContentWrapper extends ISerializable {
     relationshipId: ICoreId;
 }
 
 @type("RelationshipCreationResponseContentWrapper")
-export class RelationshipCreationResponseContentWrapper extends CoreSerializable implements IRelationshipCreationResponseContentWrapper {
+export class RelationshipCreationResponseContentWrapper extends Serializable implements IRelationshipCreationResponseContentWrapper {
     @validate()
     @serialize()
     public relationshipId: CoreId;

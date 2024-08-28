@@ -1,6 +1,6 @@
-import { AttributesController, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { AbstractStringJSON, DisplayNameJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import {
     AcceptResponseItemDVO,
     ConsumptionServices,
@@ -8,6 +8,7 @@ import {
     DataViewExpander,
     DecidableShareAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
+    LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
     RequestMessageDVO,
     ShareAttributeRequestItemDVO,
@@ -97,7 +98,7 @@ afterEach(async () => {
 async function cleanupAttributes() {
     await Promise.all(
         [sRuntimeServices, rRuntimeServices].map(async (services) => {
-            const servicesAttributeController = (rRuntimeServices.consumption.attributes as any).getAttributeUseCase.attributeController as AttributesController;
+            const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
 
             const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
             for (const attribute of servicesAttributesResult.value) {

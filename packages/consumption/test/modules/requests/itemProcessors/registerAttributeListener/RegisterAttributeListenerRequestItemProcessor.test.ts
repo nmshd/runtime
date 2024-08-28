@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { RegisterAttributeListenerRequestItem, Request, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { Transport } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, LocalRequest, LocalRequestStatus, RegisterAttributeListenerRequestItemProcessor } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 
@@ -15,7 +16,6 @@ describe("CreateAttributeRequestItemProcessor", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
-
         await transport.init();
 
         const account = (await TestUtil.provideAccounts(transport, 1))[0];

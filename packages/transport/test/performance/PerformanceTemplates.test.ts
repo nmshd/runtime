@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, CoreDate, RelationshipTemplate, Transport } from "../../src";
+import { CoreDate } from "@nmshd/core-types";
+import { AccountController, RelationshipTemplate, Transport } from "../../src";
 import { TestUtil } from "../testHelpers/TestUtil";
 
 async function createTemplate(from: AccountController) {

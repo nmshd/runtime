@@ -1,6 +1,7 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
-import { AccountController, CoreId, Relationship, RelationshipsController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 

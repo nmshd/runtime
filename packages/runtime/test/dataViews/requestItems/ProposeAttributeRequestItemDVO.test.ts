@@ -1,9 +1,7 @@
 import {
     AcceptProposeAttributeRequestItemParametersJSON,
     AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON,
-    AttributesController,
-    DecideRequestItemParametersJSON,
-    LocalRequestStatus
+    DecideRequestItemParametersJSON
 } from "@nmshd/consumption";
 import {
     AbstractStringJSON,
@@ -16,7 +14,7 @@ import {
     Surname,
     SurnameJSON
 } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import {
     AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeSuccessionAcceptResponseItemDVO,
@@ -26,6 +24,7 @@ import {
     DecidableProposeAttributeRequestItemDVO,
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
+    LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
     ProcessedIdentityAttributeQueryDVO,
     ProposeAttributeAcceptResponseItemDVO,
@@ -84,7 +83,7 @@ beforeEach(function () {
 afterEach(async () => {
     await Promise.all(
         [runtimeServices1, runtimeServices2].map(async (services) => {
-            const servicesAttributeController = (services.consumption.attributes as any).getAttributeUseCase.attributeController as AttributesController;
+            const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
 
             const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
             for (const attribute of servicesAttributesResult.value) {
@@ -731,7 +730,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
     afterEach(async () => {
         await Promise.all(
             [runtimeServices1, runtimeServices2].map(async (services) => {
-                const servicesAttributeController = (services.consumption.attributes as any).getAttributeUseCase.attributeController as AttributesController;
+                const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
 
                 const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
                 for (const attribute of servicesAttributesResult.value) {

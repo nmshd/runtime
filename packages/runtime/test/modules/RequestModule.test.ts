@@ -1,4 +1,4 @@
-import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -11,13 +11,14 @@ import {
     ResponseResult,
     ResponseWrapperJSON
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import {
     CreateOutgoingRequestRequest,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalRequestDTO,
+    LocalRequestStatus,
     MessageProcessedEvent,
     MessageSentEvent,
     OutgoingRequestCreatedAndCompletedEvent,
@@ -214,6 +215,40 @@ describe("RequestModule", () => {
 
         test("triggers RelationshipTemplateProcessedEvent if an active Relationship exists", async () => {
             await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
+
+            rRuntimeServices.eventBus.reset();
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
+            );
+        });
+
+        test("triggers RelationshipTemplateProcessedEvent if a terminated Relationship exists", async () => {
+            await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
+            const relationshipId = (await rRuntimeServices.transport.relationships.getRelationships({})).value[0].id;
+
+            await rRuntimeServices.transport.relationships.terminateRelationship({ relationshipId });
+
+            rRuntimeServices.eventBus.reset();
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
+            );
+        });
+
+        test("triggers RelationshipTemplateProcessedEvent if a Relationship whose deletion is proposed exists", async () => {
+            await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
+            const relationshipId = (await rRuntimeServices.transport.relationships.getRelationships({})).value[0].id;
+
+            await rRuntimeServices.transport.relationships.terminateRelationship({ relationshipId });
+            await syncUntilHasRelationships(sRuntimeServices.transport, 1);
+
+            await sRuntimeServices.transport.relationships.decomposeRelationship({ relationshipId });
+            await syncUntilHasRelationships(rRuntimeServices.transport, 1);
 
             rRuntimeServices.eventBus.reset();
             await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });

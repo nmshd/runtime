@@ -1,6 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { CoreDate, CoreId, CoreSynchronizable } from "../../../core";
+import { CoreSynchronizable } from "../../../core";
 import { CachedIdentityDeletionProcess, CachedIdentityDeletionProcessJSON } from "./CachedIdentityDeletionProcess";
 
 export interface IdentityDeletionProcessJSON {

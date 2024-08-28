@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
-import { AccountController, CoreAddress, Transport } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import { AttributeListenerCreatedEvent, ConsumptionController } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 import { MockEventBus } from "../MockEventBus";
@@ -24,7 +25,6 @@ describe("AttributeListenersController", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection, mockEventBus);
-
         await transport.init();
 
         const account = (await TestUtil.provideAccounts(transport, 1))[0];

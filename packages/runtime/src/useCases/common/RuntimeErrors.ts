@@ -1,6 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalAttribute } from "@nmshd/consumption";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
 
 class General {
@@ -206,6 +206,10 @@ class Attributes {
             "error.runtime.attributes.cannotSeparatelyDeleteChildOfComplexAttribute",
             `Attribute '${attributeId.toString()}' is a child of a complex Attribute. If you want to delete it, you must delete its parent.`
         );
+    }
+
+    public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
     }
 }
 

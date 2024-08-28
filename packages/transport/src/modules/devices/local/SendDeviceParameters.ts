@@ -1,14 +1,13 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreSerializable, ICoreSerializable } from "../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 
-export interface ISendDeviceParameters extends ICoreSerializable {
+export interface ISendDeviceParameters extends ISerializable {
     name?: string;
     description?: string;
     isAdmin?: boolean;
 }
 
 @type("SendDeviceParameters")
-export class SendDeviceParameters extends CoreSerializable implements ISendDeviceParameters {
+export class SendDeviceParameters extends Serializable implements ISendDeviceParameters {
     @validate({ nullable: true })
     @serialize()
     public name?: string;

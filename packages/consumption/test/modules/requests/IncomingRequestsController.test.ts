@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { IRequest, IRequestItemGroup, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
-import { CoreDate, CoreId, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreIdHelper, TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
@@ -65,7 +66,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("uses the ID of the given Request if it exists", async function () {
-            const request = TestObjectFactory.createRequestWithOneItem({ id: await CoreId.generate() });
+            const request = TestObjectFactory.createRequestWithOneItem({ id: await CoreIdHelper.notPrefixed.generate() });
 
             await When.iCreateAnIncomingRequestWith({ receivedRequest: request });
             await Then.theRequestHasTheId(request.id!);
@@ -387,6 +388,15 @@ describe("IncomingRequestsController", function () {
                 code: "error.consumption.requests.wrongRelationshipStatus"
             });
         });
+
+        test("returns 'error' on relationship whose deletion is proposed", async function () {
+            await Given.aDeletionProposedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus"
+            });
+        });
     });
 
     describe("CanReject", function () {
@@ -566,6 +576,15 @@ describe("IncomingRequestsController", function () {
 
         test("returns 'error' on terminated relationship", async function () {
             await Given.aTerminatedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus"
+            });
+        });
+
+        test("returns 'error' on relationship whose deletion is proposed", async function () {
+            await Given.aDeletionProposedRelationshipToIdentity();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
@@ -1013,7 +1032,7 @@ describe("IncomingRequestsController", function () {
 
         test("Incoming Request via Message", async function () {
             const request = Request.from({
-                id: await CoreId.generate(),
+                id: await CoreIdHelper.notPrefixed.generate(),
                 items: [TestRequestItem.from({ mustBeAccepted: false })]
             });
             const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity);

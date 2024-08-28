@@ -1,4 +1,4 @@
-import { AcceptReadAttributeRequestItemParametersWithNewAttributeJSON, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { AcceptReadAttributeRequestItemParametersWithNewAttributeJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { IdentityAttributeQuery, IQLQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
@@ -8,6 +8,7 @@ import {
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
     IQLQueryDVO,
+    LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
     ProcessedIdentityAttributeQueryDVO,
     ProcessedIQLQueryDVO,

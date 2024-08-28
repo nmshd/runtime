@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, ICoreAddress } from "@nmshd/transport";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../../attributes/hints";
 
 import { nameof } from "ts-simple-nameof";

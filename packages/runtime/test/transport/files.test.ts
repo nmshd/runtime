@@ -1,4 +1,4 @@
-import { CoreDate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
 import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";

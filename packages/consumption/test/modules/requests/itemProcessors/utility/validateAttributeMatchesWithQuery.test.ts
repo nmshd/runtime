@@ -11,7 +11,8 @@ import {
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
@@ -33,19 +34,25 @@ describe("validateAttributeMatchesWithQuery", function () {
 
     let readProcessor: ReadAttributeRequestItemProcessor;
 
+    let thirdPartyAccountController: AccountController;
+
     let recipient: CoreAddress;
     const sender = CoreAddress.from("Sender");
-    const aThirdParty = CoreAddress.from("AThirdParty");
-    const anUninvolvedThirdParty = CoreAddress.from("AnUninvolvedThirdParty");
+    let aThirdParty: CoreAddress;
+
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
-
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, 2);
         ({ accountController, consumptionController } = accounts[0]);
         recipient = accountController.identity.address;
+
+        ({ accountController: thirdPartyAccountController } = accounts[1]);
+        aThirdParty = thirdPartyAccountController.identity.address;
+
+        await TestUtil.addRelationship(accountController, thirdPartyAccountController);
     });
 
     afterAll(async function () {
@@ -987,13 +994,15 @@ describe("validateAttributeMatchesWithQuery", function () {
             });
         });
 
-        test("returns an error when a RelationshipAttribute that was queried by a ThirdPartyRelationshipAttributeQuery does not belong to the Recipient or one of the involved third parties, but an empty string was specified for the owner of the query", async function () {
+        test("returns an error when a RelationshipAttribute that was queried by a ThirdPartyRelationshipAttributeQuery does not belong to the Recipient or one of the queried third parties, but an empty string was specified for the owner of the query", async function () {
+            const aQueriedThirdParty = CoreAddress.from("AQueriedThirdParty");
+
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
                     key: "AKey",
-                    thirdParty: [aThirdParty.toString()]
+                    thirdParty: [aQueriedThirdParty.toString()]
                 })
             });
 
@@ -1015,13 +1024,13 @@ describe("validateAttributeMatchesWithQuery", function () {
                 content: RelationshipAttribute.from({
                     key: "AKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: anUninvolvedThirdParty,
+                    owner: aThirdParty,
                     value: ProprietaryString.from({
                         title: "ATitle",
                         value: "AStringValue"
                     })
                 }),
-                peer: anUninvolvedThirdParty,
+                peer: aThirdParty,
                 requestReference: await ConsumptionIds.request.generate()
             });
 

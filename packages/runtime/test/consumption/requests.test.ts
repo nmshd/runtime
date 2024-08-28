@@ -1,9 +1,15 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { LocalRequestStatus } from "@nmshd/consumption";
 import { TestRequestItemJSON } from "@nmshd/consumption/test/modules/requests/testHelpers/TestRequestItem";
 import { RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
-import { CoreDate } from "@nmshd/transport";
-import { ConsumptionServices, CreateOutgoingRequestRequest, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
+import { CoreDate } from "@nmshd/core-types";
+import {
+    ConsumptionServices,
+    CreateOutgoingRequestRequest,
+    LocalRequestStatus,
+    OutgoingRequestCreatedEvent,
+    OutgoingRequestStatusChangedEvent,
+    TransportServices
+} from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import {
     RuntimeServiceProvider,

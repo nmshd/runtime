@@ -1,4 +1,4 @@
-import { AcceptProposeAttributeRequestItemParametersJSON, DecideRequestItemGroupParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { AcceptProposeAttributeRequestItemParametersJSON, DecideRequestItemGroupParametersJSON } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -13,9 +13,10 @@ import {
     RequestItemGroupJSON,
     Surname
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import {
     IncomingRequestStatusChangedEvent,
+    LocalRequestStatus,
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     PeerRelationshipTemplateDVO,
     RelationshipTemplateDTO,

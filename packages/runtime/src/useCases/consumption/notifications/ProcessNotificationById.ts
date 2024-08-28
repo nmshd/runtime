@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { NotificationsController } from "@nmshd/consumption";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import { Inject } from "typescript-ioc";
 import { LocalNotificationDTO } from "../../../types";
 import { NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";

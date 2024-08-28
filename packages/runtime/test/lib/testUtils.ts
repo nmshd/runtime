@@ -1,10 +1,9 @@
-import { EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { Event, EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
-    DecideRequestItemParametersJSON,
-    LocalRequestStatus
+    DecideRequestItemParametersJSON
 } from "@nmshd/consumption";
 import {
     ArbitraryRelationshipCreationContent,
@@ -21,8 +20,9 @@ import {
     ResponseWrapperJSON,
     ShareAttributeAcceptResponseItemJSON
 } from "@nmshd/content";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { CoreAddress, CoreId, IdentityUtil } from "@nmshd/transport";
+import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
 import { DateTime } from "luxon";
 import {
@@ -37,6 +37,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
+    LocalRequestStatus,
     MessageContentDerivation,
     MessageDTO,
     MessageSentEvent,
@@ -130,6 +131,30 @@ export async function syncUntilHasMessageWithNotification(transportServices: Tra
 
 export async function syncUntilHasIdentityDeletionProcess(transportServices: TransportServices, identityDeletionProcessId: string | CoreId): Promise<IdentityDeletionProcessDTO> {
     return await syncUntilHas(transportServices, "identityDeletionProcesses", (m) => m.id === identityDeletionProcessId.toString());
+}
+
+export async function syncUntilHasEvent<TEvent extends Event>(
+    runtimeServices: TestRuntimeServices,
+    subscriptionTarget: SubscriptionTarget<TEvent> & { namespace: string },
+    predicate?: (event: TEvent) => boolean
+): Promise<Event> {
+    let iterationNumber = 0;
+    let event: Event | undefined;
+    do {
+        await sleep(iterationNumber * 25);
+
+        await runtimeServices.transport.account.syncEverything();
+        event = runtimeServices.eventBus.publishedEvents.find(
+            (e) =>
+                e.namespace === subscriptionTarget.namespace &&
+                (typeof subscriptionTarget === "string" || e instanceof subscriptionTarget) &&
+                (!predicate || predicate(e as TEvent))
+        ) as TEvent | undefined;
+
+        iterationNumber++;
+    } while (!event && iterationNumber < 15);
+    if (!event) throw new Error("syncUntil timed out.");
+    return event;
 }
 
 export async function uploadOwnToken(transportServices: TransportServices): Promise<TokenDTO> {
@@ -417,13 +442,52 @@ export async function establishPendingRelationshipWithRequestFlow(
 
 export async function ensureActiveRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<RelationshipDTO> {
     const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
-    const relationships = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress } })).value;
-    if (relationships.length === 0) {
+    const sRelationships = (
+        await sTransportServices.relationships.getRelationships({
+            query: {
+                peer: rTransportServicesAddress,
+                status: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed]
+            }
+        })
+    ).value;
+
+    const sTransportServicesAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
+    const rRelationships = (
+        await rTransportServices.relationships.getRelationships({
+            query: {
+                peer: sTransportServicesAddress,
+                status: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed]
+            }
+        })
+    ).value;
+
+    if (sRelationships.length === 0 && rRelationships.length === 0) {
         await establishRelationship(sTransportServices, rTransportServices);
-    } else if (relationships[0].status === RelationshipStatus.Pending) {
-        const relationship = relationships[0];
-        await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
+    } else if (sRelationships.length === 0 && rRelationships[0].status === RelationshipStatus.DeletionProposed) {
+        const relationship = rRelationships[0];
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await establishRelationship(sTransportServices, rTransportServices);
+    } else if (sRelationships[0].status === RelationshipStatus.Pending) {
+        if (sRelationships[0].template.isOwn) {
+            const relationship = sRelationships[0];
+            await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
+            await syncUntilHasRelationships(rTransportServices, 1);
+        } else {
+            const relationship = rRelationships[0];
+            await rTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
+            await syncUntilHasRelationships(sTransportServices, 1);
+        }
+    } else if (sRelationships[0].status === RelationshipStatus.Terminated) {
+        const relationship = sRelationships[0];
+        await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
         await syncUntilHasRelationships(rTransportServices, 1);
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await syncUntilHasRelationships(sTransportServices, 1);
+        await establishRelationship(sTransportServices, rTransportServices);
+    } else if (sRelationships[0].status === RelationshipStatus.DeletionProposed) {
+        const relationship = sRelationships[0];
+        await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
+        await establishRelationship(sTransportServices, rTransportServices);
     }
 
     return (await sTransportServices.relationships.getRelationships({})).value[0];
@@ -446,6 +510,24 @@ export async function ensurePendingRelationship(sTransportServices: TransportSer
     }
 
     return (await sTransportServices.relationships.getRelationships({})).value[0];
+}
+
+export async function mutualDecomposeIfActiveRelationshipExists(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<void> {
+    const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+
+    const activeRelationshipsToPeer = (await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress, status: RelationshipStatus.Active } }))
+        .value;
+
+    if (activeRelationshipsToPeer.length !== 0) {
+        const relationshipToPeer = activeRelationshipsToPeer[0];
+        await sTransportServices.relationships.terminateRelationship({ relationshipId: relationshipToPeer.id });
+        await syncUntilHasRelationships(rTransportServices, 1);
+        await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationshipToPeer.id });
+        await syncUntilHasRelationships(sTransportServices, 1);
+        await sTransportServices.relationships.decomposeRelationship({ relationshipId: relationshipToPeer.id });
+    }
+
+    return;
 }
 
 export async function exchangeAndAcceptRequestByMessage(

@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { IRequest, Request, RequestJSON } from "@nmshd/content";
-import { CoreAddress, ICoreAddress } from "@nmshd/transport";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 
 export type IRequestWithoutId = Omit<IRequest, "id">;
 export type RequestJSONWithoutId = Omit<RequestJSON, "id" | "@type" | "@version">;

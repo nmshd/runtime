@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreId, MessageController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { MessageDTO } from "../../../types";
 import { MessageIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";

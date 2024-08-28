@@ -2,7 +2,8 @@ name: Publish
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "*"
 
 jobs:
   run-checks:
@@ -27,7 +28,9 @@ jobs:
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           COMMIT_HASH: ${{ github.sha }}
-      - run: npm exec -ws -c 'enhanced-publish --if-possible --use-preid-as-tag'
+          VERSION: ${{ github.ref_name }}
+      - run: bash .ci/publishNpm.sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ github.ref_name }}
     needs: ["run-checks"]

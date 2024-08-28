@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributeListenersController, LocalAttributeListener } from "@nmshd/consumption";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeListenerDTO } from "../../../types";
 import { AttributeListenerIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";

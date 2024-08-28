@@ -1,5 +1,5 @@
 import { ConsentRequestItemJSON } from "@nmshd/content";
-import { CoreDate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
 import { GetMessagesQuery, MessageReceivedEvent, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
 import {
     QueryParamConditions,

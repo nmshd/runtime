@@ -5,8 +5,8 @@ import formDataLib from "form-data";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
+import { CoreIdHelper } from "../CoreIdHelper";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
-import { CoreId } from "../types";
 import { ClientResult } from "./ClientResult";
 import { IPaginationDataSource, Paginator, PaginatorPercentageCallback } from "./Paginator";
 import { PlatformParameters } from "./PlatformParameters";
@@ -59,7 +59,7 @@ export class RESTClient {
     }
 
     private async generateRequestId(): Promise<string> {
-        const id = await CoreId.generate("HTTP");
+        const id = await new CoreIdHelper("HTTP").generate();
         return id.toString();
     }
 

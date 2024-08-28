@@ -1,5 +1,6 @@
 import { log } from "@js-soft/ts-utils";
-import { CoreDate, CoreId, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";

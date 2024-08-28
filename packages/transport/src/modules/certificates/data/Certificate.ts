@@ -1,8 +1,8 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreBuffer, CryptoSignature, CryptoSignaturePublicKey, ICryptoSignature } from "@nmshd/crypto";
-import { CoreCrypto, CoreSerializable, ICoreSerializable } from "../../../core";
+import { CoreCrypto } from "../../../core";
 
-export interface ICertificate extends ICoreSerializable {
+export interface ICertificate extends ISerializable {
     content: string;
     signature: ICryptoSignature;
 }
@@ -19,7 +19,7 @@ export interface ICertificate extends ICoreSerializable {
  *
  */
 @type("Certificate")
-export class Certificate extends CoreSerializable {
+export class Certificate extends Serializable {
     @validate()
     @serialize()
     public content: string;

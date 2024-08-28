@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, CryptoSignaturePrivateKey } from "@nmshd/crypto";
-import { AccountController, CoreDate, CoreId, Device, DeviceSecretCredentials, DeviceSecretType, DeviceSharedSecret } from "../../../src";
+import { AccountController, Device, DeviceSecretCredentials, DeviceSecretType, DeviceSharedSecret } from "../../../src";
 import { AppDeviceTest } from "../../testHelpers/AppDeviceTest";
 import { DeviceTestParameters } from "../../testHelpers/DeviceTestParameters";
 import { TestUtil } from "../../testHelpers/TestUtil";
@@ -102,7 +103,7 @@ describe("Device Onboarding", function () {
     });
 
     test("should own the same identity", function () {
-        expect(device1Account.identity.identity.toBase64()).toBe(device2Account.identity.identity.toBase64());
+        expect(device1Account.identity.identity.toJSON()).toStrictEqual(device2Account.identity.identity.toJSON());
     });
 
     test("should be able to sign for the existing identity", async function () {

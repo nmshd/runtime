@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { CoreAddress, Transport } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { Transport } from "@nmshd/transport";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 import { Context, GivenSteps, ThenSteps, WhenSteps } from "./Context";

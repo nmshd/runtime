@@ -14,14 +14,15 @@ import {
     Request,
     ResponseItemResult
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, CoreIdHelper, Transport } from "@nmshd/transport";
 import {
     AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionController,
     ConsumptionIds,
-    DeletionStatus,
     LocalAttributeDeletionInfo,
+    LocalAttributeDeletionStatus,
     LocalAttributeShareInfo,
     LocalRequest,
     LocalRequestStatus,
@@ -43,7 +44,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
-
         await transport.init();
 
         const accounts = await TestUtil.provideAccounts(transport, 2);
@@ -557,7 +557,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: successorRepositoryAttribute.id,
                 peer: sender,
-                requestReference: await CoreId.generate()
+                requestReference: await CoreIdHelper.notPrefixed.generate()
             });
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -870,8 +870,15 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
+                shareInfo: LocalAttributeShareInfo.from({
+                    sourceAttribute: predecessorRepositoryAttribute.id,
+                    peer: sender,
+                    requestReference: await CoreIdHelper.notPrefixed.generate()
+                }),
+                deletionInfo: LocalAttributeDeletionInfo.from({
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+                    deletionDate: CoreDate.utc().subtract({ days: 1 })
+                })
             });
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -934,8 +941,12 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
+                shareInfo: LocalAttributeShareInfo.from({
+                    sourceAttribute: predecessorRepositoryAttribute.id,
+                    peer: sender,
+                    requestReference: await CoreIdHelper.notPrefixed.generate()
+                }),
+                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -987,7 +998,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const alreadySharedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttribute.id,
                 peer: sender,
-                requestReference: await CoreId.generate()
+                requestReference: await CoreIdHelper.notPrefixed.generate()
             });
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -1036,8 +1047,11 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
+                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
+                deletionInfo: LocalAttributeDeletionInfo.from({
+                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+                    deletionDate: CoreDate.utc().subtract({ days: 1 })
+                })
             });
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -1089,8 +1103,8 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: DeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
+                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
+                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 
             const requestItem = ProposeAttributeRequestItem.from({

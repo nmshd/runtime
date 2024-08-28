@@ -3,6 +3,7 @@ import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import {
     FileDTO,
     MessageContentDerivation,
@@ -13,7 +14,7 @@ import {
     RelationshipTemplateDTO,
     SyncEverythingResponse
 } from "@nmshd/runtime";
-import { CoreDate, IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
+import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { NativeBootstrapperMock } from "../mocks/NativeBootstrapperMock";

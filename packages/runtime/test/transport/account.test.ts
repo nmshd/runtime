@@ -1,4 +1,4 @@
-import { CoreDate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
 import { DateTime } from "luxon";
 import { DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
 import { emptyRelationshipTemplateContent, RuntimeServiceProvider, uploadFile } from "../lib";

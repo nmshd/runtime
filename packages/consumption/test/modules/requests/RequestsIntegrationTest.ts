@@ -14,25 +14,13 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import {
-    CoreAddress,
-    CoreId,
-    IConfigOverwrite,
-    ICoreId,
-    IMessage,
-    IRelationshipTemplate,
-    Message,
-    Relationship,
-    RelationshipTemplate,
-    SynchronizedCollection,
-    Transport
-} from "@nmshd/transport";
+import { CoreAddress, CoreId, ICoreId } from "@nmshd/core-types";
+import { CoreIdHelper, IConfigOverwrite, IMessage, IRelationshipTemplate, Message, Relationship, RelationshipTemplate, SynchronizedCollection, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
     ConsumptionIds,
     DecideRequestParametersJSON,
     DeleteAttributeRequestItemProcessor,
-    DeletionStatus,
     ICheckPrerequisitesOfIncomingRequestParameters,
     ICompleteIncomingRequestParameters,
     ICompleteOutgoingRequestParameters,
@@ -43,6 +31,7 @@ import {
     IRequireManualDecisionOfIncomingRequestParameters,
     ISentOutgoingRequestParameters,
     IncomingRequestsController,
+    LocalAttributeDeletionStatus,
     LocalRequest,
     LocalRequestSource,
     LocalRequestStatus,
@@ -179,6 +168,12 @@ export class RequestsGiven {
 
     public aTerminatedRelationshipToIdentity(): Promise<void> {
         this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createTerminatedRelationship();
+
+        return Promise.resolve();
+    }
+
+    public aDeletionProposedRelationshipToIdentity(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createDeletionProposedRelationship();
 
         return Promise.resolve();
     }
@@ -859,7 +854,7 @@ export class RequestsWhen {
     }
 
     public async iTryToGetARequestWithANonExistentId(): Promise<void> {
-        this.context.localRequestAfterAction = (await this.context.incomingRequestsController.getIncomingRequest(await CoreId.generate()))!;
+        this.context.localRequestAfterAction = (await this.context.incomingRequestsController.getIncomingRequest(await CoreIdHelper.notPrefixed.generate()))!;
     }
 
     public iTryToCompleteTheIncomingRequestWith(params: Partial<ICompleteIncomingRequestParameters>): Promise<void> {
@@ -1042,7 +1037,7 @@ export class RequestsThen {
         expect(sUpdatedOwnSharedIdentityAttributes).toHaveLength(3);
         for (const sUpdatedOwnSharedIdentityAttribute of sUpdatedOwnSharedIdentityAttributes) {
             expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo).toBeDefined();
-            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo!.deletionStatus).toBe(DeletionStatus.DeletionRequestSent);
+            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletionRequestSent);
         }
     }
 

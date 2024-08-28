@@ -1,15 +1,15 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreSerializable, ICoreAddress, ICoreSerializable } from "../../../core";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 import { File, IFile } from "../../files/local/File";
 
-export interface ISendMessageParameters extends ICoreSerializable {
+export interface ISendMessageParameters extends ISerializable {
     recipients: ICoreAddress[];
     content: ISerializable;
     attachments?: IFile[];
 }
 
 @type("SendMessageParameters")
-export class SendMessageParameters extends CoreSerializable implements ISendMessageParameters {
+export class SendMessageParameters extends Serializable implements ISendMessageParameters {
     @validate()
     @serialize({ type: CoreAddress })
     public recipients: CoreAddress[];

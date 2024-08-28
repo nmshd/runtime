@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, ICoreDate } from "@nmshd/transport";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
 
 export interface DeleteAttributeAcceptResponseItemJSON extends AcceptResponseItemJSON {

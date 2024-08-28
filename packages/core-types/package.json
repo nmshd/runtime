@@ -1,0 +1,64 @@
+{
+    "name": "@nmshd/core-types",
+    "description": "The enmeshed core types.",
+    "homepage": "https://enmeshed.eu",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nmshd/runtime.git",
+        "directory": "packages/runtime"
+    },
+    "license": "MIT",
+    "author": "j&s-soft GmbH",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "build:ci": "tsc",
+        "cdep": "tsc && madge --circular dist",
+        "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
+        "test": "jest -i",
+        "test:ci": "jest -i --coverage"
+    },
+    "jest": {
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text-summary",
+            "cobertura",
+            "lcov"
+        ],
+        "maxWorkers": 1,
+        "preset": "ts-jest",
+        "setupFilesAfterEnv": [
+            "jest-expect-message"
+        ],
+        "testEnvironment": "node",
+        "testTimeout": 60000,
+        "transform": {
+            "^.+\\.ts$": [
+                "ts-jest",
+                {
+                    "tsconfig": "test/tsconfig.json"
+                }
+            ]
+        }
+    },
+    "dependencies": {
+        "@js-soft/logging-abstractions": "^1.0.1",
+        "@js-soft/ts-serval": "2.0.10",
+        "json-stringify-safe": "^5.0.1",
+        "luxon": "^3.5.0"
+    },
+    "devDependencies": {
+        "@types/luxon": "^3.4.2"
+    },
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    }
+}

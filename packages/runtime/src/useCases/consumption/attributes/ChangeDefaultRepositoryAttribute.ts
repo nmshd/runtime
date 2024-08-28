@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute } from "@nmshd/consumption";
-import { AccountController, CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -26,6 +27,10 @@ export class ChangeDefaultRepositoryAttributeUseCase extends UseCase<ChangeDefau
     }
 
     protected async executeInternal(request: ChangeDefaultRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+        if (!this.attributesController.parent.consumptionConfig.setDefaultRepositoryAttributes) {
+            return Result.fail(RuntimeErrors.attributes.setDefaultRepositoryAttributesIsDisabled());
+        }
+
         const newDefaultAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!newDefaultAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 

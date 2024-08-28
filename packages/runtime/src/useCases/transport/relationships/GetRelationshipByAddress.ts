@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, Relationship, RelationshipsController } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { AddressString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";

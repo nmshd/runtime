@@ -1,8 +1,8 @@
 import { IDatabaseCollectionProvider } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
+import { Serializable } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
 import { AccountController } from "../modules/accounts/AccountController";
-import { CoreSerializable } from "./CoreSerializable";
 import { IConfig, Transport } from "./Transport";
 import { TransportError } from "./TransportError";
 import { TransportLoggerFactory } from "./TransportLoggerFactory";
@@ -89,7 +89,7 @@ export class TransportController {
         return Promise.resolve(this);
     }
 
-    protected parseArray<T extends CoreSerializable>(values: Object[], type: new () => T): T[] {
+    protected parseArray<T extends Serializable>(values: Object[], type: new () => T): T[] {
         return values.map((v) => (type as any).fromAny(v));
     }
 

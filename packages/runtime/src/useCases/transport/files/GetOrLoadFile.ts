@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
+import { CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreId, FileController, Token, TokenContentFile, TokenController } from "@nmshd/transport";
+import { AccountController, FileController, Token, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { FileDTO } from "../../../types";
 import {
