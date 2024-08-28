@@ -11,7 +11,7 @@ import {
     ThirdPartyRelationshipAttributeQueryOwner,
     ZipCodeJSON
 } from "@nmshd/content";
-import { CoreDate, CoreId } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import {
     AttributeCreatedEvent,
     ChangeDefaultRepositoryAttributeUseCase,

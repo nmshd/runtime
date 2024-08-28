@@ -14,19 +14,8 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import {
-    CoreAddress,
-    CoreId,
-    IConfigOverwrite,
-    ICoreId,
-    IMessage,
-    IRelationshipTemplate,
-    Message,
-    Relationship,
-    RelationshipTemplate,
-    SynchronizedCollection,
-    Transport
-} from "@nmshd/transport";
+import { CoreAddress, CoreId, ICoreId } from "@nmshd/core-types";
+import { IConfigOverwrite, IMessage, IRelationshipTemplate, Message, Relationship, RelationshipTemplate, SynchronizedCollection, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
     ConsumptionIds,

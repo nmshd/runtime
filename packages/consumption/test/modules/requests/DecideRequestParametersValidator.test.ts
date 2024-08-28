@@ -1,5 +1,5 @@
 import { Request, RequestItemGroup } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import {
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,

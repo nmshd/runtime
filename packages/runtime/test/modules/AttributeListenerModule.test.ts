@@ -1,5 +1,6 @@
 import { IdentityAttributeJSON, RelationshipAttribute, RelationshipAttributeConfidentiality, RelationshipAttributeJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
-import { CoreAddress, RelationshipStatus } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { RelationshipStatus } from "@nmshd/transport";
 import { AttributeListenerCreatedEvent, OutgoingRequestCreatedEvent } from "../../src";
 import {
     ensureActiveRelationship,

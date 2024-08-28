@@ -1,5 +1,5 @@
 import { RelationshipTemplateContent, Request } from "@nmshd/content";
-import { CoreDate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
 import {
     ConsumptionServices,
     IncomingRequestStatusChangedEvent,

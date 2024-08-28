@@ -11,7 +11,7 @@ import {
     ResponseResult,
     ResponseWrapperJSON
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import {
     CreateOutgoingRequestRequest,
     IncomingRequestReceivedEvent,

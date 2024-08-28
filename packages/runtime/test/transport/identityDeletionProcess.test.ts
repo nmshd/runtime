@@ -1,4 +1,5 @@
-import { CoreId, IdentityDeletionProcessStatus } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import {
     ApproveIdentityDeletionProcessUseCase,
     CancelIdentityDeletionProcessUseCase,

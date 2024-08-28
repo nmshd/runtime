@@ -1,7 +1,8 @@
 /* eslint-disable jest/expect-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AcceptResponseItem, RelationshipCreationContent, RelationshipTemplateContent, Request, Response, ResponseWrapper } from "@nmshd/content";
-import { AccountController, CoreDate, Message, Relationship, RelationshipTemplate, Transport } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
+import { AccountController, Message, Relationship, RelationshipTemplate, Transport } from "@nmshd/transport";
 import { ConsumptionController, LocalRequest, LocalRequestStatus } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 import { TestRequestItem } from "./testHelpers/TestRequestItem";

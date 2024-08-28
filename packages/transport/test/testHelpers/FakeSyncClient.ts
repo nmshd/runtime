@@ -1,9 +1,8 @@
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import {
     BackboneDatawalletModification,
     BackboneExternalEvent,
     ClientResult,
-    CoreDate,
-    CoreId,
     CreateDatawalletModificationsRequest,
     CreateDatawalletModificationsResponse,
     FinalizeDatawalletVersionUpgradeRequest,

@@ -1,5 +1,6 @@
+import { CoreId } from "@nmshd/core-types";
 import axios, { Axios } from "axios";
-import { AccountController, CoreId, IdentityDeletionProcess, IdentityDeletionProcessStatus } from "../../src";
+import { AccountController, IdentityDeletionProcess, IdentityDeletionProcessStatus } from "../../src";
 import { TestUtil } from "./TestUtil";
 
 export class AdminApiClient {

@@ -1,7 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSignature } from "@nmshd/crypto";
-import { AccountController, Challenge, ChallengeSigned, ChallengeType, CoreAddress, CoreDate, CoreId, Transport } from "../../../src";
+import { AccountController, Challenge, ChallengeSigned, ChallengeType, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("ChallengeTest", function () {

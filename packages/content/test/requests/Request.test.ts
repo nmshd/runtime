@@ -1,5 +1,5 @@
 import { Serializable, type } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { IRequest, IRequestItem, IRequestItemGroup, Request, RequestItem, RequestItemGroup, RequestItemGroupJSON, RequestItemJSON, RequestJSON } from "../../src";
 import { expectThrowsAsync } from "../testUtils";
 

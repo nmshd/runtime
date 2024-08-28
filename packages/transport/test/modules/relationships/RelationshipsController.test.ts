@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, CachedRelationship, CoreDate, CoreId, Identity, Relationship, RelationshipStatus, RelationshipTemplate, Transport } from "../../../src";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, CachedRelationship, Identity, Relationship, RelationshipStatus, RelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipsController", function () {

@@ -4,7 +4,7 @@ import {
     DecideRequestItemParametersJSON
 } from "@nmshd/consumption";
 import { GivenNameJSON, IdentityAttributeQuery, IQLQuery, ReadAttributeRequestItem, SurnameJSON } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import {
     AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeSuccessionAcceptResponseItemDVO,
