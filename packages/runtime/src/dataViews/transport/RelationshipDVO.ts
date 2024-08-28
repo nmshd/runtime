@@ -1,4 +1,4 @@
-import { RelationshipAuditLogDTO, RelationshipCreationContentDerivation } from "../../types/transport/RelationshipDTO";
+import { PeerDeletionStatus, RelationshipAuditLogDTO, RelationshipCreationContentDerivation } from "../../types/transport/RelationshipDTO";
 import { DataViewObject } from "../DataViewObject";
 import { LocalAttributeDVO } from "../consumption";
 
@@ -10,6 +10,7 @@ export enum RelationshipDirection {
 export interface RelationshipDVO extends DataViewObject {
     type: "RelationshipDVO";
     status: string;
+    peerDeletionStatus?: PeerDeletionStatus;
     direction: RelationshipDirection;
     statusText: string;
     isPinned: boolean;
