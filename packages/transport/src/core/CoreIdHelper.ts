@@ -1,5 +1,6 @@
 import { CoreId } from "@nmshd/core-types";
-import { RandomCharacterRange } from "@nmshd/utils";
+import { RandomCharacterRange } from "../util";
+import { GeneratableCoreId } from "./GeneratableCoreId";
 import { TransportError } from "./TransportError";
 
 export class CoreIdHelper {
@@ -17,11 +18,11 @@ export class CoreIdHelper {
             throw new TransportError("This CoreIdHelper is set up for validation only.");
         }
 
-        return await CoreId.generate(this.prefix);
+        return await GeneratableCoreId.generate(this.prefix);
     }
 
     public async generateUnsafe(): Promise<CoreId> {
-        return await CoreId.generate(this.prefix);
+        return await GeneratableCoreId.generate(this.prefix);
     }
 
     public validate(id: string | CoreId): boolean {

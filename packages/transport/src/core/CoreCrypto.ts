@@ -20,7 +20,7 @@ import {
     CryptoSignatures,
     Encoding
 } from "@nmshd/crypto";
-import { PasswordGenerator } from "@nmshd/utils";
+import { PasswordGenerator } from "../util";
 import { TransportError } from "./TransportError";
 import { TransportVersion } from "./types/TransportVersion";
 

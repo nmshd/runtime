@@ -1,11 +1,11 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
+import { GeneratableCoreId } from "../GeneratableCoreId";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
 import { ClientResult } from "./ClientResult";
 import { IPaginationDataSource, Paginator, PaginatorPercentageCallback } from "./Paginator";
@@ -59,7 +59,7 @@ export class RESTClient {
     }
 
     private async generateRequestId(): Promise<string> {
-        const id = await CoreId.generate("HTTP");
+        const id = await GeneratableCoreId.generate("HTTP");
         return id.toString();
     }
 

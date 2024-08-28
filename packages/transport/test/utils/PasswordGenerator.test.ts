@@ -1,4 +1,4 @@
-import { PasswordGenerator } from "../src";
+import { PasswordGenerator } from "../../src";
 
 describe("PasswordGeneratorTest", function () {
     describe("CreatePassword", function () {
