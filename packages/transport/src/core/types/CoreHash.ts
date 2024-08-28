@@ -1,8 +1,7 @@
-import { serialize, serializeOnly, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, serializeOnly, validate } from "@js-soft/ts-serval";
 import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding, ICoreBuffer } from "@nmshd/crypto";
-import { CoreSerializable, ICoreSerializable } from "./CoreSerializable";
 
-export interface ICoreHash extends ICoreSerializable {
+export interface ICoreHash extends ISerializable {
     hash: string;
 }
 
@@ -10,7 +9,7 @@ export interface ICoreHash extends ICoreSerializable {
  * Hash wraps a hash
  */
 @serializeOnly("hash", "string")
-export class CoreHash extends CoreSerializable {
+export class CoreHash extends Serializable {
     @validate()
     @serialize()
     public hash: string;
@@ -63,7 +62,17 @@ export class CoreHash extends CoreSerializable {
         return this.hash;
     }
 
-    public override toBase64(): string {
+    public toBase64(): string {
         return this.hash;
+    }
+
+    public static fromBase64T<T>(value: string): T {
+        const serialized = CoreBuffer.fromBase64URL(value).toUtf8();
+        return (this as any).deserialize(serialized);
+    }
+
+    public static fromBase64Unknown(value: string): Serializable {
+        const serialized = CoreBuffer.fromBase64URL(value).toUtf8();
+        return Serializable.deserializeUnknown(serialized);
     }
 }
