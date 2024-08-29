@@ -1,8 +1,8 @@
-# Consumption
+# Core Types
 
-[![npm version](https://badge.fury.io/js/@nmshd%2fconsumption.svg)](https://www.npmjs.com/package/@nmshd/consumption)
+[![npm version](https://badge.fury.io/js/@nmshd%2fcore-types.svg)](https://www.npmjs.com/package/@nmshd/core-types)
 
-The consumption library extends the [transport library](https://www.npmjs.com/package/@nmshd/transport).
+The core-types library provides common types for the transport and content library.
 
 ## Documentation
 
