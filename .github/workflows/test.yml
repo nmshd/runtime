@@ -110,9 +110,6 @@ jobs:
         with:
           node-version: current
       - run: npm ci
-        env:
-          BUILD_NUMBER: ${{ github.run_number }}
-          COMMIT_HASH: ${{ github.sha }}
       - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/content
       - name: Upload coverage reports to Codecov with GitHub Action
@@ -129,9 +126,6 @@ jobs:
         with:
           node-version: current
       - run: npm ci
-        env:
-          BUILD_NUMBER: ${{ github.run_number }}
-          COMMIT_HASH: ${{ github.sha }}
       - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/core-types
       - name: Upload coverage reports to Codecov with GitHub Action
@@ -269,9 +263,6 @@ jobs:
           node-version: current
       - run: npm ci
       - run: npm run build:node
-        env:
-          BUILD_NUMBER: ${{ github.run_number }}
-          COMMIT_HASH: ${{ github.sha }}
       - run: npm run test:ci:lokijs --workspace=@nmshd/transport
         env:
           NMSHD_TEST_BASEURL: http://localhost:8090
