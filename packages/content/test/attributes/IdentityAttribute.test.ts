@@ -241,7 +241,7 @@ describe("IdentityAttribute", function () {
             "@type": "Affiliation",
             organization: "j&s-soft GmbH",
             role: "Developer",
-            unit: "Enmeshed"
+            unit: "enmeshed"
         };
         const affiliationInstance = Affiliation.fromAny(affiliation);
         expect(affiliationInstance).toBeInstanceOf(Affiliation);

@@ -6,7 +6,7 @@ The core-types library provides common types for the transport and content libra
 
 ## Documentation
 
-You can find the documentation for Enmeshed on [enmeshed.eu](https://enmeshed.eu).
+You can find the documentation for enmeshed on [enmeshed.eu](https://enmeshed.eu).
 
 To get started developing in this repository, see the [developer's guide](README_dev.md).
 
@@ -14,7 +14,7 @@ To get started developing in this repository, see the [developer's guide](README
 
 Please file any bugs or feature requests by creating an [issue](https://github.com/nmshd/feedback/issues).
 
-Share your feedback with the Enmeshed team by contributing to the [discussions](https://github.com/nmshd/feedback/discussions).
+Share your feedback with the enmeshed team by contributing to the [discussions](https://github.com/nmshd/feedback/discussions).
 
 ## Contribute
 
