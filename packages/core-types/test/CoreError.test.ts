@@ -54,7 +54,6 @@ describe("CoreError", function () {
         });
     });
 
-    // logWith
     describe("LogWith()", function () {
         test("should return the error", function () {
             const error = new CoreError("error.code", "error.reason");
