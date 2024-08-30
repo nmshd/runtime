@@ -1,4 +1,4 @@
-import { AnonymousServices, ConsumptionServices, DataViewExpander, RuntimeConfig, TransportServices } from "../../src";
+import { AnonymousServices, ConsumptionServices, DataViewExpander, DeciderModuleConfigurationOverwrite, RuntimeConfig, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
 import { TestRuntime } from "./TestRuntime";
 
@@ -14,6 +14,7 @@ export interface TestRuntimeServices {
 export interface LaunchConfiguration {
     enableDatawallet?: boolean;
     enableDeciderModule?: boolean;
+    configureDeciderModule?: DeciderModuleConfigurationOverwrite;
     enableRequestModule?: boolean;
     enableAttributeListenerModule?: boolean;
     enableNotificationModule?: boolean;
@@ -83,6 +84,8 @@ export class RuntimeServiceProvider {
             if (launchConfiguration.enableDeciderModule) config.modules.decider.enabled = true;
             if (launchConfiguration.enableAttributeListenerModule) config.modules.attributeListener.enabled = true;
             if (launchConfiguration.enableNotificationModule) config.modules.notification.enabled = true;
+
+            config.modules.decider.automationConfig = launchConfiguration.configureDeciderModule?.automationConfig;
 
             const runtime = new TestRuntime(config, {
                 setDefaultRepositoryAttributes: launchConfiguration.enableDefaultRepositoryAttributes ?? false

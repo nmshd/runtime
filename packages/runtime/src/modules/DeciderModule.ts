@@ -1,4 +1,4 @@
-import { LocalRequestStatus } from "@nmshd/consumption";
+import { LocalRequestStatus, LocalResponse } from "@nmshd/consumption";
 import { RequestItemJSON } from "@nmshd/content";
 import {
     IncomingRequestStatusChangedEvent,
@@ -10,12 +10,14 @@ import {
 import { ModuleConfiguration, RuntimeModule } from "../extensibility";
 import { RuntimeServices } from "../Runtime";
 import { LocalRequestDTO } from "../types";
-import { RequestConfig, ResponseConfig } from "./decide";
+import { isRequestItemDerivationConfig, RequestConfig, ResponseConfig } from "./decide";
 
-// TODO: maybe this should be more flexible than an OR-list of AND-elements -> simple for now
+// simple OR-list of AND-elements with decreasing priority
 export interface DeciderModuleConfiguration extends ModuleConfiguration {
     automationConfig?: AutomationConfig[];
 }
+
+export type DeciderModuleConfigurationOverwrite = Partial<DeciderModuleConfiguration>;
 
 // TODO: add validation for fitting requestConfig-responseConfig combination
 export interface AutomationConfig {
@@ -35,22 +37,52 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     private async handleIncomingRequestStatusChanged(event: IncomingRequestStatusChangedEvent) {
         if (event.data.newStatus !== LocalRequestStatus.DecisionRequired) return;
 
-        // TODO: before changing the status of the Request, as many RequestItems as possible should be automatically processed
         if (event.data.request.content.items.some(flaggedAsManualDecisionRequired)) return await this.requireManualDecision(event);
 
-        // TODO: this is the same as above??
+        // Request is only decided automatically, if all its items can be processed automatically
+        const automationResult = await this.tryToAutomaticallyDecideRequest(event.data.request);
+        if (automationResult.automaticallyDecided) {
+            // TODO: move request to status Decided and return
+        }
+
         return await this.requireManualDecision(event);
     }
 
-    private async automaticallyDecideRequest(request: LocalRequestDTO) {
-        if (!this.configuration.automationConfig) return;
+    private async tryToAutomaticallyDecideRequest(request: LocalRequestDTO): Promise<{ automaticallyDecided: boolean; response?: LocalResponse }> {
+        if (!this.configuration.automationConfig) return { automaticallyDecided: false };
 
-        for (const configElement of this.configuration.automationConfig) {
-            // check if configElement.requestConfig matches (a part of) the Request (where manualDecisionRequired is not set)
-            // if so apply configElement.responseConfig
+        for (const automationConfigElement of this.configuration.automationConfig) {
+            // check if requestConfig matches (a part of) the Request
+            const requestConfigElement = automationConfigElement.requestConfig;
+            if (isRequestItemDerivationConfig(requestConfigElement)) {
+                // TODO: check for RequestItem compatibility
+            }
+            // TODO: check for general Request compatibility
+
+            // TODO: if so apply configElement.responseConfig
+            const responseConfigElement = automationConfigElement.responseConfig;
         }
 
-        return;
+        return { automaticallyDecided: false };
+    }
+
+    private checkRequestItemCompatibility(requestConfigElement: RequestConfig, request: LocalRequestDTO): boolean {}
+
+    private checkGeneralRequestCompatibility(requestConfigElement: RequestConfig, request: LocalRequestDTO): boolean {
+        let compatibility = true;
+        // maybe forEach instead
+        for (const property in requestConfigElement) {
+            if (typeof requestConfigElement[property as keyof RequestConfig] === "string") {
+                compatibility &&= requestConfigElement[property as keyof RequestConfig] === request[property as keyof LocalRequestDTO];
+            } else {
+                // else if (Array.isArray(requestConfigElement[property as keyof RequestConfig]))
+                const x = requestConfigElement[property as keyof RequestConfig]; // includes
+            }
+        }
+
+        // if (requestConfigElement.peer) compatibility &&= requestConfigElement["content.description"] === request["peer"];
+        // if (requestConfigElement.createdAt) compatibility &&= requestConfigElement.createdAt === request.createdAt;
+        return compatibility;
     }
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {
