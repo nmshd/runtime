@@ -1,5 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreSynchronizable, ICoreAddress, ICoreSynchronizable } from "@nmshd/transport";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
+import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 
 export interface IdentityMetadataJSON {

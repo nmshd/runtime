@@ -1,4 +1,5 @@
-import { CoreAddress, CoreErrors, SynchronizedCollection } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -62,7 +63,7 @@ export class IdentityMetadataController extends ConsumptionBaseController {
         if (!oldDoc) {
             if (parsedParams.upsert) return await this.createIdentityMetadata(parsedParams);
 
-            throw CoreErrors.general.recordNotFound(IdentityMetadata, `reference: '${parsedParams.reference.toString()}' - key: '${parsedParams.key}'`);
+            throw TransportCoreErrors.general.recordNotFound(IdentityMetadata, `reference: '${parsedParams.reference.toString()}' - key: '${parsedParams.key}'`);
         }
 
         const identityMetadata = IdentityMetadata.from(oldDoc);
@@ -79,7 +80,7 @@ export class IdentityMetadataController extends ConsumptionBaseController {
         const identityMetadata = await this.getIdentityMetadata(parsedParams.reference, parsedParams.key);
 
         if (!identityMetadata) {
-            throw CoreErrors.general.recordNotFound(IdentityMetadata, `reference: '${parsedParams.reference.toString()}' - key: '${parsedParams.key}'`);
+            throw TransportCoreErrors.general.recordNotFound(IdentityMetadata, `reference: '${parsedParams.reference.toString()}' - key: '${parsedParams.key}'`);
         }
 
         await this.identityMetadata.delete(identityMetadata);

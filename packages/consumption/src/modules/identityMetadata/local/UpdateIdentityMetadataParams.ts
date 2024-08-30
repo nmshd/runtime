@@ -1,9 +1,9 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreAddress, ICoreAddress, ICoreId } from "@nmshd/transport";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 
 export interface IUpdateIdentityMetadataParams extends ISerializable {
     key?: string;
-    reference: ICoreId | ICoreAddress;
+    reference: ICoreAddress;
     value: ISerializable;
     upsert?: boolean;
 }

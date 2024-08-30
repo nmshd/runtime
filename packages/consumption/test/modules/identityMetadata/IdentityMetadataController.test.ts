@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper } from "@js-soft/ts-serval";
-import { AccountController, CoreAddress, Transport } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import { ConsumptionController } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 import { MockEventBus } from "../MockEventBus";

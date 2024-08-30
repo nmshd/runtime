@@ -1,5 +1,5 @@
 import { JSONWrapper } from "@js-soft/ts-serval";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { IdentityMetadata } from "../../../../src";
 
 describe("IdentityMetadata", function () {
