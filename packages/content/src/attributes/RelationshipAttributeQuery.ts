@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/transport";
+import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
 import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
 import { AttributeValues } from "./AttributeValueTypes";
 import { IValueHints, ValueHints, ValueHintsJSON } from "./hints";

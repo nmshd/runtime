@@ -1,6 +1,6 @@
 import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../../consumption/ConsumptionError";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";

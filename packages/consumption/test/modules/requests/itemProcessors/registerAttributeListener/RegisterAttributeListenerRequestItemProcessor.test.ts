@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { RegisterAttributeListenerRequestItem, Request, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { Transport } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, LocalRequest, LocalRequestStatus, RegisterAttributeListenerRequestItemProcessor } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 

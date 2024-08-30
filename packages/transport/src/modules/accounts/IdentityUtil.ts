@@ -1,5 +1,5 @@
+import { CoreAddress } from "@nmshd/core-types";
 import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding, ICryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreAddress } from "../../core";
 
 const enmeshedAddressDIDPrefix = "did:e:";
 

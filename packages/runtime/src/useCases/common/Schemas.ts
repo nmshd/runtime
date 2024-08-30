@@ -2785,7 +2785,23 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
+                        },
+                        {
+                            "type": "string",
+                            "const": "thirdParty"
+                        },
+                        {
+                            "type": "string",
+                            "const": "recipient"
+                        },
+                        {
+                            "type": "string",
+                            "const": ""
+                        }
+                    ]
                 },
                 "thirdParty": {
                     "type": "array",
@@ -2807,6 +2823,14 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
+        },
+        "ThirdPartyRelationshipAttributeQueryOwner": {
+            "type": "string",
+            "enum": [
+                "thirdParty",
+                "recipient",
+                ""
+            ]
         },
         "ConsentRequestItemJSON": {
             "type": "object",
@@ -10579,7 +10603,23 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
+                        },
+                        {
+                            "type": "string",
+                            "const": "thirdParty"
+                        },
+                        {
+                            "type": "string",
+                            "const": "recipient"
+                        },
+                        {
+                            "type": "string",
+                            "const": ""
+                        }
+                    ]
                 },
                 "thirdParty": {
                     "type": "array",
@@ -10601,6 +10641,14 @@ export const CreateOutgoingRequestRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
+        },
+        "ThirdPartyRelationshipAttributeQueryOwner": {
+            "type": "string",
+            "enum": [
+                "thirdParty",
+                "recipient",
+                ""
+            ]
         },
         "ConsentRequestItemJSON": {
             "type": "object",
@@ -13884,7 +13932,23 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
+                        },
+                        {
+                            "type": "string",
+                            "const": "thirdParty"
+                        },
+                        {
+                            "type": "string",
+                            "const": "recipient"
+                        },
+                        {
+                            "type": "string",
+                            "const": ""
+                        }
+                    ]
                 },
                 "thirdParty": {
                     "type": "array",
@@ -13906,6 +13970,14 @@ export const ReceivedIncomingRequestRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
+        },
+        "ThirdPartyRelationshipAttributeQueryOwner": {
+            "type": "string",
+            "enum": [
+                "thirdParty",
+                "recipient",
+                ""
+            ]
         },
         "ConsentRequestItemJSON": {
             "type": "object",
@@ -16684,7 +16756,23 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
+                        },
+                        {
+                            "type": "string",
+                            "const": "thirdParty"
+                        },
+                        {
+                            "type": "string",
+                            "const": "recipient"
+                        },
+                        {
+                            "type": "string",
+                            "const": ""
+                        }
+                    ]
                 },
                 "thirdParty": {
                     "type": "array",
@@ -16706,6 +16794,14 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
+        },
+        "ThirdPartyRelationshipAttributeQueryOwner": {
+            "type": "string",
+            "enum": [
+                "thirdParty",
+                "recipient",
+                ""
+            ]
         }
     }
 }

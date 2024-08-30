@@ -1,5 +1,5 @@
 import { Notification } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { LocalNotification, LocalNotificationSource, LocalNotificationStatus } from "../../../../src";
 import { TestNotificationItem } from "../testHelpers/TestNotificationItem";
 

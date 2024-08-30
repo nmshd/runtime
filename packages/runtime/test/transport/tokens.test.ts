@@ -1,4 +1,4 @@
-import { CoreDate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
 import { GetTokensQuery, OwnerRestriction, TransportServices } from "../../src";
 import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../lib";
 

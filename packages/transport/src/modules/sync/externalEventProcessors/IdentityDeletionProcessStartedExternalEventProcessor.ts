@@ -9,7 +9,7 @@ class IdentityDeletionProcessStartedEventData extends Serializable {
     public deletionProcessId: string;
 }
 
-export class IdentityDeletionProcessStartedEventProcessor extends ExternalEventProcessor {
+export class IdentityDeletionProcessStartedExternalEventProcessor extends ExternalEventProcessor {
     public override async execute(externalEvent: BackboneExternalEvent): Promise<IdentityDeletionProcess> {
         const messageReceivedPayload = IdentityDeletionProcessStartedEventData.fromAny(externalEvent.payload);
 

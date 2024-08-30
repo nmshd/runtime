@@ -1,4 +1,4 @@
-import { CoreDate } from "../../src";
+import { CoreDate } from "../src";
 
 describe("CoreDate", function () {
     describe("Constructor", function () {

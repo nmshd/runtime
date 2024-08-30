@@ -1,7 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId, CoreSerializable, ICoreAddress, ICoreDate, ICoreId, ICoreSerializable } from "../../../core";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 
-export interface ICachedToken extends ICoreSerializable {
+export interface ICachedToken extends ISerializable {
     createdBy: ICoreAddress;
     createdAt: ICoreDate;
     expiresAt: ICoreDate;
@@ -11,7 +11,7 @@ export interface ICachedToken extends ICoreSerializable {
 }
 
 @type("CachedToken")
-export class CachedToken extends CoreSerializable implements ICachedToken {
+export class CachedToken extends Serializable implements ICachedToken {
     @validate()
     @serialize()
     public createdBy: CoreAddress;

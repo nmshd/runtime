@@ -1,6 +1,6 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { AbstractStringJSON, DeleteAttributeRequestItemJSON } from "@nmshd/content";
-import { CoreDate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
 import {
     AcceptResponseItemDVO,
     ConsumptionServices,

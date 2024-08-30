@@ -1,19 +1,18 @@
-import { ISerialized, serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, ISerialized, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoSignature, ICryptoSignature } from "@nmshd/crypto";
-import { CoreSerializable, ICoreSerializable } from "../../../core";
 
 export interface IChallengeSignedSerialized extends ISerialized {
     challenge: string;
     signature: string;
 }
 
-export interface IChallengeSigned extends ICoreSerializable {
+export interface IChallengeSigned extends ISerializable {
     challenge: string;
     signature: ICryptoSignature;
 }
 
 @type("ChallengeSigned")
-export class ChallengeSigned extends CoreSerializable implements IChallengeSigned {
+export class ChallengeSigned extends Serializable implements IChallengeSigned {
     @validate()
     @serialize({ enforceString: true })
     public challenge: string;

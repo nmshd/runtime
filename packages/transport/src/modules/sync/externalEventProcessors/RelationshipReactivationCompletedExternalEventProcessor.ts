@@ -1,8 +1,8 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { RelationshipChangedEvent, RelationshipReactivationCompletedEvent } from "../../../events";
+import { RelationshipReactivationCompletedEvent } from "../../../events";
 import { Relationship } from "../../relationships/local/Relationship";
 import { ExternalEvent } from "../data/ExternalEvent";
-import { ExternalEventProcessor } from "./ExternalEventProcessor";
+import { RelationshipExternalEventProcessor } from "./RelationshipExternalEventProcessor";
 
 class RelationshipReactivationCompletedExternalEventData extends Serializable {
     @serialize()
@@ -10,13 +10,16 @@ class RelationshipReactivationCompletedExternalEventData extends Serializable {
     public relationshipId: string;
 }
 
-export class RelationshipReactivationCompletedExternalEventProcessor extends ExternalEventProcessor {
+export class RelationshipReactivationCompletedExternalEventProcessor extends RelationshipExternalEventProcessor {
     public override async execute(externalEvent: ExternalEvent): Promise<Relationship | undefined> {
         const payload = RelationshipReactivationCompletedExternalEventData.fromAny(externalEvent.payload);
-        const relationship = await this.accountController.relationships.applyRelationshipChangedEvent(payload.relationshipId);
+        const result = await this.accountController.relationships.applyRelationshipChangedEvent(payload.relationshipId);
+        const changedRelationship = result.changedRelationship;
 
-        this.eventBus.publish(new RelationshipReactivationCompletedEvent(this.ownAddress, relationship));
-        this.eventBus.publish(new RelationshipChangedEvent(this.ownAddress, relationship));
-        return relationship;
+        this.eventBus.publish(new RelationshipReactivationCompletedEvent(this.ownAddress, changedRelationship));
+
+        this.triggerRelationshipChangedEvent(changedRelationship, result.oldRelationship);
+
+        return changedRelationship;
     }
 }

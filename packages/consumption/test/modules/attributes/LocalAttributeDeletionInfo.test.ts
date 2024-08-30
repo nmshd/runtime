@@ -1,7 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ValidationError } from "@js-soft/ts-serval";
 import { EMailAddress, IdentityAttribute, ProprietaryEMailAddress, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import { ConsumptionController, LocalAttribute, LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 

@@ -1,4 +1,5 @@
-import { CoreId, TransportError, TransportIds } from "../../core";
+import { CoreId } from "@nmshd/core-types";
+import { TransportError, TransportIds } from "../../core";
 import { BackboneDatawalletModification } from "./backbone/BackboneDatawalletModification";
 import { CreateDatawalletModificationsRequestItem } from "./backbone/CreateDatawalletModifications";
 import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType } from "./local/DatawalletModification";

@@ -1,6 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreAddress, CoreDate, TokenController } from "@nmshd/transport";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { AccountController, TokenController } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";

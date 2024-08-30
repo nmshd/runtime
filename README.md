@@ -6,6 +6,7 @@ This monorepo consolidates the following packages:
 
 | Package                              | Version                                                                                                           |
 | :----------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| [core-types](packages/core-types/)   | [![version](https://badge.fury.io/js/@nmshd%2fcore-types.svg)](https://www.npmjs.com/package/@nmshd/core-types)   |
 | [transport](packages/transport/)     | [![version](https://badge.fury.io/js/@nmshd%2ftransport.svg)](https://www.npmjs.com/package/@nmshd/transport)     |
 | [content](packages/content/)         | [![version](https://badge.fury.io/js/@nmshd%2fcontent.svg)](https://www.npmjs.com/package/@nmshd/content)         |
 | [consumption](packages/consumption/) | [![version](https://badge.fury.io/js/@nmshd%2fconsumption.svg)](https://www.npmjs.com/package/@nmshd/consumption) |
@@ -14,7 +15,7 @@ This monorepo consolidates the following packages:
 
 ## Documentation
 
-You can find the documentation for Enmeshed on [enmeshed.eu](https://enmeshed.eu).
+You can find the documentation for enmeshed on [enmeshed.eu](https://enmeshed.eu).
 
 To get started developing in this repository, see the [developer's guide](README_dev.md).
 
@@ -22,7 +23,7 @@ To get started developing in this repository, see the [developer's guide](README
 
 Please file any bugs or feature requests by creating an [issue](https://github.com/nmshd/feedback/issues).
 
-Share your feedback with the Enmeshed team by contributing to the [discussions](https://github.com/nmshd/feedback/discussions).
+Share your feedback with the enmeshed team by contributing to the [discussions](https://github.com/nmshd/feedback/discussions).
 
 ## Contribute
 

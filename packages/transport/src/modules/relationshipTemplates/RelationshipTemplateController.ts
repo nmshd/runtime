@@ -1,7 +1,8 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId } from "../../core";
+import { CoreCrypto, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { PeerRelationshipTemplateLoadedEvent } from "../../events";
@@ -146,7 +147,7 @@ export class RelationshipTemplateController extends TransportController {
     private async updateCacheOfExistingTemplateInDb(id: string, response?: BackboneGetRelationshipTemplatesResponse) {
         const templateDoc = await this.templates.read(id);
         if (!templateDoc) {
-            throw CoreErrors.general.recordNotFound(RelationshipTemplate, id);
+            throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, id);
         }
 
         const template = RelationshipTemplate.from(templateDoc);
@@ -183,7 +184,7 @@ export class RelationshipTemplateController extends TransportController {
         );
 
         if (!templateSignatureValid) {
-            throw CoreErrors.general.signatureNotValid("template");
+            throw TransportCoreErrors.general.signatureNotValid("template");
         }
 
         const cachedTemplate = CachedRelationshipTemplate.from({
@@ -213,7 +214,7 @@ export class RelationshipTemplateController extends TransportController {
         const id = idOrTemplate instanceof CoreId ? idOrTemplate.toString() : idOrTemplate.id.toString();
         const templateDoc = await this.templates.read(id);
         if (!templateDoc) {
-            throw CoreErrors.general.recordNotFound(RelationshipTemplate, id.toString());
+            throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, id.toString());
         }
 
         const template = RelationshipTemplate.from(templateDoc);

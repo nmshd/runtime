@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { Draft, DraftsController } from "@nmshd/consumption";
-import { AccountController, CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalDraftIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 

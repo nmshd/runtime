@@ -1,9 +1,8 @@
 import { ISerializable, Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
+import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
-import { CoreErrors } from "./CoreErrors";
 import { CoreIdHelper } from "./CoreIdHelper";
-import { CoreAddress, ICoreAddress } from "./types";
-import { CoreId, ICoreId } from "./types/CoreId";
+import { TransportCoreErrors } from "./TransportCoreErrors";
 
 export interface IReference extends ISerializable {
     id: ICoreId;
@@ -36,7 +35,7 @@ export class Reference extends Serializable implements IReference {
         const splitted = truncatedBuffer.toUtf8().split("|");
 
         if (![3, 4].includes(splitted.length)) {
-            throw CoreErrors.general.invalidTruncatedReference();
+            throw TransportCoreErrors.general.invalidTruncatedReference();
         }
 
         try {
@@ -55,7 +54,7 @@ export class Reference extends Serializable implements IReference {
                 forIdentity
             });
         } catch (e) {
-            throw CoreErrors.general.invalidTruncatedReference();
+            throw TransportCoreErrors.general.invalidTruncatedReference();
         }
     }
 

@@ -1,7 +1,7 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId, CoreSerializable, ICoreDate, ICoreSerializable } from "@nmshd/transport";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId, ICoreDate } from "@nmshd/core-types";
 
-export interface ILocalAccount extends ICoreSerializable {
+export interface ILocalAccount extends ISerializable {
     id: CoreId;
     address?: CoreAddress;
     name: string;
@@ -12,7 +12,7 @@ export interface ILocalAccount extends ICoreSerializable {
 }
 
 @type("LocalAccount")
-export class LocalAccount extends CoreSerializable implements ILocalAccount {
+export class LocalAccount extends Serializable implements ILocalAccount {
     @validate()
     @serialize()
     public id: CoreId;

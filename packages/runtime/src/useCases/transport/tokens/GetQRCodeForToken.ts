@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreId, Token, TokenController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { Token, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { QRCode, RuntimeErrors, SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common";
 

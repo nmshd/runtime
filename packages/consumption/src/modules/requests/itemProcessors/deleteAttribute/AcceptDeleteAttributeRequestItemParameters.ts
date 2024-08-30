@@ -1,5 +1,5 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 
 export interface AcceptDeleteAttributeRequestItemParametersJSON extends AcceptRequestItemParametersJSON {

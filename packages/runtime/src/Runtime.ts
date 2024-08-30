@@ -11,6 +11,7 @@ import {
     OutgoingRequestsController,
     SettingsController
 } from "@nmshd/consumption";
+import { ICoreAddress } from "@nmshd/core-types";
 import {
     AccountController,
     AnonymousTokenController,
@@ -20,7 +21,6 @@ import {
     DevicesController,
     FileController,
     IConfigOverwrite,
-    ICoreAddress,
     IdentityController,
     IdentityDeletionProcessController,
     MessageController,

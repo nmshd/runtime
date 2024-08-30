@@ -1,14 +1,13 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { CoreDate, CoreId, CoreSynchronizable, ICoreDate, ICoreSerializable } from "../../src";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../src";
 
 export interface ICachedACacheableSynchronizedCollectionItem {
     someCacheProperty: string;
 }
 
-export interface IACacheableSynchronizedCollectionItem extends ICoreSerializable {
-    id: CoreId;
-
+export interface IACacheableSynchronizedCollectionItem extends ICoreSynchronizable {
     someTechnicalProperty?: string;
 
     cache?: ICachedACacheableSynchronizedCollectionItem;

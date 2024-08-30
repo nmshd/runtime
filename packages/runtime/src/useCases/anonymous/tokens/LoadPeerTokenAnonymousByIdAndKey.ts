@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AnonymousTokenController, CoreAddress, CoreId } from "@nmshd/transport";
+import { AnonymousTokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { AddressString, SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common";

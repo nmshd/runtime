@@ -1,6 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalAttribute } from "@nmshd/consumption";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
 
 class General {

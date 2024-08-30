@@ -1,7 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreAddress, CoreDate, CoreId, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
+import { AccountController, CoreIdHelper, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenController", function () {
@@ -81,7 +82,7 @@ describe("TokenController", function () {
     test("should send and receive a TokenContentFile", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = TokenContentFile.from({
-            fileId: await CoreId.generate(),
+            fileId: await CoreIdHelper.notPrefixed.generate(),
             secretKey: await CryptoEncryption.generateKey()
         });
         const sentToken = await sender.tokens.sendToken({
@@ -110,7 +111,7 @@ describe("TokenController", function () {
     test("should send and receive a TokenContentRelationshipTemplate", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = TokenContentRelationshipTemplate.from({
-            templateId: await CoreId.generate(),
+            templateId: await CoreIdHelper.notPrefixed.generate(),
             secretKey: await CryptoEncryption.generateKey()
         });
         const sentToken = await sender.tokens.sendToken({

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Event } from "@js-soft/ts-utils";
 import { AcceptResponseItem, RejectResponseItem, Request, RequestItem, ResponseItem, ResponseItemResult } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import { ValidationResult } from "../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../incoming/decide/AcceptRequestItemParameters";
 import { RejectRequestItemParametersJSON } from "../incoming/decide/RejectRequestItemParameters";

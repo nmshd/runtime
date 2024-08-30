@@ -1,11 +1,12 @@
 {
     "name": "monorepo",
     "private": true,
-    "description": "The Enmeshed Monorepo.",
+    "description": "The enmeshed Monorepo.",
     "homepage": "https://enmeshed.eu",
     "license": "MIT",
     "author": "j&s-soft GmbH",
     "workspaces": [
+        "packages/core-types",
         "packages/transport",
         "packages/content",
         "packages/consumption",

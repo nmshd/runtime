@@ -1,5 +1,6 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { CoreAddress, CoreId, SynchronizedCollection } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { SynchronizedCollection } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";

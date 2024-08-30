@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { CoreDate } from "../../../src";
+import { CoreDate } from "@nmshd/core-types";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("SyncController.error", function () {

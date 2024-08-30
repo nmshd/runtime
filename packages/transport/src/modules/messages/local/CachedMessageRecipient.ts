@@ -1,9 +1,8 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoCipher, ICryptoCipher } from "@nmshd/crypto";
-import { CoreDate, CoreId, CoreSerializable, ICoreDate, ICoreId, ICoreSerializable } from "../../../core";
-import { CoreAddress, ICoreAddress } from "../../../core/types/CoreAddress";
 
-export interface ICachedMessageRecipient extends ICoreSerializable {
+export interface ICachedMessageRecipient extends ISerializable {
     address: ICoreAddress;
     encryptedKey: ICryptoCipher;
     receivedAt?: ICoreDate;
@@ -12,7 +11,7 @@ export interface ICachedMessageRecipient extends ICoreSerializable {
 }
 
 @type("CachedMessageRecipient")
-export class CachedMessageRecipient extends CoreSerializable implements ICachedMessageRecipient {
+export class CachedMessageRecipient extends Serializable implements ICachedMessageRecipient {
     @validate()
     @serialize()
     public address: CoreAddress;

@@ -6,7 +6,7 @@ import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { CoreErrors } from "./CoreErrors";
+import { TransportCoreErrors } from "./TransportCoreErrors";
 import { TransportError } from "./TransportError";
 import { TransportLoggerFactory } from "./TransportLoggerFactory";
 
@@ -94,15 +94,15 @@ export class Transport {
         log = TransportLoggerFactory.getLogger(Transport);
 
         if (!this._config.platformClientId) {
-            throw CoreErrors.general.platformClientIdNotSet().logWith(log);
+            throw TransportCoreErrors.general.platformClientIdNotSet().logWith(log);
         }
 
         if (!this._config.platformClientSecret) {
-            throw CoreErrors.general.platformClientSecretNotSet().logWith(log);
+            throw TransportCoreErrors.general.platformClientSecretNotSet().logWith(log);
         }
 
         if (!this._config.baseUrl) {
-            throw CoreErrors.general.baseUrlNotSet().logWith(log);
+            throw TransportCoreErrors.general.baseUrlNotSet().logWith(log);
         }
 
         if (this._config.supportedDatawalletVersion < 1) {

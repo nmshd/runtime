@@ -1,6 +1,7 @@
 import { Event, EventBus } from "@js-soft/ts-utils";
 import { Notification, NotificationItem } from "@nmshd/content";
-import { CoreAddress, CoreId, Message, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { Message, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";

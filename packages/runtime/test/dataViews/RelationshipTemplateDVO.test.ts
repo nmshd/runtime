@@ -13,7 +13,7 @@ import {
     RequestItemGroupJSON,
     Surname
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import {
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,

@@ -16,7 +16,8 @@ import {
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, CoreIdHelper, Transport } from "@nmshd/transport";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
@@ -437,7 +438,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: successorRepositoryAttribute.id,
                 peer: sender,
-                requestReference: await CoreId.generate()
+                requestReference: await CoreIdHelper.notPrefixed.generate()
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -1366,7 +1367,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    sourceAttribute: predecessorRepositoryAttribute.id,
+                    peer: sender,
+                    requestReference: await CoreIdHelper.notPrefixed.generate()
+                }),
                 deletionInfo: LocalAttributeDeletionInfo.from({
                     deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -1429,7 +1434,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: predecessorRepositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
+                shareInfo: LocalAttributeShareInfo.from({
+                    sourceAttribute: predecessorRepositoryAttribute.id,
+                    peer: sender,
+                    requestReference: await CoreIdHelper.notPrefixed.generate()
+                }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 
@@ -1478,7 +1487,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const alreadySharedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttribute.id,
                 peer: sender,
-                requestReference: await CoreId.generate()
+                requestReference: await CoreIdHelper.notPrefixed.generate()
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -1523,7 +1532,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
+                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({
                     deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -1575,7 +1584,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
                 }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreId.generate() }),
+                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
                 deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
             });
 

@@ -1,9 +1,9 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId, CoreSerializable, ICoreAddress, ICoreDate, ICoreId } from "../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { RelationshipAuditLogEntryReason } from "../transmission/RelationshipAuditLog";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 
-export interface IRelationshipAuditLogEntry {
+export interface IRelationshipAuditLogEntry extends ISerializable {
     createdAt: ICoreDate;
     createdBy: ICoreAddress;
     createdByDevice: ICoreId;
@@ -13,7 +13,7 @@ export interface IRelationshipAuditLogEntry {
 }
 
 @type("RelationshipAuditLogEntry")
-export class RelationshipAuditLogEntry extends CoreSerializable implements IRelationshipAuditLogEntry {
+export class RelationshipAuditLogEntry extends Serializable implements IRelationshipAuditLogEntry {
     @validate()
     @serialize()
     public createdAt: CoreDate;

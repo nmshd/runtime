@@ -1,19 +1,21 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { IRequest, Request } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, CoreSerializable, CoreSynchronizable, ICoreAddress, ICoreDate, ICoreId, ICoreSerializable, ICoreSynchronizable } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
+
+import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { LocalRequestStatus } from "./LocalRequestStatus";
 import { ILocalRequestStatusLogEntry, LocalRequestStatusLogEntry } from "./LocalRequestStatusLogEntry";
 import { ILocalResponse, LocalResponse } from "./LocalResponse";
 
-export interface ILocalRequestSource extends ICoreSerializable {
+export interface ILocalRequestSource extends ISerializable {
     type: "Message" | "RelationshipTemplate";
     reference: ICoreId;
 }
 
 @type("LocalRequestSource")
-export class LocalRequestSource extends CoreSerializable implements ILocalRequestSource {
+export class LocalRequestSource extends Serializable implements ILocalRequestSource {
     @serialize()
     @validate()
     public type: "Message" | "RelationshipTemplate";

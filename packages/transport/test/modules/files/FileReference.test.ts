@@ -1,6 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
+import { CoreId } from "@nmshd/core-types";
 import { CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { BackboneIds, CoreId, FileReference } from "../../../src";
+import { BackboneIds, FileReference } from "../../../src";
 
 describe("FileReference", function () {
     test("should serialize and deserialize correctly (verbose)", async function () {

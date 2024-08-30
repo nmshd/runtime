@@ -1,7 +1,7 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { RequestJSON } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import { Inject } from "typescript-ioc";
 import { RequestValidationResultDTO } from "../../../types";
 import { AddressString, UseCase } from "../../common";

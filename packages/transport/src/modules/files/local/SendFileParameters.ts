@@ -1,9 +1,8 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
-import { CoreSerializable, ICoreSerializable } from "../../../core";
-import { CoreDate, ICoreDate } from "../../../core/types/CoreDate";
 
-export interface ISendFileParameters extends ICoreSerializable {
+export interface ISendFileParameters extends ISerializable {
     title: string;
     description: string;
     filename: string;
@@ -14,7 +13,7 @@ export interface ISendFileParameters extends ICoreSerializable {
 }
 
 @type("SendFileParameters")
-export class SendFileParameters extends CoreSerializable implements ISendFileParameters {
+export class SendFileParameters extends Serializable implements ISendFileParameters {
     @validate()
     @serialize()
     public title: string;
