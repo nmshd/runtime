@@ -20357,6 +20357,27 @@ export const UpdateSettingRequest: any = {
     }
 }
 
+export const UpsertSettingByKeyRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UpsertSettingByKeyRequest",
+    "definitions": {
+        "UpsertSettingByKeyRequest": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "key",
+                "value"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const DownloadFileRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DownloadFileRequest",
