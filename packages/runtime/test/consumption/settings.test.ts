@@ -115,7 +115,7 @@ describe("Settings", () => {
         expect(result.value).toHaveLength(1);
 
         const setting = await consumptionServices.settings.getSettingByKey({ key: "a-key" });
-        expect(setting.value).toStrictEqual({ aKey: "a-value" });
+        expect(setting.value.value).toStrictEqual({ aKey: "a-value" });
     });
 
     test("should upsert a setting by key", async () => {
@@ -132,7 +132,7 @@ describe("Settings", () => {
         expect(result.value).toHaveLength(1);
 
         const setting = await consumptionServices.settings.getSettingByKey({ key: "a-key" });
-        expect(setting.value).toStrictEqual({ aKey: "aNewValue" });
+        expect(setting.value.value).toStrictEqual({ aKey: "aNewValue" });
     });
 });
 
