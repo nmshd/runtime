@@ -24,7 +24,7 @@ export class AnonymousTokenController {
 
     public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentity?: CoreAddress): Promise<Token> {
         if (forIdentity) {
-            throw CoreErrors.general.notIntendedForYou(id.toString());
+            throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
         const response = (await this.client.getToken(id.toString())).value;
 

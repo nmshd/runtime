@@ -197,7 +197,7 @@ export class TokenController extends TransportController {
         const tokenDoc = await this.tokens.read(id.toString());
         if (!tokenDoc && forIdentity && !forIdentity.equals(this.parent.identity.address)) {
             // if you created the token, it exists already
-            throw CoreErrors.general.notIntendedForYou(id.toString());
+            throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
         if (tokenDoc) {
             let token: Token | undefined = Token.from(tokenDoc);
