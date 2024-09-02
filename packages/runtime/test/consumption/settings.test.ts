@@ -103,6 +103,37 @@ describe("Settings", () => {
         const setting = result.value;
         expect(setting.value).toStrictEqual({ key: ["newValue"] });
     });
+
+    test("should upsert a setting by key when it does not exist yet", async () => {
+        await consumptionServices.settings.upsertSettingByKey({
+            key: "a-key",
+            value: { aKey: "a-value" }
+        });
+
+        const result = await consumptionServices.settings.getSettings({});
+        expect(result).toBeSuccessful();
+        expect(result.value).toHaveLength(1);
+
+        const setting = await consumptionServices.settings.getSettingByKey({ key: "a-key" });
+        expect(setting.value).toStrictEqual({ aKey: "a-value" });
+    });
+
+    test("should upsert a setting by key", async () => {
+        const value = { aKey: "a-value" };
+        await consumptionServices.settings.createSetting({ key: "a-key", value });
+
+        await consumptionServices.settings.upsertSettingByKey({
+            key: "a-key",
+            value: { aKey: "aNewValue" }
+        });
+
+        const result = await consumptionServices.settings.getSettings({});
+        expect(result).toBeSuccessful();
+        expect(result.value).toHaveLength(1);
+
+        const setting = await consumptionServices.settings.getSettingByKey({ key: "a-key" });
+        expect(setting.value).toStrictEqual({ aKey: "aNewValue" });
+    });
 });
 
 describe("Settings query", () => {
