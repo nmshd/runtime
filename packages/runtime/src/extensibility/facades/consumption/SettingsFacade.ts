@@ -13,13 +13,16 @@ import {
     GetSettingsRequest,
     GetSettingsUseCase,
     UpdateSettingRequest,
-    UpdateSettingUseCase
+    UpdateSettingUseCase,
+    UpsertSettingByKeyRequest,
+    UpsertSettingByKeyUseCase
 } from "../../../useCases";
 
 export class SettingsFacade {
     public constructor(
         @Inject private readonly createSettingUseCase: CreateSettingUseCase,
         @Inject private readonly updateSettingUseCase: UpdateSettingUseCase,
+        @Inject private readonly upsertSettingByKeyUseCase: UpsertSettingByKeyUseCase,
         @Inject private readonly deleteSettingUseCase: DeleteSettingUseCase,
         @Inject private readonly getSettingsUseCase: GetSettingsUseCase,
         @Inject private readonly getSettingUseCase: GetSettingUseCase,
@@ -48,5 +51,9 @@ export class SettingsFacade {
 
     public async updateSetting(request: UpdateSettingRequest): Promise<Result<SettingDTO, ApplicationError>> {
         return await this.updateSettingUseCase.execute(request);
+    }
+
+    public async upsertSettingByKey(request: UpsertSettingByKeyRequest): Promise<Result<SettingDTO, ApplicationError>> {
+        return await this.upsertSettingByKeyUseCase.execute(request);
     }
 }
