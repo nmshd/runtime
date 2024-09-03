@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { CoreDate } from "@nmshd/core-types";
 import { AccountController, AnonymousTokenController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
@@ -36,7 +36,7 @@ describe("TokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            forIdentity: CoreAddress.from("did:e:a-domain:dids:1234567890123456789012")
+            forIdentity: sender.identity.address
         });
         const reference = sentToken.toTokenReference().truncate();
         await TestUtil.expectThrowsAsync(async () => {
@@ -51,11 +51,11 @@ describe("TokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
+            forIdentity: sender.identity.address
         });
 
         await TestUtil.expectThrowsAsync(async () => {
-            await anonymousTokenController.loadPeerToken(sentToken.id, sentToken.secretKey);
+            await anonymousTokenController.loadPeerToken(sentToken.id, sentToken.secretKey, sender.identity.address);
         }, /transport.general.notIntendedForYou/);
     });
 });

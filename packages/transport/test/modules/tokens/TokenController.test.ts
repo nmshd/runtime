@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
 import { AccountController, CoreIdHelper, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
@@ -172,7 +172,7 @@ describe("TokenController", function () {
         expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
         expect((sentToken.cache?.content.toJSON() as any).content).toBe("TestToken");
         expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
-        expect(receivedToken.cache?.forIdentity).toBe(recipient.identity.address);
+        expect(receivedToken.cache?.forIdentity?.toString()).toBe(recipient.identity.address.toString());
     });
 
     test("should throw if a personalized token is not loaded by the right identity", async function () {
@@ -182,7 +182,7 @@ describe("TokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            forIdentity: CoreAddress.from("did:e:a-domain:dids:1234567890123456789012")
+            forIdentity: sender.identity.address
         });
         const reference = sentToken.toTokenReference().truncate();
         await TestUtil.expectThrowsAsync(async () => {
@@ -197,12 +197,15 @@ describe("TokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
+            forIdentity: sender.identity.address
         });
 
         await TestUtil.expectThrowsAsync(async () => {
-            await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false);
-        }, /transport.general.notIntendedForYou/);
+            await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false, sender.identity.address);
+        }, /transport\.general\.notIntendedForYou/);
+        await TestUtil.expectThrowsAsync(async () => {
+            await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false, recipient.identity.address);
+        }, /error\.platform\.recordNotFound/);
     });
 
     test("should delete a token", async function () {
