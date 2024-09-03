@@ -1,13 +1,14 @@
 import { TokenDTO, TransportServices } from "../../src";
-import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, uploadOwnToken } from "../lib";
+import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, TestRuntimeServices, uploadOwnToken, uploadPersonalizedOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices: TransportServices;
 let noLoginRuntime: TestRuntime;
+let runtimeService: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(1);
-    transportServices = runtimeServices[0].transport;
+    runtimeService = (await serviceProvider.launch(1))[0];
+    transportServices = runtimeService.transport;
 
     noLoginRuntime = new NoLoginTestRuntime(RuntimeServiceProvider.defaultConfig);
     await noLoginRuntime.init();
@@ -46,11 +47,19 @@ describe("Anonymous tokens", () => {
     });
 
     test("should catch a personalized token", async () => {
-        const result = await noLoginRuntime.anonymousServices.tokens.loadPeerTokenByIdAndKey({
-            id: uploadedToken.id,
-            secretKey: uploadedToken.secretKey,
-            forIdentity: "did:e:a-domain:dids:1234567890123456789012"
+        const uploadedPersonalizedToken = await uploadPersonalizedOwnToken(transportServices, runtimeService.address);
+        const resultNotIntended = await noLoginRuntime.anonymousServices.tokens.loadPeerTokenByIdAndKey({
+            id: uploadedPersonalizedToken.id,
+            secretKey: uploadedPersonalizedToken.secretKey,
+            forIdentity: runtimeService.address
         });
-        expect(result).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
+        expect(resultNotIntended).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
+
+        const resultNotFound = await noLoginRuntime.anonymousServices.tokens.loadPeerTokenByIdAndKey({
+            id: uploadedPersonalizedToken.id,
+            secretKey: uploadedPersonalizedToken.secretKey
+        });
+
+        expect(resultNotFound).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 });

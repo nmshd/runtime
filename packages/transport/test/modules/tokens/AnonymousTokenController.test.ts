@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
-import { AccountController, AnonymousTokenController, CoreAddress, CoreDate, Transport } from "../../../src";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { AccountController, AnonymousTokenController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenController", function () {

@@ -3,12 +3,14 @@ import { GetTokensQuery, OwnerRestriction, TransportServices } from "../../src";
 import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
+let runtimeServices1: TestRuntimeServices;
 let runtimeServices2: TestRuntimeServices;
 let transportServices1: TransportServices;
 let transportServices2: TransportServices;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
+    runtimeServices1 = runtimeServices[0];
     runtimeServices2 = runtimeServices[1];
     transportServices1 = runtimeServices[0].transport;
     transportServices2 = runtimeServices[1].transport;
@@ -86,11 +88,11 @@ describe("Personalized tokens", () => {
             content: { key: "value" },
             expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
             ephemeral: true,
-            forIdentity: "did:e:a-domain:dids:1234567890123456789012"
+            forIdentity: runtimeServices1.address
         });
         expect(createResult).toBeSuccessful();
 
         const loadResult = await transportServices2.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
-        expect(loadResult).toBeAnError(`You tried to access personalized content '${createResult.value.id}' that is not for you.`, "error.transport.general.notIntendedForYou");
+        expect(loadResult).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
 });

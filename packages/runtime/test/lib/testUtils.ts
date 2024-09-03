@@ -171,6 +171,21 @@ export async function uploadOwnToken(transportServices: TransportServices): Prom
     return response.value;
 }
 
+export async function uploadPersonalizedOwnToken(transportServices: TransportServices, forIdentity: string): Promise<TokenDTO> {
+    const response = await transportServices.tokens.createOwnToken({
+        content: {
+            content: "Hello"
+        },
+        expiresAt: DateTime.utc().plus({ days: 1 }).toString(),
+        ephemeral: false,
+        forIdentity
+    });
+
+    expect(response).toBeSuccessful();
+
+    return response.value;
+}
+
 export async function uploadFile(transportServices: TransportServices): Promise<FileDTO> {
     const response = await transportServices.files.uploadOwnFile(await makeUploadRequest());
 
