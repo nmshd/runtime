@@ -1,7 +1,7 @@
 import { NodeLoggerFactory } from "@js-soft/node-logger";
-import { RelationshipTemplateContent, Request, ShareAttributeAcceptResponseItemJSON } from "@nmshd/content";
+import { AuthenticationRequestItemJSON, RelationshipTemplateContent, Request, ShareAttributeAcceptResponseItemJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { GeneralRequestConfig } from "src/modules/decide";
+import { GeneralRequestConfig, RequestItemConfig } from "src/modules/decide";
 import {
     DeciderModule,
     DeciderModuleConfigurationOverwrite,
@@ -89,7 +89,7 @@ describe("DeciderModule", () => {
                         expiresAt: "expirationDate",
                         title: "requestTitle",
                         description: "requestDescription",
-                        metadata: { akey: "aValue" },
+                        metadata: { aKey: "aValue" },
                         items: [
                             {
                                 "@type": "AuthenticationRequestItem",
@@ -109,8 +109,7 @@ describe("DeciderModule", () => {
                     "content.expiresAt": "expirationDate",
                     "content.title": "requestTitle",
                     "content.description": "requestDescription",
-                    "content.metadata": { akey: "aValue" }
-                    // "content.metadata": JSON.stringify({ akey: "aValue" }) // TODO: what about specifying an object directly?
+                    "content.metadata": { aKey: "aValue" }
                 };
 
                 const compatibility = deciderModule.checkGeneralRequestCompatibility(generalRequestConfigElement, incomingLocalRequest);
@@ -126,7 +125,7 @@ describe("DeciderModule", () => {
                     "content.expiresAt": ["expirationDate", "otherDate"],
                     "content.title": ["requestTitle", "otherRequestTitle"],
                     "content.description": ["requestDescription", "otherRequestDescription"],
-                    "content.metadata": [JSON.stringify({ akey: "aValue" }), JSON.stringify({ anotherKey: "anotherValue" })]
+                    "content.metadata": [{ aKey: "aValue" }, { anotherKey: "anotherValue" }]
                 };
 
                 const compatibility = deciderModule.checkGeneralRequestCompatibility(generalRequestConfigElement, incomingLocalRequest);
@@ -170,15 +169,32 @@ describe("DeciderModule", () => {
         });
 
         describe("checkRequestItemCompatibility", () => {
-            // test("should return true if all properties of RequestItemConfig are set with strings", () => {
-            //     const requestItemConfigElement: RequestItemConfig = {
-            //         "content.item.@type": "AuthenticationRequestItem",
-            //         "content.item.mustBeAccepted": true,
-            //         "content.item.title": "requestItemTitle",
-            //         "content.item.description": "requestItemDescription"
-            //         "content.item.metadata"?: string | string[];
-            //     };
-            // });
+            describe("AuthenticationRequestItemConfig", () => {
+                let authenticationRequestItem: AuthenticationRequestItemJSON;
+
+                beforeAll(() => {
+                    authenticationRequestItem = {
+                        "@type": "AuthenticationRequestItem",
+                        mustBeAccepted: true,
+                        requireManualDecision: false,
+                        title: "requestItemTitle",
+                        description: "requestItemDescription",
+                        metadata: { aKey: "aValue" }
+                    };
+                });
+                test("should return true if all properties of RequestItemConfig are set with strings", () => {
+                    const requestItemConfigElement: RequestItemConfig = {
+                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.mustBeAccepted": true,
+                        "content.item.title": "requestItemTitle",
+                        "content.item.description": "requestItemDescription",
+                        "content.item.metadata": { aKey: "aValue" }
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, authenticationRequestItem);
+                    expect(compatibility).toBe(true);
+                });
+            });
         });
     });
 

@@ -105,7 +105,18 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     }
 
     public checkRequestItemCompatibility(requestItemConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): boolean {
-        return this.checkCompatibility(requestItemConfigElement, requestItem);
+        const reducedRequestItemConfigElement = this.reduceRequestItemConfigElement(requestItemConfigElement);
+        return this.checkCompatibility(reducedRequestItemConfigElement, requestItem);
+    }
+
+    private reduceRequestItemConfigElement(requestItemConfigElement: RequestItemDerivationConfig): Record<string, any> {
+        const prefix = "content.item.";
+        const reducedRequestItemConfigElement: Record<string, any> = {};
+        for (const key in requestItemConfigElement) {
+            const reducedKey = key.startsWith(prefix) ? key.substring(prefix.length).trim() : key;
+            reducedRequestItemConfigElement[reducedKey] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
+        }
+        return reducedRequestItemConfigElement;
     }
 
     private checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
@@ -115,39 +126,36 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             if (!unformattedRequestConfigProperty) {
                 continue;
             }
-            const requestConfigProperty = this.makeStringWithSameDimension(unformattedRequestConfigProperty);
+            const requestConfigProperty = this.makeObjectsToStrings(unformattedRequestConfigProperty);
 
-            const requestProperty = this.getNestedPropertyAsString(requestOrRequestItem, property);
-            if (!requestProperty) {
+            const unformattedRequestProperty = this.getNestedProperty(requestOrRequestItem, property);
+            if (!unformattedRequestProperty) {
                 compatibility = false;
                 break;
             }
+            const requestProperty = this.makeObjectsToStrings(unformattedRequestProperty);
 
-            if (typeof requestConfigProperty === "string") {
-                compatibility &&= requestConfigProperty === requestProperty;
-            } else {
+            if (Array.isArray(requestConfigProperty)) {
                 compatibility &&= requestConfigProperty.includes(requestProperty);
+            } else {
+                compatibility &&= requestConfigProperty === requestProperty;
             }
-
             if (!compatibility) break;
         }
         return compatibility;
     }
 
-    // TODO: this feels hacky
-    private getNestedPropertyAsString(object: any, path: string): string {
-        const nestedProperty = path.split(".").reduce((currentObject, key) => currentObject?.[key], object);
-        const nestedPropertyAsStringWithSameDimension = this.makeStringWithSameDimension(nestedProperty);
-        if (typeof nestedPropertyAsStringWithSameDimension === "string") return nestedPropertyAsStringWithSameDimension;
-        return JSON.stringify(nestedPropertyAsStringWithSameDimension);
+    private makeObjectsToStrings(data: any) {
+        if (Array.isArray(data)) {
+            return data.map((element) => (typeof element === "object" ? JSON.stringify(element) : element));
+        }
+        if (typeof data === "object") return JSON.stringify(data);
+        return data;
     }
 
-    private makeStringWithSameDimension(data: any): string | string[] {
-        if (typeof data === "string") return data;
-        if (Array.isArray(data)) {
-            return data.map((element) => (typeof element === "string" ? element : JSON.stringify(element)));
-        }
-        return JSON.stringify(data);
+    private getNestedProperty(object: any, path: string): any {
+        const nestedProperty = path.split(".").reduce((currentObject, key) => currentObject?.[key], object);
+        return nestedProperty;
     }
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {
