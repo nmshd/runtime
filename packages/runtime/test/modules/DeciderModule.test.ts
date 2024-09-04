@@ -1,7 +1,15 @@
 import { NodeLoggerFactory } from "@js-soft/node-logger";
-import { AuthenticationRequestItemJSON, RelationshipTemplateContent, Request, ShareAttributeAcceptResponseItemJSON } from "@nmshd/content";
+import {
+    AuthenticationRequestItemJSON,
+    ConsentRequestItemJSON,
+    CreateAttributeRequestItemJSON,
+    RelationshipAttributeConfidentiality,
+    RelationshipTemplateContent,
+    Request,
+    ShareAttributeAcceptResponseItemJSON
+} from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { GeneralRequestConfig, RequestItemConfig } from "src/modules/decide";
+import { ConsentRequestItemConfig, CreateAttributeRequestItemConfig, GeneralRequestConfig, RequestItemConfig } from "src/modules/decide";
 import {
     DeciderModule,
     DeciderModuleConfigurationOverwrite,
@@ -105,7 +113,6 @@ describe("DeciderModule", () => {
                     peer: "peerAddress",
                     createdAt: "creationDate",
                     "source.type": "Message",
-                    "source.reference": "messageId",
                     "content.expiresAt": "expirationDate",
                     "content.title": "requestTitle",
                     "content.description": "requestDescription",
@@ -121,7 +128,6 @@ describe("DeciderModule", () => {
                     peer: ["peerAddress", "otherAddress"],
                     createdAt: ["creationDate", "otherDate"],
                     "source.type": "Message",
-                    "source.reference": ["messageId", "otherMessageId"],
                     "content.expiresAt": ["expirationDate", "otherDate"],
                     "content.title": ["requestTitle", "otherRequestTitle"],
                     "content.description": ["requestDescription", "otherRequestDescription"],
@@ -182,6 +188,7 @@ describe("DeciderModule", () => {
                         metadata: { aKey: "aValue" }
                     };
                 });
+
                 test("should return true if all properties of RequestItemConfig are set with strings", () => {
                     const requestItemConfigElement: RequestItemConfig = {
                         "content.item.@type": "AuthenticationRequestItem",
@@ -193,6 +200,259 @@ describe("DeciderModule", () => {
 
                     const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, authenticationRequestItem);
                     expect(compatibility).toBe(true);
+                });
+
+                test("should return true if all properties of RequestItemConfig are set with string arrays", () => {
+                    const requestItemConfigElement: RequestItemConfig = {
+                        "content.item.@type": ["AuthenticationRequestItem", "ConsentRequestItem"],
+                        "content.item.mustBeAccepted": true,
+                        "content.item.title": ["requestItemTitle", "anotherRequestItemTitle"],
+                        "content.item.description": ["requestItemDescription", "anotherRequestItemDescription"],
+                        "content.item.metadata": [{ aKey: "aValue" }, { anotherKey: "anotherValue" }]
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, authenticationRequestItem);
+                    expect(compatibility).toBe(true);
+                });
+
+                test("should return true if some properties of RequestItemConfig are not set", () => {
+                    const requestItemConfigElement: RequestItemConfig = {
+                        "content.item.@type": "AuthenticationRequestItem"
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, authenticationRequestItem);
+                    expect(compatibility).toBe(true);
+                });
+
+                test("should return false if a property of RequestItemConfig doesn't match the RequestItem", () => {
+                    const requestItemConfigElement: RequestItemConfig = {
+                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.title": "anotherRequestItemTitle"
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, authenticationRequestItem);
+                    expect(compatibility).toBe(false);
+                });
+
+                test("should return false if a property of RequestItemConfig is set but is undefined in the RequestItem", () => {
+                    const requestItemConfigElement: RequestItemConfig = {
+                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.title": "requestItemTitle"
+                    };
+
+                    const authenticationRequestItemWithoutTitle = {
+                        ...authenticationRequestItem,
+                        title: undefined
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, authenticationRequestItemWithoutTitle);
+                    expect(compatibility).toBe(false);
+                });
+            });
+
+            describe("ConsentRequestItemConfig", () => {
+                let consentRequestItem: ConsentRequestItemJSON;
+
+                beforeAll(() => {
+                    consentRequestItem = {
+                        "@type": "ConsentRequestItem",
+                        consent: "consentText",
+                        link: "consentLink",
+                        mustBeAccepted: true,
+                        requireManualDecision: false,
+                        title: "requestItemTitle",
+                        description: "requestItemDescription",
+                        metadata: { aKey: "aValue" }
+                    };
+                });
+
+                test("should return true if all properties of ConsentRequestItemConfig are set with strings", () => {
+                    const requestItemConfigElement: ConsentRequestItemConfig = {
+                        "content.item.@type": "ConsentRequestItem",
+                        "content.item.consent": "consentText",
+                        "content.item.link": "consentLink",
+                        "content.item.mustBeAccepted": true,
+                        "content.item.title": "requestItemTitle",
+                        "content.item.description": "requestItemDescription",
+                        "content.item.metadata": { aKey: "aValue" }
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, consentRequestItem);
+                    expect(compatibility).toBe(true);
+                });
+
+                test("should return true if all properties of ConsentRequestItemConfig are set with string arrays", () => {
+                    const requestItemConfigElement: ConsentRequestItemConfig = {
+                        "content.item.@type": "ConsentRequestItem",
+                        "content.item.consent": ["consentText", "anotherConsentText"],
+                        "content.item.link": ["consentLink", "anotherConsentLink"],
+                        "content.item.mustBeAccepted": true,
+                        "content.item.title": ["requestItemTitle", "anotherRequestItemTitle"],
+                        "content.item.description": ["requestItemDescription", "anotherRequestItemDescription"],
+                        "content.item.metadata": [{ aKey: "aValue" }, { anotherKey: "anotherValue" }]
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, consentRequestItem);
+                    expect(compatibility).toBe(true);
+                });
+
+                test("should return false if a property of ConsentRequestItemConfig doesn't match the RequestItem", () => {
+                    const requestItemConfigElement: ConsentRequestItemConfig = {
+                        "content.item.@type": "ConsentRequestItem",
+                        "content.item.consent": "anotherConsentText"
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, consentRequestItem);
+                    expect(compatibility).toBe(false);
+                });
+            });
+
+            describe("CreateAttributeRequestItemConfig", () => {
+                let createIdentityAttributeRequestItem: CreateAttributeRequestItemJSON;
+                let createRelationshipAttributeRequestItem: CreateAttributeRequestItemJSON;
+
+                beforeAll(() => {
+                    createIdentityAttributeRequestItem = {
+                        "@type": "CreateAttributeRequestItem",
+                        attribute: {
+                            "@type": "IdentityAttribute",
+                            value: {
+                                "@type": "GivenName",
+                                value: "aGivenName"
+                            },
+                            tags: ["tag1", "tag2"],
+                            owner: "attributeOwner",
+                            validFrom: "validFromDate",
+                            validTo: "validToDate"
+                        },
+                        mustBeAccepted: true,
+                        requireManualDecision: false,
+                        title: "requestItemTitle",
+                        description: "requestItemDescription",
+                        metadata: { aKey: "aValue" }
+                    };
+
+                    createRelationshipAttributeRequestItem = {
+                        "@type": "CreateAttributeRequestItem",
+                        attribute: {
+                            "@type": "RelationshipAttribute",
+                            value: {
+                                "@type": "ProprietaryString",
+                                value: "aProprietaryString",
+                                title: "aProprietaryTitle",
+                                description: "aProprietaryDescription"
+                            },
+                            key: "aKey",
+                            isTechnical: false,
+                            confidentiality: RelationshipAttributeConfidentiality.Public,
+                            owner: "attributeOwner",
+                            validFrom: "validFromDate",
+                            validTo: "validToDate"
+                        },
+                        mustBeAccepted: true,
+                        requireManualDecision: false,
+                        title: "requestItemTitle",
+                        description: "requestItemDescription",
+                        metadata: { aKey: "aValue" }
+                    };
+                });
+
+                test("should return true if all properties of CreateAttributeRequestItemConfig for an IdentityAttribute are set with strings", () => {
+                    const requestItemConfigElement: CreateAttributeRequestItemConfig = {
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.attribute.@type": "IdentityAttribute",
+                        "content.item.attribute.owner": "attributeOwner",
+                        "content.item.attribute.validFrom": "validFromDate",
+                        "content.item.attribute.validTo": "validToDate",
+                        "content.item.attribute.tags": ["tag1", "tag2"],
+                        "content.item.attribute.value.@type": "GivenName",
+                        "content.item.attribute.value.value": "aGivenName",
+                        "content.item.mustBeAccepted": true,
+                        "content.item.title": "requestItemTitle",
+                        "content.item.description": "requestItemDescription",
+                        "content.item.metadata": { aKey: "aValue" }
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, createIdentityAttributeRequestItem);
+                    expect(compatibility).toBe(true);
+                });
+
+                test("should return true if all properties of CreateAttributeRequestItemConfig for a RelationshipAttribute are set with strings", () => {
+                    const requestItemConfigElement: CreateAttributeRequestItemConfig = {
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.attribute.@type": "RelationshipAttribute",
+                        "content.item.attribute.owner": "attributeOwner",
+                        "content.item.attribute.validFrom": "validFromDate",
+                        "content.item.attribute.validTo": "validToDate",
+                        "content.item.attribute.key": "aKey",
+                        "content.item.attribute.isTechnical": false,
+                        "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
+                        "content.item.attribute.value.@type": "ProprietaryString",
+                        "content.item.attribute.value.value": "aProprietaryString",
+                        "content.item.attribute.value.title": "aProprietaryTitle",
+                        "content.item.attribute.value.description": "aProprietaryDescription",
+                        "content.item.mustBeAccepted": true,
+                        "content.item.title": "requestItemTitle",
+                        "content.item.description": "requestItemDescription",
+                        "content.item.metadata": { aKey: "aValue" }
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, createRelationshipAttributeRequestItem);
+                    expect(compatibility).toBe(true);
+                });
+
+                test("should return true if all properties of CreateAttributeRequestItemConfig for an IdentityAttribute are set with string arrays", () => {
+                    const requestItemConfigElement: CreateAttributeRequestItemConfig = {
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.attribute.@type": "IdentityAttribute",
+                        "content.item.attribute.owner": ["attributeOwner", "anotherAttributeOwner"],
+                        "content.item.attribute.validFrom": ["validFromDate", "anotherValidFromDate"],
+                        "content.item.attribute.validTo": ["validToDate", "anotherValidToDate"],
+                        "content.item.attribute.tags": ["tag1", "tag2", "tag3"],
+                        "content.item.attribute.value.@type": ["GivenName", "Surname"],
+                        "content.item.attribute.value.value": ["aGivenName", "anotherGivenName"],
+                        "content.item.mustBeAccepted": true,
+                        "content.item.title": ["requestItemTitle", "anotherRequestItemTitle"],
+                        "content.item.description": ["requestItemDescription", "anotherRequestItemDescription"],
+                        "content.item.metadata": [{ aKey: "aValue" }, { anotherKey: "anotherValue" }]
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, createIdentityAttributeRequestItem);
+                    expect(compatibility).toBe(true);
+                });
+
+                test("should return true if all properties of CreateAttributeRequestItemConfig for a RelationshipAttribute are set with string arrays", () => {
+                    const requestItemConfigElement: CreateAttributeRequestItemConfig = {
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.attribute.@type": "RelationshipAttribute",
+                        "content.item.attribute.owner": ["attributeOwner", "anotherAttributeOwner"],
+                        "content.item.attribute.validFrom": ["validFromDate", "anotherValidFromDate"],
+                        "content.item.attribute.validTo": ["validToDate", "anotherValidToDate"],
+                        "content.item.attribute.key": ["aKey", "anotherKey"],
+                        "content.item.attribute.isTechnical": false,
+                        "content.item.attribute.confidentiality": [RelationshipAttributeConfidentiality.Public, RelationshipAttributeConfidentiality.Protected],
+                        "content.item.attribute.value.@type": ["ProprietaryString", "ProprietaryLanguage"],
+                        "content.item.attribute.value.value": ["aProprietaryString", "anotherProprietaryString"],
+                        "content.item.attribute.value.title": ["aProprietaryTitle", "anotherProprietaryTitle"],
+                        "content.item.attribute.value.description": ["aProprietaryDescription", "anotherProprietaryDescription"],
+                        "content.item.mustBeAccepted": true,
+                        "content.item.title": ["requestItemTitle", "anotherRequestItemTitle"],
+                        "content.item.description": ["requestItemDescription", "anotherRequestItemDescription"],
+                        "content.item.metadata": [{ aKey: "aValue" }, { anotherKey: "anotherValue" }]
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, createRelationshipAttributeRequestItem);
+                    expect(compatibility).toBe(true);
+                });
+
+                test("should return false if a property of CreateAttributeRequestItemConfig doesn't match the RequestItem", () => {
+                    const requestItemConfigElement: CreateAttributeRequestItemConfig = {
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.attribute.@type": "RelationshipAttribute"
+                    };
+
+                    const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, createIdentityAttributeRequestItem);
+                    expect(compatibility).toBe(false);
                 });
             });
         });
@@ -298,7 +558,7 @@ describe("DeciderModule", () => {
                     {
                         requestConfig: {
                             "content.item.@type": "ShareAttributeRequestItem",
-                            "attribute.value.@type": "IdentityFileReference"
+                            "content.item.attribute.value.@type": "IdentityFileReference"
                         },
                         responseConfig: {
                             accept: true

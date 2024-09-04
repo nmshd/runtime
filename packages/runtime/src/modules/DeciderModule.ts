@@ -120,7 +120,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     }
 
     private checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
-        let compatibility = true;
+        let compatible = true;
         for (const property in requestConfigElement) {
             const unformattedRequestConfigProperty = requestConfigElement[property as keyof RequestConfig];
             if (!unformattedRequestConfigProperty) {
@@ -130,19 +130,25 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
 
             const unformattedRequestProperty = this.getNestedProperty(requestOrRequestItem, property);
             if (!unformattedRequestProperty) {
-                compatibility = false;
+                compatible = false;
                 break;
             }
             const requestProperty = this.makeObjectsToStrings(unformattedRequestProperty);
 
-            if (Array.isArray(requestConfigProperty)) {
-                compatibility &&= requestConfigProperty.includes(requestProperty);
-            } else {
-                compatibility &&= requestConfigProperty === requestProperty;
+            if (property.endsWith("tags")) {
+                compatible &&= this.checkTagCompatibility(requestConfigProperty, requestProperty);
+                if (!compatible) break;
+                continue;
             }
-            if (!compatibility) break;
+
+            if (Array.isArray(requestConfigProperty)) {
+                compatible &&= requestConfigProperty.includes(requestProperty);
+            } else {
+                compatible &&= requestConfigProperty === requestProperty;
+            }
+            if (!compatible) break;
         }
-        return compatibility;
+        return compatible;
     }
 
     private makeObjectsToStrings(data: any) {
@@ -156,6 +162,12 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     private getNestedProperty(object: any, path: string): any {
         const nestedProperty = path.split(".").reduce((currentObject, key) => currentObject?.[key], object);
         return nestedProperty;
+    }
+
+    // at least one tag must match one of the tags
+    private checkTagCompatibility(requestConfigTags: string[], requestTags: string[]): boolean {
+        const atLeastOneMatchingTag = requestConfigTags.some((tag) => requestTags.includes(tag));
+        return atLeastOneMatchingTag;
     }
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {
