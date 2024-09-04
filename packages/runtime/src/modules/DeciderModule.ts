@@ -10,7 +10,22 @@ import {
 import { ModuleConfiguration, RuntimeModule } from "../extensibility";
 import { RuntimeServices } from "../Runtime";
 import { LocalRequestDTO } from "../types";
-import { GeneralRequestConfig, isGeneralRequestConfig, isRequestItemDerivationConfig, RequestConfig, RequestItemDerivationConfig, ResponseConfig } from "./decide";
+import {
+    GeneralRequestConfig,
+    isDeleteAttributeAcceptResponseConfig,
+    isFreeTextAcceptResponseConfig,
+    isGeneralRequestConfig,
+    isProposeAttributeWithExistingAttributeAcceptResponseConfig,
+    isProposeAttributeWithNewAttributeAcceptResponseConfig,
+    isReadAttributeWithExistingAttributeAcceptResponseConfig,
+    isReadAttributeWithNewAttributeAcceptResponseConfig,
+    isRejectResponseConfig,
+    isRequestItemDerivationConfig,
+    isSimpleAcceptResponseConfig,
+    RequestConfig,
+    RequestItemDerivationConfig,
+    ResponseConfig
+} from "./decide";
 
 // simple OR-list of AND-elements with decreasing priority
 export interface DeciderModuleConfiguration extends ModuleConfiguration {
@@ -33,6 +48,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     public start(): void {
         this.subscribeToEvent(IncomingRequestStatusChangedEvent, this.handleIncomingRequestStatusChanged.bind(this));
     }
+
+    // TODO: check canDecide
 
     private async handleIncomingRequestStatusChanged(event: IncomingRequestStatusChangedEvent) {
         if (event.data.newStatus !== LocalRequestStatus.DecisionRequired) return;
@@ -61,7 +78,13 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             if (isGeneralRequestConfig(requestConfigElement)) {
                 const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
                 if (generalRequestIsCompatible) {
-                    // TODO: apply ResponseConfig, check if it's valid, return response
+                    const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
+                    if (!responseConfigIsValid) {
+                        // TODO:
+                        throw Error();
+                    }
+                    // TODO:
+                    const result = this.applyGeneralResponseConfig();
                     return { automaticallyDecided: true };
                 }
             }
@@ -169,6 +192,27 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const atLeastOneMatchingTag = requestConfigTags.some((tag) => requestTags.includes(tag));
         return atLeastOneMatchingTag;
     }
+
+    private validateResponseConfigCompatibility(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
+        if (isRejectResponseConfig(responseConfig)) return true;
+
+        if (isGeneralRequestConfig(requestConfig)) return isSimpleAcceptResponseConfig(responseConfig);
+
+        switch (requestConfig["content.item.@type"]) {
+            case "DeleteAttributeRequestItem":
+                return isDeleteAttributeAcceptResponseConfig(responseConfig);
+            case "FreeTextRequestItem":
+                return isFreeTextAcceptResponseConfig(responseConfig);
+            case "ProposeAttributeRequestItem":
+                return isProposeAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
+            case "ReadAttributeRequestItem":
+                return isReadAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isReadAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
+            default:
+                return isSimpleAcceptResponseConfig(responseConfig);
+        }
+    }
+
+    private applyGeneralResponseConfig() {}
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {
         const request = event.data.request;

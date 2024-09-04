@@ -104,7 +104,7 @@ export interface ReadAttributeRequestItemConfig extends RequestItemConfig {
 }
 
 export interface RegisterAttributeListenerRequestItemConfig extends RequestItemConfig {
-    "content.item.@type": "ReadAttributeRequestItem";
+    "content.item.@type": "RegisterAttributeListenerRequestItem";
     "content.item.query.@type"?: "IdentityAttributeQuery" | "RelationshipAttributeQuery" | "ThirdPartyRelationshipAttributeQuery" | "IQLQuery";
     "content.item.query.validFrom"?: string | string[];
     "content.item.query.validTo"?: string | string[];
