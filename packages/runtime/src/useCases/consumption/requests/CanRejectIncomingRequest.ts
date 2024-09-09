@@ -1,6 +1,7 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequest, LocalRequestStatus } from "@nmshd/consumption";
-import { CoreId, RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RequestValidationResultDTO } from "../../../types";
 import { RuntimeErrors, UseCase } from "../../common";
