@@ -38,13 +38,13 @@ describe("AnonymousTokenController", function () {
             ephemeral: false,
             forIdentity: sender.identity.address
         });
-        const reference = sentToken.toTokenReference().truncate();
+
         await TestUtil.expectThrowsAsync(async () => {
-            await anonymousTokenController.loadPeerTokenByTruncated(reference);
-        }, /transport.general.notIntendedForYou/);
+            await anonymousTokenController.loadPeerToken(sentToken.id, sentToken.secretKey, sender.identity.address);
+        }, "transport.general.notIntendedForYou");
     });
 
-    test("should throw when loading a personalized token and it's uncaught before reaching the BB", async function () {
+    test("should throw when loading a personalized token and it's uncaught before reaching the backbone", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = Serializable.fromAny({ content: "TestToken" });
         const sentToken = await sender.tokens.sendToken({
@@ -55,7 +55,7 @@ describe("AnonymousTokenController", function () {
         });
 
         await TestUtil.expectThrowsAsync(async () => {
-            await anonymousTokenController.loadPeerToken(sentToken.id, sentToken.secretKey, sender.identity.address);
-        }, /transport.general.notIntendedForYou/);
+            await anonymousTokenController.loadPeerToken(sentToken.id, sentToken.secretKey);
+        }, "error.platform.recordNotFound");
     });
 });

@@ -184,9 +184,9 @@ describe("TokenController", function () {
             ephemeral: false,
             forIdentity: sender.identity.address
         });
-        const reference = sentToken.toTokenReference().truncate();
+
         await TestUtil.expectThrowsAsync(async () => {
-            await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+            await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false, sender.identity.address);
         }, "transport.general.notIntendedForYou");
     });
 
@@ -201,10 +201,7 @@ describe("TokenController", function () {
         });
 
         await TestUtil.expectThrowsAsync(async () => {
-            await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false, sender.identity.address);
-        }, "transport.general.notIntendedForYou");
-        await TestUtil.expectThrowsAsync(async () => {
-            await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false, recipient.identity.address);
+            await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false);
         }, "error.platform.recordNotFound");
     });
 
