@@ -13,6 +13,7 @@ export interface IRelationshipTemplate extends ICoreSynchronizable {
     cachedAt?: ICoreDate;
     metadata?: any;
     metadataModifiedAt?: ICoreDate;
+    backbone: string;
 }
 
 @type("RelationshipTemplate")
@@ -45,12 +46,16 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
     @serialize()
     public metadataModifiedAt?: CoreDate;
 
+    @validate()
+    @serialize()
+    public backbone: string;
+
     public static from(value: IRelationshipTemplate): RelationshipTemplate {
         return this.fromAny(value);
     }
 
     public toRelationshipTemplateReference(): RelationshipTemplateReference {
-        return RelationshipTemplateReference.from({ id: this.id, key: this.secretKey });
+        return RelationshipTemplateReference.from({ id: this.id, key: this.secretKey, backbone: this.backbone });
     }
 
     public truncate(): string {

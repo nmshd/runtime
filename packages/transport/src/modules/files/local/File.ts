@@ -13,6 +13,7 @@ export interface IFile extends ICoreSynchronizable {
     cachedAt?: ICoreDate;
     metadata?: any;
     metadataModifiedAt?: ICoreDate;
+    backbone: string;
 }
 
 @type("File")
@@ -44,12 +45,16 @@ export class File extends CoreSynchronizable implements IFile {
     @serialize()
     public metadataModifiedAt?: CoreDate;
 
+    @validate()
+    @serialize()
+    public backbone: string;
+
     public static from(value: IFile): File {
         return this.fromAny(value);
     }
 
     public toFileReference(): FileReference {
-        return FileReference.from({ id: this.id, key: this.secretKey });
+        return FileReference.from({ id: this.id, key: this.secretKey, backbone: this.backbone });
     }
 
     public truncate(): string {

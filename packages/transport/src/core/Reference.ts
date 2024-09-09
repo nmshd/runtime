@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
-import { CoreId, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { CoreIdHelper } from "./CoreIdHelper";
 import { TransportCoreErrors } from "./TransportCoreErrors";
@@ -7,6 +7,8 @@ import { TransportCoreErrors } from "./TransportCoreErrors";
 export interface IReference extends ISerializable {
     id: ICoreId;
     key: ICryptoSecretKey;
+    backbone: string;
+    forIdentity?: ICoreAddress;
 }
 
 export class Reference extends Serializable implements IReference {
@@ -18,8 +20,18 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public key: CryptoSecretKey;
 
+    @validate({ nullable: true })
+    @serialize()
+    public forIdentity?: CoreAddress;
+
+    @validate()
+    @serialize()
+    public backbone: string;
+
     public truncate(): string {
-        const truncatedReference = CoreBuffer.fromUtf8(`${this.id.toString()}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}`);
+        const truncatedReference = CoreBuffer.fromUtf8(
+            `${this.id.toString()}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentity?.toString() ?? ""}|${this.backbone}`
+        );
         return truncatedReference.toBase64URL();
     }
 
@@ -27,7 +39,7 @@ export class Reference extends Serializable implements IReference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
 
-        if (splitted.length !== 3) {
+        if (splitted.length !== 5) {
             throw TransportCoreErrors.general.invalidTruncatedReference();
         }
 
@@ -35,6 +47,8 @@ export class Reference extends Serializable implements IReference {
             const id = CoreId.from(splitted[0]);
             const alg = parseInt(splitted[1]);
             const key = splitted[2];
+            const forIdentity = splitted[3] ? CoreAddress.from(splitted[3]) : undefined;
+            const backbone = splitted[4];
             const secretKey = CryptoSecretKey.from({
                 algorithm: alg,
                 secretKey: CoreBuffer.fromBase64URL(key)
@@ -42,7 +56,9 @@ export class Reference extends Serializable implements IReference {
 
             return this.from({
                 id: CoreId.from(id),
-                key: secretKey
+                key: secretKey,
+                forIdentity,
+                backbone
             });
         } catch (e) {
             throw TransportCoreErrors.general.invalidTruncatedReference();

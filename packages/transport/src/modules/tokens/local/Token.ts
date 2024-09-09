@@ -13,6 +13,7 @@ export interface IToken extends ICoreSynchronizable {
     cachedAt?: ICoreDate;
     metadata?: any;
     metadataModifiedAt?: ICoreDate;
+    backbone: string;
 }
 
 @type("Token")
@@ -45,12 +46,16 @@ export class Token extends CoreSynchronizable implements IToken {
     @serialize()
     public metadataModifiedAt?: CoreDate;
 
+    @validate()
+    @serialize()
+    public backbone: string;
+
     public static from(value: IToken): Token {
         return this.fromAny(value);
     }
 
     public toTokenReference(): TokenReference {
-        return TokenReference.from({ id: this.id, key: this.secretKey });
+        return TokenReference.from({ id: this.id, key: this.secretKey, backbone: this.backbone });
     }
 
     public truncate(): string {
