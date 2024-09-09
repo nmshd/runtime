@@ -1,5 +1,7 @@
-import { LocalRequestStatus, LocalResponse } from "@nmshd/consumption";
+import { Result } from "@js-soft/ts-utils";
+import { DecideRequestItemGroupParametersJSON, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import { RequestItemGroupJSON, RequestItemJSON, RequestItemJSONDerivations } from "@nmshd/content";
+import { RuntimeErrors, RuntimeServices } from "..";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -8,10 +10,10 @@ import {
     RelationshipTemplateProcessedResult
 } from "../events";
 import { ModuleConfiguration, RuntimeModule } from "../extensibility";
-import { RuntimeServices } from "../Runtime";
 import { LocalRequestDTO } from "../types";
 import {
     GeneralRequestConfig,
+    isAcceptResponseConfig,
     isDeleteAttributeAcceptResponseConfig,
     isFreeTextAcceptResponseConfig,
     isGeneralRequestConfig,
@@ -40,6 +42,8 @@ export interface AutomationConfig {
     responseConfig: ResponseConfig;
 }
 
+// TODO: check kind of logging throughout file
+
 export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     public init(): void {
         // Nothing to do here
@@ -49,27 +53,28 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         this.subscribeToEvent(IncomingRequestStatusChangedEvent, this.handleIncomingRequestStatusChanged.bind(this));
     }
 
-    // TODO: check canDecide
-
     private async handleIncomingRequestStatusChanged(event: IncomingRequestStatusChangedEvent) {
         if (event.data.newStatus !== LocalRequestStatus.DecisionRequired) return;
 
         if (event.data.request.content.items.some(flaggedAsManualDecisionRequired)) return await this.requireManualDecision(event);
 
         // Request is only decided automatically, if all its items can be processed automatically
-        const automationResult = this.tryToAutomaticallyDecideRequest(event.data.request);
-        if (automationResult.automaticallyDecided) {
-            // TODO: move request to status Decided and return
+        const automationResult = await this.automaticallyDecideRequest(event);
+        if (automationResult.isSuccess) {
+            // TODO: handleIncomingRequestStatusChanged (RequestModule) (no return)
         }
 
+        this.logger.error(automationResult.error);
         return await this.requireManualDecision(event);
     }
 
-    public tryToAutomaticallyDecideRequest(request: LocalRequestDTO): { automaticallyDecided: boolean; response?: LocalResponse } {
-        if (!this.configuration.automationConfig) return { automaticallyDecided: false };
+    public async automaticallyDecideRequest(event: IncomingRequestStatusChangedEvent): Promise<Result<LocalRequestDTO>> {
+        if (!this.configuration.automationConfig) return Result.fail(RuntimeErrors.deciderModule.doesNotHaveAutomationConfig());
 
-        const requestItems = this.getRequestItemsFromRequest(request);
-        const requestItemIsAutomaticallyDecidable = Array(requestItems.length).fill(false);
+        const request = event.data.request;
+        const itemsOfRequest = request.content.items;
+
+        let decideRequestItemParameters = this.createArrayWithSameDimension(itemsOfRequest, undefined);
 
         for (const automationConfigElement of this.configuration.automationConfig) {
             const requestConfigElement = automationConfigElement.requestConfig;
@@ -78,49 +83,87 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             if (isGeneralRequestConfig(requestConfigElement)) {
                 const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
                 if (generalRequestIsCompatible) {
+                    // TODO: return early?
                     const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
                     if (!responseConfigIsValid) {
-                        // TODO:
-                        throw Error();
+                        this.logger.error(RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig(requestConfigElement, responseConfigElement));
+                        continue;
                     }
-                    // TODO:
-                    const result = this.applyGeneralResponseConfig();
-                    return { automaticallyDecided: true };
+
+                    const applyGeneralResponseConfigResult = await this.applyGeneralResponseConfig(event, responseConfigElement);
+                    if (applyGeneralResponseConfigResult.isError) {
+                        this.logger.error(applyGeneralResponseConfigResult.error.message);
+                        continue;
+                    }
+
+                    return applyGeneralResponseConfigResult;
                 }
             }
 
             if (isRequestItemDerivationConfig(requestConfigElement)) {
-                for (let i = 0; i < requestItems.length; i++) {
-                    const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, requestItems[i]);
-                    if (requestItemIsCompatible) {
-                        const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
-                        if (generalRequestIsCompatible) {
-                            requestItemIsAutomaticallyDecidable[i] = true;
-                            // TODO: apply ResponseConfig, check if it's valid, store response
+                const checkCompatibilityResult = this.checkRequestItemCompatibilityAndApplyReponseConfig(
+                    itemsOfRequest,
+                    decideRequestItemParameters,
+                    request,
+                    requestConfigElement,
+                    responseConfigElement
+                );
+                if (checkCompatibilityResult.isError) {
+                    this.logger.error(checkCompatibilityResult.error);
+                    continue;
+                }
+                decideRequestItemParameters = checkCompatibilityResult.value;
+            }
+        }
+
+        if (this.containsDeep(decideRequestItemParameters, (element) => element === undefined)) {
+            return Result.fail(RuntimeErrors.deciderModule.someItemsOfRequestCouldNotBeDecidedAutomatically());
+        }
+
+        const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
+        return decideRequestResult;
+    }
+
+    private checkRequestItemCompatibilityAndApplyReponseConfig(
+        itemsOfRequest: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
+        parametersToDecideRequest: any[],
+        request: LocalRequestDTO,
+        requestConfigElement: RequestItemDerivationConfig,
+        responseConfigElement: ResponseConfig
+    ): Result<ResponseConfig[]> {
+        for (let i = 0; i < itemsOfRequest.length; i++) {
+            const item = itemsOfRequest[i];
+            if (Array.isArray(item)) {
+                this.checkRequestItemCompatibilityAndApplyReponseConfig(item, parametersToDecideRequest[i], request, requestConfigElement, responseConfigElement);
+            } else {
+                if (parametersToDecideRequest[i]) continue; // there was already a fitting config found for this RequestItem
+                const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
+                if (requestItemIsCompatible) {
+                    const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
+                    if (generalRequestIsCompatible) {
+                        const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
+                        if (!responseConfigIsValid) {
+                            return Result.fail(RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig(requestConfigElement, responseConfigElement));
                         }
+                        parametersToDecideRequest[i] = responseConfigElement;
                     }
                 }
             }
         }
-
-        if (requestItemIsAutomaticallyDecidable.some((value) => value === false)) return { automaticallyDecided: false };
-
-        // TODO: create Response and return it
-        return { automaticallyDecided: true };
+        return Result.ok(parametersToDecideRequest);
     }
 
-    private getRequestItemsFromRequest(request: LocalRequestDTO): RequestItemJSONDerivations[] {
-        const requestItems = [];
+    private createArrayWithSameDimension(array: any[], initialValue: any): any[] {
+        return array.map((element) => {
+            if (Array.isArray(element)) {
+                return this.createArrayWithSameDimension(element, initialValue);
+            }
+            return initialValue;
+        });
+    }
 
-        const itemsOfRequest = request.content.items.filter((item) => item["@type"] !== "RequestItemGroup") as RequestItemJSONDerivations[];
-        requestItems.push(...itemsOfRequest);
-
-        const itemGroupsOfRequest = request.content.items.filter((item) => item["@type"] === "RequestItemGroup") as RequestItemGroupJSON[];
-        for (const itemGroup of itemGroupsOfRequest) {
-            requestItems.push(...itemGroup.items);
-        }
-
-        return requestItems;
+    private containsDeep(nestedArray: any[], callback: (element: any) => boolean): boolean {
+        return nestedArray.some((element) => (Array.isArray(element) ? this.containsDeep(element, callback) : callback(element)));
     }
 
     public checkGeneralRequestCompatibility(generalRequestConfigElement: GeneralRequestConfig, request: LocalRequestDTO): boolean {
@@ -193,7 +236,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return atLeastOneMatchingTag;
     }
 
-    private validateResponseConfigCompatibility(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
+    // TODO: check if this can be done earlier
+    public validateResponseConfigCompatibility(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
         if (isRejectResponseConfig(responseConfig)) return true;
 
         if (isGeneralRequestConfig(requestConfig)) return isSimpleAcceptResponseConfig(responseConfig);
@@ -212,7 +256,54 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         }
     }
 
-    private applyGeneralResponseConfig() {}
+    private async applyGeneralResponseConfig(event: IncomingRequestStatusChangedEvent, responseConfigElement: ResponseConfig): Promise<Result<LocalRequestDTO>> {
+        if (!(isRejectResponseConfig(responseConfigElement) || isSimpleAcceptResponseConfig(responseConfigElement))) {
+            return Result.fail(RuntimeErrors.deciderModule.responseConfigDoesNotMatchRequest(responseConfigElement, event.data.request));
+        }
+
+        const request = event.data.request;
+        const decideRequestItemParameters = this.createArrayWithSameDimension(request.content.items, responseConfigElement);
+
+        const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
+        return decideRequestResult;
+    }
+
+    private async decideRequest(
+        event: IncomingRequestStatusChangedEvent,
+        decideRequestItemParameters: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
+    ): Promise<Result<LocalRequestDTO>> {
+        const services = await this.runtime.getServices(event.eventTargetAddress);
+        const request = event.data.request;
+
+        if (!this.containsDeep(decideRequestItemParameters, isAcceptResponseConfig)) {
+            const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters });
+            if (canRejectResult.isError) {
+                // TODO: we could also return the error result directly
+                return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.error.message));
+            }
+
+            const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters });
+            if (rejectResult.isError) {
+                return Result.fail(RuntimeErrors.deciderModule.rejectRequestFailed(request.id, rejectResult.error.message));
+            }
+
+            const localRequestWithResponse = rejectResult.value;
+            return Result.ok(localRequestWithResponse);
+        }
+
+        const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters });
+        if (canAcceptResult.isError) {
+            return Result.fail(RuntimeErrors.deciderModule.canAcceptRequestFailed(request.id, canAcceptResult.error.message));
+        }
+
+        const acceptResult = await services.consumptionServices.incomingRequests.accept({ requestId: request.id, items: decideRequestItemParameters });
+        if (acceptResult.isError) {
+            return Result.fail(RuntimeErrors.deciderModule.acceptRequestFailed(request.id, acceptResult.error.message));
+        }
+
+        const localRequestWithResponse = acceptResult.value;
+        return Result.ok(localRequestWithResponse);
+    }
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {
         const request = event.data.request;

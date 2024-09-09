@@ -3,13 +3,28 @@ import {
     AuthenticationRequestItemJSON,
     ConsentRequestItemJSON,
     CreateAttributeRequestItemJSON,
+    IdentityAttribute,
     RelationshipAttributeConfidentiality,
     RelationshipTemplateContent,
     Request,
     ShareAttributeAcceptResponseItemJSON
 } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { ConsentRequestItemConfig, CreateAttributeRequestItemConfig, GeneralRequestConfig, RequestItemConfig } from "src/modules/decide";
+import {
+    AcceptResponseConfig,
+    AuthenticationRequestItemConfig,
+    ConsentRequestItemConfig,
+    CreateAttributeRequestItemConfig,
+    DeleteAttributeAcceptResponseConfig,
+    FreeTextAcceptResponseConfig,
+    GeneralRequestConfig,
+    ProposeAttributeWithExistingAttributeAcceptResponseConfig,
+    ProposeAttributeWithNewAttributeAcceptResponseConfig,
+    ReadAttributeWithExistingAttributeAcceptResponseConfig,
+    ReadAttributeWithNewAttributeAcceptResponseConfig,
+    RejectResponseConfig,
+    RequestItemConfig
+} from "src/modules/decide";
 import {
     DeciderModule,
     DeciderModuleConfigurationOverwrite,
@@ -454,6 +469,82 @@ describe("DeciderModule", () => {
                     const compatibility = deciderModule.checkRequestItemCompatibility(requestItemConfigElement, createIdentityAttributeRequestItem);
                     expect(compatibility).toBe(false);
                 });
+            });
+            // TODO: check other RequestItemConfigs
+        });
+
+        describe("validateResponseConfigCompatibility", () => {
+            const rejectResponseConfig: RejectResponseConfig = {
+                accept: false
+            };
+
+            const simpleAcceptResponseConfig: AcceptResponseConfig = {
+                accept: true
+            };
+
+            const deleteAttributeAcceptResponseConfig: DeleteAttributeAcceptResponseConfig = {
+                accept: true,
+                deletionDate: "deletionDate"
+            };
+
+            const freeTextAcceptResponseConfig: FreeTextAcceptResponseConfig = {
+                accept: true,
+                freeText: "freeText"
+            };
+
+            const proposeAttributeWithExistingAttributeAcceptResponseConfig: ProposeAttributeWithExistingAttributeAcceptResponseConfig = {
+                accept: true,
+                attributeId: "attributeId"
+            };
+
+            const proposeAttributeWithNewAttributeAcceptResponseConfig: ProposeAttributeWithNewAttributeAcceptResponseConfig = {
+                accept: true,
+                attribute: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: "owner"
+                })
+            };
+
+            const readAttributeWithExistingAttributeAcceptResponseConfig: ReadAttributeWithExistingAttributeAcceptResponseConfig = {
+                accept: true,
+                existingAttributeId: "attributeId"
+            };
+
+            const readAttributeWithNewAttributeAcceptResponseConfig: ReadAttributeWithNewAttributeAcceptResponseConfig = {
+                accept: true,
+                newAttribute: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: "owner"
+                })
+            };
+
+            const generalRequestConfig: GeneralRequestConfig = {
+                peer: ["peerA", "peerB"]
+            };
+
+            const authenticationRequestItemConfig: AuthenticationRequestItemConfig = {
+                "content.item.@type": "AuthenticationRequestItem"
+            };
+
+            // TODO: add more tests
+            test.each([
+                [generalRequestConfig, rejectResponseConfig, true],
+                [generalRequestConfig, simpleAcceptResponseConfig, true],
+                [generalRequestConfig, deleteAttributeAcceptResponseConfig, false],
+                [generalRequestConfig, freeTextAcceptResponseConfig, false],
+                [generalRequestConfig, proposeAttributeWithExistingAttributeAcceptResponseConfig, false],
+                [generalRequestConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
+                [generalRequestConfig, readAttributeWithExistingAttributeAcceptResponseConfig, false],
+                [generalRequestConfig, readAttributeWithNewAttributeAcceptResponseConfig, false]
+            ])("%p and %p should return %p as validation result", (requestConfig, responseConfig, expectedCompatibility) => {
+                const result = deciderModule.validateResponseConfigCompatibility(requestConfig, responseConfig);
+                expect(result).toBe(expectedCompatibility);
             });
         });
     });

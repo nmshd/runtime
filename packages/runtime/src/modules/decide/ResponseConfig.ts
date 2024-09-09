@@ -14,6 +14,10 @@ export interface AcceptResponseConfig {
     accept: true;
 }
 
+export function isAcceptResponseConfig(input: any): input is AcceptResponseConfig {
+    return input.accept === true;
+}
+
 export function isSimpleAcceptResponseConfig(input: any): input is AcceptResponseConfig {
     return input.accept === true && Object.keys(input).length === 1;
 }

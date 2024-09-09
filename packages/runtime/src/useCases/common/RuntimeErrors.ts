@@ -1,6 +1,8 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { RequestConfig, ResponseConfig } from "../../modules/decide";
+import { LocalRequestDTO } from "../../types";
 import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
 
 class General {
@@ -234,6 +236,46 @@ class IdentityDeletionProcess {
     }
 }
 
+class DeciderModule {
+    public doesNotHaveAutomationConfig() {
+        return new ApplicationError("error.runtime.decide.doesNotHaveAutomationConfig", "The Request can't be decided automatically, since no automationConfig was provided.");
+    }
+
+    public someItemsOfRequestCouldNotBeDecidedAutomatically() {
+        return new ApplicationError(
+            "error.runtime.decide.someItemsOfRequestCouldNotBeDecidedAutomatically",
+            "The Request can't be decided automatically, since there wasn't a suitable automationConfig provided for every RequestItem."
+        );
+    }
+
+    public requestConfigDoesNotMatchResponseConfig(requestConfig: RequestConfig, responseConfig: ResponseConfig) {
+        return new ApplicationError(
+            "error.runtime.decide.requestConfigDoesNotMatchResponseConfig",
+            `The RequestConfig (${requestConfig}) does not match the ResponseConfig (${responseConfig}).`
+        );
+    }
+
+    public responseConfigDoesNotMatchRequest(responseConfig: ResponseConfig, request: LocalRequestDTO) {
+        return new ApplicationError("error.runtime.decide.responseConfigDoesNotMatchRequest", `The ResponseConfig (${responseConfig}) does not match the Request ${request}.`);
+    }
+
+    public canRejectRequestFailed(requestId: string, errorMessage: string) {
+        return new ApplicationError("error.runtime.decide.canRejectRequestFailed", `Can not reject Request ${requestId}: ${errorMessage}`);
+    }
+
+    public canAcceptRequestFailed(requestId: string, errorMessage: string) {
+        return new ApplicationError("error.runtime.decide.canAcceptRequestFailed", `Can not accept Request ${requestId}: ${errorMessage}`);
+    }
+
+    public rejectRequestFailed(requestId: string, errorMessage: string) {
+        return new ApplicationError("error.runtime.decide.rejectRequestFailed", `An error occured trying to reject Request ${requestId}: ${errorMessage}`);
+    }
+
+    public acceptRequestFailed(requestId: string, errorMessage: string) {
+        return new ApplicationError("error.runtime.decide.acceptRequestFailed", `An error occured trying to accept Request ${requestId}: ${errorMessage}`);
+    }
+}
+
 export class RuntimeErrors {
     public static readonly general = new General();
     public static readonly serval = new Serval();
@@ -246,4 +288,5 @@ export class RuntimeErrors {
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
     public static readonly identityDeletionProcess = new IdentityDeletionProcess();
+    public static readonly deciderModule = new DeciderModule();
 }
