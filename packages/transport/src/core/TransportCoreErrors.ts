@@ -204,6 +204,10 @@ class General {
             `You tried to access personalized content '${id}'. You are either not logged in or the content is not intended for you.`
         );
     }
+
+    public accountControllerInitialSyncFailed() {
+        return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
+    }
 }
 
 export class TransportCoreErrors {
