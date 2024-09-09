@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
-import { CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { CoreIdHelper } from "./CoreIdHelper";
 import { TransportCoreErrors } from "./TransportCoreErrors";
@@ -7,7 +7,6 @@ import { TransportCoreErrors } from "./TransportCoreErrors";
 export interface IReference extends ISerializable {
     id: ICoreId;
     key: ICryptoSecretKey;
-    forIdentity?: ICoreAddress;
 }
 
 export class Reference extends Serializable implements IReference {
