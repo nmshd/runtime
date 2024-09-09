@@ -157,7 +157,6 @@ export class TokenController extends TransportController {
         }
 
         const cachedToken = await this.decryptToken(response, token.secretKey);
-        cachedToken.forIdentity = response.forIdentity ? CoreAddress.from(response.forIdentity) : undefined;
         token.setCache(cachedToken);
 
         // Update isOwn, as it is possible that the identity receives an own token
@@ -179,7 +178,8 @@ export class TokenController extends TransportController {
             expiresAt: CoreDate.from(response.expiresAt),
             createdBy: CoreAddress.from(response.createdBy),
             createdByDevice: CoreId.from(response.createdByDevice),
-            content: plaintextTokenContent
+            content: plaintextTokenContent,
+            forIdentity: response.forIdentity ? CoreAddress.from(response.forIdentity) : undefined
         });
         return cachedToken;
     }
@@ -190,7 +190,8 @@ export class TokenController extends TransportController {
     }
 
     public async loadPeerTokenByReference(tokenReference: TokenReference, ephemeral: boolean): Promise<Token> {
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key, ephemeral, tokenReference.forIdentity);
+        // TODO: add the token reference forIdentity once available
+        return await this.loadPeerToken(tokenReference.id, tokenReference.key, ephemeral);
     }
 
     public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentity?: CoreAddress): Promise<Token> {

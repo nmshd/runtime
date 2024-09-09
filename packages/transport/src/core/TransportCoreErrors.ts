@@ -201,7 +201,7 @@ class General {
     public notIntendedForYou(id: string) {
         return new CoreError(
             "error.transport.general.notIntendedForYou",
-            `You tried to access personalized content '${id}'. You are either not logged in or the content is not for you.`
+            `You tried to access personalized content '${id}'. You are either not logged in or the content is not intended for you.`
         );
     }
 }

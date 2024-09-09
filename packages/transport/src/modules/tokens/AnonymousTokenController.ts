@@ -19,7 +19,8 @@ export class AnonymousTokenController {
     }
 
     public async loadPeerTokenByReference(tokenReference: TokenReference): Promise<Token> {
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key, tokenReference.forIdentity);
+        // TODO: add the token reference forIdentity once available
+        return await this.loadPeerToken(tokenReference.id, tokenReference.key);
     }
 
     public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentity?: CoreAddress): Promise<Token> {

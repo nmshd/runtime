@@ -187,10 +187,10 @@ describe("TokenController", function () {
         const reference = sentToken.toTokenReference().truncate();
         await TestUtil.expectThrowsAsync(async () => {
             await recipient.tokens.loadPeerTokenByTruncated(reference, false);
-        }, /transport.general.notIntendedForYou/);
+        }, "transport.general.notIntendedForYou");
     });
 
-    test("should throw if a personalized token is not loaded by the right identity and it's uncaught before reaching the BB", async function () {
+    test("should throw if a personalized token is not loaded by the right identity and it's uncaught before reaching the Backbone", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = Serializable.fromAny({ content: "TestToken" });
         const sentToken = await sender.tokens.sendToken({
@@ -202,10 +202,10 @@ describe("TokenController", function () {
 
         await TestUtil.expectThrowsAsync(async () => {
             await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false, sender.identity.address);
-        }, /transport\.general\.notIntendedForYou/);
+        }, "transport.general.notIntendedForYou");
         await TestUtil.expectThrowsAsync(async () => {
             await recipient.tokens.loadPeerToken(sentToken.id, sentToken.secretKey, false, recipient.identity.address);
-        }, /error\.platform\.recordNotFound/);
+        }, "error.platform.recordNotFound");
     });
 
     test("should delete a token", async function () {
