@@ -183,8 +183,8 @@ export class AccountController {
             await this.devices.update(device!);
         }
 
-        await this.syncDatawallet().catch((error) => {
-            this._log.error("Initial sync failed.", error);
+        await this.syncDatawallet().catch(() => {
+            throw TransportCoreErrors.general.accountControllerInitialSyncFailed();
         });
 
         return this;
