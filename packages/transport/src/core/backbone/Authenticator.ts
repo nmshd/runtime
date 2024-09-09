@@ -1,6 +1,6 @@
 import { ILogger } from "@js-soft/logging-abstractions";
+import { CoreDate } from "@nmshd/core-types";
 import { AccountController } from "../../modules";
-import { CoreDate } from "../types/CoreDate";
 import { AuthClient } from "./AuthClient";
 import { IRESTClientConfig } from "./RESTClient";
 import { CredentialsBasic } from "./RESTClientAuthenticate";

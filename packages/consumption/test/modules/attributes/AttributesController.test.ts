@@ -18,18 +18,19 @@ import {
     ThirdPartyRelationshipAttributeQueryOwner,
     ZipCode
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
     ConsumptionController,
-    DeletionStatus,
     IAttributeSuccessorParams,
     ICreateRepositoryAttributeParams,
     ICreateSharedLocalAttributeCopyParams,
     ICreateSharedLocalAttributeParams,
     LocalAttribute,
     LocalAttributeDeletionInfo,
+    LocalAttributeDeletionStatus,
     LocalAttributeShareInfo,
     SharedAttributeCopyCreatedEvent
 } from "../../../src";
@@ -1406,7 +1407,7 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
-                        deletionStatus: DeletionStatus.ToBeDeleted,
+                        deletionStatus: LocalAttributeDeletionStatus.ToBeDeleted,
                         deletionDate: CoreDate.utc().add({ days: 1 })
                     })
                 });
@@ -1436,7 +1437,7 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("address")
                     }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
-                        deletionStatus: DeletionStatus.DeletionRequestRejected,
+                        deletionStatus: LocalAttributeDeletionStatus.DeletionRequestRejected,
                         deletionDate: CoreDate.utc().subtract({ days: 1 })
                     })
                 });

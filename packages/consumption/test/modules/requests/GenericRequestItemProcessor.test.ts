@@ -1,5 +1,6 @@
 import { AcceptResponseItem, RejectResponseItem, ResponseItemResult } from "@nmshd/content";
-import { AccountController, CoreAddress, IdentityController } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { AccountController, IdentityController } from "@nmshd/transport";
 import { ConsumptionController, GenericRequestItemProcessor } from "../../../src";
 import { TestRequestItem } from "./testHelpers/TestRequestItem";
 

@@ -1,24 +1,14 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
-import {
-    CoreAddress,
-    CoreDate,
-    CoreId,
-    ICoreId,
-    Message,
-    Relationship,
-    RelationshipStatus,
-    RelationshipTemplate,
-    SynchronizedCollection,
-    CoreErrors as TransportCoreErrors
-} from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
+import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { CoreErrors } from "../../../consumption/CoreErrors";
-import { DeletionStatus, LocalAttributeDeletionInfo } from "../../attributes";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../attributes";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -56,13 +46,13 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             // there should at minimum be a Pending relationship to the peer
             if (!relationship) {
                 return ValidationResult.error(
-                    CoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
+                    ConsumptionCoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
                 );
             }
 
             if (!(relationship.status === RelationshipStatus.Pending || relationship.status === RelationshipStatus.Active)) {
                 return ValidationResult.error(
-                    CoreErrors.requests.wrongRelationshipStatus(
+                    ConsumptionCoreErrors.requests.wrongRelationshipStatus(
                         `You cannot create a request to '${parsedParams.peer.toString()}' since the relationship is in status '${relationship.status}'.`
                     )
                 );
@@ -229,13 +219,16 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             }
 
             const deletionInfo = LocalAttributeDeletionInfo.from({
-                deletionStatus: DeletionStatus.DeletionRequestSent,
+                deletionStatus: LocalAttributeDeletionStatus.DeletionRequestSent,
                 deletionDate: CoreDate.utc()
             });
 
             const predecessors = await this.parent.attributes.getPredecessorsOfAttribute(ownSharedAttributeId);
             for (const attr of [ownSharedAttribute, ...predecessors]) {
-                if (attr.deletionInfo?.deletionStatus !== DeletionStatus.ToBeDeletedByPeer && attr.deletionInfo?.deletionStatus !== DeletionStatus.DeletedByPeer) {
+                if (
+                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.ToBeDeletedByPeer &&
+                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.DeletedByPeer
+                ) {
                     attr.setDeletionInfo(deletionInfo, this.identity.address);
                     await this.parent.attributes.updateAttributeUnsafe(attr);
                 }

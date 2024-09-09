@@ -11,10 +11,11 @@ import {
     Request,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreId, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { AttributeSuccessorParams, DeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { AttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -51,7 +52,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
     private static validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
         if (attribute.owner.toString() !== "") {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     "The owner of the given `attribute` can only be an empty string. This is because you can only propose Attributes where the Recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
                 )
             );
@@ -68,7 +69,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
         if (requestItem.query instanceof RelationshipAttributeQuery && requestItem.query.owner.toString() !== "") {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     "The owner of the given `query` can only be an empty string. This is because you can only propose Attributes where the Recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
                 )
             );
@@ -88,7 +89,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         if (parsedParams.isWithExistingAttribute()) {
             if (requestItem.query instanceof RelationshipAttributeQuery) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidAcceptParameters("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
                 );
             }
 
@@ -103,7 +104,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             if (requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
-                        CoreErrors.requests.attributeQueryMismatch(
+                        ConsumptionCoreErrors.requests.attributeQueryMismatch(
                             "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
                         )
                     );
@@ -128,7 +129,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     }
 
                     return ValidationResult.error(
-                        CoreErrors.requests.attributeQueryMismatch(
+                        ConsumptionCoreErrors.requests.attributeQueryMismatch(
                             `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute}' of it.`
                         )
                     );
@@ -145,7 +146,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
         if (typeof attribute === "undefined") {
             return ValidationResult.error(
-                CoreErrors.requests.invalidAcceptParameters(
+                ConsumptionCoreErrors.requests.invalidAcceptParameters(
                     `You have to specify either ${nameof<AcceptProposeAttributeRequestItemParameters>(
                         (x) => x.attribute
                     )} or ${nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.attributeId)}.`
@@ -175,10 +176,10 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             const wasSharedBefore = latestSharedVersion.length > 0;
             const wasDeletedByPeerOrOwner =
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByOwner ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeleted;
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByOwner ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeleted;
             const isLatestSharedVersion = latestSharedVersion[0]?.shareInfo?.sourceAttribute?.toString() === existingSourceAttribute.id.toString();
             const predecessorWasSharedBefore = wasSharedBefore && !isLatestSharedVersion;
 

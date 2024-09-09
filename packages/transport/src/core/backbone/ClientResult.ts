@@ -1,6 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
+import { CoreDate } from "@nmshd/core-types";
 import { TransportError } from "../TransportError";
-import { CoreDate } from "../types/CoreDate";
 import { PlatformParameters } from "./PlatformParameters";
 
 export class ClientResult<T> {

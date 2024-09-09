@@ -11,7 +11,8 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,
     ErrorValidationResult,

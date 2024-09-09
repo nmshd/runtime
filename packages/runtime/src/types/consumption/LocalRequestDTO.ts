@@ -1,5 +1,14 @@
-import { LocalRequestStatus } from "@nmshd/consumption";
 import { RequestJSON, ResponseJSON } from "@nmshd/content";
+
+export enum LocalRequestStatus {
+    Draft = "Draft",
+    Open = "Open",
+    DecisionRequired = "DecisionRequired",
+    ManualDecisionRequired = "ManualDecisionRequired",
+    Decided = "Decided",
+    Completed = "Completed",
+    Expired = "Expired"
+}
 
 export interface LocalRequestDTO {
     id: string;

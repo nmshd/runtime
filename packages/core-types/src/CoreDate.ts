@@ -1,14 +1,12 @@
-import { type } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, type } from "@js-soft/ts-serval";
 import { DateTime, DateTimeUnit, Duration, DurationLike, Interval } from "luxon";
-import { CoreSerializable, ICoreSerializable } from "../CoreSerializable";
-import { TransportError } from "../TransportError";
 
-export interface ICoreDate extends ICoreSerializable {
+export interface ICoreDate extends ISerializable {
     date: string;
 }
 
 @type("CoreDate")
-export class CoreDate extends CoreSerializable {
+export class CoreDate extends Serializable {
     private readonly _dateTime: DateTime;
     public get dateTime(): DateTime {
         return this._dateTime;
@@ -138,17 +136,17 @@ export class CoreDate extends CoreSerializable {
     }
 
     private get asValidDateTime(): DateTime<true> {
-        if (!this.dateTime.isValid) throw new TransportError("The date is invalid.");
+        if (!this.dateTime.isValid) throw new Error("The date is invalid.");
         return this.dateTime as DateTime<true>;
     }
 
     protected static override preFrom(value: any): any {
-        if (!value) throw new TransportError("The provided object is undefined and cannot be deserialized.");
+        if (!value) throw new Error("The provided object is undefined and cannot be deserialized.");
 
         if (typeof value === "object") {
             if (!value.date) {
                 if (typeof value.toISOString !== "function") {
-                    throw new TransportError("The provided object doesn't have an 'toISOString' string method.");
+                    throw new Error("The provided object doesn't have an 'toISOString' string method.");
                 }
 
                 const iso = value.toISOString();
@@ -162,7 +160,7 @@ export class CoreDate extends CoreSerializable {
 
         if (typeof value === "string") return DateTime.fromISO(value, { zone: "utc" }).toUTC();
 
-        throw new TransportError("The provided object is invalid and cannot be deserialized.");
+        throw new Error("The provided object is invalid and cannot be deserialized.");
     }
 
     public static from(value: ICoreDate | string | number): CoreDate {

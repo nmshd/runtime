@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreId, File, FileController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { File, FileController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { FileDTO } from "../../../types";
 import { FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";

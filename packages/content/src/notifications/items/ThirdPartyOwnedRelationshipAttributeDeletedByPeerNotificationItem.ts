@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId, ICoreId } from "@nmshd/transport";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 import { INotificationItem, NotificationItem, NotificationItemJSON } from "../NotificationItem";
 
 export interface ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemJSON extends NotificationItemJSON {

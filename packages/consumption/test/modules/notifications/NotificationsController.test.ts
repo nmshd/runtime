@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Notification } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, SynchronizedCollection, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, SynchronizedCollection, Transport } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, LocalNotification, LocalNotificationSource, LocalNotificationStatus } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 import { TestNotificationItem, TestNotificationItemProcessor } from "./testHelpers/TestNotificationItem";

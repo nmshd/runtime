@@ -1,15 +1,14 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoSignature, ICryptoSignature } from "@nmshd/crypto";
-import { CoreSerializable, ICoreSerializable } from "../../../../core";
 
-export interface IRelationshipCreationContentSigned extends ICoreSerializable {
+export interface IRelationshipCreationContentSigned extends ISerializable {
     serializedCreationContent: string;
     deviceSignature: ICryptoSignature;
     relationshipSignature: ICryptoSignature;
 }
 
 @type("RelationshipCreationContentSigned")
-export class RelationshipCreationContentSigned extends CoreSerializable implements IRelationshipCreationContentSigned {
+export class RelationshipCreationContentSigned extends Serializable implements IRelationshipCreationContentSigned {
     @validate()
     @serialize()
     public serializedCreationContent: string;

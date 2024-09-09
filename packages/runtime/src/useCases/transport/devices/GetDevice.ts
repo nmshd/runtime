@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreId, Device, DeviceController, DevicesController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { Device, DeviceController, DevicesController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { DeviceDTO } from "../../../types";
 import { DeviceIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";

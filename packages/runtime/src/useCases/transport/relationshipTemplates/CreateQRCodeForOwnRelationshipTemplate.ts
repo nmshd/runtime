@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreId, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 

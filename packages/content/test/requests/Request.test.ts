@@ -1,5 +1,5 @@
 import { Serializable, type } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { IRequest, IRequestItem, IRequestItemGroup, Request, RequestItem, RequestItemGroup, RequestItemGroupJSON, RequestItemJSON, RequestJSON } from "../../src";
 import { expectThrowsAsync } from "../testUtils";
 
@@ -47,10 +47,10 @@ describe("Request", function () {
         expect(requestItemGroup.items).toHaveLength(1);
     });
 
-    test("creates a Request and items from serval interface", async function () {
+    test("creates a Request and items from serval interface", function () {
         const requestInterface = {
             "@type": "Request",
-            id: await CoreId.generate(),
+            id: CoreId.from("REQ1"),
             items: [
                 {
                     "@type": "TestRequestItem",

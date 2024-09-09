@@ -1,7 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, AttributeSuccessorParamsJSON, CoreErrors } from "@nmshd/consumption";
+import { AttributesController, AttributeSuccessorParamsJSON, ConsumptionCoreErrors } from "@nmshd/consumption";
 import { AttributeValues } from "@nmshd/content";
-import { AccountController, CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -39,7 +40,7 @@ export class SucceedRepositoryAttributeUseCase extends UseCase<SucceedRepository
 
     protected async executeInternal(request: SucceedRepositoryAttributeRequest): Promise<Result<SucceedRepositoryAttributeResponse>> {
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
-        if (!predecessor) return Result.fail(CoreErrors.attributes.predecessorDoesNotExist());
+        if (!predecessor) return Result.fail(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
         const successorParams: AttributeSuccessorParamsJSON = {
             content: {

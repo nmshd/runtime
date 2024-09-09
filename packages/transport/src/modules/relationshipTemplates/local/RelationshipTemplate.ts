@@ -1,8 +1,8 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { CoreDate, ICoreDate } from "../../../core/types/CoreDate";
 import { RelationshipTemplateReference } from "../transmission/RelationshipTemplateReference";
 import { CachedRelationshipTemplate, ICachedRelationshipTemplate } from "./CachedRelationshipTemplate";
 

@@ -13,10 +13,11 @@ import {
     ResponseItemResult,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
-import { CoreAddress, CoreId, RelationshipStatus, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
-import { AttributeSuccessorParams, DeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { AttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -43,7 +44,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         if (requestItem.query instanceof RelationshipAttributeQuery && !["", this.currentIdentityAddress.toString()].includes(requestItem.query.owner.toString())) {
             return ValidationResult.error(
-                CoreErrors.requests.invalidRequestItem(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically will become the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
                 )
             );
@@ -63,7 +64,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         if (parsedParams.isWithExistingAttribute()) {
             if (requestItem.query instanceof RelationshipAttributeQuery) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidAcceptParameters("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters("When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided.")
                 );
             }
 
@@ -78,7 +79,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
-                        CoreErrors.requests.attributeQueryMismatch(
+                        ConsumptionCoreErrors.requests.attributeQueryMismatch(
                             "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
                         )
                     );
@@ -103,7 +104,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     }
 
                     return ValidationResult.error(
-                        CoreErrors.requests.attributeQueryMismatch(
+                        ConsumptionCoreErrors.requests.attributeQueryMismatch(
                             `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute}' of it.`
                         )
                     );
@@ -119,7 +120,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
                 if (typeof foundLocalAttribute.shareInfo.sourceAttribute !== "undefined") {
                     return ValidationResult.error(
-                        CoreErrors.requests.attributeQueryMismatch(
+                        ConsumptionCoreErrors.requests.attributeQueryMismatch(
                             "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided."
                         )
                     );
@@ -133,7 +134,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     !queriedThirdParties.includes(foundLocalAttribute.shareInfo.peer.toString())
                 ) {
                     return ValidationResult.error(
-                        CoreErrors.requests.attributeQueryMismatch(
+                        ConsumptionCoreErrors.requests.attributeQueryMismatch(
                             "The provided RelationshipAttribute exists in the context of a Relationship with a third party that should not be involved."
                         )
                     );
@@ -147,13 +148,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 const nonPendingRelationshipsToPeer = await this.accountController.relationships.getRelationships(queryForNonPendingRelationships);
 
                 if (nonPendingRelationshipsToPeer.length === 0) {
-                    return ValidationResult.error(CoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
+                    return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
                 }
             }
         } else if (parsedParams.isWithNewAttribute()) {
             if (requestItem.query instanceof ThirdPartyRelationshipAttributeQuery) {
                 return ValidationResult.error(
-                    CoreErrors.requests.invalidAcceptParameters(
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(
                         "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that already exist may be provided."
                     )
                 );
@@ -169,7 +170,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         if (typeof attribute === "undefined") {
             return ValidationResult.error(
-                CoreErrors.requests.invalidAcceptParameters(
+                ConsumptionCoreErrors.requests.invalidAcceptParameters(
                     `You have to specify either ${nameof<AcceptReadAttributeRequestItemParameters>(
                         (x) => x.newAttribute
                     )} or ${nameof<AcceptReadAttributeRequestItemParameters>((x) => x.existingAttributeId)}.`
@@ -186,7 +187,9 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             attribute.confidentiality === RelationshipAttributeConfidentiality.Private
         ) {
             return ValidationResult.error(
-                CoreErrors.requests.attributeQueryMismatch("The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it.")
+                ConsumptionCoreErrors.requests.attributeQueryMismatch(
+                    "The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it."
+                )
             );
         }
 
@@ -211,10 +214,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const wasSharedBefore = latestSharedVersion.length > 0;
             const wasDeletedByPeerOrOwner =
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.DeletedByOwner ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === DeletionStatus.ToBeDeleted;
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByOwner ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer ||
+                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeleted;
             const isLatestSharedVersion = latestSharedVersion[0]?.shareInfo?.sourceAttribute?.toString() === existingSourceAttribute.id.toString();
             const predecessorWasSharedBefore = wasSharedBefore && !isLatestSharedVersion;
 

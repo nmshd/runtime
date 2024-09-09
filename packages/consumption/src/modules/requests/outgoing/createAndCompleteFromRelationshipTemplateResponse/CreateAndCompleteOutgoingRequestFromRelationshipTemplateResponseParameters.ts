@@ -1,6 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { IResponse, Response } from "@nmshd/content";
-import { CoreDate, IMessage, IRelationship, IRelationshipTemplate, Message, Relationship, RelationshipTemplate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
+import { IMessage, IRelationship, IRelationshipTemplate, Message, Relationship, RelationshipTemplate } from "@nmshd/transport";
 
 export interface ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters extends ISerializable {
     template: IRelationshipTemplate;

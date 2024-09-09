@@ -1,4 +1,4 @@
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 
 export class TestIdentity {
     public static readonly SENDER = CoreAddress.from("{{Sender}}");

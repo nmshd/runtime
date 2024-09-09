@@ -37,12 +37,22 @@ export interface RelationshipAuditLogDTO extends Array<RelationshipAuditLogEntry
 
 export type RelationshipCreationContentDerivation = RelationshipCreationContentJSON | ArbitraryRelationshipCreationContentJSON;
 
+export enum PeerDeletionStatus {
+    ToBeDeleted = "ToBeDeleted",
+    Deleted = "Deleted"
+}
+
+export interface PeerDeletionInfoDTO {
+    deletionStatus: PeerDeletionStatus;
+}
+
 export interface RelationshipDTO {
     id: string;
     template: RelationshipTemplateDTO;
     status: RelationshipStatus;
     peer: string;
     peerIdentity: IdentityDTO;
+    peerDeletionInfo?: PeerDeletionInfoDTO;
     creationContent: RelationshipCreationContentDerivation;
     auditLog: RelationshipAuditLogDTO;
 }

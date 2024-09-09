@@ -1,5 +1,5 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import { DecideRequestItemGroupParametersJSON } from "./DecideRequestItemGroupParameters";
 import { DecideRequestItemParametersJSON } from "./DecideRequestItemParameters";
 

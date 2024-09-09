@@ -1,4 +1,4 @@
-import { DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -11,13 +11,14 @@ import {
     ResponseResult,
     ResponseWrapperJSON
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import {
     CreateOutgoingRequestRequest,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalRequestDTO,
+    LocalRequestStatus,
     MessageProcessedEvent,
     MessageSentEvent,
     OutgoingRequestCreatedAndCompletedEvent,

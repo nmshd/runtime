@@ -1,8 +1,9 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId, ICoreAddress, ICoreId, TransportError } from "../../core";
+import { CoreCrypto, TransportCoreErrors, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { MessageSentEvent, MessageWasReadAtChangedEvent } from "../../events";
@@ -104,7 +105,7 @@ export class MessageController extends TransportController {
     public async getMessagesByAddress(address: CoreAddress): Promise<Message[]> {
         const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(address);
         if (!relationship) {
-            throw CoreErrors.messages.missingOrInactiveRelationship(address.toString());
+            throw TransportCoreErrors.messages.missingOrInactiveRelationship(address.toString());
         }
         return await this.getMessagesByRelationshipId(relationship.id);
     }
@@ -162,7 +163,7 @@ export class MessageController extends TransportController {
     private async updateCacheOfExistingMessageInDb(id: string, response?: BackboneGetMessagesResponse) {
         const messageDoc = await this.messages.read(id);
         if (!messageDoc) {
-            throw CoreErrors.general.recordNotFound(Message, id);
+            throw TransportCoreErrors.general.recordNotFound(Message, id);
         }
 
         const message = Message.from(messageDoc);
@@ -194,7 +195,7 @@ export class MessageController extends TransportController {
         const [cachedMessage, messageKey, relationship] = await this.decryptMessage(envelope);
 
         if (!relationship) {
-            throw CoreErrors.general.recordNotFound(Relationship, envelope.id.toString());
+            throw TransportCoreErrors.general.recordNotFound(Relationship, envelope.id.toString());
         }
 
         const message = Message.from({
@@ -239,7 +240,7 @@ export class MessageController extends TransportController {
         const id = idOrMessage instanceof CoreId ? idOrMessage.toString() : idOrMessage.id.toString();
         const messageDoc = await this.messages.read(id);
         if (!messageDoc) {
-            throw CoreErrors.general.recordNotFound(Message, id.toString());
+            throw TransportCoreErrors.general.recordNotFound(Message, id.toString());
         }
 
         const message = Message.from(messageDoc);
@@ -252,7 +253,7 @@ export class MessageController extends TransportController {
     public async markMessageAsRead(id: CoreId): Promise<Message> {
         const messageDoc = await this.messages.read(id.toString());
         if (!messageDoc) {
-            throw CoreErrors.general.recordNotFound(Message, id.toString());
+            throw TransportCoreErrors.general.recordNotFound(Message, id.toString());
         }
 
         const message = Message.from(messageDoc);
@@ -269,7 +270,7 @@ export class MessageController extends TransportController {
     public async markMessageAsUnread(id: CoreId): Promise<Message> {
         const messageDoc = await this.messages.read(id.toString());
         if (!messageDoc) {
-            throw CoreErrors.general.recordNotFound(Message, id.toString());
+            throw TransportCoreErrors.general.recordNotFound(Message, id.toString());
         }
 
         const message = Message.from(messageDoc);
@@ -295,7 +296,7 @@ export class MessageController extends TransportController {
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
             if (!relationship) {
-                throw CoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
             }
 
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
@@ -334,7 +335,7 @@ export class MessageController extends TransportController {
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
             if (!relationship) {
-                throw CoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
             }
 
             const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
@@ -425,7 +426,7 @@ export class MessageController extends TransportController {
         const ownKeyCipher = envelope.recipients.find((r) => this.parent.identity.isMe(r.address))?.encryptedKey;
 
         if (!ownKeyCipher) {
-            throw CoreErrors.messages.ownAddressNotInList(envelope.id.toString());
+            throw TransportCoreErrors.messages.ownAddressNotInList(envelope.id.toString());
         }
 
         const plaintextKeyBuffer = await this.secrets.decryptPeer(relationship.relationshipSecretId, ownKeyCipher, true);
@@ -437,7 +438,7 @@ export class MessageController extends TransportController {
         const signature = signedMessage.signatures.find((s) => this.parent.identity.isMe(s.recipient))?.signature;
 
         if (!signature) {
-            throw CoreErrors.messages.signatureListMismatch(envelope.id.toString());
+            throw TransportCoreErrors.messages.signatureListMismatch(envelope.id.toString());
         }
 
         const messagePlain = MessageContentWrapper.from(JSON.parse(signedMessage.message));
@@ -448,7 +449,7 @@ export class MessageController extends TransportController {
         const plainMessageBuffer = CoreBuffer.fromUtf8(signedMessage.message);
         const validSignature = await this.secrets.verifyPeer(relationship.relationshipSecretId, plainMessageBuffer, signature);
         if (!validSignature) {
-            throw CoreErrors.messages.signatureNotValid();
+            throw TransportCoreErrors.messages.signatureNotValid();
         }
 
         if (messagePlain.recipients.length !== envelope.recipients.length) {
@@ -462,7 +463,7 @@ export class MessageController extends TransportController {
         const recipientFound = messagePlain.recipients.some((r) => this.parent.identity.isMe(r));
 
         if (!recipientFound) {
-            throw CoreErrors.messages.plaintextMismatch(envelope.id.toString());
+            throw TransportCoreErrors.messages.plaintextMismatch(envelope.id.toString());
         }
 
         return [messagePlain, plaintextKey];
@@ -509,7 +510,7 @@ export class MessageController extends TransportController {
             relationship = await this.relationships.getActiveRelationshipToIdentity(envelope.createdBy);
 
             if (!relationship) {
-                throw CoreErrors.messages.missingOrInactiveRelationship(envelope.createdBy.toString());
+                throw TransportCoreErrors.messages.missingOrInactiveRelationship(envelope.createdBy.toString());
             }
 
             const [peerMessage, peerKey] = await this.decryptPeerEnvelope(envelope, relationship);

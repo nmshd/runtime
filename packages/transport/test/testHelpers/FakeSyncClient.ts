@@ -1,9 +1,9 @@
+import { CoreDate } from "@nmshd/core-types";
 import {
     BackboneDatawalletModification,
     BackboneExternalEvent,
     ClientResult,
-    CoreDate,
-    CoreId,
+    CoreIdHelper,
     CreateDatawalletModificationsRequest,
     CreateDatawalletModificationsResponse,
     FinalizeDatawalletVersionUpgradeRequest,
@@ -91,7 +91,7 @@ export class FakeSyncClient implements ISyncClient {
         // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let i = 0; i < request.modifications.length; i++) {
             response.modifications.push({
-                id: (await CoreId.generate()).serialize(),
+                id: (await CoreIdHelper.notPrefixed.generate()).serialize(),
                 index: response.modifications.length,
                 createdAt: CoreDate.utc().toISOString()
             });

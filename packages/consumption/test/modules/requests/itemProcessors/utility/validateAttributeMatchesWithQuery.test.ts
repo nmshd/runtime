@@ -11,7 +11,8 @@ import {
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,

@@ -1,13 +1,13 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
 import { CryptoSignaturePublicKey, ICryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreAddress, CoreDate, CoreSerializable, ICoreAddress, ICoreDate, ICoreSerializable } from "../../../core";
 import { CertificateConstraint, ICertificateConstraint } from "./CertificateConstraint";
 import { CertificateItem, ICertificateItem } from "./CertificateItem";
 
-export interface ICertificateContent extends ICoreSerializable {
+export interface ICertificateContent extends ISerializable {
     issuedAt: ICoreDate;
     issuer: ICoreAddress;
-    issuerData?: ICoreSerializable;
+    issuerData?: ISerializable;
     subject: ICoreAddress;
     subjectPublicKey: ICryptoSignaturePublicKey;
     constraints: ICertificateConstraint[];
@@ -19,7 +19,7 @@ export interface ICertificateContent extends ICoreSerializable {
  * is done on top of the serialized content of this data structure.
  */
 @type("CertificateContent")
-export class CertificateContent extends CoreSerializable {
+export class CertificateContent extends Serializable {
     @validate()
     @serialize()
     public issuedAt: CoreDate;
@@ -30,7 +30,7 @@ export class CertificateContent extends CoreSerializable {
 
     @validate()
     @serialize()
-    public issuerData: CoreSerializable;
+    public issuerData: Serializable;
 
     @validate()
     @serialize()

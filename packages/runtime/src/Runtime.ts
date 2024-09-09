@@ -11,15 +11,16 @@ import {
     OutgoingRequestsController,
     SettingsController
 } from "@nmshd/consumption";
+import { ICoreAddress } from "@nmshd/core-types";
 import {
     AccountController,
     AnonymousTokenController,
+    BackboneCompatibilityController,
     ChallengeController,
     DeviceController,
     DevicesController,
     FileController,
     IConfigOverwrite,
-    ICoreAddress,
     IdentityController,
     IdentityDeletionProcessController,
     MessageController,
@@ -286,6 +287,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(AnonymousTokenController)
             .factory(() => new AnonymousTokenController(this.transport.config))
+            .scope(Scope.Singleton);
+
+        Container.bind(BackboneCompatibilityController)
+            .factory(() => new BackboneCompatibilityController(this.transport.config))
             .scope(Scope.Singleton);
 
         const schemaRepository = new SchemaRepository();

@@ -1,8 +1,15 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { LocalRequestStatus } from "@nmshd/consumption";
 import { IQLQueryJSON, ReadAttributeRequestItemJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
-import { ConsumptionServices, CreateOutgoingRequestRequest, LocalAttributeDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
+import {
+    ConsumptionServices,
+    CreateOutgoingRequestRequest,
+    LocalAttributeDTO,
+    LocalRequestStatus,
+    OutgoingRequestCreatedEvent,
+    OutgoingRequestStatusChangedEvent,
+    TransportServices
+} from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import { RuntimeServiceProvider, TestRuntimeServices, establishRelationship, exchangeMessageWithRequest, sendMessageWithRequest } from "../lib";
 import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";

@@ -1,4 +1,5 @@
-import { CoreDate, CoreErrors, CoreId } from "../../core";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { PasswordGenerator } from "../../util";
@@ -86,13 +87,13 @@ export class DevicesController extends TransportController {
     public async getSharedSecret(id: CoreId, profileName?: string): Promise<DeviceSharedSecret> {
         const deviceDoc = await this.devices.read(id.toString());
         if (!deviceDoc) {
-            throw CoreErrors.general.recordNotFound(Device, id.toString());
+            throw TransportCoreErrors.general.recordNotFound(Device, id.toString());
         }
 
         const count = await this.devices.count();
         const device = Device.from(deviceDoc);
 
-        if (device.publicKey) throw CoreErrors.device.alreadyOnboarded();
+        if (device.publicKey) throw TransportCoreErrors.device.alreadyOnboarded();
 
         const isAdmin = device.isAdmin === true;
 
@@ -103,17 +104,17 @@ export class DevicesController extends TransportController {
     public async update(device: Device): Promise<void> {
         const deviceDoc = await this.devices.read(device.id.toString());
         if (!deviceDoc) {
-            throw CoreErrors.general.recordNotFound(Device, device.id.toString());
+            throw TransportCoreErrors.general.recordNotFound(Device, device.id.toString());
         }
         await this.devices.update(deviceDoc, device);
     }
 
     public async delete(device: Device): Promise<void> {
-        if (device.publicKey) throw CoreErrors.device.couldNotDeleteDevice("Device is already onboarded.");
+        if (device.publicKey) throw TransportCoreErrors.device.couldNotDeleteDevice("Device is already onboarded.");
 
         const result = await this.client.deleteDevice(device.id.toString());
         if (result.isError) {
-            throw CoreErrors.device.couldNotDeleteDevice("Backbone did not authorize deletion.", result.error);
+            throw TransportCoreErrors.device.couldNotDeleteDevice("Backbone did not authorize deletion.", result.error);
         }
 
         await this.devices.delete(device);

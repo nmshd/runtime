@@ -1,6 +1,6 @@
+import { CoreError } from "@nmshd/core-types";
 import stringify from "json-stringify-safe";
 import { RelationshipStatus } from "../modules";
-import { CoreError } from "./CoreError";
 
 class Relationships {
     public operationOnlyAllowedForPeer(message: string) {
@@ -197,9 +197,13 @@ class General {
     public invalidTruncatedReference() {
         return new CoreError("error.transport.files.invalidTruncatedReference", "invalid truncated reference");
     }
+
+    public accountControllerInitialSyncFailed() {
+        return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
+    }
 }
 
-export class CoreErrors {
+export class TransportCoreErrors {
     public static readonly relationships = new Relationships();
     public static readonly general = new General();
     public static readonly messages = new Messages();

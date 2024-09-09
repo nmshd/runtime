@@ -1,5 +1,6 @@
 import { ConsumptionIds } from "@nmshd/consumption";
-import { CoreDate, TransportIds } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
+import { TransportIds } from "@nmshd/transport";
 import { ConsumptionServices, GetSettingsQuery } from "../../src";
 import { QueryParamConditions, RuntimeServiceProvider } from "../lib";
 
@@ -10,34 +11,39 @@ beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(1);
     consumptionServices = runtimeServices[0].consumption;
 }, 30000);
+
 afterAll(async () => await runtimeServiceProvider.stop());
 
+afterEach(async () => {
+    const settings = await consumptionServices.settings.getSettings({});
+    for (const setting of settings.value) {
+        await consumptionServices.settings.deleteSetting({ id: setting.id });
+    }
+});
+
 describe("Settings", () => {
-    const value = { aKey: "a-value" };
-    let settingId: string;
-
     test("should create a setting", async () => {
-        const result = await consumptionServices.settings.createSetting({
-            key: "a-key",
-            value: value
-        });
+        const value = { aKey: "a-value" };
+        const result = await consumptionServices.settings.createSetting({ key: "a-key", value: value });
         expect(result).toBeSuccessful();
-
-        const setting = result.value;
-        settingId = setting.id;
     });
 
     test("should get the setting", async () => {
-        const result = await consumptionServices.settings.getSetting({ id: settingId });
+        const value = { aKey: "a-value" };
+        const createSettingResult = await consumptionServices.settings.createSetting({ key: "a-key", value: value });
+
+        const result = await consumptionServices.settings.getSetting({ id: createSettingResult.value.id });
         expect(result).toBeSuccessful();
 
         const setting = result.value;
-        settingId = setting.id;
 
         expect(setting.value).toStrictEqual(value);
     });
 
     test("should contain the setting in the list of settings", async () => {
+        const value = { aKey: "a-value" };
+        const settingId = (await consumptionServices.settings.createSetting({ key: "a-key", value: value })).value.id;
+
         const result = await consumptionServices.settings.getSettings({});
         expect(result).toBeSuccessful();
 
@@ -49,6 +55,9 @@ describe("Settings", () => {
     });
 
     test("should edit the setting", async () => {
+        const value = { aKey: "a-value" };
+        const settingId = (await consumptionServices.settings.createSetting({ key: "a-key", value: value })).value.id;
+
         const newValue = { aKey: "another-Value" };
         const updateResult = await consumptionServices.settings.updateSetting({
             id: settingId,
@@ -64,6 +73,9 @@ describe("Settings", () => {
     });
 
     test("should delete the setting", async () => {
+        const value = { aKey: "a-value" };
+        const settingId = (await consumptionServices.settings.createSetting({ key: "a-key", value: value })).value.id;
+
         const deleteResult = await consumptionServices.settings.deleteSetting({ id: settingId });
         expect(deleteResult).toBeSuccessful();
 
@@ -75,10 +87,8 @@ describe("Settings", () => {
     });
 
     test("should get the setting by key", async () => {
-        const toBeSucceeded = await consumptionServices.settings.createSetting({
-            key: "a-key",
-            value: { key: ["value"] }
-        });
+        const value = { aKey: "a-value" };
+        const toBeSucceeded = await consumptionServices.settings.createSetting({ key: "a-key", value });
 
         await consumptionServices.settings.createSetting({
             key: "a-key",
@@ -92,6 +102,37 @@ describe("Settings", () => {
 
         const setting = result.value;
         expect(setting.value).toStrictEqual({ key: ["newValue"] });
+    });
+
+    test("should upsert a setting by key when it does not exist yet", async () => {
+        await consumptionServices.settings.upsertSettingByKey({
+            key: "a-key",
+            value: { aKey: "a-value" }
+        });
+
+        const result = await consumptionServices.settings.getSettings({});
+        expect(result).toBeSuccessful();
+        expect(result.value).toHaveLength(1);
+
+        const setting = await consumptionServices.settings.getSettingByKey({ key: "a-key" });
+        expect(setting.value.value).toStrictEqual({ aKey: "a-value" });
+    });
+
+    test("should upsert a setting by key", async () => {
+        const value = { aKey: "a-value" };
+        await consumptionServices.settings.createSetting({ key: "a-key", value });
+
+        await consumptionServices.settings.upsertSettingByKey({
+            key: "a-key",
+            value: { aKey: "aNewValue" }
+        });
+
+        const result = await consumptionServices.settings.getSettings({});
+        expect(result).toBeSuccessful();
+        expect(result.value).toHaveLength(1);
+
+        const setting = await consumptionServices.settings.getSettingByKey({ key: "a-key" });
+        expect(setting.value.value).toStrictEqual({ aKey: "aNewValue" });
     });
 });
 

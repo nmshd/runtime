@@ -1,5 +1,5 @@
 import { ResponseItem } from "@nmshd/content";
-import { CoreDate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
 import { LocalRequest, LocalRequestStatus, LocalRequestStatusLogEntry, LocalResponse } from "../../../../src";
 import { TestObjectFactory } from "../testHelpers/TestObjectFactory";
 import { TestRequestItem } from "../testHelpers/TestRequestItem";

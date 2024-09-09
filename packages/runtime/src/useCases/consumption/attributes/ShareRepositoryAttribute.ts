@@ -1,7 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, CreateOutgoingRequestParameters, ErrorValidationResult, LocalAttribute, OutgoingRequestsController } from "@nmshd/consumption";
 import { Request, ShareAttributeRequestItem } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreId, MessageController } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
 import { AddressString, AttributeIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";

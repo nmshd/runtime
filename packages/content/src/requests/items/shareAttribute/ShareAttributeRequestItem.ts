@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId, ICoreId } from "@nmshd/transport";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 import { RequestItemJSON } from "../..";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
 import { IRequestItem, RequestItem } from "../../RequestItem";

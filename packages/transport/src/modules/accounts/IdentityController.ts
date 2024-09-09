@@ -1,6 +1,7 @@
 import { log } from "@js-soft/ts-utils";
+import { CoreAddress } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { ControllerName, CoreAddress, CoreCrypto, CoreErrors, TransportController } from "../../core";
+import { ControllerName, CoreCrypto, TransportController, TransportCoreErrors } from "../../core";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { Identity } from "./data/Identity";
@@ -43,7 +44,7 @@ export class IdentityController extends TransportController {
     public async sign(content: CoreBuffer): Promise<CryptoSignature> {
         const privateKeyContainer = await this.parent.activeDevice.secrets.loadSecret(DeviceSecretType.IdentitySignature);
         if (!privateKeyContainer || !(privateKeyContainer.secret instanceof CryptoSignaturePrivateKey)) {
-            throw CoreErrors.secrets.secretNotFound(DeviceSecretType.IdentitySignature);
+            throw TransportCoreErrors.secrets.secretNotFound(DeviceSecretType.IdentitySignature);
         }
         const privateKey = privateKeyContainer.secret;
 

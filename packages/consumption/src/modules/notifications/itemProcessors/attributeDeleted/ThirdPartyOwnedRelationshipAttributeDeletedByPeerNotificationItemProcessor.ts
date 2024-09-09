@@ -1,10 +1,11 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
-import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
+import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent } from "../../../attributes";
-import { DeletionStatus, LocalAttributeDeletionInfo } from "../../../attributes/local/LocalAttributeDeletionInfo";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../../attributes/local/LocalAttributeDeletionInfo";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
@@ -26,11 +27,11 @@ export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemPr
         if (!attribute) return ValidationResult.success();
 
         if (!attribute.isThirdPartyOwnedRelationshipAttribute(this.currentIdentityAddress)) {
-            return ValidationResult.error(CoreErrors.attributes.isNotThirdPartyOwnedRelationshipAttribute(notificationItem.attributeId));
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotThirdPartyOwnedRelationshipAttribute(notificationItem.attributeId));
         }
 
         if (!notification.peer.equals(attribute.shareInfo.peer)) {
-            return ValidationResult.error(CoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
         }
 
         return ValidationResult.success();
@@ -45,7 +46,7 @@ export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemPr
 
         const deletionDate = CoreDate.utc();
         const deletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: DeletionStatus.DeletedByPeer,
+            deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
             deletionDate: deletionDate
         });
 

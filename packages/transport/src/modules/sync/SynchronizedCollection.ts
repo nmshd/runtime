@@ -1,8 +1,8 @@
 import { DatabaseType, IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
+import { Serializable } from "@js-soft/ts-serval";
 import jsonpatch from "fast-json-patch";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
-import { CoreSerializable } from "../../core/CoreSerializable";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../core/CoreSynchronizable";
 import { ICacheable } from "../../core/ICacheable";
 import { TransportIds } from "../../core/TransportIds";
@@ -83,7 +83,7 @@ export class SynchronizedCollection implements IDatabaseCollection {
     }
 
     public async update(oldDoc: any, newObject: CoreSynchronizable): Promise<any> {
-        const oldObject = CoreSerializable.fromUnknown(oldDoc);
+        const oldObject = Serializable.fromUnknown(oldDoc);
 
         const newObjectJson = newObject.toJSON();
 
