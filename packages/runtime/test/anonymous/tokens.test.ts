@@ -1,5 +1,5 @@
 import { TokenDTO, TransportServices } from "../../src";
-import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, TestRuntimeServices, uploadOwnToken, uploadPersonalizedOwnToken } from "../lib";
+import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, TestRuntimeServices, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices: TransportServices;
@@ -47,7 +47,7 @@ describe("Anonymous tokens", () => {
     });
 
     test("should catch a personalized token", async () => {
-        const uploadedPersonalizedToken = await uploadPersonalizedOwnToken(transportServices, runtimeService.address);
+        const uploadedPersonalizedToken = await uploadOwnToken(transportServices, runtimeService.address);
         const resultNotIntended = await noLoginRuntime.anonymousServices.tokens.loadPeerTokenByIdAndKey({
             id: uploadedPersonalizedToken.id,
             secretKey: uploadedPersonalizedToken.secretKey,
