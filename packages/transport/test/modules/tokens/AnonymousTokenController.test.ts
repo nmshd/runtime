@@ -4,7 +4,7 @@ import { CoreDate } from "@nmshd/core-types";
 import { AccountController, AnonymousTokenController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
-describe("TokenController", function () {
+describe("AnonymousTokenController", function () {
     let connection: IDatabaseConnection;
 
     let transport: Transport;
