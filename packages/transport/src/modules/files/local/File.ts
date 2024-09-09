@@ -2,7 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
+import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
 import { FileReference } from "../transmission/FileReference";
 import { CachedFile, ICachedFile } from "./CachedFile";
 
@@ -13,7 +13,6 @@ export interface IFile extends ICoreSynchronizable {
     cachedAt?: ICoreDate;
     metadata?: any;
     metadataModifiedAt?: ICoreDate;
-    backbone: string;
 }
 
 @type("File")
@@ -45,16 +44,16 @@ export class File extends CoreSynchronizable implements IFile {
     @serialize()
     public metadataModifiedAt?: CoreDate;
 
-    @validate()
-    @serialize()
-    public backbone: string;
-
     public static from(value: IFile): File {
         return this.fromAny(value);
     }
 
     public toFileReference(): FileReference {
-        return FileReference.from({ id: this.id, key: this.secretKey, backbone: this.backbone });
+        if (!this.cache) {
+            throw new TransportError(`The cache of RelationshipTemplate with id "${this.id.toString()}" is empty.`);
+        }
+
+        return FileReference.from({ id: this.id, key: this.secretKey, backbone: this.cache.createdBy.toString().split(":")[2] });
     }
 
     public truncate(): string {

@@ -2,7 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
+import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
 import { TokenReference } from "../transmission/TokenReference";
 import { CachedToken, ICachedToken } from "./CachedToken";
 
@@ -13,7 +13,6 @@ export interface IToken extends ICoreSynchronizable {
     cachedAt?: ICoreDate;
     metadata?: any;
     metadataModifiedAt?: ICoreDate;
-    backbone: string;
 }
 
 @type("Token")
@@ -46,16 +45,15 @@ export class Token extends CoreSynchronizable implements IToken {
     @serialize()
     public metadataModifiedAt?: CoreDate;
 
-    @validate()
-    @serialize()
-    public backbone: string;
-
     public static from(value: IToken): Token {
         return this.fromAny(value);
     }
 
     public toTokenReference(): TokenReference {
-        return TokenReference.from({ id: this.id, key: this.secretKey, backbone: this.backbone });
+        if (!this.cache) {
+            throw new TransportError(`The cache of Token with id "${this.id.toString()}" is empty.`);
+        }
+        return TokenReference.from({ id: this.id, key: this.secretKey, backbone: this.cache.createdBy.toString().split(":")[2] });
     }
 
     public truncate(): string {
