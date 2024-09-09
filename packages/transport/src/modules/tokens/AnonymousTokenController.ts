@@ -27,6 +27,7 @@ export class AnonymousTokenController {
         if (forIdentity) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
+
         const response = (await this.client.getToken(id.toString())).value;
 
         const cipher = CryptoCipher.fromBase64(response.content);
