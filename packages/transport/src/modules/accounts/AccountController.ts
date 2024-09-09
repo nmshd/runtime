@@ -182,7 +182,10 @@ export class AccountController {
             await this.syncDatawallet();
             await this.devices.update(device!);
         }
-        await this.syncDatawallet();
+
+        await this.syncDatawallet().catch((error) => {
+            this._log.error("Initial sync failed.", error);
+        });
 
         return this;
     }
