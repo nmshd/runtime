@@ -233,7 +233,7 @@ export class RelationshipTemplateController extends TransportController {
     }
 
     public async loadPeerRelationshipTemplateByReference(relationshipTemplateReference: RelationshipTemplateReference): Promise<RelationshipTemplate> {
-        return await this.loadPeerRelationshipTemplate(relationshipTemplateReference.id, relationshipTemplateReference.key, relationshipTemplateReference.forIdentity);
+        return await this.loadPeerRelationshipTemplate(relationshipTemplateReference.id, relationshipTemplateReference.key);
     }
 
     public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey, forIdentity?: CoreAddress): Promise<RelationshipTemplate> {
