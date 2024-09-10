@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
 import { AccountController, CoreIdHelper, DeviceSharedSecret, TokenContentDeviceSharedSecret, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
@@ -64,7 +64,8 @@ describe("TokenContent", function () {
         test("should serialize and deserialize correctly (verbose)", async function () {
             const token = TokenContentRelationshipTemplate.from({
                 secretKey: await CryptoEncryption.generateKey(),
-                templateId: await CoreIdHelper.notPrefixed.generate()
+                templateId: await CoreIdHelper.notPrefixed.generate(),
+                forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -72,20 +73,25 @@ describe("TokenContent", function () {
             expect(token.templateId).toBeInstanceOf(CoreId);
             const serialized = token.serialize();
             expect(typeof serialized).toBe("string");
-            expect(serialized).toBe(`{"@type":"TokenContentRelationshipTemplate","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`);
+            expect(serialized).toBe(
+                `{"@type":"TokenContentRelationshipTemplate","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}","forIdentity":${token.forIdentity!.serialize()}}`
+            );
             const deserialized = TokenContentRelationshipTemplate.deserialize(serialized);
             expect(deserialized).toBeInstanceOf(Serializable);
             expect(deserialized).toBeInstanceOf(TokenContentRelationshipTemplate);
             expect(deserialized.secretKey).toBeInstanceOf(CryptoSecretKey);
             expect(deserialized.templateId).toBeInstanceOf(CoreId);
+            expect(deserialized.forIdentity).toBeInstanceOf(CoreAddress);
             expect(deserialized.secretKey.toBase64()).toStrictEqual(token.secretKey.toBase64());
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
+            expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
         });
 
         test("should serialize and deserialize correctly (no type information)", async function () {
             const token = TokenContentRelationshipTemplate.from({
                 secretKey: await CryptoEncryption.generateKey(),
-                templateId: await CoreIdHelper.notPrefixed.generate()
+                templateId: await CoreIdHelper.notPrefixed.generate(),
+                forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -98,14 +104,17 @@ describe("TokenContent", function () {
             expect(deserialized).toBeInstanceOf(TokenContentRelationshipTemplate);
             expect(deserialized.secretKey).toBeInstanceOf(CryptoSecretKey);
             expect(deserialized.templateId).toBeInstanceOf(CoreId);
+            expect(deserialized.forIdentity).toBeInstanceOf(CoreAddress);
             expect(deserialized.secretKey.toBase64()).toStrictEqual(token.secretKey.toBase64());
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
+            expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
         });
 
         test("should serialize and deserialize correctly (from unknown type)", async function () {
             const token = TokenContentRelationshipTemplate.from({
                 secretKey: await CryptoEncryption.generateKey(),
-                templateId: await CoreIdHelper.notPrefixed.generate()
+                templateId: await CoreIdHelper.notPrefixed.generate(),
+                forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -113,14 +122,18 @@ describe("TokenContent", function () {
             expect(token.templateId).toBeInstanceOf(CoreId);
             const serialized = token.serialize();
             expect(typeof serialized).toBe("string");
-            expect(serialized).toBe(`{"@type":"TokenContentRelationshipTemplate","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`);
+            expect(serialized).toBe(
+                `{"@type":"TokenContentRelationshipTemplate","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}",,"forIdentity":${token.forIdentity!.serialize()}}`
+            );
             const deserialized = Serializable.deserializeUnknown(serialized) as TokenContentRelationshipTemplate;
             expect(deserialized).toBeInstanceOf(Serializable);
             expect(deserialized).toBeInstanceOf(TokenContentRelationshipTemplate);
             expect(deserialized.secretKey).toBeInstanceOf(CryptoSecretKey);
             expect(deserialized.templateId).toBeInstanceOf(CoreId);
+            expect(deserialized.forIdentity).toBeInstanceOf(CoreAddress);
             expect(deserialized.secretKey.toBase64()).toStrictEqual(token.secretKey.toBase64());
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
+            expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
         });
     });
 

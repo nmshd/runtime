@@ -1,13 +1,15 @@
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider } from "../lib";
+import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
+let runtimeServices2: TestRuntimeServices;
 let transportServices1: TransportServices;
 let transportServices2: TransportServices;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
+    runtimeServices2 = runtimeServices[1];
     transportServices1 = runtimeServices[0].transport;
     transportServices2 = runtimeServices[1].transport;
 }, 30000);
@@ -109,6 +111,33 @@ describe("Template Tests", () => {
         });
 
         expect(response).toBeAnError("The content of a RelationshipTemplate", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    describe("Personalized templates", () => {
+        test("send and receive a personalized template", async () => {
+            const createResult = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+                content: { a: "A" },
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                forIdentity: runtimeServices2.address
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createResult.value.truncatedReference });
+            expect(loadResult).toBeSuccessful();
+            expect(loadResult.value.forIdentity).toBe(runtimeServices2.address);
+        });
+
+        test("error when loading a template for another identity", async () => {
+            const createResult = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+                content: { a: "A" },
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                forIdentity: "did:e:a-domain:dids:anidentity"
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createResult.value.truncatedReference });
+            expect(loadResult).toBeAnError(`You tried to access personalized content '${createResult.value.id}' that is not for you.`, "error.transport.general.notIntendedForYou");
+        });
     });
 });
 
