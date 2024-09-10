@@ -136,7 +136,10 @@ describe("Template Tests", () => {
             expect(createResult).toBeSuccessful();
 
             const loadResult = await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createResult.value.truncatedReference });
-            expect(loadResult).toBeAnError(`You tried to access personalized content '${createResult.value.id}' that is not for you.`, "error.transport.general.notIntendedForYou");
+            expect(loadResult).toBeAnError(
+                `You tried to access personalized content '${createResult.value.id}' that is not intended for you.`,
+                "error.transport.general.notIntendedForYou"
+            );
         });
     });
 });

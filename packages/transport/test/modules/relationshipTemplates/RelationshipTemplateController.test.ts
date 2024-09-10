@@ -115,7 +115,7 @@ describe("RelationshipTemplateController", function () {
         }, /SendRelationshipTemplateParameters.maxNumberOfAllocations/);
     });
 
-    test("should create a personalized template", async function () {
+    test("should create and load a personalized template", async function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
@@ -135,7 +135,18 @@ describe("RelationshipTemplateController", function () {
         });
         await TestUtil.expectThrowsAsync(async () => {
             await recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey, ownTemplate.cache!.forIdentity);
-        }, /transport.general.notIntendedForYou/);
+        }, "transport.general.notIntendedForYou");
+    });
+
+    test("should throw an error if loaded by the wrong identity and it's uncaught before reaching the backbone", async function () {
+        const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
+        });
+        await TestUtil.expectThrowsAsync(async () => {
+            await recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey, ownTemplate.cache!.forIdentity);
+        }, "error.platform.recordNotFound");
     });
 
     test("should send and receive a RelationshipTemplate using a RelationshipTemplateReference", async function () {
