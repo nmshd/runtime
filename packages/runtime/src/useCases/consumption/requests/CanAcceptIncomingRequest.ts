@@ -46,7 +46,7 @@ export class CanAcceptIncomingRequestUseCase extends UseCase<AcceptIncomingReque
 
                 return Result.fail(
                     RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
-                        `The incoming Request has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to in order to accept or to reject the creation of a Relationship.`
+                        `The incoming Request has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to.`
                     )
                 );
             }

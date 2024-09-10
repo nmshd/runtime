@@ -1,8 +1,8 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { TestRequestItemJSON } from "@nmshd/consumption/test/modules/requests/testHelpers/TestRequestItem";
 import { RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
-import { DateTime } from "luxon";
 import { CoreDate } from "@nmshd/core-types";
+import { DateTime } from "luxon";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -659,7 +659,7 @@ describe("Requests", () => {
             });
 
             expect(result).toBeAnError(
-                `The incoming Request has the already expired RelationshipTemplate '${request.source!.reference}' as its source, which is why it cannot be responded to in order to accept or to reject the creation of a Relationship.`,
+                `The incoming Request has the already expired RelationshipTemplate '${request.source!.reference}' as its source, which is why it cannot be responded to.`,
                 "error.runtime.relationshipTemplates.expiredRelationshipTemplate"
             );
 
