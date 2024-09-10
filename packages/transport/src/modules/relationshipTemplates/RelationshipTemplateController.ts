@@ -70,7 +70,6 @@ export class RelationshipTemplateController extends TransportController {
                 content: cipher.toBase64()
             })
         ).value;
-        // TODO: error-handling
 
         const templateCache = CachedRelationshipTemplate.from({
             content: parameters.content,
@@ -241,7 +240,7 @@ export class RelationshipTemplateController extends TransportController {
         const templateDoc = await this.templates.read(id.toString());
         if (!templateDoc && !forIdentity?.equals(this.parent.identity.address)) {
             // if you created the template, it exists already
-            throw CoreErrors.general.notIntendedForYou(id.toString());
+            throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
         if (templateDoc) {
             const template = await this.updateCacheOfExistingTemplateInDb(id.toString());
