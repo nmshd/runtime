@@ -66,7 +66,7 @@ describe("Create Relationship", () => {
             creationContent: {}
         });
         expect(createRelationshipResponse).toBeAnError(
-            "An ArbitraryRelationshipCreationContent must be provided as the creationContent of the Relationship.",
+            "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent.",
             "error.runtime.validation.invalidPropertyValue"
         );
     });
