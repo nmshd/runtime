@@ -14,7 +14,7 @@ export interface TestRuntimeServices {
 export interface LaunchConfiguration {
     enableDatawallet?: boolean;
     enableDeciderModule?: boolean;
-    configureDeciderModule?: DeciderModuleConfigurationOverwrite;
+    configureDeciderModule?: DeciderModuleConfigurationOverwrite; // TODO: can we check that this is only set if enableDeciderModule is set too?
     enableRequestModule?: boolean;
     enableAttributeListenerModule?: boolean;
     enableNotificationModule?: boolean;

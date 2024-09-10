@@ -29,14 +29,13 @@ import {
     ResponseConfig
 } from "./decide";
 
-// simple OR-list of AND-elements with decreasing priority
 export interface DeciderModuleConfiguration extends ModuleConfiguration {
     automationConfig?: AutomationConfig[];
 }
 
 export type DeciderModuleConfigurationOverwrite = Partial<DeciderModuleConfiguration>;
 
-// TODO: add validation for fitting requestConfig-responseConfig combination
+// TODO: add validation for fitting requestConfig-responseConfig combination (maybe in init or start)
 export interface AutomationConfig {
     requestConfig: RequestConfig;
     responseConfig: ResponseConfig;
@@ -58,10 +57,10 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
 
         if (event.data.request.content.items.some(flaggedAsManualDecisionRequired)) return await this.requireManualDecision(event);
 
-        // Request is only decided automatically, if all its items can be processed automatically
         const automationResult = await this.automaticallyDecideRequest(event);
         if (automationResult.isSuccess) {
-            // TODO: handleIncomingRequestStatusChanged (RequestModule) (no return)
+            const services = await this.runtime.getServices(event.eventTargetAddress);
+            await this.publishEvent(event, services, "RequestAutomaticallyDecided");
         }
 
         this.logger.error(automationResult.error);
@@ -113,15 +112,14 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                     continue;
                 }
                 decideRequestItemParameters = checkCompatibilityResult.value;
+                if (!this.containsDeep(decideRequestItemParameters, (element) => element === undefined)) {
+                    const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
+                    return decideRequestResult;
+                }
             }
         }
 
-        if (this.containsDeep(decideRequestItemParameters, (element) => element === undefined)) {
-            return Result.fail(RuntimeErrors.deciderModule.someItemsOfRequestCouldNotBeDecidedAutomatically());
-        }
-
-        const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
-        return decideRequestResult;
+        return Result.fail(RuntimeErrors.deciderModule.someItemsOfRequestCouldNotBeDecidedAutomatically());
     }
 
     private checkRequestItemCompatibilityAndApplyReponseConfig(
@@ -230,7 +228,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return nestedProperty;
     }
 
-    // at least one tag must match one of the tags
     private checkTagCompatibility(requestConfigTags: string[], requestTags: string[]): boolean {
         const atLeastOneMatchingTag = requestConfigTags.some((tag) => requestTags.includes(tag));
         return atLeastOneMatchingTag;
@@ -278,7 +275,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         if (!this.containsDeep(decideRequestItemParameters, isAcceptResponseConfig)) {
             const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters });
             if (canRejectResult.isError) {
-                // TODO: we could also return the error result directly
                 return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.error.message));
             }
 
@@ -316,14 +312,13 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return;
         }
 
-        await this.publishEvent(event, services, "ManualRequestDecisionRequired", request.id);
+        await this.publishEvent(event, services, "ManualRequestDecisionRequired");
     }
 
     private async publishEvent(
         event: IncomingRequestStatusChangedEvent,
         services: RuntimeServices,
-        result: keyof typeof RelationshipTemplateProcessedResult & keyof typeof MessageProcessedResult,
-        requestId?: string
+        result: keyof typeof RelationshipTemplateProcessedResult & keyof typeof MessageProcessedResult
     ) {
         const request = event.data.request;
         switch (request.source!.type) {
@@ -341,13 +336,21 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 }
 
                 if (result === "ManualRequestDecisionRequired") {
-                    if (!requestId) throw new Error("Request ID is required for manual decision required result.");
-
                     this.runtime.eventBus.publish(
                         new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
                             template,
                             result: result as RelationshipTemplateProcessedResult.ManualRequestDecisionRequired,
-                            requestId
+                            requestId: request.id
+                        })
+                    );
+                }
+
+                if (result === "RequestAutomaticallyDecided") {
+                    this.runtime.eventBus.publish(
+                        new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
+                            template,
+                            result: result as RelationshipTemplateProcessedResult.RequestAutomaticallyDecided,
+                            requestId: request.id
                         })
                     );
                 }

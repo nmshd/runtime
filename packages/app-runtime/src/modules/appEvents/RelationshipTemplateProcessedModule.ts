@@ -21,6 +21,7 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
 
         const data = event.data;
         switch (data.result) {
+            case RelationshipTemplateProcessedResult.RequestAutomaticallyDecided: // TODO: do we want this?
             case RelationshipTemplateProcessedResult.ManualRequestDecisionRequired:
             case RelationshipTemplateProcessedResult.NonCompletedRequestExists: {
                 const result = await services.consumptionServices.incomingRequests.getRequest({ id: data.requestId });
