@@ -68,7 +68,7 @@ jobs:
         with:
           node-version: current
       - run: npm ci
-      - uses: js-soft/ferretdb-github-action@1.1.0
+      - uses: js-soft/ferretdb-github-action@1.1.1
         with:
           ferretdb-telemetry: "enabled"
           ferretdb-version: "1.20.1"
@@ -164,7 +164,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: current
-      - uses: js-soft/ferretdb-github-action@1.1.0
+      - uses: js-soft/ferretdb-github-action@1.1.1
         with:
           ferretdb-telemetry: "enabled"
           ferretdb-version: "1.20.1"
@@ -235,7 +235,7 @@ jobs:
           node-version: current
       - run: npm ci
       - run: npm run build:node
-      - uses: js-soft/ferretdb-github-action@1.1.0
+      - uses: js-soft/ferretdb-github-action@1.1.1
         with:
           ferretdb-telemetry: "enabled"
           ferretdb-version: "1.20.1"
