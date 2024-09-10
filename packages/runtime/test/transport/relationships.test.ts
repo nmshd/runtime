@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { DateTime } from "luxon";
 import {
     GetRelationshipsQuery,
@@ -56,31 +56,6 @@ describe("Create Relationship", () => {
 
         const response = await services2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
         expect(response).toBeSuccessful();
-    });
-
-    test("should not create a Relationship if the RelationshipTemplate contains a RelationshipTemplateContent", async () => {
-        const templateContent: RelationshipTemplateContentJSON = {
-            "@type": "RelationshipTemplateContent",
-            onNewRelationship: {
-                "@type": "Request",
-                items: [
-                    {
-                        "@type": "TestRequestItem",
-                        mustBeAccepted: false
-                    }
-                ]
-            }
-        };
-        const templateId = (await exchangeTemplate(services1.transport, services2.transport, templateContent)).id;
-
-        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
-            templateId: templateId,
-            creationContent: emptyRelationshipCreationContent
-        });
-        expect(createRelationshipResponse).toBeAnError(
-            "To create a Relationship from a RelationshipTemplate whose content is a RelationshipTemplateContent, the associated incoming Request must be accepted.",
-            "error.runtime.relationshipTemplates.wrongContentType"
-        );
     });
 
     test("should not create a relationship with a false creation content type", async () => {

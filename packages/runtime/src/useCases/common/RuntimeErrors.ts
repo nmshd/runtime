@@ -95,13 +95,6 @@ class RelationshipTemplates {
     public expiredRelationshipTemplate(message: string): ApplicationError {
         return new ApplicationError("error.runtime.relationshipTemplates.expiredRelationshipTemplate", message);
     }
-
-    public wrongContentType(): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.relationshipTemplates.wrongContentType",
-            "To create a Relationship from a RelationshipTemplate whose content is a RelationshipTemplateContent, the associated incoming Request must be accepted."
-        );
-    }
 }
 
 class Relationships {

@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { ArbitraryRelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
@@ -36,10 +36,6 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        if (template.cache?.content instanceof RelationshipTemplateContent) {
-            return Result.fail(RuntimeErrors.relationshipTemplates.wrongContentType());
-        }
-
         if (template.isExpired()) {
             return Result.fail(
                 RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
@@ -49,8 +45,12 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         }
 
         const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
-        if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent)) {
-            return Result.fail(RuntimeErrors.general.invalidPropertyValue("An ArbitraryRelationshipCreationContent must be provided as the creationContent of the Relationship."));
+        if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
+            return Result.fail(
+                RuntimeErrors.general.invalidPropertyValue(
+                    "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
+                )
+            );
         }
 
         const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
