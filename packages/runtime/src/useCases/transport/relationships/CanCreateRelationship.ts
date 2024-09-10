@@ -57,9 +57,9 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
             const dbQuery: any = {};
             dbQuery["source.reference"] = { $eq: template.id.toString() };
             dbQuery["status"] = { $nin: [LocalRequestStatus.Decided, LocalRequestStatus.Completed, LocalRequestStatus.Expired] };
-            const relevantRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
+            const requestsWithForthcomingDecisionFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
 
-            if (relevantRequestsFromTemplate.length === 0) {
+            if (requestsWithForthcomingDecisionFromTemplate.length === 0) {
                 const errorResponse: CanCreateRelationshipErrorResponse = {
                     isSuccess: false,
                     error: RuntimeErrors.relationshipTemplates.noRequestToAccept()
@@ -68,7 +68,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
                 return Result.ok(errorResponse);
             }
 
-            const localRequest = relevantRequestsFromTemplate[0];
+            const localRequest = requestsWithForthcomingDecisionFromTemplate[0];
 
             if (template.cache.expiresAt && template.isExpired()) {
                 await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
