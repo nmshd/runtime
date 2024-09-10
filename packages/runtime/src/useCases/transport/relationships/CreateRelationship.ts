@@ -1,10 +1,11 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
+import { IncomingRequestsController } from "@nmshd/consumption";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { RelationshipDTO } from "../../../types";
+import { LocalRequestStatus, RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
 
@@ -23,6 +24,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
+        @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
@@ -37,6 +39,20 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         }
 
         if (template.isExpired()) {
+            if (template.cache?.content instanceof RelationshipTemplateContent) {
+                const dbQuery: any = {};
+                dbQuery["source.reference"] = { $eq: template.id.toString() };
+                dbQuery["status"] = { $neq: LocalRequestStatus.Completed };
+                const nonCompletedRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
+
+                if (nonCompletedRequestsFromTemplate.length !== 0 && template.cache.expiresAt) {
+                    const promises = nonCompletedRequestsFromTemplate.map((localRequest) =>
+                        this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache!.expiresAt!)
+                    );
+                    await Promise.all(promises);
+                }
+            }
+
             return Result.fail(
                 RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
                     `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
