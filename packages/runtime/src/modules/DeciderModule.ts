@@ -47,6 +47,7 @@ export class DeciderModule extends RuntimeModule {
         result: keyof typeof RelationshipTemplateProcessedResult & keyof typeof MessageProcessedResult
     ) {
         const request = event.data.request;
+        const requestId = request.id;
         switch (request.source!.type) {
             case "RelationshipTemplate":
                 const getTemplateResult = await services.transportServices.relationshipTemplates.getRelationshipTemplate({ id: request.source!.reference });
@@ -66,7 +67,7 @@ export class DeciderModule extends RuntimeModule {
                         new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
                             template,
                             result: result as RelationshipTemplateProcessedResult.ManualRequestDecisionRequired,
-                            requestId: request.id
+                            requestId
                         })
                     );
                 }
