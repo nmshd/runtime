@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
-import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
+import { RelationshipTemplateContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController, TransportCoreErrors } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
@@ -53,48 +53,29 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
             return Result.ok(errorResponse);
         }
 
-        if (template.cache?.content instanceof RelationshipTemplateContent) {
-            const dbQuery: any = {};
-            dbQuery["source.reference"] = { $eq: template.id.toString() };
-            dbQuery["status"] = { $nin: [LocalRequestStatus.Decided, LocalRequestStatus.Completed, LocalRequestStatus.Expired] };
-            const requestsWithForthcomingDecisionFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
+        if (template.isExpired()) {
+            const errorResponse: CanCreateRelationshipErrorResponse = {
+                isSuccess: false,
+                error: RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
+                    `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
+                )
+            };
 
-            if (requestsWithForthcomingDecisionFromTemplate.length === 0) {
-                const errorResponse: CanCreateRelationshipErrorResponse = {
-                    isSuccess: false,
-                    error: RuntimeErrors.relationshipTemplates.noRequestToAccept()
-                };
+            if (template.cache?.content instanceof RelationshipTemplateContent) {
+                const dbQuery: any = {};
+                dbQuery["source.reference"] = { $eq: template.id.toString() };
+                dbQuery["status"] = { $neq: LocalRequestStatus.Completed };
+                const nonCompletedRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
 
-                return Result.ok(errorResponse);
+                if (nonCompletedRequestsFromTemplate.length !== 0 && template.cache.expiresAt && template.isExpired()) {
+                    const promises = nonCompletedRequestsFromTemplate.map((localRequest) =>
+                        this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache!.expiresAt!)
+                    );
+                    await Promise.all(promises);
+                }
             }
 
-            const localRequest = requestsWithForthcomingDecisionFromTemplate[0];
-
-            if (template.cache.expiresAt && template.isExpired()) {
-                await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
-
-                const errorResponse: CanCreateRelationshipErrorResponse = {
-                    isSuccess: false,
-                    error: RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
-                        `The incoming Request has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to in order to accept or to reject the creation of a Relationship.`
-                    )
-                };
-
-                return Result.ok(errorResponse);
-            }
-        }
-
-        if (template.cache?.content instanceof ArbitraryRelationshipTemplateContent) {
-            if (template.isExpired()) {
-                const errorResponse: CanCreateRelationshipErrorResponse = {
-                    isSuccess: false,
-                    error: RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
-                        `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
-                    )
-                };
-
-                return Result.ok(errorResponse);
-            }
+            return Result.ok(errorResponse);
         }
 
         const successResponse: CanCreateRelationshipSuccessResponse = { isSuccess: true };

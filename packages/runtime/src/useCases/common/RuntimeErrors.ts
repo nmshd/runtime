@@ -92,13 +92,6 @@ class RelationshipTemplates {
         );
     }
 
-    public noRequestToAccept(): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.relationshipTemplates.noRequestToAccept",
-            "There is no incoming Request associated with the RelationshipTemplate that could be accepted to create a Relationship."
-        );
-    }
-
     public expiredRelationshipTemplate(message: string): ApplicationError {
         return new ApplicationError("error.runtime.relationshipTemplates.expiredRelationshipTemplate", message);
     }
