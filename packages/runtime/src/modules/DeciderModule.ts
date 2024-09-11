@@ -40,8 +40,6 @@ export interface AutomationConfig {
     responseConfig: ResponseConfig;
 }
 
-// TODO: check kind of logging throughout file
-
 export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     // TODO: add validation for fitting requestConfig-responseConfig combination (maybe in init or start)
 
@@ -64,7 +62,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             await this.publishEvent(event, services, "RequestAutomaticallyDecided");
         }
 
-        this.logger.error(automationResult.error);
         return await this.requireManualDecision(event);
     }
 
@@ -82,24 +79,24 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
 
             if (isGeneralRequestConfig(requestConfigElement)) {
                 const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
-                if (generalRequestIsCompatible) {
-                    // TODO: return early?
-                    // TODO: if we validate earlier, we don't need to do so here
-                    const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
-                    if (!responseConfigIsValid) {
-                        this.logger.error(RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig(requestConfigElement, responseConfigElement));
-                        continue;
-                    }
-
-                    const decideRequestItemParameterResult = this.createDecideRequestItemParametersForGeneralResponseConfig(event, responseConfigElement);
-                    if (decideRequestItemParameterResult.isError) {
-                        this.logger.error(decideRequestItemParameterResult.error);
-                        continue;
-                    }
-
-                    const decideRequestResult = await this.decideRequest(event, decideRequestItemParameterResult.value);
-                    return decideRequestResult;
+                if (!generalRequestIsCompatible) {
+                    continue;
                 }
+
+                // TODO: if we validate earlier, we don't need to do so here
+                const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
+                if (!responseConfigIsValid) {
+                    this.logger.error(RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig(requestConfigElement, responseConfigElement));
+                    continue;
+                }
+
+                const decideRequestItemParameterResult = this.createDecideRequestItemParametersForGeneralResponseConfig(event, responseConfigElement);
+                if (decideRequestItemParameterResult.isError) {
+                    continue;
+                }
+
+                const decideRequestResult = await this.decideRequest(event, decideRequestItemParameterResult.value);
+                return decideRequestResult;
             }
 
             if (isRequestItemDerivationConfig(requestConfigElement)) {
@@ -111,9 +108,9 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                     responseConfigElement
                 );
                 if (checkCompatibilityResult.isError) {
-                    this.logger.error(checkCompatibilityResult.error);
                     continue;
                 }
+
                 decideRequestItemParameters = checkCompatibilityResult.value;
                 if (!this.containsDeep(decideRequestItemParameters, (element) => element === undefined)) {
                     const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
@@ -122,6 +119,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             }
         }
 
+        this.logger.info("The Request couldn't be decided automatically, since it contains RequestItems for which no suitable automationConfig was provided.");
         return Result.fail(RuntimeErrors.deciderModule.someItemsOfRequestCouldNotBeDecidedAutomatically());
     }
 
@@ -194,6 +192,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     ): Result<(DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]> {
         // TODO: if we add a validation earlier, this won't be necessary (maybe we should still keep it so that it is self-contained)
         if (!(isRejectResponseConfig(responseConfigElement) || isSimpleAcceptResponseConfig(responseConfigElement))) {
+            this.logger.error(`The ResponseConfig (${responseConfigElement}) does not match the Request ${event.data.request}.`);
+            // TODO: log event? await this.publishEvent(event, services, "Error"); Or maybe on a higher level?
             return Result.fail(RuntimeErrors.deciderModule.responseConfigDoesNotMatchRequest(responseConfigElement, event.data.request));
         }
 
@@ -212,11 +212,15 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         if (!this.containsDeep(decideRequestItemParameters, isAcceptResponseConfig)) {
             const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters });
             if (canRejectResult.isError) {
+                this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.error);
+                // TODO: log event? await this.publishEvent(event, services, "Error"); Or maybe on a higher level?
                 return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.error.message));
             }
 
             const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters });
             if (rejectResult.isError) {
+                this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
+                // TODO: log event? await this.publishEvent(event, services, "Error");
                 return Result.fail(RuntimeErrors.deciderModule.rejectRequestFailed(request.id, rejectResult.error.message));
             }
 
@@ -226,11 +230,15 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
 
         const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters });
         if (canAcceptResult.isError) {
+            this.logger.error(`Can not accept Request ${request.id}`, canAcceptResult.error);
+            // TODO: log event? await this.publishEvent(event, services, "Error");
             return Result.fail(RuntimeErrors.deciderModule.canAcceptRequestFailed(request.id, canAcceptResult.error.message));
         }
 
         const acceptResult = await services.consumptionServices.incomingRequests.accept({ requestId: request.id, items: decideRequestItemParameters });
         if (acceptResult.isError) {
+            this.logger.error(`An error occured trying to accept Request ${request.id}`, acceptResult.error);
+            // TODO: log event? await this.publishEvent(event, services, "Error");
             return Result.fail(RuntimeErrors.deciderModule.acceptRequestFailed(request.id, acceptResult.error.message));
         }
 
@@ -254,7 +262,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             if (Array.isArray(item)) {
                 this.checkRequestItemCompatibilityAndApplyReponseConfig(item, parametersToDecideRequest[i], request, requestConfigElement, responseConfigElement);
             } else {
-                if (parametersToDecideRequest[i]) continue; // there was already a fitting config found for this RequestItem
+                const alreadyDecidedByOtherConfig = !!parametersToDecideRequest[i];
+                if (alreadyDecidedByOtherConfig) continue;
                 const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
                 if (requestItemIsCompatible) {
                     const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
