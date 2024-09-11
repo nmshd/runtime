@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { DecideRequestItemGroupParametersJSON, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
-import { RequestItemGroupJSON, RequestItemJSON, RequestItemJSONDerivations } from "@nmshd/content";
+import { RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
 import { RuntimeErrors, RuntimeServices } from "..";
 import {
     IncomingRequestStatusChangedEvent,
@@ -78,7 +78,10 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     private async handleIncomingRequestStatusChanged(event: IncomingRequestStatusChangedEvent) {
         if (event.data.newStatus !== LocalRequestStatus.DecisionRequired) return;
 
-        if (event.data.request.content.items.some(flaggedAsManualDecisionRequired)) return await this.requireManualDecision(event);
+        const itemsOfRequest = event.data.request.content.items;
+        if (this.containsDeep(itemsOfRequest, (item) => item["requireManualDecision"] === true)) {
+            return await this.requireManualDecision(event);
+        }
 
         const automationResult = await this.automaticallyDecideRequest(event);
         if (automationResult.isSuccess) {
@@ -366,9 +369,4 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     public stop(): void {
         this.unsubscribeFromAllEvents();
     }
-}
-
-// TODO: why is this not a method?
-function flaggedAsManualDecisionRequired(itemOrGroup: { items?: RequestItemJSON[]; requireManualDecision?: boolean }) {
-    return itemOrGroup.requireManualDecision ?? itemOrGroup.items?.some((i) => i.requireManualDecision);
 }
