@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { IRequest, IRequestItemGroup, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
+import { IRequest, IRequestItemGroup, RejectResponseItem, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreIdHelper, TransportLoggerFactory } from "@nmshd/transport";
 import {
@@ -718,12 +718,16 @@ describe("IncomingRequestsController", function () {
             await When.iRejectTheRequest({
                 items: [
                     {
-                        accept: false
+                        accept: false,
+                        code: "a.requestitem.error.code",
+                        message: "A RequestItem error message"
                     },
                     {
                         items: [
                             {
-                                accept: false
+                                accept: false,
+                                code: "a.requestitemgroup.error.code",
+                                message: "A RequestItemGroup error message"
                             }
                         ]
                     }
@@ -731,9 +735,14 @@ describe("IncomingRequestsController", function () {
             });
             await Then.iExpectTheResponseContent((responseContent) => {
                 expect(responseContent.items).toHaveLength(2);
-                expect(responseContent.items[0]).toBeInstanceOf(ResponseItem);
+                expect(responseContent.items[0]).toBeInstanceOf(RejectResponseItem);
+                expect((responseContent.items[0] as RejectResponseItem).code).toBe("a.requestitem.error.code");
+                expect((responseContent.items[0] as RejectResponseItem).message).toBe("A RequestItem error message");
                 expect(responseContent.items[1]).toBeInstanceOf(ResponseItemGroup);
-                expect((responseContent.items[1] as ResponseItemGroup).items[0]).toBeInstanceOf(ResponseItem);
+                expect((responseContent.items[1] as ResponseItemGroup).items).toHaveLength(1);
+                expect((responseContent.items[1] as ResponseItemGroup).items[0]).toBeInstanceOf(RejectResponseItem);
+                expect(((responseContent.items[1] as ResponseItemGroup).items[0] as RejectResponseItem).code).toBe("a.requestitemgroup.error.code");
+                expect(((responseContent.items[1] as ResponseItemGroup).items[0] as RejectResponseItem).message).toBe("A RequestItemGroup error message");
             });
             await Then.eventHasBeenPublished(IncomingRequestStatusChangedEvent, {
                 newStatus: LocalRequestStatus.Decided

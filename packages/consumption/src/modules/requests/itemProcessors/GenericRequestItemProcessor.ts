@@ -30,7 +30,7 @@ export class GenericRequestItemProcessor<
     }
 
     public reject(requestItem: TRequestItem, params: TRejectParams, requestInfo: LocalRequestInfo): RejectResponseItem | Promise<RejectResponseItem> {
-        return RejectResponseItem.from({ result: ResponseItemResult.Rejected });
+        return RejectResponseItem.from({ result: ResponseItemResult.Rejected, code: params.code, message: params.message });
     }
 
     public canCreateOutgoingRequestItem(requestItem: TRequestItem, request: Request, recipient?: CoreAddress): Promise<ValidationResult> | ValidationResult {
