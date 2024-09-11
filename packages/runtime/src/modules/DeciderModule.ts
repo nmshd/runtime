@@ -325,6 +325,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     ) {
         const request = event.data.request;
         const requestId = request.id;
+
         switch (request.source!.type) {
             case "RelationshipTemplate":
                 const getTemplateResult = await services.transportServices.relationshipTemplates.getRelationshipTemplate({ id: request.source!.reference });
