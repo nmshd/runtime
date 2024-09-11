@@ -41,10 +41,34 @@ export interface AutomationConfig {
 }
 
 export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
-    // TODO: add validation for fitting requestConfig-responseConfig combination (maybe in init or start)
-
     public init(): void {
-        // Nothing to do here
+        if (!this.configuration.automationConfig) return;
+
+        for (const automationConfigElement of this.configuration.automationConfig) {
+            const isCompatible = this.validateAutomationConfig(automationConfigElement.requestConfig, automationConfigElement.responseConfig);
+            if (!isCompatible) {
+                throw RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig();
+            }
+        }
+    }
+
+    public validateAutomationConfig(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
+        if (isRejectResponseConfig(responseConfig)) return true;
+
+        if (isGeneralRequestConfig(requestConfig)) return isSimpleAcceptResponseConfig(responseConfig);
+
+        switch (requestConfig["content.item.@type"]) {
+            case "DeleteAttributeRequestItem":
+                return isDeleteAttributeAcceptResponseConfig(responseConfig);
+            case "FreeTextRequestItem":
+                return isFreeTextAcceptResponseConfig(responseConfig);
+            case "ProposeAttributeRequestItem":
+                return isProposeAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
+            case "ReadAttributeRequestItem":
+                return isReadAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isReadAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
+            default:
+                return isSimpleAcceptResponseConfig(responseConfig);
+        }
     }
 
     public start(): void {
@@ -80,13 +104,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             if (isGeneralRequestConfig(requestConfigElement)) {
                 const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
                 if (!generalRequestIsCompatible) {
-                    continue;
-                }
-
-                // TODO: if we validate earlier, we don't need to do so here
-                const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
-                if (!responseConfigIsValid) {
-                    this.logger.error(RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig(requestConfigElement, responseConfigElement));
                     continue;
                 }
 
@@ -190,13 +207,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         event: IncomingRequestStatusChangedEvent,
         responseConfigElement: ResponseConfig
     ): Result<(DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]> {
-        // TODO: if we add a validation earlier, this won't be necessary (maybe we should still keep it so that it is self-contained)
-        if (!(isRejectResponseConfig(responseConfigElement) || isSimpleAcceptResponseConfig(responseConfigElement))) {
-            this.logger.error(`The ResponseConfig (${responseConfigElement}) does not match the Request ${event.data.request}.`);
-            // TODO: log event? await this.publishEvent(event, services, "Error"); Or maybe on a higher level?
-            return Result.fail(RuntimeErrors.deciderModule.responseConfigDoesNotMatchRequest(responseConfigElement, event.data.request));
-        }
-
         const request = event.data.request;
         const decideRequestItemParameters = this.createArrayWithSameDimension(request.content.items, responseConfigElement);
         return Result.ok(decideRequestItemParameters);
@@ -264,18 +274,14 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             } else {
                 const alreadyDecidedByOtherConfig = !!parametersToDecideRequest[i];
                 if (alreadyDecidedByOtherConfig) continue;
+
                 const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
-                if (requestItemIsCompatible) {
-                    const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
-                    if (generalRequestIsCompatible) {
-                        // TODO: if we do this earlier we don't need to do so here
-                        const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
-                        if (!responseConfigIsValid) {
-                            return Result.fail(RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig(requestConfigElement, responseConfigElement));
-                        }
-                        parametersToDecideRequest[i] = responseConfigElement;
-                    }
-                }
+                if (!requestItemIsCompatible) continue;
+
+                const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
+                if (!generalRequestIsCompatible) continue;
+
+                parametersToDecideRequest[i] = responseConfigElement;
             }
         }
         return Result.ok(parametersToDecideRequest);
@@ -294,26 +300,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             reducedRequestItemConfigElement[reducedKey] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
         }
         return reducedRequestItemConfigElement;
-    }
-
-    // TODO: check if this can be done earlier
-    public validateResponseConfigCompatibility(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
-        if (isRejectResponseConfig(responseConfig)) return true;
-
-        if (isGeneralRequestConfig(requestConfig)) return isSimpleAcceptResponseConfig(responseConfig);
-
-        switch (requestConfig["content.item.@type"]) {
-            case "DeleteAttributeRequestItem":
-                return isDeleteAttributeAcceptResponseConfig(responseConfig);
-            case "FreeTextRequestItem":
-                return isFreeTextAcceptResponseConfig(responseConfig);
-            case "ProposeAttributeRequestItem":
-                return isProposeAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
-            case "ReadAttributeRequestItem":
-                return isReadAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isReadAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
-            default:
-                return isSimpleAcceptResponseConfig(responseConfig);
-        }
     }
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {

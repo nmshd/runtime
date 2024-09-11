@@ -35,7 +35,7 @@ import {
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
 } from "../../src";
-import { RuntimeServiceProvider, TestRequestItem, TestRuntimeServices, establishRelationship, exchangeMessage } from "../lib";
+import { RuntimeServiceProvider, TestRequestItem, TestRuntimeServices, establishRelationship, exchangeMessage, expectThrowsAsync } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 
@@ -460,7 +460,7 @@ describe("DeciderModule", () => {
             // TODO: check other RequestItemConfigs
         });
 
-        describe("validateResponseConfigCompatibility", () => {
+        describe("validateAutomationConfig", () => {
             const rejectResponseConfig: RejectResponseConfig = {
                 accept: false
             };
@@ -530,7 +530,7 @@ describe("DeciderModule", () => {
                 [generalRequestConfig, readAttributeWithExistingAttributeAcceptResponseConfig, false],
                 [generalRequestConfig, readAttributeWithNewAttributeAcceptResponseConfig, false]
             ])("%p and %p should return %p as validation result", (requestConfig, responseConfig, expectedCompatibility) => {
-                const result = deciderModule.validateResponseConfigCompatibility(requestConfig, responseConfig);
+                const result = deciderModule.validateAutomationConfig(requestConfig, responseConfig);
                 expect(result).toBe(expectedCompatibility);
             });
         });
@@ -693,6 +693,7 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         { "@type": "AuthenticationRequestItem", mustBeAccepted: false },
+                        { "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false },
                         {
                             "@type": "CreateAttributeRequestItem",
                             attribute: {
@@ -745,11 +746,12 @@ describe("DeciderModule", () => {
 
             const responseContent = requestAfterAction.response!.content;
             expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(4);
+            expect(responseContent.items).toHaveLength(5);
             expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
-            expect(responseContent.items[1]["@type"]).toBe("CreateAttributeAcceptResponseItem");
-            expect(responseContent.items[2]["@type"]).toBe("RegisterAttributeListenerAcceptResponseItem");
-            expect(responseContent.items[3]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
+            expect(responseContent.items[2]["@type"]).toBe("CreateAttributeAcceptResponseItem");
+            expect(responseContent.items[3]["@type"]).toBe("RegisterAttributeListenerAcceptResponseItem");
+            expect(responseContent.items[4]["@type"]).toBe("ShareAttributeAcceptResponseItem");
         });
 
         // test("automatically accepts a ShareAttributeRequestItem with attribute value type FileReferenceAttribute", async () => {
@@ -814,5 +816,25 @@ describe("DeciderModule", () => {
         //     const sharedAttribute = sharedAttributeResult.value;
         //     expect(sharedAttribute.content.value).toBe("A link to a file with more than 30 characters");
         // });
+
+        test("should throw an error if the automationConfig is invalid", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            "content.item.@type": "FreeTextRequestItem"
+                        },
+                        responseConfig: {
+                            accept: true,
+                            deletionDate: CoreDate.utc().add({ days: 1 }).toString()
+                        }
+                    }
+                ]
+            };
+            await expectThrowsAsync(
+                runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }),
+                "The RequestConfig does not match the ResponseConfig."
+            );
+        });
     });
 });

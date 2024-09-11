@@ -1,7 +1,7 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { RequestConfig, ResponseConfig } from "../../modules/decide";
+import { ResponseConfig } from "../../modules/decide";
 import { LocalRequestDTO } from "../../types";
 import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
 
@@ -248,11 +248,8 @@ class DeciderModule {
         );
     }
 
-    public requestConfigDoesNotMatchResponseConfig(requestConfig: RequestConfig, responseConfig: ResponseConfig) {
-        return new ApplicationError(
-            "error.runtime.decide.requestConfigDoesNotMatchResponseConfig",
-            `The RequestConfig (${requestConfig}) does not match the ResponseConfig (${responseConfig}).`
-        );
+    public requestConfigDoesNotMatchResponseConfig() {
+        return new ApplicationError("error.runtime.decide.requestConfigDoesNotMatchResponseConfig", "The RequestConfig does not match the ResponseConfig.");
     }
 
     public responseConfigDoesNotMatchRequest(responseConfig: ResponseConfig, request: LocalRequestDTO) {
