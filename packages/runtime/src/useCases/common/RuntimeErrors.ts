@@ -1,8 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { ResponseConfig } from "../../modules/decide";
-import { LocalRequestDTO } from "../../types";
 import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
 
 class General {
@@ -244,16 +242,12 @@ class DeciderModule {
     public someItemsOfRequestCouldNotBeDecidedAutomatically() {
         return new ApplicationError(
             "error.runtime.decide.someItemsOfRequestCouldNotBeDecidedAutomatically",
-            "The Request can't be decided automatically, since there wasn't a suitable automationConfig provided for every RequestItem."
+            "The Request couldn't be decided automatically, since it contains RequestItems for which no suitable automationConfig was provided."
         );
     }
 
     public requestConfigDoesNotMatchResponseConfig() {
         return new ApplicationError("error.runtime.decide.requestConfigDoesNotMatchResponseConfig", "The RequestConfig does not match the ResponseConfig.");
-    }
-
-    public responseConfigDoesNotMatchRequest(responseConfig: ResponseConfig, request: LocalRequestDTO) {
-        return new ApplicationError("error.runtime.decide.responseConfigDoesNotMatchRequest", `The ResponseConfig (${responseConfig}) does not match the Request ${request}.`);
     }
 
     public canRejectRequestFailed(requestId: string, errorMessage: string) {

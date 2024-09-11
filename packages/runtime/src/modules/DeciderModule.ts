@@ -223,14 +223,12 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters });
             if (canRejectResult.isError) {
                 this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.error);
-                // TODO: log event? await this.publishEvent(event, services, "Error"); Or maybe on a higher level?
                 return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.error.message));
             }
 
             const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters });
             if (rejectResult.isError) {
                 this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
-                // TODO: log event? await this.publishEvent(event, services, "Error");
                 return Result.fail(RuntimeErrors.deciderModule.rejectRequestFailed(request.id, rejectResult.error.message));
             }
 
@@ -241,14 +239,12 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters });
         if (canAcceptResult.isError) {
             this.logger.error(`Can not accept Request ${request.id}`, canAcceptResult.error);
-            // TODO: log event? await this.publishEvent(event, services, "Error");
             return Result.fail(RuntimeErrors.deciderModule.canAcceptRequestFailed(request.id, canAcceptResult.error.message));
         }
 
         const acceptResult = await services.consumptionServices.incomingRequests.accept({ requestId: request.id, items: decideRequestItemParameters });
         if (acceptResult.isError) {
             this.logger.error(`An error occured trying to accept Request ${request.id}`, acceptResult.error);
-            // TODO: log event? await this.publishEvent(event, services, "Error");
             return Result.fail(RuntimeErrors.deciderModule.acceptRequestFailed(request.id, acceptResult.error.message));
         }
 

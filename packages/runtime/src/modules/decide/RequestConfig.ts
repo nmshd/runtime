@@ -3,7 +3,7 @@ import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 export interface GeneralRequestConfig {
     peer?: string | string[];
     createdAt?: string | string[];
-    "source.type"?: "Message" | "RelationshipTemplate"; // TODO: can we get onNewRelationship or onExistingRelationship for RelationshipTemplates? Yes, but we won't do it for now.
+    "source.type"?: "Message" | "RelationshipTemplate";
     "content.expiresAt"?: string | string[];
     "content.title"?: string | string[];
     "content.description"?: string | string[];
@@ -133,7 +133,6 @@ export interface ShareAttributeRequestItemConfig extends RequestItemConfig {
 
 export type RequestItemDerivationConfig = RequestItemConfig | CreateAttributeRequestItemConfig | FreeTextRequestItemConfig | ShareAttributeRequestItemConfig;
 
-// TODO: delete one of the following two?
 export function isGeneralRequestConfig(input: any): input is GeneralRequestConfig {
     return !input["content.item.@type"];
 }
