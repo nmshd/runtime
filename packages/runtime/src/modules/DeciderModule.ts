@@ -89,13 +89,14 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                         continue;
                     }
 
-                    const applyGeneralResponseConfigResult = await this.applyGeneralResponseConfig(event, responseConfigElement);
-                    if (applyGeneralResponseConfigResult.isError) {
-                        this.logger.error(applyGeneralResponseConfigResult.error.message);
+                    const decideRequestItemParameterResult = this.createDecideRequestItemParametersForGeneralResponseConfig(event, responseConfigElement);
+                    if (decideRequestItemParameterResult.isError) {
+                        this.logger.error(decideRequestItemParameterResult.error);
                         continue;
                     }
 
-                    return applyGeneralResponseConfigResult;
+                    const decideRequestResult = await this.decideRequest(event, decideRequestItemParameterResult.value);
+                    return decideRequestResult;
                 }
             }
 
@@ -253,16 +254,18 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         }
     }
 
-    private async applyGeneralResponseConfig(event: IncomingRequestStatusChangedEvent, responseConfigElement: ResponseConfig): Promise<Result<LocalRequestDTO>> {
+    private createDecideRequestItemParametersForGeneralResponseConfig(
+        event: IncomingRequestStatusChangedEvent,
+        responseConfigElement: ResponseConfig
+    ): Result<(DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]> {
+        // TODO: if we add a validation earlier, this won't be necessary
         if (!(isRejectResponseConfig(responseConfigElement) || isSimpleAcceptResponseConfig(responseConfigElement))) {
             return Result.fail(RuntimeErrors.deciderModule.responseConfigDoesNotMatchRequest(responseConfigElement, event.data.request));
         }
 
         const request = event.data.request;
         const decideRequestItemParameters = this.createArrayWithSameDimension(request.content.items, responseConfigElement);
-
-        const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
-        return decideRequestResult;
+        return Result.ok(decideRequestItemParameters);
     }
 
     private async decideRequest(
@@ -321,6 +324,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         result: keyof typeof RelationshipTemplateProcessedResult & keyof typeof MessageProcessedResult
     ) {
         const request = event.data.request;
+        const requestId = request.id;
         switch (request.source!.type) {
             case "RelationshipTemplate":
                 const getTemplateResult = await services.transportServices.relationshipTemplates.getRelationshipTemplate({ id: request.source!.reference });
@@ -340,7 +344,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                         new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
                             template,
                             result: result as RelationshipTemplateProcessedResult.ManualRequestDecisionRequired,
-                            requestId: request.id
+                            requestId
                         })
                     );
                 }
@@ -350,7 +354,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                         new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
                             template,
                             result: result as RelationshipTemplateProcessedResult.RequestAutomaticallyDecided,
-                            requestId: request.id
+                            requestId
                         })
                     );
                 }
