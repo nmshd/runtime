@@ -35,7 +35,6 @@ export interface DeciderModuleConfiguration extends ModuleConfiguration {
 
 export type DeciderModuleConfigurationOverwrite = Partial<DeciderModuleConfiguration>;
 
-// TODO: add validation for fitting requestConfig-responseConfig combination (maybe in init or start)
 export interface AutomationConfig {
     requestConfig: RequestConfig;
     responseConfig: ResponseConfig;
@@ -44,6 +43,8 @@ export interface AutomationConfig {
 // TODO: check kind of logging throughout file
 
 export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
+    // TODO: add validation for fitting requestConfig-responseConfig combination (maybe in init or start)
+
     public init(): void {
         // Nothing to do here
     }
@@ -83,6 +84,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
                 if (generalRequestIsCompatible) {
                     // TODO: return early?
+                    // TODO: if we validate earlier, we don't need to do so here
                     const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
                     if (!responseConfigIsValid) {
                         this.logger.error(RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig(requestConfigElement, responseConfigElement));
@@ -123,35 +125,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return Result.fail(RuntimeErrors.deciderModule.someItemsOfRequestCouldNotBeDecidedAutomatically());
     }
 
-    private checkRequestItemCompatibilityAndApplyReponseConfig(
-        itemsOfRequest: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
-        parametersToDecideRequest: any[],
-        request: LocalRequestDTO,
-        requestConfigElement: RequestItemDerivationConfig,
-        responseConfigElement: ResponseConfig
-    ): Result<ResponseConfig[]> {
-        for (let i = 0; i < itemsOfRequest.length; i++) {
-            const item = itemsOfRequest[i];
-            if (Array.isArray(item)) {
-                this.checkRequestItemCompatibilityAndApplyReponseConfig(item, parametersToDecideRequest[i], request, requestConfigElement, responseConfigElement);
-            } else {
-                if (parametersToDecideRequest[i]) continue; // there was already a fitting config found for this RequestItem
-                const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
-                if (requestItemIsCompatible) {
-                    const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
-                    if (generalRequestIsCompatible) {
-                        const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
-                        if (!responseConfigIsValid) {
-                            return Result.fail(RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig(requestConfigElement, responseConfigElement));
-                        }
-                        parametersToDecideRequest[i] = responseConfigElement;
-                    }
-                }
-            }
-        }
-        return Result.ok(parametersToDecideRequest);
-    }
-
     private createArrayWithSameDimension(array: any[], initialValue: any): any[] {
         return array.map((element) => {
             if (Array.isArray(element)) {
@@ -161,27 +134,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         });
     }
 
-    private containsDeep(nestedArray: any[], callback: (element: any) => boolean): boolean {
-        return nestedArray.some((element) => (Array.isArray(element) ? this.containsDeep(element, callback) : callback(element)));
-    }
-
     public checkGeneralRequestCompatibility(generalRequestConfigElement: GeneralRequestConfig, request: LocalRequestDTO): boolean {
         return this.checkCompatibility(generalRequestConfigElement, request);
-    }
-
-    public checkRequestItemCompatibility(requestItemConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): boolean {
-        const reducedRequestItemConfigElement = this.reduceRequestItemConfigElement(requestItemConfigElement);
-        return this.checkCompatibility(reducedRequestItemConfigElement, requestItem);
-    }
-
-    private reduceRequestItemConfigElement(requestItemConfigElement: RequestItemDerivationConfig): Record<string, any> {
-        const prefix = "content.item.";
-        const reducedRequestItemConfigElement: Record<string, any> = {};
-        for (const key in requestItemConfigElement) {
-            const reducedKey = key.startsWith(prefix) ? key.substring(prefix.length).trim() : key;
-            reducedRequestItemConfigElement[reducedKey] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
-        }
-        return reducedRequestItemConfigElement;
     }
 
     private checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
@@ -234,31 +188,11 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return atLeastOneMatchingTag;
     }
 
-    // TODO: check if this can be done earlier
-    public validateResponseConfigCompatibility(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
-        if (isRejectResponseConfig(responseConfig)) return true;
-
-        if (isGeneralRequestConfig(requestConfig)) return isSimpleAcceptResponseConfig(responseConfig);
-
-        switch (requestConfig["content.item.@type"]) {
-            case "DeleteAttributeRequestItem":
-                return isDeleteAttributeAcceptResponseConfig(responseConfig);
-            case "FreeTextRequestItem":
-                return isFreeTextAcceptResponseConfig(responseConfig);
-            case "ProposeAttributeRequestItem":
-                return isProposeAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
-            case "ReadAttributeRequestItem":
-                return isReadAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isReadAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
-            default:
-                return isSimpleAcceptResponseConfig(responseConfig);
-        }
-    }
-
     private createDecideRequestItemParametersForGeneralResponseConfig(
         event: IncomingRequestStatusChangedEvent,
         responseConfigElement: ResponseConfig
     ): Result<(DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]> {
-        // TODO: if we add a validation earlier, this won't be necessary
+        // TODO: if we add a validation earlier, this won't be necessary (maybe we should still keep it so that it is self-contained)
         if (!(isRejectResponseConfig(responseConfigElement) || isSimpleAcceptResponseConfig(responseConfigElement))) {
             return Result.fail(RuntimeErrors.deciderModule.responseConfigDoesNotMatchRequest(responseConfigElement, event.data.request));
         }
@@ -302,6 +236,75 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
 
         const localRequestWithResponse = acceptResult.value;
         return Result.ok(localRequestWithResponse);
+    }
+
+    private containsDeep(nestedArray: any[], callback: (element: any) => boolean): boolean {
+        return nestedArray.some((element) => (Array.isArray(element) ? this.containsDeep(element, callback) : callback(element)));
+    }
+
+    private checkRequestItemCompatibilityAndApplyReponseConfig(
+        itemsOfRequest: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
+        parametersToDecideRequest: any[],
+        request: LocalRequestDTO,
+        requestConfigElement: RequestItemDerivationConfig,
+        responseConfigElement: ResponseConfig
+    ): Result<ResponseConfig[]> {
+        for (let i = 0; i < itemsOfRequest.length; i++) {
+            const item = itemsOfRequest[i];
+            if (Array.isArray(item)) {
+                this.checkRequestItemCompatibilityAndApplyReponseConfig(item, parametersToDecideRequest[i], request, requestConfigElement, responseConfigElement);
+            } else {
+                if (parametersToDecideRequest[i]) continue; // there was already a fitting config found for this RequestItem
+                const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
+                if (requestItemIsCompatible) {
+                    const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
+                    if (generalRequestIsCompatible) {
+                        // TODO: if we do this earlier we don't need to do so here
+                        const responseConfigIsValid = this.validateResponseConfigCompatibility(requestConfigElement, responseConfigElement);
+                        if (!responseConfigIsValid) {
+                            return Result.fail(RuntimeErrors.deciderModule.requestConfigDoesNotMatchResponseConfig(requestConfigElement, responseConfigElement));
+                        }
+                        parametersToDecideRequest[i] = responseConfigElement;
+                    }
+                }
+            }
+        }
+        return Result.ok(parametersToDecideRequest);
+    }
+
+    public checkRequestItemCompatibility(requestItemConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): boolean {
+        const reducedRequestItemConfigElement = this.reduceRequestItemConfigElement(requestItemConfigElement);
+        return this.checkCompatibility(reducedRequestItemConfigElement, requestItem);
+    }
+
+    private reduceRequestItemConfigElement(requestItemConfigElement: RequestItemDerivationConfig): Record<string, any> {
+        const prefix = "content.item.";
+        const reducedRequestItemConfigElement: Record<string, any> = {};
+        for (const key in requestItemConfigElement) {
+            const reducedKey = key.startsWith(prefix) ? key.substring(prefix.length).trim() : key;
+            reducedRequestItemConfigElement[reducedKey] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
+        }
+        return reducedRequestItemConfigElement;
+    }
+
+    // TODO: check if this can be done earlier
+    public validateResponseConfigCompatibility(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
+        if (isRejectResponseConfig(responseConfig)) return true;
+
+        if (isGeneralRequestConfig(requestConfig)) return isSimpleAcceptResponseConfig(responseConfig);
+
+        switch (requestConfig["content.item.@type"]) {
+            case "DeleteAttributeRequestItem":
+                return isDeleteAttributeAcceptResponseConfig(responseConfig);
+            case "FreeTextRequestItem":
+                return isFreeTextAcceptResponseConfig(responseConfig);
+            case "ProposeAttributeRequestItem":
+                return isProposeAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
+            case "ReadAttributeRequestItem":
+                return isReadAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isReadAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
+            default:
+                return isSimpleAcceptResponseConfig(responseConfig);
+        }
     }
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {
@@ -374,6 +377,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     }
 }
 
+// TODO: why is this not a method?
 function flaggedAsManualDecisionRequired(itemOrGroup: { items?: RequestItemJSON[]; requireManualDecision?: boolean }) {
     return itemOrGroup.requireManualDecision ?? itemOrGroup.items?.some((i) => i.requireManualDecision);
 }
