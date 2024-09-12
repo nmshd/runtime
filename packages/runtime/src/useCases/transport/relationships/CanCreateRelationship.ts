@@ -2,7 +2,7 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipTemplateContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController, TransportCoreErrors } from "@nmshd/transport";
+import { RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
 
@@ -47,7 +47,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         if (existingRelationshipsToPeer.length !== 0) {
             const errorResponse: CanCreateRelationshipErrorResponse = {
                 isSuccess: false,
-                error: TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status)
+                error: RuntimeErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status)
             };
 
             return Result.ok(errorResponse);
