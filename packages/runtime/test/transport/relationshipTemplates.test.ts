@@ -1,3 +1,4 @@
+import { RelationshipTemplateContent } from "@nmshd/content";
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction, TransportServices } from "../../src";
 import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider } from "../lib";
@@ -31,6 +32,26 @@ describe("Template Tests", () => {
         });
 
         expect(response).toBeAnError("must have required property 'expiresAt'", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("create a template with request for new relationship that expires after the template", async () => {
+        const relationshipTemplateContent = RelationshipTemplateContent.from({
+            onNewRelationship: {
+                "@type": "Request",
+                expiresAt: DateTime.utc().plus({ minutes: 20 }).toString(),
+                items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]
+            }
+        }).toJSON();
+
+        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: relationshipTemplateContent,
+            expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
+        });
+
+        expect(response).toBeAnError(
+            "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set so that the expiration date of the RelationshipTemplate is not exceeded.",
+            "error.runtime.relationshipTemplates.requestExpiresAfterRelationshipTemplate"
+        );
     });
 
     test("create a template with undefined maxNumberOfAllocations", async () => {
