@@ -131,7 +131,17 @@ export interface ShareAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.attribute.value.description"?: string | string[];
 }
 
-export type RequestItemDerivationConfig = RequestItemConfig | CreateAttributeRequestItemConfig | FreeTextRequestItemConfig | ShareAttributeRequestItemConfig;
+export type RequestItemDerivationConfig =
+    | RequestItemConfig
+    | AuthenticationRequestItemConfig
+    | ConsentRequestItemConfig
+    | CreateAttributeRequestItemConfig
+    | DeleteAttributeRequestItemConfig
+    | FreeTextRequestItemConfig
+    | ProposeAttributeRequestItemConfig
+    | ReadAttributeRequestItemConfig
+    | RegisterAttributeListenerRequestItemConfig
+    | ShareAttributeRequestItemConfig;
 
 export function isGeneralRequestConfig(input: any): input is GeneralRequestConfig {
     return !input["content.item.@type"];

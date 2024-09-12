@@ -12,7 +12,6 @@ import {
 import { ModuleConfiguration, RuntimeModule } from "../extensibility";
 import { LocalRequestDTO } from "../types";
 import {
-    GeneralRequestConfig,
     isAcceptResponseConfig,
     isDeleteAttributeAcceptResponseConfig,
     isFreeTextAcceptResponseConfig,
@@ -87,6 +86,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         if (automationResult.isSuccess) {
             const services = await this.runtime.getServices(event.eventTargetAddress);
             await this.publishEvent(event, services, "RequestAutomaticallyDecided");
+            return;
         }
 
         return await this.requireManualDecision(event);
@@ -105,7 +105,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             const responseConfigElement = automationConfigElement.responseConfig;
 
             if (isGeneralRequestConfig(requestConfigElement)) {
-                const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
+                const generalRequestIsCompatible = this.checkCompatibility(requestConfigElement, request);
                 if (!generalRequestIsCompatible) {
                     continue;
                 }
@@ -152,11 +152,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         });
     }
 
-    public checkGeneralRequestCompatibility(generalRequestConfigElement: GeneralRequestConfig, request: LocalRequestDTO): boolean {
-        return this.checkCompatibility(generalRequestConfigElement, request);
-    }
-
-    private checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
+    public checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
         let compatible = true;
         for (const property in requestConfigElement) {
             const unformattedRequestConfigProperty = requestConfigElement[property as keyof RequestConfig];
@@ -225,6 +221,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         if (!this.containsDeep(decideRequestItemParameters, isAcceptResponseConfig)) {
             const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters });
             if (canRejectResult.isError) {
+                // TODO: should this be logger.error or logger.debug?
                 this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.error);
                 return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.error.message));
             }
@@ -241,6 +238,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
 
         const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters });
         if (canAcceptResult.isError) {
+            // TODO: should this be logger.error or logger.debug?
             this.logger.error(`Can not accept Request ${request.id}`, canAcceptResult.error);
             return Result.fail(RuntimeErrors.deciderModule.canAcceptRequestFailed(request.id, canAcceptResult.error.message));
         }
@@ -286,19 +284,31 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return Result.ok(parametersToDecideRequest);
     }
 
-    public checkRequestItemCompatibility(requestItemConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): boolean {
-        const reducedRequestItemConfigElement = this.reduceRequestItemConfigElement(requestItemConfigElement);
-        return this.checkCompatibility(reducedRequestItemConfigElement, requestItem);
+    public checkRequestItemCompatibility(requestConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): boolean {
+        const requestItemPartOfConfigElement = this.filterConfigElementByPrefix(requestConfigElement, true);
+        return this.checkCompatibility(requestItemPartOfConfigElement, requestItem);
     }
 
-    private reduceRequestItemConfigElement(requestItemConfigElement: RequestItemDerivationConfig): Record<string, any> {
+    public checkGeneralRequestCompatibility(requestConfigElement: RequestItemDerivationConfig, request: LocalRequestDTO): boolean {
+        const generalRequestPartOfConfigElement = this.filterConfigElementByPrefix(requestConfigElement, false);
+        return this.checkCompatibility(generalRequestPartOfConfigElement, request);
+    }
+
+    private filterConfigElementByPrefix(requestItemConfigElement: RequestItemDerivationConfig, includePrefix: boolean): Record<string, any> {
         const prefix = "content.item.";
-        const reducedRequestItemConfigElement: Record<string, any> = {};
+
+        const filteredRequestItemConfigElement: Record<string, any> = {};
         for (const key in requestItemConfigElement) {
-            const reducedKey = key.startsWith(prefix) ? key.substring(prefix.length).trim() : key;
-            reducedRequestItemConfigElement[reducedKey] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
+            const startsWithPrefix = key.startsWith(prefix);
+
+            if (includePrefix && startsWithPrefix) {
+                const reducedKey = key.substring(prefix.length).trim();
+                filteredRequestItemConfigElement[reducedKey] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
+            } else if (!includePrefix && !startsWithPrefix) {
+                filteredRequestItemConfigElement[key] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
+            }
         }
-        return reducedRequestItemConfigElement;
+        return filteredRequestItemConfigElement;
     }
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {
