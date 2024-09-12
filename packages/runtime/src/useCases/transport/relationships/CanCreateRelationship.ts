@@ -70,7 +70,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
 
             const errorResponse: CanCreateRelationshipErrorResponse = {
                 isSuccess: false,
-                error: RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
+                error: RuntimeErrors.relationships.expiredRelationshipTemplate(
                     `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
                 )
             };

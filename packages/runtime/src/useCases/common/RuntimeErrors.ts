@@ -98,13 +98,13 @@ class RelationshipTemplates {
             "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set so that the expiration date of the RelationshipTemplate is not exceeded."
         );
     }
-
-    public expiredRelationshipTemplate(message: string): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.expiredRelationshipTemplate", message);
-    }
 }
 
 class Relationships {
+    public expiredRelationshipTemplate(message: string): ApplicationError {
+        return new ApplicationError("error.runtime.relationships.expiredRelationshipTemplate", message);
+    }
+
     public wrongRelationshipStatus(relationshipId: string, status: string): ApplicationError {
         return new ApplicationError(
             "error.runtime.relationships.wrongRelationshipStatus",

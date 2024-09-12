@@ -54,7 +54,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             }
 
             return Result.fail(
-                RuntimeErrors.relationshipTemplates.expiredRelationshipTemplate(
+                RuntimeErrors.relationships.expiredRelationshipTemplate(
                     `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
                 )
             );

@@ -659,7 +659,7 @@ describe("Requests", () => {
 
             expect(result).toBeAnError(
                 `The incoming Request has the already expired RelationshipTemplate '${request.source!.reference}' as its source, which is why it cannot be responded to.`,
-                "error.runtime.relationshipTemplates.expiredRelationshipTemplate"
+                "error.runtime.relationships.expiredRelationshipTemplate"
             );
 
             const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;

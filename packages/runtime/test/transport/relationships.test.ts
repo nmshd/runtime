@@ -233,7 +233,7 @@ describe("Cannot create Relationship", () => {
 
         expect(createRelationshipResponse).toBeAnError(
             `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`,
-            "error.runtime.relationshipTemplates.expiredRelationshipTemplate"
+            "error.runtime.relationships.expiredRelationshipTemplate"
         );
     });
 
