@@ -32,7 +32,7 @@ import {
     TerminateRelationshipRequest,
     TerminateRelationshipUseCase
 } from "../../../useCases";
-import { CanCreateRelationshipRequest, CanCreateRelationshipResponse, CanCreateRelationshipUseCase } from "../../../useCases/transport/relationships/CanCreateRelationship";
+import { CanCreateRelationshipResponse, CanCreateRelationshipUseCase } from "../../../useCases/transport/relationships/CanCreateRelationship";
 
 export class RelationshipsFacade {
     public constructor(
@@ -65,7 +65,7 @@ export class RelationshipsFacade {
         return await this.getRelationshipByAddressUseCase.execute(request);
     }
 
-    public async canCreateRelationship(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse>> {
+    public async canCreateRelationship(request: CreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse>> {
         return await this.canCreateRelationshipUseCase.execute(request);
     }
 
