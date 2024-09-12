@@ -1,4 +1,4 @@
-import { Serializable } from "@js-soft/ts-serval";
+import { JSONWrapper } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { IdentityMetadataController } from "@nmshd/consumption";
 import { CoreAddress } from "@nmshd/core-types";
@@ -29,7 +29,7 @@ export class UpsertIdentityMetadataUseCase extends UseCase<UpsertIdentityMetadat
     }
 
     protected override async executeInternal(request: UpsertIdentityMetadataRequest): Promise<Result<IdentityMetadataDTO>> {
-        const value = Serializable.fromAny(request.value);
+        const value = JSONWrapper.fromAny(request.value);
         const identityMetadata = await this.identityMetadataController.upsertIdentityMetadata({ reference: CoreAddress.from(request.reference), key: request.key, value });
 
         return Result.ok(IdentityMetadataMapper.toIdentityMetadataDTO(identityMetadata));

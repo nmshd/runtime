@@ -1,4 +1,4 @@
-import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
+import { ISerializable, JSONWrapper, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 
 export interface IUpsertIdentityMetadataParams extends ISerializable {
@@ -17,8 +17,8 @@ export class UpsertIdentityMetadataParams extends Serializable implements IUpser
     public reference: CoreAddress;
 
     @validate()
-    @serialize({ any: true })
-    public value: Serializable;
+    @serialize()
+    public value: JSONWrapper;
 
     public static from(value: IUpsertIdentityMetadataParams): UpsertIdentityMetadataParams {
         return this.fromAny(value);
