@@ -8,6 +8,7 @@ describe("CorrelationId", function () {
     let connection: IDatabaseConnection;
     let testAccount: AccountController;
     let interceptor: RequestInterceptor;
+
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
         const transport = TestUtil.createTransport(connection);
