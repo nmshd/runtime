@@ -37,8 +37,8 @@ describe("IdentityMetadataController", function () {
         expect(count).toBe(0);
     });
 
-    test("should create an identity metadata with scope identity", async function () {
-        const identityMetadata = await consumptionController.identityMetadata.createIdentityMetadata({
+    test("should upsert an identity metadata with scope identity", async function () {
+        const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
             value: { key: "value" },
             reference: CoreAddress.from("id1")
         });
@@ -51,7 +51,7 @@ describe("IdentityMetadataController", function () {
     });
 
     test("should create an identity metadata with scope identity with a key", async function () {
-        const identityMetadata = await consumptionController.identityMetadata.createIdentityMetadata({
+        const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
             value: { key: "value" },
             reference: CoreAddress.from("id1"),
             key: "key"
@@ -69,12 +69,12 @@ describe("IdentityMetadataController", function () {
     test("should update an identity metadata", async function () {
         const query = { reference: CoreAddress.from("id1") };
 
-        await consumptionController.identityMetadata.createIdentityMetadata({
+        await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
             value: { key: "value" }
         });
 
-        const updated = await consumptionController.identityMetadata.updateIdentityMetadata({
+        const updated = await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
             value: { key: "value2" }
         });
@@ -88,12 +88,12 @@ describe("IdentityMetadataController", function () {
     test("should update an identity metadata with a key", async function () {
         const query = { reference: CoreAddress.from("id1"), key: "key" };
 
-        await consumptionController.identityMetadata.createIdentityMetadata({
+        await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
             value: { key: "value" }
         });
 
-        const updated = await consumptionController.identityMetadata.updateIdentityMetadata({
+        const updated = await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
             value: { key: "value2" }
         });
@@ -107,10 +107,9 @@ describe("IdentityMetadataController", function () {
     test("should upsert an identity metadata", async function () {
         const query = { reference: CoreAddress.from("id1") };
 
-        const upserted = await consumptionController.identityMetadata.updateIdentityMetadata({
+        const upserted = await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
-            value: { key: "value2" },
-            upsert: true
+            value: { key: "value2" }
         });
         expect(upserted.value.toJSON()).toStrictEqual({ key: "value2" });
 
@@ -125,10 +124,9 @@ describe("IdentityMetadataController", function () {
             key: "key"
         };
 
-        const upserted = await consumptionController.identityMetadata.updateIdentityMetadata({
+        const upserted = await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
-            value: { key: "value2" },
-            upsert: true
+            value: { key: "value2" }
         });
         expect(upserted.value.toJSON()).toStrictEqual({ key: "value2" });
 
@@ -138,49 +136,27 @@ describe("IdentityMetadataController", function () {
     });
 
     test("should delete an identity metadata", async function () {
-        const query = { reference: CoreAddress.from("id1") };
-
-        await consumptionController.identityMetadata.createIdentityMetadata({
-            ...query,
+        const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
+            reference: CoreAddress.from("id1"),
             value: { key: "value" }
         });
 
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(1);
 
-        await consumptionController.identityMetadata.deleteIdentityMetadata(query);
+        await consumptionController.identityMetadata.deleteIdentityMetadata(identityMetadata);
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(0);
     });
 
     test("should delete an identity metadata with a key", async function () {
-        const query = { reference: CoreAddress.from("id1"), key: "key" };
-
-        await consumptionController.identityMetadata.createIdentityMetadata({
-            ...query,
+        const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
+            reference: CoreAddress.from("id1"),
+            key: "key",
             value: { key: "value" }
         });
 
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(1);
 
-        await consumptionController.identityMetadata.deleteIdentityMetadata(query);
+        await consumptionController.identityMetadata.deleteIdentityMetadata(identityMetadata);
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(0);
-    });
-
-    describe("errors", function () {
-        test("throws an error when updating a non existent identity metadata", async function () {
-            await expect(
-                consumptionController.identityMetadata.updateIdentityMetadata({
-                    reference: CoreAddress.from("id1"),
-                    value: { key: "value" }
-                })
-            ).rejects.toThrow("error.transport.recordNotFound");
-        });
-
-        test("throws an error when deleting a non existent identity metadata", async function () {
-            await expect(
-                consumptionController.identityMetadata.deleteIdentityMetadata({
-                    reference: CoreAddress.from("id1")
-                })
-            ).rejects.toThrow("error.transport.recordNotFound");
-        });
     });
 });
