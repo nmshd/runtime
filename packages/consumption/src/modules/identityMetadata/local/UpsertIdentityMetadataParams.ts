@@ -1,14 +1,13 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 
-export interface IUpdateIdentityMetadataParams extends ISerializable {
+export interface IUpsertIdentityMetadataParams extends ISerializable {
     key?: string;
     reference: ICoreAddress;
     value: ISerializable;
-    upsert?: boolean;
 }
 
-export class UpdateIdentityMetadataParams extends Serializable implements IUpdateIdentityMetadataParams {
+export class UpsertIdentityMetadataParams extends Serializable implements IUpsertIdentityMetadataParams {
     @validate({ nullable: true })
     @serialize()
     public key?: string;
@@ -18,14 +17,10 @@ export class UpdateIdentityMetadataParams extends Serializable implements IUpdat
     public reference: CoreAddress;
 
     @validate()
-    @serialize()
+    @serialize({ any: true })
     public value: Serializable;
 
-    @validate({ nullable: true })
-    @serialize()
-    public upsert?: boolean;
-
-    public static from(value: IUpdateIdentityMetadataParams): UpdateIdentityMetadataParams {
+    public static from(value: IUpsertIdentityMetadataParams): UpsertIdentityMetadataParams {
         return this.fromAny(value);
     }
 }

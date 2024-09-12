@@ -1,13 +1,11 @@
 import { CoreAddress } from "@nmshd/core-types";
-import { SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
+import { SynchronizedCollection } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
 import { ConsumptionIds } from "../../consumption/ConsumptionIds";
-import { CreateIdentityMetadataParams, ICreateIdentityMetadataParams } from "./local/CreateIdentityMetadataParams";
-import { DeleteIdentityMetadataParams, IDeleteIdentityMetadataParams } from "./local/DeleteIdentityMetadataParams";
 import { IdentityMetadata } from "./local/IdentityMetadata";
-import { IUpdateIdentityMetadataParams, UpdateIdentityMetadataParams } from "./local/UpdateIdentityMetadataParams";
+import { IUpsertIdentityMetadataParams, UpsertIdentityMetadataParams } from "./local/UpsertIdentityMetadataParams";
 
 export class IdentityMetadataController extends ConsumptionBaseController {
     private identityMetadata: SynchronizedCollection;
@@ -32,28 +30,8 @@ export class IdentityMetadataController extends ConsumptionBaseController {
         return result ? IdentityMetadata.from(result) : undefined;
     }
 
-    public async getIdentityMetadatas(query?: any): Promise<IdentityMetadata[]> {
-        const items = await this.identityMetadata.find(query);
-        return this.parseArray(items, IdentityMetadata);
-    }
-
-    public async createIdentityMetadata(params: ICreateIdentityMetadataParams): Promise<IdentityMetadata> {
-        const parsedParams = CreateIdentityMetadataParams.from(params);
-
-        const identityMetadata = IdentityMetadata.from({
-            id: await ConsumptionIds.identityMetadata.generate(),
-            key: parsedParams.key,
-            reference: parsedParams.reference,
-            value: parsedParams.value
-        });
-
-        await this.identityMetadata.create(identityMetadata);
-
-        return identityMetadata;
-    }
-
-    public async updateIdentityMetadata(params: IUpdateIdentityMetadataParams): Promise<IdentityMetadata> {
-        const parsedParams = UpdateIdentityMetadataParams.from(params);
+    public async upsertIdentityMetadata(params: IUpsertIdentityMetadataParams): Promise<IdentityMetadata> {
+        const parsedParams = UpsertIdentityMetadataParams.from(params);
 
         const oldDoc = await this.identityMetadata.findOne({
             reference: parsedParams.reference.toString(),
@@ -61,9 +39,16 @@ export class IdentityMetadataController extends ConsumptionBaseController {
         });
 
         if (!oldDoc) {
-            if (parsedParams.upsert) return await this.createIdentityMetadata(parsedParams);
+            const identityMetadata = IdentityMetadata.from({
+                id: await ConsumptionIds.identityMetadata.generate(),
+                key: parsedParams.key,
+                reference: parsedParams.reference,
+                value: parsedParams.value
+            });
 
-            throw TransportCoreErrors.general.recordNotFound(IdentityMetadata, `reference: '${parsedParams.reference.toString()}' - key: '${parsedParams.key}'`);
+            await this.identityMetadata.create(identityMetadata);
+
+            return identityMetadata;
         }
 
         const identityMetadata = IdentityMetadata.from(oldDoc);
@@ -74,15 +59,7 @@ export class IdentityMetadataController extends ConsumptionBaseController {
         return identityMetadata;
     }
 
-    public async deleteIdentityMetadata(params: IDeleteIdentityMetadataParams): Promise<void> {
-        const parsedParams = DeleteIdentityMetadataParams.from(params);
-
-        const identityMetadata = await this.getIdentityMetadata(parsedParams.reference, parsedParams.key);
-
-        if (!identityMetadata) {
-            throw TransportCoreErrors.general.recordNotFound(IdentityMetadata, `reference: '${parsedParams.reference.toString()}' - key: '${parsedParams.key}'`);
-        }
-
+    public async deleteIdentityMetadata(identityMetadata: IdentityMetadata): Promise<void> {
         await this.identityMetadata.delete(identityMetadata);
     }
 }
