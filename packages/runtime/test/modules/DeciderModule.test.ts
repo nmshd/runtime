@@ -5,6 +5,7 @@ import {
     CreateAttributeRequestItemJSON,
     IdentityAttribute,
     IdentityFileReferenceJSON,
+    RejectResponseItemJSON,
     RelationshipAttributeConfidentiality,
     RelationshipTemplateContent,
     Request,
@@ -636,241 +637,899 @@ describe("DeciderModule", () => {
             });
         });
 
-        test("rejects a Request given a GeneralRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: false,
-                            message: "An error message",
-                            code: "an.error.code"
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Rejected);
-            expect(responseContent.items).toStrictEqual([{ "@type": "RejectResponseItem", result: "Rejected", message: "An error message", code: "an.error.code" }]);
-        });
-
-        test("accepts a Request given a GeneralRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    items: [
-                        { "@type": "AuthenticationRequestItem", mustBeAccepted: false },
-                        { "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false },
+        describe("GeneralRequestConfig", () => {
+            test("rejects a Request given a GeneralRequestConfig", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
                         {
-                            "@type": "CreateAttributeRequestItem",
-                            attribute: {
-                                "@type": "RelationshipAttribute",
-                                owner: (await sender.transport.account.getIdentityInfo()).value.address,
-                                value: {
-                                    "@type": "ProprietaryFileReference",
-                                    value: "A link to a file with more than 30 characters",
-                                    title: "A title"
+                            requestConfig: {
+                                peer: sender.address
+                            },
+                            responseConfig: {
+                                accept: false,
+                                message: "An error message",
+                                code: "an.error.code"
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Rejected);
+                expect(responseContent.items).toStrictEqual([{ "@type": "RejectResponseItem", result: "Rejected", message: "An error message", code: "an.error.code" }]);
+            });
+
+            test("accepts a Request given a GeneralRequestConfig", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: sender.address
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            { "@type": "AuthenticationRequestItem", mustBeAccepted: false },
+                            { "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false },
+                            {
+                                "@type": "CreateAttributeRequestItem",
+                                attribute: {
+                                    "@type": "RelationshipAttribute",
+                                    owner: (await sender.transport.account.getIdentityInfo()).value.address,
+                                    value: {
+                                        "@type": "ProprietaryFileReference",
+                                        value: "A link to a file with more than 30 characters",
+                                        title: "A title"
+                                    },
+                                    key: "A key",
+                                    confidentiality: RelationshipAttributeConfidentiality.Public
                                 },
-                                key: "A key",
-                                confidentiality: RelationshipAttributeConfidentiality.Public
+                                mustBeAccepted: true
                             },
-                            mustBeAccepted: true
-                        },
+                            {
+                                "@type": "RegisterAttributeListenerRequestItem",
+                                query: {
+                                    "@type": "IdentityAttributeQuery",
+                                    valueType: "Nationality"
+                                },
+                                mustBeAccepted: true
+                            },
+                            {
+                                "@type": "ShareAttributeRequestItem",
+                                sourceAttributeId: "sourceAttributeId",
+                                attribute: {
+                                    "@type": "IdentityAttribute",
+                                    owner: (await sender.transport.account.getIdentityInfo()).value.address,
+                                    value: {
+                                        "@type": "IdentityFileReference",
+                                        value: "A link to a file with more than 30 characters"
+                                    }
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+                expect(responseContent.items).toHaveLength(5);
+                expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
+                expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
+                expect(responseContent.items[2]["@type"]).toBe("CreateAttributeAcceptResponseItem");
+                expect(responseContent.items[3]["@type"]).toBe("RegisterAttributeListenerAcceptResponseItem");
+                expect(responseContent.items[4]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            });
+
+            test("decides a Request given a GeneralRequestConfig with all fields set", async () => {
+                const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
+
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
                         {
-                            "@type": "RegisterAttributeListenerRequestItem",
-                            query: {
-                                "@type": "IdentityAttributeQuery",
-                                valueType: "Nationality"
+                            requestConfig: {
+                                peer: sender.address,
+                                "source.type": "Message",
+                                "content.expiresAt": requestExpirationDate,
+                                "content.title": "Title of Request",
+                                "content.description": "Description of Request",
+                                "content.metadata": { key: "value" }
                             },
-                            mustBeAccepted: true
-                        },
-                        {
-                            "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: "sourceAttributeId",
-                            attribute: {
-                                "@type": "IdentityAttribute",
-                                owner: (await sender.transport.account.getIdentityInfo()).value.address,
-                                value: {
-                                    "@type": "IdentityFileReference",
-                                    value: "A link to a file with more than 30 characters"
-                                }
-                            },
-                            mustBeAccepted: true
+                            responseConfig: {
+                                accept: true
+                            }
                         }
                     ]
-                },
-                requestSourceId: message.id
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        expiresAt: requestExpirationDate,
+                        title: "Title of Request",
+                        description: "Description of Request",
+                        metadata: { key: "value" },
+                        items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
             });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
 
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
+            test("decides a Request given a GeneralRequestConfig with all fields set with arrays", async () => {
+                const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
+                const anotherExpirationDate = CoreDate.utc().add({ days: 2 }).toString();
 
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(5);
-            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
-            expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
-            expect(responseContent.items[2]["@type"]).toBe("CreateAttributeAcceptResponseItem");
-            expect(responseContent.items[3]["@type"]).toBe("RegisterAttributeListenerAcceptResponseItem");
-            expect(responseContent.items[4]["@type"]).toBe("ShareAttributeAcceptResponseItem");
-        });
-
-        test("accepts a Request given a config with general and RequestItem-specific elements", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "content.item.@type": "ConsentRequestItem",
-                            "content.item.consent": "A consent text"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toStrictEqual([{ "@type": "AcceptResponseItem", result: "Accepted" }]);
-        });
-
-        // TODO: general part fits, RequestItem-spefic doesn't and vice versa
-
-        // TODO: general RequestItemConfig (multiple types of RequestItems)
-        // TODO: separate test for individual RequestItems
-
-        test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ShareAttributeRequestItem",
-                            "content.item.attribute.value.@type": "IdentityFileReference"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    items: [
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
                         {
-                            "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: "sourceAttributeId",
-                            attribute: {
-                                "@type": "IdentityAttribute",
-                                owner: (await sender.transport.account.getIdentityInfo()).value.address,
-                                value: {
-                                    "@type": "IdentityFileReference",
-                                    value: "A link to a file with more than 30 characters"
-                                }
+                            requestConfig: {
+                                peer: [sender.address, "another Identity"],
+                                "source.type": "Message",
+                                "content.expiresAt": [requestExpirationDate, anotherExpirationDate],
+                                "content.title": ["Title of Request", "Another title of Request"],
+                                "content.description": ["Description of Request", "Another description of Request"],
+                                "content.metadata": [{ key: "value" }, { anotherKey: "anotherValue" }]
                             },
-                            mustBeAccepted: true
+                            responseConfig: {
+                                accept: true
+                            }
                         }
                     ]
-                },
-                requestSourceId: message.id
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        expiresAt: requestExpirationDate,
+                        title: "Title of Request",
+                        description: "Description of Request",
+                        metadata: { key: "value" },
+                        items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
             });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-            const receivedRequest = receivedRequestResult.value;
 
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
+            test("cannot decide a Request given a GeneralRequestConfig that doesn't fit the Request", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: "another identity",
+                                "source.type": "Message"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
 
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequest.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
 
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
 
-            const sharedAttributeId = (responseContent.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
-            const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId });
-            expect(sharedAttributeResult).toBeSuccessful();
+            test("cannot decide a Request given a GeneralRequestConfig with arrays that doesn't fit the Request", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: ["another Identity", "a further other Identity"],
+                                "source.type": "Message"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
 
-            // TODO: check the created Attribute properly
-            const sharedAttribute = sharedAttributeResult.value;
-            expect(sharedAttribute.content.value["@type"]).toBe("IdentityFileReference");
-            expect((sharedAttribute.content.value as IdentityFileReferenceJSON).value).toBe("A link to a file with more than 30 characters");
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
+
+            test("cannot decide a Request given a GeneralRequestConfig that requires a property that is not set in the Request", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: sender.address,
+                                "content.title": "Title of Request"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
         });
 
-        // TODO: mixed configs,
+        describe("RequestItemConfig", () => {
+            test("rejects a RequestItem given a RequestItemConfig with all fields set", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "AuthenticationRequestItem",
+                                "content.item.mustBeAccepted": false,
+                                "content.item.title": "Title of RequestItem",
+                                "content.item.description": "Description of RequestItem",
+                                "content.item.metadata": { key: "value" }
+                            },
+                            responseConfig: {
+                                accept: false,
+                                code: "an.error.code",
+                                message: "An error message"
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "AuthenticationRequestItem",
+                                mustBeAccepted: false,
+                                title: "Title of RequestItem",
+                                description: "Description of RequestItem",
+                                metadata: { key: "value" }
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Rejected);
+                expect((responseContent.items[0] as RejectResponseItemJSON).code).toBe("an.error.code");
+                expect((responseContent.items[0] as RejectResponseItemJSON).message).toBe("An error message");
+            });
+
+            test("accepts a RequestItem given a RequestItemConfig with all fields set", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "AuthenticationRequestItem",
+                                "content.item.mustBeAccepted": false,
+                                "content.item.title": "Title of RequestItem",
+                                "content.item.description": "Description of RequestItem",
+                                "content.item.metadata": { key: "value" }
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "AuthenticationRequestItem",
+                                mustBeAccepted: false,
+                                title: "Title of RequestItem",
+                                description: "Description of RequestItem",
+                                metadata: { key: "value" }
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+            });
+
+            test("accepts a RequestItem given a RequestItemConfig with all fields set with arrays", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": ["AuthenticationRequestItem", "ContentRequestItem"],
+                                "content.item.mustBeAccepted": false,
+                                "content.item.title": ["Title of RequestItem", "Another title of RequestItem"],
+                                "content.item.description": ["Description of RequestItem", "Another description of RequestItem"],
+                                "content.item.metadata": [{ key: "value" }, { anotherKey: "anotherValue" }]
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "AuthenticationRequestItem",
+                                mustBeAccepted: false,
+                                title: "Title of RequestItem",
+                                description: "Description of RequestItem",
+                                metadata: { key: "value" }
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+            });
+
+            test("cannot decide a RequestItem given a RequestItemConfig that doesn't fit the RequestItem", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "AuthenticationRequestItem",
+                                "content.item.title": "Another title of RequestItem"
+                            },
+                            responseConfig: {
+                                accept: false
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "AuthenticationRequestItem",
+                                mustBeAccepted: false,
+                                title: "Title of RequestItem"
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
+
+            test("cannot decide a RequestItem given a RequestItemConfig with arrays that doesn't fit the RequestItem", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "AuthenticationRequestItem",
+                                "content.item.title": ["Another title of RequestItem", "A further title of RequestItem"]
+                            },
+                            responseConfig: {
+                                accept: false
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "AuthenticationRequestItem",
+                                mustBeAccepted: false,
+                                title: "Title of RequestItem"
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
+
+            test("cannot decide a RequestItem given a RequestItemConfig that requires a property that is not set in the Request", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "AuthenticationRequestItem",
+                                "content.item.title": "Title of RequestItem"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
+        });
+
+        describe("RequestItemDerivationConfigs", () => {
+            // TODO: add tests for every type of RequestItems
+
+            test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "ShareAttributeRequestItem",
+                                "content.item.attribute.value.@type": "IdentityFileReference"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "ShareAttributeRequestItem",
+                                sourceAttributeId: "sourceAttributeId",
+                                attribute: {
+                                    "@type": "IdentityAttribute",
+                                    owner: sender.address,
+                                    value: {
+                                        "@type": "IdentityFileReference",
+                                        value: "A link to a file with more than 30 characters"
+                                    }
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+                const receivedRequest = receivedRequestResult.value;
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequest.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+                expect(responseContent.items).toHaveLength(1);
+                expect(responseContent.items[0]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+
+                const sharedAttributeId = (responseContent.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
+                const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId });
+                expect(sharedAttributeResult).toBeSuccessful();
+
+                // TODO: check the created Attribute properly
+                const sharedAttribute = sharedAttributeResult.value;
+                expect(sharedAttribute.content.owner).toBe(sender.address);
+                expect(sharedAttribute.content.value["@type"]).toBe("IdentityFileReference");
+                expect((sharedAttribute.content.value as IdentityFileReferenceJSON).value).toBe("A link to a file with more than 30 characters");
+            });
+
+            test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
+                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
+                const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
+
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "ShareAttributeRequestItem",
+                                "content.item.attribute.@type": "IdentityAttribute",
+                                "content.item.attribute.owner": sender.address,
+                                "content.item.attribute.validFrom": attributeValidFrom,
+                                "content.item.attribute.validTo": attributeValidTo,
+                                "content.item.attribute.tags": ["tag1", "tag2"],
+                                "content.item.attribute.value.@type": "IdentityFileReference",
+                                "content.item.attribute.value.value": "A link to a file with more than 30 characters"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "ShareAttributeRequestItem",
+                                sourceAttributeId: "sourceAttributeId",
+                                attribute: {
+                                    "@type": "IdentityAttribute",
+                                    owner: sender.address,
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    tags: ["tag1", "tag3"],
+                                    value: {
+                                        "@type": "IdentityFileReference",
+                                        value: "A link to a file with more than 30 characters"
+                                    }
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+            });
+
+            test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for a RelationshipAttribute", async () => {
+                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
+                const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
+
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "ShareAttributeRequestItem",
+                                "content.item.attribute.@type": "RelationshipAttribute",
+                                "content.item.attribute.owner": sender.address,
+                                "content.item.attribute.validFrom": attributeValidFrom,
+                                "content.item.attribute.validTo": attributeValidTo,
+                                "content.item.attribute.key": "A key",
+                                "content.item.attribute.isTechnical": false,
+                                "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
+                                "content.item.attribute.value.@type": "ProprietaryString",
+                                "content.item.attribute.value.value": "A proprietary string",
+                                "content.item.attribute.value.title": "An Attribute's title",
+                                "content.item.attribute.value.description": "An Attribute's description"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "ShareAttributeRequestItem",
+                                sourceAttributeId: "sourceAttributeId",
+                                attribute: {
+                                    "@type": "RelationshipAttribute",
+                                    owner: sender.address,
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    key: "A key",
+                                    isTechnical: false,
+                                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                                    value: {
+                                        "@type": "ProprietaryString",
+                                        value: "A proprietary string",
+                                        title: "An Attribute's title",
+                                        description: "An Attribute's description"
+                                    }
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+            });
+        });
+
+        describe("RequestConfig with general and RequestItem-specific elements", () => {
+            test("decides a Request given a config with general and RequestItem-specific elements", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: sender.address,
+                                "content.item.@type": "ConsentRequestItem",
+                                "content.item.consent": "A consent text"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+            });
+
+            test("decides a Request given a config with general elements and multiple RequestItem types", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: sender.address,
+                                "content.item.@type": ["AuthenticationRequestItem", "ConsentRequestItem"]
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+            });
+
+            test("cannot decide a Request given a config with fitting general and not fitting RequestItem-specific elements", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: "another Identity",
+                                "content.item.@type": "ConsentRequestItem",
+                                "content.item.consent": "A consent text"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
+
+            test("cannot decide a Request given a config with not fitting general and fitting RequestItem-specific elements", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: sender.address,
+                                "content.item.@type": "ConsentRequestItem",
+                                "content.item.consent": "Another consent text"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
+        });
+
         // TODO: RequestItemGroups
+        // TODO: not all parts of Request decided
 
         test("should throw an error if the automationConfig is invalid", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {

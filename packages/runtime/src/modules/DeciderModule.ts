@@ -51,6 +51,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         }
     }
 
+    // TODO: we could add a validation that the requestConfig itself is valid too, e.g. if an IdentityAttribute is expected, it doesn't have properties of a RelationshipAttribute set
     public validateAutomationConfig(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
         if (isRejectResponseConfig(responseConfig)) return true;
 
