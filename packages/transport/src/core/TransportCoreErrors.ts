@@ -197,6 +197,10 @@ class General {
     public invalidTruncatedReference() {
         return new CoreError("error.transport.files.invalidTruncatedReference", "invalid truncated reference");
     }
+
+    public accountControllerInitialSyncFailed() {
+        return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
+    }
 }
 
 export class TransportCoreErrors {

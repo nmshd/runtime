@@ -38,16 +38,17 @@ export class DeciderModule extends RuntimeModule {
             return;
         }
 
-        await this.publishEvent(event, services, "ManualRequestDecisionRequired", request.id);
+        await this.publishEvent(event, services, "ManualRequestDecisionRequired");
     }
 
     private async publishEvent(
         event: IncomingRequestStatusChangedEvent,
         services: RuntimeServices,
-        result: keyof typeof RelationshipTemplateProcessedResult & keyof typeof MessageProcessedResult,
-        requestId?: string
+        result: keyof typeof RelationshipTemplateProcessedResult & keyof typeof MessageProcessedResult
     ) {
         const request = event.data.request;
+        const requestId = request.id;
+
         switch (request.source!.type) {
             case "RelationshipTemplate":
                 const getTemplateResult = await services.transportServices.relationshipTemplates.getRelationshipTemplate({ id: request.source!.reference });
@@ -63,8 +64,6 @@ export class DeciderModule extends RuntimeModule {
                 }
 
                 if (result === "ManualRequestDecisionRequired") {
-                    if (!requestId) throw new Error("Request ID is required for manual decision required result.");
-
                     this.runtime.eventBus.publish(
                         new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
                             template,

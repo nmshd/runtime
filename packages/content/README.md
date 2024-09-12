@@ -6,13 +6,13 @@ The content library defines data structures that can be transmitted using the [t
 
 ## Documentation
 
-You can find the documentation for Enmeshed on [enmeshed.eu](https://enmeshed.eu).
+You can find the documentation for enmeshed on [enmeshed.eu](https://enmeshed.eu).
 
 ## Feedback
 
 Please file any bugs or feature requests by creating an [issue](https://github.com/nmshd/feedback/issues).
 
-Share your feedback with the Enmeshed team by contributing to the [discussions](https://github.com/nmshd/feedback/discussions).
+Share your feedback with the enmeshed team by contributing to the [discussions](https://github.com/nmshd/feedback/discussions).
 
 ## Contribute
 
