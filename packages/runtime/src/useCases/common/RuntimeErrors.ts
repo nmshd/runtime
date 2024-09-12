@@ -105,13 +105,6 @@ class Relationships {
         return new ApplicationError("error.runtime.relationships.expiredRelationshipTemplate", message);
     }
 
-    public wrongRelationshipStatus(relationshipId: string, status: string): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.relationships.wrongRelationshipStatus",
-            `The Relationship '${relationshipId}' has the wrong status ('${status}') to run this operation.`
-        );
-    }
-
     public isNeitherRejectedNorRevoked(): ApplicationError {
         return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", "The status of the Relationship is neither 'Rejected' nor 'Revoked'.");
     }
