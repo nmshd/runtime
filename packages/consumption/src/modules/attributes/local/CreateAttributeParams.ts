@@ -1,4 +1,4 @@
-import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute } from "@nmshd/content";
 import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 
@@ -8,6 +8,7 @@ export interface ICreateAttributeParams extends ISerializable {
     requestReference: ICoreId;
 }
 
+@type("CreateAttributeParams")
 export class CreateAttributeParams extends Serializable implements ICreateAttributeParams {
     @serialize()
     @validate()

@@ -1,4 +1,4 @@
-import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { IIdentityAttributeQuery, IThirdPartyRelationshipAttributeQuery, IdentityAttributeQuery, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 
@@ -7,6 +7,7 @@ export interface ICreateLocalAttributeListenerParams extends ISerializable {
     peer: ICoreAddress;
 }
 
+@type("CreateLocalAttributeListenerParams")
 export class CreateLocalAttributeListenerParams extends Serializable implements ICreateLocalAttributeListenerParams {
     @serialize({ unionTypes: [IdentityAttributeQuery, ThirdPartyRelationshipAttributeQuery] })
     @validate()
