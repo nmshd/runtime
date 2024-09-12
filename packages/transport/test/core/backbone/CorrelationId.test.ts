@@ -23,7 +23,7 @@ describe("CorrelationId", function () {
         await connection.close();
     });
 
-    test("should send correlation id to the backend when given", async function () {
+    test("should send correlation id to the backbone when given", async function () {
         interceptor.start();
         await correlationIdLib.withId("test-correlation-id", async () => {
             await testAccount.syncEverything();
