@@ -53,7 +53,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
     }
 
     protected async executeInternal(request: CreateOwnRelationshipTemplateRequest): Promise<Result<RelationshipTemplateDTO>> {
-        const validationError = await this.validateRelationshipTemplateContent(request.content);
+        const validationError = await this.validateRelationshipTemplateContent(request.content, CoreDate.from(request.expiresAt));
         if (validationError) return Result.fail(validationError);
 
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
@@ -67,7 +67,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(relationshipTemplate));
     }
 
-    private async validateRelationshipTemplateContent(content: any) {
+    private async validateRelationshipTemplateContent(content: any, templateExpiresAt: CoreDate) {
         const transformedContent = Serializable.fromUnknown(content);
 
         if (!(transformedContent instanceof RelationshipTemplateContent || transformedContent instanceof ArbitraryRelationshipTemplateContent)) {
@@ -77,6 +77,10 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         }
 
         if (!(transformedContent instanceof RelationshipTemplateContent)) return;
+
+        if (transformedContent.onNewRelationship.expiresAt?.isAfter(templateExpiresAt)) {
+            return RuntimeErrors.relationshipTemplates.requestExpiresAfterRelationshipTemplate();
+        }
 
         const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
         if (validationResult.isError()) return validationResult.error;
