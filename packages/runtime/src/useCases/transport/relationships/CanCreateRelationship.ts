@@ -2,13 +2,10 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipTemplateContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { CachedRelationshipTemplate, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
-
-export interface CanCreateRelationshipRequest {
-    templateId: RelationshipTemplateIdString;
-}
+import { RuntimeErrors, UseCase } from "../../common";
+import { CreateRelationshipRequest } from "./CreateRelationship";
 
 export type CanCreateRelationshipResponse = CanCreateRelationshipSuccessResponse | CanCreateRelationshipErrorResponse;
 
@@ -21,7 +18,7 @@ interface CanCreateRelationshipErrorResponse {
     error: ApplicationError;
 }
 
-export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipRequest, CanCreateRelationshipResponse> {
+export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequest, CanCreateRelationshipResponse> {
     public constructor(
         @Inject private readonly relationshipController: RelationshipsController,
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
@@ -30,19 +27,18 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         super();
     }
 
-    protected async executeInternal(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse>> {
+    protected async executeInternal(request: CreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse>> {
         const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
 
         if (!template) {
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        const queryForExistingRelationships: any = {
-            "peer.address": template.cache?.createdBy.toString(),
-            status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
-        };
+        if (!template.cache) {
+            return Result.fail(RuntimeErrors.general.recordNotFound(CachedRelationshipTemplate));
+        }
 
-        const existingRelationshipsToPeer = await this.relationshipController.getRelationships(queryForExistingRelationships);
+        const existingRelationshipsToPeer = await this.relationshipController.getExistingRelationshipsToIdentity(template.cache.createdBy);
 
         if (existingRelationshipsToPeer.length !== 0) {
             const errorResponse: CanCreateRelationshipErrorResponse = {
@@ -54,7 +50,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         }
 
         if (template.isExpired()) {
-            if (template.cache?.content instanceof RelationshipTemplateContent) {
+            if (template.cache.content instanceof RelationshipTemplateContent) {
                 const dbQuery: any = {};
                 dbQuery["source.reference"] = { $eq: template.id.toString() };
                 dbQuery["status"] = { $neq: LocalRequestStatus.Completed };

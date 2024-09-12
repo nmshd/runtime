@@ -157,12 +157,7 @@ export class RelationshipsController extends TransportController {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
 
-        const queryForExistingRelationships = {
-            "peer.address": template.cache.createdBy.toString(),
-            status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
-        };
-
-        const existingRelationshipsToPeer = await this.getRelationships(queryForExistingRelationships);
+        const existingRelationshipsToPeer = await this.getExistingRelationshipsToIdentity(template.cache.createdBy);
 
         if (existingRelationshipsToPeer.length !== 0) {
             throw TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
@@ -198,6 +193,17 @@ export class RelationshipsController extends TransportController {
         this.eventBus.publish(new RelationshipChangedEvent(this.parent.identity.address.toString(), newRelationship));
 
         return newRelationship;
+    }
+
+    public async getExistingRelationshipsToIdentity(address: CoreAddress): Promise<Relationship[]> {
+        const queryForExistingRelationships = {
+            "peer.address": address.toString(),
+            status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
+        };
+
+        const existingRelationshipsToIdentity = await this.getRelationships(queryForExistingRelationships);
+
+        return existingRelationshipsToIdentity;
     }
 
     @log()

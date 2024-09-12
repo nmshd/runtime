@@ -1,7 +1,7 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { DecideRequestParametersJSON, IncomingRequestsController, LocalRequest, LocalRequestStatus } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
-import { RelationshipsController, RelationshipStatus, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
 import { RuntimeErrors, UseCase } from "../../common";
@@ -35,12 +35,7 @@ export class RejectIncomingRequestUseCase extends UseCase<RejectIncomingRequestR
                 return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
             }
 
-            const queryForExistingRelationships: any = {
-                "peer.address": localRequest.peer.toString(),
-                status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
-            };
-
-            const existingRelationshipsToPeer = await this.relationshipController.getRelationships(queryForExistingRelationships);
+            const existingRelationshipsToPeer = await this.relationshipController.getExistingRelationshipsToIdentity(localRequest.peer);
 
             if (existingRelationshipsToPeer.length === 0 && template.cache?.expiresAt && template.isExpired()) {
                 await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
