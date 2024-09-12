@@ -24,7 +24,7 @@ export class IdentityMetadataController extends ConsumptionBaseController {
     public async getIdentityMetadata(reference: CoreAddress, key?: string): Promise<IdentityMetadata | undefined> {
         const result = await this.identityMetadata.findOne({
             reference: reference.toString(),
-            key: key
+            key: key ?? { $exists: false }
         });
 
         return result ? IdentityMetadata.from(result) : undefined;
@@ -35,7 +35,7 @@ export class IdentityMetadataController extends ConsumptionBaseController {
 
         const oldDoc = await this.identityMetadata.findOne({
             reference: parsedParams.reference.toString(),
-            key: parsedParams.key
+            key: parsedParams.key ?? { $exists: false }
         });
 
         if (!oldDoc) {
