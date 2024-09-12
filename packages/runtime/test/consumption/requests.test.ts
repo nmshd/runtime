@@ -72,7 +72,7 @@ describe("Requests", () => {
                             mustBeAccepted: false
                         }
                     ],
-                    expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                    expiresAt: CoreDate.utc().add({ minute: 10 }).toISOString()
                 },
                 peer: (await rTransportServices.account.getIdentityInfo()).value.address
             };
@@ -367,7 +367,7 @@ describe("Requests", () => {
                         mustBeAccepted: false
                     }
                 ],
-                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                expiresAt: CoreDate.utc().add({ minute: 10 }).toISOString()
             }
         };
 
@@ -386,7 +386,7 @@ describe("Requests", () => {
         test("sender: create a Relationship Template with the Request", async () => {
             const result = await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: templateContent,
-                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                expiresAt: CoreDate.utc().add({ minute: 10 }).toISOString()
             });
 
             expect(result).toBeSuccessful();
@@ -624,8 +624,7 @@ describe("Requests", () => {
                         "@type": "TestRequestItem",
                         mustBeAccepted: false
                     }
-                ],
-                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                ]
             }
         };
 
