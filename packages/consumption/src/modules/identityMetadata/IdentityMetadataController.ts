@@ -62,4 +62,13 @@ export class IdentityMetadataController extends ConsumptionBaseController {
     public async deleteIdentityMetadata(identityMetadata: IdentityMetadata): Promise<void> {
         await this.identityMetadata.delete(identityMetadata);
     }
+
+    public async deleteIdentityMetadataExchangedWithPeer(peerAddress: CoreAddress): Promise<void> {
+        const docs = await this.identityMetadata.find({ reference: peerAddress.toString() });
+
+        for (const doc of docs) {
+            const identityMetadata = IdentityMetadata.from(doc);
+            await this.deleteIdentityMetadata(identityMetadata);
+        }
+    }
 }
