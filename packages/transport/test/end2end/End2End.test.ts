@@ -84,12 +84,14 @@ describe("RelationshipTest: Accept", function () {
         expect(templateContent.value).toHaveProperty("mycontent");
         expect(templateContent.value.mycontent).toBe("template");
 
-        const request = await to.relationships.sendRelationship({
-            template: templateTo,
-            creationContent: {
-                mycontent: "request"
-            }
-        });
+        const request = (
+            await to.relationships.sendRelationship({
+                template: templateTo,
+                creationContent: {
+                    mycontent: "request"
+                }
+            })
+        ).value;
         const relationshipId = request.id;
 
         const templateRequestContent = request.cache!.template.cache!.content as JSONWrapper;
@@ -198,12 +200,14 @@ describe("RelationshipTest: Reject", function () {
         expect(templateContent.value).toHaveProperty("mycontent");
         expect(templateContent.value.mycontent).toBe("template");
 
-        const request = await to.relationships.sendRelationship({
-            template: templateTo,
-            creationContent: {
-                mycontent: "request"
-            }
-        });
+        const request = (
+            await to.relationships.sendRelationship({
+                template: templateTo,
+                creationContent: {
+                    mycontent: "request"
+                }
+            })
+        ).value;
         const relationshipId = request.id;
 
         const templateRequestContent = request.cache!.template.cache!.content as JSONWrapper;
@@ -310,12 +314,14 @@ describe("RelationshipTest: Revoke", function () {
         expect(templateContent.value).toHaveProperty("mycontent");
         expect(templateContent.value.mycontent).toBe("template");
 
-        const request = await requestor.relationships.sendRelationship({
-            template: templateRequestor,
-            creationContent: {
-                mycontent: "request"
-            }
-        });
+        const request = (
+            await requestor.relationships.sendRelationship({
+                template: templateRequestor,
+                creationContent: {
+                    mycontent: "request"
+                }
+            })
+        ).value;
 
         const templateRequestContent = request.cache!.template.cache!.content as JSONWrapper;
         expect(templateRequestContent.value).toHaveProperty("mycontent");
@@ -394,12 +400,14 @@ describe("RelationshipTest: Revoke", function () {
         expect(templateContent.value).toHaveProperty("mycontent");
         expect(templateContent.value.mycontent).toBe("template");
 
-        const pendingRelationship = await requestor.relationships.sendRelationship({
-            template: templateRequestor,
-            creationContent: {
-                mycontent: "request"
-            }
-        });
+        const pendingRelationship = (
+            await requestor.relationships.sendRelationship({
+                template: templateRequestor,
+                creationContent: {
+                    mycontent: "request"
+                }
+            })
+        ).value;
 
         const revokedRelationshipSelf = await requestor.relationships.revoke(pendingRelationship.id);
         expect(revokedRelationshipSelf.status).toStrictEqual(RelationshipStatus.Revoked);
@@ -871,12 +879,14 @@ describe("RelationshipTest: operation executioner validation (on pending relatio
         }
 
         const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
-        const request = await to.relationships.sendRelationship({
-            template: templateTo,
-            creationContent: {
-                mycontent: "request"
-            }
-        });
+        const request = (
+            await to.relationships.sendRelationship({
+                template: templateTo,
+                creationContent: {
+                    mycontent: "request"
+                }
+            })
+        ).value;
         relationshipId = request.id;
         await TestUtil.syncUntilHasRelationships(from);
     });

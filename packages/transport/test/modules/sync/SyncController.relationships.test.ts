@@ -30,10 +30,12 @@ describe("RelationshipSync", function () {
             templateOnTemplatorDevice.secretKey
         );
 
-        const createdRelationship = await requestorDevice1.relationships.sendRelationship({
-            template: templateOnRequestorDevice1,
-            creationContent: { someMessageContent: "someMessageContent" }
-        });
+        const createdRelationship = (
+            await requestorDevice1.relationships.sendRelationship({
+                template: templateOnRequestorDevice1,
+                creationContent: { someMessageContent: "someMessageContent" }
+            })
+        ).value;
 
         await requestorDevice1.syncDatawallet();
 
@@ -85,10 +87,12 @@ describe("RelationshipSync", function () {
             templateOnTemplatorDevice.secretKey
         );
 
-        const createdRelationship = await requestorDevice1.relationships.sendRelationship({
-            template: templateOnRequestorDevice1,
-            creationContent: { someMessageContent: "someMessageContent" }
-        });
+        const createdRelationship = (
+            await requestorDevice1.relationships.sendRelationship({
+                template: templateOnRequestorDevice1,
+                creationContent: { someMessageContent: "someMessageContent" }
+            })
+        ).value;
 
         await requestorDevice1.syncDatawallet();
 
@@ -134,10 +138,12 @@ describe("RelationshipSync", function () {
             templateOnTemplatorDevice.secretKey
         );
 
-        const createdRelationship = await requestorDevice.relationships.sendRelationship({
-            template: templateOnRequestorDevice1,
-            creationContent: { someMessageContent: "someMessageContent" }
-        });
+        const createdRelationship = (
+            await requestorDevice.relationships.sendRelationship({
+                template: templateOnRequestorDevice1,
+                creationContent: { someMessageContent: "someMessageContent" }
+            })
+        ).value;
 
         await requestorDevice.syncDatawallet();
 

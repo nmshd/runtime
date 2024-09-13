@@ -281,12 +281,14 @@ export class TestUtil {
 
         const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
 
-        const relRequest = await to.relationships.sendRelationship({
-            template: templateTo,
-            creationContent: requestContent ?? {
-                metadata: { mycontent: "request" }
-            }
-        });
+        const relRequest = (
+            await to.relationships.sendRelationship({
+                template: templateTo,
+                creationContent: requestContent ?? {
+                    metadata: { mycontent: "request" }
+                }
+            })
+        ).value;
 
         // Accept relationship
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
@@ -306,8 +308,8 @@ export class TestUtil {
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
         expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
-        expect(relRequest.value.id.toString()).toStrictEqual(acceptedRelationshipFromSelf.id.toString());
-        expect(relRequest.value.id.toString()).toStrictEqual(acceptedRelationshipPeer.id.toString());
+        expect(relRequest.id.toString()).toStrictEqual(acceptedRelationshipFromSelf.id.toString());
+        expect(relRequest.id.toString()).toStrictEqual(acceptedRelationshipPeer.id.toString());
 
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
     }
