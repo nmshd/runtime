@@ -151,13 +151,13 @@ export class RelationshipsController extends TransportController {
     }
 
     public async sendRelationship(parameters: ISendRelationshipParameters): Promise<Result<Relationship>> {
+        await this.canSendRelationship(parameters);
+
         parameters = SendRelationshipParameters.from(parameters);
         const template = (parameters as SendRelationshipParameters).template;
         if (!template.cache) {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
-
-        await this.canSendRelationship(parameters);
 
         const secretId = await TransportIds.relationshipSecret.generate();
 
