@@ -21,9 +21,19 @@ export abstract class ValidationResult {
     }
 
     public static fromItems(items: ValidationResult[]): ValidationResult {
-        return items.some((r) => r.isError())
-            ? ValidationResult.error(ConsumptionCoreErrors.requests.inheritedFromItem("Some child items have errors."), items)
-            : ValidationResult.success(items);
+        if (items.some((r) => r.isError())) {
+            const receivedError = items.find((r) => r.isError());
+            if (typeof receivedError?.error.code !== "undefined") {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.inheritedFromItem("Some child items have errors."), items);
+            }
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.inheritedFromItem(
+                    "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
+                ),
+                items
+            );
+        }
+        return ValidationResult.success(items);
     }
 }
 

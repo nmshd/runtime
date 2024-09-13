@@ -115,11 +115,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     private async _create(id: CoreId, content: Request, peer: CoreAddress) {
         const canCreateResult = await this.canCreate({ content, peer });
 
-        if (canCreateResult.isError()) {
-            throw ConsumptionCoreErrors.requests.inheritedFromItem(
-                "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
-            );
-        }
+        if (canCreateResult.isError()) throw canCreateResult.error;
 
         const request = LocalRequest.from({
             id: id,

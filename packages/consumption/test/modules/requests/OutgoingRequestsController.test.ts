@@ -232,9 +232,7 @@ describe("OutgoingRequestsController", function () {
             };
 
             await When.iTryToCreateAnOutgoingRequest();
-            await Then.itThrowsAnErrorWithTheErrorMessage(
-                "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
-            );
+            await Then.itThrowsAnErrorWithTheErrorMessage("aMessage");
 
             context.outgoingRequestsController.canCreate = oldCanCreate;
         });
