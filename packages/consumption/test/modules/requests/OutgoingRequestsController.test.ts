@@ -228,14 +228,7 @@ describe("OutgoingRequestsController", function () {
         test("throws when canCreate returns an error", async function () {
             const oldCanCreate = context.outgoingRequestsController.canCreate;
             context.outgoingRequestsController.canCreate = (_: ICreateOutgoingRequestParameters) => {
-                return Promise.resolve(
-                    ValidationResult.error(
-                        new ApplicationError(
-                            "error.consumption.validation.inheritedFromItem",
-                            "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
-                        )
-                    )
-                );
+                return Promise.resolve(ValidationResult.error(new ApplicationError("aCode", "aMessage")));
             };
 
             await When.iTryToCreateAnOutgoingRequest();
