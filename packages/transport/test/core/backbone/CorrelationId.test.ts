@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import correlationIdLib from "correlation-id";
+import correlator from "correlation-id";
 import { AccountController } from "../../../src";
 import { RequestInterceptor } from "../../testHelpers/RequestInterceptor";
 import { TestUtil } from "../../testHelpers/TestUtil";
@@ -25,7 +25,7 @@ describe("CorrelationId", function () {
 
     test("should send correlation id to the backbone when given", async function () {
         interceptor.start();
-        await correlationIdLib.withId("test-correlation-id", async () => {
+        await correlator.withId("test-correlation-id", async () => {
             await testAccount.syncEverything();
         });
 

@@ -1,5 +1,5 @@
 import { AccountController } from "@nmshd/transport";
-import correlationIdLib from "correlation-id";
+import correlator from "correlation-id";
 import { Container } from "typescript-ioc";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 import { RequestInterceptor } from "../lib/RequestInterceptor";
@@ -25,7 +25,7 @@ describe("CorrelationId", function () {
 
     test("should send correlation id to the backbone when given", async function () {
         interceptor.start();
-        await correlationIdLib.withId("test-correlation-id", async () => {
+        await correlator.withId("test-correlation-id", async () => {
             await runtime.transport.account.syncEverything();
         });
 

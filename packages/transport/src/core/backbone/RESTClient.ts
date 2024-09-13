@@ -1,7 +1,7 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import correlationIdWrapper from "correlation-id";
+import correlator from "correlation-id";
 import formDataLib from "form-data";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
@@ -116,7 +116,7 @@ export class RESTClient {
 
         this.axiosInstance = axios.create(resultingRequestConfig);
         this.axiosInstance.interceptors.request.use((config) => {
-            const correlationId = correlationIdWrapper.getId();
+            const correlationId = correlator.getId();
             config.headers["x-correlation-id"] = correlationId;
             return config;
         });
