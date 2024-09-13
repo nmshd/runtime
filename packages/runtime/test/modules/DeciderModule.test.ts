@@ -9,6 +9,7 @@ import {
     RelationshipAttributeConfidentiality,
     RelationshipTemplateContent,
     Request,
+    ResponseItemGroupJSON,
     ResponseResult,
     ShareAttributeAcceptResponseItemJSON
 } from "@nmshd/content";
@@ -937,6 +938,8 @@ describe("DeciderModule", () => {
                     (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
                 );
             });
+
+            // TODO: can decide if Request has properties that are not asked for in the config
         });
 
         describe("RequestItemConfig", () => {
@@ -1204,6 +1207,8 @@ describe("DeciderModule", () => {
                     (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
                 );
             });
+
+            // TODO: can decide if RequestItem has properties that are not asked for in the config
         });
 
         describe("RequestItemDerivationConfigs", () => {
@@ -1528,8 +1533,267 @@ describe("DeciderModule", () => {
             });
         });
 
-        // TODO: RequestItemGroups
-        // TODO: not all parts of Request decided
+        describe("RequestItemGroups", () => {
+            test("decides a RequestItem in a RequestItemGroup given a GeneralRequestConfig", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: sender.address
+                            },
+                            responseConfig: {
+                                accept: false,
+                                code: "an.error.code",
+                                message: "An error message"
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "RequestItemGroup",
+                                items: [
+                                    {
+                                        "@type": "AuthenticationRequestItem",
+                                        mustBeAccepted: false
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Rejected);
+
+                const itemsOfResponse = responseContent.items;
+                expect(itemsOfResponse).toHaveLength(1);
+                expect(itemsOfResponse[0]["@type"]).toBe("ResponseItemGroup");
+                expect((itemsOfResponse[0] as ResponseItemGroupJSON).items).toHaveLength(1);
+                expect((itemsOfResponse[0] as ResponseItemGroupJSON).items[0]["@type"]).toBe("RejectResponseItem");
+                expect(((itemsOfResponse[0] as ResponseItemGroupJSON).items[0] as RejectResponseItemJSON).code).toBe("an.error.code");
+                expect(((itemsOfResponse[0] as ResponseItemGroupJSON).items[0] as RejectResponseItemJSON).message).toBe("An error message");
+            });
+
+            test("decides all RequestItems inside and outside of a RequestItemGroup given a GeneralRequestConfig", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: sender.address
+                            },
+                            responseConfig: {
+                                accept: false,
+                                code: "an.error.code",
+                                message: "An error message"
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "AuthenticationRequestItem",
+                                mustBeAccepted: false
+                            },
+                            {
+                                "@type": "RequestItemGroup",
+                                items: [
+                                    {
+                                        "@type": "AuthenticationRequestItem",
+                                        mustBeAccepted: false
+                                    },
+                                    {
+                                        "@type": "AuthenticationRequestItem",
+                                        mustBeAccepted: false
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Rejected);
+
+                const itemsOfResponse = responseContent.items;
+                expect(itemsOfResponse).toHaveLength(2);
+                expect(itemsOfResponse[0]["@type"]).toBe("RejectResponseItem");
+                expect((itemsOfResponse[0] as RejectResponseItemJSON).code).toBe("an.error.code");
+                expect((itemsOfResponse[0] as RejectResponseItemJSON).message).toBe("An error message");
+
+                expect(itemsOfResponse[1]["@type"]).toBe("ResponseItemGroup");
+                expect((itemsOfResponse[1] as ResponseItemGroupJSON).items).toHaveLength(2);
+                expect((itemsOfResponse[1] as ResponseItemGroupJSON).items[0]["@type"]).toBe("RejectResponseItem");
+                expect((itemsOfResponse[1] as ResponseItemGroupJSON).items[1]["@type"]).toBe("RejectResponseItem");
+            });
+
+            test("decides a RequestItem in a RequestItemGroup given a RequestItemConfig", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "AuthenticationRequestItem"
+                            },
+                            responseConfig: {
+                                accept: false,
+                                code: "an.error.code",
+                                message: "An error message"
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "RequestItemGroup",
+                                items: [
+                                    {
+                                        "@type": "AuthenticationRequestItem",
+                                        mustBeAccepted: false
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Rejected);
+
+                const itemsOfResponse = responseContent.items;
+                expect(itemsOfResponse).toHaveLength(1);
+                expect(itemsOfResponse[0]["@type"]).toBe("ResponseItemGroup");
+                expect((itemsOfResponse[0] as ResponseItemGroupJSON).items).toHaveLength(1);
+                expect((itemsOfResponse[0] as ResponseItemGroupJSON).items[0]["@type"]).toBe("RejectResponseItem");
+                expect(((itemsOfResponse[0] as ResponseItemGroupJSON).items[0] as RejectResponseItemJSON).code).toBe("an.error.code");
+                expect(((itemsOfResponse[0] as ResponseItemGroupJSON).items[0] as RejectResponseItemJSON).message).toBe("An error message");
+            });
+
+            test("decides all RequestItems inside and outside of a RequestItemGroup given a RequestItemConfig", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "AuthenticationRequestItem"
+                            },
+                            responseConfig: {
+                                accept: false,
+                                code: "an.error.code",
+                                message: "An error message"
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "AuthenticationRequestItem",
+                                mustBeAccepted: false
+                            },
+                            {
+                                "@type": "RequestItemGroup",
+                                items: [
+                                    {
+                                        "@type": "AuthenticationRequestItem",
+                                        mustBeAccepted: false
+                                    },
+                                    {
+                                        "@type": "AuthenticationRequestItem",
+                                        mustBeAccepted: false
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Rejected);
+
+                const itemsOfResponse = responseContent.items;
+                expect(itemsOfResponse).toHaveLength(2);
+                expect(itemsOfResponse[0]["@type"]).toBe("RejectResponseItem");
+                expect((itemsOfResponse[0] as RejectResponseItemJSON).code).toBe("an.error.code");
+                expect((itemsOfResponse[0] as RejectResponseItemJSON).message).toBe("An error message");
+
+                expect(itemsOfResponse[1]["@type"]).toBe("ResponseItemGroup");
+                expect((itemsOfResponse[1] as ResponseItemGroupJSON).items).toHaveLength(2);
+                expect((itemsOfResponse[1] as ResponseItemGroupJSON).items[0]["@type"]).toBe("RejectResponseItem");
+                expect((itemsOfResponse[1] as ResponseItemGroupJSON).items[1]["@type"]).toBe("RejectResponseItem");
+            });
+        });
+
+        // TODO: not all parts of Request decided (including RequestItemGroups)
 
         test("should throw an error if the automationConfig is invalid", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {

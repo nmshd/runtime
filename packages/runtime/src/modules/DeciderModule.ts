@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { DecideRequestItemGroupParametersJSON, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
+import { LocalRequestStatus } from "@nmshd/consumption";
 import { RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
 import { RuntimeErrors, RuntimeServices } from "..";
 import {
@@ -99,7 +99,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const request = event.data.request;
         const itemsOfRequest = request.content.items;
 
-        let decideRequestItemParameters = this.createArrayWithSameDimension(itemsOfRequest, undefined);
+        let decideRequestItemParameters = this.createResponseItemsWithSameDimension(itemsOfRequest, undefined);
 
         for (const automationConfigElement of this.configuration.automationConfig) {
             const requestConfigElement = automationConfigElement.requestConfig;
@@ -116,7 +116,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                     continue;
                 }
 
-                const decideRequestResult = await this.decideRequest(event, decideRequestItemParameterResult.value);
+                const decideRequestResult = await this.decideRequest(event, decideRequestItemParameterResult.value.items);
                 return decideRequestResult;
             }
 
@@ -133,8 +133,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 }
 
                 decideRequestItemParameters = checkCompatibilityResult.value;
-                if (!this.containsDeep(decideRequestItemParameters, (element) => element === undefined)) {
-                    const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
+                if (!this.containsDeep(decideRequestItemParameters.items, (element) => element === undefined)) {
+                    const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters.items);
                     return decideRequestResult;
                 }
             }
@@ -144,13 +144,16 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return Result.fail(RuntimeErrors.deciderModule.someItemsOfRequestCouldNotBeDecidedAutomatically());
     }
 
-    private createArrayWithSameDimension(array: any[], initialValue: any): any[] {
-        return array.map((element) => {
-            if (Array.isArray(element)) {
-                return this.createArrayWithSameDimension(element, initialValue);
-            }
-            return initialValue;
-        });
+    private createResponseItemsWithSameDimension(array: any[], initialValue: any): { items: any[] } {
+        return {
+            items: array.map((element) => {
+                if (element["@type"] === "RequestItemGroup") {
+                    const responseItems = this.createResponseItemsWithSameDimension(element.items, initialValue);
+                    return responseItems;
+                }
+                return initialValue;
+            })
+        };
     }
 
     public checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
@@ -203,19 +206,13 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return atLeastOneMatchingTag;
     }
 
-    private createDecideRequestItemParametersForGeneralResponseConfig(
-        event: IncomingRequestStatusChangedEvent,
-        responseConfigElement: ResponseConfig
-    ): Result<(DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]> {
+    private createDecideRequestItemParametersForGeneralResponseConfig(event: IncomingRequestStatusChangedEvent, responseConfigElement: ResponseConfig): Result<{ items: any[] }> {
         const request = event.data.request;
-        const decideRequestItemParameters = this.createArrayWithSameDimension(request.content.items, responseConfigElement);
+        const decideRequestItemParameters = this.createResponseItemsWithSameDimension(request.content.items, responseConfigElement);
         return Result.ok(decideRequestItemParameters);
     }
 
-    private async decideRequest(
-        event: IncomingRequestStatusChangedEvent,
-        decideRequestItemParameters: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
-    ): Promise<Result<LocalRequestDTO>> {
+    private async decideRequest(event: IncomingRequestStatusChangedEvent, decideRequestItemParameters: any[]): Promise<Result<LocalRequestDTO>> {
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const request = event.data.request;
 
@@ -260,17 +257,23 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
 
     private checkRequestItemCompatibilityAndApplyReponseConfig(
         itemsOfRequest: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
-        parametersToDecideRequest: any[],
+        parametersToDecideRequest: any,
         request: LocalRequestDTO,
         requestConfigElement: RequestItemDerivationConfig,
         responseConfigElement: ResponseConfig
-    ): Result<ResponseConfig[]> {
+    ): Result<{ items: any[] }> {
         for (let i = 0; i < itemsOfRequest.length; i++) {
             const item = itemsOfRequest[i];
-            if (Array.isArray(item)) {
-                this.checkRequestItemCompatibilityAndApplyReponseConfig(item, parametersToDecideRequest[i], request, requestConfigElement, responseConfigElement);
+            if (item["@type"] === "RequestItemGroup") {
+                this.checkRequestItemCompatibilityAndApplyReponseConfig(
+                    (item as RequestItemGroupJSON).items,
+                    parametersToDecideRequest.items[i],
+                    request,
+                    requestConfigElement,
+                    responseConfigElement
+                );
             } else {
-                const alreadyDecidedByOtherConfig = !!parametersToDecideRequest[i];
+                const alreadyDecidedByOtherConfig = !!parametersToDecideRequest.items[i];
                 if (alreadyDecidedByOtherConfig) continue;
 
                 const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
@@ -279,7 +282,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
                 if (!generalRequestIsCompatible) continue;
 
-                parametersToDecideRequest[i] = responseConfigElement;
+                parametersToDecideRequest.items[i] = responseConfigElement;
             }
         }
         return Result.ok(parametersToDecideRequest);
