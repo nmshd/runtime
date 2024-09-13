@@ -18,7 +18,7 @@ export class TokenContentRelationshipTemplate extends Serializable implements IT
     @serialize()
     public secretKey: CryptoSecretKey;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
     public forIdentity?: CoreAddress;
 

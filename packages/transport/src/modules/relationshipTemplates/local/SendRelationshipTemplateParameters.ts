@@ -23,7 +23,7 @@ export class SendRelationshipTemplateParameters extends Serializable implements 
     @serialize()
     public maxNumberOfAllocations?: number;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
     public forIdentity?: CoreAddress;
 

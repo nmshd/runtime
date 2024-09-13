@@ -238,7 +238,7 @@ export class RelationshipTemplateController extends TransportController {
 
     public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey, forIdentity?: CoreAddress): Promise<RelationshipTemplate> {
         const templateDoc = await this.templates.read(id.toString());
-        if (!templateDoc && !forIdentity?.equals(this.parent.identity.address)) {
+        if (!templateDoc && forIdentity && !forIdentity.equals(this.parent.identity.address)) {
             // if you created the template, it exists already
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }

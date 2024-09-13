@@ -116,28 +116,36 @@ describe("Template Tests", () => {
     describe("Personalized templates", () => {
         test("send and receive a personalized template", async () => {
             const createResult = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
-                content: { a: "A" },
+                content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                 forIdentity: runtimeServices2.address
             });
             expect(createResult).toBeSuccessful();
 
-            const loadResult = await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createResult.value.truncatedReference });
+            const loadResult = await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({
+                id: createResult.value.id,
+                secretKey: createResult.value.secretKey,
+                forIdentity: createResult.value.forIdentity
+            });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.forIdentity).toBe(runtimeServices2.address);
         });
 
         test("error when loading a template for another identity", async () => {
             const createResult = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
-                content: { a: "A" },
+                content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                forIdentity: "did:e:a-domain:dids:anidentity"
+                forIdentity: "did:e:example.com:dids:b9d25bd0a2bbd3aa4843ed"
             });
             expect(createResult).toBeSuccessful();
 
-            const loadResult = await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createResult.value.truncatedReference });
+            const loadResult = await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({
+                id: createResult.value.id,
+                secretKey: createResult.value.secretKey,
+                forIdentity: createResult.value.forIdentity
+            });
             expect(loadResult).toBeAnError(
-                `You tried to access personalized content '${createResult.value.id}' that is not intended for you.`,
+                `You tried to access personalized content '${createResult.value.id}'. You are either not logged in or the content is not intended for you.`,
                 "error.transport.general.notIntendedForYou"
             );
         });

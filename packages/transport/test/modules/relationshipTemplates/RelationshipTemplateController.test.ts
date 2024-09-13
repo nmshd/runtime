@@ -131,22 +131,21 @@ describe("RelationshipTemplateController", function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
+            forIdentity: CoreAddress.from("did:e:example.com:dids:b9d25bd0a2bbd3aa4843ed")
         });
-        await TestUtil.expectThrowsAsync(async () => {
-            await recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey, ownTemplate.cache!.forIdentity);
-        }, "transport.general.notIntendedForYou");
+        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey, ownTemplate.cache!.forIdentity)).rejects.toThrow(
+            "transport.general.notIntendedForYou"
+        );
     });
 
     test("should throw an error if loaded by the wrong identity and it's uncaught before reaching the backbone", async function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity")
+            forIdentity: CoreAddress.from("did:e:example.com:dids:b9d25bd0a2bbd3aa4843ed")
         });
-        await TestUtil.expectThrowsAsync(async () => {
-            await recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey, ownTemplate.cache!.forIdentity);
-        }, "error.platform.recordNotFound");
+
+        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey)).rejects.toThrow("error.platform.recordNotFound");
     });
 
     test("should send and receive a RelationshipTemplate using a RelationshipTemplateReference", async function () {
