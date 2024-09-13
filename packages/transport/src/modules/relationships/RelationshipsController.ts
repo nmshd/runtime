@@ -1,5 +1,5 @@
 import { ISerializable } from "@js-soft/ts-serval";
-import { log, Result } from "@js-soft/ts-utils";
+import { ApplicationError, log, Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -151,7 +151,11 @@ export class RelationshipsController extends TransportController {
     }
 
     public async sendRelationship(parameters: ISendRelationshipParameters): Promise<Result<Relationship>> {
-        await this.canSendRelationship(parameters);
+        const canSendRelationship = await this.canSendRelationship(parameters);
+
+        if (!canSendRelationship.isSuccess) {
+            return Result.fail(canSendRelationship.error);
+        }
 
         parameters = SendRelationshipParameters.from(parameters);
         const template = (parameters as SendRelationshipParameters).template;
@@ -202,6 +206,19 @@ export class RelationshipsController extends TransportController {
 
         if (existingRelationshipsToPeer.length !== 0) {
             throw TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
+        }
+
+        const secretId = await TransportIds.relationshipSecret.generate();
+
+        const creationContentCipher = await this.prepareCreationContent(secretId, template, parameters.creationContent);
+
+        const result = await this.client.canCreateRelationship({
+            creationContent: creationContentCipher.toBase64(),
+            relationshipTemplateId: template.id.toString()
+        });
+
+        if (result.value.canCreate) {
+            return Result.fail(new ApplicationError("error.platform.validation.relationship", "A Relationship to the peer cannot be created."));
         }
 
         return Result.ok(undefined);
