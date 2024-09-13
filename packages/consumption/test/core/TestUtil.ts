@@ -306,8 +306,8 @@ export class TestUtil {
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
         expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
-        expect(relRequest.id.toString()).toStrictEqual(acceptedRelationshipFromSelf.id.toString());
-        expect(relRequest.id.toString()).toStrictEqual(acceptedRelationshipPeer.id.toString());
+        expect(relRequest.value.id.toString()).toStrictEqual(acceptedRelationshipFromSelf.id.toString());
+        expect(relRequest.value.id.toString()).toStrictEqual(acceptedRelationshipPeer.id.toString());
 
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
     }
@@ -460,7 +460,7 @@ export class TestUtil {
             content: "request"
         };
 
-        return await account.relationships.sendRelationship({ template, creationContent: content });
+        return (await account.relationships.sendRelationship({ template, creationContent: content })).value;
     }
 
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {

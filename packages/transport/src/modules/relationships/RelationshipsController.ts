@@ -1,5 +1,5 @@
 import { ISerializable } from "@js-soft/ts-serval";
-import { log } from "@js-soft/ts-utils";
+import { log, Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -150,18 +150,14 @@ export class RelationshipsController extends TransportController {
         return await CoreCrypto.verify(content, signature, relationship.peer.publicKey);
     }
 
-    public async sendRelationship(parameters: ISendRelationshipParameters): Promise<Relationship> {
+    public async sendRelationship(parameters: ISendRelationshipParameters): Promise<Result<Relationship>> {
         parameters = SendRelationshipParameters.from(parameters);
         const template = (parameters as SendRelationshipParameters).template;
         if (!template.cache) {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
 
-        const existingRelationshipsToPeer = await this.getExistingRelationshipsToIdentity(template.cache.createdBy);
-
-        if (existingRelationshipsToPeer.length !== 0) {
-            throw TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
-        }
+        await this.canSendRelationship(parameters);
 
         const secretId = await TransportIds.relationshipSecret.generate();
 
@@ -192,7 +188,23 @@ export class RelationshipsController extends TransportController {
 
         this.eventBus.publish(new RelationshipChangedEvent(this.parent.identity.address.toString(), newRelationship));
 
-        return newRelationship;
+        return Result.ok(newRelationship);
+    }
+
+    public async canSendRelationship(parameters: ISendRelationshipParameters): Promise<Result<void>> {
+        parameters = SendRelationshipParameters.from(parameters);
+        const template = (parameters as SendRelationshipParameters).template;
+        if (!template.cache) {
+            throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
+        }
+
+        const existingRelationshipsToPeer = await this.getExistingRelationshipsToIdentity(template.cache.createdBy);
+
+        if (existingRelationshipsToPeer.length !== 0) {
+            throw TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
+        }
+
+        return Result.ok(undefined);
     }
 
     public async getExistingRelationshipsToIdentity(address: CoreAddress): Promise<Relationship[]> {

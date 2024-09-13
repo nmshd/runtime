@@ -69,7 +69,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             );
         }
 
-        const relationship = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
+        const relationship = (await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() })).value;
 
         await this.accountController.syncDatawallet();
 

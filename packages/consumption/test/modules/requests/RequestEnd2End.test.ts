@@ -90,10 +90,12 @@ describe("End2End Request/Response via Relationship Template", function () {
     });
 
     test("recipient: create Relationship with Response in Relationship Creation Content", async function () {
-        rRelationship = await rAccountController.relationships.sendRelationship({
-            template: rTemplate,
-            creationContent: RelationshipCreationContent.from({ response: rLocalRequest.response!.content })
-        });
+        rRelationship = (
+            await rAccountController.relationships.sendRelationship({
+                template: rTemplate,
+                creationContent: RelationshipCreationContent.from({ response: rLocalRequest.response!.content })
+            })
+        ).value;
         rCreationContent = rRelationship.cache?.creationContent as RelationshipCreationContent;
     });
 
