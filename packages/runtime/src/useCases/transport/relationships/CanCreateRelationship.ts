@@ -2,7 +2,7 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipTemplateContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { CachedRelationshipTemplate, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RuntimeErrors, UseCase } from "../../common";
 import { CreateRelationshipRequest } from "./CreateRelationship";
@@ -35,7 +35,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
         }
 
         if (!template.cache) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(CachedRelationshipTemplate));
+            return Result.fail(RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString()));
         }
 
         const existingRelationshipsToPeer = await this.relationshipController.getExistingRelationshipsToIdentity(template.cache.createdBy);
