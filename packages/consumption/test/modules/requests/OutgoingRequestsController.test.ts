@@ -152,7 +152,7 @@ describe("OutgoingRequestsController", function () {
             });
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.validation.inheritedFromItem",
-                message: "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
+                message: "Some child items have errors."
             });
             expect(validationResult.items).toHaveLength(2);
 
@@ -185,7 +185,7 @@ describe("OutgoingRequestsController", function () {
             });
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.validation.inheritedFromItem",
-                message: "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
+                message: "Some child items have errors."
             });
             expect(validationResult.items).toHaveLength(2);
 
@@ -193,9 +193,7 @@ describe("OutgoingRequestsController", function () {
 
             expect(validationResult.items[1].isError()).toBe(true);
             expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("error.consumption.validation.inheritedFromItem");
-            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe(
-                "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
-            );
+            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe("Some child items have errors.");
 
             expect(validationResult.items[1].items).toHaveLength(1);
             expect(validationResult.items[1].items[0].isError()).toBe(true);
@@ -230,11 +228,20 @@ describe("OutgoingRequestsController", function () {
         test("throws when canCreate returns an error", async function () {
             const oldCanCreate = context.outgoingRequestsController.canCreate;
             context.outgoingRequestsController.canCreate = (_: ICreateOutgoingRequestParameters) => {
-                return Promise.resolve(ValidationResult.error(new ApplicationError("aCode", "aMessage")));
+                return Promise.resolve(
+                    ValidationResult.error(
+                        new ApplicationError(
+                            "error.consumption.validation.inheritedFromItem",
+                            "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
+                        )
+                    )
+                );
             };
 
             await When.iTryToCreateAnOutgoingRequest();
-            await Then.itThrowsAnErrorWithTheErrorMessage("aMessage");
+            await Then.itThrowsAnErrorWithTheErrorMessage(
+                "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
+            );
 
             context.outgoingRequestsController.canCreate = oldCanCreate;
         });

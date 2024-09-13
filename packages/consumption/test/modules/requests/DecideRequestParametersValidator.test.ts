@@ -273,7 +273,7 @@ describe("DecideRequestParametersValidator", function () {
             expectedError: {
                 indexPath: [0],
                 code: "error.consumption.validation.inheritedFromItem",
-                message: "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
+                message: "Some child items have errors."
             }
         }
     ];

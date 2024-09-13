@@ -306,6 +306,10 @@ class Requests {
         return new CoreError("error.consumption.requests.missingRelationship", message);
     }
 
+    public inheritedFromItem(message: string) {
+        return new ApplicationError("error.consumption.validation.inheritedFromItem", message);
+    }
+
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);
