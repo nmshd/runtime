@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { IncomingRequestsController, LocalRequest, LocalRequestStatus } from "@nmshd/consumption";
+import { ErrorValidationResult, IncomingRequestsController, LocalRequest, LocalRequestStatus } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
@@ -39,11 +39,16 @@ export class CanRejectIncomingRequestUseCase extends UseCase<RejectIncomingReque
             if (existingRelationshipsToPeer.length === 0 && template.cache?.expiresAt && template.isExpired()) {
                 await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
 
-                return Result.fail(
+                const errorResult = new ErrorValidationResult(
                     RuntimeErrors.relationships.expiredRelationshipTemplate(
                         `The incoming Request has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to.`
-                    )
+                    ),
+                    []
                 );
+
+                const dto = RequestValidationResultMapper.toRequestValidationResultDTO(errorResult);
+
+                return Result.ok(dto);
             }
         }
 
