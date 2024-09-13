@@ -352,12 +352,14 @@ export class TestUtil {
 
         const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(templateFrom.id, templateFrom.secretKey);
 
-        const relRequest = await to.relationships.sendRelationship({
-            template: templateTo,
-            creationContent: {
-                mycontent: "request"
-            }
-        });
+        const relRequest = (
+            await to.relationships.sendRelationship({
+                template: templateTo,
+                creationContent: {
+                    mycontent: "request"
+                }
+            })
+        ).value;
 
         // Accept relationship
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
@@ -526,10 +528,12 @@ export class TestUtil {
                 content: "request"
             };
         }
-        return await account.relationships.sendRelationship({
-            template: template,
-            creationContent: body
-        });
+        return (
+            await account.relationships.sendRelationship({
+                template: template,
+                creationContent: body
+            })
+        ).value;
     }
 
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {
