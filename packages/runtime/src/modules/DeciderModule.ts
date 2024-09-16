@@ -78,8 +78,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     private async handleIncomingRequestStatusChanged(event: IncomingRequestStatusChangedEvent) {
         if (event.data.newStatus !== LocalRequestStatus.DecisionRequired) return;
 
-        const itemsOfRequest = event.data.request.content.items;
-        if (this.containsDeep(itemsOfRequest, (item) => item["requireManualDecision"] === true)) {
+        const requestContent = event.data.request.content;
+        if (this.containsItem(requestContent, (item) => item["requireManualDecision"] === true)) {
             return await this.requireManualDecision(event);
         }
 
@@ -116,7 +116,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                     continue;
                 }
 
-                const decideRequestResult = await this.decideRequest(event, decideRequestItemParameterResult.value.items);
+                const decideRequestResult = await this.decideRequest(event, decideRequestItemParameterResult.value);
                 return decideRequestResult;
             }
 
@@ -133,8 +133,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 }
 
                 decideRequestItemParameters = checkCompatibilityResult.value;
-                if (!this.containsDeep(decideRequestItemParameters.items, (element) => element === undefined)) {
-                    const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters.items);
+                if (!this.containsItem(decideRequestItemParameters, (element) => element === undefined)) {
+                    const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
                     return decideRequestResult;
                 }
             }
@@ -212,19 +212,19 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return Result.ok(decideRequestItemParameters);
     }
 
-    private async decideRequest(event: IncomingRequestStatusChangedEvent, decideRequestItemParameters: any[]): Promise<Result<LocalRequestDTO>> {
+    private async decideRequest(event: IncomingRequestStatusChangedEvent, decideRequestItemParameters: { items: any[] }): Promise<Result<LocalRequestDTO>> {
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const request = event.data.request;
 
-        if (!this.containsDeep(decideRequestItemParameters, isAcceptResponseConfig)) {
-            const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters });
+        if (!this.containsItem(decideRequestItemParameters, isAcceptResponseConfig)) {
+            const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
             if (canRejectResult.isError) {
                 // TODO: should this be logger.error or logger.debug?
                 this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.error);
                 return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.error.message));
             }
 
-            const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters });
+            const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters.items });
             if (rejectResult.isError) {
                 this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
                 return Result.fail(RuntimeErrors.deciderModule.rejectRequestFailed(request.id, rejectResult.error.message));
@@ -234,14 +234,14 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return Result.ok(localRequestWithResponse);
         }
 
-        const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters });
+        const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters.items });
         if (canAcceptResult.isError) {
             // TODO: should this be logger.error or logger.debug?
             this.logger.error(`Can not accept Request ${request.id}`, canAcceptResult.error);
             return Result.fail(RuntimeErrors.deciderModule.canAcceptRequestFailed(request.id, canAcceptResult.error.message));
         }
 
-        const acceptResult = await services.consumptionServices.incomingRequests.accept({ requestId: request.id, items: decideRequestItemParameters });
+        const acceptResult = await services.consumptionServices.incomingRequests.accept({ requestId: request.id, items: decideRequestItemParameters.items });
         if (acceptResult.isError) {
             this.logger.error(`An error occured trying to accept Request ${request.id}`, acceptResult.error);
             return Result.fail(RuntimeErrors.deciderModule.acceptRequestFailed(request.id, acceptResult.error.message));
@@ -251,8 +251,15 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return Result.ok(localRequestWithResponse);
     }
 
-    private containsDeep(nestedArray: any[], callback: (element: any) => boolean): boolean {
-        return nestedArray.some((element) => (Array.isArray(element) ? this.containsDeep(element, callback) : callback(element)));
+    private containsItem(objectWithItems: { items: any[] }, callback: (element: any) => boolean): boolean {
+        const items = objectWithItems.items;
+
+        return items.some((item) => {
+            if (item?.hasOwnProperty("items")) {
+                return this.containsItem(item, callback);
+            }
+            return callback(item);
+        });
     }
 
     private checkRequestItemCompatibilityAndApplyReponseConfig(
