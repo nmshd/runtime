@@ -154,8 +154,11 @@ export class RelationshipsController extends TransportController {
         const canSendRelationship = await this.canSendRelationship(parameters);
 
         if (!canSendRelationship.isSuccess) {
-            // TODO: Return error as soon as the precise error code is raised by the Backbone.
-            // return Result.fail(canSendRelationship.error);
+            if (canSendRelationship.error.code === "error.transport.relationships.relationshipCurrentlyExists") {
+                throw canSendRelationship.error;
+            }
+
+            // TODO: More throwing or returning errors as soon as the precise error codes are raised by the canSendRelationship method.
         }
 
         parameters = SendRelationshipParameters.from(parameters);
@@ -174,6 +177,7 @@ export class RelationshipsController extends TransportController {
         });
 
         if (result.isError) {
+            // TODO: Remove as soon as the throwing or returning of the errors is implemented above.
             if (result.error.code === "error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists") {
                 throw TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer();
             }
@@ -207,19 +211,19 @@ export class RelationshipsController extends TransportController {
         const existingRelationshipsToPeer = await this.getExistingRelationshipsToIdentity(peerAddress);
 
         if (existingRelationshipsToPeer.length !== 0) {
-            throw TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
+            return Result.fail(TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status));
         }
 
         const result = await this.client.canCreateRelationship(peerAddress.toString());
 
         if (!result.value.canCreate) {
-            /* TODO: As soon as a distinction can be made between error codes
-            error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists and
-            error.platform.validation.relationship.peerIsToBeDeleted, implement different handling for them. */
+            /* TODO: As soon as the precise error codes are raised by the Backbone and a distinction can be made between
+            the error codes error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists and
+            error.platform.validation.relationship.peerIsToBeDeleted, return different errors for them. */
             return Result.fail(
                 new ApplicationError(
-                    "error.platform.validation.relationship.cannotBeCreated",
-                    `A Relationship to the peer ${peerAddress} cannot be created, because a Relationship to the peer already exists or the peer is to be deleted.`
+                    "error.platform.validation.relationship.relationshipToPeerCannotBeCreated",
+                    `A Relationship to the peer ${peerAddress} cannot be created, because the former Relationship is not yet decomposed by the peer or the peer is to be deleted.`
                 )
             );
         }
