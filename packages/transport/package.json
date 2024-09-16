@@ -89,11 +89,11 @@
         "@js-soft/docdb-access-loki": "1.1.0",
         "@js-soft/docdb-access-mongo": "1.1.9",
         "@js-soft/node-logger": "1.2.0",
-        "@js-soft/ts-serval": "2.0.10",
+        "@js-soft/ts-serval": "2.0.11",
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.17.7",
         "@types/luxon": "^3.4.2",
-        "@types/qs": "^6.9.15",
+        "@types/qs": "^6.9.16",
         "@types/uuid": "^10.0.0",
         "expect": "^29.7.0",
         "ts-mockito": "^2.6.1"
