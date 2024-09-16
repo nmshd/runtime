@@ -208,13 +208,8 @@ export class RelationshipsController extends TransportController {
             throw TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
         }
 
-        const secretId = await TransportIds.relationshipSecret.generate();
-
-        const creationContentCipher = await this.prepareCreationContent(secretId, template, parameters.creationContent);
-
         const result = await this.client.canCreateRelationship({
-            creationContent: creationContentCipher.toBase64(),
-            relationshipTemplateId: template.id.toString()
+            peerAddress: template.cache.createdBy.toString()
         });
 
         if (result.value.canCreate) {
