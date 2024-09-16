@@ -36,39 +36,27 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
 
         const canSendRelationship = await this.relationshipController.canSendRelationship({ creationContent: request.creationContent, template });
 
-        if (
-            template.isExpired() &&
-            (canSendRelationship.isSuccess || (canSendRelationship.isError && canSendRelationship.error.code !== "error.transport.relationships.relationshipCurrentlyExists"))
-        ) {
-            if (!template.cache) {
-                return Result.fail(RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString()));
-            }
+        if (!canSendRelationship.isSuccess) {
+            if (canSendRelationship.error.code === "error.transport.relationships.expiredRelationshipTemplate") {
+                if (!template.cache) {
+                    return Result.fail(RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString()));
+                }
 
-            if (template.cache.content instanceof RelationshipTemplateContent) {
-                const dbQuery: any = {};
-                dbQuery["source.reference"] = { $eq: template.id.toString() };
-                dbQuery["status"] = { $neq: LocalRequestStatus.Completed };
-                const nonCompletedRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
+                if (template.cache.content instanceof RelationshipTemplateContent) {
+                    const dbQuery: any = {};
+                    dbQuery["source.reference"] = { $eq: template.id.toString() };
+                    dbQuery["status"] = { $neq: LocalRequestStatus.Completed };
+                    const nonCompletedRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
 
-                if (nonCompletedRequestsFromTemplate.length !== 0 && template.cache.expiresAt) {
-                    const promises = nonCompletedRequestsFromTemplate.map((localRequest) =>
-                        this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache!.expiresAt!)
-                    );
-                    await Promise.all(promises);
+                    if (nonCompletedRequestsFromTemplate.length !== 0 && template.cache.expiresAt) {
+                        const promises = nonCompletedRequestsFromTemplate.map((localRequest) =>
+                            this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache!.expiresAt!)
+                        );
+                        await Promise.all(promises);
+                    }
                 }
             }
 
-            const errorResponse: CanCreateRelationshipErrorResponse = {
-                isSuccess: false,
-                error: RuntimeErrors.relationships.expiredRelationshipTemplate(
-                    `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
-                )
-            };
-
-            return Result.ok(errorResponse);
-        }
-
-        if (!canSendRelationship.isSuccess) {
             const errorResponse: CanCreateRelationshipErrorResponse = {
                 isSuccess: false,
                 error: canSendRelationship.error
