@@ -219,9 +219,11 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         if (!this.containsItem(decideRequestItemParameters, isAcceptResponseConfig)) {
             const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
             if (canRejectResult.isError) {
-                // TODO: should this be logger.error or logger.debug?
-                this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.error);
+                this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.error);
                 return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.error.message));
+            } else if (!canRejectResult.value.isSuccess) {
+                this.logger.warn(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.value.message);
+                return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.value.message));
             }
 
             const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters.items });
@@ -236,9 +238,11 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
 
         const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters.items });
         if (canAcceptResult.isError) {
-            // TODO: should this be logger.error or logger.debug?
-            this.logger.error(`Can not accept Request ${request.id}`, canAcceptResult.error);
+            this.logger.error(`Can not accept Request ${request.id}.`, canAcceptResult.error);
             return Result.fail(RuntimeErrors.deciderModule.canAcceptRequestFailed(request.id, canAcceptResult.error.message));
+        } else if (!canAcceptResult.value.isSuccess) {
+            this.logger.warn(`Can not accept Request ${request.id}.`, canAcceptResult.value.message);
+            return Result.fail(RuntimeErrors.deciderModule.canAcceptRequestFailed(request.id, canAcceptResult.value.message));
         }
 
         const acceptResult = await services.consumptionServices.incomingRequests.accept({ requestId: request.id, items: decideRequestItemParameters.items });

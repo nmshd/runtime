@@ -250,11 +250,11 @@ class DeciderModule {
         return new ApplicationError("error.runtime.decide.requestConfigDoesNotMatchResponseConfig", "The RequestConfig does not match the ResponseConfig.");
     }
 
-    public canRejectRequestFailed(requestId: string, errorMessage: string) {
+    public canRejectRequestFailed(requestId: string, errorMessage?: string) {
         return new ApplicationError("error.runtime.decide.canRejectRequestFailed", `Can not reject Request ${requestId}: ${errorMessage}`);
     }
 
-    public canAcceptRequestFailed(requestId: string, errorMessage: string) {
+    public canAcceptRequestFailed(requestId: string, errorMessage?: string) {
         return new ApplicationError("error.runtime.decide.canAcceptRequestFailed", `Can not accept Request ${requestId}: ${errorMessage}`);
     }
 
