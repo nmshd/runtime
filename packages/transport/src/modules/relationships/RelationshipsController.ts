@@ -210,7 +210,7 @@ export class RelationshipsController extends TransportController {
 
         const result = await this.client.canCreateRelationship(template.cache.createdBy.toString());
 
-        if (result.value.canCreate) {
+        if (!result.value.canCreate) {
             return Result.fail(new ApplicationError("error.platform.validation.relationship", "A Relationship to the peer cannot be created."));
         }
 
