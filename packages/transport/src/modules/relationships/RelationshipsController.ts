@@ -154,7 +154,8 @@ export class RelationshipsController extends TransportController {
         const canSendRelationship = await this.canSendRelationship(parameters);
 
         if (!canSendRelationship.isSuccess) {
-            return Result.fail(canSendRelationship.error);
+            // TODO: Return error as soon as the precise error code is raised by the Backbone.
+            // return Result.fail(canSendRelationship.error);
         }
 
         parameters = SendRelationshipParameters.from(parameters);
@@ -173,12 +174,12 @@ export class RelationshipsController extends TransportController {
         });
 
         if (result.isError) {
-            if (result.error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
-                throw TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate();
-            }
-
             if (result.error.code === "error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists") {
                 throw TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer();
+            }
+
+            if (result.error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
+                throw TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate();
             }
 
             throw result.error;
@@ -212,7 +213,15 @@ export class RelationshipsController extends TransportController {
         const result = await this.client.canCreateRelationship(peerAddress.toString());
 
         if (!result.value.canCreate) {
-            return Result.fail(new ApplicationError("error.platform.validation.relationship", `A Relationship to the peer ${peerAddress} cannot be created.`));
+            /* TODO: As soon as a distinction can be made between error codes
+            error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists and
+            error.platform.validation.relationship.peerIsToBeDeleted, implement different handling for them. */
+            return Result.fail(
+                new ApplicationError(
+                    "error.platform.validation.relationship.cannotBeCreated",
+                    `A Relationship to the peer ${peerAddress} cannot be created, because a Relationship to the peer already exists or the peer is to be deleted.`
+                )
+            );
         }
 
         return Result.ok(undefined);
