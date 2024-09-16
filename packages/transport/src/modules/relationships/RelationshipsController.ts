@@ -202,16 +202,17 @@ export class RelationshipsController extends TransportController {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
 
-        const existingRelationshipsToPeer = await this.getExistingRelationshipsToIdentity(template.cache.createdBy);
+        const peerAddress = template.cache.createdBy;
+        const existingRelationshipsToPeer = await this.getExistingRelationshipsToIdentity(peerAddress);
 
         if (existingRelationshipsToPeer.length !== 0) {
             throw TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
         }
 
-        const result = await this.client.canCreateRelationship(template.cache.createdBy.toString());
+        const result = await this.client.canCreateRelationship(peerAddress.toString());
 
         if (!result.value.canCreate) {
-            return Result.fail(new ApplicationError("error.platform.validation.relationship", "A Relationship to the peer cannot be created."));
+            return Result.fail(new ApplicationError("error.platform.validation.relationship", `A Relationship to the peer ${peerAddress} cannot be created.`));
         }
 
         return Result.ok(undefined);
