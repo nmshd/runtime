@@ -34,22 +34,16 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        if (!template.cache) {
-            return Result.fail(RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString()));
-        }
+        const canSendRelationship = await this.relationshipController.canSendRelationship({ creationContent: request.creationContent, template });
 
-        const existingRelationshipsToPeer = await this.relationshipController.getExistingRelationshipsToIdentity(template.cache.createdBy);
+        if (
+            template.isExpired() &&
+            (canSendRelationship.isSuccess || (canSendRelationship.isError && canSendRelationship.error.code !== "error.transport.relationships.relationshipCurrentlyExists"))
+        ) {
+            if (!template.cache) {
+                return Result.fail(RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString()));
+            }
 
-        if (existingRelationshipsToPeer.length !== 0) {
-            const errorResponse: CanCreateRelationshipErrorResponse = {
-                isSuccess: false,
-                error: RuntimeErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status)
-            };
-
-            return Result.ok(errorResponse);
-        }
-
-        if (template.isExpired()) {
             if (template.cache.content instanceof RelationshipTemplateContent) {
                 const dbQuery: any = {};
                 dbQuery["source.reference"] = { $eq: template.id.toString() };
@@ -69,6 +63,15 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
                 error: RuntimeErrors.relationships.expiredRelationshipTemplate(
                     `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
                 )
+            };
+
+            return Result.ok(errorResponse);
+        }
+
+        if (!canSendRelationship.isSuccess) {
+            const errorResponse: CanCreateRelationshipErrorResponse = {
+                isSuccess: false,
+                error: canSendRelationship.error
             };
 
             return Result.ok(errorResponse);
