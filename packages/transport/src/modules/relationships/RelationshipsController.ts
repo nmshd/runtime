@@ -161,14 +161,12 @@ export class RelationshipsController extends TransportController {
             // TODO: More throwing or returning errors as soon as the precise error codes are raised by the canSendRelationship method.
         }
 
-        parameters = SendRelationshipParameters.from(parameters);
         const template = (parameters as SendRelationshipParameters).template;
         if (!template.cache) {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
 
         const secretId = await TransportIds.relationshipSecret.generate();
-
         const creationContentCipher = await this.prepareCreationContent(secretId, template, parameters.creationContent);
 
         const result = await this.client.createRelationship({
@@ -201,7 +199,6 @@ export class RelationshipsController extends TransportController {
     }
 
     public async canSendRelationship(parameters: ISendRelationshipParameters): Promise<Result<void>> {
-        parameters = SendRelationshipParameters.from(parameters);
         const template = (parameters as SendRelationshipParameters).template;
         if (!template.cache) {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
