@@ -70,6 +70,7 @@ export class RuntimeServiceProvider {
         return copy;
     }
 
+    // TODO: where is DB generated? Can I set it to specific Identity's DB?
     public async launch(count: number, launchConfiguration: LaunchConfiguration = {}): Promise<TestRuntimeServices[]> {
         const runtimeServices: TestRuntimeServices[] = [];
 
