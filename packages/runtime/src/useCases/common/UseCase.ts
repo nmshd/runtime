@@ -2,6 +2,7 @@ import { ParsingError, ServalError, ValidationError } from "@js-soft/ts-serval";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { CoreError } from "@nmshd/core-types";
 import { RequestError } from "@nmshd/transport";
+import correlator from "correlation-id";
 import stringifySafe from "json-stringify-safe";
 import { PlatformErrorCodes } from "./PlatformErrorCodes";
 import { RuntimeErrors } from "./RuntimeErrors";
@@ -12,19 +13,25 @@ export abstract class UseCase<IRequest, IResponse> {
     public constructor(private readonly requestValidator?: IValidator<IRequest>) {}
 
     public async execute(request: IRequest): Promise<Result<IResponse>> {
-        if (this.requestValidator) {
-            const validationResult = await this.requestValidator.validate(request);
+        const callback = async (): Promise<Result<IResponse>> => {
+            if (this.requestValidator) {
+                const validationResult = await this.requestValidator.validate(request);
 
-            if (validationResult.isInvalid()) {
-                return this.validationFailed(validationResult);
+                if (validationResult.isInvalid()) {
+                    return this.validationFailed(validationResult);
+                }
             }
-        }
 
-        try {
-            return await this.executeInternal(request);
-        } catch (e) {
-            return this.failingResultFromUnknownError(e);
-        }
+            try {
+                return await this.executeInternal(request);
+            } catch (e) {
+                return this.failingResultFromUnknownError(e);
+            }
+        };
+
+        const correlationId = correlator.getId();
+        if (correlationId) return await correlator.withId(correlationId, callback);
+        return await correlator.withId(callback);
     }
 
     private failingResultFromUnknownError(error: unknown): Result<any> {
