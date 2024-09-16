@@ -1,14 +1,14 @@
 import { ClientResult } from "../../../core/backbone/ClientResult";
 import { Paginator } from "../../../core/backbone/Paginator";
 import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
-import { BackboneCanCreateRelationshipRequest, BackboneCanCreateRelationshipResponse } from "./BackboneCanCreateRelationship";
+import { BackboneCanCreateRelationshipResponse } from "./BackboneCanCreateRelationship";
 import { BackboneGetRelationshipResponse, BackboneGetRelationshipsRequest } from "./BackboneGetRelationships";
 import { BackbonePostRelationshipsRequest, BackbonePostRelationshipsResponse } from "./BackbonePostRelationship";
 import { BackboneAcceptRelationshipsRequest, BackbonePutRelationshipsResponse } from "./BackbonePutRelationship";
 
 export class RelationshipClient extends RESTClientAuthenticate {
-    public async canCreateRelationship(request: BackboneCanCreateRelationshipRequest): Promise<ClientResult<BackboneCanCreateRelationshipResponse>> {
-        return await this.get<BackboneCanCreateRelationshipResponse>("/api/v1/Relationships/CanCreate", request);
+    public async canCreateRelationship(peerAddress: string): Promise<ClientResult<BackboneCanCreateRelationshipResponse>> {
+        return await this.get<BackboneCanCreateRelationshipResponse>(`/api/v1/Relationships/CanCreate?peer=${peerAddress}`);
     }
 
     public async createRelationship(request: BackbonePostRelationshipsRequest): Promise<ClientResult<BackbonePostRelationshipsResponse>> {
