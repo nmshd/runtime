@@ -1,4 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { LokiJsConnection } from "@js-soft/docdb-access-loki";
+import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { EventBus, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
@@ -126,7 +128,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         return this._isInitialized;
     }
 
-    public async init(): Promise<void> {
+    public async init(existingDatabaseConnection?: MongoDbConnection | LokiJsConnection): Promise<void> {
         if (this._isInitialized) {
             throw RuntimeErrors.general.alreadyInitialized();
         }
@@ -135,7 +137,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         await this.initDIContainer();
 
-        await this.initTransportLibrary();
+        await this.initTransportLibrary(existingDatabaseConnection);
         await this.initAccount();
 
         this._modules = new RuntimeModuleRegistry();
@@ -169,10 +171,21 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         };
     }
 
-    private async initTransportLibrary() {
+    private async initTransportLibrary(existingDatabaseConnection?: MongoDbConnection | LokiJsConnection) {
         this.logger.debug("Initializing Database connection... ");
 
-        const databaseConnection = await this.createDatabaseConnection();
+        let databaseConnection;
+        if (existingDatabaseConnection) {
+            // TODO: maybe this needs to be connected newly
+            databaseConnection = existingDatabaseConnection;
+            if (databaseConnection instanceof LokiJsConnection) {
+                // await databaseConnection.getDatabase();
+            } else {
+                await databaseConnection.connect();
+            }
+        } else {
+            databaseConnection = await this.createDatabaseConnection();
+        }
 
         const transportConfig = this.createTransportConfigWithAdditionalHeaders({
             ...this.runtimeConfig.transportLibrary,
@@ -183,7 +196,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             this.logger.error(`An error was thrown in an event handler of the transport event bus (namespace: '${namespace}'). Root error: ${error}`);
         });
 
-        this.transport = new Transport(databaseConnection, transportConfig, eventBus, this.loggerFactory);
+        this.transport = new Transport(databaseConnection, transportConfig, eventBus, this.loggerFactory); // TODO: is it right that a new Transport it created here?
 
         this.logger.debug("Initializing Transport Library...");
         await this.transport.init();

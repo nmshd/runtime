@@ -1,3 +1,5 @@
+import { LokiJsConnection } from "@js-soft/docdb-access-loki";
+import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { AnonymousServices, ConsumptionServices, DataViewExpander, DeciderModuleConfigurationOverwrite, RuntimeConfig, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
 import { TestRuntime } from "./TestRuntime";
@@ -19,6 +21,7 @@ export interface LaunchConfiguration {
     enableAttributeListenerModule?: boolean;
     enableNotificationModule?: boolean;
     enableDefaultRepositoryAttributes?: boolean;
+    databaseConnection?: MongoDbConnection | LokiJsConnection; // TODO: this feels very hacky
 }
 
 export class RuntimeServiceProvider {
@@ -70,7 +73,7 @@ export class RuntimeServiceProvider {
         return copy;
     }
 
-    // TODO: where is DB generated? Can I set it to specific Identity's DB?
+    // TODO: where is DB generated? Can I set it to specific Identity's DB? runtime.transport.databaseConnection, TestRuntimeService.dbConnection
     public async launch(count: number, launchConfiguration: LaunchConfiguration = {}): Promise<TestRuntimeServices[]> {
         const runtimeServices: TestRuntimeServices[] = [];
 
@@ -93,7 +96,7 @@ export class RuntimeServiceProvider {
             });
             this.runtimes.push(runtime);
 
-            await runtime.init();
+            await runtime.init(launchConfiguration.databaseConnection); // TODO: pass DB connection
             await runtime.start();
 
             const services = await runtime.getServices("");
