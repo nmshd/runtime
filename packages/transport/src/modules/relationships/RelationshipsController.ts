@@ -154,7 +154,7 @@ export class RelationshipsController extends TransportController {
         const canSendRelationship = await this.canSendRelationship(parameters);
 
         if (!canSendRelationship.isSuccess) {
-            if (canSendRelationship.error.code === "error.transport.relationships.relationshipCurrentlyExists") {
+            if (canSendRelationship.error.code !== "error.platform.validation.relationship.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted") {
                 throw canSendRelationship.error;
             }
 
@@ -211,6 +211,10 @@ export class RelationshipsController extends TransportController {
             return Result.fail(TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status));
         }
 
+        if (template.isExpired()) {
+            return Result.fail(TransportCoreErrors.relationships.expiredRelationshipTemplate(template.id.toString()));
+        }
+
         const result = await this.client.canCreateRelationship(peerAddress.toString());
 
         if (!result.value.canCreate) {
@@ -219,7 +223,7 @@ export class RelationshipsController extends TransportController {
             error.platform.validation.relationship.peerIsToBeDeleted, return different errors for them. */
             return Result.fail(
                 new ApplicationError(
-                    "error.platform.validation.relationship.relationshipToPeerCannotBeCreated",
+                    "error.platform.validation.relationship.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted",
                     `A Relationship to the peer ${peerAddress} cannot be created, because the former Relationship is not yet decomposed by the peer or the peer is to be deleted.`
                 )
             );
