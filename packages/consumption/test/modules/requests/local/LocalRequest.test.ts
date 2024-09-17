@@ -78,33 +78,22 @@ describe("LocalRequest", function () {
 
     describe("updateStatusBasedOnTemplateExpiration", function () {
         test("sets the status to expired when the underlying RelationshipTemplate of the Request is expired", function () {
-            const request = TestObjectFactory.createUnrespondedLocalRequestBasedOnTemplateWith({
-                contentProperties: {
-                    expiresAt: CoreDate.utc().add({ days: 1 })
-                }
-            });
+            const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({});
 
             request.updateStatusBasedOnTemplateExpiration(CoreDate.utc().subtract({ days: 1 }));
             expect(request.status).toStrictEqual(LocalRequestStatus.Expired);
         });
 
         test("does not set the status to expired when the underlying RelationshipTemplate of the Request is not expired", function () {
-            const request = TestObjectFactory.createUnrespondedLocalRequestBasedOnTemplateWith({
-                contentProperties: {
-                    expiresAt: CoreDate.utc().add({ days: 1 })
-                }
-            });
+            const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({});
 
             request.updateStatusBasedOnTemplateExpiration(CoreDate.utc().add({ days: 1 }));
             expect(request.status).toStrictEqual(LocalRequestStatus.ManualDecisionRequired);
         });
 
         test("does not change the status when the underlying RelationshipTemplate of the Request is expired but the Request is already completed", function () {
-            const request = TestObjectFactory.createUnrespondedLocalRequestBasedOnTemplateWith({
-                status: LocalRequestStatus.Completed,
-                contentProperties: {
-                    expiresAt: CoreDate.utc().add({ days: 1 })
-                }
+            const request = TestObjectFactory.createRejectedLocalRequestBasedOnTemplateWith({
+                status: LocalRequestStatus.Completed
             });
 
             request.updateStatusBasedOnTemplateExpiration(CoreDate.utc().subtract({ days: 1 }));
@@ -112,7 +101,7 @@ describe("LocalRequest", function () {
         });
 
         test("does not change the status when the underlying RelationshipTemplate of the Request is expired but the Request is already expired", function () {
-            const request = TestObjectFactory.createUnrespondedLocalRequestBasedOnTemplateWith({
+            const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({
                 status: LocalRequestStatus.Expired,
                 contentProperties: {
                     expiresAt: CoreDate.utc().subtract({ days: 1 })
@@ -123,15 +112,18 @@ describe("LocalRequest", function () {
             expect(request.status).toStrictEqual(LocalRequestStatus.Expired);
         });
 
-        test("does not set status of Request to expired when Message instead of RelationshipTemplate is used", function () {
-            const request = TestObjectFactory.createLocalRequestWith({
-                contentProperties: {
-                    expiresAt: CoreDate.utc().add({ days: 1 })
-                }
-            });
+        test("does not change the status when the underlying RelationshipTemplate of the Request is expired but the Request has already been rejected", function () {
+            const request = TestObjectFactory.createRejectedLocalRequestBasedOnTemplateWith({});
 
             request.updateStatusBasedOnTemplateExpiration(CoreDate.utc().subtract({ days: 1 }));
-            expect(request.status).toStrictEqual(LocalRequestStatus.Draft);
+            expect(request.status).toStrictEqual(LocalRequestStatus.Decided);
+        });
+
+        test("does not set status of Request to expired when Message instead of RelationshipTemplate is used", function () {
+            const request = TestObjectFactory.createLocalRequestWith({});
+
+            request.updateStatusBasedOnTemplateExpiration(CoreDate.utc().subtract({ days: 1 }));
+            expect(request.status).toStrictEqual(LocalRequestStatus.Decided);
         });
     });
 });

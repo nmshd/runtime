@@ -9,6 +9,7 @@ import {
     IRequest,
     IResponse,
     ProprietaryString,
+    RejectResponseItem,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     Request,
@@ -260,7 +261,7 @@ export class TestObjectFactory {
                 content: TestObjectFactory.createResponse(),
                 source: { reference: CoreId.from("MSG2"), type: "Message" }
             },
-            status: params.status ?? LocalRequestStatus.Draft,
+            status: params.status ?? LocalRequestStatus.Decided,
             statusLog: params.statusLogEntries ?? []
         };
 
@@ -268,19 +269,51 @@ export class TestObjectFactory {
         return request;
     }
 
-    public static createUnrespondedLocalRequestBasedOnTemplateWith(params: {
+    public static createUnansweredLocalRequestBasedOnTemplateWith(params: {
         contentProperties?: Partial<Request>;
         status?: LocalRequestStatus;
         statusLogEntries?: LocalRequestStatusLogEntry[];
     }): LocalRequest {
+        if (params.status && [LocalRequestStatus.Decided, LocalRequestStatus.Completed].includes(params.status)) {
+            throw new Error("An unanswered LocalRequest cannot be 'Decided' or 'Completed'.");
+        }
+
         const requestJSON: ILocalRequest = {
             id: CoreId.from("REQ1"),
             isOwn: false,
-            peer: CoreAddress.from("Sender"),
+            peer: CoreAddress.from("did:e:a-domain:dids:sender"),
             createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
             content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
             source: { type: "RelationshipTemplate", reference: CoreId.from("RLT1") },
             status: params.status ?? LocalRequestStatus.ManualDecisionRequired,
+            statusLog: params.statusLogEntries ?? []
+        };
+
+        const request = LocalRequest.from(requestJSON);
+        return request;
+    }
+
+    public static createRejectedLocalRequestBasedOnTemplateWith(params: {
+        contentProperties?: Partial<Request>;
+        status?: LocalRequestStatus;
+        statusLogEntries?: LocalRequestStatusLogEntry[];
+    }): LocalRequest {
+        if (params.status && ![LocalRequestStatus.Decided, LocalRequestStatus.Completed, LocalRequestStatus.Expired].includes(params.status)) {
+            throw new Error("A rejected LocalRequest must be 'Decided', 'Completed' or 'Expired'.");
+        }
+
+        const requestJSON: ILocalRequest = {
+            id: CoreId.from("REQ1"),
+            isOwn: false,
+            peer: CoreAddress.from("did:e:a-domain:dids:sender"),
+            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+            content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
+            source: { type: "RelationshipTemplate", reference: CoreId.from("RLT1") },
+            response: {
+                createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                content: TestObjectFactory.createResponse(ResponseResult.Rejected)
+            },
+            status: params.status ?? LocalRequestStatus.Decided,
             statusLog: params.statusLogEntries ?? []
         };
 
@@ -338,9 +371,21 @@ export class TestObjectFactory {
         };
     }
 
-    public static createResponse(customRequestId = "REQ1"): IResponse {
+    public static createResponse(result: ResponseResult = ResponseResult.Accepted, customRequestId = "REQ1"): IResponse {
+        if (result === ResponseResult.Rejected) {
+            return {
+                result: result,
+                requestId: CoreId.from(customRequestId),
+                items: [
+                    RejectResponseItem.from({
+                        result: ResponseItemResult.Rejected
+                    })
+                ]
+            };
+        }
+
         return {
-            result: ResponseResult.Accepted,
+            result: result,
             requestId: CoreId.from(customRequestId),
             items: [
                 AcceptResponseItem.from({
