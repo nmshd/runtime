@@ -1,10 +1,12 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { RelationshipAttributeConfidentiality } from "@nmshd/content";
+import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
+    IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
+    LocalRequestStatus,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
     RelationshipAuditLogEntryReason,
@@ -212,6 +214,23 @@ describe("Cannot create Relationship", () => {
     let services1: TestRuntimeServices;
     let services2: TestRuntimeServices;
 
+    const templateContent: RelationshipTemplateContentJSON = {
+        "@type": "RelationshipTemplateContent",
+        onNewRelationship: {
+            "@type": "Request",
+            items: [
+                {
+                    "@type": "ReadAttributeRequestItem",
+                    mustBeAccepted: true,
+                    query: {
+                        "@type": "IdentityAttributeQuery",
+                        valueType: "GivenName"
+                    }
+                } as ReadAttributeRequestItemJSON
+            ]
+        }
+    };
+
     beforeAll(async () => {
         const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
         services1 = runtimeServices[0];
@@ -221,20 +240,28 @@ describe("Cannot create Relationship", () => {
     afterAll(() => serviceProvider.stop());
 
     test("cannot create Relationship if RelationshipTemplate is already expired", async () => {
-        const template = await createTemplate(services1.transport, undefined, DateTime.utc().plus({ seconds: 1 }));
-        await services2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport, templateContent, DateTime.utc().plus({ seconds: 1 }))).id;
+
+        await services2.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+        const requests = (await services2.consumption.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
+
+        const incomingRequest = requests[0];
+        expect(incomingRequest.status).toBe(LocalRequestStatus.DecisionRequired);
 
         await delay(12000);
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
-            templateId: template.id,
+            templateId: templateId,
             creationContent: emptyRelationshipCreationContent
         });
 
         expect(createRelationshipResponse).toBeAnError(
-            `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`,
+            `The RelationshipTemplate '${templateId}' has already expired and therefore cannot be used to create a Relationship.`,
             "error.transport.relationships.expiredRelationshipTemplate"
         );
+
+        const expiredRequest = (await services2.consumption.incomingRequests.getRequest({ id: incomingRequest.id })).value;
+        expect(expiredRequest.status).toBe(LocalRequestStatus.Expired);
     });
 
     test("cannot create Relationship if templator has active IdentityDeletionProcess", async () => {
