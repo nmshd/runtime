@@ -151,7 +151,7 @@ describe("OutgoingRequestsController", function () {
                 }
             });
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.validation.inheritedFromItem",
+                code: "error.consumption.requests.validation.inheritedFromItem",
                 message: "Some child items have errors."
             });
             expect(validationResult.items).toHaveLength(2);
@@ -184,7 +184,7 @@ describe("OutgoingRequestsController", function () {
                 }
             });
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.validation.inheritedFromItem",
+                code: "error.consumption.requests.validation.inheritedFromItem",
                 message: "Some child items have errors."
             });
             expect(validationResult.items).toHaveLength(2);
@@ -192,7 +192,7 @@ describe("OutgoingRequestsController", function () {
             expect(validationResult.items[0].isError()).toBe(false);
 
             expect(validationResult.items[1].isError()).toBe(true);
-            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("error.consumption.validation.inheritedFromItem");
+            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("error.consumption.requests.validation.inheritedFromItem");
             expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe("Some child items have errors.");
 
             expect(validationResult.items[1].items).toHaveLength(1);
@@ -227,9 +227,7 @@ describe("OutgoingRequestsController", function () {
 
         test("throws that it is necessary to call 'canCreate' when at least one RequestItem is invalid", async function () {
             await When.iTryToCreateAnOutgoingRequestWithIncorrectRequestItem();
-            await Then.itThrowsAnErrorWithTheErrorMessage(
-                "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
-            );
+            await Then.itThrowsAnErrorWithTheErrorMessage("Some child items have errors. Call 'canCreate' to get more information.");
         });
 
         test("throws when canCreate returns an error", async function () {

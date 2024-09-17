@@ -116,12 +116,8 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const canCreateResult = await this.canCreate({ content, peer });
 
         if (canCreateResult.isError()) {
-            if (canCreateResult.error.code === "error.consumption.validation.inheritedFromItem") {
-                throw ConsumptionCoreErrors.requests.inheritedFromItem(
-                    "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
-                );
-            }
-
+            const error = ConsumptionCoreErrors.requests.inheritedFromItem("Some child items have errors. Call 'canCreate' to get more information.");
+            if (canCreateResult.error.equals(error)) throw error;
             throw canCreateResult.error;
         }
 

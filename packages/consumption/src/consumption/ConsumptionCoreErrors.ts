@@ -307,7 +307,7 @@ class Requests {
     }
 
     public inheritedFromItem(message: string) {
-        return new ApplicationError("error.consumption.validation.inheritedFromItem", message);
+        return new ApplicationError("error.consumption.requests.validation.inheritedFromItem", message);
     }
 
     private static readonly _decideValidation = class {
