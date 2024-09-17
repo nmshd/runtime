@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
+import { IncomingRequestsController } from "@nmshd/consumption";
 import { RelationshipTemplateContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
@@ -43,16 +43,13 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
                     return Result.fail(RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString()));
                 }
 
-                if (template.cache.content instanceof RelationshipTemplateContent) {
+                if (template.cache.content instanceof RelationshipTemplateContent && template.cache.expiresAt) {
                     const dbQuery: any = {};
                     dbQuery["source.reference"] = { $eq: template.id.toString() };
-                    dbQuery["status"] = { $neq: LocalRequestStatus.Completed };
-                    const nonCompletedRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
+                    const requestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
 
-                    if (nonCompletedRequestsFromTemplate.length !== 0 && template.cache.expiresAt) {
-                        for (const localRequest of nonCompletedRequestsFromTemplate) {
-                            await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
-                        }
+                    for (const localRequest of requestsFromTemplate) {
+                        await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
                     }
                 }
             }

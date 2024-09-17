@@ -5,7 +5,7 @@ import { ArbitraryRelationshipCreationContent, RelationshipCreationContent, Rela
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { LocalRequestStatus, RelationshipDTO } from "../../../types";
+import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
 
@@ -39,17 +39,13 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         }
 
         if (template.isExpired()) {
-            if (template.cache?.content instanceof RelationshipTemplateContent) {
+            if (template.cache?.content instanceof RelationshipTemplateContent && template.cache.expiresAt) {
                 const dbQuery: any = {};
                 dbQuery["source.reference"] = { $eq: template.id.toString() };
-                dbQuery["status"] = { $neq: LocalRequestStatus.Completed };
-                const nonCompletedRequestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
+                const requestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
 
-                if (nonCompletedRequestsFromTemplate.length !== 0 && template.cache.expiresAt) {
-                    const promises = nonCompletedRequestsFromTemplate.map((localRequest) =>
-                        this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache!.expiresAt!)
-                    );
-                    await Promise.all(promises);
+                for (const localRequest of requestsFromTemplate) {
+                    await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
                 }
             }
 
