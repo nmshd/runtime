@@ -1451,7 +1451,6 @@ describe("DeciderModule", () => {
                                 "content.item.query.valueType": "GivenName",
                                 "content.item.query.tags": ["tag1", "tag2"]
                             },
-                            // TODO: this will always create a new Attribute
                             responseConfig: {
                                 accept: true,
                                 attribute: IdentityAttribute.from({
@@ -1555,7 +1554,6 @@ describe("DeciderModule", () => {
                                 "content.item.query.attributeCreationHints.valueType": "ProprietaryString",
                                 "content.item.query.attributeCreationHints.confidentiality": RelationshipAttributeConfidentiality.Public
                             },
-                            // TODO: this will always create a new Attribute
                             responseConfig: {
                                 accept: true,
                                 attribute: RelationshipAttribute.from({
@@ -1661,7 +1659,6 @@ describe("DeciderModule", () => {
                                 "content.item.query.valueType": "GivenName",
                                 "content.item.query.tags": ["tag1", "tag2"]
                             },
-                            // TODO: this will always create a new Attribute
                             responseConfig: {
                                 accept: true,
                                 newAttribute: IdentityAttribute.from({
@@ -1743,7 +1740,6 @@ describe("DeciderModule", () => {
                                 "content.item.query.attributeCreationHints.valueType": "ProprietaryString",
                                 "content.item.query.attributeCreationHints.confidentiality": RelationshipAttributeConfidentiality.Public
                             },
-                            // TODO: this will always create a new Attribute
                             responseConfig: {
                                 accept: true,
                                 newAttribute: RelationshipAttribute.from({
@@ -1830,7 +1826,6 @@ describe("DeciderModule", () => {
                                 "content.item.query.attributeCreationHints.valueType": "GivenName",
                                 "content.item.query.attributeCreationHints.tags": ["tag1", "tag2"]
                             },
-                            // TODO: this will always create a new Attribute
                             responseConfig: {
                                 accept: true,
                                 newAttribute: IdentityAttribute.from({
