@@ -38,24 +38,6 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        if (template.isExpired()) {
-            if (template.cache?.content instanceof RelationshipTemplateContent && template.cache.expiresAt) {
-                const dbQuery: any = {};
-                dbQuery["source.reference"] = { $eq: template.id.toString() };
-                const requestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
-
-                for (const localRequest of requestsFromTemplate) {
-                    await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
-                }
-            }
-
-            return Result.fail(
-                RuntimeErrors.relationships.expiredRelationshipTemplate(
-                    `The RelationshipTemplate '${template.id.toString()}' has already expired and therefore cannot be used to create a Relationship.`
-                )
-            );
-        }
-
         const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
         if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
             return Result.fail(
@@ -65,10 +47,26 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             );
         }
 
-        const relationship = (await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() })).value;
+        const sendRelationshipResult = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
+
+        if (!sendRelationshipResult.isSuccess) {
+            if (sendRelationshipResult.error.code === "error.transport.relationships.expiredRelationshipTemplate") {
+                if (template.cache?.content instanceof RelationshipTemplateContent && template.cache.expiresAt) {
+                    const dbQuery: any = {};
+                    dbQuery["source.reference"] = { $eq: template.id.toString() };
+                    const requestsFromTemplate = await this.incomingRequestsController.getIncomingRequests(dbQuery);
+
+                    for (const localRequest of requestsFromTemplate) {
+                        await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
+                    }
+                }
+            }
+
+            return Result.fail(sendRelationshipResult.error);
+        }
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(RelationshipMapper.toRelationshipDTO(relationship));
+        return Result.ok(RelationshipMapper.toRelationshipDTO(sendRelationshipResult.value));
     }
 }

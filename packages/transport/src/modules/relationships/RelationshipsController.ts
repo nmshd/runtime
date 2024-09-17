@@ -154,8 +154,12 @@ export class RelationshipsController extends TransportController {
         const canSendRelationship = await this.canSendRelationship(parameters);
 
         if (!canSendRelationship.isSuccess) {
-            if (canSendRelationship.error.code !== "error.platform.validation.relationship.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted") {
+            if (canSendRelationship.error.code === "error.transport.relationships.relationshipCurrentlyExists") {
                 throw canSendRelationship.error;
+            }
+
+            if (canSendRelationship.error.code === "error.transport.relationships.expiredRelationshipTemplate") {
+                return Result.fail(canSendRelationship.error);
             }
 
             // TODO: More throwing or returning errors as soon as the precise error codes are raised by the canSendRelationship method.
