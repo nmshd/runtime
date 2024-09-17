@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { IRequest, Request } from "@nmshd/content";
+import { IRequest, Request, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 
 import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
@@ -135,6 +135,7 @@ export class LocalRequest extends CoreSynchronizable implements ILocalRequest {
         if (this.source?.type !== "RelationshipTemplate") return false;
 
         if (this.status === LocalRequestStatus.Completed || this.status === LocalRequestStatus.Expired) return false;
+        if (this.status === LocalRequestStatus.Decided && this.response?.content.result === ResponseResult.Rejected) return false;
 
         if (comparisonDate.isAfter(templateExpiresAt.add({ seconds: 10 }))) {
             this.changeStatus(LocalRequestStatus.Expired);

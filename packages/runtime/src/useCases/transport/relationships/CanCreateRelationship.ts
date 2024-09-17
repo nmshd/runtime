@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipTemplateContent, ResponseResult } from "@nmshd/content";
+import { RelationshipTemplateContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
@@ -51,9 +51,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
 
                     if (nonCompletedRequestsFromTemplate.length !== 0 && template.cache.expiresAt) {
                         for (const localRequest of nonCompletedRequestsFromTemplate) {
-                            if (!(localRequest.status === LocalRequestStatus.Decided && localRequest.response?.content.result === ResponseResult.Rejected)) {
-                                await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
-                            }
+                            await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
                         }
                     }
                 }
