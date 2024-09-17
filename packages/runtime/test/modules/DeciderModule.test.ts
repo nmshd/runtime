@@ -1,14 +1,23 @@
 import { NodeLoggerFactory } from "@js-soft/node-logger";
+import { LocalAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     AuthenticationRequestItemJSON,
     ConsentRequestItemJSON,
     CreateAttributeAcceptResponseItemJSON,
     CreateAttributeRequestItemJSON,
+    DeleteAttributeAcceptResponseItemJSON,
+    FreeTextAcceptResponseItemJSON,
+    GivenName,
+    GivenNameJSON,
     IdentityAttribute,
     IdentityFileReferenceJSON,
+    ProposeAttributeAcceptResponseItemJSON,
     ProprietaryFileReferenceJSON,
     ProprietaryStringJSON,
+    ReadAttributeAcceptResponseItemJSON,
+    RegisterAttributeListenerAcceptResponseItemJSON,
     RejectResponseItemJSON,
+    RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     RelationshipTemplateContent,
     Request,
@@ -16,7 +25,7 @@ import {
     ResponseResult,
     ShareAttributeAcceptResponseItemJSON
 } from "@nmshd/content";
-import { CoreDate } from "@nmshd/core-types";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import {
     AcceptResponseConfig,
     ConsentRequestItemConfig,
@@ -42,7 +51,15 @@ import {
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
 } from "../../src";
-import { RuntimeServiceProvider, TestRequestItem, TestRuntimeServices, establishRelationship, exchangeMessage, expectThrowsAsync } from "../lib";
+import {
+    RuntimeServiceProvider,
+    TestRequestItem,
+    TestRuntimeServices,
+    establishRelationship,
+    exchangeMessage,
+    executeFullCreateAndShareRepositoryAttributeFlow,
+    expectThrowsAsync
+} from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 
@@ -547,7 +564,7 @@ describe("DeciderModule", () => {
         let sender: TestRuntimeServices;
 
         beforeAll(async () => {
-            const runtimeServices = await runtimeServiceProvider.launch(1, { enableDeciderModule: true });
+            const runtimeServices = await runtimeServiceProvider.launch(1, { enableDeciderModule: true, enableRequestModule: true });
             sender = runtimeServices[0];
         }, 30000);
 
@@ -1598,24 +1615,33 @@ describe("DeciderModule", () => {
                 expect((createdAttribute.content.value as ProprietaryFileReferenceJSON).value).toBe("A proprietary file reference with more than 30 characters");
             });
 
-            // TODO: this requires that we can adjust the automationConfig at a later point in time -> stop and start runtime with new config for same identity
             test("accepts a DeleteAttributeRequestItem given a DeleteAttributeRequestItemConfig with all fields set", async () => {
+                const deletionDate = CoreDate.utc().add({ days: 7 }).toString();
+
                 const deciderConfig: DeciderModuleConfigurationOverwrite = {
                     automationConfig: [
                         {
                             requestConfig: {
-                                "content.item.@type": "DeleteAttributeRequestItem",
-                                "content.item.attributeId": ""
+                                "content.item.@type": "DeleteAttributeRequestItem"
                             },
                             responseConfig: {
                                 accept: true,
-                                deletionDate: ""
+                                deletionDate: deletionDate
                             }
                         }
                     ]
                 };
-                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig, enableRequestModule: true }))[0];
+
                 await establishRelationship(sender.transport, recipient.transport);
+                const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
+                    content: {
+                        value: {
+                            "@type": "GivenName",
+                            value: "Given name of sender"
+                        }
+                    }
+                });
 
                 const message = await exchangeMessage(sender.transport, recipient.transport);
                 const receivedRequestResult = await recipient.consumption.incomingRequests.received({
@@ -1625,7 +1651,7 @@ describe("DeciderModule", () => {
                             {
                                 "@type": "DeleteAttributeRequestItem",
                                 mustBeAccepted: true,
-                                attributeId: ""
+                                attributeId: sharedAttribute.id
                             }
                         ]
                     },
@@ -1646,6 +1672,11 @@ describe("DeciderModule", () => {
                 expect(responseContent.result).toBe(ResponseResult.Accepted);
                 expect(responseContent.items).toHaveLength(1);
                 expect(responseContent.items[0]["@type"]).toBe("DeleteAttributeAcceptResponseItem");
+                expect((responseContent.items[0] as DeleteAttributeAcceptResponseItemJSON).deletionDate).toBe(deletionDate);
+
+                const updatedSharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
+                expect(updatedSharedAttribute.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.ToBeDeleted);
+                expect(updatedSharedAttribute.deletionInfo!.deletionDate).toBe(deletionDate);
             });
 
             test("accepts a FreeTextRequestItem given a FreeTextRequestItemConfig with all fields set", async () => {
@@ -1695,6 +1726,531 @@ describe("DeciderModule", () => {
                 expect(responseContent.result).toBe(ResponseResult.Accepted);
                 expect(responseContent.items).toHaveLength(1);
                 expect(responseContent.items[0]["@type"]).toBe("FreeTextAcceptResponseItem");
+                expect((responseContent.items[0] as FreeTextAcceptResponseItemJSON).freeText).toBe("A Response free text");
+            });
+
+            test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
+                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
+                const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
+
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "ProposeAttributeRequestItem",
+                                "content.item.attribute.@type": "IdentityAttribute",
+                                "content.item.attribute.validFrom": attributeValidFrom,
+                                "content.item.attribute.validTo": attributeValidTo,
+                                "content.item.attribute.tags": ["tag1", "tag2"],
+                                "content.item.attribute.value.@type": "GivenName",
+                                "content.item.attribute.value.value": "Given name of recipient proposed by sender",
+                                "content.item.query.@type": "IdentityAttributeQuery",
+                                "content.item.query.validFrom": attributeValidFrom,
+                                "content.item.query.validTo": attributeValidTo,
+                                "content.item.query.valueType": "GivenName",
+                                "content.item.query.tags": ["tag1", "tag2"]
+                            },
+                            // TODO: this will always create a new Attribute
+                            responseConfig: {
+                                accept: true,
+                                attribute: IdentityAttribute.from({
+                                    owner: "",
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    value: GivenName.from("Given name of recipient").toJSON(),
+                                    tags: ["tag1"]
+                                })
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "ProposeAttributeRequestItem",
+                                attribute: {
+                                    "@type": "IdentityAttribute",
+                                    owner: recipient.address,
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    tags: ["tag1", "tag3"],
+                                    value: {
+                                        "@type": "GivenName",
+                                        value: "Given name of recipient proposed by sender"
+                                    }
+                                },
+                                query: {
+                                    "@type": "IdentityAttributeQuery",
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    valueType: "GivenName",
+                                    tags: ["tag1", "tag3"]
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+                expect(responseContent.items).toHaveLength(1);
+                expect(responseContent.items[0]["@type"]).toBe("ProposeAttributeAcceptResponseItem");
+
+                const readAttributeId = (responseContent.items[0] as ProposeAttributeAcceptResponseItemJSON).attributeId;
+                const readAttributeResult = await recipient.consumption.attributes.getAttribute({ id: readAttributeId });
+                expect(readAttributeResult).toBeSuccessful();
+
+                const readAttribute = readAttributeResult.value;
+                expect(readAttribute.content.owner).toBe(recipient.address);
+                expect(readAttribute.content.value["@type"]).toBe("GivenName");
+                expect((readAttribute.content.value as GivenNameJSON).value).toBe("Given name of recipient");
+            });
+
+            test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for a RelationshipAttribute", async () => {
+                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
+                const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
+
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "ProposeAttributeRequestItem",
+                                "content.item.attribute.@type": "RelationshipAttribute",
+                                "content.item.attribute.owner": "",
+                                "content.item.attribute.validFrom": attributeValidFrom,
+                                "content.item.attribute.validTo": attributeValidTo,
+                                "content.item.attribute.key": "A key",
+                                "content.item.attribute.isTechnical": false,
+                                "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
+                                "content.item.attribute.value.@type": "ProprietaryString",
+                                "content.item.attribute.value.value": "A proprietary string",
+                                "content.item.attribute.value.title": "Title of Attribute",
+                                "content.item.attribute.value.description": "Description of Attribute",
+                                "content.item.query.@type": "RelationshipAttributeQuery",
+                                "content.item.query.validFrom": attributeValidFrom,
+                                "content.item.query.validTo": attributeValidTo,
+                                "content.item.query.key": "A key",
+                                "content.item.query.owner": "",
+                                "content.item.query.attributeCreationHints.title": "Title of Attribute",
+                                "content.item.query.attributeCreationHints.description": "Description of Attribute",
+                                "content.item.query.attributeCreationHints.valueType": "ProprietaryString",
+                                "content.item.query.attributeCreationHints.confidentiality": RelationshipAttributeConfidentiality.Public
+                            },
+                            // TODO: this will always create a new Attribute
+                            responseConfig: {
+                                accept: true,
+                                attribute: RelationshipAttribute.from({
+                                    owner: CoreAddress.from(""),
+                                    value: {
+                                        "@type": "ProprietaryString",
+                                        value: "A proprietary string",
+                                        title: "Title of Attribute",
+                                        description: "Description of Attribute",
+                                        validFrom: attributeValidFrom,
+                                        validTo: attributeValidTo
+                                    },
+                                    key: "A key",
+                                    confidentiality: RelationshipAttributeConfidentiality.Public
+                                })
+                            }
+                        }
+                    ]
+                };
+
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "ProposeAttributeRequestItem",
+                                attribute: {
+                                    "@type": "RelationshipAttribute",
+                                    owner: sender.address,
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    key: "A key",
+                                    isTechnical: false,
+                                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                                    value: {
+                                        "@type": "ProprietaryString",
+                                        value: "A proprietary string",
+                                        title: "Title of Attribute",
+                                        description: "Description of Attribute"
+                                    }
+                                },
+                                query: {
+                                    "@type": "RelationshipAttributeQuery",
+                                    owner: "",
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    key: "A key",
+                                    attributeCreationHints: {
+                                        valueType: "ProprietaryString",
+                                        title: "Title of Attribute",
+                                        description: "Description of Attribute",
+                                        confidentiality: RelationshipAttributeConfidentiality.Public
+                                    }
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+                expect(responseContent.items).toHaveLength(1);
+                expect(responseContent.items[0]["@type"]).toBe("ProposeAttributeAcceptResponseItem");
+
+                const readAttributeId = (responseContent.items[0] as ProposeAttributeAcceptResponseItemJSON).attributeId;
+                const readAttributeResult = await recipient.consumption.attributes.getAttribute({ id: readAttributeId });
+                expect(readAttributeResult).toBeSuccessful();
+
+                const readAttribute = readAttributeResult.value;
+                expect(readAttribute.content.owner).toBe(recipient.address);
+                expect(readAttribute.content.value["@type"]).toBe("ProprietaryString");
+                expect((readAttribute.content.value as ProprietaryStringJSON).value).toBe("A proprietary string");
+            });
+
+            test("accepts a ReadAttributeRequestItem given a ReadAttributeRequestItemConfig with all fields set for an IdentityAttributeQuery", async () => {
+                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
+                const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
+
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "ReadAttributeRequestItem",
+                                "content.item.query.@type": "IdentityAttributeQuery",
+                                "content.item.query.validFrom": attributeValidFrom,
+                                "content.item.query.validTo": attributeValidTo,
+                                "content.item.query.valueType": "GivenName",
+                                "content.item.query.tags": ["tag1", "tag2"]
+                            },
+                            // TODO: this will always create a new Attribute
+                            responseConfig: {
+                                accept: true,
+                                newAttribute: IdentityAttribute.from({
+                                    owner: "",
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    value: GivenName.from("Given name of recipient").toJSON(),
+                                    tags: ["tag1"]
+                                })
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "ReadAttributeRequestItem",
+                                query: {
+                                    "@type": "IdentityAttributeQuery",
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    valueType: "GivenName",
+                                    tags: ["tag1", "tag3"]
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+                expect(responseContent.items).toHaveLength(1);
+                expect(responseContent.items[0]["@type"]).toBe("ReadAttributeAcceptResponseItem");
+
+                const readAttributeId = (responseContent.items[0] as ReadAttributeAcceptResponseItemJSON).attributeId;
+                const readAttributeResult = await recipient.consumption.attributes.getAttribute({ id: readAttributeId });
+                expect(readAttributeResult).toBeSuccessful();
+
+                const readAttribute = readAttributeResult.value;
+                expect(readAttribute.content.owner).toBe(recipient.address);
+                expect(readAttribute.content.value["@type"]).toBe("GivenName");
+                expect((readAttribute.content.value as GivenNameJSON).value).toBe("Given name of recipient");
+            });
+
+            test("accepts a ReadAttributeRequestItem given a ReadAttributeRequestItemConfig with all fields set for a RelationshipAttributeQuery", async () => {
+                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
+                const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
+
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "ReadAttributeRequestItem",
+                                "content.item.query.@type": "RelationshipAttributeQuery",
+                                "content.item.query.validFrom": attributeValidFrom,
+                                "content.item.query.validTo": attributeValidTo,
+                                "content.item.query.key": "A key",
+                                "content.item.query.owner": "",
+                                "content.item.query.attributeCreationHints.title": "Title of Attribute",
+                                "content.item.query.attributeCreationHints.description": "Description of Attribute",
+                                "content.item.query.attributeCreationHints.valueType": "ProprietaryString",
+                                "content.item.query.attributeCreationHints.confidentiality": RelationshipAttributeConfidentiality.Public
+                            },
+                            // TODO: this will always create a new Attribute
+                            responseConfig: {
+                                accept: true,
+                                newAttribute: RelationshipAttribute.from({
+                                    owner: CoreAddress.from(""),
+                                    value: {
+                                        "@type": "ProprietaryString",
+                                        value: "A proprietary string",
+                                        title: "Title of Attribute",
+                                        description: "Description of Attribute",
+                                        validFrom: attributeValidFrom,
+                                        validTo: attributeValidTo
+                                    },
+                                    key: "A key",
+                                    confidentiality: RelationshipAttributeConfidentiality.Public
+                                })
+                            }
+                        }
+                    ]
+                };
+
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "ReadAttributeRequestItem",
+                                query: {
+                                    "@type": "RelationshipAttributeQuery",
+                                    owner: "",
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    key: "A key",
+                                    attributeCreationHints: {
+                                        valueType: "ProprietaryString",
+                                        title: "Title of Attribute",
+                                        description: "Description of Attribute",
+                                        confidentiality: RelationshipAttributeConfidentiality.Public
+                                    }
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+                expect(responseContent.items).toHaveLength(1);
+                expect(responseContent.items[0]["@type"]).toBe("ReadAttributeAcceptResponseItem");
+
+                const readAttributeId = (responseContent.items[0] as ReadAttributeAcceptResponseItemJSON).attributeId;
+                const readAttributeResult = await recipient.consumption.attributes.getAttribute({ id: readAttributeId });
+                expect(readAttributeResult).toBeSuccessful();
+
+                const readAttribute = readAttributeResult.value;
+                expect(readAttribute.content.owner).toBe(recipient.address);
+                expect(readAttribute.content.value["@type"]).toBe("ProprietaryString");
+                expect((readAttribute.content.value as ProprietaryStringJSON).value).toBe("A proprietary string");
+            });
+
+            test("accepts a ReadAttributeRequestItem given a ReadAttributeRequestItemConfig with all fields set for an IQLQuery", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "ReadAttributeRequestItem",
+                                "content.item.query.@type": "IQLQuery",
+                                "content.item.query.queryString": "GivenName || LastName",
+                                "content.item.query.attributeCreationHints.valueType": "GivenName",
+                                "content.item.query.attributeCreationHints.tags": ["tag1", "tag2"]
+                            },
+                            // TODO: this will always create a new Attribute
+                            responseConfig: {
+                                accept: true,
+                                newAttribute: IdentityAttribute.from({
+                                    owner: "",
+                                    value: GivenName.from("Given name of recipient").toJSON(),
+                                    tags: ["tag1"]
+                                })
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "ReadAttributeRequestItem",
+                                query: {
+                                    "@type": "IQLQuery",
+                                    queryString: "GivenName || LastName",
+                                    attributeCreationHints: {
+                                        valueType: "GivenName",
+                                        tags: ["tag1", "tag3"]
+                                    }
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+                expect(responseContent.items).toHaveLength(1);
+                expect(responseContent.items[0]["@type"]).toBe("ReadAttributeAcceptResponseItem");
+
+                const readAttributeId = (responseContent.items[0] as ReadAttributeAcceptResponseItemJSON).attributeId;
+                const readAttributeResult = await recipient.consumption.attributes.getAttribute({ id: readAttributeId });
+                expect(readAttributeResult).toBeSuccessful();
+
+                const readAttribute = readAttributeResult.value;
+                expect(readAttribute.content.owner).toBe(recipient.address);
+                expect(readAttribute.content.value["@type"]).toBe("GivenName");
+                expect((readAttribute.content.value as GivenNameJSON).value).toBe("Given name of recipient");
+            });
+
+            test("accepts a RegisterAttributeListenerRequestItem given a RegisterAttributeListenerRequestItemConfig with all fields set for an IdentityAttributeQuery", async () => {
+                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
+                const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
+
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "RegisterAttributeListenerRequestItem",
+                                "content.item.query.@type": "IdentityAttributeQuery",
+                                "content.item.query.validFrom": attributeValidFrom,
+                                "content.item.query.validTo": attributeValidTo,
+                                "content.item.query.valueType": "GivenName",
+                                "content.item.query.tags": ["tag1", "tag2"]
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "RegisterAttributeListenerRequestItem",
+                                query: {
+                                    "@type": "IdentityAttributeQuery",
+                                    validFrom: attributeValidFrom,
+                                    validTo: attributeValidTo,
+                                    valueType: "GivenName",
+                                    tags: ["tag1", "tag3"]
+                                },
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                );
+
+                const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+                expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+                expect(requestAfterAction.response).toBeDefined();
+
+                const responseContent = requestAfterAction.response!.content;
+                expect(responseContent.result).toBe(ResponseResult.Accepted);
+                expect(responseContent.items).toHaveLength(1);
+                expect(responseContent.items[0]["@type"]).toBe("RegisterAttributeListenerAcceptResponseItem");
+                expect((responseContent.items[0] as RegisterAttributeListenerAcceptResponseItemJSON).listenerId).toBeDefined();
             });
 
             test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {

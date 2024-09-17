@@ -28,7 +28,6 @@ export interface ConsentRequestItemConfig extends RequestItemConfig {
     "content.item.link"?: string | string[];
 }
 
-// TODO: does it make sense to have an abstract interface AttributeRequestConfig to avoid redundancy?
 export interface CreateAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "CreateAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
@@ -47,7 +46,6 @@ export interface CreateAttributeRequestItemConfig extends RequestItemConfig {
 
 export interface DeleteAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "DeleteAttributeRequestItem";
-    "content.item.attributeId"?: string | string[];
 }
 
 export interface FreeTextRequestItemConfig extends RequestItemConfig {
@@ -55,7 +53,6 @@ export interface FreeTextRequestItemConfig extends RequestItemConfig {
     "content.item.freeText"?: string | string[];
 }
 
-// TODO: does it make sense to have an abstract interface QueryRequestConfig to avoid redundancy?
 export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ProposeAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
@@ -85,9 +82,10 @@ export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.query.attributeCreationHints.tags"?: string[];
 }
 
+// TODO: remove ThirdPartyRelationshipAttributeQuery
 export interface ReadAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ReadAttributeRequestItem";
-    "content.item.query.@type"?: "IdentityAttributeQuery" | "ThirdPartyRelationshipAttributeQuery";
+    "content.item.query.@type"?: "IdentityAttributeQuery" | "RelationshipAttributeQuery" | "ThirdPartyRelationshipAttributeQuery" | "IQLQuery";
     "content.item.query.validFrom"?: string | string[];
     "content.item.query.validTo"?: string | string[];
     "content.item.query.valueType"?: string | string[];
@@ -105,7 +103,7 @@ export interface ReadAttributeRequestItemConfig extends RequestItemConfig {
 
 export interface RegisterAttributeListenerRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "RegisterAttributeListenerRequestItem";
-    "content.item.query.@type"?: "IdentityAttributeQuery" | "RelationshipAttributeQuery" | "ThirdPartyRelationshipAttributeQuery" | "IQLQuery";
+    "content.item.query.@type"?: "IdentityAttributeQuery" | "ThirdPartyRelationshipAttributeQuery";
     "content.item.query.validFrom"?: string | string[];
     "content.item.query.validTo"?: string | string[];
     "content.item.query.valueType"?: string | string[];

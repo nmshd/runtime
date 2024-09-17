@@ -54,6 +54,7 @@ export function isProposeAttributeWithNewAttributeAcceptResponseConfig(object: a
     return "attribute" in object;
 }
 
+// TODO: remove withExistingAttribute stuff
 export interface ReadAttributeWithExistingAttributeAcceptResponseConfig extends AcceptResponseConfig {
     existingAttributeId: string;
 }
