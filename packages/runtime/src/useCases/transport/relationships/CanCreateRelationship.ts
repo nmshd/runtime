@@ -1,4 +1,4 @@
-import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipTemplateContent, ResponseResult } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
@@ -7,15 +7,16 @@ import { Inject } from "typescript-ioc";
 import { RuntimeErrors, UseCase } from "../../common";
 import { CreateRelationshipRequest } from "./CreateRelationship";
 
-export type CanCreateRelationshipResponse = CanCreateRelationshipSuccessResponse | CanCreateRelationshipErrorResponse;
+export type CanCreateRelationshipResponse = CanCreateRelationshipSuccessResponse | CanCreateRelationshipFailureResponse;
 
 interface CanCreateRelationshipSuccessResponse {
     isSuccess: true;
 }
 
-interface CanCreateRelationshipErrorResponse {
+interface CanCreateRelationshipFailureResponse {
     isSuccess: false;
-    error: ApplicationError;
+    code: string;
+    message: string;
 }
 
 export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequest, CanCreateRelationshipResponse> {
@@ -58,9 +59,10 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
                 }
             }
 
-            const errorResponse: CanCreateRelationshipErrorResponse = {
+            const errorResponse: CanCreateRelationshipFailureResponse = {
                 isSuccess: false,
-                error: canSendRelationship.error
+                code: canSendRelationship.error.code,
+                message: canSendRelationship.error.message
             };
 
             return Result.ok(errorResponse);
