@@ -225,6 +225,13 @@ describe("OutgoingRequestsController", function () {
             await Then.itThrowsAnErrorWithTheErrorMessage("*content*Value is not defined*");
         });
 
+        test("throws that it is necessary to call 'canCreate' when at least one RequestItem is invalid", async function () {
+            await When.iTryToCreateAnOutgoingRequestWithIncorrectRequestItem();
+            await Then.itThrowsAnErrorWithTheErrorMessage(
+                "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
+            );
+        });
+
         test("throws when canCreate returns an error", async function () {
             const oldCanCreate = context.outgoingRequestsController.canCreate;
             context.outgoingRequestsController.canCreate = (_: ICreateOutgoingRequestParameters) => {

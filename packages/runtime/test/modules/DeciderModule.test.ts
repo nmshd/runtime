@@ -123,4 +123,35 @@ describe("DeciderModule", () => {
             (e) => e.data.template.id === template.id && e.data.result === RelationshipTemplateProcessedResult.ManualRequestDecisionRequired
         );
     });
+
+    test("if you call canCreate for a request with an item which has an error you receive another errorMessage as if you call create", async () => {
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "ShareAttributeRequestItem",
+                        sourceAttributeId: "ATT",
+                        attribute: {
+                            "@type": "IdentityAttribute",
+                            owner: (await sender.transport.account.getIdentityInfo()).value.address,
+                            value: {
+                                "@type": "GivenName",
+                                value: "aGivenName"
+                            }
+                        },
+                        mustBeAccepted: true
+                    }
+                ]
+            },
+            peer: (await recipient.transport.account.getIdentityInfo()).value.address
+        };
+        const canCreateResult = await sender.consumption.outgoingRequests.canCreate(requestContent);
+        const createResult = await sender.consumption.outgoingRequests.create(requestContent);
+        expect(createResult.error.code).toBe("error.consumption.validation.inheritedFromItem");
+        expect(createResult.error.message).toBe(
+            "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
+        );
+        expect(canCreateResult.value.code).toBe("error.consumption.validation.inheritedFromItem");
+        expect(canCreateResult.value.message).toBe("Some child items have errors.");
+    });
 });
