@@ -9,11 +9,11 @@ import { CreateRelationshipRequest } from "./CreateRelationship";
 
 export type CanCreateRelationshipResponse = CanCreateRelationshipSuccessResponse | CanCreateRelationshipFailureResponse;
 
-interface CanCreateRelationshipSuccessResponse {
+export interface CanCreateRelationshipSuccessResponse {
     isSuccess: true;
 }
 
-interface CanCreateRelationshipFailureResponse {
+export interface CanCreateRelationshipFailureResponse {
     isSuccess: false;
     code: string;
     message: string;
