@@ -118,6 +118,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         if (canCreateResult.isError()) {
             const error = ConsumptionCoreErrors.requests.inheritedFromItem("Some child items have errors. Call 'canCreate' to get more information.");
             if (canCreateResult.error.equals(error)) throw error;
+
             throw canCreateResult.error;
         }
 
