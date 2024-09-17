@@ -42,15 +42,7 @@ import {
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
 } from "../../src";
-import {
-    RuntimeServiceProvider,
-    TestRequestItem,
-    TestRuntimeServices,
-    establishRelationship,
-    exchangeMessage,
-    executeFullCreateAndShareRepositoryAttributeFlow,
-    expectThrowsAsync
-} from "../lib";
+import { RuntimeServiceProvider, TestRequestItem, TestRuntimeServices, establishRelationship, exchangeMessage, expectThrowsAsync } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 
@@ -555,7 +547,7 @@ describe("DeciderModule", () => {
         let sender: TestRuntimeServices;
 
         beforeAll(async () => {
-            const runtimeServices = await runtimeServiceProvider.launch(1, { enableDeciderModule: true, enableRequestModule: true });
+            const runtimeServices = await runtimeServiceProvider.launch(1, { enableDeciderModule: true });
             sender = runtimeServices[0];
         }, 30000);
 
@@ -1608,46 +1600,22 @@ describe("DeciderModule", () => {
 
             // TODO: this requires that we can adjust the automationConfig at a later point in time -> stop and start runtime with new config for same identity
             test("accepts a DeleteAttributeRequestItem given a DeleteAttributeRequestItemConfig with all fields set", async () => {
-                let recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, enableRequestModule: true }))[0];
-
-                const testRuntimes = runtimeServiceProvider["runtimes"];
-                const recipientTestRuntime = testRuntimes[testRuntimes.length - 1];
-                const recipientDatabaseConnection = recipientTestRuntime["dbConnection"];
-
-                await establishRelationship(sender.transport, recipient.transport);
-                const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
-                    content: {
-                        value: {
-                            "@type": "GivenName",
-                            value: "Given name of sender"
-                        }
-                    }
-                });
-
-                await recipientTestRuntime.stop();
-
-                const deletionDate = CoreDate.utc().add({ days: 1 }).toString();
                 const deciderConfig: DeciderModuleConfigurationOverwrite = {
                     automationConfig: [
                         {
                             requestConfig: {
                                 "content.item.@type": "DeleteAttributeRequestItem",
-                                "content.item.attributeId": sharedAttribute.id
+                                "content.item.attributeId": ""
                             },
                             responseConfig: {
                                 accept: true,
-                                deletionDate: deletionDate
+                                deletionDate: ""
                             }
                         }
                     ]
                 };
-                recipient = (
-                    await runtimeServiceProvider.launch(1, {
-                        enableDeciderModule: true,
-                        configureDeciderModule: deciderConfig,
-                        databaseConnection: recipientDatabaseConnection
-                    })
-                )[0];
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
 
                 const message = await exchangeMessage(sender.transport, recipient.transport);
                 const receivedRequestResult = await recipient.consumption.incomingRequests.received({
@@ -1657,7 +1625,7 @@ describe("DeciderModule", () => {
                             {
                                 "@type": "DeleteAttributeRequestItem",
                                 mustBeAccepted: true,
-                                attributeId: sharedAttribute.id
+                                attributeId: ""
                             }
                         ]
                     },
