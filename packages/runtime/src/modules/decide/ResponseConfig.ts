@@ -38,29 +38,12 @@ export function isFreeTextAcceptResponseConfig(object: any): object is FreeTextA
     return "freeText" in object;
 }
 
-export interface ProposeAttributeWithExistingAttributeAcceptResponseConfig extends AcceptResponseConfig {
-    attributeId: string;
-}
-
-export function isProposeAttributeWithExistingAttributeAcceptResponseConfig(object: any): object is ProposeAttributeWithExistingAttributeAcceptResponseConfig {
-    return "attributeId" in object;
-}
-
 export interface ProposeAttributeWithNewAttributeAcceptResponseConfig extends AcceptResponseConfig {
     attribute: IdentityAttribute | RelationshipAttribute;
 }
 
 export function isProposeAttributeWithNewAttributeAcceptResponseConfig(object: any): object is ProposeAttributeWithNewAttributeAcceptResponseConfig {
     return "attribute" in object;
-}
-
-// TODO: remove withExistingAttribute stuff
-export interface ReadAttributeWithExistingAttributeAcceptResponseConfig extends AcceptResponseConfig {
-    existingAttributeId: string;
-}
-
-export function isReadAttributeWithExistingAttributeAcceptResponseConfig(object: any): object is ReadAttributeWithExistingAttributeAcceptResponseConfig {
-    return "existingAttributeId" in object;
 }
 
 export interface ReadAttributeWithNewAttributeAcceptResponseConfig extends AcceptResponseConfig {
@@ -75,9 +58,7 @@ export type AcceptResponseConfigDerivation =
     | AcceptResponseConfig
     | DeleteAttributeAcceptResponseConfig
     | FreeTextAcceptResponseConfig
-    | ProposeAttributeWithExistingAttributeAcceptResponseConfig
     | ProposeAttributeWithNewAttributeAcceptResponseConfig
-    | ReadAttributeWithExistingAttributeAcceptResponseConfig
     | ReadAttributeWithNewAttributeAcceptResponseConfig;
 
 export type ResponseConfig = AcceptResponseConfigDerivation | RejectResponseConfig;

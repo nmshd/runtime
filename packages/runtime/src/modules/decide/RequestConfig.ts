@@ -82,17 +82,15 @@ export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.query.attributeCreationHints.tags"?: string[];
 }
 
-// TODO: remove ThirdPartyRelationshipAttributeQuery
 export interface ReadAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ReadAttributeRequestItem";
-    "content.item.query.@type"?: "IdentityAttributeQuery" | "RelationshipAttributeQuery" | "ThirdPartyRelationshipAttributeQuery" | "IQLQuery";
+    "content.item.query.@type"?: "IdentityAttributeQuery" | "RelationshipAttributeQuery" | "IQLQuery";
     "content.item.query.validFrom"?: string | string[];
     "content.item.query.validTo"?: string | string[];
     "content.item.query.valueType"?: string | string[];
     "content.item.query.tags"?: string[];
     "content.item.query.key"?: string | string[];
     "content.item.query.owner"?: string | string[];
-    "content.item.query.thirdParty"?: string[];
     "content.item.query.queryString"?: string | string[];
     "content.item.query.attributeCreationHints.title"?: string | string[];
     "content.item.query.attributeCreationHints.description"?: string | string[];
@@ -103,14 +101,11 @@ export interface ReadAttributeRequestItemConfig extends RequestItemConfig {
 
 export interface RegisterAttributeListenerRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "RegisterAttributeListenerRequestItem";
-    "content.item.query.@type"?: "IdentityAttributeQuery" | "ThirdPartyRelationshipAttributeQuery";
+    "content.item.query.@type"?: "IdentityAttributeQuery";
     "content.item.query.validFrom"?: string | string[];
     "content.item.query.validTo"?: string | string[];
     "content.item.query.valueType"?: string | string[];
     "content.item.query.tags"?: string[];
-    "content.item.query.key"?: string | string[];
-    "content.item.query.owner"?: string | string[];
-    "content.item.query.thirdParty"?: string[];
 }
 
 export interface ShareAttributeRequestItemConfig extends RequestItemConfig {

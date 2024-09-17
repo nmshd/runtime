@@ -33,9 +33,7 @@ import {
     DeleteAttributeAcceptResponseConfig,
     FreeTextAcceptResponseConfig,
     GeneralRequestConfig,
-    ProposeAttributeWithExistingAttributeAcceptResponseConfig,
     ProposeAttributeWithNewAttributeAcceptResponseConfig,
-    ReadAttributeWithExistingAttributeAcceptResponseConfig,
     ReadAttributeWithNewAttributeAcceptResponseConfig,
     RejectResponseConfig,
     RequestItemConfig
@@ -503,11 +501,6 @@ describe("DeciderModule", () => {
                 freeText: "freeText"
             };
 
-            const proposeAttributeWithExistingAttributeAcceptResponseConfig: ProposeAttributeWithExistingAttributeAcceptResponseConfig = {
-                accept: true,
-                attributeId: "attributeId"
-            };
-
             const proposeAttributeWithNewAttributeAcceptResponseConfig: ProposeAttributeWithNewAttributeAcceptResponseConfig = {
                 accept: true,
                 attribute: IdentityAttribute.from({
@@ -517,11 +510,6 @@ describe("DeciderModule", () => {
                     },
                     owner: "owner"
                 })
-            };
-
-            const readAttributeWithExistingAttributeAcceptResponseConfig: ReadAttributeWithExistingAttributeAcceptResponseConfig = {
-                accept: true,
-                existingAttributeId: "attributeId"
             };
 
             const readAttributeWithNewAttributeAcceptResponseConfig: ReadAttributeWithNewAttributeAcceptResponseConfig = {
@@ -549,9 +537,7 @@ describe("DeciderModule", () => {
                 [generalRequestConfig, simpleAcceptResponseConfig, true],
                 [generalRequestConfig, deleteAttributeAcceptResponseConfig, false],
                 [generalRequestConfig, freeTextAcceptResponseConfig, false],
-                [generalRequestConfig, proposeAttributeWithExistingAttributeAcceptResponseConfig, false],
                 [generalRequestConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
-                [generalRequestConfig, readAttributeWithExistingAttributeAcceptResponseConfig, false],
                 [generalRequestConfig, readAttributeWithNewAttributeAcceptResponseConfig, false]
             ])("%p and %p should return %p as validation result", (requestConfig, responseConfig, expectedCompatibility) => {
                 const result = deciderModule.validateAutomationConfig(requestConfig, responseConfig);
@@ -1359,7 +1345,6 @@ describe("DeciderModule", () => {
         });
 
         describe("RequestItemDerivationConfigs", () => {
-            // TODO: add tests for every type of RequestItems
             test("accepts an AuthenticationRequestItem given a AuthenticationRequestItemConfig", async () => {
                 const deciderConfig: DeciderModuleConfigurationOverwrite = {
                     automationConfig: [

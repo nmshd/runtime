@@ -16,9 +16,7 @@ import {
     isDeleteAttributeAcceptResponseConfig,
     isFreeTextAcceptResponseConfig,
     isGeneralRequestConfig,
-    isProposeAttributeWithExistingAttributeAcceptResponseConfig,
     isProposeAttributeWithNewAttributeAcceptResponseConfig,
-    isReadAttributeWithExistingAttributeAcceptResponseConfig,
     isReadAttributeWithNewAttributeAcceptResponseConfig,
     isRejectResponseConfig,
     isRequestItemDerivationConfig,
@@ -63,9 +61,9 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             case "FreeTextRequestItem":
                 return isFreeTextAcceptResponseConfig(responseConfig);
             case "ProposeAttributeRequestItem":
-                return isProposeAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
+                return isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
             case "ReadAttributeRequestItem":
-                return isReadAttributeWithExistingAttributeAcceptResponseConfig(responseConfig) || isReadAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
+                return isReadAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
             default:
                 return isSimpleAcceptResponseConfig(responseConfig);
         }
