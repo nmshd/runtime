@@ -33,6 +33,7 @@ export class DeleteIdentityMetadataUseCase extends UseCase<DeleteIdentityMetadat
         }
 
         await this.identityMetadataController.deleteIdentityMetadata(identityMetadata);
+
         await this.accountController.syncDatawallet();
 
         return Result.ok(undefined);
