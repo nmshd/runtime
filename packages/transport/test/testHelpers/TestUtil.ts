@@ -134,11 +134,7 @@ export class TestUtil {
         });
     }
 
-    public static async expectThrowsAsync(method: Function | Promise<any>, customExceptionMatcher: (e: Error) => void): Promise<void>;
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string): Promise<void>;
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string | ((e: Error) => void)): Promise<void> {
+    private static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string | ((e: Error) => void)): Promise<void> {
         let error: Error | undefined;
         try {
             if (typeof method === "function") {

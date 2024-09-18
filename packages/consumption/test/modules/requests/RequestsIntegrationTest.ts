@@ -1171,13 +1171,12 @@ export class RequestsThen {
     }
 
     public async itThrowsAnErrorWithTheErrorMessage(errorMessage: string): Promise<void> {
-        await TestUtil.expectThrowsAsync(this.context.actionToTry!, errorMessage);
+        const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+        await expect(this.context.actionToTry!).rejects.toThrow(regex);
     }
 
     public async itThrowsAnErrorWithTheErrorCode(code: string): Promise<void> {
-        await TestUtil.expectThrowsAsync(this.context.actionToTry!, (error: Error) => {
-            expect((error as any).code).toStrictEqual(code);
-        });
+        await expect(this.context.actionToTry!).rejects.toThrow(code);
     }
 
     public eventHasBeenPublished<TEvent extends DataEvent<unknown>>(
