@@ -102,34 +102,27 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             const requestConfigElement = automationConfigElement.requestConfig;
             const responseConfigElement = automationConfigElement.responseConfig;
 
+            const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
+            if (!generalRequestIsCompatible) {
+                continue;
+            }
+
             if (isGeneralRequestConfig(requestConfigElement)) {
-                const generalRequestIsCompatible = this.checkCompatibility(requestConfigElement, request);
-                if (!generalRequestIsCompatible) {
-                    continue;
-                }
-
-                const decideRequestItemParameterResult = this.createDecideRequestItemParametersForGeneralResponseConfig(event, responseConfigElement);
-                if (decideRequestItemParameterResult.isError) {
-                    continue;
-                }
-
-                const decideRequestResult = await this.decideRequest(event, decideRequestItemParameterResult.value);
+                const decideRequestItemParameters = this.createDecideRequestItemParametersForGeneralResponseConfig(event, responseConfigElement);
+                const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
                 return decideRequestResult;
             }
 
             if (isRequestItemDerivationConfig(requestConfigElement)) {
-                const checkCompatibilityResult = this.checkRequestItemCompatibilityAndApplyReponseConfig(
+                const updatedRequestItemParameters = this.checkRequestItemCompatibilityAndApplyResponseConfig(
                     itemsOfRequest,
                     decideRequestItemParameters,
                     request,
                     requestConfigElement,
                     responseConfigElement
                 );
-                if (checkCompatibilityResult.isError) {
-                    continue;
-                }
 
-                decideRequestItemParameters = checkCompatibilityResult.value;
+                decideRequestItemParameters = updatedRequestItemParameters;
                 if (!this.containsItem(decideRequestItemParameters, (element) => element === undefined)) {
                     const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
                     return decideRequestResult;
@@ -203,10 +196,10 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return atLeastOneMatchingTag;
     }
 
-    private createDecideRequestItemParametersForGeneralResponseConfig(event: IncomingRequestStatusChangedEvent, responseConfigElement: ResponseConfig): Result<{ items: any[] }> {
+    private createDecideRequestItemParametersForGeneralResponseConfig(event: IncomingRequestStatusChangedEvent, responseConfigElement: ResponseConfig): { items: any[] } {
         const request = event.data.request;
         const decideRequestItemParameters = this.createResponseItemsWithSameDimension(request.content.items, responseConfigElement);
-        return Result.ok(decideRequestItemParameters);
+        return decideRequestItemParameters;
     }
 
     private async decideRequest(event: IncomingRequestStatusChangedEvent, decideRequestItemParameters: { items: any[] }): Promise<Result<LocalRequestDTO>> {
@@ -263,17 +256,17 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         });
     }
 
-    private checkRequestItemCompatibilityAndApplyReponseConfig(
+    private checkRequestItemCompatibilityAndApplyResponseConfig(
         itemsOfRequest: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
         parametersToDecideRequest: any,
         request: LocalRequestDTO,
         requestConfigElement: RequestItemDerivationConfig,
         responseConfigElement: ResponseConfig
-    ): Result<{ items: any[] }> {
+    ): { items: any[] } {
         for (let i = 0; i < itemsOfRequest.length; i++) {
             const item = itemsOfRequest[i];
             if (item["@type"] === "RequestItemGroup") {
-                this.checkRequestItemCompatibilityAndApplyReponseConfig(
+                this.checkRequestItemCompatibilityAndApplyResponseConfig(
                     (item as RequestItemGroupJSON).items,
                     parametersToDecideRequest.items[i],
                     request,
@@ -287,13 +280,10 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
                 if (!requestItemIsCompatible) continue;
 
-                const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
-                if (!generalRequestIsCompatible) continue;
-
                 parametersToDecideRequest.items[i] = responseConfigElement;
             }
         }
-        return Result.ok(parametersToDecideRequest);
+        return parametersToDecideRequest;
     }
 
     public checkRequestItemCompatibility(requestConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): boolean {
@@ -301,8 +291,13 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return this.checkCompatibility(requestItemPartOfConfigElement, requestItem);
     }
 
-    public checkGeneralRequestCompatibility(requestConfigElement: RequestItemDerivationConfig, request: LocalRequestDTO): boolean {
-        const generalRequestPartOfConfigElement = this.filterConfigElementByPrefix(requestConfigElement, false);
+    public checkGeneralRequestCompatibility(requestConfigElement: RequestConfig, request: LocalRequestDTO): boolean {
+        let generalRequestPartOfConfigElement = requestConfigElement;
+
+        if (isRequestItemDerivationConfig(requestConfigElement)) {
+            generalRequestPartOfConfigElement = this.filterConfigElementByPrefix(requestConfigElement, false);
+        }
+
         return this.checkCompatibility(generalRequestPartOfConfigElement, request);
     }
 
