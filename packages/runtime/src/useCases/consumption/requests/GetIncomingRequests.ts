@@ -2,10 +2,11 @@ import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequest, LocalRequestSource, LocalResponse, LocalResponseSource } from "@nmshd/consumption";
 import { RequestItemGroupJSON, RequestJSON, ResponseItemGroupJSON, ResponseJSON } from "@nmshd/content";
+import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
 import { LocalRequestDTO, LocalRequestSourceDTO, LocalResponseDTO, LocalResponseSourceDTO } from "../../../types";
-import { UseCase } from "../../common";
+import { RuntimeErrors, UseCase } from "../../common";
 import { flattenObject } from "../../common/flattenObject";
 import { RequestMapper } from "./RequestMapper";
 
@@ -148,16 +149,36 @@ export class GetIncomingRequestsUseCase extends UseCase<GetIncomingRequestsReque
         }
     });
 
-    public constructor(@Inject private readonly incomingRequestsController: IncomingRequestsController) {
+    public constructor(
+        @Inject private readonly incomingRequestsController: IncomingRequestsController,
+        @Inject private readonly relationshipController: RelationshipsController,
+        @Inject private readonly relationshipTemplateController: RelationshipTemplateController
+    ) {
         super();
     }
 
     protected async executeInternal(request: GetIncomingRequestsRequest): Promise<Result<LocalRequestDTO[], ApplicationError>> {
         const flattenedQuery = flattenObject(request.query);
         const dbQuery = GetIncomingRequestsUseCase.queryTranslator.parse(flattenedQuery);
-        const localRequest = await this.incomingRequestsController.getIncomingRequests(dbQuery);
+        const localRequests = await this.incomingRequestsController.getIncomingRequests(dbQuery);
 
-        const dtos = RequestMapper.toLocalRequestDTOList(localRequest);
+        for (const localRequest of localRequests) {
+            if (localRequest.source?.type === "RelationshipTemplate") {
+                const template = await this.relationshipTemplateController.getRelationshipTemplate(localRequest.source.reference);
+
+                if (!template) {
+                    return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
+                }
+
+                const existingRelationshipsToPeer = await this.relationshipController.getExistingRelationshipsToIdentity(localRequest.peer);
+
+                if (existingRelationshipsToPeer.length === 0 && template.cache?.expiresAt && template.isExpired()) {
+                    await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
+                }
+            }
+        }
+
+        const dtos = RequestMapper.toLocalRequestDTOList(localRequests);
 
         return Result.ok(dtos);
     }
