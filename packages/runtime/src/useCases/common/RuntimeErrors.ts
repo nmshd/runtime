@@ -1,7 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { RelationshipStatus } from "../../types";
 import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
 
 class General {
@@ -102,13 +101,6 @@ class RelationshipTemplates {
 }
 
 class Relationships {
-    public relationshipCurrentlyExists(status: RelationshipStatus) {
-        return new ApplicationError(
-            "error.runtime.relationships.relationshipCurrentlyExists",
-            `No new Relationship to the peer can be created as a Relationship in status '${status}' currently exists.`
-        );
-    }
-
     public expiredRelationshipTemplate(message: string): ApplicationError {
         return new ApplicationError("error.runtime.relationships.expiredRelationshipTemplate", message);
     }
