@@ -159,4 +159,14 @@ describe("IdentityMetadataController", function () {
         await consumptionController.identityMetadata.deleteIdentityMetadata(identityMetadata);
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(0);
     });
+
+    test("should delete all identity metadata exchanged with a peer", async function () {
+        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("address1"), value: { key: "value" } });
+        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("address1"), value: { key: "value" }, key: "key" });
+        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("address2"), value: { key: "value" }, key: "key" });
+        expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(3);
+
+        await consumptionController.identityMetadata.deleteIdentityMetadataExchangedWithPeer(CoreAddress.from("address1"));
+        expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(1);
+    });
 });
