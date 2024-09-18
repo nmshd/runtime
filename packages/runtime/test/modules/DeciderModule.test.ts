@@ -484,7 +484,7 @@ describe("DeciderModule", () => {
                         {
                             requestConfig: {
                                 peer: sender.address,
-                                "source.type": "Message",
+                                "source.type": "RelationshipTemplate",
                                 "content.expiresAt": requestExpirationDate,
                                 "content.title": "Title of Request",
                                 "content.description": "Description of Request",
@@ -499,23 +499,31 @@ describe("DeciderModule", () => {
                 const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
                 await establishRelationship(sender.transport, recipient.transport);
 
-                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const request = Request.from({
+                    expiresAt: requestExpirationDate,
+                    title: "Title of Request",
+                    description: "Description of Request",
+                    metadata: { key: "value" },
+                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                });
+                const template = (
+                    await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                        content: RelationshipTemplateContent.from({
+                            onNewRelationship: request
+                        }).toJSON(),
+                        expiresAt: CoreDate.utc().add({ minutes: 5 }).toISOString()
+                    })
+                ).value;
+                await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
                 const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                    receivedRequest: {
-                        "@type": "Request",
-                        expiresAt: requestExpirationDate,
-                        title: "Title of Request",
-                        description: "Description of Request",
-                        metadata: { key: "value" },
-                        items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
-                    },
-                    requestSourceId: message.id
+                    receivedRequest: request.toJSON(),
+                    requestSourceId: template.id
                 });
                 await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
 
                 await expect(recipient.eventBus).toHavePublished(
-                    MessageProcessedEvent,
-                    (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+                    RelationshipTemplateProcessedEvent,
+                    (e) => e.data.result === RelationshipTemplateProcessedResult.RequestAutomaticallyDecided && e.data.template.id === template.id
                 );
             });
 
