@@ -227,7 +227,7 @@ export class RelationshipsController extends TransportController {
             error.platform.validation.relationship.peerIsToBeDeleted, return different errors for them. */
             return Result.fail(
                 new ApplicationError(
-                    "error.platform.validation.relationship.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted",
+                    "error.transport.relationships.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted",
                     `A Relationship to the peer ${peerAddress} cannot be created, because the former Relationship is not yet decomposed by the peer or the peer is to be deleted.`
                 )
             );

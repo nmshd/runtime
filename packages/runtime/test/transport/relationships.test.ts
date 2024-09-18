@@ -120,7 +120,7 @@ describe("CanCreateRelationship", () => {
         });
 
         assertIsCanCreateRelationshipFailureResponse(canCreateRelationshipResponse.value);
-        expect(canCreateRelationshipResponse.value.code).toBe("error.platform.validation.relationship.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted");
+        expect(canCreateRelationshipResponse.value.code).toBe("error.transport.relationships.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted");
         expect(canCreateRelationshipResponse.value.message).toBe(
             `A Relationship to the peer ${services3.address} cannot be created, because the former Relationship is not yet decomposed by the peer or the peer is to be deleted.`
         );
