@@ -58,6 +58,7 @@ describe("AuthenticationTest", function () {
         testAccount = accounts[0];
         interceptor = new RequestInterceptor((testAccount.authenticator as any).authClient);
     });
+
     afterAll(async function () {
         await testAccount.close();
         await connection.close();
