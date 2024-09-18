@@ -68,7 +68,7 @@ describe("CanCreateRelationship", () => {
 
     afterAll(() => serviceProvider.stop());
 
-    test("cannot create relationship if relationship template is already expired", async () => {
+    test("cannot create Relationship if RelationshipTemplate is already expired", async () => {
         const templateContent: RelationshipTemplateContentJSON = {
             "@type": "RelationshipTemplateContent",
             onNewRelationship: {
@@ -110,7 +110,7 @@ describe("CanCreateRelationship", () => {
         expect(expiredRequest.status).toBe(LocalRequestStatus.Expired);
     });
 
-    test("cannot create relationship if templator has active IdentityDeletionProcess", async () => {
+    test("cannot create Relationship if templator has active IdentityDeletionProcess", async () => {
         const templateId = (await exchangeTemplate(services3.transport, services2.transport)).id;
         await services3.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
@@ -156,7 +156,7 @@ describe("Create Relationship", () => {
         );
     });
 
-    test("should not create relationship if relationship template is already expired", async () => {
+    test("should not create Relationship if RelationshipTemplate is already expired", async () => {
         const templateContent: RelationshipTemplateContentJSON = {
             "@type": "RelationshipTemplateContent",
             onNewRelationship: {
@@ -197,7 +197,7 @@ describe("Create Relationship", () => {
         expect(expiredRequest.status).toBe(LocalRequestStatus.Expired);
     });
 
-    test("should not create relationship if templator has active IdentityDeletionProcess", async () => {
+    test("should not create Relationship if templator has active IdentityDeletionProcess", async () => {
         const templateId = (await exchangeTemplate(services3.transport, services2.transport)).id;
         await services3.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
 

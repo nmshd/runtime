@@ -34,7 +34,7 @@ describe("Template Tests", () => {
         expect(response).toBeAnError("must have required property 'expiresAt'", "error.runtime.validation.invalidPropertyValue");
     });
 
-    test("create a template with request for new relationship that expires after the template", async () => {
+    test("create a RelationshipTemplate with Request for new Relationship that expires after the RelationshipTemplate", async () => {
         const relationshipTemplateContent = RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",

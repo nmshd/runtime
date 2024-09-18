@@ -161,8 +161,6 @@ export class RelationshipsController extends TransportController {
             if (canSendRelationship.error.code === "error.transport.relationships.expiredRelationshipTemplate") {
                 return Result.fail(canSendRelationship.error);
             }
-
-            // TODO: More throwing or returning errors as soon as the precise error codes are raised by the canSendRelationship method.
         }
 
         const template = (parameters as SendRelationshipParameters).template;
@@ -179,7 +177,6 @@ export class RelationshipsController extends TransportController {
         });
 
         if (result.isError) {
-            // TODO: Remove as soon as the throwing or returning of the errors is implemented above.
             if (result.error.code === "error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists") {
                 throw TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer();
             }
@@ -222,9 +219,6 @@ export class RelationshipsController extends TransportController {
         const result = await this.client.canCreateRelationship(peerAddress.toString());
 
         if (!result.value.canCreate) {
-            /* TODO: As soon as the precise error codes are raised by the Backbone and a distinction can be made between
-            the error codes error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists and
-            error.platform.validation.relationship.peerIsToBeDeleted, return different errors for them. */
             return Result.fail(
                 new ApplicationError(
                     "error.transport.relationships.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted",
