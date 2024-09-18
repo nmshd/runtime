@@ -37,7 +37,7 @@ describe("IdentityMetadataController", function () {
         expect(count).toBe(0);
     });
 
-    test("should upsert an identity metadata with scope identity", async function () {
+    test("should create an identity metadata", async function () {
         const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
             value: { key: "value" },
             reference: CoreAddress.from("id1")
@@ -50,7 +50,7 @@ describe("IdentityMetadataController", function () {
         expect(identityMetadata.value.toJSON()).toStrictEqual({ key: "value" });
     });
 
-    test("should create an identity metadata with scope identity with a key", async function () {
+    test("should create an identity metadata with a key", async function () {
         const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
             value: { key: "value" },
             reference: CoreAddress.from("id1"),
@@ -98,37 +98,6 @@ describe("IdentityMetadataController", function () {
             value: { key: "value2" }
         });
         expect(updated.value.toJSON()).toStrictEqual({ key: "value2" });
-
-        const queried = await consumptionController.identityMetadata.getIdentityMetadata(CoreAddress.from("id1"), "key");
-        expect(queried).toBeDefined();
-        expect(queried!.value.toJSON()).toStrictEqual({ key: "value2" });
-    });
-
-    test("should upsert an identity metadata", async function () {
-        const query = { reference: CoreAddress.from("id1") };
-
-        const upserted = await consumptionController.identityMetadata.upsertIdentityMetadata({
-            ...query,
-            value: { key: "value2" }
-        });
-        expect(upserted.value.toJSON()).toStrictEqual({ key: "value2" });
-
-        const queried = await consumptionController.identityMetadata.getIdentityMetadata(CoreAddress.from("id1"));
-        expect(queried).toBeDefined();
-        expect(queried!.value.toJSON()).toStrictEqual({ key: "value2" });
-    });
-
-    test("should upsert an identity metadata with a key", async function () {
-        const query = {
-            reference: CoreAddress.from("id1"),
-            key: "key"
-        };
-
-        const upserted = await consumptionController.identityMetadata.upsertIdentityMetadata({
-            ...query,
-            value: { key: "value2" }
-        });
-        expect(upserted.value.toJSON()).toStrictEqual({ key: "value2" });
 
         const queried = await consumptionController.identityMetadata.getIdentityMetadata(CoreAddress.from("id1"), "key");
         expect(queried).toBeDefined();
