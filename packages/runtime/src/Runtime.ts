@@ -6,6 +6,7 @@ import {
     AttributesController,
     ConsumptionController,
     DraftsController,
+    IdentityMetadataController,
     IncomingRequestsController,
     NotificationsController,
     OutgoingRequestsController,
@@ -279,6 +280,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(SettingsController)
             .factory(() => this.getConsumptionController().settings)
+            .scope(Scope.Request);
+
+        Container.bind(IdentityMetadataController)
+            .factory(() => this.getConsumptionController().identityMetadata)
             .scope(Scope.Request);
 
         Container.bind(NotificationsController)

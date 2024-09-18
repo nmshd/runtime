@@ -19999,6 +19999,86 @@ export const UpdateDraftRequest: any = {
     }
 }
 
+export const DeleteIdentityMetadataRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteIdentityMetadataRequest",
+    "definitions": {
+        "DeleteIdentityMetadataRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "reference"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const GetIdentityMetadataRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetIdentityMetadataRequest",
+    "definitions": {
+        "GetIdentityMetadataRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "reference"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const UpsertIdentityMetadataRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UpsertIdentityMetadataRequest",
+    "definitions": {
+        "UpsertIdentityMetadataRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "reference",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+        }
+    }
+}
+
 export const GetNotificationRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetNotificationRequest",
