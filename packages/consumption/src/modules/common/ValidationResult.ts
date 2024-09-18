@@ -1,4 +1,5 @@
 import { ApplicationError } from "@js-soft/ts-utils";
+import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors";
 
 export abstract class ValidationResult {
     protected constructor(public readonly items: ValidationResult[]) {}
@@ -21,13 +22,7 @@ export abstract class ValidationResult {
 
     public static fromItems(items: ValidationResult[]): ValidationResult {
         return items.some((r) => r.isError())
-            ? ValidationResult.error(
-                  new ApplicationError(
-                      "error.consumption.validation.inheritedFromItem",
-                      "Some child items have errors. If this error occurred during the specification of a Request, call 'canCreate' to get more information."
-                  ),
-                  items
-              )
+            ? ValidationResult.error(ConsumptionCoreErrors.requests.inheritedFromItem("Some child items have errors."), items)
             : ValidationResult.success(items);
     }
 }
