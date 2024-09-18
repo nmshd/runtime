@@ -132,10 +132,14 @@ describe("IdentityMetadataController", function () {
     test("should delete all identity metadata for peer", async function () {
         await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("did:e:a-domain:dids:anidentity"), value: { a: "json" } });
         await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("did:e:a-domain:dids:anidentity"), value: { a: "json" }, key: "key" });
-        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("address2"), value: { a: "json" }, key: "key" });
+        await consumptionController.identityMetadata.upsertIdentityMetadata({
+            reference: CoreAddress.from("did:e:a-domain:dids:anotheridentity"),
+            value: { a: "json" },
+            key: "key"
+        });
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(3);
 
-        await consumptionController.identityMetadata.deleteIdentityMetadataForPeer(CoreAddress.from("did:e:a-domain:dids:anidentity"));
+        await consumptionController.identityMetadata.deleteIdentityMetadataReferencedWithPeer(CoreAddress.from("did:e:a-domain:dids:anidentity"));
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(1);
     });
 });
