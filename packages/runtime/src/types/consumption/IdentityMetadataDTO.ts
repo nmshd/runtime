@@ -1,5 +1,5 @@
 export interface IdentityMetadataDTO {
     reference: string;
-    key: string | undefined;
+    key?: string;
     value: unknown;
 }
