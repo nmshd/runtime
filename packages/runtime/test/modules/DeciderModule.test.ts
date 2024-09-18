@@ -269,7 +269,19 @@ describe("DeciderModule", () => {
 
         describe("no automationConfig", () => {
             test("moves an incoming Request into status 'ManualDecisionRequired' if a RequestItem is flagged as requireManualDecision", async () => {
-                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true }))[0];
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                peer: sender.address
+                            },
+                            responseConfig: {
+                                accept: false
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
                 await establishRelationship(sender.transport, recipient.transport);
 
                 const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2174,7 +2186,7 @@ describe("DeciderModule", () => {
                 );
             });
 
-            test("cannot decide a Request given a config with fitting general and not fitting RequestItem-specific elements", async () => {
+            test("cannot decide a Request given a config with not fitting general and fitting RequestItem-specific elements", async () => {
                 const deciderConfig: DeciderModuleConfigurationOverwrite = {
                     automationConfig: [
                         {
@@ -2205,7 +2217,7 @@ describe("DeciderModule", () => {
                 );
             });
 
-            test("cannot decide a Request given a config with not fitting general and fitting RequestItem-specific elements", async () => {
+            test("cannot decide a Request given a config with fitting general and not fitting RequestItem-specific elements", async () => {
                 const deciderConfig: DeciderModuleConfigurationOverwrite = {
                     automationConfig: [
                         {
@@ -2226,6 +2238,48 @@ describe("DeciderModule", () => {
                 const message = await exchangeMessage(sender.transport, recipient.transport);
                 const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                     receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
+
+            test("cannot decide a Request if there is no fitting RequestItemConfig for every RequestItem", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "AuthenticationRequestItem"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "AuthenticationRequestItem",
+                                mustBeAccepted: false
+                            },
+                            {
+                                "@type": "ConsentRequestItem",
+                                mustBeAccepted: false,
+                                consent: "A consent text"
+                            }
+                        ]
+                    },
                     requestSourceId: message.id
                 });
                 await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -2495,6 +2549,53 @@ describe("DeciderModule", () => {
                 expect((itemsOfResponse[1] as ResponseItemGroupJSON).items[0]["@type"]).toBe("RejectResponseItem");
                 expect((itemsOfResponse[1] as ResponseItemGroupJSON).items[1]["@type"]).toBe("RejectResponseItem");
             });
+
+            test("cannot decide a Request with RequestItemGroup if there is no fitting RequestItemConfig for every RequestItem", async () => {
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.item.@type": "AuthenticationRequestItem"
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: {
+                        "@type": "Request",
+                        items: [
+                            {
+                                "@type": "AuthenticationRequestItem",
+                                mustBeAccepted: false
+                            },
+                            {
+                                "@type": "RequestItemGroup",
+                                items: [
+                                    {
+                                        "@type": "ConsentRequestItem",
+                                        mustBeAccepted: false,
+                                        consent: "A consent text"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
         });
 
         describe("automationConfig with multiple elements", () => {
@@ -2736,95 +2837,6 @@ describe("DeciderModule", () => {
 
                 const responseContent = requestAfterAction.response!.content;
                 expect(responseContent.result).toBe(ResponseResult.Rejected);
-            });
-
-            test("cannot decide a Request if there is no fitting RequestItemConfig for every RequestItem", async () => {
-                const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                    automationConfig: [
-                        {
-                            requestConfig: {
-                                "content.item.@type": "AuthenticationRequestItem"
-                            },
-                            responseConfig: {
-                                accept: true
-                            }
-                        }
-                    ]
-                };
-                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-                await establishRelationship(sender.transport, recipient.transport);
-
-                const message = await exchangeMessage(sender.transport, recipient.transport);
-                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                    receivedRequest: {
-                        "@type": "Request",
-                        items: [
-                            {
-                                "@type": "AuthenticationRequestItem",
-                                mustBeAccepted: false
-                            },
-                            {
-                                "@type": "ConsentRequestItem",
-                                mustBeAccepted: false,
-                                consent: "A consent text"
-                            }
-                        ]
-                    },
-                    requestSourceId: message.id
-                });
-                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-                await expect(recipient.eventBus).toHavePublished(
-                    MessageProcessedEvent,
-                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
-                );
-            });
-
-            test("cannot decide a Request with RequestItemGroup if there is no fitting RequestItemConfig for every RequestItem", async () => {
-                const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                    automationConfig: [
-                        {
-                            requestConfig: {
-                                "content.item.@type": "AuthenticationRequestItem"
-                            },
-                            responseConfig: {
-                                accept: true
-                            }
-                        }
-                    ]
-                };
-                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-                await establishRelationship(sender.transport, recipient.transport);
-
-                const message = await exchangeMessage(sender.transport, recipient.transport);
-                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                    receivedRequest: {
-                        "@type": "Request",
-                        items: [
-                            {
-                                "@type": "AuthenticationRequestItem",
-                                mustBeAccepted: false
-                            },
-                            {
-                                "@type": "RequestItemGroup",
-                                items: [
-                                    {
-                                        "@type": "ConsentRequestItem",
-                                        mustBeAccepted: false,
-                                        consent: "A consent text"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    requestSourceId: message.id
-                });
-                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-                await expect(recipient.eventBus).toHavePublished(
-                    MessageProcessedEvent,
-                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
-                );
             });
 
             test("cannot decide a Request if a mustBeAccepted RequestItem is not accepted", async () => {
