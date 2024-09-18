@@ -51,15 +51,7 @@ import {
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
 } from "../../src";
-import {
-    RuntimeServiceProvider,
-    TestRequestItem,
-    TestRuntimeServices,
-    establishRelationship,
-    exchangeMessage,
-    executeFullCreateAndShareRepositoryAttributeFlow,
-    expectThrowsAsync
-} from "../lib";
+import { RuntimeServiceProvider, TestRequestItem, TestRuntimeServices, establishRelationship, exchangeMessage, executeFullCreateAndShareRepositoryAttributeFlow } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 
@@ -2892,8 +2884,7 @@ describe("DeciderModule", () => {
                     }
                 ]
             };
-            await expectThrowsAsync(
-                runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }),
+            await expect(runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig })).rejects.toThrow(
                 "The RequestConfig does not match the ResponseConfig."
             );
         });
