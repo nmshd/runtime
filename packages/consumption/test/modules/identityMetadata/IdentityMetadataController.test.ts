@@ -39,7 +39,7 @@ describe("IdentityMetadataController", function () {
 
     test("should create an identity metadata", async function () {
         const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
-            value: { key: "value" },
+            value: { a: "json" },
             reference: CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
 
@@ -47,12 +47,12 @@ describe("IdentityMetadataController", function () {
         expect(identityMetadata.reference.toString()).toBe("did:e:a-domain:dids:anidentity");
 
         expect(identityMetadata.value).toBeInstanceOf(JSONWrapper);
-        expect(identityMetadata.value.toJSON()).toStrictEqual({ key: "value" });
+        expect(identityMetadata.value.toJSON()).toStrictEqual({ a: "json" });
     });
 
     test("should create an identity metadata with a key", async function () {
         const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
-            value: { key: "value" },
+            value: { a: "json" },
             reference: CoreAddress.from("did:e:a-domain:dids:anidentity"),
             key: "key"
         });
@@ -61,7 +61,7 @@ describe("IdentityMetadataController", function () {
         expect(identityMetadata.reference.toString()).toBe("did:e:a-domain:dids:anidentity");
 
         expect(identityMetadata.value).toBeInstanceOf(JSONWrapper);
-        expect(identityMetadata.value.toJSON()).toStrictEqual({ key: "value" });
+        expect(identityMetadata.value.toJSON()).toStrictEqual({ a: "json" });
 
         expect(identityMetadata.key).toBe("key");
     });
@@ -71,18 +71,18 @@ describe("IdentityMetadataController", function () {
 
         await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
-            value: { key: "value" }
+            value: { a: "json" }
         });
 
         const updated = await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
-            value: { key: "value2" }
+            value: { another: "json" }
         });
-        expect(updated.value.toJSON()).toStrictEqual({ key: "value2" });
+        expect(updated.value.toJSON()).toStrictEqual({ another: "json" });
 
         const queried = await consumptionController.identityMetadata.getIdentityMetadata(CoreAddress.from("did:e:a-domain:dids:anidentity"));
         expect(queried).toBeDefined();
-        expect(queried!.value.toJSON()).toStrictEqual({ key: "value2" });
+        expect(queried!.value.toJSON()).toStrictEqual({ another: "json" });
     });
 
     test("should update an identity metadata with a key", async function () {
@@ -90,24 +90,24 @@ describe("IdentityMetadataController", function () {
 
         await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
-            value: { key: "value" }
+            value: { a: "json" }
         });
 
         const updated = await consumptionController.identityMetadata.upsertIdentityMetadata({
             ...query,
-            value: { key: "value2" }
+            value: { another: "json" }
         });
-        expect(updated.value.toJSON()).toStrictEqual({ key: "value2" });
+        expect(updated.value.toJSON()).toStrictEqual({ another: "json" });
 
         const queried = await consumptionController.identityMetadata.getIdentityMetadata(CoreAddress.from("did:e:a-domain:dids:anidentity"), "key");
         expect(queried).toBeDefined();
-        expect(queried!.value.toJSON()).toStrictEqual({ key: "value2" });
+        expect(queried!.value.toJSON()).toStrictEqual({ another: "json" });
     });
 
     test("should delete an identity metadata", async function () {
         const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
             reference: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-            value: { key: "value" }
+            value: { a: "json" }
         });
 
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(1);
@@ -120,7 +120,7 @@ describe("IdentityMetadataController", function () {
         const identityMetadata = await consumptionController.identityMetadata.upsertIdentityMetadata({
             reference: CoreAddress.from("did:e:a-domain:dids:anidentity"),
             key: "key",
-            value: { key: "value" }
+            value: { a: "json" }
         });
 
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(1);
@@ -130,9 +130,9 @@ describe("IdentityMetadataController", function () {
     });
 
     test("should delete all identity metadata exchanged with a peer", async function () {
-        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("did:e:a-domain:dids:anidentity"), value: { key: "value" } });
-        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("did:e:a-domain:dids:anidentity"), value: { key: "value" }, key: "key" });
-        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("address2"), value: { key: "value" }, key: "key" });
+        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("did:e:a-domain:dids:anidentity"), value: { a: "json" } });
+        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("did:e:a-domain:dids:anidentity"), value: { a: "json" }, key: "key" });
+        await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("address2"), value: { a: "json" }, key: "key" });
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(3);
 
         await consumptionController.identityMetadata.deleteIdentityMetadataForPeer(CoreAddress.from("did:e:a-domain:dids:anidentity"));

@@ -32,7 +32,7 @@ describe("IdentityMetadata", () => {
         {
             reference: "did:e:localhost:dids:1234567890abcdef123456",
             key: undefined,
-            value: { key: "value" }
+            value: { a: "json" }
         },
         {
             reference: "did:e:localhost:dids:1234567890abcdef123456",
