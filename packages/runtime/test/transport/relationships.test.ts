@@ -1,4 +1,4 @@
-import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
 import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CanCreateRelationshipFailureResponse } from "@nmshd/runtime/src/useCases/transport/relationships/CanCreateRelationship";
 import { DateTime } from "luxon";
@@ -93,7 +93,7 @@ describe("CanCreateRelationship", () => {
         const incomingRequest = requests[0];
         expect(incomingRequest.status).toBe(LocalRequestStatus.DecisionRequired);
 
-        await delay(12000);
+        await sleep(12000);
 
         const canCreateRelationshipResponse = await services2.transport.relationships.canCreateRelationship({
             templateId: templateId,
@@ -181,7 +181,7 @@ describe("Create Relationship", () => {
         const incomingRequest = requests[0];
         expect(incomingRequest.status).toBe(LocalRequestStatus.DecisionRequired);
 
-        await delay(12000);
+        await sleep(12000);
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
@@ -1059,11 +1059,3 @@ describe("Relationship existence check", () => {
         expect(await services1.transport.relationships.decomposeRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 });
-
-function delay(milliseconds: number): Promise<void> {
-    if (milliseconds <= 0) {
-        throw new Error("The specified delay time must be positive.");
-    }
-
-    return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}

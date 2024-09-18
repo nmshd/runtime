@@ -1,4 +1,4 @@
-import { EventBus } from "@js-soft/ts-utils";
+import { EventBus, sleep } from "@js-soft/ts-utils";
 import { TestRequestItemJSON } from "@nmshd/consumption/test/modules/requests/testHelpers/TestRequestItem";
 import { RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
@@ -640,7 +640,7 @@ describe("Requests", () => {
 
             expect(request.status).not.toBe(LocalRequestStatus.Expired);
 
-            await delay(12000);
+            await sleep(12000);
 
             const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
 
@@ -662,7 +662,7 @@ describe("Requests", () => {
 
             expect(request.status).not.toBe(LocalRequestStatus.Expired);
 
-            await delay(12000);
+            await sleep(12000);
 
             const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequests({})).value[0];
 
@@ -692,7 +692,7 @@ describe("Requests", () => {
                     triggeredEvent = event;
                 });
 
-                await delay(12000);
+                await sleep(12000);
 
                 const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
                     requestId: request.id,
@@ -717,14 +717,6 @@ describe("Requests", () => {
                 expect(triggeredEvent).toBeUndefined();
             });
         });
-
-        function delay(milliseconds: number): Promise<void> {
-            if (milliseconds <= 0) {
-                throw new Error("The specified delay time must be positive.");
-            }
-
-            return new Promise((resolve) => setTimeout(resolve, milliseconds));
-        }
     });
 });
 
