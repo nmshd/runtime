@@ -178,6 +178,6 @@ export class ConsumptionController {
         await this.settings.deleteSettingsForRelationship(relationshipId);
         await this.attributeListeners.deletePeerAttributeListeners(peer);
         await this.notifications.deleteNotificationsExchangedWithPeer(peer);
-        await this.identityMetadata.deleteIdentityMetadataExchangedWithPeer(peer);
+        await this.identityMetadata.deleteIdentityMetadataForPeer(peer);
     }
 }

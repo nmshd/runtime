@@ -135,7 +135,7 @@ describe("IdentityMetadataController", function () {
         await consumptionController.identityMetadata.upsertIdentityMetadata({ reference: CoreAddress.from("address2"), value: { key: "value" }, key: "key" });
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(3);
 
-        await consumptionController.identityMetadata.deleteIdentityMetadataExchangedWithPeer(CoreAddress.from("did:e:a-domain:dids:anidentity"));
+        await consumptionController.identityMetadata.deleteIdentityMetadataForPeer(CoreAddress.from("did:e:a-domain:dids:anidentity"));
         expect(await consumptionController.identityMetadata["identityMetadata"].count()).toBe(1);
     });
 });
