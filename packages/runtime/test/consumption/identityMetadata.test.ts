@@ -39,7 +39,7 @@ describe("IdentityMetadata", () => {
             key: "key",
             value: "value"
         }
-    ])("should upsert an IndentityMetadata with key '$key' and value '$value'", async (data) => {
+    ])("should upsert an IdentityMetadata with key '$key' and value '$value'", async (data) => {
         const result = await consumptionServices.identityMetadata.upsertIdentityMetadata(data);
         expect(result).toBeSuccessful();
 
