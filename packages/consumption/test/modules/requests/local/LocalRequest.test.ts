@@ -35,7 +35,7 @@ describe("LocalRequest", function () {
         });
 
         test("adds a status log entry on status change", function () {
-            const request = TestObjectFactory.createLocalRequestWith({});
+            const request = TestObjectFactory.createLocalRequestWith({ status: LocalRequestStatus.Draft });
             request.changeStatus(LocalRequestStatus.Open);
 
             expect(request.statusLog).toHaveLength(1);
