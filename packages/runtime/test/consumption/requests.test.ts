@@ -599,16 +599,7 @@ describe("Requests", () => {
         });
     });
 
-    describe.each([
-        {
-            action: "Accept"
-        },
-        {
-            action: "Reject"
-        }
-    ] as TestCase[])("Cannot respond to Request of expired RelationshipTemplate: $action Request throws error", ({ action }) => {
-        const actionLowerCase = action.toLowerCase() as "accept" | "reject";
-
+    describe("Request expired due to expired RelationshipTemplate", () => {
         const runtimeServiceProvider = new RuntimeServiceProvider();
         let sRuntimeServices: TestRuntimeServices;
         let rRuntimeServices: TestRuntimeServices;
@@ -635,9 +626,10 @@ describe("Requests", () => {
             rConsumptionServices = rRuntimeServices.consumption;
             rEventBus = rRuntimeServices.eventBus;
         }, 30000);
+
         afterAll(async () => await runtimeServiceProvider.stop());
 
-        test(`recipient: cannot ${actionLowerCase} incoming Request`, async () => {
+        test("change status of Request when querying it if the underlying RelationshipTemplate is expired", async () => {
             const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
                 .request;
 
@@ -646,21 +638,9 @@ describe("Requests", () => {
                 triggeredEvent = event;
             });
 
+            expect(request.status).not.toBe(LocalRequestStatus.Expired);
+
             await delay(12000);
-
-            const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
-                requestId: request.id,
-                items: [
-                    {
-                        accept: action === "Accept"
-                    }
-                ]
-            });
-
-            expect(result).toBeAnError(
-                `The incoming Request has the already expired RelationshipTemplate '${request.source!.reference}' as its source, which is why it cannot be responded to.`,
-                "error.runtime.relationships.expiredRelationshipTemplate"
-            );
 
             const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
 
@@ -669,6 +649,73 @@ describe("Requests", () => {
             expect(rLocalRequest.response).toBeUndefined();
 
             expect(triggeredEvent).toBeUndefined();
+        });
+
+        test("change status of Request when querying Requests if the underlying RelationshipTemplate is expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
+                .request;
+
+            let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+            rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
+                triggeredEvent = event;
+            });
+
+            expect(request.status).not.toBe(LocalRequestStatus.Expired);
+
+            await delay(12000);
+
+            const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequests({})).value[0];
+
+            expect(rLocalRequest).toBeDefined();
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+            expect(rLocalRequest.response).toBeUndefined();
+
+            expect(triggeredEvent).toBeUndefined();
+        });
+
+        describe.each([
+            {
+                action: "Accept"
+            },
+            {
+                action: "Reject"
+            }
+        ] as TestCase[])("Cannot respond to Request of expired RelationshipTemplate: $action Request throws error", ({ action }) => {
+            const actionLowerCase = action.toLowerCase() as "accept" | "reject";
+
+            test(`recipient: cannot ${actionLowerCase} incoming Request`, async () => {
+                const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
+                    .request;
+
+                let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+                rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
+                    triggeredEvent = event;
+                });
+
+                await delay(12000);
+
+                const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
+                    requestId: request.id,
+                    items: [
+                        {
+                            accept: action === "Accept"
+                        }
+                    ]
+                });
+
+                expect(result).toBeAnError(
+                    `The incoming Request has the already expired RelationshipTemplate '${request.source!.reference}' as its source, which is why it cannot be responded to.`,
+                    "error.runtime.relationships.expiredRelationshipTemplate"
+                );
+
+                const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
+
+                expect(rLocalRequest).toBeDefined();
+                expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+                expect(rLocalRequest.response).toBeUndefined();
+
+                expect(triggeredEvent).toBeUndefined();
+            });
         });
 
         function delay(milliseconds: number): Promise<void> {
