@@ -1,6 +1,7 @@
+import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController } from "@nmshd/consumption";
-import { RelationshipTemplateContent } from "@nmshd/content";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
@@ -33,6 +34,15 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
 
         if (!template) {
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
+        }
+
+        const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
+        if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
+            return Result.fail(
+                RuntimeErrors.general.invalidPropertyValue(
+                    "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
+                )
+            );
         }
 
         const canSendRelationship = await this.relationshipController.canSendRelationship({ creationContent: request.creationContent, template });
