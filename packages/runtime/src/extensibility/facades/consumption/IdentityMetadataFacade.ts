@@ -1,4 +1,4 @@
-import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { Result } from "@js-soft/ts-utils";
 import { Inject } from "typescript-ioc";
 import { IdentityMetadataDTO } from "../../../types";
 import {
@@ -17,15 +17,15 @@ export class IdentityMetadataFacade {
         @Inject private readonly getIdentityMetadataUseCase: GetIdentityMetadataUseCase
     ) {}
 
-    public async getIdentityMetadata(request: GetIdentityMetadataRequest): Promise<Result<IdentityMetadataDTO, ApplicationError>> {
+    public async getIdentityMetadata(request: GetIdentityMetadataRequest): Promise<Result<IdentityMetadataDTO>> {
         return await this.getIdentityMetadataUseCase.execute(request);
     }
 
-    public async deleteIdentityMetadata(request: DeleteIdentityMetadataRequest): Promise<Result<void, ApplicationError>> {
+    public async deleteIdentityMetadata(request: DeleteIdentityMetadataRequest): Promise<Result<void>> {
         return await this.deleteIdentityMetadataUseCase.execute(request);
     }
 
-    public async upsertIdentityMetadata(request: UpsertIdentityMetadataRequest): Promise<Result<IdentityMetadataDTO, ApplicationError>> {
+    public async upsertIdentityMetadata(request: UpsertIdentityMetadataRequest): Promise<Result<IdentityMetadataDTO>> {
         return await this.upsertIdentityMetadataUseCase.execute(request);
     }
 }
