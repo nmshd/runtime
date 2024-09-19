@@ -1773,6 +1773,7 @@ export class DataViewExpander {
         return {
             id: relationship.id,
             name: relationshipSetting.userTitle ?? name,
+            originalName: relationshipSetting.userTitle ? name : undefined,
             description: relationshipSetting.userDescription ?? statusText,
             date: creationDate,
             image: "",
@@ -1818,6 +1819,7 @@ export class DataViewExpander {
             type: "IdentityDVO",
             id: relationship.peer,
             name: relationshipDVO.name,
+            originalName: relationshipDVO.originalName,
             date: relationshipDVO.date,
             description: relationshipDVO.description,
             publicKey: relationship.peerIdentity.publicKey,
