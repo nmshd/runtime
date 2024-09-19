@@ -3,6 +3,7 @@ import {
     AttributeListenersFacade,
     AttributesFacade,
     DraftsFacade,
+    IdentityMetadataFacade,
     IncomingRequestsFacade,
     NotificationsFacade,
     OutgoingRequestsFacade,
@@ -17,6 +18,7 @@ export class ConsumptionServices {
         @Inject public readonly incomingRequests: IncomingRequestsFacade,
         @Inject public readonly outgoingRequests: OutgoingRequestsFacade,
         @Inject public readonly attributeListeners: AttributeListenersFacade,
-        @Inject public readonly notifications: NotificationsFacade
+        @Inject public readonly notifications: NotificationsFacade,
+        @Inject public readonly identityMetadata: IdentityMetadataFacade
     ) {}
 }
