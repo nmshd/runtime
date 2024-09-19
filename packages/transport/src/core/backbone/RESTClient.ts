@@ -1,7 +1,6 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import correlator from "correlation-id";
 import formDataLib from "form-data";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
@@ -115,11 +114,6 @@ export class RESTClient {
         this._logger = TransportLoggerFactory.getLogger(RESTClient);
 
         this.axiosInstance = axios.create(resultingRequestConfig);
-        this.axiosInstance.interceptors.request.use((config) => {
-            const correlationId = correlator.getId();
-            config.headers["x-correlation-id"] = correlationId;
-            return config;
-        });
 
         if (this.config.debug) {
             this.addAxiosLoggingInterceptors(this.axiosInstance);
