@@ -1804,7 +1804,8 @@ export class DataViewExpander {
 
         if (settingResult.value.length === 0) return defaultSetting;
 
-        const value = settingResult.value.reduce((prev, current) => (prev.createdAt > current.createdAt ? prev : current));
+        const latestSetting = settingResult.value.reduce((prev, current) => (prev.createdAt > current.createdAt ? prev : current));
+        const value = latestSetting.value;
 
         if (typeof value !== "object") return defaultSetting;
 
