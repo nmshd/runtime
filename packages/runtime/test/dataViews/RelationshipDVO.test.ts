@@ -103,7 +103,7 @@ describe("RelationshipDVO", () => {
         expect(dvo.relationship!.templateId).toBe(dto.template.id);
     });
 
-    test("check the relationship dvo for the templator wit active relationshipSetting", async () => {
+    test("check the relationship dvo for the templator with active relationshipSetting", async () => {
         const dtos = (await runtimeServices1.transport.relationships.getRelationships({})).value;
         const dto = dtos[0];
 
