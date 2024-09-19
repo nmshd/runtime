@@ -33,8 +33,8 @@ export class UpsertSettingByKeyUseCase extends UseCase<UpsertSettingByKeyRequest
     protected async executeInternal(request: UpsertSettingByKeyRequest): Promise<Result<SettingDTO>> {
         const settings = await this.settingController.getSettings({
             key: request.key,
-            reference: request.reference,
-            scope: request.scope
+            reference: request.reference ?? { $exists: false },
+            scope: request.scope ?? SettingScope.Identity
         });
 
         const newValue = Serializable.fromUnknown(request.value);
