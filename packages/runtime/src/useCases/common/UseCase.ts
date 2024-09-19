@@ -16,7 +16,7 @@ export abstract class UseCase<IRequest, IResponse> {
     public constructor(private readonly requestValidator?: IValidator<IRequest>) {}
 
     public async execute(request: IRequest): Promise<Result<IResponse>> {
-        // if no correlator is defined in the DI a broken one withoug any methods is injected
+        // if no correlator is defined in the DI a broken one without any methods is injected
         // we handle this exactly like no correlator is defined
         if (typeof this.correlator?.getId === "undefined") {
             return await this._executeCallback(request);
