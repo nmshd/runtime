@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { IConfig } from "../../core";
+import { IConfig, ICorrelator } from "../../core";
 import { VersionClient } from "./backbone/VersionClient";
 
 export interface BackboneCompatibility {
@@ -12,8 +12,11 @@ export interface BackboneCompatibility {
 export class BackboneCompatibilityController {
     private readonly client: VersionClient;
 
-    public constructor(private readonly config: IConfig) {
-        this.client = new VersionClient(config);
+    public constructor(
+        private readonly config: IConfig,
+        correlator?: ICorrelator
+    ) {
+        this.client = new VersionClient(config, correlator);
         this.config = config;
     }
 

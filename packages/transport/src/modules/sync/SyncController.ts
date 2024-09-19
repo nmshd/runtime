@@ -50,7 +50,7 @@ export class SyncController extends TransportController {
     ) {
         super(ControllerName.Sync, parent);
 
-        this.client = dependencyOverrides.syncClient ?? new SyncClient(this.config, this.parent.authenticator);
+        this.client = dependencyOverrides.syncClient ?? new SyncClient(this.config, this.parent.authenticator, this.transport.correlator);
 
         this.identityMigrations = new IdentityMigrations(this.parent);
         this.deviceMigrations = new DeviceMigrations(this.parent);
