@@ -73,7 +73,6 @@
         "@nmshd/core-types": "*",
         "@nmshd/crypto": "2.0.6",
         "axios": "^1.7.7",
-        "correlation-id": "^5.2.0",
         "fast-json-patch": "^3.1.1",
         "form-data": "^4.0.0",
         "https-proxy-agent": "^7.0.5",
@@ -95,6 +94,7 @@
         "@types/luxon": "^3.4.2",
         "@types/qs": "^6.9.16",
         "@types/uuid": "^10.0.0",
+        "correlation-id": "^5.2.0",
         "expect": "^29.7.0",
         "ts-mockito": "^2.6.1"
     },

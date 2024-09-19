@@ -27,7 +27,7 @@ export class FileController extends TransportController {
     public override async init(): Promise<this> {
         await super.init();
 
-        this.client = new FileClient(this.config, this.parent.authenticator);
+        this.client = new FileClient(this.config, this.parent.authenticator, this.transport.correlator);
         this.files = await this.parent.getSynchronizedCollection(DbCollectionName.Files);
         return this;
     }

@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreCrypto, IConfig, TransportCoreErrors } from "../../core";
+import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core";
 import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
 import { CachedToken } from "./local/CachedToken";
 import { Token } from "./local/Token";
@@ -9,8 +9,8 @@ import { TokenReference } from "./transmission/TokenReference";
 
 export class AnonymousTokenController {
     private readonly client: AnonymousTokenClient;
-    public constructor(config: IConfig) {
-        this.client = new AnonymousTokenClient(config);
+    public constructor(config: IConfig, correlator?: ICorrelator) {
+        this.client = new AnonymousTokenClient(config, correlator);
     }
 
     public async loadPeerTokenByTruncated(truncated: string): Promise<Token> {

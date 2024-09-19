@@ -11,7 +11,7 @@ describe("CorrelationId", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        const transport = TestUtil.createTransport(connection);
+        const transport = TestUtil.createTransport(connection, undefined, correlator);
         await transport.init();
         const accounts = await TestUtil.provideAccounts(transport, 1);
         testAccount = accounts[0];
