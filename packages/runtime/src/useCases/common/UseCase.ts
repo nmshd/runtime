@@ -11,10 +11,9 @@ import { IValidator } from "./validation/IValidator";
 import { ValidationResult } from "./validation/ValidationResult";
 
 export abstract class UseCase<IRequest, IResponse> {
-    public constructor(
-        private readonly requestValidator?: IValidator<IRequest>,
-        @Inject private readonly correlator?: AbstractCorrelator
-    ) {}
+    @Inject private readonly correlator?: AbstractCorrelator;
+
+    public constructor(private readonly requestValidator?: IValidator<IRequest>) {}
 
     public async execute(request: IRequest): Promise<Result<IResponse>> {
         if (!this.correlator) return await this._executeCallback(request);
