@@ -6,6 +6,7 @@ import { ConsumptionConfig, ConsumptionController, GenericRequestItemProcessor }
 import { ICoreAddress } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { ConsumptionServices, DataViewExpander, ModuleConfiguration, Runtime, RuntimeConfig, RuntimeHealth, RuntimeServices, TransportServices } from "../../src";
+import { AbstractCorrelator } from "../../src/useCases/common/AbstractCorrelator";
 import { MockEventBus } from "./MockEventBus";
 import { TestNotificationItem, TestNotificationItemProcessor } from "./TestNotificationItem";
 import { TestRequestItem } from "./TestRequestItem";
@@ -19,7 +20,8 @@ export class TestRuntime extends Runtime {
 
     public constructor(
         runtimeConfig: RuntimeConfig,
-        private readonly consumptionConfig: ConsumptionConfig
+        private readonly consumptionConfig: ConsumptionConfig,
+        correlator?: AbstractCorrelator
     ) {
         super(
             runtimeConfig,
@@ -43,7 +45,8 @@ export class TestRuntime extends Runtime {
                     }
                 }
             }),
-            new MockEventBus()
+            new MockEventBus(),
+            correlator
         );
     }
 

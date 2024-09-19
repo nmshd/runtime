@@ -1,6 +1,7 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { CoreDate } from "@nmshd/core-types";
 import { AccountController } from "../../modules";
+import { ICorrelator } from "../ICorrelator";
 import { AuthClient } from "./AuthClient";
 import { IRESTClientConfig } from "./RESTClient";
 import { CredentialsBasic } from "./RESTClientAuthenticate";
@@ -11,8 +12,11 @@ export abstract class AbstractAuthenticator {
     private token?: string;
 
     private readonly authClient: AuthClient;
-    public constructor(private readonly config: IRESTClientConfig) {
-        this.authClient = new AuthClient(config);
+    public constructor(
+        private readonly config: IRESTClientConfig,
+        correlator?: ICorrelator
+    ) {
+        this.authClient = new AuthClient(config, correlator);
     }
 
     public async getToken(): Promise<string> {
@@ -78,8 +82,11 @@ export abstract class AbstractAuthenticator {
 }
 
 export class Authenticator extends AbstractAuthenticator {
-    public constructor(private readonly accountController: AccountController) {
-        super(accountController.config);
+    public constructor(
+        private readonly accountController: AccountController,
+        correlator?: ICorrelator
+    ) {
+        super(accountController.config, correlator);
     }
 
     public async getCredentials(): Promise<CredentialsBasic> {

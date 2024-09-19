@@ -19,6 +19,7 @@ import {
     File,
     IChangedItems,
     IConfigOverwrite,
+    ICorrelator,
     IdentityDeletionProcess,
     IdentityUtil,
     ISendFileParameters,
@@ -172,12 +173,12 @@ export class TestUtil {
         return dbConnection;
     }
 
-    public static createTransport(connection: IDatabaseConnection, configOverwrite: Partial<IConfigOverwrite> = {}): Transport {
+    public static createTransport(connection: IDatabaseConnection, configOverwrite: Partial<IConfigOverwrite> = {}, correlator?: ICorrelator): Transport {
         const eventBus = TestUtil.createEventBus();
 
         const config = TestUtil.createConfig();
 
-        return new Transport(connection, { ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory);
+        return new Transport(connection, { ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
     }
 
     public static createEventBus(): EventEmitter2EventBus {

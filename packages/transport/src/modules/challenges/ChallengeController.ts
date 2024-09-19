@@ -22,8 +22,8 @@ export class ChallengeController extends TransportController {
     public override async init(): Promise<this> {
         await super.init();
 
-        this.client = new ChallengeClient(this.config);
-        this.authClient = new ChallengeAuthClient(this.config, this.parent.authenticator);
+        this.client = new ChallengeClient(this.config, this.transport.correlator);
+        this.authClient = new ChallengeAuthClient(this.config, this.parent.authenticator, this.transport.correlator);
         return this;
     }
 
