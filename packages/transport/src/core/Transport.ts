@@ -6,6 +6,7 @@ import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
+import { ICorrelator } from "./ICorrelator";
 import { TransportCoreErrors } from "./TransportCoreErrors";
 import { TransportError } from "./TransportError";
 import { TransportLoggerFactory } from "./TransportLoggerFactory";
@@ -85,7 +86,8 @@ export class Transport {
         databaseConnection: IDatabaseConnection,
         customConfig: IConfigOverwrite,
         public readonly eventBus: EventBus,
-        loggerFactory: ILoggerFactory = new SimpleLoggerFactory()
+        loggerFactory: ILoggerFactory = new SimpleLoggerFactory(),
+        public readonly correlator?: ICorrelator
     ) {
         this.databaseConnection = databaseConnection;
         this._config = _.defaultsDeep({}, customConfig, Transport.defaultConfig);

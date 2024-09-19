@@ -27,7 +27,7 @@ export class RelationshipTemplateController extends TransportController {
     public constructor(parent: AccountController, secrets: RelationshipSecretController, controllerName?: ControllerName) {
         super(controllerName ? controllerName : ControllerName.RelationshipTemplate, parent);
         this.secrets = secrets;
-        this.client = new RelationshipTemplateClient(this.config, this.parent.authenticator);
+        this.client = new RelationshipTemplateClient(this.config, this.parent.authenticator, this.transport.correlator);
     }
 
     public override async init(): Promise<this> {

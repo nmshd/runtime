@@ -17,7 +17,7 @@ export class IdentityDeletionProcessController extends TransportController {
     public constructor(parent: AccountController) {
         super(ControllerName.Identity, parent);
 
-        this.identityDeletionProcessClient = new IdentityDeletionProcessClient(this.config, this.parent.authenticator);
+        this.identityDeletionProcessClient = new IdentityDeletionProcessClient(this.config, this.parent.authenticator, this.transport.correlator);
     }
 
     @log()
