@@ -1698,15 +1698,7 @@ export class DataViewExpander {
     }
 
     private async createRelationshipDVO(relationship: RelationshipDTO): Promise<RelationshipDVO> {
-        let relationshipSetting: RelationshipSettingDVO;
-        const settingResult = await this.consumption.settings.getSettings({ query: { reference: relationship.id } });
-        if (settingResult.value.length > 0) {
-            relationshipSetting = settingResult.value[0].value;
-        } else {
-            relationshipSetting = {
-                isPinned: false
-            };
-        }
+        const relationshipSetting = await this.getRelationshipSettingDVO(relationship);
 
         const stringByType: Record<string, undefined | string> = {};
         const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ onlyValid: true, peer: relationship.peer });
@@ -1797,6 +1789,25 @@ export class DataViewExpander {
             auditLog: relationship.auditLog,
             creationContent: relationship.creationContent
         };
+    }
+
+    private async getRelationshipSettingDVO(relationship: RelationshipDTO): Promise<RelationshipSettingDVO> {
+        const settingResult = await this.consumption.settings.getSettings({
+            query: {
+                scope: "Relationship",
+                reference: relationship.id
+            }
+        });
+
+        const defaultSetting = { isPinned: false };
+
+        if (settingResult.value.length === 0) return defaultSetting;
+
+        const value = settingResult.value.reduce((prev, current) => (prev.createdAt > current.createdAt ? prev : current));
+
+        if (typeof value !== "object") return defaultSetting;
+
+        return { ...defaultSetting, ...value };
     }
 
     public async expandRelationshipDTO(relationship: RelationshipDTO): Promise<IdentityDVO> {
