@@ -20309,6 +20309,17 @@ export const GetSettingByKeyRequest: any = {
             "properties": {
                 "key": {
                     "type": "string"
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": [
+                        "Identity",
+                        "Device",
+                        "Relationship"
+                    ]
                 }
             },
             "required": [
@@ -20454,13 +20465,28 @@ export const UpsertSettingByKeyRequest: any = {
                 "key": {
                     "type": "string"
                 },
-                "value": {}
+                "value": {},
+                "reference": {
+                    "$ref": "#/definitions/GenericIdString"
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": [
+                        "Identity",
+                        "Device",
+                        "Relationship"
+                    ]
+                }
             },
             "required": [
                 "key",
                 "value"
             ],
             "additionalProperties": false
+        },
+        "GenericIdString": {
+            "type": "string",
+            "pattern": "[A-Za-z0-9]{20}"
         }
     }
 }

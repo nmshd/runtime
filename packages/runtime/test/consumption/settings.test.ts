@@ -134,6 +134,20 @@ describe("Settings", () => {
         const setting = await consumptionServices.settings.getSettingByKey({ key: "a-key" });
         expect(setting.value.value).toStrictEqual({ aKey: "aNewValue" });
     });
+
+    test("should get the settings by key including a reference and type", async () => {
+        const key = "a-key";
+        const value = { aKey: "a-value" };
+        const reference = (await TransportIds.generic.generate()).toString();
+        const scope = "Identity";
+
+        const upsertSettingResult = await consumptionServices.settings.upsertSettingByKey({ key, reference, scope, value });
+        expect(upsertSettingResult).toBeSuccessful();
+
+        const result = await consumptionServices.settings.getSettingByKey({ key, reference, scope });
+        expect(result).toBeSuccessful();
+        expect(result.value.value).toStrictEqual(value);
+    });
 });
 
 describe("Settings query", () => {
