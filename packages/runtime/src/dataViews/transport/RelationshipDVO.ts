@@ -21,6 +21,7 @@ export interface RelationshipDVO extends DataViewObject {
     attributeMap: Record<string, undefined | LocalAttributeDVO[]>;
     nameMap: Record<string, undefined | string>;
     templateId: string;
+    originalName?: string;
 }
 
 export interface RelationshipTheme {
