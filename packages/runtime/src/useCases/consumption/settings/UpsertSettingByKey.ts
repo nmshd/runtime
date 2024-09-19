@@ -1,15 +1,18 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { SettingsController } from "@nmshd/consumption";
+import { SettingsController, SettingScope } from "@nmshd/consumption";
+import { CoreId } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { SettingDTO } from "../../../types";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { GenericIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { SettingMapper } from "./SettingMapper";
 
 export interface UpsertSettingByKeyRequest {
     key: string;
     value: any;
+    reference?: GenericIdString;
+    scope?: "Identity" | "Device" | "Relationship";
 }
 
 class Validator extends SchemaValidator<UpsertSettingByKeyRequest> {
@@ -28,12 +31,21 @@ export class UpsertSettingByKeyUseCase extends UseCase<UpsertSettingByKeyRequest
     }
 
     protected async executeInternal(request: UpsertSettingByKeyRequest): Promise<Result<SettingDTO>> {
-        const settings = await this.settingController.getSettings({ key: request.key });
+        const settings = await this.settingController.getSettings({
+            key: request.key,
+            reference: request.reference,
+            scope: request.scope
+        });
 
         const newValue = Serializable.fromUnknown(request.value);
 
         if (settings.length === 0) {
-            const setting = await this.settingController.createSetting({ key: request.key, value: newValue });
+            const setting = await this.settingController.createSetting({
+                key: request.key,
+                value: newValue,
+                reference: request.reference ? CoreId.from(request.reference) : undefined,
+                scope: request.scope as SettingScope | undefined
+            });
             await this.accountController.syncDatawallet();
             return Result.ok(SettingMapper.toSettingDTO(setting));
         }
