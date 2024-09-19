@@ -2,36 +2,42 @@ import { ParsingError, ServalError, ValidationError } from "@js-soft/ts-serval";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { CoreError } from "@nmshd/core-types";
 import { RequestError } from "@nmshd/transport";
-import correlator from "correlation-id";
 import stringifySafe from "json-stringify-safe";
+import { Inject } from "typescript-ioc";
+import { AbstractCorrelator } from "./AbstractCorrelator";
 import { PlatformErrorCodes } from "./PlatformErrorCodes";
 import { RuntimeErrors } from "./RuntimeErrors";
 import { IValidator } from "./validation/IValidator";
 import { ValidationResult } from "./validation/ValidationResult";
 
 export abstract class UseCase<IRequest, IResponse> {
-    public constructor(private readonly requestValidator?: IValidator<IRequest>) {}
+    public constructor(
+        private readonly requestValidator?: IValidator<IRequest>,
+        @Inject private readonly correlator?: AbstractCorrelator
+    ) {}
 
     public async execute(request: IRequest): Promise<Result<IResponse>> {
-        const callback = async (): Promise<Result<IResponse>> => {
-            if (this.requestValidator) {
-                const validationResult = await this.requestValidator.validate(request);
+        if (!this.correlator) return await this._executeCallback(request);
 
-                if (validationResult.isInvalid()) {
-                    return this.validationFailed(validationResult);
-                }
+        const correlationId = this.correlator.getId();
+        if (correlationId) return await this.correlator.withId(correlationId, () => this._executeCallback(request));
+        return await this.correlator.withId(() => this._executeCallback(request));
+    }
+
+    private async _executeCallback(request: IRequest) {
+        if (this.requestValidator) {
+            const validationResult = await this.requestValidator.validate(request);
+
+            if (validationResult.isInvalid()) {
+                return this.validationFailed(validationResult);
             }
+        }
 
-            try {
-                return await this.executeInternal(request);
-            } catch (e) {
-                return this.failingResultFromUnknownError(e);
-            }
-        };
-
-        const correlationId = correlator.getId();
-        if (correlationId) return await correlator.withId(correlationId, callback);
-        return await correlator.withId(callback);
+        try {
+            return await this.executeInternal(request);
+        } catch (e) {
+            return this.failingResultFromUnknownError(e);
+        }
     }
 
     private failingResultFromUnknownError(error: unknown): Result<any> {
