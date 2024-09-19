@@ -146,6 +146,7 @@ describe("Settings", () => {
 
         const result = await consumptionServices.settings.getSettingByKey({ key, reference, scope });
         expect(result).toBeSuccessful();
+        expect(result.value.value).toStrictEqual(value);
     });
 });
 
