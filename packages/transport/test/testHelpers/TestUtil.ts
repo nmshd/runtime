@@ -350,7 +350,15 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(templateFrom.id, templateFrom.secretKey);
+        return await this.addRelationshipWithExistingTemplate(from, to, templateFrom);
+    }
+
+    public static async addRelationshipWithExistingTemplate(
+        from: AccountController,
+        to: AccountController,
+        template: RelationshipTemplate
+    ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(template.id, template.secretKey);
 
         const relRequest = await to.relationships.sendRelationship({
             template: templateTo,
@@ -401,6 +409,15 @@ export class TestUtil {
         const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
 
         return decomposedRelationshipPeer;
+    }
+
+    public static async terminateAndDecomposeRelationshipMutually(from: AccountController, to: AccountController): Promise<void> {
+        await TestUtil.terminateRelationship(from, to);
+        await TestUtil.decomposeRelationship(from, to);
+
+        const relationship = (await to.relationships.getRelationshipToIdentity(from.identity.address))!;
+        await to.relationships.decompose(relationship.id);
+        await to.cleanupDataOfDecomposedRelationship(relationship);
     }
 
     public static async generateAddressPseudonym(backboneBaseUrl: string): Promise<CoreAddress> {
