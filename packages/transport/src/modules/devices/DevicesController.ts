@@ -22,7 +22,7 @@ export class DevicesController extends TransportController {
     public override async init(): Promise<DevicesController> {
         await super.init();
 
-        this.client = new DeviceAuthClient(this.config, this.parent.authenticator);
+        this.client = new DeviceAuthClient(this.config, this.parent.authenticator, this.transport.correlator);
         this.devices = await this.parent.getSynchronizedCollection(DbCollectionName.Devices);
         return this;
     }
