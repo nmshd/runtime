@@ -9,4 +9,5 @@ export interface IdentityDVO extends DataViewObject {
     isSelf: boolean;
     hasRelationship: boolean;
     relationship?: RelationshipDVO;
+    originalName?: string;
 }

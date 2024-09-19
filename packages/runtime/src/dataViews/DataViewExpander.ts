@@ -1699,15 +1699,7 @@ export class DataViewExpander {
     }
 
     private async createRelationshipDVO(relationship: RelationshipDTO): Promise<RelationshipDVO> {
-        let relationshipSetting: RelationshipSettingDVO;
-        const settingResult = await this.consumption.settings.getSettings({ query: { reference: relationship.id } });
-        if (settingResult.value.length > 0) {
-            relationshipSetting = settingResult.value[0].value;
-        } else {
-            relationshipSetting = {
-                isPinned: false
-            };
-        }
+        const relationshipSetting = await this.getRelationshipSettingDVO(relationship);
 
         const stringByType: Record<string, undefined | string> = {};
         const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ onlyValid: true, peer: relationship.peer });
@@ -1782,6 +1774,7 @@ export class DataViewExpander {
         return {
             id: relationship.id,
             name: relationshipSetting.userTitle ?? name,
+            originalName: relationshipSetting.userTitle ? name : undefined,
             description: relationshipSetting.userDescription ?? statusText,
             date: creationDate,
             image: "",
@@ -1800,6 +1793,26 @@ export class DataViewExpander {
         };
     }
 
+    private async getRelationshipSettingDVO(relationship: RelationshipDTO): Promise<RelationshipSettingDVO> {
+        const settingResult = await this.consumption.settings.getSettings({
+            query: {
+                scope: "Relationship",
+                reference: relationship.id
+            }
+        });
+
+        const defaultSetting = { isPinned: false };
+
+        if (settingResult.value.length === 0) return defaultSetting;
+
+        const latestSetting = settingResult.value.reduce((prev, current) => (prev.createdAt > current.createdAt ? prev : current));
+        const value = latestSetting.value;
+
+        if (typeof value !== "object") return defaultSetting;
+
+        return { ...defaultSetting, ...value };
+    }
+
     public async expandRelationshipDTO(relationship: RelationshipDTO): Promise<IdentityDVO> {
         const relationshipDVO = await this.createRelationshipDVO(relationship);
         const initials = (relationshipDVO.name.match(/\b\w/g) ?? []).join("");
@@ -1808,6 +1821,7 @@ export class DataViewExpander {
             type: "IdentityDVO",
             id: relationship.peer,
             name: relationshipDVO.name,
+            originalName: relationshipDVO.originalName,
             date: relationshipDVO.date,
             description: relationshipDVO.description,
             publicKey: relationship.peerIdentity.publicKey,
