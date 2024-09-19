@@ -10,24 +10,21 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { CoreIdHelper } from "@nmshd/transport";
-import { DataViewExpander, TransportServices } from "../../src";
-import { establishRelationshipWithContents, RuntimeServiceProvider } from "../lib";
+import { establishRelationshipWithContents, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
-let transportServices1: TransportServices;
-let transportServices2: TransportServices;
-let expander1: DataViewExpander;
-let expander2: DataViewExpander;
+
+let runtimeServices1: TestRuntimeServices;
+let runtimeServices2: TestRuntimeServices;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
-    transportServices1 = runtimeServices[0].transport;
-    transportServices2 = runtimeServices[1].transport;
-    expander1 = runtimeServices[0].expander;
-    expander2 = runtimeServices[1].expander;
+    runtimeServices1 = runtimeServices[0];
+    runtimeServices2 = runtimeServices[1];
+
     await establishRelationshipWithContents(
-        transportServices1,
-        transportServices2,
+        runtimeServices1.transport,
+        runtimeServices2.transport,
 
         RelationshipTemplateContent.from({
             onNewRelationship: {
@@ -53,7 +50,7 @@ beforeAll(async () => {
                         result: ResponseItemResult.Accepted,
                         attributeId: await CoreIdHelper.notPrefixed.generate(),
                         attribute: IdentityAttribute.from({
-                            owner: CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address),
+                            owner: CoreAddress.from((await runtimeServices1.transport.account.getIdentityInfo()).value.address),
                             value: GivenName.from("AGivenName")
                         })
                     }).toJSON()
@@ -67,8 +64,8 @@ afterAll(() => serviceProvider.stop());
 
 describe("RelationshipDVO", () => {
     test("check the relationship dvo for the templator", async () => {
-        const dtos = (await transportServices1.relationships.getRelationships({})).value;
-        const dvos = await expander1.expandRelationshipDTOs(dtos);
+        const dtos = (await runtimeServices1.transport.relationships.getRelationships({})).value;
+        const dvos = await runtimeServices1.expander.expandRelationshipDTOs(dtos);
         const dto = dtos[0];
         const dvo = dvos[0];
         expect(dvo).toBeDefined();
@@ -87,8 +84,8 @@ describe("RelationshipDVO", () => {
     });
 
     test("check the relationship dvo for the requestor", async () => {
-        const dtos = (await transportServices2.relationships.getRelationships({})).value;
-        const dvos = await expander2.expandRelationshipDTOs(dtos);
+        const dtos = (await runtimeServices2.transport.relationships.getRelationships({})).value;
+        const dvos = await runtimeServices2.expander.expandRelationshipDTOs(dtos);
         const dto = dtos[0];
         const dvo = dvos[0];
         expect(dvo).toBeDefined();
@@ -104,5 +101,25 @@ describe("RelationshipDVO", () => {
         expect(dvo.relationship!.statusText).toBe("i18n://dvo.relationship.Active");
 
         expect(dvo.relationship!.templateId).toBe(dto.template.id);
+    });
+
+    test("check the relationship dvo for the templator wit active relationshipSetting", async () => {
+        const dtos = (await runtimeServices1.transport.relationships.getRelationships({})).value;
+        const dto = dtos[0];
+
+        await runtimeServices1.consumption.settings.upsertSettingByKey({
+            key: "relationshipSetting",
+            value: { userTitle: "aTitle", userDescription: "aDescription" },
+            scope: "Relationship",
+            reference: dto.id
+        });
+
+        const dvos = await runtimeServices1.expander.expandRelationshipDTOs(dtos);
+        const dvo = dvos[0];
+
+        expect(dvo).toBeDefined();
+        expect(dvo.name).toBe("aTitle");
+        expect(dvo.originalName).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.description).toBe("aDescription");
     });
 });
