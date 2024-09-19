@@ -13,7 +13,7 @@ describe("CorrelationId", function () {
 
     beforeAll(async function () {
         runtimeServiceProvider = new RuntimeServiceProvider();
-        runtime = (await runtimeServiceProvider.launch(1))[0];
+        runtime = (await runtimeServiceProvider.launch(1, { useCorrelator: true }))[0];
 
         const accountController = Container.get(AccountController);
         interceptor = new RequestInterceptor((accountController as any).synchronization.client);

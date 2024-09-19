@@ -48,7 +48,7 @@ export class MessageController extends TransportController {
         this.secrets = new RelationshipSecretController(this.parent);
         await this.secrets.init();
 
-        this.client = new MessageClient(this.config, this.parent.authenticator);
+        this.client = new MessageClient(this.config, this.parent.authenticator, this.transport.correlator);
         this.messages = await this.parent.getSynchronizedCollection(DbCollectionName.Messages);
         return this;
     }
