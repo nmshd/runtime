@@ -7,6 +7,8 @@ import { SettingMapper } from "./SettingMapper";
 
 export interface GetSettingByKeyRequest {
     key: string;
+    reference?: string;
+    scope?: "Identity" | "Device" | "Relationship";
 }
 
 class Validator extends SchemaValidator<GetSettingByKeyRequest> {
@@ -24,7 +26,11 @@ export class GetSettingByKeyUseCase extends UseCase<GetSettingByKeyRequest, Sett
     }
 
     protected async executeInternal(request: GetSettingByKeyRequest): Promise<Result<SettingDTO>> {
-        const settings = await this.settingController.getSettings({ key: request.key });
+        const settings = await this.settingController.getSettings({
+            key: request.key,
+            reference: request.reference,
+            scope: request.scope
+        });
         if (settings.length === 0) {
             return Result.fail(RuntimeErrors.general.recordNotFound(Setting));
         }
