@@ -11,7 +11,7 @@ export interface GeneralRequestConfig {
 }
 
 export interface RequestItemConfig extends GeneralRequestConfig {
-    "content.item.@type": string | string[];
+    "content.item.@type"?: string | string[];
     "content.item.mustBeAccepted"?: boolean;
     "content.item.title"?: string | string[];
     "content.item.description"?: string | string[];
@@ -137,11 +137,11 @@ export type RequestItemDerivationConfig =
     | ShareAttributeRequestItemConfig;
 
 export function isGeneralRequestConfig(input: any): input is GeneralRequestConfig {
-    return !input["content.item.@type"];
+    return !Object.keys(input).some((key) => key.startsWith("content.item."));
 }
 
 export function isRequestItemDerivationConfig(input: any): input is RequestItemDerivationConfig {
-    return !!input["content.item.@type"];
+    return Object.keys(input).some((key) => key.startsWith("content.item."));
 }
 
 export type RequestConfig = GeneralRequestConfig | RequestItemDerivationConfig;
