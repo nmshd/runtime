@@ -220,6 +220,7 @@ describe("MessageController", function () {
 
     describe("Relationship Termination", function () {
         let messageId: CoreId;
+
         beforeAll(async function () {
             messageId = (await TestUtil.sendMessage(sender, recipient)).id;
             await TestUtil.terminateRelationship(sender, recipient);
