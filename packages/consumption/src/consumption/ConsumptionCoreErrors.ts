@@ -310,6 +310,10 @@ class Requests {
         return new ApplicationError("error.consumption.requests.validation.inheritedFromItem", message);
     }
 
+    public cannotShareARequestWithYourself() {
+        return new CoreError("error.consumption.requests.cannotShareARequestWithYourself", "You cannot share a Request with yourself.");
+    }
+
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);

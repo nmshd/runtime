@@ -40,6 +40,9 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     public async canCreate(params: ICanCreateOutgoingRequestParameters): Promise<ValidationResult> {
         const parsedParams = CanCreateOutgoingRequestParameters.from(params);
+        if (parsedParams.peer?.equals(this.identity.address)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareARequestWithYourself());
+        }
         if (parsedParams.peer) {
             const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
 
