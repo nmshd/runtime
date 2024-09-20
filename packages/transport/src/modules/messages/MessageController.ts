@@ -507,10 +507,10 @@ export class MessageController extends TransportController {
                 );
             }
         } else {
-            relationship = await this.relationships.getOnceActiveRelationshipToIdentity(envelope.createdBy);
+            relationship = await this.relationships.getRelationshipToIdentity(envelope.createdBy);
 
             if (!relationship) {
-                throw TransportCoreErrors.general.recordNotFound("Once active Relationship to Identity", envelope.createdBy.toString());
+                throw TransportCoreErrors.general.recordNotFound(Relationship, envelope.createdBy.toString());
             }
 
             const [peerMessage, peerKey] = await this.decryptPeerEnvelope(envelope, relationship);
