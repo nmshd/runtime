@@ -219,12 +219,19 @@ describe("MessageController", function () {
     });
 
     describe("Relationship Termination", function () {
+        let messageId: CoreId;
         beforeAll(async function () {
+            messageId = (await TestUtil.sendMessage(sender, recipient)).id;
             await TestUtil.terminateRelationship(sender, recipient);
         });
 
         test("should not send a message on a terminated relationship", async function () {
             await expect(TestUtil.sendMessage(sender, recipient)).rejects.toThrow("error.transport.messages.missingOrInactiveRelationship");
+        });
+
+        test("should still decrypt the message", async function () {
+            await expect(sender.messages.fetchCaches([messageId])).resolves.not.toThrow();
+            await expect(recipient.messages.fetchCaches([messageId])).resolves.not.toThrow();
         });
     });
 });
