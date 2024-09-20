@@ -121,40 +121,23 @@ export class TestUtil {
         return { winner: syncWinner, looser: syncLooser, thrownError: thrownError };
     }
 
-    public static async expectThrowsRequestErrorAsync(method: Function | Promise<any>, errorMessageRegexp?: RegExp | string, status?: number): Promise<void> {
-        return await this.expectThrowsAsync(method, (error: Error) => {
-            if (errorMessageRegexp) {
-                expect(error.message).toMatch(new RegExp(errorMessageRegexp));
-            }
+    public static async expectThrowsRequestErrorAsync(method: Promise<any>, errorMessageRegexp?: RegExp | string, status?: number): Promise<void> {
+        await expect(method).rejects.toThrow(RequestError);
 
+        try {
+            await method;
+        } catch (error) {
             expect(error).toBeInstanceOf(RequestError);
 
             const requestError = error as RequestError;
 
-            expect(requestError.status).toStrictEqual(status);
-        });
-    }
-
-    private static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string | ((e: Error) => void)): Promise<void> {
-        let error: Error | undefined;
-        try {
-            if (typeof method === "function") {
-                await method();
-            } else {
-                await method;
+            if (errorMessageRegexp) {
+                expect(requestError.message).toMatch(new RegExp(errorMessageRegexp));
             }
-        } catch (err: any) {
-            error = err;
-        }
-        expect(error).toBeInstanceOf(Error);
 
-        if (typeof errorMessageRegexp === "function") {
-            errorMessageRegexp(error!);
-            return;
-        }
-
-        if (errorMessageRegexp) {
-            expect(error!.message).toMatch(new RegExp(errorMessageRegexp));
+            if (status) {
+                expect(requestError.status).toStrictEqual(status);
+            }
         }
     }
 
