@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate } from "@nmshd/core-types";
-import { AccountController, IdentityDeletionProcessStatus, Transport } from "../../../src";
+import { AccountController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("SyncController.ordered", function () {
@@ -44,11 +44,5 @@ describe("SyncController.ordered", function () {
         const newDevice = await recipient!.devices.sendDevice({ name: "Test2", isAdmin: true });
         await recipient!.syncDatawallet();
         recipientSecondDevice = await TestUtil.onboardDevice(transport, await recipient!.devices.getSharedSecret(newDevice.id));
-
-        // run an operation on the newly created account
-        await recipientSecondDevice.identityDeletionProcess.getIdentityDeletionProcessByStatus(
-            IdentityDeletionProcessStatus.Approved,
-            IdentityDeletionProcessStatus.WaitingForApproval
-        );
     });
 });
