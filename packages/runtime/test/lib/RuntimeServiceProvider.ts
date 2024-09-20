@@ -1,3 +1,4 @@
+import correlator from "correlation-id";
 import { AnonymousServices, ConsumptionServices, DataViewExpander, DeciderModuleConfigurationOverwrite, RuntimeConfig, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
 import { TestRuntime } from "./TestRuntime";
@@ -19,6 +20,7 @@ export interface LaunchConfiguration {
     enableAttributeListenerModule?: boolean;
     enableNotificationModule?: boolean;
     enableDefaultRepositoryAttributes?: boolean;
+    useCorrelator?: boolean;
 }
 
 export class RuntimeServiceProvider {
@@ -87,9 +89,14 @@ export class RuntimeServiceProvider {
 
             config.modules.decider.automationConfig = launchConfiguration.configureDeciderModule?.automationConfig;
 
-            const runtime = new TestRuntime(config, {
-                setDefaultRepositoryAttributes: launchConfiguration.enableDefaultRepositoryAttributes ?? false
-            });
+            const runtime = new TestRuntime(
+                config,
+                {
+                    setDefaultRepositoryAttributes: launchConfiguration.enableDefaultRepositoryAttributes ?? false
+                },
+                launchConfiguration.useCorrelator ? correlator : undefined
+            );
+
             this.runtimes.push(runtime);
 
             await runtime.init();

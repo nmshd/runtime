@@ -111,7 +111,7 @@ export class AccountController {
         private readonly _config: IConfig,
         private readonly dependencyOverrides: DependencyOverrides = {}
     ) {
-        this._authenticator = new Authenticator(this);
+        this._authenticator = new Authenticator(this, _transport.correlator);
         this._log = TransportLoggerFactory.getLogger(ControllerName.Account);
     }
 
@@ -120,8 +120,8 @@ export class AccountController {
         this.info = await this.db.getMap("AccountInfo");
         this.unpushedDatawalletModifications = await this.db.getCollection(DbCollectionName.UnpushedDatawalletModifications);
 
-        this.deviceClient = new DeviceClient(this.config);
-        this.identityClient = new IdentityClient(this.config);
+        this.deviceClient = new DeviceClient(this.config, this._transport.correlator);
+        this.identityClient = new IdentityClient(this.config, this._transport.correlator);
 
         this._identity = new IdentityController(this);
         this._identityDeletionProcess = new IdentityDeletionProcessController(this);
@@ -146,7 +146,7 @@ export class AccountController {
 
                 identityCreated = true;
                 device = result.device;
-                this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator);
+                this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator, this.transport.correlator);
             } else {
                 // Device Onboarding
                 device = await this.onboardDevice(deviceSharedSecret);
@@ -166,7 +166,7 @@ export class AccountController {
             await this.identityDeletionProcess.init();
             await this.activeDevice.init(availableBaseKey, availableDevice);
 
-            this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator);
+            this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator, this.transport.correlator);
         } else {
             throw new TransportError("The combination of deviceSharedSecret, existing identity or device is not allowed.");
         }
@@ -401,7 +401,7 @@ export class AccountController {
             await this.activeDevice.secrets.storeSecret(deviceSharedSecret.identityPrivateKey, DeviceSecretType.IdentitySignature);
         }
 
-        this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator);
+        this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator, this.transport.correlator);
 
         await this.activeDevice.changePassword(devicePwdDn);
 
