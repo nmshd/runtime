@@ -121,23 +121,25 @@ export class TestUtil {
         return { winner: syncWinner, looser: syncLooser, thrownError: thrownError };
     }
 
-    public static async expectThrowsRequestErrorAsync(method: Promise<any>, errorMessageRegexp?: RegExp | string, status?: number): Promise<void> {
-        await expect(method).rejects.toThrow(RequestError);
+    public static async expectThrowsRequestErrorAsync(promise: Promise<any>, errorMessageRegexp?: RegExp | string, status?: number): Promise<void> {
+        let error: Error | undefined;
 
         try {
-            await method;
-        } catch (error) {
-            expect(error).toBeInstanceOf(RequestError);
+            await promise;
+        } catch (e) {
+            error = e as Error;
+        }
 
-            const requestError = error as RequestError;
+        expect(error).toBeInstanceOf(RequestError);
 
-            if (errorMessageRegexp) {
-                expect(requestError.message).toMatch(new RegExp(errorMessageRegexp));
-            }
+        const requestError = error as RequestError;
 
-            if (status) {
-                expect(requestError.status).toStrictEqual(status);
-            }
+        if (errorMessageRegexp) {
+            expect(requestError.message).toMatch(new RegExp(errorMessageRegexp));
+        }
+
+        if (status) {
+            expect(requestError.status).toStrictEqual(status);
         }
     }
 
