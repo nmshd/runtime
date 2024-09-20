@@ -5,7 +5,6 @@ import { CoreCrypto, TransportCoreErrors } from "../../core";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
 import { Relationship } from "../relationships/local/Relationship";
-import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus";
 import { ChallengeAuthClient } from "./backbone/ChallengeAuthClient";
 import { ChallengeClient } from "./backbone/ChallengeClient";
 import { Challenge, ChallengeType } from "./data/Challenge";
@@ -31,9 +30,9 @@ export class ChallengeController extends TransportController {
     private async validateChallengeLocally(challenge: Challenge, signedChallenge: ChallengeSigned): Promise<{ isValid: boolean; correspondingRelationship?: Relationship }> {
         if (!challenge.createdBy) return { isValid: false };
 
-        const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(challenge.createdBy);
+        const relationship = await this.parent.relationships.getOnceActiveRelationshipToIdentity(challenge.createdBy);
         if (!relationship) {
-            throw TransportCoreErrors.general.recordNotFound(Relationship, challenge.createdBy.toString());
+            throw TransportCoreErrors.general.recordNotFound("Once active Relationship to Identity", challenge.createdBy.toString());
         }
         const challengeBuffer = CoreBuffer.fromUtf8(signedChallenge.challenge);
         let isValid = false;
@@ -89,8 +88,8 @@ export class ChallengeController extends TransportController {
 
     @log()
     public async createChallenge(type: ChallengeType = ChallengeType.Identity, relationship?: Relationship): Promise<ChallengeSigned> {
-        if (type === ChallengeType.Relationship && relationship?.status !== RelationshipStatus.Active) {
-            throw TransportCoreErrors.challenges.challengeTypeRequiresActiveRelationship();
+        if (type === ChallengeType.Relationship && (!relationship || !this.parent.relationships.relationshipWasOnceActive(relationship))) {
+            throw TransportCoreErrors.challenges.challengeTypeRequiresOnceActiveRelationship();
         }
 
         const backboneResponse = (await this.authClient.createChallenge()).value;

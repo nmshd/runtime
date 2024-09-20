@@ -127,6 +127,17 @@ export class RelationshipsController extends TransportController {
         return await this.getRelationshipToIdentity(address, RelationshipStatus.Active);
     }
 
+    public async getOnceActiveRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
+        const relationship = await this.getRelationshipToIdentity(address);
+        if (!relationship || !this.relationshipWasOnceActive(relationship)) return;
+
+        return relationship;
+    }
+
+    public relationshipWasOnceActive(relationship: Relationship): boolean {
+        return !!relationship.cache?.auditLog.find((entry) => entry.newStatus === RelationshipStatus.Active);
+    }
+
     public async getRelationship(id: CoreId): Promise<Relationship | undefined> {
         const relationshipDoc = await this.relationships.read(id.toString());
         if (!relationshipDoc) {
