@@ -520,6 +520,14 @@ describe("RelationshipTermination", () => {
         expect(result).toBeAnError(/.*/, "error.consumption.requests.wrongRelationshipStatus");
     });
 
+    test("should not create a challenge for the relationship", async () => {
+        const result = await services1.transport.challenges.createChallenge({
+            challengeType: "Relationship",
+            relationship: relationshipId
+        });
+        expect(result).toBeAnError(/.*/, "error.transport.challenges.challengeTypeRequiresActiveRelationship");
+    });
+
     describe("Validating relationship operations on terminated relationship", () => {
         test("should not be able to create a new relationship if a terminated relationship currently exists", async () => {
             const templateId = (await exchangeTemplate(services2.transport, services1.transport)).id;
