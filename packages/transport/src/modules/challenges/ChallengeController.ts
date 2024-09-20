@@ -5,6 +5,7 @@ import { CoreCrypto, TransportCoreErrors } from "../../core";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
 import { Relationship } from "../relationships/local/Relationship";
+import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus";
 import { ChallengeAuthClient } from "./backbone/ChallengeAuthClient";
 import { ChallengeClient } from "./backbone/ChallengeClient";
 import { Challenge, ChallengeType } from "./data/Challenge";
@@ -88,8 +89,8 @@ export class ChallengeController extends TransportController {
 
     @log()
     public async createChallenge(type: ChallengeType = ChallengeType.Identity, relationship?: Relationship): Promise<ChallengeSigned> {
-        if (type === ChallengeType.Relationship && (!relationship || !this.parent.relationships.relationshipWasOnceActive(relationship))) {
-            throw TransportCoreErrors.challenges.challengeTypeRequiresOnceActiveRelationship();
+        if (type === ChallengeType.Relationship && relationship?.status !== RelationshipStatus.Active) {
+            throw TransportCoreErrors.challenges.challengeTypeRequiresActiveRelationship();
         }
 
         const backboneResponse = (await this.authClient.createChallenge()).value;

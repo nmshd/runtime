@@ -55,4 +55,11 @@ describe("ChallengeTest", function () {
         expect(validationResult.isValid).toBe(true);
         expect(validationResult.correspondingRelationship).toBeDefined();
     });
+
+    test("should not create a relationship challenge on terminated relationship", async function () {
+        const terminatedRelationship = (await TestUtil.terminateRelationship(recipient, sender)).terminatedRelationshipPeer;
+        await expect(sender.challenges.createChallenge(ChallengeType.Relationship, terminatedRelationship)).rejects.toThrow(
+            "error.transport.challenges.challengeTypeRequiresActiveRelationship"
+        );
+    });
 });

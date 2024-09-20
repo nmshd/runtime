@@ -98,8 +98,8 @@ class Secrets {
 }
 
 class Challenges {
-    public challengeTypeRequiresOnceActiveRelationship() {
-        return new CoreError("error.transport.challenges.challengeTypeRequiresRelationship", "The challenge type Relationship requires a once active Relationship.");
+    public challengeTypeRequiresActiveRelationship() {
+        return new CoreError("error.transport.challenges.challengeTypeRequiresActiveRelationship", "The challenge type Relationship requires an active Relationship.");
     }
 }
 
