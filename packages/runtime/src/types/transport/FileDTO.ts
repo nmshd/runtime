@@ -9,7 +9,6 @@ export interface FileDTO {
     mimetype: string;
     isOwn: boolean;
     title: string;
-    secretKey: string;
     description?: string;
     truncatedReference: string;
 }
