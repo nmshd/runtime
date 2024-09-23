@@ -211,15 +211,10 @@ export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationCont
 
 export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON, templateExpiresAt?: DateTime): Promise<RelationshipTemplateDTO> {
     const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
-    let expirationDateTime = defaultExpirationDateTime;
-
-    if (templateExpiresAt) {
-        expirationDateTime = templateExpiresAt.toString();
-    }
 
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
-        expiresAt: expirationDateTime,
+        expiresAt: templateExpiresAt ? templateExpiresAt.toString() : defaultExpirationDateTime,
         content: body ?? emptyRelationshipTemplateContent
     });
 
