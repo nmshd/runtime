@@ -53,11 +53,17 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
     }
 
     protected async executeInternal(request: CreateOwnRelationshipTemplateRequest): Promise<Result<RelationshipTemplateDTO>> {
-        const validationError = await this.validateRelationshipTemplateContent(request.content, CoreDate.from(request.expiresAt));
+        const content = request.content;
+
+        const validationError = await this.validateRelationshipTemplateContent(content, CoreDate.from(request.expiresAt));
         if (validationError) return Result.fail(validationError);
 
+        if (content instanceof RelationshipTemplateContent && !content.onNewRelationship.expiresAt) {
+            content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
+        }
+
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
-            content: request.content,
+            content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations
         });
