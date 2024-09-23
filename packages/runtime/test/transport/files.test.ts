@@ -315,7 +315,7 @@ describe("Load peer file with token reference", () => {
 
     test("passing empty object causes an error", async () => {
         const response = await transportServices2.files.getOrLoadFile({} as any);
-        expect(response).toBeAnError("The given combination of properties in the payload is not supported.", "error.runtime.validation.invalidPayload");
+        expect(response).toBeAnError("token / file reference invalid", "error.runtime.validation.invalidPropertyValue");
     });
 });
 
@@ -336,6 +336,8 @@ describe("Load peer file with file id and secret", () => {
     test("after peer file is loaded the file can be accessed under /Files/{id}", async () => {
         expect(file).toBeDefined();
 
+        await transportServices2.files.getOrLoadFile({ reference: file.truncatedReference });
+
         const response = await transportServices2.files.getFile({ id: file.id });
         expect(response).toBeSuccessful();
         expect(response.value).toMatchObject({ ...file, isOwn: false });
@@ -343,6 +345,8 @@ describe("Load peer file with file id and secret", () => {
 
     test("after peer file is loaded it can be accessed under /Files", async () => {
         expect(file).toBeDefined();
+
+        await transportServices2.files.getOrLoadFile({ reference: file.truncatedReference });
 
         const response = await transportServices2.files.getFiles({ query: { createdAt: file.createdAt } });
         expect(response).toBeSuccessful();
