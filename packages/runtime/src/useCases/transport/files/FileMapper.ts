@@ -32,7 +32,6 @@ export class FileMapper {
             mimetype: file.cache.mimetype,
             isOwn: file.isOwn,
             title: file.cache.title ?? "",
-            secretKey: file.secretKey.toBase64(false),
             description: file.cache.description,
             truncatedReference: file.truncate()
         };
