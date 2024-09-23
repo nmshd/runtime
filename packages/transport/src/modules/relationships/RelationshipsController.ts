@@ -158,7 +158,7 @@ export class RelationshipsController extends TransportController {
                 throw canSendRelationship.error;
             }
 
-            if (canSendRelationship.error.code === "error.transport.relationships.expiredRelationshipTemplate") {
+            if (canSendRelationship.error.code === "error.transport.relationships.relationshipTemplateIsExpired") {
                 return Result.fail(canSendRelationship.error);
             }
         }
@@ -213,7 +213,7 @@ export class RelationshipsController extends TransportController {
         }
 
         if (template.isExpired()) {
-            return Result.fail(TransportCoreErrors.relationships.expiredRelationshipTemplate(template.id.toString()));
+            return Result.fail(TransportCoreErrors.relationships.relationshipTemplateIsExpired(template.id.toString()));
         }
 
         const result = await this.client.canCreateRelationship(peerAddress.toString());

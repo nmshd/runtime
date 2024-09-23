@@ -14,6 +14,7 @@ import {
     RelationshipAttributeConfidentiality,
     Request,
     RequestItemGroup,
+    ResponseItemDerivations,
     ResponseItemResult,
     ResponseJSON,
     ResponseResult
@@ -311,7 +312,7 @@ export class TestObjectFactory {
             source: { type: "RelationshipTemplate", reference: CoreId.from("RLT1") },
             response: {
                 createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                content: TestObjectFactory.createResponse(ResponseResult.Rejected)
+                content: TestObjectFactory.createResponse("REQ1", ResponseResult.Rejected)
             },
             status: params.status ?? LocalRequestStatus.Decided,
             statusLog: params.statusLogEntries ?? []
@@ -371,27 +372,21 @@ export class TestObjectFactory {
         };
     }
 
-    public static createResponse(result: ResponseResult = ResponseResult.Accepted, customRequestId = "REQ1"): IResponse {
+    public static createResponse(customRequestId = "REQ1", result: ResponseResult = ResponseResult.Accepted): IResponse {
+        let responseItem: ResponseItemDerivations = AcceptResponseItem.from({
+            result: ResponseItemResult.Accepted
+        });
+
         if (result === ResponseResult.Rejected) {
-            return {
-                result: result,
-                requestId: CoreId.from(customRequestId),
-                items: [
-                    RejectResponseItem.from({
-                        result: ResponseItemResult.Rejected
-                    })
-                ]
-            };
+            responseItem = RejectResponseItem.from({
+                result: ResponseItemResult.Rejected
+            });
         }
 
         return {
             result: result,
             requestId: CoreId.from(customRequestId),
-            items: [
-                AcceptResponseItem.from({
-                    result: ResponseItemResult.Accepted
-                })
-            ]
+            items: [responseItem]
         };
     }
 

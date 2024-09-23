@@ -40,11 +40,7 @@ export class AcceptIncomingRequestUseCase extends UseCase<AcceptIncomingRequestR
             if (existingRelationshipsToPeer.length === 0 && template.cache?.expiresAt && template.isExpired()) {
                 await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
 
-                return Result.fail(
-                    RuntimeErrors.relationships.expiredRelationshipTemplate(
-                        `The incoming Request has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to.`
-                    )
-                );
+                return Result.fail(RuntimeErrors.relationshipTemplates.relationshipTemplateIsExpired(template.id));
             }
         }
 

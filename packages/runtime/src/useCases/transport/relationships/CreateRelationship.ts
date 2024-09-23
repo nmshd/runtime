@@ -50,7 +50,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         const sendRelationshipResult = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
 
         if (!sendRelationshipResult.isSuccess) {
-            if (sendRelationshipResult.error.code === "error.transport.relationships.expiredRelationshipTemplate") {
+            if (sendRelationshipResult.error.code === "error.transport.relationships.relationshipTemplateIsExpired") {
                 if (template.cache?.content instanceof RelationshipTemplateContent && template.cache.expiresAt) {
                     const dbQuery: any = {};
                     dbQuery["source.reference"] = { $eq: template.id.toString() };

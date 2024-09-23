@@ -430,10 +430,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    public async updateRequestExpiryRegardingTemplate(request: LocalRequest, templateExpiresAt: CoreDate): Promise<void> {
+    public async updateRequestExpiryRegardingTemplate(request: LocalRequest, templateExpiresAt: CoreDate): Promise<LocalRequest> {
         const statusUpdated = request.updateStatusBasedOnTemplateExpiration(templateExpiresAt);
         if (statusUpdated) await this.update(request);
-        return;
+        return request;
     }
 }
 

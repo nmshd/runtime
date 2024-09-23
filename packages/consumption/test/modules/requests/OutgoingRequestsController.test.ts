@@ -287,7 +287,7 @@ describe("OutgoingRequestsController", function () {
             test("uses the id from the response for the created Local Request", async function () {
                 await When.iCreateAnOutgoingRequestFromRelationshipCreationWith({
                     responseSource: TestObjectFactory.createPendingRelationship(),
-                    response: TestObjectFactory.createResponse(ResponseResult.Accepted, "requestIdReceivedFromPeer")
+                    response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
 
                 await Then.theRequestHasTheId("requestIdReceivedFromPeer");
@@ -304,7 +304,7 @@ describe("OutgoingRequestsController", function () {
                         })
                     ),
                     responseSource: TestObjectFactory.createPendingRelationship(),
-                    response: TestObjectFactory.createResponse(ResponseResult.Accepted, "requestIdReceivedFromPeer")
+                    response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
 
                 await Then.theRequestHasTheId("requestIdReceivedFromPeer");
@@ -321,7 +321,7 @@ describe("OutgoingRequestsController", function () {
         test("uses the content from onExistingRelationship when the relationship exists", async function () {
             await When.iCreateAnOutgoingRequestFromRelationshipCreationWhenRelationshipExistsWith({
                 responseSource: TestObjectFactory.createIncomingIMessageWithResponse(CoreAddress.from("did:e:a-domain:dids:anidentity"), "requestIdReceivedFromPeer"),
-                response: TestObjectFactory.createResponse(ResponseResult.Accepted, "requestIdReceivedFromPeer")
+                response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
             });
             await Then.theRequestHasTheId("requestIdReceivedFromPeer");
             await Then.eventsHaveBeenPublished(OutgoingRequestCreatedAndCompletedEvent);
@@ -350,7 +350,7 @@ describe("OutgoingRequestsController", function () {
                         CoreAddress.from("did:e:a-domain:dids:anidentity"),
                         CoreId.from("requestIdReceivedFromPeer")
                     ),
-                    response: TestObjectFactory.createResponse(ResponseResult.Accepted, "requestIdReceivedFromPeer")
+                    response: TestObjectFactory.createResponse("requestIdReceivedFromPeer")
                 });
                 await Then.theRequestHasTheId("requestIdReceivedFromPeer");
                 await Then.eventsHaveBeenPublished(OutgoingRequestCreatedAndCompletedEvent);

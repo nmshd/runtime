@@ -8,16 +8,10 @@ import { Inject } from "typescript-ioc";
 import { RuntimeErrors, UseCase } from "../../common";
 import { CreateRelationshipRequest } from "./CreateRelationship";
 
-export type CanCreateRelationshipResponse = CanCreateRelationshipSuccessResponse | CanCreateRelationshipFailureResponse;
-
-export interface CanCreateRelationshipSuccessResponse {
-    isSuccess: true;
-}
-
-export interface CanCreateRelationshipFailureResponse {
-    isSuccess: false;
-    code: string;
-    message: string;
+export interface CanCreateRelationshipResponse {
+    isSuccess: boolean;
+    code?: string;
+    message?: string;
 }
 
 export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequest, CanCreateRelationshipResponse> {
@@ -36,6 +30,10 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
+        if (!template.cache) {
+            return Result.fail(RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString()));
+        }
+
         const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
         if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
             return Result.fail(
@@ -48,11 +46,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
         const canSendRelationship = await this.relationshipController.canSendRelationship({ creationContent: request.creationContent, template });
 
         if (!canSendRelationship.isSuccess) {
-            if (canSendRelationship.error.code === "error.transport.relationships.expiredRelationshipTemplate") {
-                if (!template.cache) {
-                    return Result.fail(RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString()));
-                }
-
+            if (canSendRelationship.error.code === "error.transport.relationships.relationshipTemplateIsExpired") {
                 if (template.cache.content instanceof RelationshipTemplateContent && template.cache.expiresAt) {
                     const dbQuery: any = {};
                     dbQuery["source.reference"] = { $eq: template.id.toString() };
@@ -64,7 +58,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
                 }
             }
 
-            const errorResponse: CanCreateRelationshipFailureResponse = {
+            const errorResponse: CanCreateRelationshipResponse = {
                 isSuccess: false,
                 code: canSendRelationship.error.code,
                 message: canSendRelationship.error.message
@@ -73,7 +67,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
             return Result.ok(errorResponse);
         }
 
-        const successResponse: CanCreateRelationshipSuccessResponse = { isSuccess: true };
+        const successResponse: CanCreateRelationshipResponse = { isSuccess: true };
         return Result.ok(successResponse);
     }
 }

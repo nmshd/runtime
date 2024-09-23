@@ -49,8 +49,8 @@ describe("Template Tests", () => {
         });
 
         expect(response).toBeAnError(
-            "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set so that the expiration date of the RelationshipTemplate is not exceeded.",
-            "error.runtime.relationshipTemplates.requestExpiresAfterRelationshipTemplate"
+            "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set such that the expiration date of the RelationshipTemplate is not exceeded.",
+            "error.runtime.relationshipTemplates.requestCannotExpireAfterRelationshipTemplate"
         );
     });
 

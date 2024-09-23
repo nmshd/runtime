@@ -21,10 +21,10 @@ class Relationships {
         );
     }
 
-    public expiredRelationshipTemplate(templateId: string) {
+    public relationshipTemplateIsExpired(templateId: string) {
         return new CoreError(
-            "error.transport.relationships.expiredRelationshipTemplate",
-            `The RelationshipTemplate '${templateId}' has already expired and therefore cannot be used to create a Relationship.`
+            "error.transport.relationships.relationshipTemplateIsExpired",
+            `The RelationshipTemplate '${templateId}' is already expired and therefore cannot be used to create a Relationship.`
         );
     }
 

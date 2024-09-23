@@ -39,12 +39,7 @@ export class CanRejectIncomingRequestUseCase extends UseCase<RejectIncomingReque
             if (existingRelationshipsToPeer.length === 0 && template.cache?.expiresAt && template.isExpired()) {
                 await this.incomingRequestsController.updateRequestExpiryRegardingTemplate(localRequest, template.cache.expiresAt);
 
-                const errorResult = new ErrorValidationResult(
-                    RuntimeErrors.relationships.expiredRelationshipTemplate(
-                        `The incoming Request has the already expired RelationshipTemplate '${template.id.toString()}' as its source, which is why it cannot be responded to.`
-                    ),
-                    []
-                );
+                const errorResult = new ErrorValidationResult(RuntimeErrors.relationshipTemplates.relationshipTemplateIsExpired(template.id), []);
 
                 const dto = RequestValidationResultMapper.toRequestValidationResultDTO(errorResult);
 

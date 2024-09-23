@@ -92,19 +92,22 @@ class RelationshipTemplates {
         );
     }
 
-    public requestExpiresAfterRelationshipTemplate(): ApplicationError {
+    public requestCannotExpireAfterRelationshipTemplate(): ApplicationError {
         return new ApplicationError(
-            "error.runtime.relationshipTemplates.requestExpiresAfterRelationshipTemplate",
-            "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set so that the expiration date of the RelationshipTemplate is not exceeded."
+            "error.runtime.relationshipTemplates.requestCannotExpireAfterRelationshipTemplate",
+            "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set such that the expiration date of the RelationshipTemplate is not exceeded."
+        );
+    }
+
+    public relationshipTemplateIsExpired(templateId: CoreId): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationshipTemplates.relationshipTemplateIsExpired",
+            `The incoming Request cannot be responded to, since its source RelationshipTemplate '${templateId.toString()}' is already expired.`
         );
     }
 }
 
 class Relationships {
-    public expiredRelationshipTemplate(message: string): ApplicationError {
-        return new ApplicationError("error.runtime.relationships.expiredRelationshipTemplate", message);
-    }
-
     public isNeitherRejectedNorRevoked(): ApplicationError {
         return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", "The status of the Relationship is neither 'Rejected' nor 'Revoked'.");
     }

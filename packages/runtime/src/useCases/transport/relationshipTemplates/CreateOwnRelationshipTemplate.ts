@@ -79,7 +79,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         if (!(transformedContent instanceof RelationshipTemplateContent)) return;
 
         if (transformedContent.onNewRelationship.expiresAt?.isAfter(templateExpiresAt)) {
-            return RuntimeErrors.relationshipTemplates.requestExpiresAfterRelationshipTemplate();
+            return RuntimeErrors.relationshipTemplates.requestCannotExpireAfterRelationshipTemplate();
         }
 
         const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });

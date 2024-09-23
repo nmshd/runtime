@@ -1,6 +1,7 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
 import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
-import { CanCreateRelationshipFailureResponse } from "@nmshd/runtime/src/useCases/transport/relationships/CanCreateRelationship";
+import { CanCreateRelationshipResponse } from "@nmshd/runtime/src/useCases/transport/relationships/CanCreateRelationship";
+import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import {
     GetRelationshipsQuery,
@@ -51,23 +52,22 @@ beforeAll(async () => {
     services3 = runtimeServices[2];
 }, 30000);
 
+afterEach(async () => {
+    const activeIdentityDeletionProcess = await services3.transport.identityDeletionProcesses.getActiveIdentityDeletionProcess();
+    if (!activeIdentityDeletionProcess.isSuccess) {
+        return;
+    }
+    let abortResult;
+    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+        abortResult = await services3.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
+    }
+
+    if (abortResult?.isError) throw abortResult.error;
+});
+
 afterAll(() => serviceProvider.stop());
 
 describe("CanCreateRelationship", () => {
-    const serviceProvider = new RuntimeServiceProvider();
-    let services1: TestRuntimeServices;
-    let services2: TestRuntimeServices;
-    let services3: TestRuntimeServices;
-
-    beforeAll(async () => {
-        const runtimeServices = await serviceProvider.launch(3, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
-        services1 = runtimeServices[0];
-        services2 = runtimeServices[1];
-        services3 = runtimeServices[2];
-    }, 30000);
-
-    afterAll(() => serviceProvider.stop());
-
     test("cannot create Relationship if RelationshipTemplate is already expired", async () => {
         const templateContent: RelationshipTemplateContentJSON = {
             "@type": "RelationshipTemplateContent",
@@ -101,9 +101,9 @@ describe("CanCreateRelationship", () => {
         });
 
         assertIsCanCreateRelationshipFailureResponse(canCreateRelationshipResponse.value);
-        expect(canCreateRelationshipResponse.value.code).toBe("error.transport.relationships.expiredRelationshipTemplate");
+        expect(canCreateRelationshipResponse.value.code).toBe("error.transport.relationships.relationshipTemplateIsExpired");
         expect(canCreateRelationshipResponse.value.message).toContain(
-            `The RelationshipTemplate '${templateId}' has already expired and therefore cannot be used to create a Relationship.`
+            `The RelationshipTemplate '${templateId}' is already expired and therefore cannot be used to create a Relationship.`
         );
 
         const expiredRequest = (await services2.consumption.incomingRequests.getRequest({ id: incomingRequest.id })).value;
@@ -126,7 +126,7 @@ describe("CanCreateRelationship", () => {
         );
     });
 
-    function assertIsCanCreateRelationshipFailureResponse(obj: any): asserts obj is CanCreateRelationshipFailureResponse {
+    function assertIsCanCreateRelationshipFailureResponse(obj: any): asserts obj is CanCreateRelationshipResponse {
         if (!(obj && typeof obj.code === "string" && typeof obj.message === "string")) {
             throw new Error("Object is not of type CanCreateRelationshipFailureResponse.");
         }
@@ -176,10 +176,11 @@ describe("Create Relationship", () => {
         const templateId = (await exchangeTemplate(services1.transport, services2.transport, templateContent, DateTime.utc().plus({ seconds: 1 }))).id;
 
         await services2.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-        const requests = (await services2.consumption.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
+        await services2.eventBus.waitForRunningEventHandlers();
 
+        const requests = (await services2.consumption.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
         const incomingRequest = requests[0];
-        expect(incomingRequest.status).toBe(LocalRequestStatus.DecisionRequired);
+        expect([LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired]).toContain(incomingRequest.status);
 
         await sleep(12000);
 
@@ -189,8 +190,8 @@ describe("Create Relationship", () => {
         });
 
         expect(createRelationshipResponse).toBeAnError(
-            `The RelationshipTemplate '${templateId}' has already expired and therefore cannot be used to create a Relationship.`,
-            "error.transport.relationships.expiredRelationshipTemplate"
+            `The RelationshipTemplate '${templateId}' is already expired and therefore cannot be used to create a Relationship.`,
+            "error.transport.relationships.relationshipTemplateIsExpired"
         );
 
         const expiredRequest = (await services2.consumption.incomingRequests.getRequest({ id: incomingRequest.id })).value;
