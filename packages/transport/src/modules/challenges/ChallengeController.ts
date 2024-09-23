@@ -31,9 +31,9 @@ export class ChallengeController extends TransportController {
     private async validateChallengeLocally(challenge: Challenge, signedChallenge: ChallengeSigned): Promise<{ isValid: boolean; correspondingRelationship?: Relationship }> {
         if (!challenge.createdBy) return { isValid: false };
 
-        const relationship = await this.parent.relationships.getOnceActiveRelationshipToIdentity(challenge.createdBy);
+        const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(challenge.createdBy);
         if (!relationship) {
-            throw TransportCoreErrors.general.recordNotFound("Once active Relationship to Identity", challenge.createdBy.toString());
+            throw TransportCoreErrors.general.recordNotFound(Relationship, challenge.createdBy.toString());
         }
         const challengeBuffer = CoreBuffer.fromUtf8(signedChallenge.challenge);
         let isValid = false;
