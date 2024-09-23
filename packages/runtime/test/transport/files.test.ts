@@ -326,8 +326,31 @@ describe("Load peer file with the FileReference", () => {
         file = await uploadFile(transportServices1);
     });
 
+    test("before the peer file is loaded another client cannot access it", async () => {
+        expect(file).toBeDefined();
+
+        const response = await transportServices2.files.getFile({ id: file.id });
+        expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+    });
+
     test("load the file using the FileReference", async () => {
         const fileResult = await transportServices2.files.getOrLoadFile({ reference: file.truncatedReference });
         expect(fileResult).toBeSuccessful();
+    });
+
+    test("after peer file is loaded the file can be accessed under /Files/{id}", async () => {
+        expect(file).toBeDefined();
+
+        const response = await transportServices2.files.getFile({ id: file.id });
+        expect(response).toBeSuccessful();
+        expect(response.value).toMatchObject({ ...file, isOwn: false });
+    });
+
+    test("after peer file is loaded it can be accessed under /Files", async () => {
+        expect(file).toBeDefined();
+
+        const response = await transportServices2.files.getFiles({ query: { createdAt: file.createdAt } });
+        expect(response).toBeSuccessful();
+        expect(response.value).toContainEqual({ ...file, isOwn: false });
     });
 });
