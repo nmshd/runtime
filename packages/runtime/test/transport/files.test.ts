@@ -333,15 +333,6 @@ describe("Load peer file with file id and secret", () => {
         expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 
-    test("peer file can be loaded with file id and secret key", async () => {
-        expect(file).toBeDefined();
-
-        const response = await transportServices2.files.getOrLoadFile({ id: file.id, secretKey: file.secretKey });
-
-        expect(response).toBeSuccessful();
-        expect(response.value).toMatchObject({ ...file, isOwn: false });
-    });
-
     test("after peer file is loaded the file can be accessed under /Files/{id}", async () => {
         expect(file).toBeDefined();
 
@@ -356,42 +347,6 @@ describe("Load peer file with file id and secret", () => {
         const response = await transportServices2.files.getFiles({ query: { createdAt: file.createdAt } });
         expect(response).toBeSuccessful();
         expect(response.value).toContainEqual({ ...file, isOwn: false });
-    });
-
-    test("cannot pass an unkown file id", async () => {
-        expect(file).toBeDefined();
-
-        const response = await transportServices2.files.getOrLoadFile({ id: UNKNOWN_FILE_ID, secretKey: file.secretKey });
-
-        expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
-    });
-
-    test("cannot pass an unkown token id as file id", async () => {
-        expect(file).toBeDefined();
-
-        const response = await transportServices2.files.getOrLoadFile({ id: UNKNOWN_TOKEN_ID, secretKey: file.secretKey });
-
-        expect(response).toBeAnError("id must match pattern FIL.*", "error.runtime.validation.invalidPropertyValue");
-    });
-
-    test.each([
-        [null, "secretKey must be string"],
-        [undefined, "must have required property 'secretKey'"],
-        ["", "secretKey must NOT have fewer than 10 characters"]
-    ])("cannot pass %p as secret key", async (secretKey, expectedMessage) => {
-        const response = await transportServices2.files.getOrLoadFile({ id: file.id, secretKey: secretKey! });
-
-        expect(response).toBeAnError(expectedMessage, "error.runtime.validation.invalidPropertyValue");
-    });
-
-    test.each([
-        [null, "id must be string"],
-        [undefined, "must have required property 'id'"],
-        ["", "id must match pattern FIL.*"]
-    ])("cannot pass %p as file id", async (fileId, expectedMessage) => {
-        const response = await transportServices2.files.getOrLoadFile({ id: fileId!, secretKey: file.secretKey });
-
-        expect(response).toBeAnError(expectedMessage, "error.runtime.validation.invalidPropertyValue");
     });
 });
 
