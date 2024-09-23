@@ -14,11 +14,13 @@ import {
     Notification,
     RelationshipCreationContentJSON,
     RelationshipTemplateContentJSON,
+    Request,
     RequestItemGroupJSON,
     RequestItemJSONDerivations,
     RequestJSON,
     ResponseWrapperJSON,
-    ShareAttributeAcceptResponseItemJSON
+    ShareAttributeAcceptResponseItemJSON,
+    ShareAttributeRequestItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
@@ -704,7 +706,7 @@ export async function waitForRecipientToReceiveNotification(
  *
  * Returns the sender's own shared ThirdPartyRelationshipAttribute.
  */
-export async function executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+export async function executeFullRequestThirdPartyRelationshipAttributeQueryFlow(
     owner: TestRuntimeServices,
     peer: TestRuntimeServices,
     request: CreateOutgoingRequestRequest,
@@ -730,6 +732,36 @@ export async function executeFullRequestAndShareThirdPartyRelationshipAttributeF
 
     const ownSharedThirdPartyRelationshipAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
     return ownSharedThirdPartyRelationshipAttribute;
+}
+
+export async function executeFullShareThirdPartyRelationshipAttributeFlow(
+    owner: TestRuntimeServices,
+    peer: TestRuntimeServices,
+    requestItem: ShareAttributeRequestItem
+): Promise<LocalAttributeDTO> {
+    const request = Request.from({
+        items: [requestItem]
+    });
+
+    const canCreateResult = await owner.consumption.outgoingRequests.canCreate({
+        content: request.toJSON(),
+        peer: peer.address
+    });
+
+    expect(canCreateResult.value.isSuccess).toBe(true);
+
+    const createRequestResult = await owner.consumption.outgoingRequests.create({
+        content: request.toJSON(),
+        peer: peer.address
+    });
+
+    await owner.transport.messages.sendMessage({
+        recipients: [peer.address],
+        content: createRequestResult.value.content
+    });
+
+    const result = await acceptIncomingShareAttributeRequest(owner, peer, createRequestResult.value.id);
+    return result;
 }
 
 /**

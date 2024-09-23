@@ -225,12 +225,14 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: CoreId.from(existingSourceAttribute.id),
                     peer: CoreAddress.from(requestInfo.peer),
-                    requestReference: CoreId.from(requestInfo.id)
+                    requestReference: CoreId.from(requestInfo.id),
+                    thirdPartyAddress: existingSourceAttribute.shareInfo?.peer ? CoreAddress.from(existingSourceAttribute.shareInfo.peer) : undefined
                 });
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: sharedLocalAttribute.id,
-                    attribute: sharedLocalAttribute.content
+                    attribute: sharedLocalAttribute.content,
+                    thirdPartyAddress: sharedLocalAttribute.shareInfo?.thirdPartyAddress
                 });
             }
 
@@ -361,7 +363,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 id: responseItem.attributeId,
                 content: responseItem.attribute,
                 peer: requestInfo.peer,
-                requestReference: requestInfo.id
+                requestReference: requestInfo.id,
+                thirdPartyAddress: responseItem.thirdPartyAddress
             });
         }
 

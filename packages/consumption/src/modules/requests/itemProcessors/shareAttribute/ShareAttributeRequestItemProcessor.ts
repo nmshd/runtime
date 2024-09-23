@@ -8,7 +8,7 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/core-types";
+import { CoreAddress, CoreError } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
@@ -130,6 +130,18 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             if (nonPendingRelationshipsToPeer.length === 0) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
             }
+
+            if (recipient && !foundAttribute.shareInfo.peer.equals(recipient) && !requestItem.thirdPartyAddress) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "The source attribute provided is a relationship attribute. You must provide a third party address that is the original peer when sharing with a third party."
+                    )
+                );
+            }
+
+            if (requestItem.thirdPartyAddress && !requestItem.thirdPartyAddress.equals(foundAttribute.shareInfo.peer)) {
+                return ValidationResult.error(new CoreError("The third party address must be the peer of the relationship attribute."));
+            }
         }
 
         if (requestItem.attribute instanceof IdentityAttribute) {
@@ -172,7 +184,8 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         const localAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
             content: requestItem.attribute,
             peer: requestInfo.peer,
-            requestReference: requestInfo.id
+            requestReference: requestInfo.id,
+            thirdPartyAddress: requestItem.thirdPartyAddress
         });
 
         return ShareAttributeAcceptResponseItem.from({
@@ -194,7 +207,8 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             attributeId: responseItem.attributeId,
             sourceAttributeId: requestItem.sourceAttributeId,
             peer: requestInfo.peer,
-            requestReference: requestInfo.id
+            requestReference: requestInfo.id,
+            thirdPartyAddress: requestItem.thirdPartyAddress
         });
     }
 }

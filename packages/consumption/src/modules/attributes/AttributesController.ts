@@ -340,7 +340,8 @@ export class AttributesController extends ConsumptionBaseController {
         const shareInfo = LocalAttributeShareInfo.from({
             peer: parsedParams.peer,
             requestReference: parsedParams.requestReference,
-            sourceAttribute: parsedParams.sourceAttributeId
+            sourceAttribute: parsedParams.sourceAttributeId,
+            thirdPartyAddress: parsedParams.thirdPartyAddress
         });
 
         const sharedLocalAttributeCopy = await LocalAttribute.fromAttribute(sourceAttribute.content, undefined, shareInfo, parsedParams.attributeId);
@@ -353,7 +354,8 @@ export class AttributesController extends ConsumptionBaseController {
     public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
         const shareInfo = LocalAttributeShareInfo.from({
             peer: params.peer,
-            requestReference: params.requestReference
+            requestReference: params.requestReference,
+            thirdPartyAddress: params.thirdPartyAddress
         });
         const peerLocalAttribute = LocalAttribute.from({
             id: params.id ?? (await ConsumptionIds.attribute.generate()),

@@ -7,6 +7,7 @@ export interface CreateSharedLocalAttributeParamsJSON {
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
     requestReferece: string;
     peer: string;
+    thirdPartyAddress?: string;
 }
 
 export interface ICreateSharedLocalAttributeParams extends ISerializable {
@@ -14,6 +15,7 @@ export interface ICreateSharedLocalAttributeParams extends ISerializable {
     content: IIdentityAttribute | IRelationshipAttribute;
     requestReference: ICoreId;
     peer: ICoreAddress;
+    thirdPartyAddress?: ICoreAddress;
 }
 
 export class CreateSharedLocalAttributeParams extends Serializable implements ICreateSharedLocalAttributeParams {
@@ -32,6 +34,10 @@ export class CreateSharedLocalAttributeParams extends Serializable implements IC
     @serialize()
     @validate()
     public peer: CoreAddress;
+
+    @serialize()
+    @validate({ nullable: true })
+    public thirdPartyAddress: CoreAddress;
 
     public static from(value: ICreateSharedLocalAttributeParams | CreateSharedLocalAttributeParamsJSON): CreateSharedLocalAttributeParams {
         return this.fromAny(value);
