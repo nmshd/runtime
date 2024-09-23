@@ -198,6 +198,32 @@ describe("OutgoingRequestsController", function () {
             expect(validationResult.items[1].items).toHaveLength(1);
             expect(validationResult.items[1].items[0].isError()).toBe(true);
         });
+
+        test("returns a validation result that contains an error for requests to myself", async function () {
+            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
+                content: {
+                    items: [
+                        TestRequestItem.from({
+                            mustBeAccepted: false
+                        }),
+                        RequestItemGroup.from({
+                            items: [
+                                TestRequestItem.from({
+                                    mustBeAccepted: false,
+                                    shouldFailAtCanCreateOutgoingRequestItem: true
+                                })
+                            ]
+                        })
+                    ]
+                },
+                peer: context.currentIdentity.address
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.cannotShareARequestWithYourself",
+                message: "You cannot share a Request with yourself."
+            });
+        });
     });
 
     describe("Create (on active relationship)", function () {
