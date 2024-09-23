@@ -58,7 +58,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         const validationError = await this.validateRelationshipTemplateContent(content, CoreDate.from(request.expiresAt));
         if (validationError) return Result.fail(validationError);
 
-        if (content instanceof RelationshipTemplateContent && !content.onNewRelationship.expiresAt) {
+        if (Serializable.fromUnknown(content) instanceof RelationshipTemplateContent && !content.onNewRelationship.expiresAt) {
             content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
         }
 

@@ -1,4 +1,4 @@
-import { RelationshipTemplateContent } from "@nmshd/content";
+import { RelationshipTemplateContent, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction, TransportServices } from "../../src";
 import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider } from "../lib";
@@ -32,6 +32,24 @@ describe("Template Tests", () => {
         });
 
         expect(response).toBeAnError("must have required property 'expiresAt'", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("automatically set expiresAt of Request creating a RelationshipTemplate with Request for new Relationship with undefined expiresAt", async () => {
+        const relationshipTemplateContent = RelationshipTemplateContent.from({
+            onNewRelationship: {
+                "@type": "Request",
+                items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]
+            }
+        }).toJSON();
+
+        const relationshipTemplateExpirationDate = DateTime.utc().plus({ minutes: 10 }).toString();
+        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: relationshipTemplateContent,
+            expiresAt: relationshipTemplateExpirationDate
+        });
+
+        expect(response.isSuccess).toBe(true);
+        expect((response.value.content as RelationshipTemplateContentJSON).onNewRelationship.expiresAt).toStrictEqual(relationshipTemplateExpirationDate);
     });
 
     test("create a RelationshipTemplate with Request for new Relationship that expires after the RelationshipTemplate", async () => {
