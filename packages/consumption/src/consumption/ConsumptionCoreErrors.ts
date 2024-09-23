@@ -310,7 +310,7 @@ class Requests {
         return new ApplicationError("error.consumption.requests.validation.inheritedFromItem", message);
     }
 
-    public cannotShareARequestWithYourself() {
+    public cannotShareRequestWithYourself() {
         return new CoreError("error.consumption.requests.cannotShareARequestWithYourself", "You cannot share a Request with yourself.");
     }
 
