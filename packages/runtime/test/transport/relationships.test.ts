@@ -1,6 +1,5 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
 import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
-import { CanCreateRelationshipResponse } from "@nmshd/runtime/src/useCases/transport/relationships/CanCreateRelationship";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import {
@@ -100,7 +99,6 @@ describe("CanCreateRelationship", () => {
             creationContent: emptyRelationshipCreationContent
         });
 
-        assertIsCanCreateRelationshipFailureResponse(canCreateRelationshipResponse.value);
         expect(canCreateRelationshipResponse.value.code).toBe("error.transport.relationships.relationshipTemplateIsExpired");
         expect(canCreateRelationshipResponse.value.message).toContain(
             `The RelationshipTemplate '${templateId}' is already expired and therefore cannot be used to create a Relationship.`
@@ -119,18 +117,11 @@ describe("CanCreateRelationship", () => {
             creationContent: emptyRelationshipCreationContent
         });
 
-        assertIsCanCreateRelationshipFailureResponse(canCreateRelationshipResponse.value);
         expect(canCreateRelationshipResponse.value.code).toBe("error.transport.relationships.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted");
         expect(canCreateRelationshipResponse.value.message).toBe(
             `A Relationship to the peer ${services3.address} cannot be created, because the former Relationship is not yet decomposed by the peer or the peer is to be deleted.`
         );
     });
-
-    function assertIsCanCreateRelationshipFailureResponse(obj: any): asserts obj is CanCreateRelationshipResponse {
-        if (!(obj && typeof obj.code === "string" && typeof obj.message === "string")) {
-            throw new Error("Object is not of type CanCreateRelationshipFailureResponse.");
-        }
-    }
 });
 
 describe("Create Relationship", () => {
