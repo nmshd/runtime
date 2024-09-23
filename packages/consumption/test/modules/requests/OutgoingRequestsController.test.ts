@@ -220,7 +220,7 @@ describe("OutgoingRequestsController", function () {
             });
 
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.cannotShareARequestWithYourself",
+                code: "error.consumption.requests.cannotShareRequestWithYourself",
                 message: "You cannot share a Request with yourself."
             });
         });

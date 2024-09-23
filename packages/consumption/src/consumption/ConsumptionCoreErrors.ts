@@ -311,7 +311,7 @@ class Requests {
     }
 
     public cannotShareRequestWithYourself() {
-        return new CoreError("error.consumption.requests.cannotShareARequestWithYourself", "You cannot share a Request with yourself.");
+        return new CoreError("error.consumption.requests.cannotShareRequestWithYourself", "You cannot share a Request with yourself.");
     }
 
     private static readonly _decideValidation = class {
