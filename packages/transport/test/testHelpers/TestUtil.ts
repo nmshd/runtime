@@ -19,6 +19,7 @@ import {
     File,
     IChangedItems,
     IConfigOverwrite,
+    ICorrelator,
     IdentityDeletionProcess,
     IdentityUtil,
     ISendFileParameters,
@@ -120,44 +121,25 @@ export class TestUtil {
         return { winner: syncWinner, looser: syncLooser, thrownError: thrownError };
     }
 
-    public static async expectThrowsRequestErrorAsync(method: Function | Promise<any>, errorMessageRegexp?: RegExp | string, status?: number): Promise<void> {
-        return await this.expectThrowsAsync(method, (error: Error) => {
-            if (errorMessageRegexp) {
-                expect(error.message).toMatch(new RegExp(errorMessageRegexp));
-            }
-
-            expect(error).toBeInstanceOf(RequestError);
-
-            const requestError = error as RequestError;
-
-            expect(requestError.status).toStrictEqual(status);
-        });
-    }
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, customExceptionMatcher: (e: Error) => void): Promise<void>;
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string): Promise<void>;
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string | ((e: Error) => void)): Promise<void> {
+    public static async expectThrowsRequestErrorAsync(promise: Promise<any>, errorMessageRegexp?: RegExp | string, status?: number): Promise<void> {
         let error: Error | undefined;
-        try {
-            if (typeof method === "function") {
-                await method();
-            } else {
-                await method;
-            }
-        } catch (err: any) {
-            error = err;
-        }
-        expect(error).toBeInstanceOf(Error);
 
-        if (typeof errorMessageRegexp === "function") {
-            errorMessageRegexp(error!);
-            return;
+        try {
+            await promise;
+        } catch (e) {
+            error = e as Error;
         }
+
+        expect(error).toBeInstanceOf(RequestError);
+
+        const requestError = error as RequestError;
 
         if (errorMessageRegexp) {
-            expect(error!.message).toMatch(new RegExp(errorMessageRegexp));
+            expect(requestError.message).toMatch(new RegExp(errorMessageRegexp));
+        }
+
+        if (status) {
+            expect(requestError.status).toStrictEqual(status);
         }
     }
 
@@ -172,12 +154,12 @@ export class TestUtil {
         return dbConnection;
     }
 
-    public static createTransport(connection: IDatabaseConnection, configOverwrite: Partial<IConfigOverwrite> = {}): Transport {
+    public static createTransport(connection: IDatabaseConnection, configOverwrite: Partial<IConfigOverwrite> = {}, correlator?: ICorrelator): Transport {
         const eventBus = TestUtil.createEventBus();
 
         const config = TestUtil.createConfig();
 
-        return new Transport(connection, { ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory);
+        return new Transport(connection, { ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
     }
 
     public static createEventBus(): EventEmitter2EventBus {

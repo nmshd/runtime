@@ -43,7 +43,7 @@ export class RelationshipsController extends TransportController {
     public override async init(): Promise<this> {
         await super.init();
 
-        this.client = new RelationshipClient(this.config, this.parent.authenticator);
+        this.client = new RelationshipClient(this.config, this.parent.authenticator, this.transport.correlator);
         this.relationships = await this.parent.getSynchronizedCollection(DbCollectionName.Relationships);
 
         return this;

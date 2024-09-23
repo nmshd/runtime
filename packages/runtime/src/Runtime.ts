@@ -6,6 +6,7 @@ import {
     AttributesController,
     ConsumptionController,
     DraftsController,
+    IdentityMetadataController,
     IncomingRequestsController,
     NotificationsController,
     OutgoingRequestsController,
@@ -41,6 +42,7 @@ import { RuntimeConfig } from "./RuntimeConfig";
 import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
 import { RuntimeHealth } from "./types";
 import { RuntimeErrors } from "./useCases";
+import { AbstractCorrelator } from "./useCases/common/AbstractCorrelator";
 import { SchemaRepository } from "./useCases/common/SchemaRepository";
 
 export interface RuntimeServices {
@@ -110,7 +112,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     public constructor(
         protected runtimeConfig: TConfig,
         protected loggerFactory: ILoggerFactory,
-        eventBus?: EventBus
+        eventBus?: EventBus,
+        protected correlator?: AbstractCorrelator
     ) {
         this._logger = this.loggerFactory.getLogger(this.constructor.name);
 
@@ -183,7 +186,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             this.logger.error(`An error was thrown in an event handler of the transport event bus (namespace: '${namespace}'). Root error: ${error}`);
         });
 
-        this.transport = new Transport(databaseConnection, transportConfig, eventBus, this.loggerFactory);
+        this.transport = new Transport(databaseConnection, transportConfig, eventBus, this.loggerFactory, this.correlator);
 
         this.logger.debug("Initializing Transport Library...");
         await this.transport.init();
@@ -201,6 +204,12 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     }
 
     private async initDIContainer() {
+        if (this.correlator) {
+            Container.bind(AbstractCorrelator)
+                .factory(() => this.correlator!)
+                .scope(Scope.Request);
+        }
+
         Container.bind(EventBus)
             .factory(() => this.eventBus)
             .scope(Scope.Singleton);
@@ -281,16 +290,20 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             .factory(() => this.getConsumptionController().settings)
             .scope(Scope.Request);
 
+        Container.bind(IdentityMetadataController)
+            .factory(() => this.getConsumptionController().identityMetadata)
+            .scope(Scope.Request);
+
         Container.bind(NotificationsController)
             .factory(() => this.getConsumptionController().notifications)
             .scope(Scope.Request);
 
         Container.bind(AnonymousTokenController)
-            .factory(() => new AnonymousTokenController(this.transport.config))
+            .factory(() => new AnonymousTokenController(this.transport.config, this.correlator))
             .scope(Scope.Singleton);
 
         Container.bind(BackboneCompatibilityController)
-            .factory(() => new BackboneCompatibilityController(this.transport.config))
+            .factory(() => new BackboneCompatibilityController(this.transport.config, this.correlator))
             .scope(Scope.Singleton);
 
         const schemaRepository = new SchemaRepository();

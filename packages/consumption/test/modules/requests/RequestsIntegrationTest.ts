@@ -936,6 +936,30 @@ export class RequestsWhen {
         return Promise.resolve();
     }
 
+    public iTryToCreateAnOutgoingRequestWithIncorrectRequestItem(): Promise<void> {
+        const params: ICreateOutgoingRequestParameters = {
+            content: {
+                items: [
+                    TestRequestItem.from({
+                        mustBeAccepted: false,
+                        shouldFailAtCanCreateOutgoingRequestItem: true
+                    }),
+                    TestRequestItem.from({
+                        mustBeAccepted: false,
+                        shouldFailAtCanCreateOutgoingRequestItem: true
+                    })
+                ]
+            },
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
+        };
+
+        this.context.actionToTry = async () => {
+            await this.context.outgoingRequestsController.create(params as any);
+        };
+
+        return Promise.resolve();
+    }
+
     public iTryToCreateAnOutgoingRequestFromRelationshipTemplateResponseWithoutResponseSource(): Promise<void> {
         const paramsWithoutResponseSource: Omit<ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters, "responseSource"> = {
             response: TestObjectFactory.createResponse(),
@@ -1147,13 +1171,12 @@ export class RequestsThen {
     }
 
     public async itThrowsAnErrorWithTheErrorMessage(errorMessage: string): Promise<void> {
-        await TestUtil.expectThrowsAsync(this.context.actionToTry!, errorMessage);
+        const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+        await expect(this.context.actionToTry!).rejects.toThrow(regex);
     }
 
     public async itThrowsAnErrorWithTheErrorCode(code: string): Promise<void> {
-        await TestUtil.expectThrowsAsync(this.context.actionToTry!, (error: Error) => {
-            expect((error as any).code).toStrictEqual(code);
-        });
+        await expect(this.context.actionToTry!).rejects.toThrow(code);
     }
 
     public eventHasBeenPublished<TEvent extends DataEvent<unknown>>(

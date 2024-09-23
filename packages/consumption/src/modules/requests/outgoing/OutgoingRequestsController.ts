@@ -40,6 +40,11 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     public async canCreate(params: ICanCreateOutgoingRequestParameters): Promise<ValidationResult> {
         const parsedParams = CanCreateOutgoingRequestParameters.from(params);
+
+        if (parsedParams.peer?.equals(this.identity.address)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRequestWithYourself());
+        }
+
         if (parsedParams.peer) {
             const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
 
@@ -115,7 +120,12 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     private async _create(id: CoreId, content: Request, peer: CoreAddress) {
         const canCreateResult = await this.canCreate({ content, peer });
 
-        if (canCreateResult.isError()) throw canCreateResult.error;
+        if (canCreateResult.isError()) {
+            const error = ConsumptionCoreErrors.requests.inheritedFromItem("Some child items have errors. Call 'canCreate' to get more information.");
+            if (canCreateResult.error.equals(error)) throw error;
+
+            throw canCreateResult.error;
+        }
 
         const request = LocalRequest.from({
             id: id,

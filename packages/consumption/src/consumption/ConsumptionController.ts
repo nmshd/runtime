@@ -23,6 +23,7 @@ import {
     DraftsController,
     FreeTextRequestItemProcessor,
     GenericRequestItemProcessor,
+    IdentityMetadataController,
     IncomingRequestsController,
     NotificationItemConstructor,
     NotificationItemProcessorConstructor,
@@ -86,6 +87,11 @@ export class ConsumptionController {
         return this._notifications;
     }
 
+    private _identityMetadata: IdentityMetadataController;
+    public get identityMetadata(): IdentityMetadataController {
+        return this._identityMetadata;
+    }
+
     public async init(
         requestItemProcessorOverrides = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessorOverrides = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
@@ -135,6 +141,8 @@ export class ConsumptionController {
             this.accountController.activeDevice
         ).init();
 
+        this._identityMetadata = await new IdentityMetadataController(this).init();
+
         this._settings = await new SettingsController(this).init();
         this._attributeListeners = await new AttributeListenersController(this, this.transport.eventBus, this.accountController.identity).init();
         return this;
@@ -170,5 +178,6 @@ export class ConsumptionController {
         await this.settings.deleteSettingsForRelationship(relationshipId);
         await this.attributeListeners.deletePeerAttributeListeners(peer);
         await this.notifications.deleteNotificationsExchangedWithPeer(peer);
+        await this.identityMetadata.deleteIdentityMetadataReferencedWithPeer(peer);
     }
 }

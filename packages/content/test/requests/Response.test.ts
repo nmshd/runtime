@@ -18,7 +18,6 @@ import {
     ResponseJSON,
     ResponseResult
 } from "../../src";
-import { expectThrowsAsync } from "../testUtils";
 
 interface ITestAcceptResponseItem extends IAcceptResponseItem {
     test: string;
@@ -141,7 +140,7 @@ describe("Response", function () {
         expect(serializedRequest).toStrictEqual(responseJSON);
     });
 
-    test("must have at least one item", async function () {
+    test("must have at least one item", function () {
         const responseJSON = {
             "@type": "Response",
             result: ResponseResult.Accepted,
@@ -149,10 +148,13 @@ describe("Response", function () {
             items: []
         } as ResponseJSON;
 
-        await expectThrowsAsync(() => Response.from(responseJSON), "*Response.items*may not be empty*");
+        const errorMessage = "*Response.items*may not be empty*";
+        const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+
+        expect(() => Response.from(responseJSON)).toThrow(regex);
     });
 
-    test("groups must have at least one item", async function () {
+    test("groups must have at least one item", function () {
         const responseJSON = {
             "@type": "Response",
             result: ResponseResult.Accepted,
@@ -165,7 +167,10 @@ describe("Response", function () {
             ]
         } as ResponseJSON;
 
-        await expectThrowsAsync(() => Response.from(responseJSON), "*ResponseItemGroup.items*may not be empty*");
+        const errorMessage = "*ResponseItemGroup.items*may not be empty*";
+        const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+
+        expect(() => Response.from(responseJSON)).toThrow(regex);
     });
 
     test("allows an inherited AcceptResponseItem in the items", function () {
@@ -196,7 +201,7 @@ describe("Response", function () {
     });
 
     describe("Throws an error when a mandatory property is missing", function () {
-        test("throws on missing requestId", async function () {
+        test("throws on missing requestId", function () {
             const responseJSON = {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
@@ -208,10 +213,13 @@ describe("Response", function () {
                 ]
             } as ResponseJSON;
 
-            await expectThrowsAsync(() => Response.from(responseJSON), "*Response.requestId*Value is not defined*");
+            const errorMessage = "*Response.requestId*Value is not defined*";
+            const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+
+            expect(() => Response.from(responseJSON)).toThrow(regex);
         });
 
-        test("throws on missing response item status", async function () {
+        test("throws on missing response item status", function () {
             const responseJSON = {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
@@ -223,10 +231,13 @@ describe("Response", function () {
                 ]
             } as ResponseJSON;
 
-            await expectThrowsAsync(() => Response.from(responseJSON), "*ResponseItem.result*Value is not defined*");
+            const errorMessage = "*ResponseItem.result*Value is not defined*";
+            const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+
+            expect(() => Response.from(responseJSON)).toThrow(regex);
         });
 
-        test("throws on missing error response content properties", async function () {
+        test("throws on missing error response content properties", function () {
             const jsonWithMissingErrorCode = {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
@@ -240,10 +251,13 @@ describe("Response", function () {
                 ]
             } as ResponseJSON;
 
-            await expectThrowsAsync(() => Response.from(jsonWithMissingErrorCode), "*ErrorResponseItem.code*Value is not defined*");
+            const errorMessage = "*ErrorResponseItem.code*Value is not defined*";
+            const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+
+            expect(() => Response.from(jsonWithMissingErrorCode)).toThrow(regex);
         });
 
-        test("error response content message is mandatory", async function () {
+        test("error response content message is mandatory", function () {
             const jsonWithMissingErrorCode: ResponseJSON = {
                 "@type": "Response",
                 result: ResponseResult.Accepted,
@@ -257,7 +271,10 @@ describe("Response", function () {
                 ]
             };
 
-            await expectThrowsAsync(() => Response.from(jsonWithMissingErrorCode), "*ErrorResponseItem.message*Value is not defined*");
+            const errorMessage = "*ErrorResponseItem.message*Value is not defined*";
+            const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+
+            expect(() => Response.from(jsonWithMissingErrorCode)).toThrow(regex);
         });
     });
 });

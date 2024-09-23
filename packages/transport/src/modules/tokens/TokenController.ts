@@ -25,7 +25,7 @@ export class TokenController extends TransportController {
     public override async init(): Promise<this> {
         await super.init();
 
-        this.client = new TokenClient(this.config, this.parent.authenticator);
+        this.client = new TokenClient(this.config, this.parent.authenticator, this.transport.correlator);
         this.tokens = await this.parent.getSynchronizedCollection(DbCollectionName.Tokens);
 
         return this;

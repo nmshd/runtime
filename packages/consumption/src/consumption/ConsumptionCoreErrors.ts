@@ -306,6 +306,14 @@ class Requests {
         return new CoreError("error.consumption.requests.missingRelationship", message);
     }
 
+    public inheritedFromItem(message: string) {
+        return new ApplicationError("error.consumption.requests.validation.inheritedFromItem", message);
+    }
+
+    public cannotShareRequestWithYourself() {
+        return new CoreError("error.consumption.requests.cannotShareRequestWithYourself", "You cannot share a Request with yourself.");
+    }
+
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);

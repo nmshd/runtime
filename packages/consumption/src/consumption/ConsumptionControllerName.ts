@@ -4,5 +4,6 @@ export enum ConsumptionControllerName {
     DraftsController = "DraftsController",
     RequestsController = "RequestsController",
     SettingsController = "SettingsController",
-    NotificationsController = "NotificationsController"
+    NotificationsController = "NotificationsController",
+    IdentityMetadataController = "IdentityMetadataController"
 }

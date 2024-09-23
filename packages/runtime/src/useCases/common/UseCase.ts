@@ -3,15 +3,31 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { CoreError } from "@nmshd/core-types";
 import { RequestError } from "@nmshd/transport";
 import stringifySafe from "json-stringify-safe";
+import { Inject } from "typescript-ioc";
+import { AbstractCorrelator } from "./AbstractCorrelator";
 import { PlatformErrorCodes } from "./PlatformErrorCodes";
 import { RuntimeErrors } from "./RuntimeErrors";
 import { IValidator } from "./validation/IValidator";
 import { ValidationResult } from "./validation/ValidationResult";
 
 export abstract class UseCase<IRequest, IResponse> {
+    @Inject private readonly correlator?: AbstractCorrelator;
+
     public constructor(private readonly requestValidator?: IValidator<IRequest>) {}
 
     public async execute(request: IRequest): Promise<Result<IResponse>> {
+        // if no correlator is defined in the DI a broken one without any methods is injected
+        // we handle this exactly like no correlator is defined
+        if (typeof this.correlator?.getId === "undefined") {
+            return await this._executeCallback(request);
+        }
+
+        const correlationId = this.correlator.getId();
+        if (correlationId) return await this.correlator.withId(correlationId, () => this._executeCallback(request));
+        return await this.correlator.withId(() => this._executeCallback(request));
+    }
+
+    private async _executeCallback(request: IRequest) {
         if (this.requestValidator) {
             const validationResult = await this.requestValidator.validate(request);
 

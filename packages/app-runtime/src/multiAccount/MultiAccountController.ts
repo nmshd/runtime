@@ -99,7 +99,16 @@ export class MultiAccountController {
 
         this._log.trace(`Initializing AccountController for local account ${id}...`);
         const accountController = new AccountController(this.transport, db, this.transport.config);
-        await accountController.init();
+
+        await accountController.init().catch((error) => {
+            if (error instanceof CoreError && TransportCoreErrors.general.accountControllerInitialSyncFailed().equals(error)) {
+                this._log.error(`Initial sync of AccountController for local account ${id} failed.`, error);
+                return;
+            }
+
+            throw error;
+        });
+
         this._log.trace(`AccountController for local account ${id} initialized.`);
 
         this._openAccounts[localAccount.id.toString()] = accountController;
