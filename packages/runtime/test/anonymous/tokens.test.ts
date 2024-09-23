@@ -25,19 +25,8 @@ describe("Anonymous tokens", () => {
     });
 
     test("should get the token anonymous by truncated reference", async () => {
-        const result = await noLoginRuntime.anonymousServices.tokens.loadPeerTokenByTruncatedReference({
+        const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
             reference: uploadedToken.truncatedReference
-        });
-        expect(result).toBeSuccessful();
-
-        const token = result.value;
-        expect(token.content).toStrictEqual(uploadedToken.content);
-    });
-
-    test("should get the token anonymous by id and key", async () => {
-        const result = await noLoginRuntime.anonymousServices.tokens.loadPeerTokenByIdAndKey({
-            id: uploadedToken.id,
-            secretKey: uploadedToken.secretKey
         });
         expect(result).toBeSuccessful();
 
