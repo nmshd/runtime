@@ -139,6 +139,11 @@ export class LocalRequest extends CoreSynchronizable implements ILocalRequest {
         const currentDate = CoreDate.utc();
         if (currentDate.isAfter(templateExpiresAt.add({ seconds: 10 }))) {
             this.changeStatus(LocalRequestStatus.Expired);
+
+            if (!this.content.expiresAt || !this.isExpired()) {
+                this.content.expiresAt = templateExpiresAt;
+            }
+
             return true;
         }
 

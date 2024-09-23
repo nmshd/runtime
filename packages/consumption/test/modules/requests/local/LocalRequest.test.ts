@@ -84,11 +84,22 @@ describe("LocalRequest", function () {
             expect(request.status).toStrictEqual(LocalRequestStatus.Expired);
         });
 
-        test("sets the status when the underlying RelationshipTemplate of the Request is expired and the Request has already been rejected", function () {
+        test("sets the status if the underlying RelationshipTemplate of the Request is expired and the Request has already been rejected", function () {
             const request = TestObjectFactory.createRejectedLocalRequestBasedOnTemplateWith({});
 
             request.updateStatusBasedOnTemplateExpiration(CoreDate.utc().subtract({ days: 1 }));
             expect(request.status).toStrictEqual(LocalRequestStatus.Expired);
+        });
+
+        test("sets expiresAt if the underlying RelationshipTemplate of the Request is expired and the Request doesn't have an expiration date", function () {
+            const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({});
+            expect(request.content.expiresAt).toBeUndefined();
+
+            const relationshipTemplateExpirationDate = CoreDate.utc().subtract({ days: 1 });
+            request.updateStatusBasedOnTemplateExpiration(relationshipTemplateExpirationDate);
+
+            expect(request.status).toStrictEqual(LocalRequestStatus.Expired);
+            expect(request.content.expiresAt).toStrictEqual(relationshipTemplateExpirationDate);
         });
 
         test("does not set the status to expired when the underlying RelationshipTemplate of the Request is not expired", function () {
