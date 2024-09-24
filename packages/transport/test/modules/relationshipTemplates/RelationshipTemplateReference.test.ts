@@ -2,6 +2,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
 import { BackboneIds, RelationshipTemplateReference } from "../../../src";
+import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipTemplateReference", function () {
     test("should serialize and deserialize correctly (verbose)", async function () {
@@ -199,5 +200,25 @@ describe("RelationshipTemplateReference", function () {
                 forIdentityTruncated: "123j"
             });
         }).rejects.toThrow("RelationshipTemplateReference.forIdentityTruncated");
+    });
+
+    test("should correctly create a reference to a template", async function () {
+        const connection = await TestUtil.createDatabaseConnection();
+        const transport = TestUtil.createTransport(connection);
+        await transport.init();
+        const account = (await TestUtil.provideAccounts(transport, 1))[0];
+
+        const sentRelationshipTemplate = await TestUtil.sendRelationshipTemplate(account);
+
+        const reference = sentRelationshipTemplate.toRelationshipTemplateReference();
+        expect(reference).toBeInstanceOf(Serializable);
+        expect(reference).toBeInstanceOf(RelationshipTemplateReference);
+        expect(reference.key).toBeInstanceOf(CryptoSecretKey);
+        expect(reference.id).toBeInstanceOf(CoreId);
+        expect(reference.id.equals(sentRelationshipTemplate.id)).toBe(true);
+        expect(reference.backboneBaseUrl).toBe("localhost");
+
+        await account.close();
+        await connection.close();
     });
 });
