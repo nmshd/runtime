@@ -122,8 +122,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 itemsOfRequest,
                 decideRequestItemParameters,
                 requestConfigElement,
-                responseConfigElement,
-                isRequestItemDerivationConfig(requestConfigElement)
+                responseConfigElement
             );
 
             decideRequestItemParameters = updatedRequestItemParameters;
@@ -230,8 +229,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         itemsOfRequest: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
         parametersToDecideRequest: any,
         requestConfigElement: RequestItemDerivationConfig,
-        responseConfigElement: ResponseConfig,
-        isRequestItemDerivationConfig = false
+        responseConfigElement: ResponseConfig
     ): { items: any[] } {
         for (let i = 0; i < itemsOfRequest.length; i++) {
             const item = itemsOfRequest[i];
@@ -240,17 +238,18 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                     (item as RequestItemGroupJSON).items,
                     parametersToDecideRequest.items[i],
                     requestConfigElement,
-                    responseConfigElement,
-                    isRequestItemDerivationConfig
+                    responseConfigElement
                 );
             } else {
                 const alreadyDecidedByOtherConfig = !!parametersToDecideRequest.items[i];
                 if (alreadyDecidedByOtherConfig) continue;
 
-                if (isRequestItemDerivationConfig) {
+                if (isRequestItemDerivationConfig(requestConfigElement)) {
                     const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
                     if (!requestItemIsCompatible) continue;
-                } else if (responseConfigElement.accept) {
+                }
+
+                if (isGeneralRequestConfig(requestConfigElement) && responseConfigElement.accept) {
                     const requestItemsWithSimpleAccept = [
                         "AuthenticationRequestItem",
                         "ConsentRequestItem",
