@@ -121,7 +121,7 @@ describe("TokenReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
     });
 
-    test("should truncate and read in correctly with backbone, password and personalization", async function () {
+    test("should truncate and read in correctly with backbone, identity, password", async function () {
         const reference = TokenReference.from({
             key: await CryptoEncryption.generateKey(),
             id: await BackboneIds.token.generateUnsafe(),

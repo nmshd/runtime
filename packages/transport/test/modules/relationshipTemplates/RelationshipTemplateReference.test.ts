@@ -121,7 +121,7 @@ describe("RelationshipTemplateReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
     });
 
-    test("should truncate and read in correctly with backbone, password and personalization", async function () {
+    test("should truncate and read in correctly with backbone, identity, password", async function () {
         const reference = RelationshipTemplateReference.from({
             key: await CryptoEncryption.generateKey(),
             id: await BackboneIds.relationshipTemplate.generateUnsafe(),
