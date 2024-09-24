@@ -54,7 +54,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
             throw new TransportError(`The cache of RelationshipTemplate with id "${this.id.toString()}" is empty.`);
         }
 
-        return RelationshipTemplateReference.from({ id: this.id, key: this.secretKey, backbone: this.cache.createdBy.toString().split(":")[2] });
+        return RelationshipTemplateReference.from({ id: this.id, key: this.secretKey, backboneBaseUrl: this.cache.createdBy.toString().split(":")[2] });
     }
 
     public truncate(): string {

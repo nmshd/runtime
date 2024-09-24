@@ -53,7 +53,7 @@ export class File extends CoreSynchronizable implements IFile {
             throw new TransportError(`The cache of RelationshipTemplate with id "${this.id.toString()}" is empty.`);
         }
 
-        return FileReference.from({ id: this.id, key: this.secretKey, backbone: this.cache.createdBy.toString().split(":")[2] });
+        return FileReference.from({ id: this.id, key: this.secretKey, backboneBaseUrl: this.cache.createdBy.toString().split(":")[2] });
     }
 
     public truncate(): string {

@@ -1,36 +1,42 @@
 import { ISerializable, Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
-import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { CoreIdHelper } from "./CoreIdHelper";
 import { TransportCoreErrors } from "./TransportCoreErrors";
 
 export interface IReference extends ISerializable {
     id: ICoreId;
+    backboneBaseUrl?: string;
     key: ICryptoSecretKey;
-    backbone: string;
-    forIdentity?: ICoreAddress;
+    forIdentityTruncated?: string;
+    passwordType?: number;
 }
 
 export class Reference extends Serializable implements IReference {
-    @validate()
+    @validate({ regExp: new RegExp("^[A-Za-z0-9]{20}$") })
     @serialize()
     public id: CoreId;
+
+    @validate({ nullable: true })
+    @serialize()
+    public backboneBaseUrl?: string;
 
     @validate()
     @serialize()
     public key: CryptoSecretKey;
 
-    @validate({ nullable: true })
+    @validate({ nullable: true, regExp: new RegExp("^[0-9a-f]{4}$") })
     @serialize()
-    public forIdentity?: CoreAddress;
+    public forIdentityTruncated?: string;
 
-    @validate()
+    @validate({ nullable: true, min: 1, max: 12, customValidator: (v) => (Number.isInteger(v) ? "must be an integer" : undefined) })
     @serialize()
-    public backbone: string;
+    public passwordType?: number;
 
     public truncate(): string {
+        const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
         const truncatedReference = CoreBuffer.fromUtf8(
-            `${this.id.toString()}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentity?.toString() ?? ""}|${this.backbone}`
+            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated}|${this.passwordType?.toString()}`
         );
         return truncatedReference.toBase64URL();
     }
@@ -39,16 +45,17 @@ export class Reference extends Serializable implements IReference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
 
-        if (splitted.length !== 5) {
+        if (![3, 5].includes(splitted.length)) {
             throw TransportCoreErrors.general.invalidTruncatedReference();
         }
 
         try {
-            const id = CoreId.from(splitted[0]);
+            const idPart = splitted[0];
+            const [id, backboneBaseUrl] = idPart.split("@");
             const alg = parseInt(splitted[1]);
             const key = splitted[2];
-            const forIdentity = splitted[3] ? CoreAddress.from(splitted[3]) : undefined;
-            const backbone = splitted[4];
+            const forIdentityTruncated = splitted[3];
+            const passwordType = parseInt(splitted[4]);
             const secretKey = CryptoSecretKey.from({
                 algorithm: alg,
                 secretKey: CoreBuffer.fromBase64URL(key)
@@ -56,9 +63,10 @@ export class Reference extends Serializable implements IReference {
 
             return this.from({
                 id: CoreId.from(id),
+                backboneBaseUrl,
                 key: secretKey,
-                forIdentity,
-                backbone
+                forIdentityTruncated,
+                passwordType
             });
         } catch (e) {
             throw TransportCoreErrors.general.invalidTruncatedReference();

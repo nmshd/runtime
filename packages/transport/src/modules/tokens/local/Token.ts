@@ -53,7 +53,7 @@ export class Token extends CoreSynchronizable implements IToken {
         if (!this.cache) {
             throw new TransportError(`The cache of Token with id "${this.id.toString()}" is empty.`);
         }
-        return TokenReference.from({ id: this.id, key: this.secretKey, backbone: this.cache.createdBy.toString().split(":")[2] });
+        return TokenReference.from({ id: this.id, key: this.secretKey, backboneBaseUrl: this.cache.createdBy.toString().split(":")[2] });
     }
 
     public truncate(): string {
