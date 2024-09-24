@@ -29,14 +29,14 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public forIdentityTruncated?: string;
 
-    @validate({ nullable: true, min: 1, max: 12, customValidator: (v) => (Number.isInteger(v) ? "must be an integer" : undefined) })
+    @validate({ nullable: true, min: 1, max: 12, customValidator: (v) => (!Number.isInteger(v) ? "must be an integer" : undefined) })
     @serialize()
     public passwordType?: number;
 
     public truncate(): string {
         const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
         const truncatedReference = CoreBuffer.fromUtf8(
-            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated}|${this.passwordType?.toString()}`
+            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ? this.forIdentityTruncated : ""}|${this.passwordType ? this.passwordType.toString() : ""}`
         );
         return truncatedReference.toBase64URL();
     }
@@ -54,8 +54,8 @@ export class Reference extends Serializable implements IReference {
             const [id, backboneBaseUrl] = idPart.split("@");
             const alg = parseInt(splitted[1]);
             const key = splitted[2];
-            const forIdentityTruncated = splitted[3];
-            const passwordType = parseInt(splitted[4]);
+            const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
+            const passwordType = splitted[4] ? parseInt(splitted[4]) : undefined;
             const secretKey = CryptoSecretKey.from({
                 algorithm: alg,
                 secretKey: CoreBuffer.fromBase64URL(key)
