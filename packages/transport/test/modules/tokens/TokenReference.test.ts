@@ -1,8 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
 import { BackboneIds, TokenReference } from "../../../src";
-import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenReference", function () {
     test("should serialize and deserialize correctly (verbose)", async function () {
@@ -200,31 +199,5 @@ describe("TokenReference", function () {
                 forIdentityTruncated: "123j"
             });
         }).rejects.toThrow("TokenReference.forIdentityTruncated");
-    });
-
-    test("should correctly create a reference to a token", async function () {
-        const connection = await TestUtil.createDatabaseConnection();
-        const transport = TestUtil.createTransport(connection);
-        await transport.init();
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
-
-        const content = Serializable.fromAny({ content: "TestToken" });
-        const expiresAt = CoreDate.utc().add({ minutes: 5 });
-        const sentToken = await account.tokens.sendToken({
-            content,
-            expiresAt,
-            ephemeral: false
-        });
-
-        const reference = sentToken.toTokenReference();
-        expect(reference).toBeInstanceOf(Serializable);
-        expect(reference).toBeInstanceOf(TokenReference);
-        expect(reference.key).toBeInstanceOf(CryptoSecretKey);
-        expect(reference.id).toBeInstanceOf(CoreId);
-        expect(reference.id.equals(sentToken.id)).toBe(true);
-        expect(reference.backboneBaseUrl).toBe("localhost");
-
-        await account.close();
-        await connection.close();
     });
 });

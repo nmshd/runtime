@@ -2,7 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { RelationshipTemplateReference } from "../transmission/RelationshipTemplateReference";
 import { CachedRelationshipTemplate, ICachedRelationshipTemplate } from "./CachedRelationshipTemplate";
 
@@ -50,11 +50,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
     }
 
     public toRelationshipTemplateReference(): RelationshipTemplateReference {
-        if (!this.cache) {
-            throw new TransportError(`The cache of RelationshipTemplate with id "${this.id.toString()}" is empty.`);
-        }
-
-        return RelationshipTemplateReference.from({ id: this.id, key: this.secretKey, backboneBaseUrl: this.cache.createdBy.toString().split(":")[2] });
+        return RelationshipTemplateReference.from({ id: this.id, key: this.secretKey });
     }
 
     public truncate(): string {

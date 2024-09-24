@@ -2,7 +2,6 @@ import { Serializable } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
 import { BackboneIds, FileReference } from "../../../src";
-import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("FileReference", function () {
     test("should serialize and deserialize correctly (verbose)", async function () {
@@ -200,26 +199,5 @@ describe("FileReference", function () {
                 forIdentityTruncated: "123j"
             });
         }).rejects.toThrow("FileReference.forIdentityTruncated");
-    });
-
-    test("should correctly create a reference to a file", async function () {
-        const connection = await TestUtil.createDatabaseConnection();
-        const transport = TestUtil.createTransport(connection);
-        await transport.init();
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
-
-        const content = CoreBuffer.fromUtf8("Test");
-        const file = await TestUtil.uploadFile(account, content);
-
-        const reference = file.toFileReference();
-        expect(reference).toBeInstanceOf(Serializable);
-        expect(reference).toBeInstanceOf(FileReference);
-        expect(reference.key).toBeInstanceOf(CryptoSecretKey);
-        expect(reference.id).toBeInstanceOf(CoreId);
-        expect(reference.id.equals(file.id)).toBe(true);
-        expect(reference.backboneBaseUrl).toBe("localhost");
-
-        await account.close();
-        await connection.close();
     });
 });

@@ -2,7 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { FileReference } from "../transmission/FileReference";
 import { CachedFile, ICachedFile } from "./CachedFile";
 
@@ -49,11 +49,7 @@ export class File extends CoreSynchronizable implements IFile {
     }
 
     public toFileReference(): FileReference {
-        if (!this.cache) {
-            throw new TransportError(`The cache of RelationshipTemplate with id "${this.id.toString()}" is empty.`);
-        }
-
-        return FileReference.from({ id: this.id, key: this.secretKey, backboneBaseUrl: this.cache.createdBy.toString().split(":")[2] });
+        return FileReference.from({ id: this.id, key: this.secretKey });
     }
 
     public truncate(): string {
