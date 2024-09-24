@@ -170,6 +170,10 @@ class General {
         return new CoreError("error.transport.general.baseUrlNotSet", "The baseUrl was not set.");
     }
 
+    public invalidBaseUrl() {
+        return new CoreError("error.transport.general.invalidBaseUrl", "The baseUrl is invalid since it contains a vertical bar |.");
+    }
+
     public platformClientSecretNotSet() {
         return new CoreError("error.transport.general.platformClientSecretNotSet", "The platform clientSecret was not set.");
     }
