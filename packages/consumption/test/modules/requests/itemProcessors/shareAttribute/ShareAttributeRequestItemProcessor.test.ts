@@ -138,20 +138,24 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
+            // eslint-disable-next-line jest/no-conditional-in-test
             if (testParams.attribute.owner.address === "Sender") {
                 testParams.attribute.owner = sender;
             }
 
+            // eslint-disable-next-line jest/no-conditional-in-test
             if (testParams.attribute.owner.address === "Recipient") {
                 testParams.attribute.owner = recipient;
             }
 
             let sourceAttribute;
 
+            // eslint-disable-next-line jest/no-conditional-in-test
             if (testParams.attribute instanceof IdentityAttribute) {
                 sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
                     content: {
                         ...testParams.attribute.toJSON(),
+                        // eslint-disable-next-line jest/no-conditional-in-test
                         owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
                     } as IIdentityAttribute
                 });
@@ -159,6 +163,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 sourceAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: {
                         ...testParams.attribute.toJSON(),
+                        // eslint-disable-next-line jest/no-conditional-in-test
                         owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
                     } as IRelationshipAttribute,
                     peer: aThirdParty,
@@ -169,12 +174,14 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: sourceAttribute.content,
-                sourceAttributeId: sourceAttribute.id
+                sourceAttributeId: sourceAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
+            // eslint-disable-next-line jest/no-conditional-in-test
             if (testParams.result === "success") {
                 // eslint-disable-next-line jest/no-conditional-expect
                 expect(result).successfulValidationResult();
@@ -861,7 +868,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id
+                sourceAttributeId: initialRelationshipAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -908,7 +916,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id
+                sourceAttributeId: initialRelationshipAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
