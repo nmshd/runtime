@@ -260,7 +260,7 @@ export class RelationshipTemplateController extends TransportController {
     }
 
     public async cleanupTemplatesOfDecomposedRelationship(relationship: Relationship): Promise<void> {
-        const templateOfRelationship = relationship.cache!.template;
+        const templateOfRelationship = (await this.getRelationshipTemplate(relationship.templateId))!;
 
         if (!templateOfRelationship.isOwn || templateOfRelationship.cache!.maxNumberOfAllocations === 1) {
             await this.templates.delete(templateOfRelationship);

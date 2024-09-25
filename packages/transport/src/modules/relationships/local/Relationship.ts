@@ -1,9 +1,8 @@
 import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
-import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
@@ -21,6 +20,8 @@ export interface IRelationship extends ICoreSynchronizable {
 
     metadata?: any;
     metadataModifiedAt?: CoreDate;
+
+    templateId: ICoreId;
 }
 
 @type("Relationship")
@@ -68,27 +69,36 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @serialize()
     public metadataModifiedAt?: CoreDate;
 
+    @validate()
+    @serialize()
+    public templateId: CoreId;
+
+    public static override preFrom(value: any): any {
+        if (value.cache.template && !value.templateId) {
+            value = { ...value, templateId: value.cache.template.id };
+        }
+
+        return value;
+    }
+
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): Object {
         const json = super.toJSON(verbose, serializeAsString) as any;
 
         // Adds flattened peerAddress and templateId to the JSON stored in the database.
         // This helps us to boost the performance of database queries that include these fields.
         json.peerAddress = this.peer.address.toString();
-        json.templateId = this.cache?.template.id.toString();
 
         return json;
     }
 
     public static fromBackboneAndCreationContent(
         response: BackboneGetRelationshipResponse,
-        template: IRelationshipTemplate,
         peer: IIdentity,
         creationContent: ISerializable,
         relationshipSecretId: CoreId
     ): Relationship {
         const cache = CachedRelationship.from({
             creationContent,
-            template: template,
             auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
         return Relationship.from({
@@ -97,7 +107,8 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
             peer: peer,
             status: RelationshipStatus.Pending,
             cache: cache,
-            cachedAt: CoreDate.utc()
+            cachedAt: CoreDate.utc(),
+            templateId: CoreId.from(response.relationshipTemplateId)
         });
     }
 
@@ -115,9 +126,5 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         this.metadata = metadata;
         this.metadataModifiedAt = CoreDate.utc();
         return this;
-    }
-
-    private newCacheEmptyError(): Error {
-        return new TransportError(`The cache of the Relationship with id "${this.id}" is empty.`);
     }
 }

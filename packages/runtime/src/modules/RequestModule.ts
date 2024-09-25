@@ -292,10 +292,17 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        // only trigger for new relationships that were created from an own template
-        if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
+        const templateResult = await services.transportServices.relationshipTemplates.getRelationshipTemplate({ id: createdRelationship.templateId });
+        if (templateResult.isError) {
+            this.logger.error(`Could not get template for relationshipId ${createdRelationship.id}. Root error:`, templateResult.error);
+            return;
+        }
 
-        const template = createdRelationship.template;
+        const template = templateResult.value;
+
+        // only trigger for new relationships that were created from an own template
+        if (createdRelationship.status !== RelationshipStatus.Pending || !template.isOwn) return;
+
         const templateId = template.id;
         // do not trigger for templates without the correct content type
         if (template.content["@type"] !== "RelationshipTemplateContent") return;

@@ -1725,10 +1725,7 @@ export class DataViewExpander {
             }
         }
 
-        let direction = RelationshipDirection.Incoming;
-        if (!relationship.template.isOwn) {
-            direction = RelationshipDirection.Outgoing;
-        }
+        const direction = this.identityController.isMe(CoreAddress.from(relationship.auditLog[0].createdBy)) ? RelationshipDirection.Outgoing : RelationshipDirection.Incoming;
 
         let statusText = "";
         switch (relationship.status) {
@@ -1786,7 +1783,7 @@ export class DataViewExpander {
             attributeMap: attributesByType,
             items: expandedAttributes,
             nameMap: stringByType,
-            templateId: relationship.template.id,
+            templateId: relationship.templateId,
             auditLog: relationship.auditLog,
             creationContent: relationship.creationContent
         };

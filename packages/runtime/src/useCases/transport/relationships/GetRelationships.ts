@@ -1,15 +1,16 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { CachedRelationship, Identity, Relationship, RelationshipsController, RelationshipTemplate } from "@nmshd/transport";
+import { Identity, Relationship, RelationshipsController } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
-import { RelationshipDTO, RelationshipTemplateDTO } from "../../../types";
+import { RelationshipDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
 
 export interface GetRelationshipsQuery {
     peer?: string | string[];
     status?: string | string[];
+    templateId?: string | string[];
     "template.id"?: string | string[];
 }
 
@@ -28,12 +29,12 @@ export class GetRelationshipsUseCase extends UseCase<GetRelationshipsRequest, Re
         whitelist: {
             [nameof<RelationshipDTO>((r) => r.peer)]: true,
             [nameof<RelationshipDTO>((r) => r.status)]: true,
-            [`${nameof<RelationshipDTO>((r) => r.template)}.${nameof<RelationshipTemplateDTO>((t) => t.id)}`]: true
+            [nameof<RelationshipDTO>((r) => r.templateId)]: true,
+            "template.id": true
         },
         alias: {
-            [`${nameof<RelationshipDTO>((r) => r.template)}.${nameof<RelationshipTemplateDTO>((r) => r.id)}`]: `${nameof<Relationship>(
-                (r) => r.cache
-            )}.${nameof<CachedRelationship>((r) => r.template)}.${nameof<RelationshipTemplate>((r) => r.id)}`,
+            [nameof<RelationshipDTO>((r) => r.templateId)]: nameof<Relationship>((r) => r.templateId),
+            "template.id": `${nameof<Relationship>((r) => r.templateId)}`,
             [nameof<RelationshipDTO>((r) => r.status)]: nameof<Relationship>((r) => r.status),
             [nameof<RelationshipDTO>((r) => r.peer)]: `${nameof<Relationship>((r) => r.peer)}.${nameof<Identity>((r) => r.address)}`
         }
