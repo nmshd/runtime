@@ -23,4 +23,8 @@ export class PeerDeletionInfo extends Serializable implements IPeerDeletionInfo 
     public static from(value: IPeerDeletionInfo | PeerDeletionInfoJSON): PeerDeletionInfo {
         return this.fromAny(value);
     }
+
+    public override toJSON(): PeerDeletionInfoJSON {
+        return super.toJSON() as PeerDeletionInfoJSON;
+    }
 }
