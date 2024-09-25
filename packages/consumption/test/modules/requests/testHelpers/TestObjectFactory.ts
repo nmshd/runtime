@@ -63,9 +63,9 @@ export class TestObjectFactory {
                             reason: RelationshipAuditLogEntryReason.Creation,
                             newStatus: RelationshipStatus.Pending
                         }
-                    ],
-                    template: this.createIncomingRelationshipTemplate()
-                })
+                    ]
+                }),
+            templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
         });
     }
 
@@ -105,9 +105,9 @@ export class TestObjectFactory {
                             oldStatus: RelationshipStatus.Pending,
                             newStatus: RelationshipStatus.Active
                         }
-                    ],
-                    template: this.createIncomingRelationshipTemplate()
-                })
+                    ]
+                }),
+            templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
         });
     }
 
@@ -156,9 +156,9 @@ export class TestObjectFactory {
                             oldStatus: RelationshipStatus.Active,
                             newStatus: RelationshipStatus.Terminated
                         }
-                    ],
-                    template: this.createIncomingRelationshipTemplate()
-                })
+                    ]
+                }),
+            templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
         });
     }
 
@@ -216,9 +216,9 @@ export class TestObjectFactory {
                             oldStatus: RelationshipStatus.Terminated,
                             newStatus: RelationshipStatus.DeletionProposed
                         }
-                    ],
-                    template: this.createIncomingRelationshipTemplate()
-                })
+                    ]
+                }),
+            templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
         });
     }
 
