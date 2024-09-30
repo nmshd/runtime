@@ -24,6 +24,7 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
+import _ from "lodash";
 import { DateTime } from "luxon";
 import {
     ConsumptionServices,
@@ -215,7 +216,7 @@ export async function createTemplate(transportServices: TransportServices, body?
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
         expiresAt: templateExpiresAt ? templateExpiresAt.toString() : defaultExpirationDateTime,
-        content: body ?? emptyRelationshipTemplateContent
+        content: _.cloneDeep(body) ?? emptyRelationshipTemplateContent
     });
 
     expect(response).toBeSuccessful();
