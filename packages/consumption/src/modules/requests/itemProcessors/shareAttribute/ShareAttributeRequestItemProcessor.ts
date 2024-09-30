@@ -118,6 +118,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                         ConsumptionCoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
                     );
                 }
+                if (!requestItem.thirdPartyAddress) {
+                    return ValidationResult.error(
+                        ConsumptionCoreErrors.requests.invalidRequestItem(
+                            "The source attribute provided is a relationship attribute. You must provide a third party address that is the original peer when sharing with a third party."
+                        )
+                    );
+                }
             }
 
             const queryForNonPendingRelationships = {
@@ -129,14 +136,6 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
             if (nonPendingRelationshipsToPeer.length === 0) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
-            }
-
-            if (recipient && !foundAttribute.shareInfo.peer.equals(recipient) && !requestItem.thirdPartyAddress) {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The source attribute provided is a relationship attribute. You must provide a third party address that is the original peer when sharing with a third party."
-                    )
-                );
             }
 
             if (requestItem.thirdPartyAddress && !requestItem.thirdPartyAddress.equals(foundAttribute.shareInfo.peer)) {
