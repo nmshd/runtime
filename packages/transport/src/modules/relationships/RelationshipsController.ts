@@ -206,10 +206,10 @@ export class RelationshipsController extends TransportController {
         }
 
         const peerAddress = template.cache.createdBy;
-        const existingRelationshipsToPeer = await this.getExistingRelationshipsToIdentity(peerAddress);
+        const existingRelationshipToPeer = await this.getExistingRelationshipToIdentity(peerAddress);
 
-        if (existingRelationshipsToPeer.length !== 0) {
-            return Result.fail(TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status));
+        if (existingRelationshipToPeer) {
+            return Result.fail(TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipToPeer.status));
         }
 
         if (template.isExpired()) {
@@ -230,7 +230,7 @@ export class RelationshipsController extends TransportController {
         return Result.ok(undefined);
     }
 
-    public async getExistingRelationshipsToIdentity(address: CoreAddress): Promise<Relationship[]> {
+    public async getExistingRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
         const queryForExistingRelationships = {
             "peer.address": address.toString(),
             status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
@@ -238,7 +238,7 @@ export class RelationshipsController extends TransportController {
 
         const existingRelationshipsToIdentity = await this.getRelationships(queryForExistingRelationships);
 
-        return existingRelationshipsToIdentity;
+        return existingRelationshipsToIdentity.length === 0 ? undefined : existingRelationshipsToIdentity[0];
     }
 
     @log()
