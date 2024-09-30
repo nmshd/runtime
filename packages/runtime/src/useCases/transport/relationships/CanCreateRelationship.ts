@@ -50,7 +50,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
                 if (template.cache.content instanceof RelationshipTemplateContent && template.cache.expiresAt) {
                     const dbQuery: any = {};
                     dbQuery["source.reference"] = { $eq: template.id.toString() };
-                    await this.incomingRequestsController.getIncomingRequests(dbQuery);
+                    await this.incomingRequestsController.getIncomingRequestsWithUpdatedExpiry(dbQuery);
                 }
             }
 
