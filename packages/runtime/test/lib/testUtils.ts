@@ -1,4 +1,4 @@
-import { Event, EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { ApplicationError, Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     ConsumptionIds,
@@ -37,6 +37,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
+    LocalRequestDTO,
     LocalRequestStatus,
     MessageContentDerivation,
     MessageDTO,
@@ -297,6 +298,26 @@ export async function sendMessageToMultipleRecipients(transportServices: Transpo
 
     return response.value;
 }
+export async function failToSendMessageToMultipleRecipients(
+    transportServices: TransportServices,
+    recipients: string[],
+    content?: any,
+    attachments?: string[]
+): Promise<Result<MessageDTO>> {
+    const response = await transportServices.messages.sendMessage({
+        recipients,
+        content: content ?? {
+            "@type": "Mail",
+            subject: "This is the mail subject",
+            body: "This is the mail body",
+            cc: [],
+            to: recipients
+        },
+        attachments
+    });
+
+    return response;
+}
 
 export async function sendMessageWithRequest(
     sender: TestRuntimeServices,
@@ -312,6 +333,15 @@ export async function sendMessageWithRequest(
     expect(sendMessageResult).toBeSuccessful();
 
     return sendMessageResult.value as MessageDTO & { content: RequestJSON };
+}
+
+export async function createRequest(
+    sender: TestRuntimeServices,
+    recipient: TestRuntimeServices,
+    request: CreateOutgoingRequestRequest
+): Promise<Result<LocalRequestDTO, ApplicationError>> {
+    const createRequestResult = await sender.consumption.outgoingRequests.create(request);
+    return createRequestResult;
 }
 
 export async function exchangeMessage(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices, attachments?: string[]): Promise<MessageDTO> {

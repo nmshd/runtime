@@ -292,21 +292,37 @@ export class MessageController extends TransportController {
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
+        const peerInDeletionAddressArray: string[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
             if (!relationship) {
                 throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
             }
+            if (typeof relationship.peerDeletionInfo?.deletionStatus === "undefined") {
+                const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
+                envelopeRecipients.push(
+                    MessageEnvelopeRecipient.from({
+                        address: recipient,
+                        encryptedKey: cipherForRecipient
+                    })
+                );
+                addressArray.push(recipient);
+            }
+            if (typeof relationship.peerDeletionInfo?.deletionStatus !== "undefined") {
+                peerInDeletionAddressArray.push(recipient.address);
+            }
+        }
 
-            const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
-            envelopeRecipients.push(
-                MessageEnvelopeRecipient.from({
-                    address: recipient,
-                    encryptedKey: cipherForRecipient
-                })
+        if (peerInDeletionAddressArray.toString() !== "") {
+            if (typeof peerInDeletionAddressArray[1] === "undefined") {
+                throw TransportCoreErrors.messages.peerInDeletion(
+                    `The recipient with the address '${peerInDeletionAddressArray}' has an active IdentityDeletionProcess so you cannot send a message to him.`
+                );
+            }
+            throw TransportCoreErrors.messages.peerInDeletion(
+                `The recipients with the following addresses '${peerInDeletionAddressArray}' have an active IdentityDeletionProcess so you cannot send a message to them.`
             );
-            addressArray.push(recipient);
         }
 
         const publicAttachmentArray: CoreId[] = [];
@@ -334,18 +350,20 @@ export class MessageController extends TransportController {
 
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
+            /*
             if (!relationship) {
                 throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
             }
+                */
 
-            const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
+            const signature = await this.secrets.sign(relationship!.relationshipSecretId, plaintextBuffer);
             const messageSignature = MessageSignature.from({
                 recipient: recipient,
                 signature: signature
             });
             messageSignatures.push(messageSignature);
 
-            addressToRelationshipId[recipient.toString()] = relationship.id;
+            addressToRelationshipId[recipient.toString()] = relationship!.id;
         }
 
         const signed = MessageSigned.from({

@@ -6,6 +6,7 @@ import {
     LocalAttributeDTO,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
+    PeerToBeDeletedEvent,
     RelationshipAuditLogEntryReason,
     RelationshipChangedEvent,
     RelationshipDTO,
@@ -18,6 +19,7 @@ import {
     QueryParamConditions,
     RuntimeServiceProvider,
     TestRuntimeServices,
+    createRequest,
     createTemplate,
     emptyRelationshipCreationContent,
     ensureActiveRelationship,
@@ -27,10 +29,12 @@ import {
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
+    failToSendMessageToMultipleRecipients,
     generateAddressPseudonym,
     getRelationship,
     sendAndReceiveNotification,
     sendMessageToMultipleRecipients,
+    syncUntilHasEvent,
     syncUntilHasMessageWithNotification,
     syncUntilHasRelationships
 } from "../lib";
@@ -940,5 +944,93 @@ describe("Relationship existence check", () => {
 
     test("should not decompose a relationship", async function () {
         expect(await services1.transport.relationships.decomposeRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+});
+
+describe("PeerIdentityDeletion", () => {
+    let services3: TestRuntimeServices;
+    let services4: TestRuntimeServices;
+    let relationshipId2: string;
+    let updatedRelationship: RelationshipDTO;
+
+    beforeAll(async () => {
+        const relationship1 = await ensureActiveRelationship(services1.transport, services2.transport);
+
+        const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+        services3 = runtimeServices[0];
+        const relationship2 = await establishRelationship(services2.transport, services3.transport);
+        relationshipId2 = relationship2.id;
+        services4 = runtimeServices[1];
+        await establishRelationship(services2.transport, services4.transport);
+
+        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationship1.id);
+        await services2.eventBus.waitForRunningEventHandlers();
+        updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationship1.id })).value;
+    });
+
+    test("returns error if the peer of the Request has an active IdentityDeletionProcess", async () => {
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            },
+            peer: services1.address
+        };
+        const result = await createRequest(services2, services1, requestContent);
+        expect(result).toBeAnError(
+            `You cannot create a request to '${services1.address.toString()}' since the peer is in status '${updatedRelationship.peerDeletionInfo?.deletionStatus}'.`,
+            "error.consumption.requests.peerInDeletion"
+        );
+    });
+
+    test("should not decide a request if the peer has an active IdentityDeletionProcess", async () => {
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            },
+            peer: services2.address
+        };
+        const rRequestMessage = await exchangeMessageWithRequest(services3, services2, requestContent);
+        const result = await services2.consumption.incomingRequests.received({
+            receivedRequest: rRequestMessage.content,
+            requestSourceId: rRequestMessage.id
+        });
+
+        expect(result).toBeSuccessful();
+        const requestIds = rRequestMessage.content.id!;
+        const canAcceptResult = (await services2.consumption.incomingRequests.canAccept({ requestId: requestIds, items: [{ accept: true }] })).value;
+        expect(canAcceptResult.isSuccess).toBe(true);
+        await services3.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId2);
+        await services2.eventBus.waitForRunningEventHandlers();
+        const canAcceptResultAfterPeerDeletion = (await services2.consumption.incomingRequests.canAccept({ requestId: requestIds, items: [{ accept: true }] })).value;
+        expect(canAcceptResultAfterPeerDeletion.isSuccess).toBe(false);
+        expect(canAcceptResultAfterPeerDeletion.code).toBe("error.consumption.requests.peerInDeletion");
+    });
+
+    test("messages with multiple recipients should fail if one of the recipients has an active IdentityDeletionProcess", async () => {
+        const result = await failToSendMessageToMultipleRecipients(services2.transport, [services4.address, services1.address]);
+        expect(result).toBeAnError(
+            `The recipient with the address '${services1.address.toString()}' has an active IdentityDeletionProcess so you cannot send a message to him.`,
+            "error.transport.messages.peerInDeletion"
+        );
+    });
+
+    test("messages with multiple recipients should fail with another ErrorMessage if more than one of the recipients has an active IdentityDeletionProcess", async () => {
+        const result = await failToSendMessageToMultipleRecipients(services2.transport, [services3.address, services1.address]);
+        expect(result).toBeAnError(
+            `The recipients with the following addresses '${services3.address.toString()},${services1.address.toString()}' have an active IdentityDeletionProcess so you cannot send a message to them.`,
+            "error.transport.messages.peerInDeletion"
+        );
     });
 });
