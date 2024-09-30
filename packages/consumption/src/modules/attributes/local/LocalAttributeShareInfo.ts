@@ -40,7 +40,7 @@ export class LocalAttributeShareInfo extends Serializable implements ILocalAttri
 
     @serialize()
     @validate({ nullable: true })
-    public thirdPartyAddress: CoreAddress;
+    public thirdPartyAddress?: CoreAddress;
 
     public static from(value: ILocalAttributeShareInfo | LocalAttributeShareInfoJSON): LocalAttributeShareInfo {
         return super.fromAny(value) as LocalAttributeShareInfo;
