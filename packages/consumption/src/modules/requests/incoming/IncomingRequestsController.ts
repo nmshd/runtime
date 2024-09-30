@@ -39,6 +39,9 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         private readonly identity: { address: CoreAddress },
         private readonly relationshipResolver: {
             getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+        },
+        private readonly relationshipTemplateResolver: {
+            getRelationshipTemplate(id: CoreId): Promise<RelationshipTemplate | undefined>;
         }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
@@ -185,6 +188,19 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
 
         this.assertRequestStatus(request, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired);
+
+        if (request.source?.type === "RelationshipTemplate") {
+            const template = await this.relationshipTemplateResolver.getRelationshipTemplate(request.source.reference);
+
+            if (!template) {
+                return ValidationResult.error(TransportCoreErrors.general.recordNotFound(RelationshipTemplate, request.source.reference.toString()));
+            }
+
+            if ((!relationship || relationship.status !== RelationshipStatus.Active) && template.cache?.expiresAt && template.isExpired()) {
+                request.updateStatusBasedOnTemplateExpiration(template.cache.expiresAt);
+                return ValidationResult.error(ConsumptionCoreErrors.requests.relationshipTemplateIsExpired(request.source.reference));
+            }
+        }
 
         const validationResult = this.decideRequestParamsValidator.validate(params, request);
         if (validationResult.isError()) return validationResult;

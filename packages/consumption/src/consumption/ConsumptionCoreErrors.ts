@@ -298,6 +298,13 @@ class Requests {
         );
     }
 
+    public relationshipTemplateIsExpired(templateId: CoreId): ApplicationError {
+        return new CoreError(
+            "error.consumption.relationshipTemplates.relationshipTemplateIsExpired",
+            `The incoming Request cannot be responded to, since its source RelationshipTemplate '${templateId.toString()}' is already expired.`
+        );
+    }
+
     public wrongRelationshipStatus(message: string) {
         return new CoreError("error.consumption.requests.wrongRelationshipStatus", message);
     }

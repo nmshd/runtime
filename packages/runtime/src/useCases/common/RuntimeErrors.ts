@@ -98,13 +98,6 @@ class RelationshipTemplates {
             "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set such that the expiration date of the RelationshipTemplate is not exceeded."
         );
     }
-
-    public relationshipTemplateIsExpired(templateId: CoreId): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.relationshipTemplates.relationshipTemplateIsExpired",
-            `The incoming Request cannot be responded to, since its source RelationshipTemplate '${templateId.toString()}' is already expired.`
-        );
-    }
 }
 
 class Relationships {
