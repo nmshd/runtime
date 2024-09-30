@@ -37,7 +37,7 @@ export class CreateSharedLocalAttributeParams extends Serializable implements IC
 
     @serialize()
     @validate({ nullable: true })
-    public thirdPartyAddress: CoreAddress;
+    public thirdPartyAddress?: CoreAddress;
 
     public static from(value: ICreateSharedLocalAttributeParams | CreateSharedLocalAttributeParamsJSON): CreateSharedLocalAttributeParams {
         return this.fromAny(value);
