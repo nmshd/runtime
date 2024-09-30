@@ -946,28 +946,35 @@ describe("Relationship existence check", () => {
         expect(await services1.transport.relationships.decomposeRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 });
-
-describe("PeerIdentityDeletion", () => {
+describe("Peer IdentityDeletionProcess", () => {
+    const serviceProvider = new RuntimeServiceProvider();
+    let services1: TestRuntimeServices;
+    let services2: TestRuntimeServices;
     let services3: TestRuntimeServices;
     let services4: TestRuntimeServices;
     let relationshipId2: string;
     let updatedRelationship: RelationshipDTO;
 
     beforeAll(async () => {
+        const runtimeServices = await serviceProvider.launch(4, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+        services1 = runtimeServices[0];
+        services2 = runtimeServices[1];
+        services3 = runtimeServices[2];
+        services4 = runtimeServices[3];
         const relationship1 = await ensureActiveRelationship(services1.transport, services2.transport);
-
-        const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
-        services3 = runtimeServices[0];
-        const relationship2 = await establishRelationship(services2.transport, services3.transport);
-        relationshipId2 = relationship2.id;
-        services4 = runtimeServices[1];
-        await establishRelationship(services2.transport, services4.transport);
 
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
         await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationship1.id);
         await services2.eventBus.waitForRunningEventHandlers();
         updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationship1.id })).value;
-    });
+
+        const relationship2 = await establishRelationship(services2.transport, services3.transport);
+        relationshipId2 = relationship2.id;
+
+        await establishRelationship(services2.transport, services4.transport);
+    }, 30000);
+
+    afterAll(() => serviceProvider.stop());
 
     test("returns error if the peer of the Request has an active IdentityDeletionProcess", async () => {
         const requestContent = {
