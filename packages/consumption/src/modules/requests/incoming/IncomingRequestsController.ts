@@ -1,7 +1,7 @@
 import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
 import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
@@ -39,6 +39,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         private readonly identity: { address: CoreAddress },
         private readonly relationshipResolver: {
             getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+            getExistingRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
         },
         private readonly relationshipTemplateResolver: {
             getRelationshipTemplate(id: CoreId): Promise<RelationshipTemplate | undefined>;
@@ -62,6 +63,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             source: infoFromSource.source,
             statusLog: []
         });
+
+        if ((await this.relationshipResolver.getExistingRelationshipToIdentity(CoreAddress.from(infoFromSource.peer))) && infoFromSource.expiresAt) {
+            request.content.expiresAt = CoreDate.min(CoreDate.from(infoFromSource.expiresAt), request.content.expiresAt);
+        }
 
         await this.localRequests.create(request);
 
@@ -98,7 +103,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             source: {
                 reference: template.id,
                 type: "RelationshipTemplate"
-            }
+            },
+            expiresAt: template.cache!.expiresAt
         };
     }
 
@@ -197,7 +203,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             }
 
             if ((!relationship || relationship.status !== RelationshipStatus.Active) && template.cache?.expiresAt && template.isExpired()) {
-                request.updateStatusBasedOnTemplateExpiration(template.cache.expiresAt);
+                request.updateExpirationDateBasedOnTemplateExpiration(template.cache.expiresAt);
                 return ValidationResult.error(ConsumptionCoreErrors.requests.relationshipTemplateIsExpired(request.source.reference));
             }
         }
@@ -408,6 +414,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         if (!requestDoc) return;
 
         const localRequest = LocalRequest.from(requestDoc);
+
         return await this.updateRequestExpiry(localRequest);
     }
 
@@ -441,13 +448,17 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     private async updateRequestExpiry(request: LocalRequest) {
-        const statusUpdated = request.updateStatusBasedOnExpiration();
-        if (statusUpdated) await this.update(request);
-        return request;
-    }
+        if (request.source?.type === "RelationshipTemplate" && (await this.relationshipResolver.getExistingRelationshipToIdentity(request.peer))) {
+            const template = await this.relationshipTemplateResolver.getRelationshipTemplate(request.source.reference);
+            if (!template) {
+                throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, request.source.reference.toString());
+            }
+            if (template.cache?.expiresAt) {
+                request.updateExpirationDateBasedOnTemplateExpiration(template.cache.expiresAt);
+            }
+        }
 
-    public async updateRequestExpiryRegardingTemplate(request: LocalRequest, templateExpiresAt: CoreDate): Promise<LocalRequest> {
-        const statusUpdated = request.updateStatusBasedOnTemplateExpiration(templateExpiresAt);
+        const statusUpdated = request.updateStatusBasedOnExpiration();
         if (statusUpdated) await this.update(request);
         return request;
     }
@@ -456,4 +467,5 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 interface InfoFromSource {
     peer: ICoreAddress;
     source: ILocalRequestSource;
+    expiresAt?: ICoreDate;
 }
