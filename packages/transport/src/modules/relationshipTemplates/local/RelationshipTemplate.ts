@@ -73,6 +73,6 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
     public isExpired(comparisonDate: CoreDate = CoreDate.utc()): boolean {
         if (!this.cache?.expiresAt) return false;
 
-        return comparisonDate.isAfter(this.cache.expiresAt.add({ seconds: 10 }));
+        return comparisonDate.isAfter(this.cache.expiresAt);
     }
 }
