@@ -82,17 +82,21 @@ export async function exchangeTemplateAndReceiverRequiresManualDecision(
     templateContent: any,
     templateExpiresAt?: DateTime
 ): Promise<LocalRequestWithSource> {
+    console.log(templateContent);
     const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent, templateExpiresAt);
-
+    // console.log(template);
     const request = (
         await rRuntimeServices.consumption.incomingRequests.received({
             receivedRequest: (template.content as RelationshipTemplateContentJSON).onNewRelationship,
             requestSourceId: template.id
         })
     ).value;
-    await rRuntimeServices.consumption.incomingRequests.checkPrerequisites({
+    // console.log(request);
+    // console.log(DateTime.utc());
+    const req = await rRuntimeServices.consumption.incomingRequests.checkPrerequisites({
         requestId: request.id
     });
+    // console.log(DateTime.utc());
     return {
         request: (
             await rRuntimeServices.consumption.incomingRequests.requireManualDecision({

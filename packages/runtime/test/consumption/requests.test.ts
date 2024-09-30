@@ -599,7 +599,7 @@ describe("Requests", () => {
         });
     });
 
-    describe("Request expired due to expired RelationshipTemplate", () => {
+    describe.only("Request expired due to expired RelationshipTemplate", () => {
         const runtimeServiceProvider = new RuntimeServiceProvider();
         let sRuntimeServices: TestRuntimeServices;
         let rRuntimeServices: TestRuntimeServices;
@@ -630,6 +630,7 @@ describe("Requests", () => {
         afterAll(async () => await runtimeServiceProvider.stop());
 
         test("change status of Request when querying it if the underlying RelationshipTemplate is expired", async () => {
+            // const templateContent = templateContent
             const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
                 .request;
 
@@ -683,7 +684,9 @@ describe("Requests", () => {
         ] as TestCase[])("Cannot respond to Request of expired RelationshipTemplate: $action Request throws error", ({ action }) => {
             const actionLowerCase = action.toLowerCase() as "accept" | "reject";
 
-            test(`recipient: cannot ${actionLowerCase} incoming Request`, async () => {
+            test.only(`recipient: cannot ${actionLowerCase} incoming Request`, async () => {
+                // console.log(DateTime.utc());
+                // console.log(templateContent);
                 const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
                     .request;
 
