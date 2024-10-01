@@ -703,10 +703,7 @@ describe("Requests", () => {
                     ]
                 });
 
-                expect(result).toBeAnError(
-                    `The incoming Request cannot be responded to, since its source RelationshipTemplate '${request.source!.reference}' is already expired.`,
-                    "error.runtime.relationshipTemplates.relationshipTemplateIsExpired"
-                );
+                expect(result).toBeAnError("Local Request has to be in status 'DecisionRequired/ManualDecisionRequired", "error.runtime.unknown");
 
                 const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
 

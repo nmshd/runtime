@@ -1,7 +1,7 @@
 import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
 import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
@@ -64,8 +64,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             statusLog: []
         });
 
-        if ((await this.relationshipResolver.getExistingRelationshipToIdentity(CoreAddress.from(infoFromSource.peer))) && infoFromSource.expiresAt) {
-            request.content.expiresAt = CoreDate.min(CoreDate.from(infoFromSource.expiresAt), request.content.expiresAt);
+        if (!(await this.relationshipResolver.getExistingRelationshipToIdentity(CoreAddress.from(infoFromSource.peer))) && infoFromSource.expiresAt) {
+            request.content.expiresAt = CoreDate.min(infoFromSource.expiresAt, request.content.expiresAt);
         }
 
         await this.localRequests.create(request);
@@ -454,5 +454,5 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 interface InfoFromSource {
     peer: ICoreAddress;
     source: ILocalRequestSource;
-    expiresAt?: ICoreDate;
+    expiresAt?: CoreDate;
 }

@@ -59,7 +59,7 @@ describe("Delete requests", function () {
         await TestUtil.decomposeRelationship(sAccountController, sConsumptionController, rAccountController);
         await TestUtil.decomposeRelationship(rAccountController, rConsumptionController, sAccountController);
         const sRequest = await sConsumptionController.outgoingRequests.getOutgoingRequest(sLocalRequest.id);
-        const rRequest = await sConsumptionController.incomingRequests.getIncomingRequest(rLocalRequest.id);
+        const rRequest = await sConsumptionController.incomingRequests.getIncomingRequestWithUpdatedExpiry(rLocalRequest.id);
         expect(sRequest).toBeUndefined();
         expect(rRequest).toBeUndefined();
     });

@@ -123,20 +123,20 @@ describe("LocalRequest", function () {
             const timestamp = CoreDate.utc().subtract({ days: 1 });
 
             request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
-            expect(request.content.expiresAt).toStrictEqual(timestamp);
+            expect(request.content.expiresAt).toBeUndefined();
         });
 
         test("does not change the expiration date when the Request is already expired", function () {
+            const timestamp = CoreDate.utc().subtract({ days: 1 });
+
             const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({
                 status: LocalRequestStatus.Expired,
                 contentProperties: {
-                    expiresAt: CoreDate.utc().subtract({ days: 1 })
+                    expiresAt: timestamp
                 }
             });
 
-            const timestamp = CoreDate.utc().subtract({ days: 2 });
-
-            request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
+            request.updateExpirationDateBasedOnTemplateExpiration(timestamp.subtract({ days: 1 }));
             expect(request.content.expiresAt).toStrictEqual(timestamp);
         });
 
@@ -146,7 +146,7 @@ describe("LocalRequest", function () {
             const timestamp = CoreDate.utc().subtract({ days: 1 });
 
             request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
-            expect(request.content.expiresAt).toStrictEqual(timestamp);
+            expect(request.content.expiresAt).toBeUndefined();
         });
     });
 });
