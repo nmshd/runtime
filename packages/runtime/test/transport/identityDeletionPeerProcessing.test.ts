@@ -51,6 +51,8 @@ describe("IdentityDeletionProcess", () => {
 
     test("peer should be notified about cancelled deletion process", async function () {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
+
         await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
 
         await syncUntilHasEvent(services2, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
