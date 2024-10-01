@@ -57,6 +57,7 @@ export class RequestsTestsContext {
     public currentIdentity: CoreAddress;
     public mockEventBus = new MockEventBus();
     public relationshipToReturnFromGetRelationshipToIdentity: Relationship | undefined;
+    public templateToReturnFromGetTemplate: RelationshipTemplate | undefined;
     public consumptionController: ConsumptionController;
 
     private constructor() {
@@ -110,7 +111,11 @@ export class RequestsTestsContext {
                 address: account.accountController.identity.address
             },
             {
-                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
+                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity),
+                getExistingRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
+            },
+            {
+                getRelationshipTemplate: () => Promise.resolve(context.templateToReturnFromGetTemplate)
             }
         );
 
@@ -132,6 +137,7 @@ export class RequestsTestsContext {
         this.validationResult = undefined;
         this.actionToTry = undefined;
         this.relationshipToReturnFromGetRelationshipToIdentity = undefined;
+        this.templateToReturnFromGetTemplate = undefined;
 
         TestRequestItemProcessor.numberOfApplyIncomingResponseItemCalls = 0;
 
@@ -221,6 +227,12 @@ export class RequestsGiven {
             receivedRequest: params.content,
             requestSourceObject: params.requestSource
         });
+
+        try {
+            this.context.templateToReturnFromGetTemplate = RelationshipTemplate.from(params.requestSource as any);
+        } catch (e) {
+            // the source is not a template
+        }
 
         await this.moveIncomingRequestToStatus(localRequest, params.status);
 
@@ -834,7 +846,7 @@ export class RequestsWhen {
     }
 
     public async iGetIncomingRequestsWithTheQuery(query?: any): Promise<void> {
-        this.context.localRequestsAfterAction = await this.context.incomingRequestsController.getIncomingRequests(query);
+        this.context.localRequestsAfterAction = await this.context.incomingRequestsController.getIncomingRequestsWithUpdatedExpiry(query);
     }
 
     public async iGetOutgoingRequestsWithTheQuery(query?: any): Promise<void> {
@@ -842,7 +854,7 @@ export class RequestsWhen {
     }
 
     public async iGetTheIncomingRequestWith(id: CoreId): Promise<void> {
-        this.context.localRequestAfterAction = await this.context.incomingRequestsController.getIncomingRequest(id);
+        this.context.localRequestAfterAction = await this.context.incomingRequestsController.getIncomingRequestWithUpdatedExpiry(id);
     }
 
     public async iGetTheOutgoingRequest(): Promise<void> {
@@ -854,7 +866,7 @@ export class RequestsWhen {
     }
 
     public async iTryToGetARequestWithANonExistentId(): Promise<void> {
-        this.context.localRequestAfterAction = (await this.context.incomingRequestsController.getIncomingRequest(await CoreIdHelper.notPrefixed.generate()))!;
+        this.context.localRequestAfterAction = (await this.context.incomingRequestsController.getIncomingRequestWithUpdatedExpiry(await CoreIdHelper.notPrefixed.generate()))!;
     }
 
     public iTryToCompleteTheIncomingRequestWith(params: Partial<ICompleteIncomingRequestParameters>): Promise<void> {

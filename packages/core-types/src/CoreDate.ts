@@ -113,7 +113,7 @@ export class CoreDate extends Serializable {
     }
 
     public static min(date1: CoreDate, date2?: CoreDate): CoreDate {
-        if (!date2 || date1 < date2) return date1;
+        if (!date2 || date1.isBefore(date2)) return date1;
         return date2;
     }
 
