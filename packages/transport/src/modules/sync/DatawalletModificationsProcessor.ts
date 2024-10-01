@@ -4,7 +4,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
 import _ from "lodash";
-import { TransportCoreErrors, TransportError } from "../../core";
+import { TransportCoreErrors, TransportError, TransportIds } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ICacheable } from "../../core/ICacheable";
 import { CachedIdentityDeletionProcess } from "../accounts/data/CachedIdentityDeletionProcess";
@@ -105,12 +105,30 @@ export class DatawalletModificationsProcessor {
 
                 await targetCollection.update(oldDoc, newObject);
             } else {
+                await this.simulateCacheChangeForCreate(targetCollectionName, objectIdentifier);
                 await targetCollection.create({
                     id: objectIdentifier,
                     ...resultingObject
                 });
             }
         }
+    }
+
+    /**
+     * if a collection contains cacheable items, the cache has to be fetched after the item is created on a new device
+     * this can only happen after all creates are applied, because the fetching needs properties like the secret key
+     */
+    private async simulateCacheChangeForCreate(targetCollectionName: string, objectIdentifier: string) {
+        if (!this.collectionsWithCacheableItems.includes(targetCollectionName)) return;
+
+        const modification = DatawalletModification.from({
+            localId: await TransportIds.datawalletModification.generate(),
+            type: DatawalletModificationType.CacheChanged,
+            collection: targetCollectionName,
+            objectIdentifier: CoreId.from(objectIdentifier)
+        });
+
+        this.cacheChanges.push(modification);
     }
 
     private async applyCacheChanges() {
