@@ -22782,3 +22782,30 @@ export const GetTokensRequest: any = {
     }
 }
 
+export const LoadPeerTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/LoadPeerTokenRequest",
+    "definitions": {
+        "LoadPeerTokenRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "$ref": "#/definitions/TokenReferenceString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "reference",
+                "ephemeral"
+            ],
+            "additionalProperties": false,
+            "errorMessage": "token reference invalid"
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        }
+    }
+}
