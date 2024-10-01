@@ -1,8 +1,7 @@
-import { TokenDTO, TransportServices } from "../../src";
+import { TokenDTO } from "../../src";
 import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, TestRuntimeServices, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
-let transportServices: TransportServices;
 let noLoginRuntime: TestRuntime;
 let runtimeService: TestRuntimeServices;
 
@@ -21,7 +20,7 @@ afterAll(async () => {
 describe("Anonymous tokens", () => {
     let uploadedToken: TokenDTO;
     beforeAll(async () => {
-        uploadedToken = await uploadOwnToken(transportServices);
+        uploadedToken = await uploadOwnToken(runtimeService.transport);
     });
 
     test("should get the token anonymous by truncated reference", async () => {
