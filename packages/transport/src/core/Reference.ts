@@ -54,7 +54,7 @@ export class Reference extends Serializable implements IReference {
 
         const secretKey = this.parseSecretKey(splitted[1], splitted[2]);
         const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
-        const passwordType = this.parsePasswordType(splitted[4]);
+        const passwordType = splitted[4] ? this.parsePasswordType(splitted[4]) : undefined;
 
         return this.from({
             id: CoreId.from(id),
