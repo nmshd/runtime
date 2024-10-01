@@ -143,14 +143,12 @@ export class DatawalletModificationsProcessor {
 
         const caches = await this.cacheFetcher.fetchCacheFor({
             files: cacheChangesGroupedByCollection.fileIds,
-            messages: cacheChangesGroupedByCollection.messageIds,
             relationshipTemplates: cacheChangesGroupedByCollection.relationshipTemplateIds,
             tokens: cacheChangesGroupedByCollection.tokenIds,
             identityDeletionProcesses: cacheChangesGroupedByCollection.identityDeletionProcessIds
         });
 
         await this.saveNewCaches(caches.files, DbCollectionName.Files, File);
-        await this.saveNewCaches(caches.messages, DbCollectionName.Messages, Message);
         await this.saveNewCaches(caches.relationshipTemplates, DbCollectionName.RelationshipTemplates, RelationshipTemplate);
         await this.saveNewCaches(caches.tokens, DbCollectionName.Tokens, Token);
         await this.saveNewCaches(caches.identityDeletionProcesses, DbCollectionName.IdentityDeletionProcess, IdentityDeletionProcess);
@@ -160,6 +158,11 @@ export class DatawalletModificationsProcessor {
         // is needed
         const relationshipCaches = await this.cacheFetcher.fetchCacheFor({ relationships: cacheChangesGroupedByCollection.relationshipIds });
         await this.saveNewCaches(relationshipCaches.relationships, DbCollectionName.Relationships, Relationship);
+
+        // Need to fetch the cache for messages after the cache for relationships was fetched,
+        // because when building the message cache, the cache of thecorresponding relationship is needed
+        const messageCaches = await this.cacheFetcher.fetchCacheFor({ messages: cacheChangesGroupedByCollection.messageIds });
+        await this.saveNewCaches(messageCaches.messages, DbCollectionName.Messages, Message);
     }
 
     @log()
