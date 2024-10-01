@@ -5,17 +5,17 @@ import { TokenDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
 import { TokenMapper } from "../../transport/tokens/TokenMapper";
 
-export interface LoadPeerTokenAnonymousByTruncatedReferenceRequest {
+export interface LoadPeerTokenAnonymousRequest {
     reference: TokenReferenceString;
 }
 
-class Validator extends SchemaValidator<LoadPeerTokenAnonymousByTruncatedReferenceRequest> {
+class Validator extends SchemaValidator<LoadPeerTokenAnonymousRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("LoadPeerTokenAnonymousByTruncatedReferenceRequest"));
+        super(schemaRepository.getSchema("LoadPeerTokenAnonymousRequest"));
     }
 }
 
-export class LoadPeerTokenAnonymousByTruncatedReferenceUseCase extends UseCase<LoadPeerTokenAnonymousByTruncatedReferenceRequest, TokenDTO> {
+export class LoadPeerTokenAnonymousUseCase extends UseCase<LoadPeerTokenAnonymousRequest, TokenDTO> {
     public constructor(
         @Inject private readonly anonymousTokenController: AnonymousTokenController,
         @Inject validator: Validator
@@ -23,7 +23,7 @@ export class LoadPeerTokenAnonymousByTruncatedReferenceUseCase extends UseCase<L
         super(validator);
     }
 
-    protected async executeInternal(request: LoadPeerTokenAnonymousByTruncatedReferenceRequest): Promise<Result<TokenDTO>> {
+    protected async executeInternal(request: LoadPeerTokenAnonymousRequest): Promise<Result<TokenDTO>> {
         const createdToken = await this.anonymousTokenController.loadPeerTokenByTruncated(request.reference);
         return Result.ok(TokenMapper.toTokenDTO(createdToken, true));
     }

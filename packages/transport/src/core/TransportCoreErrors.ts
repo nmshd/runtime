@@ -170,6 +170,10 @@ class General {
         return new CoreError("error.transport.general.baseUrlNotSet", "The baseUrl was not set.");
     }
 
+    public invalidBaseUrl() {
+        return new CoreError("error.transport.general.invalidBaseUrl", "The baseUrl is invalid since it contains a vertical bar |.");
+    }
+
     public platformClientSecretNotSet() {
         return new CoreError("error.transport.general.platformClientSecretNotSet", "The platform clientSecret was not set.");
     }
@@ -194,8 +198,8 @@ class General {
         return new CoreError("error.transport.notSupported", "The method is not yet supported.");
     }
 
-    public invalidTruncatedReference() {
-        return new CoreError("error.transport.files.invalidTruncatedReference", "invalid truncated reference");
+    public invalidTruncatedReference(message: string) {
+        return new CoreError("error.transport.files.invalidTruncatedReference", message);
     }
 
     public notIntendedForYou(id: string) {

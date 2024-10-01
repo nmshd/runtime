@@ -5,8 +5,6 @@ export interface TokenDTO {
     content: any;
     createdAt: string;
     expiresAt: string;
-    secretKey: string;
-    forIdentity?: string;
     truncatedReference: string;
     isEphemeral: boolean;
 }
