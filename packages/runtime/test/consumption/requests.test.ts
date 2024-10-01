@@ -640,7 +640,7 @@ describe("Requests", () => {
 
             expect(request.status).not.toBe(LocalRequestStatus.Expired);
 
-            await sleep(12000);
+            await sleep(1000);
 
             const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
 
@@ -662,7 +662,7 @@ describe("Requests", () => {
 
             expect(request.status).not.toBe(LocalRequestStatus.Expired);
 
-            await sleep(12000);
+            await sleep(1000);
 
             const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequests({})).value[0];
 
@@ -692,7 +692,7 @@ describe("Requests", () => {
                     triggeredEvent = event;
                 });
 
-                await sleep(12000);
+                await sleep(1000);
 
                 const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
                     requestId: request.id,

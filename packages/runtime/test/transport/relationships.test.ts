@@ -92,7 +92,7 @@ describe("CanCreateRelationship", () => {
         const incomingRequest = requests[0];
         expect(incomingRequest.status).toBe(LocalRequestStatus.DecisionRequired);
 
-        await sleep(12000);
+        await sleep(1000);
 
         const canCreateRelationshipResponse = await services2.transport.relationships.canCreateRelationship({
             templateId: templateId,
@@ -173,7 +173,7 @@ describe("Create Relationship", () => {
         const incomingRequest = requests[0];
         expect([LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired]).toContain(incomingRequest.status);
 
-        await sleep(12000);
+        await sleep(1000);
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
