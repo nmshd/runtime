@@ -15,11 +15,7 @@ export class AnonymousTokenController {
 
     public async loadPeerTokenByTruncated(truncated: string): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerTokenByReference(reference);
-    }
-
-    private async loadPeerTokenByReference(tokenReference: TokenReference): Promise<Token> {
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key, tokenReference.forIdentityTruncated);
+        return await this.loadPeerToken(reference.id, reference.key, reference.forIdentityTruncated);
     }
 
     private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string): Promise<Token> {

@@ -8,7 +8,6 @@ let runtimeService: TestRuntimeServices;
 
 beforeAll(async () => {
     runtimeService = (await serviceProvider.launch(1))[0];
-    transportServices = runtimeService.transport;
 
     noLoginRuntime = new NoLoginTestRuntime(RuntimeServiceProvider.defaultConfig);
     await noLoginRuntime.init();
@@ -36,10 +35,10 @@ describe("Anonymous tokens", () => {
     });
 
     test("should catch a personalized token", async () => {
-        const uploadedPersonalizedToken = await uploadOwnToken(transportServices, runtimeService.address);
-        const resultNotIntended = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
+        const uploadedPersonalizedToken = await uploadOwnToken(runtimeService.transport, runtimeService.address);
+        const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
             reference: uploadedPersonalizedToken.truncatedReference
         });
-        expect(resultNotIntended).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
+        expect(result).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
 });

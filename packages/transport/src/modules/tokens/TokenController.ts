@@ -186,11 +186,7 @@ export class TokenController extends TransportController {
 
     public async loadPeerTokenByTruncated(truncated: string, ephemeral: boolean): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerTokenByReference(reference, ephemeral);
-    }
-
-    private async loadPeerTokenByReference(tokenReference: TokenReference, ephemeral: boolean): Promise<Token> {
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key, ephemeral, tokenReference.forIdentityTruncated);
+        return await this.loadPeerToken(reference.id, reference.key, ephemeral, reference.forIdentityTruncated);
     }
 
     private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentityTruncated?: string): Promise<Token> {
@@ -199,6 +195,7 @@ export class TokenController extends TransportController {
             // if you created the token, it exists already
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
+
         if (tokenDoc) {
             let token: Token | undefined = Token.from(tokenDoc);
             if (token.cache) {
