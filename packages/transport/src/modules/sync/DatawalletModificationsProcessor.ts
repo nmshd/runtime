@@ -138,8 +138,8 @@ export class DatawalletModificationsProcessor {
 
         this.ensureAllItemsAreCacheable();
 
-        const cacheChangesWithoutFinalDeletes = this.cacheChanges.filter((c) => !this.deletedObjects.some((d) => c.objectIdentifier.equals(d)));
-        const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(cacheChangesWithoutFinalDeletes);
+        const cacheChangesWithoutDeletes = this.cacheChanges.filter((c) => !this.deletedObjects.some((d) => c.objectIdentifier.equals(d)));
+        const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(cacheChangesWithoutDeletes);
 
         const caches = await this.cacheFetcher.fetchCacheFor({
             files: cacheChangesGroupedByCollection.fileIds,
