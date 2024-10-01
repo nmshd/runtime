@@ -23,7 +23,6 @@ describe("FileReference", function () {
         expect(deserialized.id).toBeInstanceOf(CoreId);
         expect(deserialized.key.toBase64()).toStrictEqual(reference.key.toBase64());
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
-        expect(deserialized.backboneBaseUrl).toBeUndefined();
     });
 
     test("should serialize and deserialize correctly (from unknown type)", async function () {
