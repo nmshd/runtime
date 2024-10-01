@@ -52,13 +52,5 @@
         "source.organizeImports": "always"
     },
     "files.eol": "\n",
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "jest.jestCommandLine": "../../node_modules/.bin/jest",
-    "jest.nodeEnv": {
-        "USE_LOKIJS": "true"
-    },
-    "jest.virtualFolders": [
-        { "name": "Consumption", "rootPath": "packages/consumption" },
-        { "name": "Runtime", "rootPath": "packages/runtime" }
-    ]
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
