@@ -153,14 +153,11 @@ export class DatawalletModificationsProcessor {
         await this.saveNewCaches(caches.tokens, DbCollectionName.Tokens, Token);
         await this.saveNewCaches(caches.identityDeletionProcesses, DbCollectionName.IdentityDeletionProcess, IdentityDeletionProcess);
 
-        // Need to fetch the cache for relationships after the cache for relationship templates was fetched,
-        // because when building the relationship cache, the cache of thecorresponding relationship template
-        // is needed
+        // Need to fetch the cache for relationships after the cache for relationship templates was fetched, because when building the relationship cache, the cache of thecorresponding relationship template is needed
         const relationshipCaches = await this.cacheFetcher.fetchCacheFor({ relationships: cacheChangesGroupedByCollection.relationshipIds });
         await this.saveNewCaches(relationshipCaches.relationships, DbCollectionName.Relationships, Relationship);
 
-        // Need to fetch the cache for messages after the cache for relationships was fetched,
-        // because when building the message cache, the cache of thecorresponding relationship is needed
+        // Need to fetch the cache for messages after the cache for relationships was fetched, because when building the message cache, the cache of thecorresponding relationship is needed
         const messageCaches = await this.cacheFetcher.fetchCacheFor({ messages: cacheChangesGroupedByCollection.messageIds });
         await this.saveNewCaches(messageCaches.messages, DbCollectionName.Messages, Message);
     }
