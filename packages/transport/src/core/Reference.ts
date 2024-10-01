@@ -49,26 +49,12 @@ export class Reference extends Serializable implements IReference {
             throw TransportCoreErrors.general.invalidTruncatedReference("A TruncatedReference must consist of either exactly 3 or exactly 5 components.");
         }
 
-        let alg: number | undefined;
-        let passwordType: number | undefined;
         const idPart = splitted[0];
         const [id, backboneBaseUrl] = idPart.split("@");
-        try {
-            alg = parseInt(splitted[1]);
-        } catch (e) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("The encryption algorithm must be indicated by an integer in the TruncatedReference.");
-        }
-        const key = splitted[2];
+
+        const secretKey = this.parseSecretKey(splitted[1], splitted[2]);
         const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
-        try {
-            passwordType = splitted[4] ? parseInt(splitted[4]) : undefined;
-        } catch (e) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("The password type must be indicated by an integer in the TruncatedReference.");
-        }
-        const secretKey = CryptoSecretKey.from({
-            algorithm: alg,
-            secretKey: CoreBuffer.fromBase64URL(key)
-        });
+        const passwordType = this.parsePasswordType(splitted[4]);
 
         return this.from({
             id: CoreId.from(id),
@@ -76,6 +62,35 @@ export class Reference extends Serializable implements IReference {
             key: secretKey,
             forIdentityTruncated,
             passwordType
+        });
+    }
+
+    private static parsePasswordType(value: string): number | undefined {
+        try {
+            if (value === "") return undefined;
+
+            return parseInt(value);
+        } catch (e) {
+            throw TransportCoreErrors.general.invalidTruncatedReference("The password type must be indicated by an integer in the TruncatedReference.");
+        }
+    }
+
+    private static parseSecretKey(alg: string, secretKey: string): CryptoSecretKey {
+        let algorithm: number;
+
+        try {
+            algorithm = parseInt(alg);
+        } catch (e) {
+            throw TransportCoreErrors.general.invalidTruncatedReference("The encryption algorithm must be indicated by an integer in the TruncatedReference.");
+        }
+
+        if (Number.isNaN(algorithm) || typeof algorithm === "undefined") {
+            throw TransportCoreErrors.general.invalidTruncatedReference("The encryption algorithm must be indicated by an integer in the TruncatedReference.");
+        }
+
+        return CryptoSecretKey.from({
+            algorithm,
+            secretKey: CoreBuffer.fromBase64URL(secretKey)
         });
     }
 
