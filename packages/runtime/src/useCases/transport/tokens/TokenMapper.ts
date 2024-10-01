@@ -16,7 +16,6 @@ export class TokenMapper {
             content: token.cache.content.toJSON(),
             createdAt: token.cache.createdAt.toString(),
             expiresAt: token.cache.expiresAt.toString(),
-            secretKey: token.secretKey.toBase64(false),
             truncatedReference: reference.truncate(),
             isEphemeral: ephemeral
         };
