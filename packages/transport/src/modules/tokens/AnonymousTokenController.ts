@@ -18,13 +18,12 @@ export class AnonymousTokenController {
         return await this.loadPeerTokenByReference(reference);
     }
 
-    public async loadPeerTokenByReference(tokenReference: TokenReference): Promise<Token> {
-        // TODO: add the token reference forIdentity once available
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key);
+    private async loadPeerTokenByReference(tokenReference: TokenReference): Promise<Token> {
+        return await this.loadPeerToken(tokenReference.id, tokenReference.key, tokenReference.forIdentityTruncated);
     }
 
-    public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentity?: CoreAddress): Promise<Token> {
-        if (forIdentity) {
+    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string): Promise<Token> {
+        if (forIdentityTruncated) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
 

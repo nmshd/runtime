@@ -189,14 +189,13 @@ export class TokenController extends TransportController {
         return await this.loadPeerTokenByReference(reference, ephemeral);
     }
 
-    public async loadPeerTokenByReference(tokenReference: TokenReference, ephemeral: boolean): Promise<Token> {
-        // TODO: add the token reference forIdentity once available
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key, ephemeral);
+    private async loadPeerTokenByReference(tokenReference: TokenReference, ephemeral: boolean): Promise<Token> {
+        return await this.loadPeerToken(tokenReference.id, tokenReference.key, ephemeral, tokenReference.forIdentityTruncated);
     }
 
-    public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentity?: CoreAddress): Promise<Token> {
+    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentityTruncated?: string): Promise<Token> {
         const tokenDoc = await this.tokens.read(id.toString());
-        if (!tokenDoc && forIdentity && !forIdentity.equals(this.parent.identity.address)) {
+        if (!tokenDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
             // if you created the token, it exists already
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }

@@ -39,9 +39,9 @@ describe("AnonymousTokenController", function () {
             forIdentity: sender.identity.address
         });
 
-        await TestUtil.expectThrowsAsync(async () => {
-            await anonymousTokenController.loadPeerToken(sentToken.id, sentToken.secretKey, sender.identity.address);
-        }, "transport.general.notIntendedForYou");
+        await expect(async () => {
+            await anonymousTokenController.loadPeerTokenByTruncated(sentToken.toTokenReference().truncate());
+        }).rejects.toThrow("transport.general.notIntendedForYou");
     });
 
     test("should throw when loading a personalized token and it's uncaught before reaching the backbone", async function () {
@@ -54,8 +54,12 @@ describe("AnonymousTokenController", function () {
             forIdentity: sender.identity.address
         });
 
-        await TestUtil.expectThrowsAsync(async () => {
-            await anonymousTokenController.loadPeerToken(sentToken.id, sentToken.secretKey);
-        }, "error.platform.recordNotFound");
+        const reference = sentToken.toTokenReference();
+        reference.forIdentityTruncated = undefined;
+        const truncatedReference = reference.truncate();
+
+        await expect(async () => {
+            await anonymousTokenController.loadPeerTokenByTruncated(truncatedReference);
+        }).rejects.toThrow("error.platform.recordNotFound");
     });
 });

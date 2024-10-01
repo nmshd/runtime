@@ -92,12 +92,7 @@ describe("Personalized tokens", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await transportServices2.tokens.loadPeerToken({
-            id: createResult.value.id,
-            secretKey: createResult.value.secretKey,
-            ephemeral: true,
-            forIdentity: createResult.value.forIdentity
-        });
+        const loadResult = await transportServices2.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
         expect(loadResult).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
 });

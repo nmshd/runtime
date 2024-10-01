@@ -34,4 +34,12 @@ describe("Anonymous tokens", () => {
         const token = result.value;
         expect(token.content).toStrictEqual(uploadedToken.content);
     });
+
+    test("should catch a personalized token", async () => {
+        const uploadedPersonalizedToken = await uploadOwnToken(transportServices, runtimeService.address);
+        const resultNotIntended = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
+            reference: uploadedPersonalizedToken.truncatedReference
+        });
+        expect(resultNotIntended).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
+    });
 });
