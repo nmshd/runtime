@@ -107,6 +107,10 @@ export class Transport {
             throw TransportCoreErrors.general.baseUrlNotSet().logWith(log);
         }
 
+        if (this._config.baseUrl.includes("|")) {
+            throw TransportCoreErrors.general.invalidBaseUrl().logWith(log);
+        }
+
         if (this._config.supportedDatawalletVersion < 1) {
             throw new TransportError("The given supported datawallet version is invalid. The value must be 1 or higher.");
         }
