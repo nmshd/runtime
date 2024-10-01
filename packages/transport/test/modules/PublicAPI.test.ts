@@ -103,6 +103,7 @@ publicFunctions[RelationshipsController.name] = [
     nameof<RelationshipsController>((r) => r.getRelationships),
     nameof<RelationshipsController>((r) => r.getRelationshipToIdentity),
     nameof<RelationshipsController>((r) => r.getActiveRelationshipToIdentity),
+    nameof<RelationshipsController>((r) => r.getExistingRelationshipToIdentity),
     nameof<RelationshipsController>((r) => r.getRelationship),
     nameof<RelationshipsController>((r) => r.sign),
     nameof<RelationshipsController>((r) => r.verify),

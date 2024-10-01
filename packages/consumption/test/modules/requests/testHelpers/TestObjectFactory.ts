@@ -475,11 +475,11 @@ export class TestObjectFactory {
         };
     }
 
-    public static createIncomingRelationshipTemplate(): RelationshipTemplate {
-        return RelationshipTemplate.from(this.createIncomingIRelationshipTemplate());
+    public static createIncomingRelationshipTemplate(expiresAt?: CoreDate): RelationshipTemplate {
+        return RelationshipTemplate.from(this.createIncomingIRelationshipTemplate(expiresAt));
     }
 
-    public static createIncomingIRelationshipTemplate(): IRelationshipTemplate {
+    public static createIncomingIRelationshipTemplate(expiresAt?: CoreDate): IRelationshipTemplate {
         return {
             // @ts-expect-error
             "@type": "RelationshipTemplate",
@@ -495,6 +495,7 @@ export class TestObjectFactory {
                 createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 createdByDevice: { id: "senderDeviceId" },
                 maxNumberOfAllocations: 1,
+                expiresAt,
                 identity: {
                     address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                     publicKey: CryptoSignaturePublicKey.from({

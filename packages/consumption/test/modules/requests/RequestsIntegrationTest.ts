@@ -14,7 +14,7 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import { CoreAddress, CoreId, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreIdHelper, IConfigOverwrite, IMessage, IRelationshipTemplate, Message, Relationship, RelationshipTemplate, SynchronizedCollection, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
@@ -1047,6 +1047,12 @@ export class RequestsThen {
         expect(this.context.localRequestAfterAction!.source!.type).toStrictEqual(sourceType);
         expect(this.context.localRequestAfterAction!.response).toBeUndefined();
         expect(this.context.localRequestAfterAction!.statusLog).toHaveLength(0);
+
+        return Promise.resolve();
+    }
+
+    public theRequestHasExpirationDate(expiresAt: CoreDate): Promise<void> {
+        expect(this.context.localRequestAfterAction?.content.expiresAt).toStrictEqual(expiresAt);
 
         return Promise.resolve();
     }

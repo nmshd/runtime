@@ -66,6 +66,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         if (!(await this.relationshipResolver.getExistingRelationshipToIdentity(CoreAddress.from(infoFromSource.peer))) && infoFromSource.expiresAt) {
             request.content.expiresAt = CoreDate.min(infoFromSource.expiresAt, request.content.expiresAt);
+            request.updateStatusBasedOnExpiration();
         }
 
         await this.localRequests.create(request);
@@ -435,18 +436,19 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     private async updateRequestExpiry(request: LocalRequest) {
-        if (request.source?.type === "RelationshipTemplate" && (await this.relationshipResolver.getExistingRelationshipToIdentity(request.peer))) {
+        let expirationDateUpdated;
+        if (request.source?.type === "RelationshipTemplate" && !(await this.relationshipResolver.getExistingRelationshipToIdentity(request.peer))) {
             const template = await this.relationshipTemplateResolver.getRelationshipTemplate(request.source.reference);
             if (!template) {
                 throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, request.source.reference.toString());
             }
             if (template.cache?.expiresAt) {
-                request.updateExpirationDateBasedOnTemplateExpiration(template.cache.expiresAt);
+                expirationDateUpdated = request.updateExpirationDateBasedOnTemplateExpiration(template.cache.expiresAt);
             }
         }
 
         const statusUpdated = request.updateStatusBasedOnExpiration();
-        if (statusUpdated) await this.update(request);
+        if (expirationDateUpdated ?? statusUpdated) await this.update(request);
         return request;
     }
 }

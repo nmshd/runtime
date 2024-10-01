@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { IRequest, IRequestItemGroup, RejectResponseItem, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreIdHelper, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreIdHelper, RelationshipTemplate, TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
@@ -63,6 +63,28 @@ describe("IncomingRequestsController", function () {
             await Then.theRequestIsInStatus(LocalRequestStatus.Open);
             await Then.theNewRequestIsPersistedInTheDatabase();
             await Then.eventHasBeenPublished(IncomingRequestReceivedEvent);
+        });
+
+        test("takes the expiration date from the template if the request has no expiration date", async function () {
+            const timestamp = CoreDate.utc();
+            const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
+            await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
+            await Then.theRequestHasExpirationDate(timestamp);
+            await Then.theRequestIsInStatus(LocalRequestStatus.Expired);
+        });
+
+        test("takes the expiration date from the template if the request has a later expiration date", async function () {
+            const timestamp = CoreDate.utc().add({ days: 1 });
+            const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
+            await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
+            await Then.theRequestHasExpirationDate(timestamp);
+        });
+
+        test("takes the expiration date from the request if the request has an earlier expiration date", async function () {
+            const timestamp = CoreDate.utc().add({ days: 1 });
+            const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
+            await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
+            await Then.theRequestHasExpirationDate(timestamp);
         });
 
         test("uses the ID of the given Request if it exists", async function () {
@@ -954,6 +976,37 @@ describe("IncomingRequestsController", function () {
             await Then.theNumberOfReturnedRequestsIs(2);
         });
 
+        test("updates the expiration date if the template expires before the request", async function () {
+            const timestamp = CoreDate.utc();
+            const request = await Given.anIncomingRequestWith({
+                content: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp.add({ days: 1 }) }),
+                requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp)
+            });
+            await When.iGetTheIncomingRequestWith(request.id);
+            await Then.theRequestHasExpirationDate(timestamp);
+            await Then.theRequestIsInStatus(LocalRequestStatus.Expired);
+        });
+
+        test("updates the expiration date if the request has no expiration date", async function () {
+            const timestamp = CoreDate.utc().add({ days: 1 });
+            const request = await Given.anIncomingRequestWith({
+                content: TestObjectFactory.createRequestWithOneItem(),
+                requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp)
+            });
+            await When.iGetTheIncomingRequestWith(request.id);
+            await Then.theRequestHasExpirationDate(timestamp);
+        });
+
+        test("doesn't update the expiration date if the request expires before the template", async function () {
+            const timestamp = CoreDate.utc().add({ days: 1 });
+            const request = await Given.anIncomingRequestWith({
+                content: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp }),
+                requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp.add({ days: 1 }))
+            });
+            await When.iGetTheIncomingRequestWith(request.id);
+            await Then.theRequestHasExpirationDate(timestamp);
+        });
+
         test("moves the Request to status 'Expired' when expiredAt is reached", async function () {
             const outgoingRequest = await Given.anIncomingRequestWith({
                 status: LocalRequestStatus.Draft,
@@ -999,6 +1052,7 @@ describe("IncomingRequestsController", function () {
                 items: [TestRequestItem.from({ mustBeAccepted: false })]
             });
             const template = TestObjectFactory.createIncomingIRelationshipTemplate();
+            context.templateToReturnFromGetTemplate = RelationshipTemplate.from(template);
 
             let cnsRequest = await context.incomingRequestsController.received({
                 receivedRequest: request,
