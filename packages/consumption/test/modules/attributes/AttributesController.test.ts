@@ -2457,8 +2457,7 @@ describe("AttributesController", function () {
                 })
             });
 
-            await TestUtil.expectThrowsAsync(
-                appConsumptionController.attributes.setAsDefaultRepositoryAttribute(sharedAttribute),
+            await expect(appConsumptionController.attributes.setAsDefaultRepositoryAttribute(sharedAttribute)).rejects.toThrow(
                 "error.consumption.attributes.isNotRepositoryAttribute"
             );
         });
@@ -2475,8 +2474,7 @@ describe("AttributesController", function () {
             });
             expect(repositoryAttribute.isDefault).toBeUndefined();
 
-            await TestUtil.expectThrowsAsync(
-                consumptionController.attributes.setAsDefaultRepositoryAttribute(repositoryAttribute),
+            await expect(consumptionController.attributes.setAsDefaultRepositoryAttribute(repositoryAttribute)).rejects.toThrow(
                 "error.consumption.attributes.setDefaultRepositoryAttributesIsDisabled"
             );
         });
@@ -2864,7 +2862,7 @@ describe("AttributesController", function () {
         });
 
         test("should throw if an unassigned attribute id is queried", async function () {
-            await TestUtil.expectThrowsAsync(consumptionController.attributes.getVersionsOfAttribute(CoreId.from("ATTxxxxxxxxxxxxxxxxx")), "error.transport.recordNotFound");
+            await expect(consumptionController.attributes.getVersionsOfAttribute(CoreId.from("ATTxxxxxxxxxxxxxxxxx"))).rejects.toThrow("error.transport.recordNotFound");
         });
 
         test("should check if two attributes are subsequent in succession", async function () {
@@ -3052,7 +3050,7 @@ describe("AttributesController", function () {
         });
 
         test("should throw if an unassigned attribute id is queried", async function () {
-            await TestUtil.expectThrowsAsync(consumptionController.attributes.getSharedVersionsOfAttribute(CoreId.from("ATTxxxxxxxxxxxxxxxxx")), "error.transport.recordNotFound");
+            await expect(consumptionController.attributes.getSharedVersionsOfAttribute(CoreId.from("ATTxxxxxxxxxxxxxxxxx"))).rejects.toThrow("error.transport.recordNotFound");
         });
 
         test("should return an empty list if a shared identity attribute is queried", async function () {
