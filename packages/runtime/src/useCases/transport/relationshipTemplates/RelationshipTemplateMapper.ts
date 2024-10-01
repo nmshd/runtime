@@ -20,7 +20,6 @@ export class RelationshipTemplateMapper {
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
-            secretKey: template.secretKey.toBase64(false),
             truncatedReference: template.truncate()
         };
     }

@@ -1,35 +1,8 @@
-export const LoadPeerTokenAnonymousByIdAndKeyRequest: any = {
+export const LoadPeerTokenAnonymousRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadPeerTokenAnonymousByIdAndKeyRequest",
+    "$ref": "#/definitions/LoadPeerTokenAnonymousRequest",
     "definitions": {
-        "LoadPeerTokenAnonymousByIdAndKeyRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/TokenIdString"
-                },
-                "secretKey": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "TokenIdString": {
-            "type": "string",
-            "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const LoadPeerTokenAnonymousByTruncatedReferenceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadPeerTokenAnonymousByTruncatedReferenceRequest",
-    "definitions": {
-        "LoadPeerTokenAnonymousByTruncatedReferenceRequest": {
+        "LoadPeerTokenAnonymousRequest": {
             "type": "object",
             "properties": {
                 "reference": {
@@ -21500,105 +21473,11 @@ export const GetFilesRequest: any = {
     }
 }
 
-export const GetOrLoadFileViaSecretRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetOrLoadFileViaSecretRequest",
-    "definitions": {
-        "GetOrLoadFileViaSecretRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/FileIdString"
-                },
-                "secretKey": {
-                    "type": "string",
-                    "minLength": 10
-                }
-            },
-            "required": [
-                "id",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetOrLoadFileViaReferenceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetOrLoadFileViaReferenceRequest",
-    "definitions": {
-        "GetOrLoadFileViaReferenceRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/TokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/FileReferenceString"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "reference"
-            ],
-            "additionalProperties": false,
-            "errorMessage": "token / file reference invalid"
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        },
-        "FileReferenceString": {
-            "type": "string",
-            "pattern": "RklM.{84}"
-        }
-    }
-}
-
 export const GetOrLoadFileRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetOrLoadFileRequest",
     "definitions": {
         "GetOrLoadFileRequest": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/GetOrLoadFileViaSecretRequest"
-                },
-                {
-                    "$ref": "#/definitions/GetOrLoadFileViaReferenceRequest"
-                }
-            ]
-        },
-        "GetOrLoadFileViaSecretRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/FileIdString"
-                },
-                "secretKey": {
-                    "type": "string",
-                    "minLength": 10
-                }
-            },
-            "required": [
-                "id",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        },
-        "GetOrLoadFileViaReferenceRequest": {
             "type": "object",
             "properties": {
                 "reference": {
@@ -22311,119 +22190,11 @@ export const GetRelationshipTemplatesRequest: any = {
     }
 }
 
-export const LoadPeerRelationshipTemplateViaSecretRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadPeerRelationshipTemplateViaSecretRequest",
-    "definitions": {
-        "LoadPeerRelationshipTemplateViaSecretRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "secretKey": {
-                    "type": "string",
-                    "minLength": 10
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                }
-            },
-            "required": [
-                "id",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const LoadPeerRelationshipTemplateViaReferenceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadPeerRelationshipTemplateViaReferenceRequest",
-    "definitions": {
-        "LoadPeerRelationshipTemplateViaReferenceRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/TokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/RelationshipTemplateReferenceString"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "reference"
-            ],
-            "additionalProperties": false,
-            "errorMessage": "token / relationship template reference invalid"
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        },
-        "RelationshipTemplateReferenceString": {
-            "type": "string",
-            "pattern": "UkxU.{84}"
-        }
-    }
-}
-
 export const LoadPeerRelationshipTemplateRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/LoadPeerRelationshipTemplateRequest",
     "definitions": {
         "LoadPeerRelationshipTemplateRequest": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/LoadPeerRelationshipTemplateViaSecretRequest"
-                },
-                {
-                    "$ref": "#/definitions/LoadPeerRelationshipTemplateViaReferenceRequest"
-                }
-            ]
-        },
-        "LoadPeerRelationshipTemplateViaSecretRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "secretKey": {
-                    "type": "string",
-                    "minLength": 10
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                }
-            },
-            "required": [
-                "id",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
-        },
-        "LoadPeerRelationshipTemplateViaReferenceRequest": {
             "type": "object",
             "properties": {
                 "reference": {
@@ -22983,81 +22754,11 @@ export const GetTokensRequest: any = {
     }
 }
 
-export const LoadPeerTokenViaReferenceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadPeerTokenViaReferenceRequest",
-    "definitions": {
-        "LoadPeerTokenViaReferenceRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "$ref": "#/definitions/TokenReferenceString"
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                }
-            },
-            "required": [
-                "reference",
-                "ephemeral"
-            ],
-            "additionalProperties": false,
-            "errorMessage": "token reference invalid"
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        }
-    }
-}
-
-export const LoadPeerTokenViaSecretRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadPeerTokenViaSecretRequest",
-    "definitions": {
-        "LoadPeerTokenViaSecretRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/TokenIdString"
-                },
-                "secretKey": {
-                    "type": "string",
-                    "minLength": 10
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                }
-            },
-            "required": [
-                "id",
-                "secretKey",
-                "ephemeral"
-            ],
-            "additionalProperties": false
-        },
-        "TokenIdString": {
-            "type": "string",
-            "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
 export const LoadPeerTokenRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/LoadPeerTokenRequest",
     "definitions": {
         "LoadPeerTokenRequest": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/LoadPeerTokenViaReferenceRequest"
-                },
-                {
-                    "$ref": "#/definitions/LoadPeerTokenViaSecretRequest"
-                }
-            ]
-        },
-        "LoadPeerTokenViaReferenceRequest": {
             "type": "object",
             "properties": {
                 "reference": {
@@ -23077,31 +22778,6 @@ export const LoadPeerTokenRequest: any = {
         "TokenReferenceString": {
             "type": "string",
             "pattern": "VE9L.{84}"
-        },
-        "LoadPeerTokenViaSecretRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/TokenIdString"
-                },
-                "secretKey": {
-                    "type": "string",
-                    "minLength": 10
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                }
-            },
-            "required": [
-                "id",
-                "secretKey",
-                "ephemeral"
-            ],
-            "additionalProperties": false
-        },
-        "TokenIdString": {
-            "type": "string",
-            "pattern": "TOK[A-Za-z0-9]{17}"
         }
     }
 }

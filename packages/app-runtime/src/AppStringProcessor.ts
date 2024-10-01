@@ -63,9 +63,7 @@ export class AppStringProcessor {
             return UserfriendlyResult.fail(error);
         }
 
-        const tokenResult = await this.runtime.anonymousServices.tokens.loadPeerTokenByTruncatedReference({
-            reference: truncatedReference
-        });
+        const tokenResult = await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference });
         if (tokenResult.isError) {
             return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(tokenResult.error));
         }

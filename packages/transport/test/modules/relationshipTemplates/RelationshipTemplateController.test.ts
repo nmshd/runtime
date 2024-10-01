@@ -106,13 +106,13 @@ describe("RelationshipTemplateController", function () {
     });
 
     test("should throw an error with maxNumberOfAllocations=0", async function () {
-        await TestUtil.expectThrowsAsync(async () => {
+        await expect(async () => {
             await sender.relationshipTemplates.sendRelationshipTemplate({
                 content: { a: "A" },
                 expiresAt: CoreDate.utc().add({ minutes: 1 }),
                 maxNumberOfAllocations: 0
             });
-        }, /SendRelationshipTemplateParameters.maxNumberOfAllocations/);
+        }).rejects.toThrow(/SendRelationshipTemplateParameters.maxNumberOfAllocations/);
     });
 
     test("should create and load a personalized template", async function () {
