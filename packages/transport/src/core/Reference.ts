@@ -46,31 +46,37 @@ export class Reference extends Serializable implements IReference {
         const splitted = truncatedBuffer.toUtf8().split("|");
 
         if (![3, 5].includes(splitted.length)) {
-            throw TransportCoreErrors.general.invalidTruncatedReference();
+            throw TransportCoreErrors.general.invalidTruncatedReference("A TruncatedReference must consist of either exactly 3 or exactly 5 components.");
         }
 
+        let alg: number | undefined;
+        let passwordType: number | undefined;
+        const idPart = splitted[0];
+        const [id, backboneBaseUrl] = idPart.split("@");
         try {
-            const idPart = splitted[0];
-            const [id, backboneBaseUrl] = idPart.split("@");
-            const alg = parseInt(splitted[1]);
-            const key = splitted[2];
-            const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
-            const passwordType = splitted[4] ? parseInt(splitted[4]) : undefined;
-            const secretKey = CryptoSecretKey.from({
-                algorithm: alg,
-                secretKey: CoreBuffer.fromBase64URL(key)
-            });
-
-            return this.from({
-                id: CoreId.from(id),
-                backboneBaseUrl,
-                key: secretKey,
-                forIdentityTruncated,
-                passwordType
-            });
+            alg = parseInt(splitted[1]);
         } catch (e) {
-            throw TransportCoreErrors.general.invalidTruncatedReference();
+            throw TransportCoreErrors.general.invalidTruncatedReference("The encryption algorithm must be indicated by an integer in the TruncatedReference.");
         }
+        const key = splitted[2];
+        const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
+        try {
+            passwordType = splitted[4] ? parseInt(splitted[4]) : undefined;
+        } catch (e) {
+            throw TransportCoreErrors.general.invalidTruncatedReference("The password type must be indicated by an integer in the TruncatedReference.");
+        }
+        const secretKey = CryptoSecretKey.from({
+            algorithm: alg,
+            secretKey: CoreBuffer.fromBase64URL(key)
+        });
+
+        return this.from({
+            id: CoreId.from(id),
+            backboneBaseUrl,
+            key: secretKey,
+            forIdentityTruncated,
+            passwordType
+        });
     }
 
     protected static validateId(value: any, helper: CoreIdHelper): void {

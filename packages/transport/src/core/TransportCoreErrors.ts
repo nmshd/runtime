@@ -198,8 +198,8 @@ class General {
         return new CoreError("error.transport.notSupported", "The method is not yet supported.");
     }
 
-    public invalidTruncatedReference() {
-        return new CoreError("error.transport.files.invalidTruncatedReference", "invalid truncated reference");
+    public invalidTruncatedReference(message: string) {
+        return new CoreError("error.transport.files.invalidTruncatedReference", message);
     }
 
     public accountControllerInitialSyncFailed() {
