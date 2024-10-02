@@ -65,7 +65,7 @@ describe("IncomingRequestsController", function () {
             await Then.eventHasBeenPublished(IncomingRequestReceivedEvent);
         });
 
-        test("takes the expiration date from the template if the request has no expiration date", async function () {
+        test("takes the expiration date from the Template if the Request has no expiration date", async function () {
             const timestamp = CoreDate.utc();
             const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
             await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
@@ -73,14 +73,14 @@ describe("IncomingRequestsController", function () {
             await Then.theRequestIsInStatus(LocalRequestStatus.Expired);
         });
 
-        test("takes the expiration date from the template if the request has a later expiration date", async function () {
+        test("takes the expiration date from the Template if the Request has a later expiration date", async function () {
             const timestamp = CoreDate.utc().add({ days: 1 });
             const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
             await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
             await Then.theRequestHasExpirationDate(timestamp);
         });
 
-        test("takes the expiration date from the request if the request has an earlier expiration date", async function () {
+        test("takes the expiration date from the Request if the Request has an earlier expiration date", async function () {
             const timestamp = CoreDate.utc().add({ days: 1 });
             const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
             await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
@@ -976,9 +976,10 @@ describe("IncomingRequestsController", function () {
             await Then.theNumberOfReturnedRequestsIs(2);
         });
 
-        test("updates the expiration date if the template expires before the request", async function () {
+        test("updates the expiration date if the Template expires before the Request", async function () {
             const timestamp = CoreDate.utc();
             const request = await Given.anIncomingRequestWith({
+                status: LocalRequestStatus.Open,
                 content: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp.add({ days: 1 }) }),
                 requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp)
             });
@@ -987,9 +988,10 @@ describe("IncomingRequestsController", function () {
             await Then.theRequestIsInStatus(LocalRequestStatus.Expired);
         });
 
-        test("updates the expiration date if the request has no expiration date", async function () {
+        test("updates the expiration date if the Request has no expiration date", async function () {
             const timestamp = CoreDate.utc().add({ days: 1 });
             const request = await Given.anIncomingRequestWith({
+                status: LocalRequestStatus.Open,
                 content: TestObjectFactory.createRequestWithOneItem(),
                 requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp)
             });
@@ -997,9 +999,10 @@ describe("IncomingRequestsController", function () {
             await Then.theRequestHasExpirationDate(timestamp);
         });
 
-        test("doesn't update the expiration date if the request expires before the template", async function () {
+        test("doesn't update the expiration date if the Request expires before the Template", async function () {
             const timestamp = CoreDate.utc().add({ days: 1 });
             const request = await Given.anIncomingRequestWith({
+                status: LocalRequestStatus.Open,
                 content: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp }),
                 requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp.add({ days: 1 }))
             });
