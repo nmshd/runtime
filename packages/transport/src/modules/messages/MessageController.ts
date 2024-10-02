@@ -1,5 +1,6 @@
-import { ISerializable } from "@js-soft/ts-serval";
+import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
+import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -299,7 +300,7 @@ export class MessageController extends TransportController {
             if (!relationship) {
                 throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
             }
-            if (typeof relationship.peerDeletionInfo?.deletionStatus === "undefined") {
+            if (Serializable.fromUnknown(parameters.content) instanceof Notification || typeof relationship.peerDeletionInfo?.deletionStatus === "undefined") {
                 const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
                 envelopeRecipients.push(
                     MessageEnvelopeRecipient.from({
@@ -309,7 +310,13 @@ export class MessageController extends TransportController {
                 );
                 addressArray.push(recipient);
             }
-            if (typeof relationship.peerDeletionInfo?.deletionStatus !== "undefined") {
+            if (
+                (Serializable.fromUnknown(parameters.content) instanceof Mail ||
+                    Serializable.fromUnknown(parameters.content) instanceof ResponseWrapper ||
+                    Serializable.fromUnknown(parameters.content) instanceof ArbitraryMessageContent ||
+                    Serializable.fromUnknown(parameters.content) instanceof Request) &&
+                typeof relationship.peerDeletionInfo?.deletionStatus !== "undefined"
+            ) {
                 peerInDeletionAddressArray.push(recipient.address);
             }
         }
@@ -350,11 +357,6 @@ export class MessageController extends TransportController {
 
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
-            /*
-            if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
-            }
-                */
 
             const signature = await this.secrets.sign(relationship!.relationshipSecretId, plaintextBuffer);
             const messageSignature = MessageSignature.from({

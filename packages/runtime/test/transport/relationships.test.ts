@@ -1,5 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { RelationshipAttributeConfidentiality } from "@nmshd/content";
+import { ConsumptionIds } from "@nmshd/consumption";
+import { Notification, RelationshipAttributeConfidentiality } from "@nmshd/content";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
@@ -18,6 +19,7 @@ import {
 import {
     QueryParamConditions,
     RuntimeServiceProvider,
+    TestNotificationItem,
     TestRuntimeServices,
     createRequest,
     createTemplate,
@@ -1020,6 +1022,9 @@ describe("Peer IdentityDeletionProcess", () => {
         await services3.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
         await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId2);
         await services2.eventBus.waitForRunningEventHandlers();
+        const updatedRelationship2 = (await services2.transport.relationships.getRelationship({ id: relationshipId2 })).value;
+        expect(updatedRelationship2.peerDeletionInfo?.deletionStatus).toBe("ToBeDeleted");
+
         const canAcceptResultAfterPeerDeletion = (await services2.consumption.incomingRequests.canAccept({ requestId: requestIds, items: [{ accept: true }] })).value;
         expect(canAcceptResultAfterPeerDeletion.isSuccess).toBe(false);
         expect(canAcceptResultAfterPeerDeletion.code).toBe("error.consumption.requests.peerInDeletion");
@@ -1038,6 +1043,16 @@ describe("Peer IdentityDeletionProcess", () => {
         expect(result).toBeAnError(
             `The recipients with the following addresses '${services3.address.toString()},${services1.address.toString()}' have an active IdentityDeletionProcess so you cannot send a message to them.`,
             "error.transport.messages.peerInDeletion"
+        );
+    });
+
+    test("sending Notification to an Identity which is in status 'ToBeDeleted' results in an error redirected from the Backbone", async () => {
+        const id = await ConsumptionIds.notification.generate();
+        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+        const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
+        expect(result).toBeAnError(
+            "Cannot send message to 1 of the recipients because they are in status 'ToBeDeleted'.",
+            "error.platform.validation.message.recipientToBeDeleted"
         );
     });
 });
