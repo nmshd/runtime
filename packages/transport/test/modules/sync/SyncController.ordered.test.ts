@@ -29,7 +29,7 @@ describe("SyncController.ordered", function () {
         await connection.close();
     });
 
-    // eslint-disable-next-line jest/expect-expect -- no assertions are needed because it is sufficient thet the onboarding does not throw an error
+    // eslint-disable-next-line jest/expect-expect -- no assertions are needed because it is sufficient that the onboarding does not throw an error
     test("should execute datawallet modifications in the correct order", async function () {
         const template = await sender!.relationshipTemplates.sendRelationshipTemplate({ content: {}, expiresAt: CoreDate.utc().add({ days: 1 }) });
 
