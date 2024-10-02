@@ -192,7 +192,6 @@ export class TokenController extends TransportController {
     private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentityTruncated?: string): Promise<Token> {
         const tokenDoc = await this.tokens.read(id.toString());
         if (!tokenDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
-            // if you created the token, it exists already
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
 
