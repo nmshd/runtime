@@ -444,7 +444,6 @@ export class DataViewExpander {
             date: template.createdAt,
             ...template,
             createdBy,
-            forIdentity: template.forIdentity,
             request: expandedLocalRequest,
             onNewRelationship,
             onExistingRelationship

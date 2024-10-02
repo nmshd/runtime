@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, RelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
@@ -123,7 +123,7 @@ describe("RelationshipTemplateController", function () {
         });
         expect(ownTemplate).toBeDefined();
 
-        const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey, recipient.identity.address);
+        const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate());
         expect(peerTemplate).toBeDefined();
     });
 
@@ -131,9 +131,9 @@ describe("RelationshipTemplateController", function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            forIdentity: CoreAddress.from("did:e:example.com:dids:b9d25bd0a2bbd3aa4843ed")
+            forIdentity: sender.identity.address
         });
-        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey, ownTemplate.cache!.forIdentity)).rejects.toThrow(
+        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
             "transport.general.notIntendedForYou"
         );
     });
@@ -142,21 +142,10 @@ describe("RelationshipTemplateController", function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            forIdentity: CoreAddress.from("did:e:example.com:dids:b9d25bd0a2bbd3aa4843ed")
+            forIdentity: sender.identity.address
         });
 
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey)).rejects.toThrow("error.platform.recordNotFound");
-    });
-
-    test("should send and receive a RelationshipTemplate using a RelationshipTemplateReference", async function () {
-        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
-        const sentRelationshipTemplate = await TestUtil.sendRelationshipTemplate(sender);
-
-        const receivedRelationshipTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByReference(
-            sentRelationshipTemplate.toRelationshipTemplateReference()
-        );
-
-        expectValidRelationshipTemplates(sentRelationshipTemplate, receivedRelationshipTemplate, tempDate);
     });
 
     test("should send and receive a RelationshipTemplate using a truncated RelationshipTemplateReference", async function () {

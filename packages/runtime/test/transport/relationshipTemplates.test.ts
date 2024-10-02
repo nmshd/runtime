@@ -1,23 +1,22 @@
 import { DateTime } from "luxon";
-import { GetRelationshipTemplatesQuery, OwnerRestriction, TransportServices } from "../../src";
+import { GetRelationshipTemplatesQuery, OwnerRestriction } from "../../src";
 import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
+let runtimeServices1: TestRuntimeServices;
 let runtimeServices2: TestRuntimeServices;
-let transportServices1: TransportServices;
-let transportServices2: TransportServices;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
     runtimeServices2 = runtimeServices[1];
-    transportServices1 = runtimeServices[0].transport;
-    transportServices2 = runtimeServices[1].transport;
+    runtimeServices1.transport = runtimeServices[0].transport;
+    runtimeServices2.transport = runtimeServices[1].transport;
 }, 30000);
 afterAll(() => serviceProvider.stop());
 
 describe("Template Tests", () => {
     test("create a template", async () => {
-        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             maxNumberOfAllocations: 1,
             expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
             content: emptyRelationshipTemplateContent
@@ -27,7 +26,7 @@ describe("Template Tests", () => {
     });
 
     test("create a template with undefined expiresAt", async () => {
-        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: emptyRelationshipTemplateContent,
             expiresAt: undefined as unknown as string
         });
@@ -36,7 +35,7 @@ describe("Template Tests", () => {
     });
 
     test("create a template with undefined maxNumberOfAllocations", async () => {
-        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: emptyRelationshipTemplateContent,
             expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
         });
@@ -49,13 +48,13 @@ describe("Template Tests", () => {
 
     test("read a template with undefined maxNumberOfAllocations", async () => {
         const templateWithUndefinedMaxNumberOfAllocations = (
-            await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
             })
         ).value;
 
-        const response = await transportServices1.relationshipTemplates.getRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplate({
             id: templateWithUndefinedMaxNumberOfAllocations.id
         });
 
@@ -65,14 +64,14 @@ describe("Template Tests", () => {
 
     test("see If template exists in /RelationshipTemplates/Own", async () => {
         const template = (
-            await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
                 content: emptyRelationshipTemplateContent
             })
         ).value;
 
-        const response = await transportServices1.relationshipTemplates.getRelationshipTemplates({
+        const response = await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
             ownerRestriction: OwnerRestriction.Own
         });
         expect(response).toBeSuccessful();
@@ -81,19 +80,19 @@ describe("Template Tests", () => {
 
     test("see If template exists in /RelationshipTemplates/{id}", async () => {
         const template = (
-            await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
                 content: emptyRelationshipTemplateContent
             })
         ).value;
 
-        const response = await transportServices1.relationshipTemplates.getRelationshipTemplate({ id: template.id });
+        const response = await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplate({ id: template.id });
         expect(response).toBeSuccessful();
     });
 
     test("expect a validation error for sending maxNumberOfAllocations 0", async () => {
-        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: emptyRelationshipTemplateContent,
             expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
             maxNumberOfAllocations: 0
@@ -104,7 +103,7 @@ describe("Template Tests", () => {
     });
 
     test("expect a validation error for sending a false template content type", async () => {
-        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: {},
             expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
             maxNumberOfAllocations: 1
@@ -115,34 +114,30 @@ describe("Template Tests", () => {
 
     describe("Personalized templates", () => {
         test("send and receive a personalized template", async () => {
-            const createResult = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                 forIdentity: runtimeServices2.address
             });
             expect(createResult).toBeSuccessful();
 
-            const loadResult = await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({
-                id: createResult.value.id,
-                secretKey: createResult.value.secretKey,
-                forIdentity: createResult.value.forIdentity
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.forIdentity).toBe(runtimeServices2.address);
         });
 
         test("error when loading a template for another identity", async () => {
-            const createResult = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                forIdentity: "did:e:example.com:dids:b9d25bd0a2bbd3aa4843ed"
+                forIdentity: runtimeServices1.address
             });
             expect(createResult).toBeSuccessful();
 
-            const loadResult = await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({
-                id: createResult.value.id,
-                secretKey: createResult.value.secretKey,
-                forIdentity: createResult.value.forIdentity
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference
             });
             expect(loadResult).toBeAnError(
                 `You tried to access personalized content '${createResult.value.id}'. You are either not logged in or the content is not intended for you.`,
@@ -154,7 +149,7 @@ describe("Template Tests", () => {
 
 describe("Serialization Errors", () => {
     test("create a template with wrong content : missing values", async () => {
-        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: { a: "A", "@type": "Message" },
             expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
         });
@@ -162,7 +157,7 @@ describe("Serialization Errors", () => {
     });
 
     test("create a template with wrong content : not existent type", async () => {
-        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: { a: "A", "@type": "someNoneExistingType" },
             expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
         });
@@ -176,13 +171,13 @@ describe("Serialization Errors", () => {
 describe("RelationshipTemplates query", () => {
     test("query all relationshipTemplates", async () => {
         const template = (
-            await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
                 content: emptyRelationshipTemplateContent
             })
         ).value;
-        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, transportServices1)
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
             .addBooleanSet("isOwn")
             .addDateSet("createdAt")
             .addDateSet("expiresAt")
@@ -195,13 +190,13 @@ describe("RelationshipTemplates query", () => {
 
     test("query own relationshipTemplates", async () => {
         const template = (
-            await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
                 content: emptyRelationshipTemplateContent
             })
         ).value;
-        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, transportServices1)
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
             .addDateSet("createdAt")
             .addDateSet("expiresAt")
             .addStringSet("createdBy")
@@ -212,14 +207,14 @@ describe("RelationshipTemplates query", () => {
 
     test("query peerRelationshipTemplates", async () => {
         const createdTemplate = (
-            await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
                 content: emptyRelationshipTemplateContent
             })
         ).value;
-        const peerTemplate = (await transportServices2.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createdTemplate.truncatedReference })).value;
-        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(peerTemplate, transportServices2)
+        const peerTemplate = (await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createdTemplate.truncatedReference })).value;
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(peerTemplate, runtimeServices2.transport)
             .addDateSet("createdAt")
             .addDateSet("expiresAt")
             .addStringSet("createdBy")

@@ -71,7 +71,7 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
     }
 
     private async loadTemplate(id: CoreId, key: CryptoSecretKey, forIdentity?: CoreAddress) {
-        const template = await this.templateController.loadPeerRelationshipTemplate(id, key, forIdentity);
+        const template = await this.templateController.loadPeerRelationshipTemplate(id, key, forIdentity?.toString());
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
 }
