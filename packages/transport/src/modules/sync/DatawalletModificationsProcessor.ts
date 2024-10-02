@@ -30,7 +30,7 @@ import { DatawalletModification, DatawalletModificationType } from "./local/Data
 export class DatawalletModificationsProcessor {
     private readonly modificationsWithoutCacheChanges: DatawalletModification[];
     private readonly cacheChanges: DatawalletModification[];
-    private readonly deletedObjects: string[] = [];
+    private readonly deletedObjectIdentifiers: string[] = [];
 
     public get log(): ILogger {
         return this.logger;
@@ -72,7 +72,7 @@ export class DatawalletModificationsProcessor {
             const lastModification = currentModifications.at(-1)!;
             if (lastModification.type === DatawalletModificationType.Delete) {
                 await targetCollection.delete({ id: objectIdentifier });
-                this.deletedObjects.push(objectIdentifier);
+                this.deletedObjectIdentifiers.push(objectIdentifier);
 
                 continue;
             }
@@ -81,8 +81,6 @@ export class DatawalletModificationsProcessor {
             for (const modification of currentModifications) {
                 switch (modification.type) {
                     case DatawalletModificationType.Create:
-                        resultingObject = { ...resultingObject, ...modification.payload };
-                        break;
                     case DatawalletModificationType.Update:
                         resultingObject = { ...resultingObject, ...modification.payload };
                         break;
@@ -138,7 +136,7 @@ export class DatawalletModificationsProcessor {
 
         this.ensureAllItemsAreCacheable();
 
-        const cacheChangesWithoutDeletes = this.cacheChanges.filter((c) => !this.deletedObjects.some((d) => c.objectIdentifier.equals(d)));
+        const cacheChangesWithoutDeletes = this.cacheChanges.filter((c) => !this.deletedObjectIdentifiers.some((d) => c.objectIdentifier.equals(d)));
         const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(cacheChangesWithoutDeletes);
 
         const caches = await this.cacheFetcher.fetchCacheFor({
