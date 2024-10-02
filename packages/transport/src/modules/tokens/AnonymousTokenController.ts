@@ -15,14 +15,14 @@ export class AnonymousTokenController {
 
     public async loadPeerTokenByTruncated(truncated: string): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerTokenByReference(reference);
+        return await this.loadPeerToken(reference.id, reference.key, reference.forIdentityTruncated);
     }
 
-    public async loadPeerTokenByReference(tokenReference: TokenReference): Promise<Token> {
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key);
-    }
+    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string): Promise<Token> {
+        if (forIdentityTruncated) {
+            throw TransportCoreErrors.general.notIntendedForYou(id.toString());
+        }
 
-    public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey): Promise<Token> {
         const response = (await this.client.getToken(id.toString())).value;
 
         const cipher = CryptoCipher.fromBase64(response.content);
