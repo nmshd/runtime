@@ -660,11 +660,13 @@ export class DataViewExpander {
                         response: responseItemDVO
                     } as DecidableShareAttributeRequestItemDVO;
                 }
-                // We have to manually copy the attribute id here, otherwise we could not link to the local attribute
-                const shareAttributeResponseItem = responseItemDVO as ShareAttributeAcceptResponseItemDVO | undefined;
-                if (shareAttributeResponseItem) {
-                    attributeDVO.id = shareAttributeResponseItem.attributeId;
+
+                if (responseItemDVO?.result === ResponseItemResult.Accepted) {
+                    // We have to manually copy the attribute id here, otherwise we could not link to the local attribute
+                    const shareAttributeResponseItem = responseItemDVO as ShareAttributeAcceptResponseItemDVO | undefined;
+                    if (shareAttributeResponseItem) attributeDVO.id = shareAttributeResponseItem.attributeId;
                 }
+
                 return {
                     ...shareAttributeRequestItem,
                     type: "ShareAttributeRequestItemDVO",
