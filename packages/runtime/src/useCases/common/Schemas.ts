@@ -21238,6 +21238,9 @@ export const CreateTokenForFileRequest: any = {
                 },
                 "ephemeral": {
                     "type": "boolean"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -21253,6 +21256,10 @@ export const CreateTokenForFileRequest: any = {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -21269,6 +21276,9 @@ export const CreateTokenQRCodeForFileRequest: any = {
                 },
                 "expiresAt": {
                     "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -21284,6 +21294,10 @@ export const CreateTokenQRCodeForFileRequest: any = {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -22000,6 +22014,9 @@ export const CreateTokenForOwnTemplateRequest: any = {
                 },
                 "ephemeral": {
                     "type": "boolean"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -22015,6 +22032,10 @@ export const CreateTokenForOwnTemplateRequest: any = {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -22031,6 +22052,9 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
                 },
                 "expiresAt": {
                     "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -22046,6 +22070,10 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }
@@ -22600,6 +22628,9 @@ export const CreateOwnTokenRequest: any = {
                 },
                 "ephemeral": {
                     "type": "boolean"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -22613,6 +22644,10 @@ export const CreateOwnTokenRequest: any = {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
         }
     }
 }

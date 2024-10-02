@@ -151,6 +151,63 @@ describe("TokenController", function () {
         testTokens(sentTokens[1], receivedTokens[1], tempDate);
     });
 
+    test("should send and receive a personalized Token", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            forIdentity: recipient.identity.address
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+        tempId1 = sentToken.id;
+
+        testTokens(sentToken, receivedToken, tempDate);
+        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
+        expect(sentToken.cache?.forIdentity).toBe(recipient.identity.address);
+        expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
+        expect((sentToken.cache?.content.toJSON() as any).content).toBe("TestToken");
+        expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
+        expect(receivedToken.cache?.forIdentity?.toString()).toBe(recipient.identity.address.toString());
+    });
+
+    test("should throw if a personalized token is not loaded by the right identity", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            forIdentity: sender.identity.address
+        });
+
+        await expect(async () => {
+            await recipient.tokens.loadPeerTokenByTruncated(sentToken.toTokenReference().truncate(), true);
+        }).rejects.toThrow("transport.general.notIntendedForYou");
+    });
+    test("should throw if a personalized token is not loaded by the right identity and it's uncaught before reaching the Backbone", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            forIdentity: sender.identity.address
+        });
+
+        const reference = sentToken.toTokenReference();
+        reference.forIdentityTruncated = undefined;
+        const truncatedReference = reference.truncate();
+
+        await expect(async () => {
+            await recipient.tokens.loadPeerTokenByTruncated(truncatedReference, true);
+        }).rejects.toThrow("error.platform.recordNotFound");
+    });
+
     test("should delete a token", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = Serializable.fromAny({ content: "TestToken" });
