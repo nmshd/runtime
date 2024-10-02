@@ -47,7 +47,8 @@ export class TokenController extends TransportController {
         const response = (
             await this.client.createToken({
                 content: cipher.toBase64(),
-                expiresAt: input.expiresAt.toString()
+                expiresAt: input.expiresAt.toString(),
+                forIdentity: input.forIdentity?.toString()
             })
         ).value;
 
@@ -56,7 +57,8 @@ export class TokenController extends TransportController {
             expiresAt: input.expiresAt,
             createdBy: this.parent.identity.address,
             createdByDevice: this.parent.activeDevice.id,
-            content: input.content
+            content: input.content,
+            forIdentity: input.forIdentity
         });
 
         const token = Token.from({
@@ -176,22 +178,23 @@ export class TokenController extends TransportController {
             expiresAt: CoreDate.from(response.expiresAt),
             createdBy: CoreAddress.from(response.createdBy),
             createdByDevice: CoreId.from(response.createdByDevice),
-            content: plaintextTokenContent
+            content: plaintextTokenContent,
+            forIdentity: response.forIdentity ? CoreAddress.from(response.forIdentity) : undefined
         });
         return cachedToken;
     }
 
     public async loadPeerTokenByTruncated(truncated: string, ephemeral: boolean): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerTokenByReference(reference, ephemeral);
+        return await this.loadPeerToken(reference.id, reference.key, ephemeral, reference.forIdentityTruncated);
     }
 
-    public async loadPeerTokenByReference(tokenReference: TokenReference, ephemeral: boolean): Promise<Token> {
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key, ephemeral);
-    }
-
-    public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean): Promise<Token> {
+    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentityTruncated?: string): Promise<Token> {
         const tokenDoc = await this.tokens.read(id.toString());
+        if (!tokenDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
+            throw TransportCoreErrors.general.notIntendedForYou(id.toString());
+        }
+
         if (tokenDoc) {
             let token: Token | undefined = Token.from(tokenDoc);
             if (token.cache) {

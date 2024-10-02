@@ -1,12 +1,13 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AddressString, ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface CreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
+    forIdentity?: AddressString;
 }
 
 class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> {
@@ -50,7 +51,8 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
-            ephemeral: true
+            ephemeral: true,
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
         });
 
         const qrCode = await QRCode.forTruncateable(token);
