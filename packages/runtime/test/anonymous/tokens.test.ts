@@ -1,13 +1,12 @@
-import { TokenDTO, TransportServices } from "../../src";
-import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, uploadOwnToken } from "../lib";
+import { TokenDTO } from "../../src";
+import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, TestRuntimeServices, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
-let transportServices: TransportServices;
 let noLoginRuntime: TestRuntime;
+let runtimeService: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(1);
-    transportServices = runtimeServices[0].transport;
+    runtimeService = (await serviceProvider.launch(1))[0];
 
     noLoginRuntime = new NoLoginTestRuntime(RuntimeServiceProvider.defaultConfig);
     await noLoginRuntime.init();
@@ -21,7 +20,7 @@ afterAll(async () => {
 describe("Anonymous tokens", () => {
     let uploadedToken: TokenDTO;
     beforeAll(async () => {
-        uploadedToken = await uploadOwnToken(transportServices);
+        uploadedToken = await uploadOwnToken(runtimeService.transport);
     });
 
     test("should get the token anonymous by truncated reference", async () => {
@@ -32,5 +31,13 @@ describe("Anonymous tokens", () => {
 
         const token = result.value;
         expect(token.content).toStrictEqual(uploadedToken.content);
+    });
+
+    test("should catch a personalized token", async () => {
+        const uploadedPersonalizedToken = await uploadOwnToken(runtimeService.transport, runtimeService.address);
+        const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
+            reference: uploadedPersonalizedToken.truncatedReference
+        });
+        expect(result).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
 });
