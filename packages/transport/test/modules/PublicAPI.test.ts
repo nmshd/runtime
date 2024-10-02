@@ -155,16 +155,10 @@ publicFunctions[TokenController.name] = [
     nameof<TokenController>((r) => r.sendToken),
     nameof<TokenController>((r) => r.getToken),
     nameof<TokenController>((r) => r.updateCache),
-    nameof<TokenController>((r) => r.loadPeerTokenByTruncated),
-    nameof<TokenController>((r) => r.loadPeerTokenByReference),
-    nameof<TokenController>((r) => r.loadPeerToken)
+    nameof<TokenController>((r) => r.loadPeerTokenByTruncated)
 ];
 
-publicFunctions[AnonymousTokenController.name] = [
-    nameof<AnonymousTokenController>((r) => r.loadPeerToken),
-    nameof<AnonymousTokenController>((r) => r.loadPeerTokenByReference),
-    nameof<AnonymousTokenController>((r) => r.loadPeerTokenByTruncated)
-];
+publicFunctions[AnonymousTokenController.name] = [nameof<AnonymousTokenController>((r) => r.loadPeerTokenByTruncated)];
 
 let account: AccountController;
 const controllers: any = {};
