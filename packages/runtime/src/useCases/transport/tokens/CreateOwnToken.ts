@@ -1,18 +1,19 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate } from "@nmshd/core-types";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { AccountController, TokenController } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { Inject } from "typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
 export interface CreateOwnTokenRequest {
     content: any;
     expiresAt: ISO8601DateTimeString;
     ephemeral: boolean;
+    forIdentity?: AddressString;
 }
 
 class Validator extends SchemaValidator<CreateOwnTokenRequest> {
@@ -57,7 +58,8 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
         const response = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: CoreDate.from(request.expiresAt),
-            ephemeral: request.ephemeral
+            ephemeral: request.ephemeral,
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
         });
 
         if (!request.ephemeral) {
