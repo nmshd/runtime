@@ -30,7 +30,7 @@ describe("SyncController.ordered", function () {
     });
 
     // eslint-disable-next-line jest/expect-expect -- no assertions are needed because it is sufficient that the onboarding does not throw an error
-    test("should execute datawallet modifications in the correct order", async function () {
+    test("onboarding does not throw an exception because datawallet modifications are executed in the correct order", async function () {
         const template = await sender!.relationshipTemplates.sendRelationshipTemplate({ content: {}, expiresAt: CoreDate.utc().add({ days: 1 }) });
 
         // create and decompose a relationship
