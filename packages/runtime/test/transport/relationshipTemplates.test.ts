@@ -8,9 +8,8 @@ let runtimeServices2: TestRuntimeServices;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
+    runtimeServices1 = runtimeServices[0];
     runtimeServices2 = runtimeServices[1];
-    runtimeServices1.transport = runtimeServices[0].transport;
-    runtimeServices2.transport = runtimeServices[1].transport;
 }, 30000);
 afterAll(() => serviceProvider.stop());
 
