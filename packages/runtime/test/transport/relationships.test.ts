@@ -992,7 +992,7 @@ describe("Peer IdentityDeletionProcess", () => {
         };
         const result = await createRequest(services2, services1, requestContent);
         expect(result).toBeAnError(
-            `You cannot create a request to '${services1.address.toString()}' since the peer is in status '${updatedRelationship.peerDeletionInfo?.deletionStatus}'.`,
+            `You cannot create a Request to '${services1.address.toString()}' since the peer is in status '${updatedRelationship.peerDeletionInfo?.deletionStatus}'.`,
             "error.consumption.requests.peerInDeletion"
         );
     });
@@ -1028,12 +1028,15 @@ describe("Peer IdentityDeletionProcess", () => {
         const canAcceptResultAfterPeerDeletion = (await services2.consumption.incomingRequests.canAccept({ requestId: requestIds, items: [{ accept: true }] })).value;
         expect(canAcceptResultAfterPeerDeletion.isSuccess).toBe(false);
         expect(canAcceptResultAfterPeerDeletion.code).toBe("error.consumption.requests.peerInDeletion");
+        expect(canAcceptResultAfterPeerDeletion.message).toContain(
+            `You cannot decide a Request from '${services3.address.toString()}' since the peer is in status '${updatedRelationship2.peerDeletionInfo?.deletionStatus}'`
+        );
     });
 
     test("messages with multiple recipients should fail if one of the recipients has an active IdentityDeletionProcess", async () => {
         const result = await failToSendMessageToMultipleRecipients(services2.transport, [services4.address, services1.address]);
         expect(result).toBeAnError(
-            `The recipient with the address '${services1.address.toString()}' has an active IdentityDeletionProcess so you cannot send a message to him.`,
+            `The recipient with the address '${services1.address.toString()}' has an active IdentityDeletionProcess, so you cannot send them a Message.`,
             "error.transport.messages.peerInDeletion"
         );
     });
@@ -1041,7 +1044,7 @@ describe("Peer IdentityDeletionProcess", () => {
     test("messages with multiple recipients should fail with another ErrorMessage if more than one of the recipients has an active IdentityDeletionProcess", async () => {
         const result = await failToSendMessageToMultipleRecipients(services2.transport, [services3.address, services1.address]);
         expect(result).toBeAnError(
-            `The recipients with the following addresses '${services3.address.toString()},${services1.address.toString()}' have an active IdentityDeletionProcess so you cannot send a message to them.`,
+            `The recipients with the following addresses '${services3.address.toString()},${services1.address.toString()}' have an active IdentityDeletionProcess, so you cannot send them a Message.`,
             "error.transport.messages.peerInDeletion"
         );
     });

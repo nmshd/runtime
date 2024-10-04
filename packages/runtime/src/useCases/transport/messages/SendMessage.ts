@@ -92,29 +92,27 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
             return;
         }
-        if (transformedContent instanceof Mail || transformedContent instanceof ResponseWrapper || transformedContent instanceof ArbitraryMessageContent) {
-            const peerInDeletionAddressArray: string[] = [];
-            const recipientsCoreAddress = recipients.map((r) => CoreAddress.from(r));
-            for (const recipient of recipientsCoreAddress) {
-                const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(recipient);
-                if (!relationship) {
-                    return TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
-                }
-                if (typeof relationship.peerDeletionInfo?.deletionStatus !== "undefined") {
-                    peerInDeletionAddressArray.push(recipient.address);
-                }
+
+        const peerInDeletionAddressArray: string[] = [];
+        const recipientsCoreAddress = recipients.map((r) => CoreAddress.from(r));
+        for (const recipient of recipientsCoreAddress) {
+            const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(recipient);
+            if (!relationship) {
+                return TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
             }
-            if (peerInDeletionAddressArray.toString() !== "") {
-                if (typeof peerInDeletionAddressArray[1] === "undefined") {
-                    return TransportCoreErrors.messages.peerInDeletion(
-                        `The recipient with the address '${peerInDeletionAddressArray}' has an active IdentityDeletionProcess so you cannot send a message to him.`
-                    );
-                }
+            if (typeof relationship.peerDeletionInfo?.deletionStatus !== "undefined") {
+                peerInDeletionAddressArray.push(recipient.address);
+            }
+        }
+        if (peerInDeletionAddressArray.length > 0) {
+            if (!peerInDeletionAddressArray[1]) {
                 return TransportCoreErrors.messages.peerInDeletion(
-                    `The recipients with the following addresses '${peerInDeletionAddressArray}' have an active IdentityDeletionProcess so you cannot send a message to them.`
+                    `The recipient with the address '${peerInDeletionAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
                 );
             }
-            return;
+            return TransportCoreErrors.messages.peerInDeletion(
+                `The recipients with the following addresses '${peerInDeletionAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
+            );
         }
         return;
     }
