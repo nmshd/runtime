@@ -77,7 +77,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
         if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
-        const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
+        const localRequest = await this.outgoingRequestsController.getOutgoingRequestWithUpdatedExpiry(transformedContent.id);
         if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
 
         if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {

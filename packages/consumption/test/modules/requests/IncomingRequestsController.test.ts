@@ -979,7 +979,6 @@ describe("IncomingRequestsController", function () {
         test("updates the expiration date if the Template expires before the Request", async function () {
             const timestamp = CoreDate.utc();
             const request = await Given.anIncomingRequestWith({
-                status: LocalRequestStatus.Open,
                 content: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp.add({ days: 1 }) }),
                 requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp)
             });
@@ -991,7 +990,6 @@ describe("IncomingRequestsController", function () {
         test("updates the expiration date if the Request has no expiration date", async function () {
             const timestamp = CoreDate.utc().add({ days: 1 });
             const request = await Given.anIncomingRequestWith({
-                status: LocalRequestStatus.Open,
                 content: TestObjectFactory.createRequestWithOneItem(),
                 requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp)
             });
@@ -1002,7 +1000,6 @@ describe("IncomingRequestsController", function () {
         test("doesn't update the expiration date if the Request expires before the Template", async function () {
             const timestamp = CoreDate.utc().add({ days: 1 });
             const request = await Given.anIncomingRequestWith({
-                status: LocalRequestStatus.Open,
                 content: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp }),
                 requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp.add({ days: 1 }))
             });

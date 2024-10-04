@@ -155,7 +155,7 @@ export class GetOutgoingRequestsUseCase extends UseCase<GetOutgoingRequestsReque
     protected async executeInternal(request: GetOutgoingRequestsRequest): Promise<Result<LocalRequestDTO[], ApplicationError>> {
         const flattenedQuery = flattenObject(request.query);
         const dbQuery = GetOutgoingRequestsUseCase.queryTranslator.parse(flattenedQuery);
-        const localRequest = await this.outgoingRequestsController.getOutgoingRequests(dbQuery);
+        const localRequest = await this.outgoingRequestsController.getOutgoingRequestsWithUpdatedExpiry(dbQuery);
 
         const dtos = RequestMapper.toLocalRequestDTOList(localRequest);
 

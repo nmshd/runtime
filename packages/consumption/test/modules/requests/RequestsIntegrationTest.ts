@@ -98,7 +98,11 @@ export class RequestsTestsContext {
             context.mockEventBus,
             { address: account.accountController.identity.address },
             {
-                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
+                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity),
+                getExistingRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
+            },
+            {
+                getRelationshipTemplate: () => Promise.resolve(context.templateToReturnFromGetTemplate)
             }
         );
 
@@ -318,11 +322,13 @@ export class RequestsGiven {
     }
 
     private async moveOutgoingRequestToStatus(localRequest: LocalRequest, status: LocalRequestStatus) {
-        if (localRequest.status === status) return;
+        const updatedRequest = await this.context.outgoingRequestsController.getOutgoingRequestWithUpdatedExpiry(localRequest.id);
+
+        if (updatedRequest!.status === status) return;
 
         if (isStatusAAfterStatusB(status, LocalRequestStatus.Draft)) {
             await this.context.outgoingRequestsController.sent({
-                requestId: localRequest.id,
+                requestId: updatedRequest!.id,
                 requestSourceObject: TestObjectFactory.createOutgoingIMessage(this.context.currentIdentity)
             });
         }
@@ -850,7 +856,7 @@ export class RequestsWhen {
     }
 
     public async iGetOutgoingRequestsWithTheQuery(query?: any): Promise<void> {
-        this.context.localRequestsAfterAction = await this.context.outgoingRequestsController.getOutgoingRequests(query);
+        this.context.localRequestsAfterAction = await this.context.outgoingRequestsController.getOutgoingRequestsWithUpdatedExpiry(query);
     }
 
     public async iGetTheIncomingRequestWith(id: CoreId): Promise<void> {
@@ -862,7 +868,7 @@ export class RequestsWhen {
     }
 
     public async iGetTheOutgoingRequestWith(id: CoreId): Promise<void> {
-        this.context.localRequestAfterAction = await this.context.outgoingRequestsController.getOutgoingRequest(id);
+        this.context.localRequestAfterAction = await this.context.outgoingRequestsController.getOutgoingRequestWithUpdatedExpiry(id);
     }
 
     public async iTryToGetARequestWithANonExistentId(): Promise<void> {
@@ -1223,8 +1229,6 @@ function isStatusAAfterStatusB(a: LocalRequestStatus, b: LocalRequestStatus): bo
 
 function getIntegerValue(status: LocalRequestStatus): number {
     switch (status) {
-        case LocalRequestStatus.Expired:
-            return -1;
         case LocalRequestStatus.Draft:
             return 0;
         case LocalRequestStatus.Open:
@@ -1233,6 +1237,8 @@ function getIntegerValue(status: LocalRequestStatus): number {
             return 2;
         case LocalRequestStatus.ManualDecisionRequired:
             return 3;
+        case LocalRequestStatus.Expired:
+            return 4;
         case LocalRequestStatus.Decided:
             return 5;
         case LocalRequestStatus.Completed:
