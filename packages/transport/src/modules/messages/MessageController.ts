@@ -1,6 +1,5 @@
-import { ISerializable, Serializable } from "@js-soft/ts-serval";
+import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -293,43 +292,20 @@ export class MessageController extends TransportController {
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
-        const peerInDeletionAddressArray: string[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
             if (!relationship) {
                 throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
             }
-            if (Serializable.fromUnknown(parameters.content) instanceof Notification || typeof relationship.peerDeletionInfo?.deletionStatus === "undefined") {
-                const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
-                envelopeRecipients.push(
-                    MessageEnvelopeRecipient.from({
-                        address: recipient,
-                        encryptedKey: cipherForRecipient
-                    })
-                );
-                addressArray.push(recipient);
-            }
-            if (
-                (Serializable.fromUnknown(parameters.content) instanceof Mail ||
-                    Serializable.fromUnknown(parameters.content) instanceof ResponseWrapper ||
-                    Serializable.fromUnknown(parameters.content) instanceof ArbitraryMessageContent ||
-                    Serializable.fromUnknown(parameters.content) instanceof Request) &&
-                typeof relationship.peerDeletionInfo?.deletionStatus !== "undefined"
-            ) {
-                peerInDeletionAddressArray.push(recipient.address);
-            }
-        }
-
-        if (peerInDeletionAddressArray.toString() !== "") {
-            if (typeof peerInDeletionAddressArray[1] === "undefined") {
-                throw TransportCoreErrors.messages.peerInDeletion(
-                    `The recipient with the address '${peerInDeletionAddressArray}' has an active IdentityDeletionProcess so you cannot send a message to him.`
-                );
-            }
-            throw TransportCoreErrors.messages.peerInDeletion(
-                `The recipients with the following addresses '${peerInDeletionAddressArray}' have an active IdentityDeletionProcess so you cannot send a message to them.`
+            const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
+            envelopeRecipients.push(
+                MessageEnvelopeRecipient.from({
+                    address: recipient,
+                    encryptedKey: cipherForRecipient
+                })
             );
+            addressArray.push(recipient);
         }
 
         const publicAttachmentArray: CoreId[] = [];

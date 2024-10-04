@@ -3,7 +3,7 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { AccountController, File, FileController, MessageController } from "@nmshd/transport";
+import { AccountController, File, FileController, MessageController, RelationshipsController, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { Inject } from "typescript-ioc";
 import { MessageDTO } from "../../../types";
@@ -28,6 +28,7 @@ class Validator extends SchemaValidator<SendMessageRequest> {
 
 export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> {
     public constructor(
+        @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly messageController: MessageController,
         @Inject private readonly fileController: FileController,
         @Inject private readonly accountController: AccountController,
@@ -73,21 +74,48 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             );
         }
 
-        if (!(transformedContent instanceof Request)) return;
+        if (transformedContent instanceof Notification) return;
 
-        if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
+        if (transformedContent instanceof Request) {
+            if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
-        const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
-        if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
+            const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
+            if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
 
-        if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
-            return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
+            if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
+                return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
+            }
+
+            if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
+
+            const recipient = CoreAddress.from(recipients[0]);
+            if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
+            return;
         }
-
-        if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
-
-        const recipient = CoreAddress.from(recipients[0]);
-        if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
+        if (transformedContent instanceof Mail || transformedContent instanceof ResponseWrapper || transformedContent instanceof ArbitraryMessageContent) {
+            const peerInDeletionAddressArray: string[] = [];
+            const recipientsCoreAddress = recipients.map((r) => CoreAddress.from(r));
+            for (const recipient of recipientsCoreAddress) {
+                const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(recipient);
+                if (!relationship) {
+                    return TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+                }
+                if (typeof relationship.peerDeletionInfo?.deletionStatus !== "undefined") {
+                    peerInDeletionAddressArray.push(recipient.address);
+                }
+            }
+            if (peerInDeletionAddressArray.toString() !== "") {
+                if (typeof peerInDeletionAddressArray[1] === "undefined") {
+                    return TransportCoreErrors.messages.peerInDeletion(
+                        `The recipient with the address '${peerInDeletionAddressArray}' has an active IdentityDeletionProcess so you cannot send a message to him.`
+                    );
+                }
+                return TransportCoreErrors.messages.peerInDeletion(
+                    `The recipients with the following addresses '${peerInDeletionAddressArray}' have an active IdentityDeletionProcess so you cannot send a message to them.`
+                );
+            }
+            return;
+        }
         return;
     }
 
