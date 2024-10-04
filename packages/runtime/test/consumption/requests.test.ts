@@ -630,7 +630,7 @@ describe("Requests", () => {
         afterAll(async () => await runtimeServiceProvider.stop());
 
         test("change status of Request when querying it if the underlying RelationshipTemplate is expired", async () => {
-            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
                 .request;
 
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
@@ -640,7 +640,7 @@ describe("Requests", () => {
 
             expect(request.status).not.toBe(LocalRequestStatus.Expired);
 
-            await sleep(1000);
+            await sleep(3000);
 
             const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
 
@@ -652,7 +652,7 @@ describe("Requests", () => {
         });
 
         test("change status of Request when querying Requests if the underlying RelationshipTemplate is expired", async () => {
-            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
                 .request;
 
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
@@ -662,7 +662,7 @@ describe("Requests", () => {
 
             expect(request.status).not.toBe(LocalRequestStatus.Expired);
 
-            await sleep(1000);
+            await sleep(3000);
 
             const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequests({})).value[0];
 
@@ -684,7 +684,7 @@ describe("Requests", () => {
             const actionLowerCase = action.toLowerCase() as "accept" | "reject";
 
             test(`recipient: cannot ${actionLowerCase} incoming Request`, async () => {
-                const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 1 })))
+                const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
                     .request;
 
                 let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
@@ -692,7 +692,7 @@ describe("Requests", () => {
                     triggeredEvent = event;
                 });
 
-                await sleep(1000);
+                await sleep(3000);
 
                 const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
                     requestId: request.id,

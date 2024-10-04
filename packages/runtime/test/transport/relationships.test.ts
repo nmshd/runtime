@@ -84,7 +84,7 @@ describe("CanCreateRelationship", () => {
                 ]
             }
         };
-        const templateId = (await exchangeTemplate(services1.transport, services2.transport, templateContent, DateTime.utc().plus({ seconds: 1 }))).id;
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport, templateContent, DateTime.utc().plus({ seconds: 3 }))).id;
 
         await services2.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         const requests = (await services2.consumption.incomingRequests.getRequests({ query: { "source.reference": templateId } })).value;
@@ -92,7 +92,7 @@ describe("CanCreateRelationship", () => {
         const incomingRequest = requests[0];
         expect(incomingRequest.status).toBe(LocalRequestStatus.DecisionRequired);
 
-        await sleep(1000);
+        await sleep(3000);
 
         const canCreateRelationshipResponse = await services2.transport.relationships.canCreateRelationship({
             templateId: templateId,
@@ -164,7 +164,7 @@ describe("Create Relationship", () => {
                 ]
             }
         };
-        const templateId = (await exchangeTemplate(services1.transport, services2.transport, templateContent, DateTime.utc().plus({ seconds: 1 }))).id;
+        const templateId = (await exchangeTemplate(services1.transport, services2.transport, templateContent, DateTime.utc().plus({ seconds: 3 }))).id;
 
         await services2.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         await services2.eventBus.waitForRunningEventHandlers();
@@ -173,7 +173,7 @@ describe("Create Relationship", () => {
         const incomingRequest = requests[0];
         expect([LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired]).toContain(incomingRequest.status);
 
-        await sleep(1000);
+        await sleep(3000);
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
