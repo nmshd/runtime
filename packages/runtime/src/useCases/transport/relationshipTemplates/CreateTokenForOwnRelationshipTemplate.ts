@@ -1,15 +1,16 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateTokenForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
+    forIdentity?: AddressString;
 }
 
 class Validator extends SchemaValidator<CreateTokenForOwnTemplateRequest> {
@@ -50,7 +51,8 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
-            ephemeral
+            ephemeral,
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
         });
 
         if (!ephemeral) {

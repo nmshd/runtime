@@ -7,6 +7,7 @@ export interface ICachedToken extends ISerializable {
     expiresAt: ICoreDate;
     content: ISerializable;
     createdByDevice: ICoreId;
+    forIdentity?: ICoreAddress;
 }
 
 @type("CachedToken")
@@ -30,6 +31,10 @@ export class CachedToken extends Serializable implements ICachedToken {
     @validate()
     @serialize()
     public createdByDevice: CoreId;
+
+    @validate({ nullable: true })
+    @serialize()
+    public forIdentity?: CoreAddress;
 
     public static from(value: ICachedToken): CachedToken {
         return this.fromAny(value);

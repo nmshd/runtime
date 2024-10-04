@@ -206,6 +206,13 @@ class General {
         return new CoreError("error.transport.files.invalidTruncatedReference", message);
     }
 
+    public notIntendedForYou(id: string) {
+        return new CoreError(
+            "error.transport.general.notIntendedForYou",
+            `You tried to access personalized content '${id}'. You are either not logged in or the content is not intended for you.`
+        );
+    }
+
     public accountControllerInitialSyncFailed() {
         return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
     }
