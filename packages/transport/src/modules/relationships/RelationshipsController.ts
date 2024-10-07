@@ -150,17 +150,11 @@ export class RelationshipsController extends TransportController {
         return await CoreCrypto.verify(content, signature, relationship.peer.publicKey);
     }
 
-    public async sendRelationship(parameters: ISendRelationshipParameters): Promise<Result<Relationship>> {
+    public async sendRelationship(parameters: ISendRelationshipParameters): Promise<Relationship> {
         const canSendRelationship = await this.canSendRelationship(parameters);
 
         if (!canSendRelationship.isSuccess) {
-            if (canSendRelationship.error.code === "error.transport.relationships.relationshipCurrentlyExists") {
-                throw canSendRelationship.error;
-            }
-
-            if (canSendRelationship.error.code === "error.transport.relationships.relationshipTemplateIsExpired") {
-                return Result.fail(canSendRelationship.error);
-            }
+            throw canSendRelationship.error;
         }
 
         const template = (parameters as SendRelationshipParameters).template;
@@ -196,7 +190,7 @@ export class RelationshipsController extends TransportController {
 
         this.eventBus.publish(new RelationshipChangedEvent(this.parent.identity.address.toString(), newRelationship));
 
-        return Result.ok(newRelationship);
+        return newRelationship;
     }
 
     public async canSendRelationship(parameters: ISendRelationshipParameters): Promise<Result<void>> {
