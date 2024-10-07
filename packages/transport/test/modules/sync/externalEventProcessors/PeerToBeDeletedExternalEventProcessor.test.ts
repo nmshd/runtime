@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, PeerDeletionStatus, Transport } from "../../../../src";
 import { PeerToBeDeletedExternalEventProcessor } from "../../../../src/modules/sync/externalEventProcessors/PeerToBeDeletedExternalEventProcessor";
 import { TestUtil } from "../../../testHelpers/TestUtil";
@@ -41,7 +41,7 @@ describe("PeerToBeDeletedExternalEventProcessor", function () {
             index: 1,
             syncErrorCount: 0,
             type: "PeerToBeDeleted",
-            payload: { relationshipId: relationshipId.toString() }
+            payload: { relationshipId: relationshipId.toString(), deletionDate: CoreDate.local().add({ days: 14 }) }
         });
         const relationship = await recipient.relationships.getRelationship(relationshipId);
         expect(relationship!.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.ToBeDeleted);

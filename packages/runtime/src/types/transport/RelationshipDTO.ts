@@ -44,7 +44,7 @@ export enum PeerDeletionStatus {
 
 export interface PeerDeletionInfoDTO {
     deletionStatus: PeerDeletionStatus;
-    deletionDate?: string;
+    deletionDate: string;
 }
 
 export interface RelationshipDTO {
