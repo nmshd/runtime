@@ -8,7 +8,7 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreError } from "@nmshd/core-types";
+import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
@@ -140,7 +140,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             }
 
             if (!requestItem.thirdPartyAddress.equals(foundAttribute.shareInfo.peer)) {
-                return ValidationResult.error(new CoreError("The third party address must be the peer of the relationship attribute."));
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The third party address must be the peer of the relationship attribute."));
             }
         }
 
