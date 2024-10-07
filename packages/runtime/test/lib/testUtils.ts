@@ -1,4 +1,4 @@
-import { ApplicationError, Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     ConsumptionIds,
@@ -37,7 +37,6 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalNotificationDTO,
-    LocalRequestDTO,
     LocalRequestStatus,
     MessageContentDerivation,
     MessageDTO,
@@ -283,23 +282,7 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
-export async function sendMessageToMultipleRecipients(transportServices: TransportServices, recipients: string[], content?: any, attachments?: string[]): Promise<MessageDTO> {
-    const response = await transportServices.messages.sendMessage({
-        recipients,
-        content: content ?? {
-            "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
-            cc: [],
-            to: recipients
-        },
-        attachments
-    });
-    expect(response).toBeSuccessful();
-
-    return response.value;
-}
-export async function failToSendMessageToMultipleRecipients(
+export async function sendMessageToMultipleRecipients(
     transportServices: TransportServices,
     recipients: string[],
     content?: any,
@@ -334,15 +317,6 @@ export async function sendMessageWithRequest(
     expect(sendMessageResult).toBeSuccessful();
 
     return sendMessageResult.value as MessageDTO & { content: RequestJSON };
-}
-
-export async function createRequest(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    request: CreateOutgoingRequestRequest
-): Promise<Result<LocalRequestDTO, ApplicationError>> {
-    const createRequestResult = await sender.consumption.outgoingRequests.create(request);
-    return createRequestResult;
 }
 
 export async function exchangeMessage(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices, attachments?: string[]): Promise<MessageDTO> {

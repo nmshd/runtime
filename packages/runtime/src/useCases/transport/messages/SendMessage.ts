@@ -94,15 +94,22 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         const peerInDeletionAddressArray: string[] = [];
+        const missingOrInactiveRelationshipAddressArray: string[] = [];
         const recipientsCoreAddress = recipients.map((r) => CoreAddress.from(r));
         for (const recipient of recipientsCoreAddress) {
             const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(recipient);
             if (!relationship) {
-                return TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+                missingOrInactiveRelationshipAddressArray.push(recipient.address);
             }
-            if (typeof relationship.peerDeletionInfo?.deletionStatus !== "undefined") {
+            if (relationship?.peerDeletionInfo?.deletionStatus) {
                 peerInDeletionAddressArray.push(recipient.address);
             }
+        }
+        if (missingOrInactiveRelationshipAddressArray.length > 0) {
+            if (!missingOrInactiveRelationshipAddressArray[1]) {
+                return TransportCoreErrors.messages.missingOrInactiveRelationship(missingOrInactiveRelationshipAddressArray[0]);
+            }
+            return TransportCoreErrors.messages.missingOrInactiveRelationships(missingOrInactiveRelationshipAddressArray);
         }
         if (peerInDeletionAddressArray.length > 0) {
             if (!peerInDeletionAddressArray[1]) {

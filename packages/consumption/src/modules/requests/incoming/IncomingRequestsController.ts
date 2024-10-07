@@ -173,14 +173,13 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const relationship = await this.relationshipResolver.getRelationshipToIdentity(request.peer);
         // It is safe to decide an incoming Request when no Relationship is found as this is the case when the Request origins from onNewRelationship of the RelationshipTemplateContent
-        if (relationship) {
-            if (relationship.peerDeletionInfo?.deletionStatus) {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.peerInDeletion(
-                        `You cannot decide a Request from '${request.peer.toString()}' since the peer is in status '${relationship.peerDeletionInfo.deletionStatus}'.`
-                    )
-                );
-            }
+
+        if (relationship?.peerDeletionInfo?.deletionStatus) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.peerInDeletion(
+                    `You cannot decide a Request from '${request.peer.toString()}' since the peer is in status '${relationship.peerDeletionInfo.deletionStatus}'.`
+                )
+            );
         }
 
         const possibleStatuses =

@@ -84,6 +84,10 @@ class Messages {
         return new CoreError("error.transport.messages.missingOrInactiveRelationship", `An active Relationship with the given address '${address}' does not exist.`);
     }
 
+    public missingOrInactiveRelationships(address: string[]) {
+        return new CoreError("error.transport.messages.missingOrInactiveRelationships", `Active Relationships with the given addresses '${address}' do not exist.`);
+    }
+
     public peerInDeletion(message: string) {
         return new CoreError("error.transport.messages.peerInDeletion", message);
     }
