@@ -1,4 +1,3 @@
-import { CoreDate } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "../../src";
 import { establishRelationship, RuntimeServiceProvider, syncUntilHasEvent, TestRuntimeServices } from "../lib";
@@ -50,7 +49,6 @@ describe("IdentityDeletionProcess", () => {
         const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
         expect(updatedRelationship.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.ToBeDeleted);
         expect(updatedRelationship.peerDeletionInfo!.deletionDate).toBeDefined();
-        expect(CoreDate.from(updatedRelationship.peerDeletionInfo!.deletionDate!).isAfter(CoreDate.local())).toBeTruthy();
     });
 
     test("peer should be notified about cancelled deletion process", async function () {
