@@ -199,8 +199,8 @@ describe("Create Relationship", () => {
         });
 
         expect(createRelationshipResponse).toBeAnError(
-            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
-            "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
+            `A Relationship to the peer ${services3.address} cannot be created, because the former Relationship is not yet decomposed by the peer or the peer is to be deleted.`,
+            "error.transport.relationships.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted"
         );
     });
 
@@ -971,8 +971,8 @@ describe("RelationshipDecomposition", () => {
         });
 
         expect(result).toBeAnError(
-            "No new Relationship can be created as the former Relationship is not yet decomposed by the peer.",
-            "error.transport.relationships.relationshipNotYetDecomposedByPeer"
+            `A Relationship to the peer ${services2.address} cannot be created, because the former Relationship is not yet decomposed by the peer or the peer is to be deleted.`,
+            "error.transport.relationships.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted"
         );
     });
 
