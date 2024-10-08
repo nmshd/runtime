@@ -293,19 +293,74 @@ export class MessageController extends TransportController {
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
+        const peerDeletedAddressArray: string[] = [];
+        const missingOrInactiveRelationshipAddressArray: string[] = [];
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
-            if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+            if (
+                relationship &&
+                (relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active) &&
+                (relationship.peerDeletionInfo?.deletionStatus === "ToBeDeleted" || !relationship.peerDeletionInfo?.deletionStatus)
+            ) {
+                const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
+                envelopeRecipients.push(
+                    MessageEnvelopeRecipient.from({
+                        address: recipient,
+                        encryptedKey: cipherForRecipient
+                    })
+                );
+                addressArray.push(recipient);
             }
-            const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
-            envelopeRecipients.push(
-                MessageEnvelopeRecipient.from({
-                    address: recipient,
-                    encryptedKey: cipherForRecipient
-                })
+            if (!(relationship && (relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active))) {
+                missingOrInactiveRelationshipAddressArray.push(recipient.address);
+            }
+            if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
+                peerDeletedAddressArray.push(recipient.address);
+            }
+        }
+        if (missingOrInactiveRelationshipAddressArray.length > 0) {
+            if (!missingOrInactiveRelationshipAddressArray[1]) {
+                if (peerDeletedAddressArray.length > 0 && !peerDeletedAddressArray[1]) {
+                    throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                        `An active Relationship with the given address '${missingOrInactiveRelationshipAddressArray[0]}' does not exist and the recipient with the address '${peerDeletedAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
+                    );
+                }
+                if (peerDeletedAddressArray[1]) {
+                    throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                        `An active Relationship with the given address '${missingOrInactiveRelationshipAddressArray[0]}' does not exist and the recipients with the addresses '${peerDeletedAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
+                    );
+                }
+                throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                    `An active Relationship with the given address '${missingOrInactiveRelationshipAddressArray[0]}' does not exist.`
+                );
+            }
+            if (missingOrInactiveRelationshipAddressArray[1]) {
+                if (peerDeletedAddressArray.length > 0 && !peerDeletedAddressArray[1]) {
+                    throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                        `An active Relationship with the given addresses '${missingOrInactiveRelationshipAddressArray}' do not exist and the recipient with the address '${peerDeletedAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
+                    );
+                }
+                if (peerDeletedAddressArray[1]) {
+                    throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                        `An active Relationship with the given addresses '${missingOrInactiveRelationshipAddressArray}' do not exist and the recipients with the addresses '${peerDeletedAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
+                    );
+                }
+                throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                    `An active Relationship with the given addresses '${missingOrInactiveRelationshipAddressArray}' do not exist.`
+                );
+            }
+        }
+
+        if (peerDeletedAddressArray.length > 0 && !peerDeletedAddressArray[1]) {
+            throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                `The recipient with the address '${peerDeletedAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
             );
-            addressArray.push(recipient);
+        }
+
+        if (peerDeletedAddressArray.length > 0 && peerDeletedAddressArray[1]) {
+            throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                `The recipients with the following addresses '${peerDeletedAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
+            );
         }
 
         const publicAttachmentArray: CoreId[] = [];

@@ -107,17 +107,45 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
         if (missingOrInactiveRelationshipAddressArray.length > 0) {
             if (!missingOrInactiveRelationshipAddressArray[1]) {
-                return TransportCoreErrors.messages.missingOrInactiveRelationship(missingOrInactiveRelationshipAddressArray[0]);
-            }
-            return TransportCoreErrors.messages.missingOrInactiveRelationships(missingOrInactiveRelationshipAddressArray);
-        }
-        if (peerInDeletionAddressArray.length > 0) {
-            if (!peerInDeletionAddressArray[1]) {
-                return TransportCoreErrors.messages.peerInDeletion(
-                    `The recipient with the address '${peerInDeletionAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
+                if (peerInDeletionAddressArray.length > 0 && !peerInDeletionAddressArray[1]) {
+                    return TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                        `An active Relationship with the given address '${missingOrInactiveRelationshipAddressArray[0]}' does not exist and the recipient with the address '${peerInDeletionAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
+                    );
+                }
+                if (peerInDeletionAddressArray[1]) {
+                    return TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                        `An active Relationship with the given address '${missingOrInactiveRelationshipAddressArray[0]}' does not exist and the recipients with the addresses '${peerInDeletionAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
+                    );
+                }
+                return TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                    `An active Relationship with the given address '${missingOrInactiveRelationshipAddressArray[0]}' does not exist.`
                 );
             }
-            return TransportCoreErrors.messages.peerInDeletion(
+            if (missingOrInactiveRelationshipAddressArray[1]) {
+                if (peerInDeletionAddressArray.length > 0 && !peerInDeletionAddressArray[1]) {
+                    return TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                        `An active Relationship with the given addresses '${missingOrInactiveRelationshipAddressArray}' do not exist and the recipient with the address '${peerInDeletionAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
+                    );
+                }
+                if (peerInDeletionAddressArray[1]) {
+                    return TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                        `An active Relationship with the given addresses '${missingOrInactiveRelationshipAddressArray}' do not exist and the recipients with the addresses '${peerInDeletionAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
+                    );
+                }
+                return TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                    `An active Relationship with the given addresses '${missingOrInactiveRelationshipAddressArray}' do not exist.`
+                );
+            }
+        }
+
+        if (peerInDeletionAddressArray.length > 0 && !peerInDeletionAddressArray[1]) {
+            return TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
+                `The recipient with the address '${peerInDeletionAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
+            );
+        }
+
+        if (peerInDeletionAddressArray.length > 0 && peerInDeletionAddressArray[1]) {
+            return TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
                 `The recipients with the following addresses '${peerInDeletionAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
             );
         }

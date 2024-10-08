@@ -77,7 +77,7 @@ describe("IdentityDeletionProcess", () => {
         const result = await sendMessageToMultipleRecipients(services2.transport, [services3.address, services1.address]);
         expect(result).toBeAnError(
             `The recipient with the address '${services1.address.toString()}' has an active IdentityDeletionProcess, so you cannot send them a Message.`,
-            "error.transport.messages.peerInDeletion"
+            "error.transport.messages.missingOrWrongRelationshipStatusOrPeerInDeletion"
         );
     });
 
@@ -95,7 +95,7 @@ describe("IdentityDeletionProcess", () => {
         const result = await sendMessageToMultipleRecipients(services2.transport, [services3.address, services1.address]);
         expect(result).toBeAnError(
             `The recipients with the following addresses '${services3.address.toString()},${services1.address.toString()}' have an active IdentityDeletionProcess, so you cannot send them a Message.`,
-            "error.transport.messages.peerInDeletion"
+            "error.transport.messages.missingOrWrongRelationshipStatusOrPeerInDeletion"
         );
     });
 

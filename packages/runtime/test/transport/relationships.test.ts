@@ -493,7 +493,7 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.transport.messages.missingOrInactiveRelationship");
+        expect(result).toBeAnError(/.*/, "error.transport.messages.missingOrWrongRelationshipStatusOrPeerInDeletion");
     });
 
     test("should not decide a request", async () => {
@@ -732,7 +732,7 @@ describe("RelationshipDecomposition", () => {
     let templateId: string;
     let relationshipId2: string;
     let templateId2: string;
-    let multipleRecipientsMessageId: any;
+    let multipleRecipientsMessageId: string;
 
     beforeAll(async () => {
         const relationship = await ensureActiveRelationship(services1.transport, services2.transport);
@@ -748,7 +748,7 @@ describe("RelationshipDecomposition", () => {
         templateId2 = relationship2.template.id;
 
         await createRelationshipData(services1, services3);
-        multipleRecipientsMessageId = await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
+        multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).value.id;
 
         await services1.transport.relationships.terminateRelationship({ relationshipId });
         await services1.transport.relationships.decomposeRelationship({ relationshipId });
@@ -833,7 +833,7 @@ describe("RelationshipDecomposition", () => {
         expect(anonymizedMessages).toHaveLength(1);
 
         const anonymizedMessage = anonymizedMessages[0];
-        expect(anonymizedMessage.id).toBe(multipleRecipientsMessageId.value.id);
+        expect(anonymizedMessage.id).toBe(multipleRecipientsMessageId);
         expect(anonymizedMessage.recipients.map((r) => r.address)).toStrictEqual([addressPseudonym, services3.address]);
     });
 
@@ -973,8 +973,8 @@ describe("Peer IdentityDeletionProcess", () => {
     test("messages with multiple recipients should fail if there is no active Relationship to the recipients", async () => {
         const result = await sendMessageToMultipleRecipients(services1.transport, [services4.address, services3.address]);
         expect(result).toBeAnError(
-            `Active Relationships with the given addresses '${services4.address.toString()},${services3.address.toString()}' do not exist.`,
-            "error.transport.messages.missingOrInactiveRelationships"
+            `An active Relationship with the given addresses '${services4.address.toString()},${services3.address.toString()}' do not exist.`,
+            "error.transport.messages.missingOrWrongRelationshipStatusOrPeerInDeletion"
         );
     });
 
