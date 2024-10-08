@@ -42,7 +42,7 @@ describe("PeerDeletedExternalEventProcessor", function () {
             index: 1,
             syncErrorCount: 0,
             type: "PeerDeleted",
-            payload: { relationshipId: relationshipId.toString(), deletionDate: deletionDate }
+            payload: { relationshipId: relationshipId.toString(), deletionDate }
         });
         const relationship = await recipient.relationships.getRelationship(relationshipId);
         expect(relationship!.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.Deleted);
