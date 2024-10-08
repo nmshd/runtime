@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import { RuntimeErrors, RuntimeServices } from "..";
 import {
     IncomingRequestStatusChangedEvent,
@@ -197,6 +198,12 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 continue;
             }
 
+            if (property.endsWith("At") || property.endsWith("From") || property.endsWith("To")) {
+                compatible &&= this.checkDatesCompatibility(requestConfigProperty, requestProperty);
+                if (!compatible) break;
+                continue;
+            }
+
             if (Array.isArray(requestConfigProperty)) {
                 compatible &&= requestConfigProperty.includes(requestProperty);
             } else {
@@ -223,6 +230,17 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     private checkTagCompatibility(requestConfigTags: string[], requestTags: string[]): boolean {
         const atLeastOneMatchingTag = requestConfigTags.some((tag) => requestTags.includes(tag));
         return atLeastOneMatchingTag;
+    }
+
+    private checkDatesCompatibility(requestConfigDates: string | string[], requestDate: string): boolean {
+        if (typeof requestConfigDates === "string") return this.checkDateCompatibility(requestConfigDates, requestDate);
+        return requestConfigDates.every((configDate) => this.checkDateCompatibility(configDate, requestDate));
+    }
+
+    private checkDateCompatibility(configDate: string, requestDate: string): boolean {
+        if (configDate.startsWith(">")) return CoreDate.from(requestDate).isAfter(CoreDate.from(configDate.substring(1)));
+        if (configDate.startsWith("<")) return CoreDate.from(requestDate).isBefore(CoreDate.from(configDate.substring(1)));
+        return CoreDate.from(requestDate).equals(CoreDate.from(configDate));
     }
 
     private checkRequestItemCompatibilityAndApplyResponseConfig(

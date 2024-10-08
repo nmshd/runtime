@@ -497,7 +497,7 @@ describe("DeciderModule", () => {
             });
 
             test("decides a Request given a GeneralRequestConfig with all fields set", async () => {
-                const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
+                const requestExpirationDate = CoreDate.utc().add({ days: 1 });
 
                 const deciderConfig: DeciderModuleConfigurationOverwrite = {
                     automationConfig: [
@@ -505,7 +505,7 @@ describe("DeciderModule", () => {
                             requestConfig: {
                                 peer: sender.address,
                                 "source.type": "RelationshipTemplate",
-                                "content.expiresAt": requestExpirationDate,
+                                "content.expiresAt": `<${requestExpirationDate.add({ days: 1 })}`,
                                 "content.title": "Title of Request",
                                 "content.description": "Description of Request",
                                 "content.metadata": { key: "value" }
@@ -520,7 +520,7 @@ describe("DeciderModule", () => {
                 await establishRelationship(sender.transport, recipient.transport);
 
                 const request = Request.from({
-                    expiresAt: requestExpirationDate,
+                    expiresAt: requestExpirationDate.toString(),
                     title: "Title of Request",
                     description: "Description of Request",
                     metadata: { key: "value" },
@@ -557,7 +557,7 @@ describe("DeciderModule", () => {
                             requestConfig: {
                                 peer: [sender.address, "another Identity"],
                                 "source.type": "Message",
-                                "content.expiresAt": [requestExpirationDate, anotherExpirationDate],
+                                "content.expiresAt": [requestExpirationDate, `<${anotherExpirationDate}`],
                                 "content.title": ["Title of Request", "Another title of Request"],
                                 "content.description": ["Description of Request", "Another description of Request"],
                                 "content.metadata": [{ key: "value" }, { anotherKey: "anotherValue" }]
@@ -644,6 +644,66 @@ describe("DeciderModule", () => {
                 const message = await exchangeMessage(sender.transport, recipient.transport);
                 const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                     receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
+
+            test("cannot decide a Request given with an expiration date too high", async () => {
+                const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.expiresAt": [requestExpirationDate, `<${requestExpirationDate}`]
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }], expiresAt: requestExpirationDate },
+                    requestSourceId: message.id
+                });
+                await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+                await expect(recipient.eventBus).toHavePublished(
+                    MessageProcessedEvent,
+                    (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+                );
+            });
+
+            test("cannot decide a Request given with an expiration date too low", async () => {
+                const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
+                const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                    automationConfig: [
+                        {
+                            requestConfig: {
+                                "content.expiresAt": [requestExpirationDate, `>${requestExpirationDate}`]
+                            },
+                            responseConfig: {
+                                accept: true
+                            }
+                        }
+                    ]
+                };
+                const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                await establishRelationship(sender.transport, recipient.transport);
+
+                const message = await exchangeMessage(sender.transport, recipient.transport);
+                const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                    receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }], expiresAt: requestExpirationDate },
                     requestSourceId: message.id
                 });
                 await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -1939,9 +1999,9 @@ describe("DeciderModule", () => {
                 expect((readAttribute.content.value as GivenNameJSON).value).toBe("Given name of recipient");
             });
 
-            test("accepts a RegisterAttributeListenerRequestItem given a RegisterAttributeListenerRequestItemConfig with all fields set for an IdentityAttributeQuery", async () => {
-                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
-                const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
+            test("accepts a RegisterAttributeListenerRequestItem given a RegisterAttributeListenerRequestItemConfig with all fields set for an IdentityAttributeQuery and lower bounds for dates", async () => {
+                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 });
+                const attributeValidTo = CoreDate.utc().add({ days: 1 });
 
                 const deciderConfig: DeciderModuleConfigurationOverwrite = {
                     automationConfig: [
@@ -1949,8 +2009,8 @@ describe("DeciderModule", () => {
                             requestConfig: {
                                 "content.item.@type": "RegisterAttributeListenerRequestItem",
                                 "content.item.query.@type": "IdentityAttributeQuery",
-                                "content.item.query.validFrom": attributeValidFrom,
-                                "content.item.query.validTo": attributeValidTo,
+                                "content.item.query.validFrom": `>${attributeValidFrom.subtract({ days: 1 }).toString()}`,
+                                "content.item.query.validTo": `>${attributeValidTo.subtract({ days: 1 }).toString()}`,
                                 "content.item.query.valueType": "GivenName",
                                 "content.item.query.tags": ["tag1", "tag2"]
                             },
@@ -1972,8 +2032,8 @@ describe("DeciderModule", () => {
                                 "@type": "RegisterAttributeListenerRequestItem",
                                 query: {
                                     "@type": "IdentityAttributeQuery",
-                                    validFrom: attributeValidFrom,
-                                    validTo: attributeValidTo,
+                                    validFrom: attributeValidFrom.toString(),
+                                    validTo: attributeValidTo.toString(),
                                     valueType: "GivenName",
                                     tags: ["tag1", "tag3"]
                                 },
@@ -2001,9 +2061,9 @@ describe("DeciderModule", () => {
                 expect((responseContent.items[0] as RegisterAttributeListenerAcceptResponseItemJSON).listenerId).toBeDefined();
             });
 
-            test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
-                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
-                const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
+            test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for an IdentityAttribute and upper bounds for dates", async () => {
+                const attributeValidFrom = CoreDate.utc().subtract({ days: 1 });
+                const attributeValidTo = CoreDate.utc().add({ days: 1 });
 
                 const deciderConfig: DeciderModuleConfigurationOverwrite = {
                     automationConfig: [
@@ -2012,8 +2072,8 @@ describe("DeciderModule", () => {
                                 "content.item.@type": "ShareAttributeRequestItem",
                                 "content.item.attribute.@type": "IdentityAttribute",
                                 "content.item.attribute.owner": sender.address,
-                                "content.item.attribute.validFrom": attributeValidFrom,
-                                "content.item.attribute.validTo": attributeValidTo,
+                                "content.item.attribute.validFrom": `<${attributeValidFrom.add({ days: 1 }).toString()}`,
+                                "content.item.attribute.validTo": `<${attributeValidTo.add({ days: 1 }).toString()}`,
                                 "content.item.attribute.tags": ["tag1", "tag2"],
                                 "content.item.attribute.value.@type": "IdentityFileReference",
                                 "content.item.attribute.value.value": "A link to a file with more than 30 characters"
@@ -2038,8 +2098,8 @@ describe("DeciderModule", () => {
                                 attribute: {
                                     "@type": "IdentityAttribute",
                                     owner: sender.address,
-                                    validFrom: attributeValidFrom,
-                                    validTo: attributeValidTo,
+                                    validFrom: attributeValidFrom.toString(),
+                                    validTo: attributeValidTo.toString(),
                                     tags: ["tag1", "tag3"],
                                     value: {
                                         "@type": "IdentityFileReference",
