@@ -39,7 +39,8 @@ export type RelationshipCreationContentDerivation = RelationshipCreationContentJ
 
 export enum PeerDeletionStatus {
     ToBeDeleted = "ToBeDeleted",
-    Deleted = "Deleted"
+    Deleted = "Deleted",
+    NeverDeletable = "NeverDeletable"
 }
 
 export interface PeerDeletionInfoDTO {
