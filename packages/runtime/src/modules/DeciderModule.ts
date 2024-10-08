@@ -234,13 +234,13 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
 
     private checkDatesCompatibility(requestConfigDates: string | string[], requestDate: string): boolean {
         if (typeof requestConfigDates === "string") return this.checkDateCompatibility(requestConfigDates, requestDate);
-        return requestConfigDates.every((configDate) => this.checkDateCompatibility(configDate, requestDate));
+        return requestConfigDates.every((requestConfigDate) => this.checkDateCompatibility(requestConfigDate, requestDate));
     }
 
-    private checkDateCompatibility(configDate: string, requestDate: string): boolean {
-        if (configDate.startsWith(">")) return CoreDate.from(requestDate).isAfter(CoreDate.from(configDate.substring(1)));
-        if (configDate.startsWith("<")) return CoreDate.from(requestDate).isBefore(CoreDate.from(configDate.substring(1)));
-        return CoreDate.from(requestDate).equals(CoreDate.from(configDate));
+    private checkDateCompatibility(requestConfigDate: string, requestDate: string): boolean {
+        if (requestConfigDate.startsWith(">")) return CoreDate.from(requestDate).isAfter(CoreDate.from(requestConfigDate.substring(1)));
+        if (requestConfigDate.startsWith("<")) return CoreDate.from(requestDate).isBefore(CoreDate.from(requestConfigDate.substring(1)));
+        return CoreDate.from(requestDate).equals(CoreDate.from(requestConfigDate));
     }
 
     private checkRequestItemCompatibilityAndApplyResponseConfig(
