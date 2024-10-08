@@ -198,24 +198,24 @@ export class TestUtil {
 
     public static async addRelationship(from: LocalAccountSession, to: LocalAccountSession): Promise<{ from: RelationshipDTO; to: RelationshipDTO }> {
         const templateTo = await TestUtil.createAndLoadPeerTemplate(from, to);
-        const relationshipRequestTo = await TestUtil.requestRelationshipForTemplate(to, templateTo.id);
-        let relationshipFrom = await TestUtil.syncUntilHasRelationship(from, relationshipRequestTo.id);
+        const relationshipTo = await TestUtil.requestRelationshipForTemplate(to, templateTo.id);
+        let relationshipFrom = await TestUtil.syncUntilHasRelationship(from, relationshipTo.id);
         relationshipFrom = await TestUtil.acceptRelationship(from, relationshipFrom.id);
 
-        const relationshipTo = await TestUtil.syncUntilHasRelationship(to, relationshipRequestTo.id);
+        const syncedRelationshipTo = await TestUtil.syncUntilHasRelationship(to, relationshipTo.id);
 
-        return { from: relationshipFrom, to: relationshipTo };
+        return { from: relationshipFrom, to: syncedRelationshipTo };
     }
 
     public static async addRejectedRelationship(from: LocalAccountSession, to: LocalAccountSession): Promise<{ from: RelationshipDTO; to: RelationshipDTO }> {
         const templateTo = await TestUtil.createAndLoadPeerTemplate(from, to);
-        const relationshipRequestTo = await TestUtil.requestRelationshipForTemplate(to, templateTo.id);
-        let relationshipFrom = await TestUtil.syncUntilHasRelationship(from, relationshipRequestTo.id);
+        const relationshipTo = await TestUtil.requestRelationshipForTemplate(to, templateTo.id);
+        let relationshipFrom = await TestUtil.syncUntilHasRelationship(from, relationshipTo.id);
         relationshipFrom = await TestUtil.rejectRelationship(from, relationshipFrom.id);
 
-        const relationshipTo = await TestUtil.syncUntilHasRelationship(to, relationshipRequestTo.id);
+        const syncedRelationshipTo = await TestUtil.syncUntilHasRelationship(to, relationshipTo.id);
 
-        return { from: relationshipFrom, to: relationshipTo };
+        return { from: relationshipFrom, to: syncedRelationshipTo };
     }
 
     /**
