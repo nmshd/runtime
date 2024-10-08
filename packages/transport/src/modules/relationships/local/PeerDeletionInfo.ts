@@ -27,6 +27,13 @@ export class PeerDeletionInfo extends Serializable implements IPeerDeletionInfo 
     @validate()
     public deletionDate: CoreDate;
 
+    public static override preFrom(value: any): any {
+        if (!value.deletionDate) {
+            value.deletionDate = value.deletionStatus === PeerDeletionStatus.ToBeDeleted ? CoreDate.local().add({ days: 14 }) : CoreDate.local();
+        }
+        return value;
+    }
+
     public static from(value: IPeerDeletionInfo | PeerDeletionInfoJSON): PeerDeletionInfo {
         return this.fromAny(value);
     }
