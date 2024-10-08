@@ -35,6 +35,7 @@ describe("PeerToBeDeletedExternalEventProcessor", function () {
 
     test("PeerToBeDeletedExternalEventProcessor should mark peer as deleted", async function () {
         const eventProcessor = new PeerToBeDeletedExternalEventProcessor(recipient.identityDeletionProcess.eventBus, recipient);
+        const deletionDate = CoreDate.local().add({ days: 14 });
         await eventProcessor.execute({
             id: "anId",
             createdAt: "aDate",
@@ -43,11 +44,11 @@ describe("PeerToBeDeletedExternalEventProcessor", function () {
             type: "PeerToBeDeleted",
             payload: {
                 relationshipId: relationshipId.toString(),
-                deletionDate: CoreDate.local().add({ days: 14 })
+                deletionDate: deletionDate
             }
         });
         const relationship = await recipient.relationships.getRelationship(relationshipId);
         expect(relationship!.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.ToBeDeleted);
-        expect(relationship!.peerDeletionInfo!.deletionDate.isAfter(CoreDate.local())).toBeTruthy();
+        expect(relationship!.peerDeletionInfo!.deletionDate.isSame(deletionDate)).toBeTruthy();
     });
 });
