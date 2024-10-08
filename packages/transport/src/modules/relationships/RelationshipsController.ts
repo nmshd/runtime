@@ -182,7 +182,7 @@ export class RelationshipsController extends TransportController {
                 throw TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate();
             }
 
-            if (result.error.code === "error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists") {
+            if (result.error.code.startsWith("error.platform.validation.") && result.error.code.endsWith(".relationshipToTargetAlreadyExists")) {
                 throw TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer();
             }
 
