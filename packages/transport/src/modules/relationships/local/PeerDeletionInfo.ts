@@ -3,8 +3,7 @@ import { CoreDate } from "@nmshd/core-types";
 
 export enum PeerDeletionStatus {
     ToBeDeleted = "ToBeDeleted",
-    Deleted = "Deleted",
-    NeverDeletable = "NeverDeletable"
+    Deleted = "Deleted"
 }
 
 export interface PeerDeletionInfoJSON {
@@ -29,16 +28,13 @@ export class PeerDeletionInfo extends Serializable implements IPeerDeletionInfo 
     public deletionDate: CoreDate;
 
     public static override preFrom(value: any): any {
-        const deletionStatus = value.deletionStatus as PeerDeletionStatus;
-        switch (deletionStatus) {
+        switch (value.deletionStatus as PeerDeletionStatus) {
             case PeerDeletionStatus.ToBeDeleted:
                 value.deletionDate = CoreDate.local().add({ days: 14 }).toString();
                 break;
             case PeerDeletionStatus.Deleted:
                 value.deletionDate = CoreDate.local().toString();
                 break;
-            // case PeerDeletionStatus.NeverDeletable:
-            // break;
         }
 
         return value;
