@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
-import { ApplicationError, log, Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { log, Result } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { ControllerName, CoreCrypto, TransportController, TransportError } from "../../core";
@@ -193,7 +193,7 @@ export class RelationshipsController extends TransportController {
         return newRelationship;
     }
 
-    public async canSendRelationship(parameters: ISendRelationshipParameters): Promise<Result<void>> {
+    public async canSendRelationship(parameters: ISendRelationshipParameters): Promise<Result<void, CoreError>> {
         const template = (parameters as SendRelationshipParameters).template;
         if (!template.cache) {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
@@ -207,18 +207,26 @@ export class RelationshipsController extends TransportController {
         }
 
         if (template.isExpired()) {
+            const fdds = TransportCoreErrors.relationships.relationshipTemplateIsExpired(template.id.toString());
             return Result.fail(TransportCoreErrors.relationships.relationshipTemplateIsExpired(template.id.toString()));
         }
 
         const result = await this.client.canCreateRelationship(peerAddress.toString());
 
         if (!result.value.canCreate) {
-            return Result.fail(
-                new ApplicationError(
-                    "error.transport.relationships.relationshipNotYetDecomposedByPeerOrPeerIsToBeDeleted",
-                    `A Relationship to the peer ${peerAddress} cannot be created, because the former Relationship is not yet decomposed by the peer or the peer is to be deleted.`
-                )
-            );
+            switch (result.value.code) {
+                case "error.platform.validation.relationship.relationshipToTargetAlreadyExists":
+                    return Result.fail(TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer());
+                case "error.platform.validation.relationship.peerIsToBeDeleted":
+                    return Result.fail(TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate());
+                default:
+                    return Result.fail(
+                        new CoreError(
+                            "error.transport.relationships.unknownErrorForCreatingRelationship",
+                            `A Relationship to the peer ${peerAddress} cannot be created for an unknown reason.`
+                        )
+                    );
+            }
         }
 
         return Result.ok(undefined);
