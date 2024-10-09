@@ -213,11 +213,11 @@ export class RelationshipsController extends TransportController {
         const result = await this.client.canCreateRelationship(peerAddress.toString());
 
         if (!result.value.canCreate) {
-            if (result.error.code.match(/^error.platform.validation.(relationship|relationshipRequest).relationshipToTargetAlreadyExists$/)) {
+            if (result.value.code.match(/^error.platform.validation.(relationship|relationshipRequest).relationshipToTargetAlreadyExists$/)) {
                 return Result.fail(TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer());
             }
 
-            if (result.error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
+            if (result.value.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
                 return Result.fail(TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate());
             }
 
