@@ -171,12 +171,12 @@ export class RelationshipsController extends TransportController {
         });
 
         if (result.isError) {
-            if (result.error.code === "error.platform.validation.relationshipRequest.relationshipToTargetAlreadyExists") {
-                throw TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer();
-            }
-
             if (result.error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
                 throw TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate();
+            }
+
+            if (result.error.code.match(/^error.platform.validation.(relationship|relationshipRequest).relationshipToTargetAlreadyExists$/)) {
+                throw TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer();
             }
 
             throw result.error;
