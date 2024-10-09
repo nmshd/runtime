@@ -27,20 +27,21 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
         const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
 
         if (!template) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
+            const error = RuntimeErrors.general.recordNotFound(RelationshipTemplate);
+            return Result.ok({ isSuccess: false, code: error.code, message: error.message } as CanCreateRelationshipResponse);
         }
 
         if (!template.cache) {
-            return Result.fail(RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString()));
+            const error = RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString());
+            return Result.ok({ isSuccess: false, code: error.code, message: error.message } as CanCreateRelationshipResponse);
         }
 
         const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
         if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
-            return Result.fail(
-                RuntimeErrors.general.invalidPropertyValue(
-                    "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
-                )
+            const error = RuntimeErrors.general.invalidPropertyValue(
+                "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
             );
+            return Result.ok({ isSuccess: false, code: error.code, message: error.message } as CanCreateRelationshipResponse);
         }
 
         const canSendRelationship = await this.relationshipController.canSendRelationship({ creationContent: request.creationContent, template });
@@ -57,7 +58,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
             const errorResponse: CanCreateRelationshipResponse = {
                 isSuccess: false,
                 code: canSendRelationship.error.code,
-                message: canSendRelationship.error.message
+                message: canSendRelationship.error.reason
             };
 
             return Result.ok(errorResponse);
