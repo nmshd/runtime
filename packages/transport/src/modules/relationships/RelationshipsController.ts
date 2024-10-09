@@ -207,26 +207,21 @@ export class RelationshipsController extends TransportController {
         }
 
         if (template.isExpired()) {
-            const fdds = TransportCoreErrors.relationships.relationshipTemplateIsExpired(template.id.toString());
             return Result.fail(TransportCoreErrors.relationships.relationshipTemplateIsExpired(template.id.toString()));
         }
 
         const result = await this.client.canCreateRelationship(peerAddress.toString());
 
         if (!result.value.canCreate) {
-            switch (result.value.code) {
-                case "error.platform.validation.relationship.relationshipToTargetAlreadyExists":
-                    return Result.fail(TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer());
-                case "error.platform.validation.relationship.peerIsToBeDeleted":
-                    return Result.fail(TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate());
-                default:
-                    return Result.fail(
-                        new CoreError(
-                            "error.transport.relationships.unknownErrorForCreatingRelationship",
-                            `A Relationship to the peer ${peerAddress} cannot be created for an unknown reason.`
-                        )
-                    );
+            if (result.error.code.match(/^error.platform.validation.(relationship|relationshipRequest).relationshipToTargetAlreadyExists$/)) {
+                return Result.fail(TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer());
             }
+
+            if (result.error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
+                return Result.fail(TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate());
+            }
+
+            return Result.fail(new CoreError(result.error.code));
         }
 
         return Result.ok(undefined);
