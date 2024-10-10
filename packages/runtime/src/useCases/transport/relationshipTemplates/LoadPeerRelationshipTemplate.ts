@@ -1,6 +1,4 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { CryptoSecretKey } from "@nmshd/crypto";
 import { AccountController, RelationshipTemplateController, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
@@ -67,11 +65,7 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         }
 
         const content = token.cache.content;
-        return await this.loadTemplate(content.templateId, content.secretKey, content.forIdentity);
-    }
-
-    private async loadTemplate(id: CoreId, key: CryptoSecretKey, forIdentity?: CoreAddress) {
-        const template = await this.templateController.loadPeerRelationshipTemplate(id, key, forIdentity?.toString());
+        const template = await this.templateController.loadPeerRelationshipTemplate(content.templateId, content.secretKey, content.forIdentity?.toString());
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
 }

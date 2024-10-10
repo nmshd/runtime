@@ -28,7 +28,7 @@ import { RuntimeServiceProvider, TestRuntimeServices, syncUntilHasRelationships 
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
 let requestor: TestRuntimeServices;
-let templatorTemplate: RelationshipTemplateDTO;
+let templatorTemplate: RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
 let templateId: string;
 let responseItems: DecideRequestItemGroupParametersJSON[];
 
@@ -150,12 +150,12 @@ describe("RelationshipTemplateDVO", () => {
                 content: templateContent,
                 forIdentity: requestor.address
             })
-        ).value;
+        ).value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         templateId = templatorTemplate.id;
     });
 
     test("TemplateDVO for templator", async () => {
-        const dto = templatorTemplate as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
+        const dto = templatorTemplate;
         const dvo = await templator.expander.expandRelationshipTemplateDTO(dto);
         expect(dvo).toBeDefined();
         expect(dvo.id).toBe(dto.id);

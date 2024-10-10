@@ -108,6 +108,38 @@ describe("TokenController", function () {
         expect((receivedToken.cache?.content as TokenContentFile).secretKey.toBase64()).toBe((sentToken.cache?.content as TokenContentFile).secretKey.toBase64());
     });
 
+    test("should send and receive a TokenContentRelationshipTemplate", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = TokenContentRelationshipTemplate.from({
+            templateId: await CoreIdHelper.notPrefixed.generate(),
+            secretKey: await CryptoEncryption.generateKey()
+        });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+
+        testTokens(sentToken, receivedToken, tempDate);
+        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
+        expect((sentToken.cache?.content as TokenContentRelationshipTemplate).templateId).toBeInstanceOf(CoreId);
+        expect((sentToken.cache?.content as TokenContentRelationshipTemplate).secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect(receivedToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
+        expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).templateId).toBeInstanceOf(CoreId);
+        expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect((sentToken.cache?.content as TokenContentRelationshipTemplate).templateId.toString()).toBe(content.templateId.toString());
+        expect((sentToken.cache?.content as TokenContentRelationshipTemplate).secretKey.toBase64()).toBe(content.secretKey.toBase64());
+        expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).templateId.toString()).toBe(
+            (sentToken.cache?.content as TokenContentRelationshipTemplate).templateId.toString()
+        );
+        expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).secretKey.toBase64()).toBe(
+            (sentToken.cache?.content as TokenContentRelationshipTemplate).secretKey.toBase64()
+        );
+    });
+
     test("should send and receive a personalized TokenContentRelationshipTemplate", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = TokenContentRelationshipTemplate.from({
