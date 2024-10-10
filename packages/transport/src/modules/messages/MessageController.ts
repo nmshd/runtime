@@ -287,26 +287,48 @@ export class MessageController extends TransportController {
     @log()
     public async sendMessage(parameters: ISendMessageParameters): Promise<Message> {
         const parsedParams = SendMessageParameters.from(parameters);
-        if (!parsedParams.attachments) parsedParams.attachments = [];
 
+        if (!parsedParams.attachments) parsedParams.attachments = [];
+        /*
+        if (parameters.content.constructor.name === "Notification")
+        {
+*/
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
+        const peerInDeletionAddressArray: string[] = [];
+        const missingOrInactiveRelationshipAddressArray: string[] = [];
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
-            if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+            const relationship = await this.relationships.getRelationshipToIdentity(recipient);
+            if (
+                relationship &&
+                (relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active) &&
+                relationship.peerDeletionInfo?.deletionStatus !== "Deleted"
+            ) {
+                const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
+                envelopeRecipients.push(
+                    MessageEnvelopeRecipient.from({
+                        address: recipient,
+                        encryptedKey: cipherForRecipient
+                    })
+                );
+                addressArray.push(recipient);
             }
+            if (!(relationship && (relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active))) {
+                missingOrInactiveRelationshipAddressArray.push(recipient.address);
+            }
+            if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
+                peerInDeletionAddressArray.push(recipient.address);
+            }
+        }
 
-            const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
-            envelopeRecipients.push(
-                MessageEnvelopeRecipient.from({
-                    address: recipient,
-                    encryptedKey: cipherForRecipient
-                })
-            );
-            addressArray.push(recipient);
+        if (peerInDeletionAddressArray.length > 0) {
+            throw TransportCoreErrors.messages.peerInDeletion(peerInDeletionAddressArray);
+        }
+
+        if (missingOrInactiveRelationshipAddressArray.length > 0) {
+            throw TransportCoreErrors.messages.missingOrInactiveRelationship(missingOrInactiveRelationshipAddressArray);
         }
 
         const publicAttachmentArray: CoreId[] = [];
@@ -333,19 +355,16 @@ export class MessageController extends TransportController {
         const addressToRelationshipId: Record<string, ICoreId> = {};
 
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
-            if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
-            }
+            const relationship = await this.relationships.getRelationshipToIdentity(CoreAddress.from(recipient));
 
-            const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
+            const signature = await this.secrets.sign(relationship!.relationshipSecretId, plaintextBuffer);
             const messageSignature = MessageSignature.from({
                 recipient: recipient,
                 signature: signature
             });
             messageSignatures.push(messageSignature);
 
-            addressToRelationshipId[recipient.toString()] = relationship.id;
+            addressToRelationshipId[recipient.toString()] = relationship!.id;
         }
 
         const signed = MessageSigned.from({
