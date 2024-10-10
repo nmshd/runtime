@@ -57,7 +57,7 @@ import {
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullNotifyPeerAboutAttributeSuccessionFlow,
-    executeFullRequestRelationshipAttributeFlow,
+    executeFullRequestExistingAttributeFlow,
     executeFullShareAndAcceptAttributeRequestFlow,
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
@@ -1843,7 +1843,7 @@ describe("Get (shared) versions of attribute", () => {
                     ]
                 }
             };
-            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestRelationshipAttributeFlow(
+            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestExistingAttributeFlow(
                 services1,
                 services3,
                 requestParams,
@@ -2068,12 +2068,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestRelationshipAttributeFlow(
-                services1,
-                services2,
-                requestParams,
-                ownSharedRelationshipAttribute.id
-            );
+            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestExistingAttributeFlow(services1, services2, requestParams, ownSharedRelationshipAttribute.id);
 
             await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedRelationshipAttribute.id });
 
@@ -2176,7 +2171,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            const thirdPartyOwnedRelationshipAttribute = await executeFullRequestRelationshipAttributeFlow(services1, services2, requestParams, peerSharedRelationshipAttribute.id);
+            const thirdPartyOwnedRelationshipAttribute = await executeFullRequestExistingAttributeFlow(services1, services2, requestParams, peerSharedRelationshipAttribute.id);
 
             await services1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: peerSharedRelationshipAttribute.id });
 
@@ -2266,7 +2261,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            thirdPartyOwnedRelationshipAttribute = await executeFullRequestRelationshipAttributeFlow(services1, services2, requestParams, peerSharedRelationshipAttribute.id);
+            thirdPartyOwnedRelationshipAttribute = await executeFullRequestExistingAttributeFlow(services1, services2, requestParams, peerSharedRelationshipAttribute.id);
         });
 
         test("should delete a third party owned RelationshipAttribute as the sender of it", async () => {
@@ -2392,7 +2387,7 @@ describe("Third party relationship attributes", () => {
     });
 
     test("Should request a third party attribute from the initial owner", async () => {
-        const localThirdPartyAttribute = await executeFullRequestRelationshipAttributeFlow(
+        const localThirdPartyAttribute = await executeFullRequestExistingAttributeFlow(
             services1,
             services3,
             {
@@ -2420,7 +2415,7 @@ describe("Third party relationship attributes", () => {
     });
 
     test("Should request a third party attribute from the initial peer", async () => {
-        const localThirdPartyAttribute = await executeFullRequestRelationshipAttributeFlow(
+        const localThirdPartyAttribute = await executeFullRequestExistingAttributeFlow(
             services2,
             services3,
             {
