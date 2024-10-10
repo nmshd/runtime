@@ -35,6 +35,7 @@ export abstract class CoreCrypto {
      */
     public static async generateSignatureKeypair(version: TransportVersion = TransportVersion.Latest): Promise<CryptoSignatureKeypair> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoSignatures.generateKeypair(CryptoSignatureAlgorithm.ECDSA_ED25519);
             default:
@@ -53,6 +54,7 @@ export abstract class CoreCrypto {
      */
     public static async generateExchangeKeypair(version: TransportVersion = TransportVersion.Latest): Promise<CryptoExchangeKeypair> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoExchange.generateKeypair(CryptoExchangeAlgorithm.ECDH_X25519);
             default:
@@ -70,6 +72,7 @@ export abstract class CoreCrypto {
      */
     public static async generateSecretKey(version: TransportVersion = TransportVersion.Latest): Promise<CryptoSecretKey> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoEncryption.generateKey(CryptoEncryptionAlgorithm.XCHACHA20_POLY1305);
             default:
@@ -101,6 +104,7 @@ export abstract class CoreCrypto {
         const masterBuffer = CoreBuffer.fromString(master, Encoding.Utf8);
         const saltBuffer = CoreBuffer.fromString(salt, Encoding.Utf8);
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoDerivation.deriveKeyFromMaster(masterBuffer, 150000, keyAlgorithm, saltBuffer);
             default:
@@ -132,6 +136,7 @@ export abstract class CoreCrypto {
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoExchangeSecrets> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 const base: CryptoExchangeSecrets = await CryptoExchange.deriveTemplator(client, serverPublicKey, keyAlgorithm);
                 return base;
@@ -147,6 +152,7 @@ export abstract class CoreCrypto {
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoExchangeSecrets> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 const base = await CryptoExchange.deriveRequestor(server, clientPublicKey, keyAlgorithm);
                 return base;
@@ -167,6 +173,7 @@ export abstract class CoreCrypto {
      */
     public static async sign(content: CoreBuffer, privateKey: CryptoSignaturePrivateKey, version: TransportVersion = TransportVersion.Latest): Promise<CryptoSignature> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoSignatures.sign(content, privateKey, CryptoHashAlgorithm.SHA512);
             default:
@@ -192,6 +199,7 @@ export abstract class CoreCrypto {
         version: TransportVersion = TransportVersion.Latest
     ): Promise<boolean> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoSignatures.verify(content, signature, publicKey);
             default:
@@ -213,6 +221,7 @@ export abstract class CoreCrypto {
      */
     public static async encrypt(content: CoreBuffer, secretKey: CryptoSecretKey, version: TransportVersion = TransportVersion.Latest): Promise<CryptoCipher> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoEncryption.encrypt(content, secretKey);
             default:
@@ -234,6 +243,7 @@ export abstract class CoreCrypto {
      */
     public static async decrypt(cipher: CryptoCipher, secretKey: CryptoSecretKey, version: TransportVersion = TransportVersion.Latest): Promise<CoreBuffer> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoEncryption.decrypt(cipher, secretKey);
             default:

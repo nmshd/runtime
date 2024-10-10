@@ -104,20 +104,13 @@ class Challenges {
 }
 
 class Datawallet {
-    public unsupportedModification(type: "unsupportedCacheChangedModificationCollection", data: any) {
-        const errorCode = "error.transport.datawallet.unsupportedModification";
+    public cacheChangeForUnsupportedCollectionDetected(data: any) {
         const formattedData = data ? stringify(data) : "";
 
-        switch (type) {
-            case "unsupportedCacheChangedModificationCollection":
-                return new CoreError(
-                    errorCode,
-                    `The following collections were received in CacheChanged datawallet modifications but are not supported by the current version of this library: '${formattedData}'.`
-                );
-
-            default:
-                throw new Error(`Given type '${type}' is not supported.`);
-        }
+        return new CoreError(
+            "error.transport.datawallet.cacheChangeForUnsupportedCollectionDetected",
+            `The following collections were received in CacheChanged datawallet modifications but are not supported by the current version of this library: '${formattedData}'.`
+        );
     }
 
     public insufficientSupportedDatawalletVersion(supportedVersion: number, requiredVersion: number) {

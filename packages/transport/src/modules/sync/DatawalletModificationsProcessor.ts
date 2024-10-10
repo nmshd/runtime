@@ -167,7 +167,7 @@ export class DatawalletModificationsProcessor {
         const collectionsWithUncacheableItems = uniqueCollections.filter((c) => !this.collectionsWithCacheableItems.includes(c));
 
         if (collectionsWithUncacheableItems.length > 0) {
-            throw TransportCoreErrors.datawallet.unsupportedModification("unsupportedCacheChangedModificationCollection", collectionsWithUncacheableItems);
+            throw TransportCoreErrors.datawallet.cacheChangeForUnsupportedCollectionDetected(collectionsWithUncacheableItems);
         }
     }
 
