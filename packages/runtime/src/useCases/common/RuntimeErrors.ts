@@ -77,6 +77,13 @@ class Files {
 }
 
 class RelationshipTemplates {
+    public personalizationMustBeInherited(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationshipTemplates.personalizationMustBeInherited",
+            "If a RelationshipTemplate is personalized, Tokens created from it must have the same personalization."
+        );
+    }
+
     public cannotCreateTokenForPeerTemplate(): ApplicationError {
         return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateTokenForPeerTemplate", "You cannot create a Token for a peer RelationshipTemplate.");
     }
