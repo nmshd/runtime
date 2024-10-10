@@ -287,20 +287,24 @@ export class MessageController extends TransportController {
     @log()
     public async sendMessage(parameters: ISendMessageParameters): Promise<Message> {
         const parsedParams = SendMessageParameters.from(parameters);
-        if (!parsedParams.attachments) parsedParams.attachments = [];
 
+        if (!parsedParams.attachments) parsedParams.attachments = [];
+        /*
+        if (parameters.content.constructor.name === "Notification")
+        {
+*/
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
-        const peerDeletedAddressArray: string[] = [];
+        const peerInDeletionAddressArray: string[] = [];
         const missingOrInactiveRelationshipAddressArray: string[] = [];
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
+            const relationship = await this.relationships.getRelationshipToIdentity(recipient);
             if (
                 relationship &&
                 (relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active) &&
-                (relationship.peerDeletionInfo?.deletionStatus === "ToBeDeleted" || !relationship.peerDeletionInfo?.deletionStatus)
+                relationship.peerDeletionInfo?.deletionStatus !== "Deleted"
             ) {
                 const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
                 envelopeRecipients.push(
@@ -315,52 +319,16 @@ export class MessageController extends TransportController {
                 missingOrInactiveRelationshipAddressArray.push(recipient.address);
             }
             if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
-                peerDeletedAddressArray.push(recipient.address);
+                peerInDeletionAddressArray.push(recipient.address);
             }
         }
+
+        if (peerInDeletionAddressArray.length > 0) {
+            throw TransportCoreErrors.messages.peerInDeletion(peerInDeletionAddressArray);
+        }
+
         if (missingOrInactiveRelationshipAddressArray.length > 0) {
-            if (!missingOrInactiveRelationshipAddressArray[1]) {
-                if (peerDeletedAddressArray.length > 0 && !peerDeletedAddressArray[1]) {
-                    throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
-                        `An active Relationship with the given address '${missingOrInactiveRelationshipAddressArray[0]}' does not exist and the recipient with the address '${peerDeletedAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
-                    );
-                }
-                if (peerDeletedAddressArray[1]) {
-                    throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
-                        `An active Relationship with the given address '${missingOrInactiveRelationshipAddressArray[0]}' does not exist and the recipients with the addresses '${peerDeletedAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
-                    );
-                }
-                throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
-                    `An active Relationship with the given address '${missingOrInactiveRelationshipAddressArray[0]}' does not exist.`
-                );
-            }
-            if (missingOrInactiveRelationshipAddressArray[1]) {
-                if (peerDeletedAddressArray.length > 0 && !peerDeletedAddressArray[1]) {
-                    throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
-                        `An active Relationship with the given addresses '${missingOrInactiveRelationshipAddressArray}' do not exist and the recipient with the address '${peerDeletedAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
-                    );
-                }
-                if (peerDeletedAddressArray[1]) {
-                    throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
-                        `An active Relationship with the given addresses '${missingOrInactiveRelationshipAddressArray}' do not exist and the recipients with the addresses '${peerDeletedAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
-                    );
-                }
-                throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
-                    `An active Relationship with the given addresses '${missingOrInactiveRelationshipAddressArray}' do not exist.`
-                );
-            }
-        }
-
-        if (peerDeletedAddressArray.length > 0 && !peerDeletedAddressArray[1]) {
-            throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
-                `The recipient with the address '${peerDeletedAddressArray[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
-            );
-        }
-
-        if (peerDeletedAddressArray.length > 0 && peerDeletedAddressArray[1]) {
-            throw TransportCoreErrors.messages.missingOrWrongRelationshipStatusOrPeerInDeletion(
-                `The recipients with the following addresses '${peerDeletedAddressArray}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
-            );
+            throw TransportCoreErrors.messages.missingOrInactiveRelationship(missingOrInactiveRelationshipAddressArray);
         }
 
         const publicAttachmentArray: CoreId[] = [];
@@ -387,7 +355,7 @@ export class MessageController extends TransportController {
         const addressToRelationshipId: Record<string, ICoreId> = {};
 
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
+            const relationship = await this.relationships.getRelationshipToIdentity(CoreAddress.from(recipient));
 
             const signature = await this.secrets.sign(relationship!.relationshipSecretId, plaintextBuffer);
             const messageSignature = MessageSignature.from({

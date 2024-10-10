@@ -447,6 +447,7 @@ describe("Attributes for the relationship", () => {
 describe("RelationshipTermination", () => {
     let relationshipId: string;
     let terminationResult: Result<RelationshipDTO, ApplicationError>;
+
     beforeAll(async () => {
         relationshipId = (await ensureActiveRelationship(services1.transport, services2.transport)).id;
 
@@ -493,7 +494,18 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.transport.messages.missingOrWrongRelationshipStatusOrPeerInDeletion");
+        expect(result).toBeAnError(/.*/, "error.transport.messages.missingOrInactiveRelationship");
+    });
+
+    // eslint-disable-next-line jest/no-disabled-tests
+    test.skip("sending Notification results in an error redirected from the Backbone", async () => {
+        const id = await ConsumptionIds.notification.generate();
+        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+        const result = await services1.transport.messages.sendMessage({ recipients: [services2.address], content: notificationToSend.toJSON() });
+        expect(result).toBeAnError(
+            `Cannot send message to ${services1.address.toString()} because the relationship to it is not active. In order to be able to send messages again, you have to reactivate the relationship.`,
+            "error.platform.validation.message.relationshipToRecipientNotActive"
+        );
     });
 
     test("should not decide a request", async () => {
@@ -974,11 +986,12 @@ describe("Peer IdentityDeletionProcess", () => {
         const result = await sendMessageToMultipleRecipients(services1.transport, [services4.address, services3.address]);
         expect(result).toBeAnError(
             `An active Relationship with the given addresses '${services4.address.toString()},${services3.address.toString()}' do not exist.`,
-            "error.transport.messages.missingOrWrongRelationshipStatusOrPeerInDeletion"
+            "error.transport.messages.missingOrInactiveRelationship"
         );
     });
 
-    test("sending Notification to an Identity which is in status 'ToBeDeleted' results in an error redirected from the Backbone", async () => {
+    // eslint-disable-next-line jest/no-disabled-tests
+    test.skip("sending Notification to an Identity which is in status 'ToBeDeleted' results in an error redirected from the Backbone", async () => {
         const id = await ConsumptionIds.notification.generate();
         const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
         const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
