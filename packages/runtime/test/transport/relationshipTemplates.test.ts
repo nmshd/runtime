@@ -1,3 +1,4 @@
+import { RelationshipTemplateContent, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction, TransportServices } from "../../src";
 import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider } from "../lib";
@@ -31,6 +32,44 @@ describe("Template Tests", () => {
         });
 
         expect(response).toBeAnError("must have required property 'expiresAt'", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("automatically set expiresAt of Request creating a RelationshipTemplate with Request for new Relationship with undefined expiresAt", async () => {
+        const relationshipTemplateContent = RelationshipTemplateContent.from({
+            onNewRelationship: {
+                "@type": "Request",
+                items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]
+            }
+        }).toJSON();
+
+        const relationshipTemplateExpirationDate = DateTime.utc().plus({ minutes: 10 }).toString();
+        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: relationshipTemplateContent,
+            expiresAt: relationshipTemplateExpirationDate
+        });
+
+        expect(response.isSuccess).toBe(true);
+        expect((response.value.content as RelationshipTemplateContentJSON).onNewRelationship.expiresAt).toStrictEqual(relationshipTemplateExpirationDate);
+    });
+
+    test("create a RelationshipTemplate with Request for new Relationship that expires after the RelationshipTemplate", async () => {
+        const relationshipTemplateContent = RelationshipTemplateContent.from({
+            onNewRelationship: {
+                "@type": "Request",
+                expiresAt: DateTime.utc().plus({ minutes: 20 }).toString(),
+                items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]
+            }
+        }).toJSON();
+
+        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+            content: relationshipTemplateContent,
+            expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
+        });
+
+        expect(response).toBeAnError(
+            "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set such that the expiration date of the RelationshipTemplate is not exceeded.",
+            "error.runtime.relationshipTemplates.requestCannotExpireAfterRelationshipTemplate"
+        );
     });
 
     test("create a template with undefined maxNumberOfAllocations", async () => {

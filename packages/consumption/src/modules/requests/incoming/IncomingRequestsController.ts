@@ -39,6 +39,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         private readonly identity: { address: CoreAddress },
         private readonly relationshipResolver: {
             getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+            getExistingRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+        },
+        private readonly relationshipTemplateResolver: {
+            getRelationshipTemplate(id: CoreId): Promise<RelationshipTemplate | undefined>;
         }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
@@ -59,6 +63,11 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             source: infoFromSource.source,
             statusLog: []
         });
+
+        if (!(await this.relationshipResolver.getExistingRelationshipToIdentity(CoreAddress.from(infoFromSource.peer))) && infoFromSource.expiresAt) {
+            request.content.expiresAt = CoreDate.min(infoFromSource.expiresAt, request.content.expiresAt);
+            request.updateStatusBasedOnExpiration();
+        }
 
         await this.localRequests.create(request);
 
@@ -95,7 +104,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             source: {
                 reference: template.id,
                 type: "RelationshipTemplate"
-            }
+            },
+            expiresAt: template.cache!.expiresAt
         };
     }
 
@@ -377,7 +387,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    public async getIncomingRequests(query?: any): Promise<LocalRequest[]> {
+    public async getIncomingRequestsWithUpdatedExpiry(query?: any): Promise<LocalRequest[]> {
         const requestDocs = await this.localRequests.find({
             ...query,
             isOwn: false
@@ -387,16 +397,17 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return await Promise.all(requestPromises);
     }
 
-    public async getIncomingRequest(idIncomingRequest: ICoreId): Promise<LocalRequest | undefined> {
+    public async getIncomingRequestWithUpdatedExpiry(idIncomingRequest: ICoreId): Promise<LocalRequest | undefined> {
         const requestDoc = await this.localRequests.findOne({ id: idIncomingRequest.toString(), isOwn: false });
         if (!requestDoc) return;
 
         const localRequest = LocalRequest.from(requestDoc);
+
         return await this.updateRequestExpiry(localRequest);
     }
 
     private async getOrThrow(id: CoreId | string) {
-        const request = await this.getIncomingRequest(CoreId.from(id));
+        const request = await this.getIncomingRequestWithUpdatedExpiry(CoreId.from(id));
         if (!request) {
             throw TransportCoreErrors.general.recordNotFound(LocalRequest, id.toString());
         }
@@ -412,7 +423,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     public async deleteRequestsFromPeer(peer: CoreAddress): Promise<void> {
-        const requests = await this.getIncomingRequests({ peer: peer.toString() });
+        const requests = await this.getIncomingRequestsWithUpdatedExpiry({ peer: peer.toString() });
         for (const request of requests) {
             await this.localRequests.delete(request);
         }
@@ -425,8 +436,19 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     private async updateRequestExpiry(request: LocalRequest) {
+        let expirationDateUpdated;
+        if (request.source?.type === "RelationshipTemplate" && !(await this.relationshipResolver.getExistingRelationshipToIdentity(request.peer))) {
+            const template = await this.relationshipTemplateResolver.getRelationshipTemplate(request.source.reference);
+            if (!template) {
+                throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, request.source.reference.toString());
+            }
+            if (template.cache?.expiresAt) {
+                expirationDateUpdated = request.updateExpirationDateBasedOnTemplateExpiration(template.cache.expiresAt);
+            }
+        }
+
         const statusUpdated = request.updateStatusBasedOnExpiration();
-        if (statusUpdated) await this.update(request);
+        if (expirationDateUpdated ?? statusUpdated) await this.update(request);
         return request;
     }
 }
@@ -434,4 +456,5 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 interface InfoFromSource {
     peer: ICoreAddress;
     source: ILocalRequestSource;
+    expiresAt?: CoreDate;
 }

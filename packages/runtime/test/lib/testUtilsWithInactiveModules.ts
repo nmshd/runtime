@@ -1,4 +1,5 @@
 import { IResponse, RelationshipCreationContent, RelationshipTemplateContentJSON, ResponseWrapperJSON } from "@nmshd/content";
+import { DateTime } from "luxon";
 import { CreateOutgoingRequestRequest, LocalRequestDTO, MessageDTO, RelationshipDTO } from "../../src";
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { exchangeMessageWithRequest, exchangeTemplate, syncUntilHasMessageWithResponse } from "./testUtils";
@@ -78,10 +79,10 @@ export async function exchangeMessageWithRequestAndSendResponse(
 export async function exchangeTemplateAndReceiverRequiresManualDecision(
     sRuntimeServices: TestRuntimeServices,
     rRuntimeServices: TestRuntimeServices,
-    templateContent: any
+    templateContent: any,
+    templateExpiresAt?: DateTime
 ): Promise<LocalRequestWithSource> {
-    const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
-
+    const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent, templateExpiresAt);
     const request = (
         await rRuntimeServices.consumption.incomingRequests.received({
             receivedRequest: (template.content as RelationshipTemplateContentJSON).onNewRelationship,

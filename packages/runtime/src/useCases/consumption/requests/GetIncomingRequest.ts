@@ -16,7 +16,7 @@ export class GetIncomingRequestUseCase extends UseCase<GetIncomingRequestRequest
     }
 
     protected async executeInternal(request: GetIncomingRequestRequest): Promise<Result<LocalRequestDTO, ApplicationError>> {
-        const localRequest = await this.incomingRequestsController.getIncomingRequest(CoreId.from(request.id));
+        const localRequest = await this.incomingRequestsController.getIncomingRequestWithUpdatedExpiry(CoreId.from(request.id));
 
         if (!localRequest) {
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalRequest));
