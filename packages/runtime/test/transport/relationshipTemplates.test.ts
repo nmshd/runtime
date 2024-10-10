@@ -144,7 +144,7 @@ describe("Template Tests", () => {
             );
         });
 
-        test("create a Token for a personalized template", async () => {
+        test("create a token for a personalized template", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
@@ -158,7 +158,7 @@ describe("Template Tests", () => {
             expect(createTokenResult).toBeSuccessful();
         });
 
-        test("create a Token QR code for a personalized template", async () => {
+        test("create a token QR code for a personalized template", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
@@ -190,7 +190,7 @@ describe("Template Tests", () => {
             expect(createQRCodeWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
         });
 
-        test("error when creating a QR code for a personalized template with false personalization", async () => {
+        test("error when creating a token QR code for a personalized template with false personalization", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
