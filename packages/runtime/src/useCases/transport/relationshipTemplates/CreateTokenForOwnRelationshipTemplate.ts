@@ -40,6 +40,10 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.cannotCreateTokenForPeerTemplate());
         }
 
+        if (template.cache?.forIdentity && request.forIdentity !== template.cache.forIdentity.toString()) {
+            return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
+        }
+
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
             secretKey: template.secretKey,
