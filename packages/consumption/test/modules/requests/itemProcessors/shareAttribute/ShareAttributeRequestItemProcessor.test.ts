@@ -169,7 +169,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: sourceAttribute.content,
-                sourceAttributeId: sourceAttribute.id
+                sourceAttributeId: sourceAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -861,7 +862,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id
+                sourceAttributeId: initialRelationshipAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -908,7 +910,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id
+                sourceAttributeId: initialRelationshipAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 

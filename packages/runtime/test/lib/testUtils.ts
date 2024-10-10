@@ -14,11 +14,13 @@ import {
     Notification,
     RelationshipCreationContentJSON,
     RelationshipTemplateContentJSON,
+    Request,
     RequestItemGroupJSON,
     RequestItemJSONDerivations,
     RequestJSON,
     ResponseWrapperJSON,
-    ShareAttributeAcceptResponseItemJSON
+    ShareAttributeAcceptResponseItemJSON,
+    ShareAttributeRequestItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
@@ -700,12 +702,12 @@ export async function waitForRecipientToReceiveNotification(
 
 /**
  * The owner of a RelationshipAttribute receives a Request of a
- * peer and forwards them the ThirdPartyRelationshipAttribute,
+ * peer and forwards them the RelationshipAttribute,
  * waiting for all communication and event processing to finish.
  *
- * Returns the sender's own shared ThirdPartyRelationshipAttribute.
+ * Returns the sender's own shared RelationshipAttribute.
  */
-export async function executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+export async function executeFullRequestExistingAttributeFlow(
     owner: TestRuntimeServices,
     peer: TestRuntimeServices,
     request: CreateOutgoingRequestRequest,
@@ -729,8 +731,38 @@ export async function executeFullRequestAndShareThirdPartyRelationshipAttributeF
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });
 
-    const ownSharedThirdPartyRelationshipAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-    return ownSharedThirdPartyRelationshipAttribute;
+    const ownSharedRelationshipAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    return ownSharedRelationshipAttribute;
+}
+
+export async function executeFullShareAndAcceptAttributeRequestFlow(
+    owner: TestRuntimeServices,
+    peer: TestRuntimeServices,
+    requestItem: ShareAttributeRequestItem
+): Promise<LocalAttributeDTO> {
+    const request = Request.from({
+        items: [requestItem]
+    });
+
+    const canCreateResult = await owner.consumption.outgoingRequests.canCreate({
+        content: request.toJSON(),
+        peer: peer.address
+    });
+
+    expect(canCreateResult.value.isSuccess).toBe(true);
+
+    const createRequestResult = await owner.consumption.outgoingRequests.create({
+        content: request.toJSON(),
+        peer: peer.address
+    });
+
+    await owner.transport.messages.sendMessage({
+        recipients: [peer.address],
+        content: createRequestResult.value.content
+    });
+
+    const result = await acceptIncomingShareAttributeRequest(owner, peer, createRequestResult.value.id);
+    return result;
 }
 
 /**
