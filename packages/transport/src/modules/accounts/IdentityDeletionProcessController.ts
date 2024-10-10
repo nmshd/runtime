@@ -117,7 +117,9 @@ export class IdentityDeletionProcessController extends TransportController {
         const getIdentityDeletionPromises = ids.map((id) => this.identityDeletionProcessClient.getIdentityDeletionProcess(id.toString()));
         const backboneTokens: { id: CoreId; cache: CachedIdentityDeletionProcess }[] = [];
 
-        for await (const identityDeletionProcess of getIdentityDeletionPromises) {
+        const identityDeletionProcesses = await Promise.all(getIdentityDeletionPromises);
+
+        for (const identityDeletionProcess of identityDeletionProcesses) {
             const { id, ...cache } = identityDeletionProcess.value;
             backboneTokens.push({ id: CoreId.from(id), cache: CachedIdentityDeletionProcess.from(cache) });
         }

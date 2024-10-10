@@ -228,7 +228,7 @@ export class TokenController extends TransportController {
     public async cleanupTokensOfDecomposedRelationship(peer: CoreAddress): Promise<void> {
         const tokenDocs = await this.getTokens({ "cache.createdBy": peer.toString() });
         const tokens = this.parseArray<Token>(tokenDocs, Token);
-        for await (const token of tokens) {
+        for (const token of tokens) {
             await this.tokens.delete(token);
         }
     }
