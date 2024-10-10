@@ -1,13 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
-import { AddressString, ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface CreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
-    forIdentity?: AddressString;
 }
 
 class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> {
@@ -40,10 +39,6 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             return Result.fail(RuntimeErrors.relationshipTemplates.cannotCreateTokenForPeerTemplate());
         }
 
-        if (template.cache?.forIdentity && request.forIdentity !== template.cache.forIdentity.toString()) {
-            return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
-        }
-
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
             secretKey: template.secretKey,
@@ -56,7 +51,7 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral: true,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: template.cache?.forIdentity
         });
 
         const qrCode = await QRCode.forTruncateable(token);
