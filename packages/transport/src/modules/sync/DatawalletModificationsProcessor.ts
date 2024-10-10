@@ -167,7 +167,9 @@ export class DatawalletModificationsProcessor {
         const collectionsWithUncacheableItems = uniqueCollections.filter((c) => !this.collectionsWithCacheableItems.includes(c));
 
         if (collectionsWithUncacheableItems.length > 0) {
-            throw TransportCoreErrors.datawallet.cacheChangeForUnsupportedCollectionDetected(collectionsWithUncacheableItems);
+            throw TransportCoreErrors.datawallet.unsupportedModification(
+                `The following collections were received in CacheChanged datawallet modifications but are not supported by the current version of this library: '${collectionsWithUncacheableItems.join(", ")}'.`
+            );
         }
     }
 

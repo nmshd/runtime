@@ -1,5 +1,4 @@
 import { CoreError } from "@nmshd/core-types";
-import stringify from "json-stringify-safe";
 import { RelationshipStatus } from "../modules";
 
 class Relationships {
@@ -104,13 +103,8 @@ class Challenges {
 }
 
 class Datawallet {
-    public cacheChangeForUnsupportedCollectionDetected(data: any) {
-        const formattedData = data ? stringify(data) : "";
-
-        return new CoreError(
-            "error.transport.datawallet.cacheChangeForUnsupportedCollectionDetected",
-            `The following collections were received in CacheChanged datawallet modifications but are not supported by the current version of this library: '${formattedData}'.`
-        );
+    public unsupportedModification(message: string) {
+        return new CoreError("error.transport.datawallet.unsupportedModification", message);
     }
 
     public insufficientSupportedDatawalletVersion(supportedVersion: number, requiredVersion: number) {
