@@ -702,12 +702,12 @@ export async function waitForRecipientToReceiveNotification(
 
 /**
  * The owner of a RelationshipAttribute receives a Request of a
- * peer and forwards them the ThirdPartyRelationshipAttribute,
+ * peer and forwards them the RelationshipAttribute,
  * waiting for all communication and event processing to finish.
  *
- * Returns the sender's own shared ThirdPartyRelationshipAttribute.
+ * Returns the sender's own shared RelationshipAttribute.
  */
-export async function executeFullRequestThirdPartyRelationshipAttributeQueryFlow(
+export async function executeFullRequestExistingAttributeFlow(
     owner: TestRuntimeServices,
     peer: TestRuntimeServices,
     request: CreateOutgoingRequestRequest,
@@ -731,11 +731,11 @@ export async function executeFullRequestThirdPartyRelationshipAttributeQueryFlow
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });
 
-    const ownSharedThirdPartyRelationshipAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-    return ownSharedThirdPartyRelationshipAttribute;
+    const ownSharedRelationshipAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    return ownSharedRelationshipAttribute;
 }
 
-export async function executeFullShareThirdPartyRelationshipAttributeFlow(
+export async function executeFullShareAndAcceptAttributeRequestFlow(
     owner: TestRuntimeServices,
     peer: TestRuntimeServices,
     requestItem: ShareAttributeRequestItem
