@@ -2982,7 +2982,7 @@ export const CanCreateOutgoingRequestRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -10800,7 +10800,7 @@ export const CreateOutgoingRequestRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -14904,7 +14904,7 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -17110,7 +17110,7 @@ export const GetOwnSharedAttributesRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         },
         "GetOwnSharedAttributeRequestQuery": {
             "type": "object",
@@ -17340,7 +17340,7 @@ export const GetPeerSharedAttributesRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         },
         "GetPeerSharedAttributesRequestQuery": {
             "type": "object",
@@ -17642,7 +17642,7 @@ export const GetSharedVersionsOfAttributeRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -17696,7 +17696,7 @@ export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -17763,7 +17763,7 @@ export const ShareRepositoryAttributeRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         },
         "ISO8601DateTimeString": {
             "type": "string",
@@ -19986,7 +19986,7 @@ export const DeleteIdentityMetadataRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -20012,7 +20012,7 @@ export const GetIdentityMetadataRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -20040,7 +20040,7 @@ export const UpsertIdentityMetadataRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -21259,7 +21259,7 @@ export const CreateTokenForFileRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -21297,7 +21297,7 @@ export const CreateTokenQRCodeForFileRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -21937,7 +21937,7 @@ export const SendMessageRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         },
         "FileIdString": {
             "type": "string",
@@ -22035,7 +22035,7 @@ export const CreateTokenForOwnTemplateRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -22073,7 +22073,7 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -22411,7 +22411,7 @@ export const GetRelationshipByAddressRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -22647,7 +22647,7 @@ export const CreateOwnTokenRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([a-z0-9]([a-z0-9-]*[a-z0-9])*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
