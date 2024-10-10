@@ -99,7 +99,6 @@ describe("ReflectionTest", function () {
         const reflectionKeys = Reflect.getMetadataKeys(Serializable, "types");
         const notFoundClasses: string[] = [];
         for (const className of cryptoClassNames) {
-            // eslint-disable-next-line jest/no-conditional-in-test
             if (!reflectionKeys.includes(className)) {
                 notFoundClasses.push(className);
             }
@@ -112,7 +111,6 @@ describe("ReflectionTest", function () {
         const notFoundClasses: string[] = [];
 
         for (const className of transportClassNames) {
-            // eslint-disable-next-line jest/no-conditional-in-test
             if (!reflectionKeys.includes(className)) {
                 notFoundClasses.push(className);
             }

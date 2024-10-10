@@ -15,7 +15,6 @@ describe("RandomTest", function () {
             const iterations = 10000;
             for (let i = 1; i < iterations; i++) {
                 const n = await Random.intBetween(0, 1);
-                // eslint-disable-next-line jest/no-conditional-in-test
                 switch (n) {
                     case 0:
                         buckets[0]++;
@@ -136,7 +135,6 @@ describe("RandomTest", function () {
 
             for (let i = 1; i < iterations; i++) {
                 const n = await Random.string(1, RandomCharacterRange.Alphabet);
-                // eslint-disable-next-line jest/no-conditional-in-test
                 if (buckets[n]) buckets[n]++;
                 else buckets[n] = 1;
             }

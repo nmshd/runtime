@@ -70,7 +70,7 @@ export class Reference extends Serializable implements IReference {
             if (value === "") return undefined;
 
             return parseInt(value);
-        } catch (e) {
+        } catch (_) {
             throw TransportCoreErrors.general.invalidTruncatedReference("The password type must be indicated by an integer in the TruncatedReference.");
         }
     }
@@ -80,7 +80,7 @@ export class Reference extends Serializable implements IReference {
 
         try {
             algorithm = parseInt(alg);
-        } catch (e) {
+        } catch (_) {
             throw TransportCoreErrors.general.invalidTruncatedReference("The encryption algorithm must be indicated by an integer in the TruncatedReference.");
         }
 
