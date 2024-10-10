@@ -90,7 +90,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
     return ValidationResult.success();
 }
 
-function validateAttributeMatchesWithIQLQuery(query: IQLQuery, attribute: IdentityAttribute | RelationshipAttribute, recipient: CoreAddress): ValidationResult {
+function validateAttributeMatchesWithIQLQuery(_: IQLQuery, attribute: IdentityAttribute | RelationshipAttribute, recipient: CoreAddress): ValidationResult {
     if (!(attribute instanceof IdentityAttribute)) {
         return ValidationResult.error(
             ConsumptionCoreErrors.requests.attributeQueryMismatch(

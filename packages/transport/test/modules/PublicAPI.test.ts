@@ -167,7 +167,6 @@ function testPublicFunctions(controllerName: string) {
         let found = 0;
         for (const functionName of publicFunctions[controllerName]) {
             const item = controllers[controllerName][functionName];
-            // eslint-disable-next-line jest/no-conditional-in-test
             if (!item || typeof item !== "function") continue;
             found++;
         }

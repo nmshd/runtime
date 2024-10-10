@@ -90,7 +90,7 @@ export class RESTClient {
                 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/naming-convention
                 const HttpsProxyAgent = require("https-proxy-agent").HttpsProxyAgent;
                 resultingRequestConfig.httpsAgent = new HttpsProxyAgent(httpsProxy, this.config.httpsAgentOptions);
-            } catch (e) {
+            } catch (_) {
                 // ignore
             }
         } else {
@@ -99,7 +99,7 @@ export class RESTClient {
                 const httpsAgent = require("https")?.Agent;
 
                 if (httpsAgent) resultingRequestConfig.httpsAgent = new httpsAgent(this.config.httpsAgentOptions);
-            } catch (e) {
+            } catch (_) {
                 // ignore
             }
         }
@@ -109,7 +109,7 @@ export class RESTClient {
             const agent = require("http")?.Agent;
 
             if (agent) resultingRequestConfig.httpAgent = new agent(this.config.httpAgentOptions);
-        } catch (e) {
+        } catch (_) {
             // ignore
         }
 
@@ -184,7 +184,7 @@ export class RESTClient {
             try {
                 const errorText = CoreBuffer.from(response.data).toUtf8();
                 response.data = JSON.parse(errorText);
-            } catch (e) {
+            } catch (_) {
                 // Do nothing here: Error is handled below
             }
         }
@@ -503,7 +503,7 @@ export class RESTClient {
             const message = `Response ${requestId}: ${method} ${path} | TraceId: '${platformParameters.traceId}' | PlatformDuration: ${platformParameters.responseDuration}`;
             try {
                 this._logger.trace(message, JSON.stringify(response.data, undefined, 2));
-            } catch (e) {
+            } catch (_) {
                 this._logger.trace(message);
             }
         }
