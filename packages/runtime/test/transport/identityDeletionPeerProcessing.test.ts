@@ -18,14 +18,14 @@ beforeAll(async () => {
     relationshipId2 = (await establishRelationship(services3.transport, services2.transport)).id;
 }, 30000);
 
+afterAll(async () => {
+    return await serviceProvider.stop();
+});
+
 beforeEach(() => {
     services1.eventBus.reset();
     services2.eventBus.reset();
     services3.eventBus.reset();
-});
-
-afterAll(async () => {
-    return await serviceProvider.stop();
 });
 
 afterEach(async () => {
@@ -39,6 +39,7 @@ afterEach(async () => {
     } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
         abortResult = await services1.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
     }
+    await syncUntilHasEvent(services2, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
 
     if (abortResult?.isError) throw abortResult.error;
 });
@@ -52,6 +53,7 @@ describe("IdentityDeletionProcess", () => {
 
         const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
         expect(updatedRelationship.peerDeletionInfo!.deletionStatus).toBe(PeerDeletionStatus.ToBeDeleted);
+        expect(updatedRelationship.peerDeletionInfo!.deletionDate).toBeDefined();
     });
 
     test("peer should be notified about cancelled deletion process", async function () {
