@@ -397,6 +397,24 @@ describe("IncomingRequestsController", function () {
                 code: "error.consumption.requests.wrongRelationshipStatus"
             });
         });
+
+        test("returns 'error' on relationship with peer which is deleted", async function () {
+            await Given.aRelationshipToDeletedPeer();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.peerInDeletion"
+            });
+        });
+
+        test("returns 'error' on relationship with peer which is toBeDeleted", async function () {
+            await Given.aRelationshipToBeDeletedPeer();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.peerInDeletion"
+            });
+        });
     });
 
     describe("CanReject", function () {
@@ -589,6 +607,24 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.wrongRelationshipStatus"
+            });
+        });
+
+        test("returns 'error' on relationship with peer which is deleted", async function () {
+            await Given.aRelationshipToDeletedPeer();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.peerInDeletion"
+            });
+        });
+
+        test("returns 'error' on relationship with peer which is toBeDeleted", async function () {
+            await Given.aRelationshipToBeDeletedPeer();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.peerInDeletion"
             });
         });
     });

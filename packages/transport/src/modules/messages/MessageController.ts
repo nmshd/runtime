@@ -297,7 +297,7 @@ export class MessageController extends TransportController {
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
-        const peerInDeletionAddressArray: string[] = [];
+        const peerDeletedAddressArray: string[] = [];
         const missingOrInactiveRelationshipAddressArray: string[] = [];
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getRelationshipToIdentity(recipient);
@@ -319,12 +319,12 @@ export class MessageController extends TransportController {
                 missingOrInactiveRelationshipAddressArray.push(recipient.address);
             }
             if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
-                peerInDeletionAddressArray.push(recipient.address);
+                peerDeletedAddressArray.push(recipient.address);
             }
         }
 
-        if (peerInDeletionAddressArray.length > 0) {
-            throw TransportCoreErrors.messages.peerInDeletion(peerInDeletionAddressArray);
+        if (peerDeletedAddressArray.length > 0) {
+            throw TransportCoreErrors.messages.peerDeleted(peerDeletedAddressArray);
         }
 
         if (missingOrInactiveRelationshipAddressArray.length > 0) {

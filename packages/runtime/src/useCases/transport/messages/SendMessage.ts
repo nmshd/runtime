@@ -93,7 +93,8 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             return;
         }
 
-        const peerInDeletionAddressArray: string[] = [];
+        const peerDeletedAddressArray: string[] = [];
+        const peerToBeDeletedAddressArray: string[] = [];
         const missingOrInactiveRelationshipAddressArray: string[] = [];
         const recipientsCoreAddress = recipients.map((r) => CoreAddress.from(r));
         for (const recipient of recipientsCoreAddress) {
@@ -101,13 +102,20 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             if (!relationship) {
                 missingOrInactiveRelationshipAddressArray.push(recipient.address);
             }
-            if (relationship?.peerDeletionInfo?.deletionStatus) {
-                peerInDeletionAddressArray.push(recipient.address);
+            if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
+                peerDeletedAddressArray.push(recipient.address);
+            }
+            if (relationship?.peerDeletionInfo?.deletionStatus === "ToBeDeleted") {
+                peerToBeDeletedAddressArray.push(recipient.address);
             }
         }
 
-        if (peerInDeletionAddressArray.length > 0) {
-            return TransportCoreErrors.messages.peerInDeletion(peerInDeletionAddressArray);
+        if (peerDeletedAddressArray.length > 0) {
+            return TransportCoreErrors.messages.peerDeleted(peerDeletedAddressArray);
+        }
+
+        if (peerToBeDeletedAddressArray.length > 0) {
+            return TransportCoreErrors.messages.peerToBeDeleted(peerToBeDeletedAddressArray);
         }
 
         if (missingOrInactiveRelationshipAddressArray.length > 0) {
