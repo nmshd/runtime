@@ -1,6 +1,7 @@
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "../../src";
-import { establishRelationship, exchangeMessageWithRequest, RuntimeServiceProvider, sendMessageToMultipleRecipients, syncUntilHasEvent, TestRuntimeServices } from "../lib";
+import { establishRelationship, RuntimeServiceProvider, sendMessageToMultipleRecipients, syncUntilHasEvent, TestRuntimeServices } from "../lib";
+import { exchangeMessageWithRequestAndRequireManualDecision } from "../lib/testUtilsWithInactiveModules";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;
@@ -11,7 +12,7 @@ let relationshipId: string;
 let relationshipId2: string;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(4, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+    const runtimeServices = await serviceProvider.launch(4);
     services1 = runtimeServices[0];
     services2 = runtimeServices[1];
     services3 = runtimeServices[2];
@@ -139,14 +140,9 @@ describe("IdentityDeletionProcess", () => {
             },
             peer: services2.address
         };
-        const rRequestMessage = await exchangeMessageWithRequest(services1, services2, requestContent);
-        const result = await services2.consumption.incomingRequests.received({
-            receivedRequest: rRequestMessage.content,
-            requestSourceId: rRequestMessage.id
-        });
+        const rRequestMessage = await exchangeMessageWithRequestAndRequireManualDecision(services1, services2, requestContent);
 
-        expect(result).toBeSuccessful();
-        const requestIds = rRequestMessage.content.id!;
+        const requestIds = rRequestMessage.request.content.id!;
         const canAcceptResult = (await services2.consumption.incomingRequests.canAccept({ requestId: requestIds, items: [{ accept: true }] })).value;
         expect(canAcceptResult.isSuccess).toBe(true);
 
