@@ -36,6 +36,10 @@ class General {
         return new ApplicationError("error.runtime.validation.invalidPropertyValue", message);
     }
 
+    public invalidPIN() {
+        return new ApplicationError("error.runtime.invalidPIN", "A PIN (a password consisting of numbers only) must be at least 2 and at most 12 digits long.");
+    }
+
     public invalidPayload(message?: string): ApplicationError {
         return new ApplicationError("error.runtime.validation.invalidPayload", message ?? "The given combination of properties in the payload is not supported.");
     }

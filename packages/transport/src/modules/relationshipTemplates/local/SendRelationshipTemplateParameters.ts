@@ -7,6 +7,7 @@ export interface ISendRelationshipTemplateParameters extends ISerializable {
     expiresAt: ICoreDate;
     maxNumberOfAllocations?: number;
     forIdentity?: ICoreAddress;
+    password?: string;
 }
 
 @type("SendRelationshipTemplateParameters")
@@ -26,6 +27,18 @@ export class SendRelationshipTemplateParameters extends Serializable implements 
     @validate({ nullable: true })
     @serialize()
     public forIdentity?: CoreAddress;
+
+    @validate({
+        nullable: true,
+        customValidator: (input) => {
+            if (input.password && /^\d+$/.test(input.password) && !(input.password.length <= 12) && !(input.password.length >= 2)) {
+                return "PINs must be between 2 and 12 digits long";
+            }
+            return undefined;
+        }
+    })
+    @serialize()
+    public password?: string;
 
     public static from(value: ISendRelationshipTemplateParameters): SendRelationshipTemplateParameters {
         return this.fromAny(value);
