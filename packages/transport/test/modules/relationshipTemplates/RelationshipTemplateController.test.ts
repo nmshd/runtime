@@ -115,15 +115,37 @@ describe("RelationshipTemplateController", function () {
         }).rejects.toThrow(/SendRelationshipTemplateParameters.maxNumberOfAllocations/);
     });
 
-    test("should send and receive a RelationshipTemplate using a RelationshipTemplateReference", async function () {
-        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
-        const sentRelationshipTemplate = await TestUtil.sendRelationshipTemplate(sender);
+    test("should create and load a personalized template", async function () {
+        const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            forIdentity: recipient.identity.address
+        });
+        expect(ownTemplate).toBeDefined();
 
-        const receivedRelationshipTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByReference(
-            sentRelationshipTemplate.toRelationshipTemplateReference()
+        const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate());
+        expect(peerTemplate).toBeDefined();
+    });
+
+    test("should throw an error if loaded by the wrong identity", async function () {
+        const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            forIdentity: sender.identity.address
+        });
+        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
+            "transport.general.notIntendedForYou"
         );
+    });
 
-        expectValidRelationshipTemplates(sentRelationshipTemplate, receivedRelationshipTemplate, tempDate);
+    test("should throw an error if loaded by the wrong identity and it's uncaught before reaching the backbone", async function () {
+        const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            forIdentity: sender.identity.address
+        });
+
+        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey)).rejects.toThrow("error.platform.recordNotFound");
     });
 
     test("should send and receive a RelationshipTemplate using a truncated RelationshipTemplateReference", async function () {
