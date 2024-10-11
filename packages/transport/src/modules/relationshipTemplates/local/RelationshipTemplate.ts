@@ -50,7 +50,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
     }
 
     public toRelationshipTemplateReference(): RelationshipTemplateReference {
-        return RelationshipTemplateReference.from({ id: this.id, key: this.secretKey });
+        return RelationshipTemplateReference.from({ id: this.id, key: this.secretKey, forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4) });
     }
 
     public truncate(): string {
