@@ -40,9 +40,14 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             return Result.fail(RuntimeErrors.relationshipTemplates.cannotCreateTokenForPeerTemplate());
         }
 
+        if (template.cache?.forIdentity && request.forIdentity !== template.cache.forIdentity.toString()) {
+            return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
+        }
+
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
-            secretKey: template.secretKey
+            secretKey: template.secretKey,
+            forIdentity: template.cache!.forIdentity
         });
 
         const defaultTokenExpiry = template.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
