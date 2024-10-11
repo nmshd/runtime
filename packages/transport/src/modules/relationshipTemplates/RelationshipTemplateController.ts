@@ -66,6 +66,7 @@ export class RelationshipTemplateController extends TransportController {
             await this.client.createRelationshipTemplate({
                 expiresAt: parameters.expiresAt.toString(),
                 maxNumberOfAllocations: parameters.maxNumberOfAllocations,
+                forIdentity: parameters.forIdentity?.address.toString(),
                 content: cipher.toBase64()
             })
         ).value;
@@ -77,6 +78,7 @@ export class RelationshipTemplateController extends TransportController {
             createdByDevice: this.parent.activeDevice.id,
             expiresAt: parameters.expiresAt,
             identity: this.parent.identity.identity,
+            forIdentity: parameters.forIdentity,
             maxNumberOfAllocations: parameters.maxNumberOfAllocations,
             templateKey: templateKey
         });
@@ -195,6 +197,7 @@ export class RelationshipTemplateController extends TransportController {
             expiresAt: response.expiresAt ? CoreDate.from(response.expiresAt) : undefined,
             identity: templateContent.identity,
             maxNumberOfAllocations: response.maxNumberOfAllocations ?? undefined,
+            forIdentity: response.forIdentity ? CoreAddress.from(response.forIdentity) : undefined,
             templateKey: templateContent.templateKey
         });
 
@@ -226,15 +229,15 @@ export class RelationshipTemplateController extends TransportController {
 
     public async loadPeerRelationshipTemplateByTruncated(truncated: string): Promise<RelationshipTemplate> {
         const reference = RelationshipTemplateReference.fromTruncated(truncated);
-        return await this.loadPeerRelationshipTemplateByReference(reference);
+        return await this.loadPeerRelationshipTemplate(reference.id, reference.key, reference.forIdentityTruncated);
     }
 
-    public async loadPeerRelationshipTemplateByReference(relationshipTemplateReference: RelationshipTemplateReference): Promise<RelationshipTemplate> {
-        return await this.loadPeerRelationshipTemplate(relationshipTemplateReference.id, relationshipTemplateReference.key);
-    }
-
-    public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey): Promise<RelationshipTemplate> {
+    public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string): Promise<RelationshipTemplate> {
         const templateDoc = await this.templates.read(id.toString());
+        if (!templateDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
+            throw TransportCoreErrors.general.notIntendedForYou(id.toString());
+        }
+
         if (templateDoc) {
             const template = await this.updateCacheOfExistingTemplateInDb(id.toString());
 

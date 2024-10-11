@@ -7,6 +7,7 @@ export interface BackboneGetRelationshipTemplatesResponse {
     createdBy: string;
     createdByDevice: string;
     maxNumberOfAllocations: number | null;
+    forIdentity: string | null;
     expiresAt: string | null;
     content: string;
     createdAt: string;
