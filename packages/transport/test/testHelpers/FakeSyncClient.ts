@@ -49,7 +49,7 @@ export class FakeSyncClient implements ISyncClient {
         throw new Error("Method not implemented.");
     }
 
-    public finalizeDatawalletVersionUpgrade(id: string, request: FinalizeDatawalletVersionUpgradeRequest): Promise<ClientResult<FinalizeDatawalletVersionUpgradeResponse>> {
+    public finalizeDatawalletVersionUpgrade(_id: string, request: FinalizeDatawalletVersionUpgradeRequest): Promise<ClientResult<FinalizeDatawalletVersionUpgradeResponse>> {
         this.finalizeDatawalletVersionUpgradeRequest = request;
 
         return Promise.resolve(

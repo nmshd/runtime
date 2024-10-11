@@ -17,7 +17,7 @@ describe("RelationshipsController", function () {
     let recipientRel: Relationship;
     let tempDate: CoreDate;
 
-    function expectValidActiveFreshRelationship(relationship: Relationship, ownAccount: AccountController, peerAccount: AccountController, creationTime: CoreDate) {
+    function expectValidActiveFreshRelationship(relationship: Relationship, _: AccountController, peerAccount: AccountController, creationTime: CoreDate) {
         expect(relationship.id).toBeInstanceOf(CoreId);
         expect(relationship.status).toStrictEqual(RelationshipStatus.Active);
         expect(relationship.peer).toBeInstanceOf(Identity);
