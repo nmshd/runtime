@@ -128,6 +128,33 @@ describe("IdentityDeletionProcess", () => {
         );
     });
 
+    test("returns error sending the Request when the peer has initiated an active IdentityDeletionProcess after the request has been created", async () => {
+        const requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            },
+            peer: services1.address
+        };
+        const result = await services2.consumption.outgoingRequests.create(requestContent);
+        expect(result).toBeSuccessful();
+
+        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
+        await services2.eventBus.waitForRunningEventHandlers();
+
+        const messageResult = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: result.value.content });
+
+        expect(messageResult).toBeAnError(
+            `The recipient with the address '${services1.address.toString()}' has an active IdentityDeletionProcess, so you cannot send them a Message.`,
+            "error.transport.messages.peerToBeDeleted"
+        );
+    });
+
     test("should not decide a request if the peer has an active IdentityDeletionProcess", async () => {
         const requestContent = {
             content: {

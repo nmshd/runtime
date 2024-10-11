@@ -75,7 +75,36 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         if (transformedContent instanceof Notification) return;
+        if (!(transformedContent instanceof Notification)) {
+            const peerDeletedAddressArray: string[] = [];
+            const peerToBeDeletedAddressArray: string[] = [];
+            const missingOrInactiveRelationshipAddressArray: string[] = [];
+            const recipientsCoreAddress = recipients.map((r) => CoreAddress.from(r));
+            for (const recipient of recipientsCoreAddress) {
+                const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(recipient);
+                if (!relationship) {
+                    missingOrInactiveRelationshipAddressArray.push(recipient.address);
+                }
+                if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
+                    peerDeletedAddressArray.push(recipient.address);
+                }
+                if (relationship?.peerDeletionInfo?.deletionStatus === "ToBeDeleted") {
+                    peerToBeDeletedAddressArray.push(recipient.address);
+                }
+            }
 
+            if (peerDeletedAddressArray.length > 0) {
+                return TransportCoreErrors.messages.peerDeleted(peerDeletedAddressArray);
+            }
+
+            if (peerToBeDeletedAddressArray.length > 0) {
+                return TransportCoreErrors.messages.peerToBeDeleted(peerToBeDeletedAddressArray);
+            }
+
+            if (missingOrInactiveRelationshipAddressArray.length > 0) {
+                return TransportCoreErrors.messages.missingOrInactiveRelationship(missingOrInactiveRelationshipAddressArray);
+            }
+        }
         if (transformedContent instanceof Request) {
             if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
@@ -91,35 +120,6 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             const recipient = CoreAddress.from(recipients[0]);
             if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
             return;
-        }
-
-        const peerDeletedAddressArray: string[] = [];
-        const peerToBeDeletedAddressArray: string[] = [];
-        const missingOrInactiveRelationshipAddressArray: string[] = [];
-        const recipientsCoreAddress = recipients.map((r) => CoreAddress.from(r));
-        for (const recipient of recipientsCoreAddress) {
-            const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(recipient);
-            if (!relationship) {
-                missingOrInactiveRelationshipAddressArray.push(recipient.address);
-            }
-            if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
-                peerDeletedAddressArray.push(recipient.address);
-            }
-            if (relationship?.peerDeletionInfo?.deletionStatus === "ToBeDeleted") {
-                peerToBeDeletedAddressArray.push(recipient.address);
-            }
-        }
-
-        if (peerDeletedAddressArray.length > 0) {
-            return TransportCoreErrors.messages.peerDeleted(peerDeletedAddressArray);
-        }
-
-        if (peerToBeDeletedAddressArray.length > 0) {
-            return TransportCoreErrors.messages.peerToBeDeleted(peerToBeDeletedAddressArray);
-        }
-
-        if (missingOrInactiveRelationshipAddressArray.length > 0) {
-            return TransportCoreErrors.messages.missingOrInactiveRelationship(missingOrInactiveRelationshipAddressArray);
         }
         return;
     }
