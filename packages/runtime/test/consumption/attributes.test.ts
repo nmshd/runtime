@@ -1867,7 +1867,7 @@ describe("Get (shared) versions of attribute", () => {
         test("should return an empty list calling getSharedVersionsOfAttribute with a nonexistent peer", async () => {
             const result = await services1.consumption.attributes.getSharedVersionsOfAttribute({
                 attributeId: sRepositoryAttributeVersion2.id,
-                peers: ["did:e:a-domain:dids:0000000000000000000000"]
+                peers: ["did:e:localhost:dids:0000000000000000000000"]
             });
             expect(result.isSuccess).toBe(true);
             const returnedVersions = result.value;
