@@ -1,4 +1,4 @@
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import {
     AttributeListenersFacade,
     AttributesFacade,

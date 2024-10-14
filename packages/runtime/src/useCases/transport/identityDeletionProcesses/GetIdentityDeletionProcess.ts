@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { IdentityDeletionProcess, IdentityDeletionProcessController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDeletionProcessDTO";
 import { IdentityDeletionProcessIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper";

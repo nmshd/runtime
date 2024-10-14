@@ -1,6 +1,6 @@
 import { AccountController } from "@nmshd/transport";
+import { Container } from "@nmshd/typescript-ioc";
 import correlator from "correlation-id";
-import { Container } from "typescript-ioc";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 import { RequestInterceptor } from "../lib/RequestInterceptor";
 

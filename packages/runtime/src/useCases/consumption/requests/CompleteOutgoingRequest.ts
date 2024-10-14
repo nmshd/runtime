@@ -3,7 +3,7 @@ import { ICompleteOutgoingRequestParameters, OutgoingRequestsController } from "
 import { Response, ResponseJSON } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { Message, MessageController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
 import { MessageIdString, RuntimeErrors, UseCase } from "../../common";
 import { RequestMapper } from "./RequestMapper";
