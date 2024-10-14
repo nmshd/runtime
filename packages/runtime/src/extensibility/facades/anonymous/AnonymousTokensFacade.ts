@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { LoadPeerTokenAnonymousRequest, LoadPeerTokenAnonymousUseCase } from "../../../useCases";
 

@@ -30,7 +30,7 @@ import {
     TokenController,
     Transport
 } from "@nmshd/transport";
-import { Container, Scope } from "typescript-ioc";
+import { Container, Scope } from "@nmshd/typescript-ioc";
 import { buildInformation } from "./buildInformation";
 import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
 import { DataViewExpander } from "./dataViews";

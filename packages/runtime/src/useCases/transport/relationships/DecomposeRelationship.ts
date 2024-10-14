@@ -2,7 +2,7 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, Relationship, RelationshipsController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DecomposeRelationshipRequest {

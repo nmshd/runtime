@@ -3,7 +3,7 @@ import { OutgoingRequestsController } from "@nmshd/consumption";
 import { Response, ResponseJSON } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { MessageController, Relationship, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
 import { MessageIdString, RelationshipIdString, RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
 import { RequestMapper } from "./RequestMapper";

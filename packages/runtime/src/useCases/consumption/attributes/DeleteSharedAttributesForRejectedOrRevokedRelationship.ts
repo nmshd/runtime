@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, Relationship, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest {

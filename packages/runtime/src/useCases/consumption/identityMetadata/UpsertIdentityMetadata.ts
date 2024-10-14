@@ -3,7 +3,7 @@ import { Result } from "@js-soft/ts-utils";
 import { IdentityMetadataController } from "@nmshd/consumption";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { IdentityMetadataDTO } from "../../../types";
 import { AddressString, SchemaRepository, SchemaValidator } from "../../common";
 import { UseCase } from "../../common/UseCase";

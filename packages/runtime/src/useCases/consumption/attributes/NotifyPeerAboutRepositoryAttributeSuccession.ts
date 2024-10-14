@@ -3,7 +3,7 @@ import { AttributesController, ConsumptionIds, IAttributeSuccessorParams, LocalA
 import { Notification, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { AccountController, MessageController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { AddressString, AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";

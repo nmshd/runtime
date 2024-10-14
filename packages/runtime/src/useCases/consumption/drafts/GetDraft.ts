@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { Draft, DraftsController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { DraftDTO } from "../../../types";
 import { LocalDraftIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { DraftMapper } from "./DraftMapper";
