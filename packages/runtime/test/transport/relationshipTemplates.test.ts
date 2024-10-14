@@ -1,3 +1,4 @@
+import { TokenContentRelationshipTemplate } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction } from "../../src";
 import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
@@ -206,6 +207,72 @@ describe("Template Tests", () => {
                 templateId: createResult.value.id
             });
             expect(createQRCodeWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
+        });
+    });
+
+    describe("Password-protected templates", () => {
+        test("send and receive a personalized template", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password"
+            });
+            expect(createResult).toBeSuccessful();
+            expect(createResult.value.password).toBe("password");
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                password: "password"
+            });
+            expect(loadResult).toBeSuccessful();
+            expect(loadResult.value.password).toBe("password");
+        });
+
+        test("error when loading a template with a wrong password", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password"
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                password: "wrong-password"
+            });
+            expect(loadResult).toBeAnError(
+                `You tried to access personalized content '${createResult.value.id}'. You are either not logged in or the content is not intended for you.`,
+                "error.transport.general.notIntendedForYou"
+            );
+        });
+
+        test("create a token for a password-protected template", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password"
+            });
+            expect(createResult).toBeSuccessful();
+            const createTokenResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId: createResult.value.id
+            });
+            expect(createTokenResult).toBeSuccessful();
+            const loadTokenResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createTokenResult.value.truncatedReference, ephemeral: true });
+            expect(loadTokenResult).toBeSuccessful();
+            expect((loadTokenResult.value.content as TokenContentRelationshipTemplate).passwordType).toBe(1);
+        });
+
+        test("create a token QR code for a password-protected template", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password"
+            });
+            expect(createResult).toBeSuccessful();
+            const createTokenResult = await runtimeServices1.transport.relationshipTemplates.createTokenQRCodeForOwnTemplate({
+                templateId: createResult.value.id
+            });
+            expect(createTokenResult).toBeSuccessful();
         });
     });
 });

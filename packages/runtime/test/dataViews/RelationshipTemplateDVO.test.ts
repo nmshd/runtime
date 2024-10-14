@@ -148,7 +148,8 @@ describe("RelationshipTemplateDVO", () => {
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
                 content: templateContent,
-                forIdentity: requestor.address
+                forIdentity: requestor.address,
+                password: "password"
             })
         ).value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         templateId = templatorTemplate.id;
@@ -168,6 +169,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.isOwn).toBe(true);
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
+        expect(dvo.password).toBe("password");
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);
@@ -203,6 +205,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.isOwn).toBe(false);
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
+        expect(dvo.password).toBe("password");
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);
