@@ -134,13 +134,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             if (!requestItem.thirdPartyAddress) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The source attribute provided is a relationship attribute. You must provide a third party address that is the original peer when sharing with a third party."
+                        "The source attribute provided is a RelationshipAttribute. You must provide a third party address that is the original peer when sharing with a third party."
                     )
                 );
             }
 
             if (!requestItem.thirdPartyAddress.equals(foundAttribute.shareInfo.peer)) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The third party address must be the peer of the relationship attribute."));
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The third party address must be the peer of the RelationshipAttribute."));
             }
         }
 
