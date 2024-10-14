@@ -53,8 +53,8 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { IdentityController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
-import { Inject } from "typescript-ioc";
 import {
     AuthenticationRequestItemDVO,
     ConsentRequestItemDVO,

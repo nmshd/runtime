@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController } from "@nmshd/consumption";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { RequestValidationResultDTO } from "../../../types";
 import { UseCase } from "../../common";
 import { AcceptIncomingRequestRequest } from "./AcceptIncomingRequest";

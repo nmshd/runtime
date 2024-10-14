@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
 import { ChallengeController, ChallengeType, Relationship, RelationshipsController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { ChallengeDTO } from "../../../types";
 import { JsonSchema, RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { ChallengeMapper } from "./ChallengeMapper";

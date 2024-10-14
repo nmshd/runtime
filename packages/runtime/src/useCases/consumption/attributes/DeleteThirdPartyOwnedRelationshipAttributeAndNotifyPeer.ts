@@ -3,7 +3,7 @@ import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/con
 import { Notification, ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, MessageController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest {

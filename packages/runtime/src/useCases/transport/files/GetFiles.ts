@@ -1,8 +1,8 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { CachedFile, File, FileController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { Inject } from "typescript-ioc";
 import { FileDTO } from "../../../types";
 import { OwnerRestriction, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { FileMapper } from "./FileMapper";
