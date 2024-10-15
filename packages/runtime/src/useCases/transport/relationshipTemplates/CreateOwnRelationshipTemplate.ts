@@ -44,7 +44,7 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
             validationResult.addFailure(
                 new ValidationFailure(
                     RuntimeErrors.general.invalidPropertyValue(
-                        `'${nameof<CreateOwnRelationshipTemplateRequest>((r) => r.password)}' is a PIN (consists of numbers only) and PINs must be at least 2 and at most 12 digits long`
+                        `Your chosen '${nameof<CreateOwnRelationshipTemplateRequest>((r) => r.password)}' is a PIN (consists of numbers only) and PINs must be at least 2 and at most 12 digits long`
                     ),
                     nameof<CreateOwnRelationshipTemplateRequest>((r) => r.password)
                 )

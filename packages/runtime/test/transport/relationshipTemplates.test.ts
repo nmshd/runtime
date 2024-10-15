@@ -243,6 +243,18 @@ describe("Template Tests", () => {
             expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
         });
 
+        test.only("validation error when creating a template with a too short PIN", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "1"
+            });
+            expect(createResult).toBeAnError(
+                "Your chosen 'password' is a PIN \\(consists of numbers only\\) and PINs must be at least 2 and at most 12 digits long",
+                "error.runtime.validation.invalidPropertyValue"
+            );
+        });
+
         test("create a token for a password-protected template", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
