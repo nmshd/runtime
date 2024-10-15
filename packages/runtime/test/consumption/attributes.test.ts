@@ -2377,7 +2377,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
         expect(services3AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services2.address);
     });
 
-    test("Should share an third party attribute that was shared with the sharing identity", async () => {
+    test("should share an ThirdPartyRelationshipAttribute that was shared with the sharing identity", async () => {
         const localThirdPartyAttribute = await executeFullShareAndAcceptAttributeRequestFlow(
             services2,
             services3,
@@ -2396,7 +2396,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
         expect(services3AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services1.address);
     });
 
-    test("Should request a third party attribute from the initial owner", async () => {
+    test("should request a ThirdPartyRelationshipAttribute from the initial owner", async () => {
         const localThirdPartyAttribute = await executeFullRequestAndAcceptExistingAttributeFlow(
             services1,
             services3,
@@ -2424,7 +2424,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
         expect(services3AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services2.address);
     });
 
-    test("Should request a third party attribute from the initial peer", async () => {
+    test("should request a ThirdPartyRelationshipAttribute from the initial peer", async () => {
         const localThirdPartyAttribute = await executeFullRequestAndAcceptExistingAttributeFlow(
             services2,
             services3,

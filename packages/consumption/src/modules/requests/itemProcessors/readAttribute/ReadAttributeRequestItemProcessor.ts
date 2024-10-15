@@ -228,6 +228,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     requestReference: CoreId.from(requestInfo.id),
                     thirdPartyAddress: existingSourceAttribute.shareInfo?.peer ? CoreAddress.from(existingSourceAttribute.shareInfo.peer) : undefined
                 });
+                debugger;
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: sharedLocalAttribute.id,
