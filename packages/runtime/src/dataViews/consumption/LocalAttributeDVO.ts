@@ -46,7 +46,6 @@ export interface SharedToPeerAttributeDVO extends LocalAttributeDVO {
     requestReference?: string;
     notificationReference?: string;
     sourceAttribute?: string;
-    thirdPartyAddress?: string;
     isOwn: true;
     tags?: string[];
     deletionDate?: string;

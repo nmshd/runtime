@@ -805,6 +805,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 shareInfo: {
                     peer: recipient,
                     requestReference: await ConsumptionIds.request.generate(),
+                    thirdPartyAddress: aThirdParty,
                     sourceAttribute: initialRelationshipAttribute.id
                 }
             });
@@ -812,7 +813,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id
+                sourceAttributeId: initialRelationshipAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -851,6 +853,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 shareInfo: {
                     peer: recipient,
                     requestReference: await ConsumptionIds.request.generate(),
+                    thirdPartyAddress: aThirdParty,
                     sourceAttribute: initialRelationshipAttribute.id
                 },
                 deletionInfo: {
@@ -899,7 +902,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 shareInfo: {
                     peer: recipient,
                     requestReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: initialRelationshipAttribute.id
+                    sourceAttribute: initialRelationshipAttribute.id,
+                    thirdPartyAddress: aThirdParty
                 },
                 deletionInfo: {
                     deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,

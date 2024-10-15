@@ -701,13 +701,13 @@ export async function waitForRecipientToReceiveNotification(
 }
 
 /**
- * The owner of a RelationshipAttribute receives a Request of a
- * peer and forwards them the RelationshipAttribute,
+ * The owner of a Attribute receives a Request of a
+ * peer and forwards them a Attribute,
  * waiting for all communication and event processing to finish.
  *
- * Returns the sender's own shared RelationshipAttribute.
+ * Returns the sender's own shared Attribute.
  */
-export async function executeFullRequestExistingAttributeFlow(
+export async function executeFullRequestAndAcceptExistingAttributeFlow(
     owner: TestRuntimeServices,
     peer: TestRuntimeServices,
     request: CreateOutgoingRequestRequest,
@@ -731,8 +731,8 @@ export async function executeFullRequestExistingAttributeFlow(
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });
 
-    const ownSharedRelationshipAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-    return ownSharedRelationshipAttribute;
+    const ownSharedAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    return ownSharedAttribute;
 }
 
 export async function executeFullShareAndAcceptAttributeRequestFlow(
@@ -761,8 +761,8 @@ export async function executeFullShareAndAcceptAttributeRequestFlow(
         content: createRequestResult.value.content
     });
 
-    const result = await acceptIncomingShareAttributeRequest(owner, peer, createRequestResult.value.id);
-    return result;
+    const ownSharedAttribute = await acceptIncomingShareAttributeRequest(owner, peer, createRequestResult.value.id);
+    return ownSharedAttribute;
 }
 
 /**

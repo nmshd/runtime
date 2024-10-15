@@ -1192,7 +1192,6 @@ export class DataViewExpander {
                 requestReference: localAttribute.shareInfo.requestReference?.toString(),
                 notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
                 sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
-                thirdPartyAddress: localAttribute.shareInfo.thirdPartyAddress?.toString(),
                 tags: identityAttribute.tags,
                 valueType,
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
