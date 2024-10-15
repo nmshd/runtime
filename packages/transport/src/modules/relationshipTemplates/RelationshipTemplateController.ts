@@ -133,7 +133,7 @@ export class RelationshipTemplateController extends TransportController {
 
     private async readTemplates(ids: string[]): Promise<RelationshipTemplate[]> {
         const templatePromises = ids.map(async (id) => {
-            const templateDoc = await this.templates.read(id.toString());
+            const templateDoc = await this.templates.read(id);
             if (!templateDoc) {
                 this._log.error(
                     `Template '${id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
