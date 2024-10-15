@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { IdentityMetadata, IdentityMetadataController } from "@nmshd/consumption";
 import { CoreAddress } from "@nmshd/core-types";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { IdentityMetadataDTO } from "../../../types";
 import { AddressString, RuntimeErrors, SchemaRepository, SchemaValidator } from "../../common";
 import { UseCase } from "../../common/UseCase";

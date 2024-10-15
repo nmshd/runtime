@@ -3,7 +3,7 @@ import { CreateOutgoingRequestParameters, OutgoingRequestsController } from "@nm
 import { AttributeValues, CreateAttributeRequestItem, RelationshipAttribute, RelationshipAttributeConfidentiality, Request } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController, MessageController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
 import { AddressString, ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RequestMapper } from "../requests";

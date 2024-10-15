@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributeListenersController } from "@nmshd/consumption";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeListenerDTO } from "../../../types";
 import { UseCase } from "../../common";
 import { AttributeListenerMapper } from "./AttributeListenerMapper";

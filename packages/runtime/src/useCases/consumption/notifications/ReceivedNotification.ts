@@ -3,7 +3,7 @@ import { NotificationsController } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { Message, MessageController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalNotificationDTO } from "../../../types";
 import { MessageIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { NotificationMapper } from "./NotificationMapper";

@@ -9,7 +9,7 @@ import {
     TokenContentRelationshipTemplate,
     TokenController
 } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { DeviceOnboardingInfoDTO, FileDTO, RelationshipTemplateDTO, TokenDTO } from "../../../types";
 import {
     Base64ForIdPrefix,
