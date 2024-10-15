@@ -239,13 +239,13 @@ describe("OutgoingRequestsController", function () {
             });
 
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.peerInDeletion",
+                code: "error.consumption.requests.peerHasDeletionInfo",
                 message: "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer is in status 'Deleted'."
             });
         });
     });
 
-    test("returns a validation result that contains an error for requests to a peer which is deleted", async function () {
+    test("returns a validation result that contains an error for requests to a peer which is toBeDeleted", async function () {
         await Given.aRelationshipToBeDeletedPeer();
         const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
             content: {
@@ -259,7 +259,7 @@ describe("OutgoingRequestsController", function () {
         });
 
         expect(validationResult).errorValidationResult({
-            code: "error.consumption.requests.peerInDeletion",
+            code: "error.consumption.requests.peerHasDeletionInfo",
             message: "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer is in status 'ToBeDeleted'."
         });
     });

@@ -179,7 +179,7 @@ export class RequestsGiven {
     }
 
     public aRelationshipToBeDeletedPeer(): Promise<void> {
-        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationshipToBeDeletedPeer();
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationshipToPeerInDeletion();
 
         return Promise.resolve();
     }

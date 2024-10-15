@@ -124,7 +124,7 @@ describe("IdentityDeletionProcess", () => {
         const result = await services2.consumption.outgoingRequests.create(requestContent);
         expect(result).toBeAnError(
             `You cannot create a Request to '${services1.address.toString()}' since the peer is in status 'ToBeDeleted'.`,
-            "error.consumption.requests.peerInDeletion"
+            "error.consumption.requests.peerHasDeletionInfo"
         );
     });
 
@@ -181,7 +181,7 @@ describe("IdentityDeletionProcess", () => {
 
         const canAcceptResultAfterPeerDeletion = (await services2.consumption.incomingRequests.canAccept({ requestId: requestIds, items: [{ accept: true }] })).value;
         expect(canAcceptResultAfterPeerDeletion.isSuccess).toBe(false);
-        expect(canAcceptResultAfterPeerDeletion.code).toBe("error.consumption.requests.peerInDeletion");
+        expect(canAcceptResultAfterPeerDeletion.code).toBe("error.consumption.requests.peerHasDeletionInfo");
         expect(canAcceptResultAfterPeerDeletion.message).toContain(`You cannot decide a Request from '${services1.address.toString()}' since the peer is in status 'ToBeDeleted'`);
     });
 });

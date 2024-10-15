@@ -289,16 +289,13 @@ export class MessageController extends TransportController {
         const parsedParams = SendMessageParameters.from(parameters);
 
         if (!parsedParams.attachments) parsedParams.attachments = [];
-        /*
-        if (parameters.content.constructor.name === "Notification")
-        {
-*/
+
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
-        const peerDeletedAddressArray: string[] = [];
-        const missingOrInactiveRelationshipAddressArray: string[] = [];
+        const deletedPeers: string[] = [];
+        const peersWithMissingOrInactiveRelationship: string[] = [];
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getRelationshipToIdentity(recipient);
             if (
@@ -316,19 +313,19 @@ export class MessageController extends TransportController {
                 addressArray.push(recipient);
             }
             if (!(relationship && (relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active))) {
-                missingOrInactiveRelationshipAddressArray.push(recipient.address);
+                peersWithMissingOrInactiveRelationship.push(recipient.address);
             }
             if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
-                peerDeletedAddressArray.push(recipient.address);
+                deletedPeers.push(recipient.address);
             }
         }
 
-        if (peerDeletedAddressArray.length > 0) {
-            throw TransportCoreErrors.messages.peerDeleted(peerDeletedAddressArray);
+        if (deletedPeers.length > 0) {
+            throw TransportCoreErrors.messages.peerDeleted(deletedPeers);
         }
 
-        if (missingOrInactiveRelationshipAddressArray.length > 0) {
-            throw TransportCoreErrors.messages.missingOrInactiveRelationship(missingOrInactiveRelationshipAddressArray);
+        if (peersWithMissingOrInactiveRelationship.length > 0) {
+            throw TransportCoreErrors.messages.missingOrInactiveRelationship(peersWithMissingOrInactiveRelationship);
         }
 
         const publicAttachmentArray: CoreId[] = [];

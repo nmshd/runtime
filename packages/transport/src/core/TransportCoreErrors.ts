@@ -86,6 +86,12 @@ class Messages {
                 `An active Relationship with the given addresses '${address}' do not exist, so you cannot send them a Message.`
             );
         }
+        if (typeof address === "string") {
+            return new CoreError(
+                "error.transport.messages.missingOrInactiveRelationship",
+                `An active Relationship with the given address '${address}' does not exist, so you cannot send them a Message.`
+            );
+        }
         return new CoreError(
             "error.transport.messages.missingOrInactiveRelationship",
             `An active Relationship with the given address '${address[0]}' does not exist, so you cannot send them a Message.`
@@ -99,7 +105,7 @@ class Messages {
                 `The recipients with the following addresses '${address}' are deleted, so you cannot send them a Message.`
             );
         }
-        return new CoreError("error.transport.messages.peerInDeletion", `The recipient with the address '${address[0]}' is deleted, so you cannot send them a Message.`);
+        return new CoreError("error.transport.messages.peerDeleted", `The recipient with the address '${address[0]}' is deleted, so you cannot send them a Message.`);
     }
 
     public peerToBeDeleted(address: string[]) {
