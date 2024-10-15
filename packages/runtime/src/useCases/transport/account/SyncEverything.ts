@@ -1,7 +1,7 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { Result } from "@js-soft/ts-utils";
 import { AccountController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { RuntimeLoggerFactory } from "../../../RuntimeLoggerFactory";
 import { IdentityDeletionProcessDTO, MessageDTO, RelationshipDTO } from "../../../types";
 import { UseCase } from "../../common";

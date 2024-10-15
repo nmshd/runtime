@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { AccountController, FileController, Token, TokenContentFile, TokenController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { FileDTO } from "../../../types";
 import { Base64ForIdPrefix, FileReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
 import { FileMapper } from "./FileMapper";

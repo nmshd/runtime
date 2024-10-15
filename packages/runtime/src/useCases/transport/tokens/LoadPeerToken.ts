@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AccountController, TokenController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
 import { TokenMapper } from "./TokenMapper";

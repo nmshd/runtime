@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalRequestDTO, RequestValidationResultDTO } from "../../../types";
 import {
     AcceptIncomingRequestRequest,

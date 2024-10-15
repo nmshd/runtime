@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
 import { TokenController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common";
 import { TokenMapper } from "./TokenMapper";

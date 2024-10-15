@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AccountController, RelationshipTemplateController, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
 import { Base64ForIdPrefix, RelationshipTemplateReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";

@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { NotificationsController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalNotificationDTO } from "../../../types";
 import { NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { NotificationMapper } from "./NotificationMapper";

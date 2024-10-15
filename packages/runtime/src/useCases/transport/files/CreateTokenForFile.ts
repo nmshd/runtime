@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, File, FileController, TokenContentFile, TokenController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { AddressString, FileIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
