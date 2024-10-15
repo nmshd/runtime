@@ -1,6 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreBuffer, CryptoEncryptionAlgorithm, CryptoSecretKey } from "@nmshd/crypto";
 import { AccountController, RelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
@@ -172,7 +171,7 @@ describe("RelationshipTemplateController", function () {
                 expiresAt: CoreDate.utc().add({ minutes: 1 }),
                 password: "1234567890123"
             })
-        ).rejects.toThrow("error.platform.recordNotFound");
+        ).rejects.toThrow("SendRelationshipTemplateParameters.password:String :: PINs must be at least 2 and at most 12 digits long");
     });
 
     test("should throw an error if loaded with a wrong or missing password", async function () {
@@ -185,48 +184,54 @@ describe("RelationshipTemplateController", function () {
 
         await expect(
             recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate(), "wrongPassword")
-        ).rejects.toThrow("error.platform.recordNotFound");
+        ).rejects.toThrow("error.platform.inputCannotBeParsed");
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
             "error.platform.recordNotFound"
         );
     });
 
+    test("should fetch multiple password-protected templates", async function () {
+        const ownTemplate1 = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            password: "password"
+        });
+        const ownTemplate2 = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            password: "password"
+        });
+
+        await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate1.toRelationshipTemplateReference().truncate(), "password");
+        await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate2.toRelationshipTemplateReference().truncate(), "password");
+        const fetchCachesResult = await recipient.relationshipTemplates.fetchCaches([ownTemplate1.id, ownTemplate2.id]);
+        expect(fetchCachesResult).toHaveLength(2);
+    });
+
     describe("should correctly compute the password type", function () {
-        test("should get password type undefined if no password is given", function () {
-            const template = RelationshipTemplate.from({
-                id: CoreId.from("an-id"),
-                secretKey: CryptoSecretKey.from({
-                    secretKey: CoreBuffer.from("ERt3WazEKVtoyjBoBx2JJu1tkkC4QIW3gi9uM00nI3o"),
-                    algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
-                }),
-                isOwn: true
+        test("should get password type undefined if no password is given", async function () {
+            const template = await sender.relationshipTemplates.sendRelationshipTemplate({
+                content: { a: "A" },
+                expiresAt: CoreDate.utc().add({ minutes: 1 })
             });
             const reference = template.toRelationshipTemplateReference();
             expect(reference.passwordType).toBeUndefined();
         });
 
-        test("should get password type 1 if a text password is given", function () {
-            const template = RelationshipTemplate.from({
-                id: CoreId.from("an-id"),
-                secretKey: CryptoSecretKey.from({
-                    secretKey: CoreBuffer.from("ERt3WazEKVtoyjBoBx2JJu1tkkC4QIW3gi9uM00nI3o"),
-                    algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
-                }),
-                isOwn: true,
+        test("should get password type 1 if a text password is given", async function () {
+            const template = await sender.relationshipTemplates.sendRelationshipTemplate({
+                content: { a: "A" },
+                expiresAt: CoreDate.utc().add({ minutes: 1 }),
                 password: "password"
             });
             const reference = template.toRelationshipTemplateReference();
             expect(reference.passwordType).toBe(1);
         });
 
-        test("should get the PIN length if a PIN is given", function () {
-            const template = RelationshipTemplate.from({
-                id: CoreId.from("an-id"),
-                secretKey: CryptoSecretKey.from({
-                    secretKey: CoreBuffer.from("ERt3WazEKVtoyjBoBx2JJu1tkkC4QIW3gi9uM00nI3o"),
-                    algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
-                }),
-                isOwn: true,
+        test("should get the PIN length if a PIN is given", async function () {
+            const template = await sender.relationshipTemplates.sendRelationshipTemplate({
+                content: { a: "A" },
+                expiresAt: CoreDate.utc().add({ minutes: 1 }),
                 password: "1234"
             });
             const reference = template.toRelationshipTemplateReference();

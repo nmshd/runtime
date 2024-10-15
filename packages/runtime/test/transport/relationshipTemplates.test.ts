@@ -211,7 +211,7 @@ describe("Template Tests", () => {
     });
 
     describe("Password-protected templates", () => {
-        test("send and receive a personalized template", async () => {
+        test("send and receive a password-protected template", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
@@ -240,10 +240,7 @@ describe("Template Tests", () => {
                 reference: createResult.value.truncatedReference,
                 password: "wrong-password"
             });
-            expect(loadResult).toBeAnError(
-                `You tried to access personalized content '${createResult.value.id}'. You are either not logged in or the content is not intended for you.`,
-                "error.transport.general.notIntendedForYou"
-            );
+            expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
         });
 
         test("create a token for a password-protected template", async () => {

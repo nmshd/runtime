@@ -31,8 +31,8 @@ export class SendRelationshipTemplateParameters extends Serializable implements 
     @validate({
         nullable: true,
         customValidator: (input) => {
-            if (input.password && /^\d+$/.test(input.password) && !(input.password.length <= 12) && !(input.password.length >= 2)) {
-                return "PINs must be between 2 and 12 digits long";
+            if (/^\d+$/.test(input) && (input.length > 12 || input.length < 2)) {
+                return "PINs must be at least 2 and at most 12 digits long";
             }
             return undefined;
         }

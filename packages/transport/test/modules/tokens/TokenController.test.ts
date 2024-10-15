@@ -251,8 +251,8 @@ describe("TokenController", function () {
     test("should get the cached tokens", async function () {
         const sentTokens = await sender.tokens.getTokens();
         const receivedTokens = await recipient.tokens.getTokens();
-        expect(sentTokens).toHaveLength(4);
-        expect(receivedTokens).toHaveLength(4);
+        expect(sentTokens).toHaveLength(6);
+        expect(receivedTokens).toHaveLength(6);
         expect(sentTokens[0].id.toString()).toBe(tempId1.toString());
         expect(sentTokens[1].id.toString()).toBe(tempId2.toString());
         testTokens(sentTokens[0], receivedTokens[0], tempDate);

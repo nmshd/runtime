@@ -30,7 +30,7 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
     }
 
     protected async executeInternal(request: LoadPeerRelationshipTemplateRequest): Promise<Result<RelationshipTemplateDTO>> {
-        const result = await this.loadRelationshipTemplateFromReference(request.reference);
+        const result = await this.loadRelationshipTemplateFromReference(request.reference, request.password);
 
         await this.accountController.syncDatawallet();
 

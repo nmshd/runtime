@@ -40,7 +40,7 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
             );
         }
 
-        if (input.password && /^\d+$/.test(input.password) && !(input.password.length <= 12) && !(input.password.length >= 2)) {
+        if (input.password && /^\d+$/.test(input.password) && (input.password.length > 12 || input.password.length < 2)) {
             validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPIN()));
         }
 

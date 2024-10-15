@@ -118,7 +118,7 @@ export class RelationshipTemplateController extends TransportController {
 
         const resultItems = (
             await this.client.getRelationshipTemplates({
-                ids,
+                // ids: templates.map((t) => t.id.toString()),
                 templates: templates
                     .filter((t) => t.password)
                     .map((t) => {
@@ -156,7 +156,7 @@ export class RelationshipTemplateController extends TransportController {
 
         const backboneRelationships = await (
             await this.client.getRelationshipTemplates({
-                ids: ids.map((id) => id.id),
+                // ids: templates.map((t) => t.id.toString()),
                 templates: templates
                     .filter((t) => t.password)
                     .map((t) => {

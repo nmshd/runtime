@@ -6,7 +6,10 @@ import { BackbonePostRelationshipTemplatesRequest, BackbonePostRelationshipTempl
 
 export class RelationshipTemplateClient extends RESTClientAuthenticate {
     public async getRelationshipTemplates(request: BackboneGetRelationshipTemplatesRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipTemplatesResponse>>> {
-        return await this.getPaged<BackboneGetRelationshipTemplatesResponse>("/api/v1/RelationshipTemplates", request);
+        return await this.getPaged<BackboneGetRelationshipTemplatesResponse>("/api/v1/RelationshipTemplates", {
+            ...request,
+            templates: request.templates ? JSON.stringify(request.templates) : undefined
+        });
     }
 
     public async getRelationshipTemplate(id: string, password?: string): Promise<ClientResult<BackboneGetRelationshipTemplatesResponse>> {
