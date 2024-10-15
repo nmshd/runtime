@@ -2377,7 +2377,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
         expect(services3AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services2.address);
     });
 
-    test("should share an ThirdPartyRelationshipAttribute that was shared with the sharing identity", async () => {
+    test("should share a ThirdPartyRelationshipAttribute that was shared with the sharing identity", async () => {
         const localThirdPartyAttribute = await executeFullShareAndAcceptAttributeRequestFlow(
             services2,
             services3,

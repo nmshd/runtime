@@ -1620,7 +1620,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.deletionInfo).toBeUndefined();
         });
 
-        test.only("accept with existing own shared RelationshipAttribute that exists in the context of a Relationship with a third party whose predecessor was already shared", async function () {
+        test("accept with existing own shared RelationshipAttribute that exists in the context of a Relationship with a third party whose predecessor was already shared", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const sender = CoreAddress.from("Sender");
 
