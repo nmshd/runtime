@@ -243,7 +243,7 @@ describe("Template Tests", () => {
             expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
         });
 
-        test.only("validation error when creating a template with a too short PIN", async () => {
+        test("validation error when creating a template with a too short PIN", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
