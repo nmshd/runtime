@@ -18,7 +18,7 @@ export class FakeNativeBootstrapper implements INativeBootstrapper {
 
     public async init(): Promise<Result<void>> {
         const loggerFactory = new WebLoggerFactory();
-        const nativeLogger = loggerFactory.getLogger("NativeMocks");
+        const nativeLogger = loggerFactory.getLogger("FakeNatives");
 
         this._nativeEnvironment = {
             configAccess: new FakeNativeConfigAccess(),
