@@ -1,8 +1,8 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { Result } from "@js-soft/ts-utils";
-import { INativeNotificationAccess, INativeNotificationScheduleOptions } from "../../src";
+import { INativeNotificationAccess, INativeNotificationScheduleOptions } from "../../../src";
 
-export class NativeNotificationAccessMock implements INativeNotificationAccess {
+export class FakeNativeNotificationAccess implements INativeNotificationAccess {
     public constructor(private readonly logger: ILogger) {}
 
     public schedule(title: string, body: string, options?: INativeNotificationScheduleOptions): Promise<Result<number>> {
