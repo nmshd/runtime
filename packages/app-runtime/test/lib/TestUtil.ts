@@ -17,14 +17,14 @@ import {
 import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
-import { NativeBootstrapperMock } from "../mocks/NativeBootstrapperMock";
 import { FakeUIBridge } from "./FakeUIBridge";
+import { FakeNativeBootstrapper } from "./natives/FakeNativeBootstrapper";
 
 export class TestUtil {
     public static async createRuntime(configOverride?: any): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapperMock = new NativeBootstrapperMock();
+        const nativeBootstrapperMock = new FakeNativeBootstrapper();
         await nativeBootstrapperMock.init();
         const runtime = await AppRuntime.create(nativeBootstrapperMock, config);
         runtime.registerUIBridge(new FakeUIBridge());
@@ -35,7 +35,7 @@ export class TestUtil {
     public static async createRuntimeWithoutInit(configOverride?: any): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapperMock = new NativeBootstrapperMock();
+        const nativeBootstrapperMock = new FakeNativeBootstrapper();
         await nativeBootstrapperMock.init();
         const runtime = new AppRuntime(nativeBootstrapperMock.nativeEnvironment, config);
 
