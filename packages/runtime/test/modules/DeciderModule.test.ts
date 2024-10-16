@@ -248,7 +248,7 @@ describe("DeciderModule", () => {
                 [shareAttributeRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
                 [shareAttributeRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false]
             ])("%p and %p should return %p as validation result", (requestConfig, responseConfig, expectedCompatibility) => {
-                const result = deciderModule.validateAutomationConfig(requestConfig, responseConfig);
+                const result = deciderModule["validateAutomationConfig"](requestConfig, responseConfig);
                 expect(result).toBe(expectedCompatibility);
             });
         });

@@ -50,7 +50,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         }
     }
 
-    public validateAutomationConfig(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
+    private validateAutomationConfig(requestConfig: RequestConfig, responseConfig: ResponseConfig): boolean {
         if (isRejectResponseConfig(responseConfig)) return true;
 
         if (isGeneralRequestConfig(requestConfig)) return isSimpleAcceptResponseConfig(responseConfig);
