@@ -701,37 +701,37 @@ export async function waitForRecipientToReceiveNotification(
 }
 
 /**
- * The owner of a Attribute receives a Request of a
- * peer and forwards them a Attribute,
+ * The requestor asks the responder for a RepositoryAttribute or a RelationshipAttribute from another Relationship.
+ * The responder sends them an own shared IdentityAttribute or ThirdPartyRelationshipAttribute,
  * waiting for all communication and event processing to finish.
  *
- * Returns the sender's own shared Attribute.
+ * Returns the responder's own shared Attribute.
  */
 export async function executeFullRequestAndAcceptExistingAttributeFlow(
-    owner: TestRuntimeServices,
-    peer: TestRuntimeServices,
+    responder: TestRuntimeServices,
+    requestor: TestRuntimeServices,
     request: CreateOutgoingRequestRequest,
     attributeId: string
 ): Promise<LocalAttributeDTO> {
-    const localRequest = (await peer.consumption.outgoingRequests.create(request)).value;
-    await peer.transport.messages.sendMessage({ recipients: [owner.address], content: localRequest.content });
+    const localRequest = (await requestor.consumption.outgoingRequests.create(request)).value;
+    await requestor.transport.messages.sendMessage({ recipients: [responder.address], content: localRequest.content });
 
-    await syncUntilHasMessageWithRequest(owner.transport, localRequest.id);
-    await owner.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
+    await syncUntilHasMessageWithRequest(responder.transport, localRequest.id);
+    await responder.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
     });
-    await owner.consumption.incomingRequests.accept({
+    await responder.consumption.incomingRequests.accept({
         requestId: localRequest.id,
         items: [{ accept: true, existingAttributeId: attributeId } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON]
     });
 
-    const responseMessage = await syncUntilHasMessageWithResponse(peer.transport, localRequest.id);
+    const responseMessage = await syncUntilHasMessageWithResponse(requestor.transport, localRequest.id);
     const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
-    await peer.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
+    await requestor.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });
 
-    const ownSharedAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    const ownSharedAttribute = (await responder.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
     return ownSharedAttribute;
 }
 
