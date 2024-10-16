@@ -179,6 +179,7 @@ export class TestUtil {
             baseUrl: globalThis.process.env.NMSHD_TEST_BASEURL!,
             platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
+            addressGenerationHostnameOverride: globalThis.process.env.NMSHD_TEST_ADDRESS_GENERATION_HOSTNAME_OVERRIDE,
             debug: true,
             supportedIdentityVersion: 1
         };
