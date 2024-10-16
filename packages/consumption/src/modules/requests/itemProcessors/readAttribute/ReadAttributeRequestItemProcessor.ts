@@ -307,12 +307,15 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
     }
 
     private async performOwnSharedThirdPartyRelationshipAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
+        const predecessor = await this.consumptionController.attributes.getLocalAttribute(sharedPredecessorId);
+
         const successorParams = {
             content: sourceSuccessor.content,
             shareInfo: LocalAttributeShareInfo.from({
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id,
-                sourceAttribute: sourceSuccessor.id
+                sourceAttribute: sourceSuccessor.id,
+                thirdPartyAddress: predecessor?.shareInfo?.thirdPartyAddress
             })
         };
         const { successor } = await this.consumptionController.attributes.succeedOwnSharedRelationshipAttribute(sharedPredecessorId, successorParams);
@@ -320,12 +323,15 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
     }
 
     private async performThirdPartyOwnedRelationshipAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
+        const predecessor = await this.consumptionController.attributes.getLocalAttribute(sharedPredecessorId);
+
         const successorParams = {
             content: sourceSuccessor.content,
             shareInfo: LocalAttributeShareInfo.from({
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id,
-                sourceAttribute: sourceSuccessor.id
+                sourceAttribute: sourceSuccessor.id,
+                thirdPartyAddress: predecessor?.shareInfo?.thirdPartyAddress
             })
         };
         const { successor } = await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(sharedPredecessorId, successorParams);
@@ -380,7 +386,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (responseItem.successorContent instanceof IdentityAttribute) {
                 const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
                 return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
-            } else if (responseItem.successorContent.owner === requestInfo.peer) {
+            }
+            const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
+
+            if (successorParams.shareInfo) {
+                successorParams.shareInfo.thirdPartyAddress = predecessor?.shareInfo?.thirdPartyAddress;
+            }
+            if (responseItem.successorContent.owner === requestInfo.peer) {
                 await this.consumptionController.attributes.succeedPeerSharedRelationshipAttribute(responseItem.predecessorId, successorParams);
             } else {
                 await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(responseItem.predecessorId, successorParams);

@@ -2392,7 +2392,8 @@ describe("AttributesController", function () {
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
                         requestReference: CoreId.from("reqRefA"),
-                        sourceAttribute: CoreId.from("ATT0")
+                        sourceAttribute: CoreId.from("ATT0"),
+                        thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
                     }
                 });
                 const successorParams: IAttributeSuccessorParams = {
@@ -2409,7 +2410,8 @@ describe("AttributesController", function () {
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
                         requestReference: CoreId.from("reqRefB"),
-                        sourceAttribute: CoreId.from("ATT1")
+                        sourceAttribute: CoreId.from("ATT1"),
+                        thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
                     }
                 };
 

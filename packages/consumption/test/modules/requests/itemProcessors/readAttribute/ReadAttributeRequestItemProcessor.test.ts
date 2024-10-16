@@ -859,7 +859,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     shareInfo: {
                         peer: aThirdParty,
                         requestReference: await ConsumptionIds.request.generate(),
-                        sourceAttribute: CoreId.from("sourceAttributeId")
+                        sourceAttribute: CoreId.from("sourceAttributeId"),
+                        thirdPartyAddress: CoreAddress.from("aThirdParty")
                     }
                 });
 
@@ -1735,6 +1736,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(successorOwnSharedRelationshipAttribute!.shareInfo).toBeDefined();
             expect(successorOwnSharedRelationshipAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             expect(successorOwnSharedRelationshipAttribute?.shareInfo!.sourceAttribute).toStrictEqual(successorSourceAttribute.id);
+            expect(successorOwnSharedRelationshipAttribute?.shareInfo?.thirdPartyAddress).toStrictEqual(thirdPartyAddress);
             expect(successorOwnSharedRelationshipAttribute!.succeeds).toStrictEqual(predecessorOwnSharedRelationshipAttribute.id);
 
             const updatedPredecessorOwnSharedRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedRelationshipAttribute.id);
@@ -1812,6 +1814,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(successorOwnSharedRelationshipAttribute!.shareInfo).toBeDefined();
             expect(successorOwnSharedRelationshipAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             expect(successorOwnSharedRelationshipAttribute?.shareInfo!.sourceAttribute).toStrictEqual(successorSourceAttribute.id);
+            expect(successorOwnSharedRelationshipAttribute?.shareInfo!.thirdPartyAddress).toStrictEqual(thirdPartyAddress);
             expect(successorOwnSharedRelationshipAttribute!.succeeds).toStrictEqual(predecessorOwnSharedRelationshipAttribute.id);
 
             const updatedPredecessorOwnSharedRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedRelationshipAttribute.id);
@@ -1922,7 +1925,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: thirdPartyAddress
                 }),
                 peer: recipient,
-                requestReference: CoreId.from("oldReqRef")
+                requestReference: CoreId.from("oldReqRef"),
+                thirdPartyAddress: thirdPartyAddress
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -1965,6 +1969,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(successorPeerSharedRelationshipAttribute!.shareInfo).toBeDefined();
             expect(successorPeerSharedRelationshipAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             expect(successorPeerSharedRelationshipAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+            expect(successorPeerSharedRelationshipAttribute!.shareInfo!.thirdPartyAddress).toStrictEqual(thirdPartyAddress);
             expect(successorPeerSharedRelationshipAttribute!.succeeds).toStrictEqual(predecessorPeerSharedRelationshipAttribute.id);
 
             const updatedPredecessorPeerSharedRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(predecessorPeerSharedRelationshipAttribute.id);
