@@ -1,4 +1,3 @@
-import { Result } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
@@ -81,8 +80,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return await this.requireManualDecision(event);
         }
 
-        const automationResult = await this.automaticallyDecideRequest(event);
-        if (automationResult.isSuccess) {
+        const automaticallyDecided = (await this.automaticallyDecideRequest(event)).wasDecided;
+        if (automaticallyDecided) {
             const services = await this.runtime.getServices(event.eventTargetAddress);
             await this.publishEvent(event, services, "RequestAutomaticallyDecided");
             return;
@@ -91,8 +90,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return await this.requireManualDecision(event);
     }
 
-    private async automaticallyDecideRequest(event: IncomingRequestStatusChangedEvent): Promise<Result<LocalRequestDTO>> {
-        if (!this.configuration.automationConfig) return Result.fail(RuntimeErrors.deciderModule.doesNotHaveAutomationConfig());
+    private async automaticallyDecideRequest(event: IncomingRequestStatusChangedEvent): Promise<{ wasDecided: boolean }> {
+        if (!this.configuration.automationConfig) return { wasDecided: false };
 
         const request = event.data.request;
         const itemsOfRequest = request.content.items;
@@ -123,10 +122,10 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         }
 
         this.logger.info("The Request couldn't be decided automatically, since it contains RequestItems for which no suitable automationConfig was provided.");
-        return Result.fail(RuntimeErrors.deciderModule.someItemsOfRequestCouldNotBeDecidedAutomatically());
+        return { wasDecided: false };
     }
 
-    private async decideRequest(event: IncomingRequestStatusChangedEvent, decideRequestItemParameters: { items: any[] }): Promise<Result<LocalRequestDTO>> {
+    private async decideRequest(event: IncomingRequestStatusChangedEvent, decideRequestItemParameters: { items: any[] }): Promise<{ wasDecided: boolean }> {
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const request = event.data.request;
 
@@ -134,39 +133,37 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
             if (canRejectResult.isError) {
                 this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.error);
-                return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.error.message));
+                return { wasDecided: false };
             } else if (!canRejectResult.value.isSuccess) {
                 this.logger.warn(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.value.message);
-                return Result.fail(RuntimeErrors.deciderModule.canRejectRequestFailed(request.id, canRejectResult.value.message));
+                return { wasDecided: false };
             }
 
             const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters.items });
             if (rejectResult.isError) {
                 this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
-                return Result.fail(RuntimeErrors.deciderModule.rejectRequestFailed(request.id, rejectResult.error.message));
+                return { wasDecided: false };
             }
 
-            const localRequestWithResponse = rejectResult.value;
-            return Result.ok(localRequestWithResponse);
+            return { wasDecided: true };
         }
 
         const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters.items });
         if (canAcceptResult.isError) {
             this.logger.error(`Can not accept Request ${request.id}.`, canAcceptResult.error);
-            return Result.fail(RuntimeErrors.deciderModule.canAcceptRequestFailed(request.id, canAcceptResult.error.message));
+            return { wasDecided: false };
         } else if (!canAcceptResult.value.isSuccess) {
             this.logger.warn(`Can not accept Request ${request.id}.`, canAcceptResult.value.message);
-            return Result.fail(RuntimeErrors.deciderModule.canAcceptRequestFailed(request.id, canAcceptResult.value.message));
+            return { wasDecided: false };
         }
 
         const acceptResult = await services.consumptionServices.incomingRequests.accept({ requestId: request.id, items: decideRequestItemParameters.items });
         if (acceptResult.isError) {
             this.logger.error(`An error occured trying to accept Request ${request.id}`, acceptResult.error);
-            return Result.fail(RuntimeErrors.deciderModule.acceptRequestFailed(request.id, acceptResult.error.message));
+            return { wasDecided: false };
         }
 
-        const localRequestWithResponse = acceptResult.value;
-        return Result.ok(localRequestWithResponse);
+        return { wasDecided: true };
     }
 
     private async requireManualDecision(event: IncomingRequestStatusChangedEvent): Promise<void> {
