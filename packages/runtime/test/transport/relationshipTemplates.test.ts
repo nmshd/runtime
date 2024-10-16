@@ -228,6 +228,24 @@ describe("Template Tests", () => {
             expect(loadResult.value.password).toBe("password");
         });
 
+        test("send and receive a password-protected template via a token", async () => {
+            const templateId = (
+                await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: emptyRelationshipTemplateContent,
+                    expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                    password: "password"
+                })
+            ).value.id;
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                password: "password"
+            });
+            expect(loadResult).toBeSuccessful();
+            expect(loadResult.value.password).toBe("password");
+        });
+
         test("error when loading a template with a wrong password", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,

@@ -43,7 +43,7 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         }
 
         if (reference.startsWith(Base64ForIdPrefix.Token)) {
-            return await this.loadRelationshipTemplateFromTokenReference(reference);
+            return await this.loadRelationshipTemplateFromTokenReference(reference, password);
         }
 
         throw RuntimeErrors.relationshipTemplates.invalidReference(reference);
