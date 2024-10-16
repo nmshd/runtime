@@ -114,7 +114,7 @@ export class RelationshipTemplateController extends TransportController {
         if (ids.length < 1) {
             return [];
         }
-        const templates = await this.readTemplates(ids);
+        const templates = await this.readRelationshipTemplates(ids);
 
         const resultItems = (
             await this.client.getRelationshipTemplates({
@@ -131,25 +131,9 @@ export class RelationshipTemplateController extends TransportController {
         return await Promise.all(promises);
     }
 
-    private async readTemplates(ids: string[]): Promise<RelationshipTemplate[]> {
-        const templatePromises = ids.map(async (id) => {
-            const templateDoc = await this.templates.read(id);
-            if (!templateDoc) {
-                this._log.error(
-                    `Template '${id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
-                );
-                return;
-            }
-
-            return RelationshipTemplate.from(templateDoc);
-        });
-
-        return (await Promise.all(templatePromises)).filter((t) => t !== undefined);
-    }
-
     public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedRelationshipTemplate }[]> {
         if (ids.length === 0) return [];
-        const templates = await this.readTemplates(ids.map((id) => id.toString()));
+        const templates = await this.readRelationshipTemplates(ids.map((id) => id.toString()));
 
         const backboneRelationshipTemplates = await (
             await this.client.getRelationshipTemplates({
@@ -167,6 +151,22 @@ export class RelationshipTemplateController extends TransportController {
 
         const caches = await Promise.all(decryptionPromises);
         return caches.filter((c) => c !== undefined);
+    }
+
+    private async readRelationshipTemplates(ids: string[]): Promise<RelationshipTemplate[]> {
+        const templatePromises = ids.map(async (id) => {
+            const templateDoc = await this.templates.read(id);
+            if (!templateDoc) {
+                this._log.error(
+                    `Template '${id}' not found in local database. This should not happen and might be a bug in the application logic. Skipping further processing of that Template.`
+                );
+                return;
+            }
+
+            return RelationshipTemplate.from(templateDoc);
+        });
+
+        return (await Promise.all(templatePromises)).filter((t) => t !== undefined);
     }
 
     @log()

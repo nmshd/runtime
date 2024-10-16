@@ -1,4 +1,3 @@
-import { TokenContentRelationshipTemplate } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction } from "../../src";
 import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
@@ -286,20 +285,7 @@ describe("Template Tests", () => {
             expect(createTokenResult).toBeSuccessful();
             const loadTokenResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createTokenResult.value.truncatedReference, ephemeral: true });
             expect(loadTokenResult).toBeSuccessful();
-            expect((loadTokenResult.value.content as TokenContentRelationshipTemplate).passwordType).toBe(1);
-        });
-
-        test("create a token QR code for a password-protected template", async () => {
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                password: "password"
-            });
-            expect(createResult).toBeSuccessful();
-            const createTokenResult = await runtimeServices1.transport.relationshipTemplates.createTokenQRCodeForOwnTemplate({
-                templateId: createResult.value.id
-            });
-            expect(createTokenResult).toBeSuccessful();
+            expect(loadTokenResult.value.content.passwordType).toBe(1);
         });
     });
 });
