@@ -151,7 +151,7 @@ export class RelationshipTemplateController extends TransportController {
         if (ids.length === 0) return [];
         const templates = await this.readTemplates(ids.map((id) => id.toString()));
 
-        const backboneRelationships = await (
+        const backboneRelationshipTemplates = await (
             await this.client.getRelationshipTemplates({
                 templates: templates.map((t) => {
                     return { id: t.id.toString(), password: t.password };
@@ -159,7 +159,7 @@ export class RelationshipTemplateController extends TransportController {
             })
         ).value.collect();
 
-        const decryptionPromises = backboneRelationships.map(async (t) => {
+        const decryptionPromises = backboneRelationshipTemplates.map(async (t) => {
             const template = templates.find((template) => template.id.toString() === t.id);
             if (!template) return;
             return { id: CoreId.from(t.id), cache: await this.decryptRelationshipTemplate(t, template.secretKey) };
