@@ -246,7 +246,7 @@ describe("OutgoingRequestsController", function () {
     });
 
     test("returns a validation result that contains an error for requests to a peer which is toBeDeleted", async function () {
-        await Given.aRelationshipToBeDeletedPeer();
+        await Given.aRelationshipToPeerInDeletion();
         const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
             content: {
                 items: [

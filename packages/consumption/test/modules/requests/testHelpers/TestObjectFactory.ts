@@ -180,7 +180,7 @@ export class TestObjectFactory {
                 properties?.peerDeletionInfo ??
                 PeerDeletionInfo.from({
                     deletionStatus: PeerDeletionStatus.Deleted,
-                    deletionDate: CoreDate.from("2100-01-03T00:00:00.000Z")
+                    deletionDate: CoreDate.from("2022-01-03T00:00:00.000Z")
                 }),
             status: properties?.status ?? RelationshipStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),

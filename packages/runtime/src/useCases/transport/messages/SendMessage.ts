@@ -98,7 +98,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         if (peersInDeletion.length > 0) {
-            return TransportCoreErrors.messages.peerToBeDeleted(peersInDeletion);
+            return TransportCoreErrors.messages.peerInDeletion(peersInDeletion);
         }
 
         if (peersWithMissingOrInactiveRelationship.length > 0) {

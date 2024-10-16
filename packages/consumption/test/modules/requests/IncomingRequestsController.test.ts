@@ -385,7 +385,8 @@ describe("IncomingRequestsController", function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanAccept();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.wrongRelationshipStatus"
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot decide a request from 'did:e:a-domain:dids:anidentity' since the relationship is in status 'Terminated'."
             });
         });
 
@@ -403,12 +404,13 @@ describe("IncomingRequestsController", function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanAccept();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.peerHasDeletionInfo"
+                code: "error.consumption.requests.peerHasDeletionInfo",
+                message: "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in status 'Deleted'."
             });
         });
 
         test("returns 'error' on relationship with peer which is toBeDeleted", async function () {
-            await Given.aRelationshipToBeDeletedPeer();
+            await Given.aRelationshipToPeerInDeletion();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanAccept();
             expect(validationResult).errorValidationResult({
@@ -615,16 +617,18 @@ describe("IncomingRequestsController", function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.peerHasDeletionInfo"
+                code: "error.consumption.requests.peerHasDeletionInfo",
+                message: "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in status 'Deleted'."
             });
         });
 
         test("returns 'error' on relationship with peer which is toBeDeleted", async function () {
-            await Given.aRelationshipToBeDeletedPeer();
+            await Given.aRelationshipToPeerInDeletion();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.peerHasDeletionInfo"
+                code: "error.consumption.requests.peerHasDeletionInfo",
+                message: "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in status 'ToBeDeleted'."
             });
         });
     });

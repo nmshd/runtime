@@ -207,6 +207,39 @@ describe("Relationship status validations on active relationship", () => {
     });
 });
 
+describe("tests on active relationship", () => {
+    const serviceProvider = new RuntimeServiceProvider();
+    let services1: TestRuntimeServices;
+    let services2: TestRuntimeServices;
+    let services3: TestRuntimeServices;
+
+    beforeAll(async () => {
+        const runtimeServices = await serviceProvider.launch(3);
+        services1 = runtimeServices[0];
+        services2 = runtimeServices[1];
+        services3 = runtimeServices[2];
+    }, 30000);
+
+    afterAll(() => serviceProvider.stop());
+
+    test("messages with multiple recipients should fail if there is no active Relationship to the recipients", async () => {
+        const result = await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
+        expect(result).toBeAnError(
+            `An active Relationship with the given addresses '${services2.address.toString()},${services3.address.toString()}' do not exist, so you cannot send them a Message.`,
+            "error.transport.messages.missingOrInactiveRelationship"
+        );
+    });
+
+    test("messages with multiple recipients should also fail if only one Relationship is not active", async () => {
+        await ensureActiveRelationship(services1.transport, services2.transport);
+        const result = await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
+        expect(result).toBeAnError(
+            `An active Relationship with the given address '${services3.address.toString()}' does not exist, so you cannot send them a Message.`,
+            "error.transport.messages.missingOrInactiveRelationship"
+        );
+    });
+});
+
 describe("Templator with active IdentityDeletionProcess", () => {
     const serviceProvider = new RuntimeServiceProvider();
     let services1: TestRuntimeServices;
@@ -507,6 +540,8 @@ describe("RelationshipTermination", () => {
             "error.platform.validation.message.relationshipToRecipientNotActive"
         );
     });
+
+    test.todo("should be able to send a Notification");
 
     test("should not decide a request", async () => {
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
@@ -958,18 +993,16 @@ describe("Relationship existence check", () => {
         expect(await services1.transport.relationships.decomposeRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 });
-describe("Peer IdentityDeletionProcess", () => {
+describe("", () => {
     const serviceProvider = new RuntimeServiceProvider();
     let services1: TestRuntimeServices;
     let services2: TestRuntimeServices;
-    let services3: TestRuntimeServices;
     let services4: TestRuntimeServices;
 
     beforeAll(async () => {
         const runtimeServices = await serviceProvider.launch(4, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
         services1 = runtimeServices[0];
         services2 = runtimeServices[1];
-        services3 = runtimeServices[2];
         services4 = runtimeServices[3];
         const relationship1 = await ensureActiveRelationship(services1.transport, services2.transport);
 
@@ -982,14 +1015,6 @@ describe("Peer IdentityDeletionProcess", () => {
 
     afterAll(() => serviceProvider.stop());
 
-    test("messages with multiple recipients should fail if there is no active Relationship to the recipients", async () => {
-        const result = await sendMessageToMultipleRecipients(services1.transport, [services4.address, services3.address]);
-        expect(result).toBeAnError(
-            `An active Relationship with the given addresses '${services4.address.toString()},${services3.address.toString()}' do not exist.`,
-            "error.transport.messages.missingOrInactiveRelationship"
-        );
-    });
-
     // eslint-disable-next-line jest/no-disabled-tests
     test.skip("sending Notification to an Identity which is in status 'ToBeDeleted' results in an error redirected from the Backbone", async () => {
         const id = await ConsumptionIds.notification.generate();
@@ -1000,4 +1025,6 @@ describe("Peer IdentityDeletionProcess", () => {
             "error.platform.validation.message.recipientToBeDeleted"
         );
     });
+
+    test.todo("should be able to send a Notification to an Identity which is in status 'toBeDeleted'");
 });

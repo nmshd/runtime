@@ -108,15 +108,15 @@ class Messages {
         return new CoreError("error.transport.messages.peerDeleted", `The recipient with the address '${address[0]}' is deleted, so you cannot send them a Message.`);
     }
 
-    public peerToBeDeleted(address: string[]) {
+    public peerInDeletion(address: string[]) {
         if (address.length > 1) {
             return new CoreError(
-                "error.transport.messages.peerToBeDeleted",
+                "error.transport.messages.peerInDeletion",
                 `The recipients with the following addresses '${address}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
             );
         }
         return new CoreError(
-            "error.transport.messages.peerToBeDeleted",
+            "error.transport.messages.peerInDeletion",
             `The recipient with the address '${address[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
         );
     }

@@ -178,7 +178,7 @@ export class RequestsGiven {
         return Promise.resolve();
     }
 
-    public aRelationshipToBeDeletedPeer(): Promise<void> {
+    public aRelationshipToPeerInDeletion(): Promise<void> {
         this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationshipToPeerInDeletion();
 
         return Promise.resolve();
