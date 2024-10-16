@@ -336,8 +336,39 @@ describe("AttributesController", function () {
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
-    });
 
+        test("should add a third party address when creating a share copy of an relationship attribute", async function () {
+            const relationshipAttributePeer = CoreAddress.from("thirdParty");
+            const thirdPartyRelationshipAttributePeer = CoreAddress.from("peerAddress");
+
+            const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: CoreAddress.from("thirdPartyAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                shareInfo: {
+                    peer: relationshipAttributePeer,
+                    requestReference: CoreId.from("reqRefA"),
+                    sourceAttribute: CoreId.from("ATT0")
+                }
+            });
+
+            const thirdPartyLocalAttributeCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                peer: thirdPartyRelationshipAttributePeer,
+                requestReference: CoreId.from("reqRefB"),
+                sourceAttributeId: relationshipAttribute.id,
+                attributeId: CoreId.from("ATTthirdParty")
+            });
+
+            expect(thirdPartyLocalAttributeCopy.shareInfo?.thirdPartyAddress?.toString()).toBe(relationshipAttributePeer.toString());
+        });
+    });
     describe("query Attributes", function () {
         test("should allow to query relationship attributes with empty owner", async function () {
             const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {

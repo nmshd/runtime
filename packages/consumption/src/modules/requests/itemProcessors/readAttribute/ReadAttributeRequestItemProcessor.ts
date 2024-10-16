@@ -225,8 +225,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: CoreId.from(existingSourceAttribute.id),
                     peer: CoreAddress.from(requestInfo.peer),
-                    requestReference: CoreId.from(requestInfo.id),
-                    thirdPartyAddress: existingSourceAttribute.shareInfo?.peer ? CoreAddress.from(existingSourceAttribute.shareInfo.peer) : undefined
+                    requestReference: CoreId.from(requestInfo.id)
                 });
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,

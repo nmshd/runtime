@@ -341,7 +341,7 @@ export class AttributesController extends ConsumptionBaseController {
             peer: parsedParams.peer,
             requestReference: parsedParams.requestReference,
             sourceAttribute: parsedParams.sourceAttributeId,
-            thirdPartyAddress: parsedParams.thirdPartyAddress
+            thirdPartyAddress: sourceAttribute.shareInfo?.peer
         });
 
         const sharedLocalAttributeCopy = await LocalAttribute.fromAttribute(sourceAttribute.content, undefined, shareInfo, parsedParams.attributeId);

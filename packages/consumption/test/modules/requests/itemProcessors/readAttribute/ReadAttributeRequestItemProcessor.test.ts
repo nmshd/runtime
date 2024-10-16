@@ -1139,7 +1139,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
     });
 
-    describe.only("accept", function () {
+    describe("accept", function () {
         test("accept with existing RepositoryAttribute", async function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
@@ -1618,6 +1618,50 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
             expect(createdAttribute!.content).toStrictEqual(alreadySharedAttribute.content);
             expect(createdAttribute!.deletionInfo).toBeUndefined();
+        });
+
+        test("accept with existing peer shared RelationshipAttribute that exists in the context of a Relationship with a third party", async function () {
+            const peerAddress = CoreAddress.from("peerAddress");
+            const sender = CoreAddress.from("Sender");
+
+            const localRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({
+                    owner: accountController.identity.address
+                }),
+                peer: peerAddress,
+                requestReference: CoreId.from("reqRef")
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: ThirdPartyRelationshipAttributeQuery.from({
+                    key: "AKey",
+                    owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                    thirdParty: [peerAddress.toString()]
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: localRelationshipAttribute.id.toString()
+            };
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+
+            expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+            expect((result as ReadAttributeAcceptResponseItem).thirdPartyAddress?.toString()).toBe(peerAddress.toString());
         });
 
         test("accept with existing own shared RelationshipAttribute that exists in the context of a Relationship with a third party whose predecessor was already shared", async function () {

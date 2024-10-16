@@ -207,8 +207,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             attributeId: responseItem.attributeId,
             sourceAttributeId: requestItem.sourceAttributeId,
             peer: requestInfo.peer,
-            requestReference: requestInfo.id,
-            thirdPartyAddress: requestItem.thirdPartyAddress
+            requestReference: requestInfo.id
         });
     }
 }
