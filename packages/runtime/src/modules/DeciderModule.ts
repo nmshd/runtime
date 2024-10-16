@@ -77,7 +77,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         if (event.data.newStatus !== LocalRequestStatus.DecisionRequired) return;
 
         const requestContent = event.data.request.content;
-        if (this.containsItem(requestContent, (item) => item["requireManualDecision"] === true)) {
+        if (containsItem(requestContent, (item) => item["requireManualDecision"] === true)) {
             return await this.requireManualDecision(event);
         }
 
@@ -91,35 +91,24 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return await this.requireManualDecision(event);
     }
 
-    private containsItem(objectWithItems: { items: any[] }, callback: (element: any) => boolean): boolean {
-        const items = objectWithItems.items;
-
-        return items.some((item) => {
-            if (item?.hasOwnProperty("items")) {
-                return this.containsItem(item, callback);
-            }
-            return callback(item);
-        });
-    }
-
-    public async automaticallyDecideRequest(event: IncomingRequestStatusChangedEvent): Promise<Result<LocalRequestDTO>> {
+    private async automaticallyDecideRequest(event: IncomingRequestStatusChangedEvent): Promise<Result<LocalRequestDTO>> {
         if (!this.configuration.automationConfig) return Result.fail(RuntimeErrors.deciderModule.doesNotHaveAutomationConfig());
 
         const request = event.data.request;
         const itemsOfRequest = request.content.items;
 
-        let decideRequestItemParameters = this.createEmptyDecideRequestItemParameters(itemsOfRequest);
+        let decideRequestItemParameters = createEmptyDecideRequestItemParameters(itemsOfRequest);
 
         for (const automationConfigElement of this.configuration.automationConfig) {
             const requestConfigElement = automationConfigElement.requestConfig;
             const responseConfigElement = automationConfigElement.responseConfig;
 
-            const generalRequestIsCompatible = this.checkGeneralRequestCompatibility(requestConfigElement, request);
+            const generalRequestIsCompatible = checkGeneralRequestCompatibility(requestConfigElement, request);
             if (!generalRequestIsCompatible) {
                 continue;
             }
 
-            const updatedRequestItemParameters = this.checkRequestItemCompatibilityAndApplyResponseConfig(
+            const updatedRequestItemParameters = checkRequestItemCompatibilityAndApplyResponseConfig(
                 itemsOfRequest,
                 decideRequestItemParameters,
                 requestConfigElement,
@@ -127,7 +116,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             );
 
             decideRequestItemParameters = updatedRequestItemParameters;
-            if (!this.containsItem(decideRequestItemParameters, (element) => element === undefined)) {
+            if (!containsItem(decideRequestItemParameters, (element) => element === undefined)) {
                 const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
                 return decideRequestResult;
             }
@@ -137,163 +126,11 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         return Result.fail(RuntimeErrors.deciderModule.someItemsOfRequestCouldNotBeDecidedAutomatically());
     }
 
-    private createEmptyDecideRequestItemParameters(array: any[]): { items: any[] } {
-        return {
-            items: array.map((element) => {
-                if (element["@type"] === "RequestItemGroup") {
-                    const responseItems = this.createEmptyDecideRequestItemParameters(element.items);
-                    return responseItems;
-                }
-                return undefined;
-            })
-        };
-    }
-
-    public checkGeneralRequestCompatibility(requestConfigElement: RequestConfig, request: LocalRequestDTO): boolean {
-        let generalRequestPartOfConfigElement = requestConfigElement;
-
-        if (isRequestItemDerivationConfig(requestConfigElement)) {
-            generalRequestPartOfConfigElement = this.filterConfigElementByPrefix(requestConfigElement, false);
-        }
-
-        return this.checkCompatibility(generalRequestPartOfConfigElement, request);
-    }
-
-    private filterConfigElementByPrefix(requestItemConfigElement: RequestItemDerivationConfig, includePrefix: boolean): Record<string, any> {
-        const prefix = "content.item.";
-
-        const filteredRequestItemConfigElement: Record<string, any> = {};
-        for (const key in requestItemConfigElement) {
-            const startsWithPrefix = key.startsWith(prefix);
-
-            if (includePrefix && startsWithPrefix) {
-                const reducedKey = key.substring(prefix.length).trim();
-                filteredRequestItemConfigElement[reducedKey] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
-            } else if (!includePrefix && !startsWithPrefix) {
-                filteredRequestItemConfigElement[key] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
-            }
-        }
-        return filteredRequestItemConfigElement;
-    }
-
-    public checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
-        let compatible = true;
-        for (const property in requestConfigElement) {
-            const unformattedRequestConfigProperty = requestConfigElement[property as keyof RequestConfig];
-            if (!unformattedRequestConfigProperty) {
-                continue;
-            }
-            const requestConfigProperty = this.makeObjectsToStrings(unformattedRequestConfigProperty);
-
-            const unformattedRequestProperty = this.getNestedProperty(requestOrRequestItem, property);
-            if (!unformattedRequestProperty) {
-                compatible = false;
-                break;
-            }
-            const requestProperty = this.makeObjectsToStrings(unformattedRequestProperty);
-
-            if (property.endsWith("tags")) {
-                compatible &&= this.checkTagCompatibility(requestConfigProperty, requestProperty);
-                if (!compatible) break;
-                continue;
-            }
-
-            if (property.endsWith("At") || property.endsWith("From") || property.endsWith("To")) {
-                compatible &&= this.checkDatesCompatibility(requestConfigProperty, requestProperty);
-                if (!compatible) break;
-                continue;
-            }
-
-            if (Array.isArray(requestConfigProperty)) {
-                compatible &&= requestConfigProperty.includes(requestProperty);
-            } else {
-                compatible &&= requestConfigProperty === requestProperty;
-            }
-            if (!compatible) break;
-        }
-        return compatible;
-    }
-
-    private makeObjectsToStrings(data: any) {
-        if (Array.isArray(data)) {
-            return data.map((element) => (typeof element === "object" ? JSON.stringify(element) : element));
-        }
-        if (typeof data === "object") return JSON.stringify(data);
-        return data;
-    }
-
-    private getNestedProperty(object: any, path: string): any {
-        const nestedProperty = path.split(".").reduce((currentObject, key) => currentObject?.[key], object);
-        return nestedProperty;
-    }
-
-    private checkTagCompatibility(requestConfigTags: string[], requestTags: string[]): boolean {
-        const atLeastOneMatchingTag = requestConfigTags.some((tag) => requestTags.includes(tag));
-        return atLeastOneMatchingTag;
-    }
-
-    private checkDatesCompatibility(requestConfigDates: string | string[], requestDate: string): boolean {
-        if (typeof requestConfigDates === "string") return this.checkDateCompatibility(requestConfigDates, requestDate);
-        return requestConfigDates.every((requestConfigDate) => this.checkDateCompatibility(requestConfigDate, requestDate));
-    }
-
-    private checkDateCompatibility(requestConfigDate: string, requestDate: string): boolean {
-        if (requestConfigDate.startsWith(">")) return CoreDate.from(requestDate).isAfter(CoreDate.from(requestConfigDate.substring(1)));
-        if (requestConfigDate.startsWith("<")) return CoreDate.from(requestDate).isBefore(CoreDate.from(requestConfigDate.substring(1)));
-        return CoreDate.from(requestDate).equals(CoreDate.from(requestConfigDate));
-    }
-
-    private checkRequestItemCompatibilityAndApplyResponseConfig(
-        itemsOfRequest: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
-        parametersToDecideRequest: any,
-        requestConfigElement: RequestItemDerivationConfig,
-        responseConfigElement: ResponseConfig
-    ): { items: any[] } {
-        for (let i = 0; i < itemsOfRequest.length; i++) {
-            const item = itemsOfRequest[i];
-            if (item["@type"] === "RequestItemGroup") {
-                this.checkRequestItemCompatibilityAndApplyResponseConfig(
-                    (item as RequestItemGroupJSON).items,
-                    parametersToDecideRequest.items[i],
-                    requestConfigElement,
-                    responseConfigElement
-                );
-            } else {
-                const alreadyDecidedByOtherConfig = !!parametersToDecideRequest.items[i];
-                if (alreadyDecidedByOtherConfig) continue;
-
-                if (isRequestItemDerivationConfig(requestConfigElement)) {
-                    const requestItemIsCompatible = this.checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
-                    if (!requestItemIsCompatible) continue;
-                }
-
-                if (isGeneralRequestConfig(requestConfigElement) && responseConfigElement.accept) {
-                    const requestItemsWithSimpleAccept = [
-                        "AuthenticationRequestItem",
-                        "ConsentRequestItem",
-                        "CreateAttributeRequestItem",
-                        "RegisterAttributeListenerRequestItem",
-                        "ShareAttributeRequestItem"
-                    ];
-                    if (!requestItemsWithSimpleAccept.includes(item["@type"])) continue;
-                }
-
-                parametersToDecideRequest.items[i] = responseConfigElement;
-            }
-        }
-        return parametersToDecideRequest;
-    }
-
-    public checkRequestItemCompatibility(requestConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): boolean {
-        const requestItemPartOfConfigElement = this.filterConfigElementByPrefix(requestConfigElement, true);
-        return this.checkCompatibility(requestItemPartOfConfigElement, requestItem);
-    }
-
     private async decideRequest(event: IncomingRequestStatusChangedEvent, decideRequestItemParameters: { items: any[] }): Promise<Result<LocalRequestDTO>> {
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const request = event.data.request;
 
-        if (!this.containsItem(decideRequestItemParameters, isAcceptResponseConfig)) {
+        if (!containsItem(decideRequestItemParameters, isAcceptResponseConfig)) {
             const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
             if (canRejectResult.isError) {
                 this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.error);
@@ -400,4 +237,167 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     public stop(): void {
         this.unsubscribeFromAllEvents();
     }
+}
+
+function containsItem(objectWithItems: { items: any[] }, callback: (element: any) => boolean): boolean {
+    const items = objectWithItems.items;
+
+    return items.some((item) => {
+        if (item?.hasOwnProperty("items")) {
+            return containsItem(item, callback);
+        }
+        return callback(item);
+    });
+}
+
+function createEmptyDecideRequestItemParameters(array: any[]): { items: any[] } {
+    return {
+        items: array.map((element) => {
+            if (element["@type"] === "RequestItemGroup") {
+                const responseItems = createEmptyDecideRequestItemParameters(element.items);
+                return responseItems;
+            }
+            return undefined;
+        })
+    };
+}
+
+function checkGeneralRequestCompatibility(requestConfigElement: RequestConfig, request: LocalRequestDTO): boolean {
+    let generalRequestPartOfConfigElement = requestConfigElement;
+
+    if (isRequestItemDerivationConfig(requestConfigElement)) {
+        generalRequestPartOfConfigElement = filterConfigElementByPrefix(requestConfigElement, false);
+    }
+
+    return checkCompatibility(generalRequestPartOfConfigElement, request);
+}
+
+function filterConfigElementByPrefix(requestItemConfigElement: RequestItemDerivationConfig, includePrefix: boolean): Record<string, any> {
+    const prefix = "content.item.";
+
+    const filteredRequestItemConfigElement: Record<string, any> = {};
+    for (const key in requestItemConfigElement) {
+        const startsWithPrefix = key.startsWith(prefix);
+
+        if (includePrefix && startsWithPrefix) {
+            const reducedKey = key.substring(prefix.length).trim();
+            filteredRequestItemConfigElement[reducedKey] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
+        } else if (!includePrefix && !startsWithPrefix) {
+            filteredRequestItemConfigElement[key] = requestItemConfigElement[key as keyof RequestItemDerivationConfig];
+        }
+    }
+    return filteredRequestItemConfigElement;
+}
+
+function checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
+    let compatible = true;
+    for (const property in requestConfigElement) {
+        const unformattedRequestConfigProperty = requestConfigElement[property as keyof RequestConfig];
+        if (!unformattedRequestConfigProperty) {
+            continue;
+        }
+        const requestConfigProperty = makeObjectsToStrings(unformattedRequestConfigProperty);
+
+        const unformattedRequestProperty = getNestedProperty(requestOrRequestItem, property);
+        if (!unformattedRequestProperty) {
+            compatible = false;
+            break;
+        }
+        const requestProperty = makeObjectsToStrings(unformattedRequestProperty);
+
+        if (property.endsWith("tags")) {
+            compatible &&= checkTagCompatibility(requestConfigProperty, requestProperty);
+            if (!compatible) break;
+            continue;
+        }
+
+        if (property.endsWith("At") || property.endsWith("From") || property.endsWith("To")) {
+            compatible &&= checkDatesCompatibility(requestConfigProperty, requestProperty);
+            if (!compatible) break;
+            continue;
+        }
+
+        if (Array.isArray(requestConfigProperty)) {
+            compatible &&= requestConfigProperty.includes(requestProperty);
+        } else {
+            compatible &&= requestConfigProperty === requestProperty;
+        }
+        if (!compatible) break;
+    }
+    return compatible;
+}
+
+function makeObjectsToStrings(data: any) {
+    if (Array.isArray(data)) {
+        return data.map((element) => (typeof element === "object" ? JSON.stringify(element) : element));
+    }
+    if (typeof data === "object") return JSON.stringify(data);
+    return data;
+}
+
+function getNestedProperty(object: any, path: string): any {
+    const nestedProperty = path.split(".").reduce((currentObject, key) => currentObject?.[key], object);
+    return nestedProperty;
+}
+
+function checkTagCompatibility(requestConfigTags: string[], requestTags: string[]): boolean {
+    const atLeastOneMatchingTag = requestConfigTags.some((tag) => requestTags.includes(tag));
+    return atLeastOneMatchingTag;
+}
+
+function checkDatesCompatibility(requestConfigDates: string | string[], requestDate: string): boolean {
+    if (typeof requestConfigDates === "string") return checkDateCompatibility(requestConfigDates, requestDate);
+    return requestConfigDates.every((requestConfigDate) => checkDateCompatibility(requestConfigDate, requestDate));
+}
+
+function checkDateCompatibility(requestConfigDate: string, requestDate: string): boolean {
+    if (requestConfigDate.startsWith(">")) return CoreDate.from(requestDate).isAfter(CoreDate.from(requestConfigDate.substring(1)));
+    if (requestConfigDate.startsWith("<")) return CoreDate.from(requestDate).isBefore(CoreDate.from(requestConfigDate.substring(1)));
+    return CoreDate.from(requestDate).equals(CoreDate.from(requestConfigDate));
+}
+
+function checkRequestItemCompatibilityAndApplyResponseConfig(
+    itemsOfRequest: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
+    parametersToDecideRequest: any,
+    requestConfigElement: RequestItemDerivationConfig,
+    responseConfigElement: ResponseConfig
+): { items: any[] } {
+    for (let i = 0; i < itemsOfRequest.length; i++) {
+        const item = itemsOfRequest[i];
+        if (item["@type"] === "RequestItemGroup") {
+            checkRequestItemCompatibilityAndApplyResponseConfig(
+                (item as RequestItemGroupJSON).items,
+                parametersToDecideRequest.items[i],
+                requestConfigElement,
+                responseConfigElement
+            );
+        } else {
+            const alreadyDecidedByOtherConfig = !!parametersToDecideRequest.items[i];
+            if (alreadyDecidedByOtherConfig) continue;
+
+            if (isRequestItemDerivationConfig(requestConfigElement)) {
+                const requestItemIsCompatible = checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
+                if (!requestItemIsCompatible) continue;
+            }
+
+            if (isGeneralRequestConfig(requestConfigElement) && responseConfigElement.accept) {
+                const requestItemsWithSimpleAccept = [
+                    "AuthenticationRequestItem",
+                    "ConsentRequestItem",
+                    "CreateAttributeRequestItem",
+                    "RegisterAttributeListenerRequestItem",
+                    "ShareAttributeRequestItem"
+                ];
+                if (!requestItemsWithSimpleAccept.includes(item["@type"])) continue;
+            }
+
+            parametersToDecideRequest.items[i] = responseConfigElement;
+        }
+    }
+    return parametersToDecideRequest;
+}
+
+function checkRequestItemCompatibility(requestConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): boolean {
+    const requestItemPartOfConfigElement = filterConfigElementByPrefix(requestConfigElement, true);
+    return checkCompatibility(requestItemPartOfConfigElement, requestItem);
 }
