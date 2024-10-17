@@ -4,7 +4,7 @@ import { IncomingRequestsController } from "@nmshd/consumption";
 import { ArbitraryRelationshipCreationContent, RelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { RuntimeErrors, UseCase } from "../../common";
 import { CreateRelationshipRequest } from "./CreateRelationship";
 
