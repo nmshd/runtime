@@ -43,7 +43,7 @@ describe("Template Tests", () => {
         }).toJSON();
 
         const relationshipTemplateExpirationDate = DateTime.utc().plus({ minutes: 10 }).toString();
-        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: relationshipTemplateContent,
             expiresAt: relationshipTemplateExpirationDate
         });
@@ -61,7 +61,7 @@ describe("Template Tests", () => {
             }
         }).toJSON();
 
-        const response = await transportServices1.relationshipTemplates.createOwnRelationshipTemplate({
+        const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: relationshipTemplateContent,
             expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
         });
