@@ -69,6 +69,10 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
                 );
                 break;
             }
+
+            case RelationshipTemplateProcessedResult.RequestAutomaticallyDecided: {
+                break;
+            }
         }
     }
 
