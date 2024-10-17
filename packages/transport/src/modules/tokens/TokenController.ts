@@ -175,7 +175,7 @@ export class TokenController extends TransportController {
         const tokenId = token.id.toString();
 
         if (!response) {
-            response = (await this.client.getToken(tokenId)).value;
+            response = (await this.client.getToken(tokenId, token.password)).value;
         }
 
         const cachedToken = await this.decryptToken(response, token.secretKey);
