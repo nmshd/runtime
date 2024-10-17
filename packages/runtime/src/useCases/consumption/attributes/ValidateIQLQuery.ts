@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { IQLQuery, IQLQueryJSON } from "@nmshd/content";
 import { IValidateResult, validate as validateIQL } from "@nmshd/iql";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export type ValidateIQLQueryResponse = IValidateResult;

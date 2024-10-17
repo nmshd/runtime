@@ -1,8 +1,8 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { CachedToken, Token, TokenController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { Inject } from "typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { OwnerRestriction, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "./TokenMapper";

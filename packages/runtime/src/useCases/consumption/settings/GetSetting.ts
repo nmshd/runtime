@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { Setting, SettingsController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { SettingDTO } from "../../../types";
 import { LocalSettingIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { SettingMapper } from "./SettingMapper";

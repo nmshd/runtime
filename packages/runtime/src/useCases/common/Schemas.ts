@@ -21978,7 +21978,7 @@ export const CreateOwnRelationshipTemplateRequest: any = {
         },
         "AddressString": {
             "type": "string",
-            "pattern": "did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}"
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }

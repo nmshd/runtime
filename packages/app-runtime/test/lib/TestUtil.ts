@@ -17,16 +17,16 @@ import {
 import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
-import { NativeBootstrapperMock } from "../mocks/NativeBootstrapperMock";
 import { FakeUIBridge } from "./FakeUIBridge";
+import { FakeNativeBootstrapper } from "./natives/FakeNativeBootstrapper";
 
 export class TestUtil {
     public static async createRuntime(configOverride?: any): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapperMock = new NativeBootstrapperMock();
-        await nativeBootstrapperMock.init();
-        const runtime = await AppRuntime.create(nativeBootstrapperMock, config);
+        const nativeBootstrapper = new FakeNativeBootstrapper();
+        await nativeBootstrapper.init();
+        const runtime = await AppRuntime.create(nativeBootstrapper, config);
         runtime.registerUIBridge(new FakeUIBridge());
 
         return runtime;
@@ -35,9 +35,9 @@ export class TestUtil {
     public static async createRuntimeWithoutInit(configOverride?: any): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapperMock = new NativeBootstrapperMock();
-        await nativeBootstrapperMock.init();
-        const runtime = new AppRuntime(nativeBootstrapperMock.nativeEnvironment, config);
+        const nativeBootstrapper = new FakeNativeBootstrapper();
+        await nativeBootstrapper.init();
+        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, config);
 
         return runtime;
     }
@@ -53,6 +53,7 @@ export class TestUtil {
             baseUrl: globalThis.process.env.NMSHD_TEST_BASEURL!,
             platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
+            addressGenerationHostnameOverride: globalThis.process.env.NMSHD_TEST_ADDRESS_GENERATION_HOSTNAME_OVERRIDE,
             debug: true
         };
 
