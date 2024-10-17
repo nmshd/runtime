@@ -241,6 +241,12 @@ class IdentityDeletionProcess {
     }
 }
 
+class DeciderModule {
+    public requestConfigDoesNotMatchResponseConfig() {
+        return new ApplicationError("error.runtime.decide.requestConfigDoesNotMatchResponseConfig", "The RequestConfig does not match the ResponseConfig.");
+    }
+}
+
 export class RuntimeErrors {
     public static readonly general = new General();
     public static readonly serval = new Serval();
@@ -253,4 +259,5 @@ export class RuntimeErrors {
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
     public static readonly identityDeletionProcess = new IdentityDeletionProcess();
+    public static readonly deciderModule = new DeciderModule();
 }
