@@ -11,6 +11,7 @@ export interface CreateTokenForFileRequest {
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
     forIdentity?: AddressString;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<CreateTokenForFileRequest> {
@@ -48,7 +49,8 @@ export class CreateTokenForFileUseCase extends UseCase<CreateTokenForFileRequest
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            password: request.password
         });
 
         if (!ephemeral) {

@@ -10,11 +10,14 @@ export class TokenClient extends RESTClientAuthenticate {
     }
 
     public async getTokens(request: BackboneGetTokensRequest): Promise<ClientResult<Paginator<BackboneGetTokensResponse>>> {
-        return await this.getPaged<BackboneGetTokensResponse>("/api/v1/Tokens", request);
+        return await this.getPaged<BackboneGetTokensResponse>("/api/v1/Tokens", {
+            tokens: JSON.stringify(request.tokens)
+        });
     }
 
-    public async getToken(id: string): Promise<ClientResult<BackboneGetTokensResponse>> {
-        return await this.get<BackboneGetTokensResponse>(`/api/v1/Tokens/${id}`);
+    public async getToken(id: string, password?: string): Promise<ClientResult<BackboneGetTokensResponse>> {
+        const request = password ? { password } : undefined;
+        return await this.get<BackboneGetTokensResponse>(`/api/v1/Tokens/${id}`, request);
     }
 
     public async deleteToken(id: string): Promise<ClientResult<void>> {

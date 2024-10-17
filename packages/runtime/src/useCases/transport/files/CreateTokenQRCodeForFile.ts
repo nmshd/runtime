@@ -8,6 +8,7 @@ export interface CreateTokenQRCodeForFileRequest {
     fileId: FileIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
+    password?: string;
 }
 
 export interface CreateTokenQRCodeForFileResponse {
@@ -47,7 +48,8 @@ export class CreateTokenQRCodeForFileUseCase extends UseCase<CreateTokenQRCodeFo
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral: true,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            password: request.password
         });
 
         const qrCode = await QRCode.forTruncateable(token);
