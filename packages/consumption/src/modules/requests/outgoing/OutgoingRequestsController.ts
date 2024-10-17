@@ -62,6 +62,14 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
                     )
                 );
             }
+
+            if (relationship.peerDeletionInfo) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.peerHasDeletionInfo(
+                        `You cannot create a Request to '${parsedParams.peer.toString()}' since the peer is in status '${relationship.peerDeletionInfo.deletionStatus}'.`
+                    )
+                );
+            }
         }
 
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);

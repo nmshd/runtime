@@ -1,4 +1,4 @@
-import { Event, EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     ConsumptionIds,
@@ -282,7 +282,12 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
-export async function sendMessageToMultipleRecipients(transportServices: TransportServices, recipients: string[], content?: any, attachments?: string[]): Promise<MessageDTO> {
+export async function sendMessageToMultipleRecipients(
+    transportServices: TransportServices,
+    recipients: string[],
+    content?: any,
+    attachments?: string[]
+): Promise<Result<MessageDTO>> {
     const response = await transportServices.messages.sendMessage({
         recipients,
         content: content ?? {
@@ -294,9 +299,8 @@ export async function sendMessageToMultipleRecipients(transportServices: Transpo
         },
         attachments
     });
-    expect(response).toBeSuccessful();
 
-    return response.value;
+    return response;
 }
 
 export async function sendMessageWithRequest(

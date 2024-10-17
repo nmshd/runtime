@@ -3,7 +3,7 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { AccountController, File, FileController, MessageController } from "@nmshd/transport";
+import { AccountController, File, FileController, MessageController, RelationshipsController, TransportCoreErrors } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
 import { MessageDTO } from "../../../types";
@@ -28,6 +28,7 @@ class Validator extends SchemaValidator<SendMessageRequest> {
 
 export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> {
     public constructor(
+        @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly messageController: MessageController,
         @Inject private readonly fileController: FileController,
         @Inject private readonly accountController: AccountController,
@@ -73,21 +74,54 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             );
         }
 
-        if (!(transformedContent instanceof Request)) return;
+        if (transformedContent instanceof Notification) return;
 
-        if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
-
-        const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
-        if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
-
-        if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
-            return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
+        const deletedPeers: string[] = [];
+        const peersInDeletion: string[] = [];
+        const peersWithMissingOrInactiveRelationship: string[] = [];
+        for (const recipient of recipients) {
+            const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
+            if (!relationship) {
+                peersWithMissingOrInactiveRelationship.push(recipient);
+                continue;
+            }
+            if (relationship.peerDeletionInfo?.deletionStatus === "Deleted") {
+                deletedPeers.push(recipient);
+            }
+            if (relationship.peerDeletionInfo?.deletionStatus === "ToBeDeleted") {
+                peersInDeletion.push(recipient);
+            }
         }
 
-        if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
+        if (deletedPeers.length > 0) {
+            return TransportCoreErrors.messages.peerDeleted(deletedPeers);
+        }
 
-        const recipient = CoreAddress.from(recipients[0]);
-        if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
+        if (peersInDeletion.length > 0) {
+            return TransportCoreErrors.messages.peerInDeletion(peersInDeletion);
+        }
+
+        if (peersWithMissingOrInactiveRelationship.length > 0) {
+            return TransportCoreErrors.messages.missingOrInactiveRelationship(peersWithMissingOrInactiveRelationship);
+        }
+
+        if (transformedContent instanceof Request) {
+            if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
+
+            const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
+            if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
+
+            if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
+                return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
+            }
+
+            if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
+
+            const recipient = CoreAddress.from(recipients[0]);
+            if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
+            return;
+        }
+
         return;
     }
 
