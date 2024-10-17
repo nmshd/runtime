@@ -307,7 +307,7 @@ describe("TokenController", function () {
 
         const receivedToken1 = await recipient.tokens.loadPeerTokenByTruncated(reference1, false, "password");
         const receivedToken2 = await recipient.tokens.loadPeerTokenByTruncated(reference2, false, "password");
-        const fetchCachesResult = await recipient.relationshipTemplates.fetchCaches([receivedToken1.id, receivedToken2.id]);
+        const fetchCachesResult = await recipient.tokens.fetchCaches([receivedToken1.id, receivedToken2.id]);
         expect(fetchCachesResult).toHaveLength(2);
     });
 
