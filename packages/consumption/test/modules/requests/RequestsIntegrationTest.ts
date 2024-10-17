@@ -43,6 +43,7 @@ import {
     RequestItemProcessorRegistry,
     ValidationResult
 } from "../../../src";
+
 import { TestUtil } from "../../core/TestUtil";
 import { MockEventBus } from "../MockEventBus";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
@@ -231,8 +232,10 @@ export class RequestsGiven {
             requestSourceObject: params.requestSource
         });
 
-        if (params.requestSource instanceof RelationshipTemplate) {
+        try {
             this.context.templateToReturnFromGetTemplate = RelationshipTemplate.from(params.requestSource as any);
+        } catch (_) {
+            // the source is not a template
         }
 
         await this.moveIncomingRequestToStatus(localRequest, params.status);
