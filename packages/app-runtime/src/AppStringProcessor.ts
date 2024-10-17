@@ -3,7 +3,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress } from "@nmshd/core-types";
 import { AnonymousServices, Base64ForIdPrefix, DeviceMapper } from "@nmshd/runtime";
-import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
+import { Reference, TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
 import { IUIBridge } from "./extensibility";
@@ -17,7 +17,7 @@ export class AppStringProcessor {
     public constructor(
         protected readonly runtime: {
             get anonymousServices(): AnonymousServices;
-            requestAccountSelection(title?: string, description?: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>>;
+            requestAccountSelection(title?: string, description?: string, forIdentityTruncated?: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>>;
             uiBridge(): Promise<IUIBridge>;
             getServices(accountReference: string | ICoreAddress): Promise<AppRuntimeServices>;
             translate(key: string, ...values: any[]): Promise<Result<string>>;
@@ -42,9 +42,11 @@ export class AppStringProcessor {
     public async processTruncatedReference(truncatedReference: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         if (account) return await this._handleTruncatedReference(truncatedReference, account);
 
+        const reference = Reference.fromTruncated(truncatedReference);
+
         // process Files and RelationshipTemplates and ask for an account
         if (truncatedReference.startsWith(Base64ForIdPrefix.File) || truncatedReference.startsWith(Base64ForIdPrefix.RelationshipTemplate)) {
-            const result = await this.runtime.requestAccountSelection();
+            const result = await this.runtime.requestAccountSelection(undefined, undefined, reference.forIdentityTruncated);
             if (result.isError) {
                 this.logger.error("Could not query account", result.error);
                 return UserfriendlyResult.fail(result.error);
@@ -99,9 +101,7 @@ export class AppStringProcessor {
         const services = await this.runtime.getServices(account.id);
         const uiBridge = await this.runtime.uiBridge();
 
-        const result = await services.transportServices.account.loadItemFromTruncatedReference({
-            reference: truncatedReference
-        });
+        const result = await services.transportServices.account.loadItemFromTruncatedReference({ reference: truncatedReference });
         if (result.isError) {
             if (result.error.code === "error.runtime.validation.invalidPropertyValue") {
                 return UserfriendlyResult.fail(

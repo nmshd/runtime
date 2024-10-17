@@ -16,18 +16,18 @@ import {
 } from "@nmshd/runtime";
 import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
-import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
+import { AppConfig, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
 import { FakeNativeBootstrapper } from "./natives/FakeNativeBootstrapper";
 
 export class TestUtil {
-    public static async createRuntime(configOverride?: any): Promise<AppRuntime> {
+    public static async createRuntime(configOverride?: any, uiBridge: IUIBridge = new FakeUIBridge()): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
         const nativeBootstrapper = new FakeNativeBootstrapper();
         await nativeBootstrapper.init();
         const runtime = await AppRuntime.create(nativeBootstrapper, config);
-        runtime.registerUIBridge(new FakeUIBridge());
+        runtime.registerUIBridge(uiBridge);
 
         return runtime;
     }
