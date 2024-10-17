@@ -12,6 +12,7 @@ export class RelationshipTemplateProcessedEvent extends DataEvent<RelationshipTe
 }
 
 export enum RelationshipTemplateProcessedResult {
+    RequestAutomaticallyDecided = "RequestAutomaticallyDecided",
     ManualRequestDecisionRequired = "ManualRequestDecisionRequired",
     NonCompletedRequestExists = "NonCompletedRequestExists",
     RelationshipExists = "RelationshipExists",
@@ -20,6 +21,11 @@ export enum RelationshipTemplateProcessedResult {
 }
 
 export type RelationshipTemplateProcessedEventData =
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.RequestAutomaticallyDecided;
+          requestId: string;
+      }
     | {
           template: RelationshipTemplateDTO;
           result: RelationshipTemplateProcessedResult.ManualRequestDecisionRequired;
