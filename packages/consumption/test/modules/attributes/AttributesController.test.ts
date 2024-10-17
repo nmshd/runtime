@@ -337,9 +337,9 @@ describe("AttributesController", function () {
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
 
-        test("should add a third party address when creating a share copy of an relationship attribute", async function () {
-            const relationshipAttributePeer = CoreAddress.from("thirdParty");
-            const thirdPartyRelationshipAttributePeer = CoreAddress.from("peerAddress");
+        test("should add a third party address when creating a shared copy of a relationship attribute", async function () {
+            const thirdPartyAddress = CoreAddress.from("thirdParty");
+            const peerAddress = CoreAddress.from("peerAddress");
 
             const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
@@ -353,20 +353,19 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 shareInfo: {
-                    peer: relationshipAttributePeer,
-                    requestReference: CoreId.from("reqRefA"),
-                    sourceAttribute: CoreId.from("ATT0")
+                    peer: thirdPartyAddress,
+                    requestReference: CoreId.from("reqRefA")
                 }
             });
 
             const thirdPartyLocalAttributeCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                peer: thirdPartyRelationshipAttributePeer,
+                peer: peerAddress,
                 requestReference: CoreId.from("reqRefB"),
                 sourceAttributeId: relationshipAttribute.id,
                 attributeId: CoreId.from("ATTthirdParty")
             });
 
-            expect(thirdPartyLocalAttributeCopy.shareInfo?.thirdPartyAddress?.toString()).toBe(relationshipAttributePeer.toString());
+            expect(thirdPartyLocalAttributeCopy.shareInfo?.thirdPartyAddress?.toString()).toBe(thirdPartyAddress.toString());
         });
     });
     describe("query Attributes", function () {
