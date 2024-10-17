@@ -20,6 +20,18 @@ describe("LocalAttributeShareInfo", function () {
         {
             notificationReference: "notificationReferenceId",
             peer: "peerAddress"
+        },
+        {
+            notificationReference: "notificationReferenceId",
+            peer: "peerAddress",
+            sourceAttribute: "sourceAttributeId",
+            thirdPartyAddress: "thirdPartyAddress"
+        },
+        {
+            requestReference: "requestReferenceId",
+            peer: "peerAddress",
+            sourceAttribute: "sourceAttributeId",
+            thirdPartyAddress: "thirdPartyAddress"
         }
     ];
     test.each(validShareInfoJsonParams)("should create objects from valid parameters using from()", function (shareInfoParams: LocalAttributeShareInfoJSON) {

@@ -3,22 +3,22 @@ import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 
-/* Either of requestReference or noticicationReference must be set, but not both. */
+/* Either of requestReference or notificationReference must be set, but not both. */
 export interface LocalAttributeShareInfoJSON {
     requestReference?: string;
     notificationReference?: string;
-
     peer: string;
     sourceAttribute?: string;
+    thirdPartyAddress?: string;
 }
 
-/* Either of requestReference or noticicationReference must be set, but not both. */
+/* Either of requestReference or notificationReference must be set, but not both. */
 export interface ILocalAttributeShareInfo extends ISerializable {
     requestReference?: ICoreId;
     notificationReference?: ICoreId;
-
     peer: ICoreAddress;
     sourceAttribute?: ICoreId;
+    thirdPartyAddress?: ICoreAddress;
 }
 
 export class LocalAttributeShareInfo extends Serializable implements ILocalAttributeShareInfo {
@@ -37,6 +37,10 @@ export class LocalAttributeShareInfo extends Serializable implements ILocalAttri
     @serialize()
     @validate({ nullable: true })
     public sourceAttribute?: CoreId;
+
+    @serialize()
+    @validate({ nullable: true })
+    public thirdPartyAddress?: CoreAddress;
 
     public static from(value: ILocalAttributeShareInfo | LocalAttributeShareInfoJSON): LocalAttributeShareInfo {
         return super.fromAny(value) as LocalAttributeShareInfo;

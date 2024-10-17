@@ -336,8 +336,38 @@ describe("AttributesController", function () {
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
-    });
 
+        test("should add a third party address when creating a shared copy of a relationship attribute", async function () {
+            const thirdPartyAddress = CoreAddress.from("thirdParty");
+            const peerAddress = CoreAddress.from("peerAddress");
+
+            const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: CoreAddress.from("thirdPartyAddress"),
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                shareInfo: {
+                    peer: thirdPartyAddress,
+                    requestReference: CoreId.from("reqRefA")
+                }
+            });
+
+            const thirdPartyLocalAttributeCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                peer: peerAddress,
+                requestReference: CoreId.from("reqRefB"),
+                sourceAttributeId: relationshipAttribute.id,
+                attributeId: CoreId.from("ATTthirdParty")
+            });
+
+            expect(thirdPartyLocalAttributeCopy.shareInfo?.thirdPartyAddress?.toString()).toBe(thirdPartyAddress.toString());
+        });
+    });
     describe("query Attributes", function () {
         test("should allow to query relationship attributes with empty owner", async function () {
             const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
@@ -2361,7 +2391,8 @@ describe("AttributesController", function () {
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
                         requestReference: CoreId.from("reqRefA"),
-                        sourceAttribute: CoreId.from("ATT0")
+                        sourceAttribute: CoreId.from("ATT0"),
+                        thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
                     }
                 });
                 const successorParams: IAttributeSuccessorParams = {
@@ -2378,7 +2409,8 @@ describe("AttributesController", function () {
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
                         requestReference: CoreId.from("reqRefB"),
-                        sourceAttribute: CoreId.from("ATT1")
+                        sourceAttribute: CoreId.from("ATT1"),
+                        thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
                     }
                 };
 

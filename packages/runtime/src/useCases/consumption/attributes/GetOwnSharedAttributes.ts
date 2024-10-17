@@ -33,6 +33,7 @@ export interface GetOwnSharedAttributeRequestQuery {
     "shareInfo.requestReference"?: string | string[];
     "shareInfo.notificationReference"?: string | string[];
     "shareInfo.sourceAttribute"?: string | string[];
+    "shareInfo.thirdPartyAddress"?: string | string[];
     deletionInfo?: string | string[];
     "deletionInfo.deletionStatus"?: string | string[];
     "deletionInfo.deletionDate"?: string | string[];

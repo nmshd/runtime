@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreId, ICoreId } from "@nmshd/core-types";
 import { RequestItemJSON } from "../..";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
 import { IRequestItem, RequestItem } from "../../RequestItem";
@@ -8,11 +8,13 @@ export interface ShareAttributeRequestItemJSON extends RequestItemJSON {
     "@type": "ShareAttributeRequestItem";
     attribute: IdentityAttributeJSON | RelationshipAttributeJSON;
     sourceAttributeId: string;
+    thirdPartyAddress?: string;
 }
 
 export interface IShareAttributeRequestItem extends IRequestItem {
     attribute: IIdentityAttribute | IRelationshipAttribute;
     sourceAttributeId: ICoreId;
+    thirdPartyAddress?: CoreAddress;
 }
 
 @type("ShareAttributeRequestItem")
@@ -24,6 +26,10 @@ export class ShareAttributeRequestItem extends RequestItem implements IShareAttr
     @serialize()
     @validate()
     public sourceAttributeId: CoreId;
+
+    @serialize()
+    @validate({ nullable: true })
+    public thirdPartyAddress?: CoreAddress;
 
     public static from(value: IShareAttributeRequestItem | Omit<ShareAttributeRequestItemJSON, "@type"> | ShareAttributeRequestItemJSON): ShareAttributeRequestItem {
         return this.fromAny(value);

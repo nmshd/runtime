@@ -76,6 +76,7 @@ export interface OwnRelationshipAttributeDVO extends LocalAttributeDVO {
     requestReference?: string;
     notificationReference?: string;
     sourceAttribute?: string;
+    thirdPartyAddress?: string;
     isOwn: true;
     confidentiality: string;
     isTechnical: boolean;
@@ -93,6 +94,7 @@ export interface PeerRelationshipAttributeDVO extends LocalAttributeDVO {
     requestReference?: string;
     notificationReference?: string;
     sourceAttribute?: string;
+    thirdPartyAddress?: string;
     isOwn: false;
     confidentiality: string;
     isTechnical: boolean;

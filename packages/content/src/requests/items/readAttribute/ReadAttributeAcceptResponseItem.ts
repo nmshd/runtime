@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreId, ICoreId } from "@nmshd/core-types";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
 import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
 
@@ -7,11 +7,13 @@ export interface ReadAttributeAcceptResponseItemJSON extends AcceptResponseItemJ
     "@type": "ReadAttributeAcceptResponseItem";
     attributeId: string;
     attribute: IdentityAttributeJSON | RelationshipAttributeJSON;
+    thirdPartyAddress?: string;
 }
 
 export interface IReadAttributeAcceptResponseItem extends IAcceptResponseItem {
     attributeId: ICoreId;
     attribute: IIdentityAttribute | IRelationshipAttribute;
+    thirdPartyAddress?: CoreAddress;
 }
 
 @type("ReadAttributeAcceptResponseItem")
@@ -23,6 +25,10 @@ export class ReadAttributeAcceptResponseItem extends AcceptResponseItem implemen
     @serialize({ unionTypes: [IdentityAttribute, RelationshipAttribute] })
     @validate()
     public attribute: IdentityAttribute | RelationshipAttribute;
+
+    @serialize()
+    @validate({ nullable: true })
+    public thirdPartyAddress?: CoreAddress;
 
     public static override from(
         value: IReadAttributeAcceptResponseItem | Omit<ReadAttributeAcceptResponseItemJSON, "@type"> | ReadAttributeAcceptResponseItemJSON

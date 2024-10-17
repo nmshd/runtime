@@ -36,6 +36,7 @@ export interface GetAttributesRequestQuery {
     "shareInfo.notificationReference"?: string | string[];
     "shareInfo.peer"?: string | string[];
     "shareInfo.sourceAttribute"?: string | string[];
+    "shareInfo.thirdPartyAddress"?: string | string[];
     deletionInfo?: string | string[];
     "deletionInfo.deletionStatus"?: string | string[];
     "deletionInfo.deletionDate"?: string | string[];

@@ -50,6 +50,12 @@ export type OwnSharedRelationshipAttribute = LocalAttribute & {
     isDefault: undefined;
 };
 
+export type OwnSharedThirdPartyRelationshipAttribute = OwnSharedRelationshipAttribute & {
+    shareInfo: OwnSharedRelationshipAttribute["shareInfo"] & {
+        thirdPartyAddress: CoreAddress;
+    };
+};
+
 export type PeerSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
@@ -62,9 +68,17 @@ export type PeerSharedRelationshipAttribute = LocalAttribute & {
     isDefault: undefined;
 };
 
+export type PeerSharedThirdPartyRelationshipAttribute = PeerSharedRelationshipAttribute & {
+    shareInfo: PeerSharedRelationshipAttribute["shareInfo"] & {
+        thirdPartyAddress: CoreAddress;
+    };
+};
+
 export type ThirdPartyOwnedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
-    shareInfo: LocalAttributeShareInfo;
+    shareInfo: LocalAttribute["shareInfo"] & {
+        thirdPartyAddress: CoreAddress;
+    };
     isDefault: undefined;
 };
 
@@ -164,6 +178,18 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
         if (peerAddress) isPeerSharedAttribute &&= this.isOwnedBy(peerAddress);
         return isPeerSharedAttribute;
+    }
+
+    public isOwnSharedThirdPartyRelationshipAttribute(ownAddress: CoreAddress): this is OwnSharedThirdPartyRelationshipAttribute {
+        const isThirdPartyAttribute = this.shareInfo?.thirdPartyAddress !== undefined;
+        const isOwnShared = this.isOwnedBy(ownAddress);
+        return isThirdPartyAttribute && isOwnShared;
+    }
+
+    public isPeerSharedThirdPartyRelationshipAttribute(peerAddress: CoreAddress): this is PeerSharedThirdPartyRelationshipAttribute {
+        const isThirdPartyAttribute = this.shareInfo?.thirdPartyAddress !== undefined;
+        const isPeerShared = this.isOwnedBy(peerAddress);
+        return isThirdPartyAttribute && isPeerShared;
     }
 
     public isThirdPartyOwnedAttribute(ownAddress: CoreAddress, thirdPartyAddress?: CoreAddress): this is ThirdPartyOwnedRelationshipAttribute {

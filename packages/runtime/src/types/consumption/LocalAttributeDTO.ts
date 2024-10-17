@@ -5,6 +5,7 @@ export interface LocalAttributeShareInfoDTO {
     notificationReference?: string;
     peer: string;
     sourceAttribute?: string;
+    thirdPartyAddress?: string;
 }
 
 export enum LocalAttributeDeletionStatus {
