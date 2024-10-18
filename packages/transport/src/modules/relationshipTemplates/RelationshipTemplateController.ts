@@ -67,7 +67,7 @@ export class RelationshipTemplateController extends TransportController {
                 expiresAt: parameters.expiresAt.toString(),
                 maxNumberOfAllocations: parameters.maxNumberOfAllocations,
                 forIdentity: parameters.forIdentity?.address.toString(),
-                password: parameters.password,
+                password: parameters.password ? await this.hashPassword(parameters.password) : undefined,
                 content: cipher.toBase64()
             })
         ).value;
@@ -118,9 +118,11 @@ export class RelationshipTemplateController extends TransportController {
 
         const resultItems = (
             await this.client.getRelationshipTemplates({
-                templates: templates.map((t) => {
-                    return { id: t.id.toString(), password: t.password };
-                })
+                templates: await Promise.all(
+                    templates.map(async (t) => {
+                        return { id: t.id.toString(), password: t.password ? await this.hashPassword(t.password) : undefined };
+                    })
+                )
             })
         ).value;
         const promises = [];
@@ -137,9 +139,11 @@ export class RelationshipTemplateController extends TransportController {
 
         const backboneRelationshipTemplates = await (
             await this.client.getRelationshipTemplates({
-                templates: templates.map((t) => {
-                    return { id: t.id.toString(), password: t.password };
-                })
+                templates: await Promise.all(
+                    templates.map(async (t) => {
+                        return { id: t.id.toString(), password: t.password ? await this.hashPassword(t.password) : undefined };
+                    })
+                )
             })
         ).value.collect();
 
@@ -185,7 +189,7 @@ export class RelationshipTemplateController extends TransportController {
 
     private async updateCacheOfTemplate(template: RelationshipTemplate, response?: BackboneGetRelationshipTemplatesResponse) {
         if (!response) {
-            response = (await this.client.getRelationshipTemplate(template.id.toString(), template.password)).value;
+            response = (await this.client.getRelationshipTemplate(template.id.toString(), template.password ? await this.hashPassword(template.password) : undefined)).value;
         }
 
         const cachedTemplate = await this.decryptRelationshipTemplate(response, template.secretKey);
@@ -301,5 +305,9 @@ export class RelationshipTemplateController extends TransportController {
         for (const template of otherTemplatesOfPeer) {
             await this.templates.delete(template);
         }
+    }
+
+    private async hashPassword(password: string): Promise<string> {
+        return (await CoreCrypto.generatePassword(password)).toBase64();
     }
 }
