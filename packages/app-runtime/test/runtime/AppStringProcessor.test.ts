@@ -61,7 +61,7 @@ describe("AppStringProcessor", function () {
         expect(result.error.code).toBe("error.appStringProcessor.truncatedReferenceInvalid");
     });
 
-    test("should properly handle a personalized RelationshipTemplate", async function () {
+    test("should properly handle a personalized RelationshipTemplate with the correct Identity available", async function () {
         const runtime2SessionAAddress = runtime2SessionA.account.address!;
         assert(runtime2SessionAAddress);
 
@@ -71,9 +71,25 @@ describe("AppStringProcessor", function () {
             forIdentity: runtime2SessionAAddress
         });
 
-        await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        expect(result.isSuccess).toBeTruthy();
 
         verify(mockUiBridge.enterPassword(anyNumber())).never();
         eventBus.expectLastPublishedEvent(PeerRelationshipTemplateLoadedEvent);
+    });
+
+    test("should properly handle a personalized RelationshipTemplate with the correct Identity not available", async function () {
+        const runtime2SessionAAddress = runtime1Session.account.address!;
+        assert(runtime2SessionAAddress);
+
+        const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+            content: templateContent,
+            expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+            forIdentity: runtime2SessionAAddress
+        });
+
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        expect(result.isSuccess).toBeFalsy();
+        expect(result.error.code).toBe("error.appruntime.general.noAccountAvailableForIdentityTruncated");
     });
 });
