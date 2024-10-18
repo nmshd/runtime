@@ -191,7 +191,7 @@ describe("RelationshipTemplateDVO", () => {
         const requestorTemplate = (
             await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: templatorTemplate.truncatedReference,
-                password: "password"
+                passwordOrPin: "password"
             })
         ).value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
 

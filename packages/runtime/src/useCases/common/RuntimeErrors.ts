@@ -51,6 +51,10 @@ class General {
     public cacheEmpty(entityName: string | Function, id: string) {
         return new ApplicationError("error.runtime.cacheEmpty", `The cache of ${entityName instanceof Function ? entityName.name : entityName} with id '${id}' is empty.`);
     }
+
+    public onlyOneOfPinAndPassword(): ApplicationError {
+        return new ApplicationError("error.runtime.validation.onlyOneOfPinAndPassword", "It is not possible to give both a password and a PIN to an object.");
+    }
 }
 
 class Serval {

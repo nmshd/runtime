@@ -20,6 +20,7 @@ export interface CreateOwnRelationshipTemplateRequest {
     maxNumberOfAllocations?: number;
     forIdentity?: AddressString;
     password?: string;
+    pin?: string;
 }
 
 class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
@@ -40,15 +41,8 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
             );
         }
 
-        if (input.password && /^\d+$/.test(input.password) && (input.password.length > 12 || input.password.length < 2)) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(
-                        `Your chosen '${nameof<CreateOwnRelationshipTemplateRequest>((r) => r.password)}' is a PIN (consists of numbers only) and PINs must be at least 2 and at most 12 digits long`
-                    ),
-                    nameof<CreateOwnRelationshipTemplateRequest>((r) => r.password)
-                )
-            );
+        if (!!input.password && !!input.pin) {
+            validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.onlyOneOfPinAndPassword()));
         }
 
         return validationResult;

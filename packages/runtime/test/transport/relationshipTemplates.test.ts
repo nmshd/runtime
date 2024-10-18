@@ -221,7 +221,7 @@ describe("Template Tests", () => {
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
-                password: "password"
+                passwordOrPin: "password"
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("password");
@@ -239,7 +239,7 @@ describe("Template Tests", () => {
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
-                password: "password"
+                passwordOrPin: "password"
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("password");
@@ -255,7 +255,7 @@ describe("Template Tests", () => {
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
-                password: "wrong-password"
+                passwordOrPin: "wrong-password"
             });
             expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
         });

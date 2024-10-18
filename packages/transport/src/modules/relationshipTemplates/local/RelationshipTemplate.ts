@@ -10,6 +10,7 @@ export interface IRelationshipTemplate extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
     password?: string;
+    pin?: string;
     cache?: ICachedRelationshipTemplate;
     cachedAt?: ICoreDate;
     metadata?: any;
@@ -33,6 +34,10 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
     @validate({ nullable: true })
     @serialize()
     public password?: string;
+
+    @validate({ nullable: true })
+    @serialize()
+    public pin?: string;
 
     @validate({ nullable: true })
     @serialize()

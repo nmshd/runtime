@@ -1,5 +1,5 @@
 import { ISerializable } from "@js-soft/ts-serval";
-import { log } from "@js-soft/ts-utils";
+import { ApplicationError, log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, TransportCoreErrors } from "../../core";
@@ -40,6 +40,9 @@ export class RelationshipTemplateController extends TransportController {
 
     public async sendRelationshipTemplate(parameters: ISendRelationshipTemplateParameters): Promise<RelationshipTemplate> {
         parameters = SendRelationshipTemplateParameters.from(parameters);
+        if (!!parameters.password && !!parameters.pin) {
+            throw new ApplicationError("error.transport.notBothPasswordAndPin", "It's not possible to protect a RelationshipTemplate with both a password and a PIN.");
+        }
 
         const templateKey = await this.secrets.createTemplateKey();
 
@@ -120,7 +123,8 @@ export class RelationshipTemplateController extends TransportController {
             await this.client.getRelationshipTemplates({
                 templates: await Promise.all(
                     templates.map(async (t) => {
-                        return { id: t.id.toString(), password: t.password ? await this.hashPassword(t.password) : undefined };
+                        const passwordOrPin = t.password ?? t.pin;
+                        return { id: t.id.toString(), password: passwordOrPin ? await this.hashPassword(passwordOrPin) : undefined };
                     })
                 )
             })
@@ -141,7 +145,8 @@ export class RelationshipTemplateController extends TransportController {
             await this.client.getRelationshipTemplates({
                 templates: await Promise.all(
                     templates.map(async (t) => {
-                        return { id: t.id.toString(), password: t.password ? await this.hashPassword(t.password) : undefined };
+                        const passwordOrPin = t.password ?? t.pin;
+                        return { id: t.id.toString(), password: passwordOrPin ? await this.hashPassword(passwordOrPin) : undefined };
                     })
                 )
             })
@@ -189,7 +194,8 @@ export class RelationshipTemplateController extends TransportController {
 
     private async updateCacheOfTemplate(template: RelationshipTemplate, response?: BackboneGetRelationshipTemplatesResponse) {
         if (!response) {
-            response = (await this.client.getRelationshipTemplate(template.id.toString(), template.password ? await this.hashPassword(template.password) : undefined)).value;
+            const passwordOrPin = template.password ?? template.pin;
+            response = (await this.client.getRelationshipTemplate(template.id.toString(), passwordOrPin ? await this.hashPassword(passwordOrPin) : undefined)).value;
         }
 
         const cachedTemplate = await this.decryptRelationshipTemplate(response, template.secretKey);
@@ -255,12 +261,12 @@ export class RelationshipTemplateController extends TransportController {
         return template;
     }
 
-    public async loadPeerRelationshipTemplateByTruncated(truncated: string, password?: string): Promise<RelationshipTemplate> {
+    public async loadPeerRelationshipTemplateByTruncated(truncated: string, passwordOrPin?: string): Promise<RelationshipTemplate> {
         const reference = RelationshipTemplateReference.fromTruncated(truncated);
-        return await this.loadPeerRelationshipTemplate(reference.id, reference.key, reference.forIdentityTruncated, password);
+        return await this.loadPeerRelationshipTemplate(reference.id, reference.key, reference.forIdentityTruncated, passwordOrPin);
     }
 
-    public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, password?: string): Promise<RelationshipTemplate> {
+    public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, passwordOrPin?: string): Promise<RelationshipTemplate> {
         const templateDoc = await this.templates.read(id.toString());
         if (!templateDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
@@ -280,7 +286,7 @@ export class RelationshipTemplateController extends TransportController {
             id: id,
             secretKey: secretKey,
             isOwn: false,
-            password
+            password: passwordOrPin
         });
         await this.updateCacheOfTemplate(relationshipTemplate);
 
