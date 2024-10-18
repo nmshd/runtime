@@ -1,6 +1,5 @@
 import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentJSON } from "@nmshd/content";
 import { IdentityDTO } from "./IdentityDTO";
-import { RelationshipTemplateDTO } from "./RelationshipTemplateDTO";
 
 export enum RelationshipStatus {
     Pending = "Pending",
@@ -49,7 +48,7 @@ export interface PeerDeletionInfoDTO {
 
 export interface RelationshipDTO {
     id: string;
-    template: RelationshipTemplateDTO;
+    templateId: string;
     status: RelationshipStatus;
     peer: string;
     peerIdentity: IdentityDTO;
