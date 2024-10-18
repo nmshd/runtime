@@ -79,8 +79,46 @@ class Messages {
         );
     }
 
-    public missingOrInactiveRelationship(address: string) {
-        return new CoreError("error.transport.messages.missingOrInactiveRelationship", `An active Relationship with the given address '${address}' does not exist.`);
+    public missingRelationshipOrWrongRelationshipStatus(address: string[] | string) {
+        if (typeof address !== "string" && address.length > 1) {
+            return new CoreError(
+                "error.transport.messages.missingRelationshipOrWrongRelationshipStatus",
+                `A Relationship with the given addresses '${address}' does not exist or has the wrong status, so you cannot send them a Message.`
+            );
+        }
+        if (typeof address === "string") {
+            return new CoreError(
+                "error.transport.messages.missingRelationshipOrWrongRelationshipStatus",
+                `A Relationship with the given address '${address}' does not exist or has the wrong status, so you cannot send them a Message.`
+            );
+        }
+        return new CoreError(
+            "error.transport.messages.missingRelationshipOrWrongRelationshipStatus",
+            `A Relationship with the given address '${address[0]}' does not exist or has the wrong status, so you cannot send them a Message.`
+        );
+    }
+
+    public peerDeleted(address: string[]) {
+        if (address.length > 1) {
+            return new CoreError(
+                "error.transport.messages.peerDeleted",
+                `The recipients with the following addresses '${address}' are deleted, so you cannot send them a Message.`
+            );
+        }
+        return new CoreError("error.transport.messages.peerDeleted", `The recipient with the address '${address[0]}' is deleted, so you cannot send them a Message.`);
+    }
+
+    public peerInDeletion(address: string[]) {
+        if (address.length > 1) {
+            return new CoreError(
+                "error.transport.messages.peerInDeletion",
+                `The recipients with the following addresses '${address}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
+            );
+        }
+        return new CoreError(
+            "error.transport.messages.peerInDeletion",
+            `The recipient with the address '${address[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
+        );
     }
 }
 

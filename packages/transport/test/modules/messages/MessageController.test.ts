@@ -226,9 +226,7 @@ describe("MessageController", function () {
             await TestUtil.terminateRelationship(sender, recipient);
         });
 
-        test("should not send a message on a terminated relationship", async function () {
-            await expect(TestUtil.sendMessage(sender, recipient)).rejects.toThrow("error.transport.messages.missingOrInactiveRelationship");
-        });
+        test.todo("should be able to send a Notification on a terminated relationship");
 
         test("should still decrypt the message", async function () {
             await expect(sender.messages.fetchCaches([messageId])).resolves.not.toThrow();

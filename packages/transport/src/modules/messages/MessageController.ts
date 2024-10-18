@@ -105,7 +105,7 @@ export class MessageController extends TransportController {
     public async getMessagesByAddress(address: CoreAddress): Promise<Message[]> {
         const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(address);
         if (!relationship) {
-            throw TransportCoreErrors.messages.missingOrInactiveRelationship(address.toString());
+            throw TransportCoreErrors.messages.missingRelationshipOrWrongRelationshipStatus(address.toString());
         }
         return await this.getMessagesByRelationshipId(relationship.id);
     }
@@ -287,16 +287,26 @@ export class MessageController extends TransportController {
     @log()
     public async sendMessage(parameters: ISendMessageParameters): Promise<Message> {
         const parsedParams = SendMessageParameters.from(parameters);
+
         if (!parsedParams.attachments) parsedParams.attachments = [];
 
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
+        const deletedPeers: string[] = [];
+        const peersWithMissingOrInactiveRelationship: string[] = [];
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
-            if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+            const relationship = await this.relationships.getRelationshipToIdentity(recipient);
+
+            if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
+                deletedPeers.push(recipient.address);
+                continue;
+            }
+
+            if (!relationship || !(relationship.status === "Terminated" || relationship.status === "Active")) {
+                peersWithMissingOrInactiveRelationship.push(recipient.address);
+                continue;
             }
 
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
@@ -307,6 +317,14 @@ export class MessageController extends TransportController {
                 })
             );
             addressArray.push(recipient);
+        }
+
+        if (deletedPeers.length > 0) {
+            throw TransportCoreErrors.messages.peerDeleted(deletedPeers);
+        }
+
+        if (peersWithMissingOrInactiveRelationship.length > 0) {
+            throw TransportCoreErrors.messages.missingRelationshipOrWrongRelationshipStatus(peersWithMissingOrInactiveRelationship);
         }
 
         const publicAttachmentArray: CoreId[] = [];
@@ -333,9 +351,10 @@ export class MessageController extends TransportController {
         const addressToRelationshipId: Record<string, ICoreId> = {};
 
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
+            const relationship = await this.relationships.getRelationshipToIdentity(CoreAddress.from(recipient));
+
             if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+                throw TransportCoreErrors.messages.missingRelationshipOrWrongRelationshipStatus(recipient.toString());
             }
 
             const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
