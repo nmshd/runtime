@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
-import { Result } from "@js-soft/ts-utils";
+import { EventBus, Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
 import { CoreId, ICoreAddress } from "@nmshd/core-types";
 import { ModuleConfiguration, Runtime, RuntimeHealth } from "@nmshd/runtime";
@@ -31,9 +31,10 @@ import { UserfriendlyResult } from "./UserfriendlyResult";
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(
         private readonly _nativeEnvironment: INativeEnvironment,
-        appConfig: AppConfig
+        appConfig: AppConfig,
+        eventBus?: EventBus
     ) {
-        super(appConfig, _nativeEnvironment.loggerFactory);
+        super(appConfig, _nativeEnvironment.loggerFactory, eventBus);
 
         this._stringProcessor = new AppStringProcessor(this, this.loggerFactory);
     }
@@ -45,16 +46,17 @@ export class AppRuntime extends Runtime<AppConfig> {
     private _uiBridge: IUIBridge | undefined;
     private _uiBridgeResolver?: { promise: Promise<IUIBridge>; resolve(uiBridge: IUIBridge): void };
 
-    public async uiBridge(): Promise<IUIBridge> {
+    public uiBridge(): Promise<IUIBridge> | IUIBridge {
         if (this._uiBridge) return this._uiBridge;
-        if (this._uiBridgeResolver) return await this._uiBridgeResolver.promise;
+
+        if (this._uiBridgeResolver) return this._uiBridgeResolver.promise;
 
         let resolve: (uiBridge: IUIBridge) => void = () => "";
         const promise = new Promise<IUIBridge>((r) => (resolve = r));
         this._uiBridgeResolver = { promise, resolve };
 
         try {
-            return await this._uiBridgeResolver.promise;
+            return this._uiBridgeResolver.promise;
         } finally {
             this._uiBridgeResolver = undefined;
         }
@@ -250,7 +252,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         this._accountServices = new AccountServices(this._multiAccountController);
     }
 
-    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
+    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite, eventBus?: EventBus): Promise<AppRuntime> {
         // TODO: JSSNMSHDD-2524 (validate app config)
 
         if (!nativeBootstrapper.isInitialized) {
@@ -283,7 +285,7 @@ export class AppRuntime extends Runtime<AppConfig> {
                   databaseFolder: databaseFolder
               });
 
-        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig);
+        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig, eventBus);
         await runtime.init();
         runtime.logger.trace("Runtime initialized");
 
