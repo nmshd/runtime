@@ -171,6 +171,8 @@ describe("RelationshipTemplateReference", function () {
         }).rejects.toThrow("RelationshipTemplateReference.passwordType");
     });
 
+    test.todo("non-pw non-pin");
+
     test("should not create a reference with non-integer passwordType", async function () {
         await expect(async () => {
             RelationshipTemplateReference.from({
