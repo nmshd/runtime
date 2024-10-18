@@ -221,8 +221,8 @@ describe("tests on active relationship", () => {
     test("messages with multiple recipients should fail if there is no active Relationship to the recipients", async () => {
         const result = await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
         expect(result).toBeAnError(
-            `An active Relationship with the given addresses '${services2.address.toString()},${services3.address.toString()}' does not exist, so you cannot send them a Message.`,
-            "error.transport.messages.missingOrInactiveRelationship"
+            `A Relationship with the given addresses '${services2.address.toString()},${services3.address.toString()}' does not exist or has the wrong status, so you cannot send them a Message.`,
+            "error.transport.messages.missingRelationshipOrWrongRelationshipStatus"
         );
     });
 
@@ -230,8 +230,8 @@ describe("tests on active relationship", () => {
         await ensureActiveRelationship(services1.transport, services2.transport);
         const result = await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
         expect(result).toBeAnError(
-            `An active Relationship with the given address '${services3.address.toString()}' does not exist, so you cannot send them a Message.`,
-            "error.transport.messages.missingOrInactiveRelationship"
+            `A Relationship with the given address '${services3.address.toString()}' does not exist or has the wrong status, so you cannot send them a Message.`,
+            "error.transport.messages.missingRelationshipOrWrongRelationshipStatus"
         );
     });
 });
@@ -523,7 +523,7 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.transport.messages.missingOrInactiveRelationship");
+        expect(result).toBeAnError(/.*/, "error.transport.messages.missingRelationshipOrWrongRelationshipStatus");
     });
 
     test.todo("should be able to send a Notification");

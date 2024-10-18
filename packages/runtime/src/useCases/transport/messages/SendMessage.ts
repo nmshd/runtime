@@ -102,7 +102,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         if (peersWithMissingOrInactiveRelationship.length > 0) {
-            return TransportCoreErrors.messages.missingOrInactiveRelationship(peersWithMissingOrInactiveRelationship);
+            return TransportCoreErrors.messages.missingRelationshipOrWrongRelationshipStatus(peersWithMissingOrInactiveRelationship);
         }
 
         if (transformedContent instanceof Request) {

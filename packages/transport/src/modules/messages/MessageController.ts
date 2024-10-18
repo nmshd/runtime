@@ -105,7 +105,7 @@ export class MessageController extends TransportController {
     public async getMessagesByAddress(address: CoreAddress): Promise<Message[]> {
         const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(address);
         if (!relationship) {
-            throw TransportCoreErrors.messages.missingOrInactiveRelationship(address.toString());
+            throw TransportCoreErrors.messages.missingRelationshipOrWrongRelationshipStatus(address.toString());
         }
         return await this.getMessagesByRelationshipId(relationship.id);
     }
@@ -298,14 +298,17 @@ export class MessageController extends TransportController {
         const peersWithMissingOrInactiveRelationship: string[] = [];
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getRelationshipToIdentity(recipient);
+
             if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
                 deletedPeers.push(recipient.address);
                 continue;
             }
+
             if (!relationship || !(relationship.status === "Terminated" || relationship.status === "Active")) {
                 peersWithMissingOrInactiveRelationship.push(recipient.address);
                 continue;
             }
+
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
             envelopeRecipients.push(
                 MessageEnvelopeRecipient.from({
@@ -321,7 +324,7 @@ export class MessageController extends TransportController {
         }
 
         if (peersWithMissingOrInactiveRelationship.length > 0) {
-            throw TransportCoreErrors.messages.missingOrInactiveRelationship(peersWithMissingOrInactiveRelationship);
+            throw TransportCoreErrors.messages.missingRelationshipOrWrongRelationshipStatus(peersWithMissingOrInactiveRelationship);
         }
 
         const publicAttachmentArray: CoreId[] = [];
@@ -350,14 +353,18 @@ export class MessageController extends TransportController {
         for (const recipient of parsedParams.recipients) {
             const relationship = await this.relationships.getRelationshipToIdentity(CoreAddress.from(recipient));
 
-            const signature = await this.secrets.sign(relationship!.relationshipSecretId, plaintextBuffer);
+            if (!relationship) {
+                throw TransportCoreErrors.messages.missingRelationshipOrWrongRelationshipStatus(recipient.toString());
+            }
+
+            const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
             const messageSignature = MessageSignature.from({
                 recipient: recipient,
                 signature: signature
             });
             messageSignatures.push(messageSignature);
 
-            addressToRelationshipId[recipient.toString()] = relationship!.id;
+            addressToRelationshipId[recipient.toString()] = relationship.id;
         }
 
         const signed = MessageSigned.from({

@@ -79,22 +79,22 @@ class Messages {
         );
     }
 
-    public missingOrInactiveRelationship(address: string[] | string) {
+    public missingRelationshipOrWrongRelationshipStatus(address: string[] | string) {
         if (typeof address !== "string" && address.length > 1) {
             return new CoreError(
-                "error.transport.messages.missingOrInactiveRelationship",
-                `An active Relationship with the given addresses '${address}' does not exist, so you cannot send them a Message.`
+                "error.transport.messages.missingRelationshipOrWrongRelationshipStatus",
+                `A Relationship with the given addresses '${address}' does not exist or has the wrong status, so you cannot send them a Message.`
             );
         }
         if (typeof address === "string") {
             return new CoreError(
-                "error.transport.messages.missingOrInactiveRelationship",
-                `An active Relationship with the given address '${address}' does not exist, so you cannot send them a Message.`
+                "error.transport.messages.missingRelationshipOrWrongRelationshipStatus",
+                `A Relationship with the given address '${address}' does not exist or has the wrong status, so you cannot send them a Message.`
             );
         }
         return new CoreError(
-            "error.transport.messages.missingOrInactiveRelationship",
-            `An active Relationship with the given address '${address[0]}' does not exist, so you cannot send them a Message.`
+            "error.transport.messages.missingRelationshipOrWrongRelationshipStatus",
+            `A Relationship with the given address '${address[0]}' does not exist or has the wrong status, so you cannot send them a Message.`
         );
     }
 
