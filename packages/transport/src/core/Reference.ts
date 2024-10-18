@@ -9,7 +9,7 @@ export interface IReference extends ISerializable {
     backboneBaseUrl?: string;
     key: ICryptoSecretKey;
     forIdentityTruncated?: string;
-    passwordType?: number;
+    passwordType?: string;
 }
 
 export class Reference extends Serializable implements IReference {
@@ -29,9 +29,9 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public forIdentityTruncated?: string;
 
-    @validate({ nullable: true, min: 1, max: 12, customValidator: (v) => (!Number.isInteger(v) ? "must be an integer" : undefined) })
+    @validate({ nullable: true, regExp: /^(pw|pin(4|5|6|7|8|9|10|11|12|13|14|15|16))$/ })
     @serialize()
-    public passwordType?: number;
+    public passwordType?: string;
 
     public truncate(): string {
         const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
@@ -54,7 +54,7 @@ export class Reference extends Serializable implements IReference {
 
         const secretKey = this.parseSecretKey(splitted[1], splitted[2]);
         const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
-        const passwordType = splitted[4] ? this.parsePasswordType(splitted[4]) : undefined;
+        const passwordType = splitted[4] ? splitted[4] : undefined;
 
         return this.from({
             id: CoreId.from(id),
@@ -63,16 +63,6 @@ export class Reference extends Serializable implements IReference {
             forIdentityTruncated,
             passwordType
         });
-    }
-
-    private static parsePasswordType(value: string): number | undefined {
-        try {
-            if (value === "") return undefined;
-
-            return parseInt(value);
-        } catch (_) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("The password type must be indicated by an integer in the TruncatedReference.");
-        }
     }
 
     private static parseSecretKey(alg: string, secretKey: string): CryptoSecretKey {

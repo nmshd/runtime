@@ -68,8 +68,8 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
         });
     }
 
-    public get passwordType(): number | undefined {
-        return !this.password ? undefined : /^\d+$/.test(this.password) ? this.password.length : 1;
+    public get passwordType(): string | undefined {
+        return this.password ? "pw" : this.password ? `pin${this.password.length}` : undefined;
     }
 
     public truncate(): string {
