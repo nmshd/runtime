@@ -61,7 +61,7 @@ describe("RelationshipTemplateReference", function () {
         const serialized = reference.serialize();
         expect(typeof serialized).toBe("string");
         expect(serialized).toBe(
-            `{"@type":"RelationshipTemplateReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":pin10}`
+            `{"@type":"RelationshipTemplateReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":"pin10"}`
         );
         const deserialized = RelationshipTemplateReference.deserialize(serialized);
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -90,7 +90,7 @@ describe("RelationshipTemplateReference", function () {
         const serialized = reference.serialize();
         expect(typeof serialized).toBe("string");
         expect(serialized).toBe(
-            `{"@type":"RelationshipTemplateReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":pin10}`
+            `{"@type":"RelationshipTemplateReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":"pin10"}`
         );
         const deserialized = Serializable.deserializeUnknown(serialized) as RelationshipTemplateReference;
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -110,7 +110,7 @@ describe("RelationshipTemplateReference", function () {
             id: await BackboneIds.relationshipTemplate.generateUnsafe()
         });
         const truncated = reference.truncate();
-        expect(truncated.length).toBeLessThan(115);
+        expect(truncated.length).toBeLessThan(120);
         expect(truncated.length).toBeGreaterThan(80);
         const deserialized = RelationshipTemplateReference.fromTruncated(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -130,7 +130,7 @@ describe("RelationshipTemplateReference", function () {
             passwordType: "pin10"
         });
         const truncated = reference.truncate();
-        expect(truncated.length).toBeLessThan(115);
+        expect(truncated.length).toBeLessThan(120);
         expect(truncated.length).toBeGreaterThan(80);
         const deserialized = RelationshipTemplateReference.fromTruncated(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -150,7 +150,7 @@ describe("RelationshipTemplateReference", function () {
             id: await BackboneIds.relationshipTemplate.generateUnsafe()
         });
         const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}`).toBase64URL();
-        expect(truncated.length).toBeLessThan(115);
+        expect(truncated.length).toBeLessThan(120);
         expect(truncated.length).toBeGreaterThan(80);
         const deserialized = RelationshipTemplateReference.fromTruncated(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);

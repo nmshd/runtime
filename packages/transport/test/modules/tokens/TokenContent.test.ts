@@ -66,7 +66,7 @@ describe("TokenContent", function () {
                 secretKey: await CryptoEncryption.generateKey(),
                 templateId: await CoreIdHelper.notPrefixed.generate(),
                 forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                passwordType: 1
+                passwordType: "pw"
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -75,7 +75,7 @@ describe("TokenContent", function () {
             const serialized = token.serialize();
             expect(typeof serialized).toBe("string");
             expect(serialized).toBe(
-                `{"@type":"TokenContentRelationshipTemplate","forIdentity":"${token.forIdentity!.serialize()}","passwordType":${token.passwordType},"secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`
+                `{"@type":"TokenContentRelationshipTemplate","forIdentity":"${token.forIdentity!.serialize()}","passwordType":"${token.passwordType}","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`
             );
             const deserialized = TokenContentRelationshipTemplate.deserialize(serialized);
             expect(deserialized).toBeInstanceOf(Serializable);
@@ -94,7 +94,7 @@ describe("TokenContent", function () {
                 secretKey: await CryptoEncryption.generateKey(),
                 templateId: await CoreIdHelper.notPrefixed.generate(),
                 forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                passwordType: 1
+                passwordType: "pw"
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -119,7 +119,7 @@ describe("TokenContent", function () {
                 secretKey: await CryptoEncryption.generateKey(),
                 templateId: await CoreIdHelper.notPrefixed.generate(),
                 forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                passwordType: 1
+                passwordType: "pw"
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -128,7 +128,7 @@ describe("TokenContent", function () {
             const serialized = token.serialize();
             expect(typeof serialized).toBe("string");
             expect(serialized).toBe(
-                `{"@type":"TokenContentRelationshipTemplate","forIdentity":"${token.forIdentity!.serialize()}","passwordType":${token.passwordType},"secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`
+                `{"@type":"TokenContentRelationshipTemplate","forIdentity":"${token.forIdentity!.serialize()}","passwordType":"${token.passwordType}","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`
             );
             const deserialized = Serializable.deserializeUnknown(serialized) as TokenContentRelationshipTemplate;
             expect(deserialized).toBeInstanceOf(Serializable);
