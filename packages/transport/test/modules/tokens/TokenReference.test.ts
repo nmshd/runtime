@@ -52,7 +52,7 @@ describe("TokenReference", function () {
             id: await BackboneIds.token.generateUnsafe(),
             backboneBaseUrl: "localhost",
             forIdentityTruncated: "1234",
-            passwordType: 10
+            passwordType: "pin10"
         });
         expect(reference).toBeInstanceOf(Serializable);
         expect(reference).toBeInstanceOf(TokenReference);
@@ -61,7 +61,7 @@ describe("TokenReference", function () {
         const serialized = reference.serialize();
         expect(typeof serialized).toBe("string");
         expect(serialized).toBe(
-            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":10}`
+            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":"pin10"}`
         );
         const deserialized = TokenReference.deserialize(serialized);
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -81,7 +81,7 @@ describe("TokenReference", function () {
             id: await BackboneIds.token.generateUnsafe(),
             backboneBaseUrl: "localhost",
             forIdentityTruncated: "1234",
-            passwordType: 10
+            passwordType: "pin10"
         });
         expect(reference).toBeInstanceOf(Serializable);
         expect(reference).toBeInstanceOf(TokenReference);
@@ -90,7 +90,7 @@ describe("TokenReference", function () {
         const serialized = reference.serialize();
         expect(typeof serialized).toBe("string");
         expect(serialized).toBe(
-            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":10}`
+            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":"pin10"}`
         );
         const deserialized = Serializable.deserializeUnknown(serialized) as TokenReference;
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -110,7 +110,7 @@ describe("TokenReference", function () {
             id: await BackboneIds.token.generateUnsafe()
         });
         const truncated = reference.truncate();
-        expect(truncated.length).toBeLessThan(115);
+        expect(truncated.length).toBeLessThan(120);
         expect(truncated.length).toBeGreaterThan(80);
         const deserialized = TokenReference.fromTruncated(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -127,10 +127,10 @@ describe("TokenReference", function () {
             id: await BackboneIds.token.generateUnsafe(),
             backboneBaseUrl: "localhost",
             forIdentityTruncated: "1234",
-            passwordType: 10
+            passwordType: "pin10"
         });
         const truncated = reference.truncate();
-        expect(truncated.length).toBeLessThan(115);
+        expect(truncated.length).toBeLessThan(120);
         expect(truncated.length).toBeGreaterThan(80);
         const deserialized = TokenReference.fromTruncated(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -150,7 +150,7 @@ describe("TokenReference", function () {
             id: await BackboneIds.token.generateUnsafe()
         });
         const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}`).toBase64URL();
-        expect(truncated.length).toBeLessThan(115);
+        expect(truncated.length).toBeLessThan(120);
         expect(truncated.length).toBeGreaterThan(80);
         const deserialized = TokenReference.fromTruncated(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -166,7 +166,7 @@ describe("TokenReference", function () {
             TokenReference.from({
                 key: await CryptoEncryption.generateKey(),
                 id: await BackboneIds.token.generateUnsafe(),
-                passwordType: 20
+                passwordType: "pin20"
             });
         }).rejects.toThrow("TokenReference.passwordType");
     });
@@ -176,7 +176,7 @@ describe("TokenReference", function () {
             TokenReference.from({
                 key: await CryptoEncryption.generateKey(),
                 id: await BackboneIds.token.generateUnsafe(),
-                passwordType: 2.4
+                passwordType: "pin2.4"
             });
         }).rejects.toThrow("TokenReference.passwordType");
     });

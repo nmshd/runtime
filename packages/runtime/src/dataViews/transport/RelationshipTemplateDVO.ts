@@ -13,6 +13,8 @@ export interface RelationshipTemplateDVO extends DataViewObject {
     expiresAt?: string;
     maxNumberOfAllocations?: number;
     forIdentity?: string;
+    password?: string;
+    pin?: string;
 
     /**
      * Is optional, as there can be RelationshipTemplates without actual requests in it

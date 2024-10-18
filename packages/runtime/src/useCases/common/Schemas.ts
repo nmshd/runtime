@@ -21963,6 +21963,9 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -22234,6 +22237,9 @@ export const LoadPeerRelationshipTemplateRequest: any = {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
                         }
                     ]
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [

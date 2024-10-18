@@ -19,6 +19,8 @@ export interface CreateOwnRelationshipTemplateRequest {
      */
     maxNumberOfAllocations?: number;
     forIdentity?: AddressString;
+    password?: string;
+    pin?: string;
 }
 
 class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
@@ -37,6 +39,10 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
                     nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)
                 )
             );
+        }
+
+        if (!!input.password && !!input.pin) {
+            validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.onlyOneOfPinAndPassword()));
         }
 
         return validationResult;
@@ -61,7 +67,8 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             content: request.content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            password: request.password
         });
 
         await this.accountController.syncDatawallet();
