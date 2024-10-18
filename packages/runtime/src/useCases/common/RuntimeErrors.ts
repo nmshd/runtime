@@ -53,7 +53,7 @@ class General {
     }
 
     public onlyOneOfPinAndPassword(): ApplicationError {
-        return new ApplicationError("error.runtime.validation.onlyOneOfPinAndPassword", "It is not possible to give both a password and a PIN to an object.");
+        return new ApplicationError("error.runtime.validation.notBothPasswordAndPin", "It is not possible to protect an object with both a password and a PIN.");
     }
 }
 
