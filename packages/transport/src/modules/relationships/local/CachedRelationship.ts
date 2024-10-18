@@ -1,10 +1,9 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, ICoreDate } from "@nmshd/core-types";
-import { IRelationshipTemplate, RelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
+import { CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { IRelationshipAuditLogEntry, RelationshipAuditLogEntry } from "./RelationshipAuditLogEntry";
 
 export interface ICachedRelationship extends ISerializable {
-    template: IRelationshipTemplate;
+    templateId: ICoreId;
     creationContent: ISerializable;
 
     lastMessageSentAt?: ICoreDate;
@@ -16,7 +15,7 @@ export interface ICachedRelationship extends ISerializable {
 export class CachedRelationship extends Serializable implements ICachedRelationship {
     @validate()
     @serialize()
-    public template: RelationshipTemplate;
+    public templateId: CoreId;
 
     @validate()
     @serialize()
@@ -33,6 +32,15 @@ export class CachedRelationship extends Serializable implements ICachedRelations
     @validate()
     @serialize({ type: RelationshipAuditLogEntry })
     public auditLog: RelationshipAuditLogEntry[];
+
+    public static override preFrom(value: any): any {
+        if (typeof value.template !== "undefined") {
+            value.templateId = value.template.id;
+            delete value.template;
+        }
+
+        return value;
+    }
 
     public static from(value: ICachedRelationship): CachedRelationship {
         return this.fromAny(value);
