@@ -157,21 +157,38 @@ describe("RelationshipTemplateController", function () {
         expect(ownTemplate).toBeDefined();
         expect(ownTemplate.password).toBe("password");
         const reference = ownTemplate.toRelationshipTemplateReference();
-        expect(reference.passwordType).toBe(1);
+        expect(reference.passwordType).toBe("pw");
 
         const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference.truncate(), "password");
         expect(peerTemplate).toBeDefined();
         expect(peerTemplate.password).toBe("password");
     });
 
-    test("should throw an error if the password is a too long PIN", async function () {
+    test("should create and load a PIN-protected template", async function () {
+        const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            password: "1234"
+        });
+        expect(ownTemplate).toBeDefined();
+        expect(ownTemplate.password).toBe("1234");
+        const reference = ownTemplate.toRelationshipTemplateReference();
+        expect(reference.passwordType).toBe("pin4");
+
+        const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference.truncate(), "password");
+        expect(peerTemplate).toBeDefined();
+        expect(peerTemplate.password).toBe("1234");
+    });
+
+    test("should throw an error if created with password and PIN", async function () {
         await expect(
             sender.relationshipTemplates.sendRelationshipTemplate({
                 content: { a: "A" },
                 expiresAt: CoreDate.utc().add({ minutes: 1 }),
-                password: "1234567890123"
+                password: "password",
+                pin: "1234"
             })
-        ).rejects.toThrow("SendRelationshipTemplateParameters.password:String :: PINs must be at least 2 and at most 12 digits long");
+        ).rejects.toThrow("error.transport.notBothPasswordAndPin");
     });
 
     test("should throw an error if loaded with a wrong or missing password", async function () {
@@ -218,14 +235,14 @@ describe("RelationshipTemplateController", function () {
             expect(reference.passwordType).toBeUndefined();
         });
 
-        test("should get password type 1 if a text password is given", async function () {
+        test("should get password type pw if a password is given", async function () {
             const template = await sender.relationshipTemplates.sendRelationshipTemplate({
                 content: { a: "A" },
                 expiresAt: CoreDate.utc().add({ minutes: 1 }),
                 password: "password"
             });
             const reference = template.toRelationshipTemplateReference();
-            expect(reference.passwordType).toBe(1);
+            expect(reference.passwordType).toBe("pw");
         });
 
         test("should get the PIN length if a PIN is given", async function () {
@@ -235,7 +252,7 @@ describe("RelationshipTemplateController", function () {
                 password: "1234"
             });
             const reference = template.toRelationshipTemplateReference();
-            expect(reference.passwordType).toBe(4);
+            expect(reference.passwordType).toBe("pin4");
         });
     });
 

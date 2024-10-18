@@ -178,7 +178,7 @@ describe("TokenController", function () {
         const content = TokenContentRelationshipTemplate.from({
             templateId: await CoreIdHelper.notPrefixed.generate(),
             secretKey: await CryptoEncryption.generateKey(),
-            passwordType: 1
+            passwordType: "pw"
         });
         const sentToken = await sender.tokens.sendToken({
             content,
@@ -212,7 +212,7 @@ describe("TokenController", function () {
             templateId: await CoreIdHelper.notPrefixed.generate(),
             secretKey: await CryptoEncryption.generateKey(),
             forIdentity: recipient.identity.address,
-            passwordType: 1
+            passwordType: "pw"
         });
         const sentToken = await sender.tokens.sendToken({
             content,

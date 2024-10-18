@@ -227,6 +227,23 @@ describe("Template Tests", () => {
             expect(loadResult.value.password).toBe("password");
         });
 
+        test("send and receive a PIN-protected template", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                pin: "1234"
+            });
+            expect(createResult).toBeSuccessful();
+            expect(createResult.value.password).toBe("password");
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                passwordOrPin: "1234"
+            });
+            expect(loadResult).toBeSuccessful();
+            expect(loadResult.value.pin).toBe("1234");
+        });
+
         test("send and receive a password-protected template via a token", async () => {
             const templateId = (
                 await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -260,16 +277,14 @@ describe("Template Tests", () => {
             expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
         });
 
-        test("validation error when creating a template with a too short PIN", async () => {
+        test("validation error when creating a template with both a password and a PIN", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                password: "1"
+                password: "password",
+                pin: "1234"
             });
-            expect(createResult).toBeAnError(
-                "Your chosen 'password' is a PIN \\(consists of numbers only\\) and PINs must be at least 2 and at most 12 digits long",
-                "error.runtime.validation.invalidPropertyValue"
-            );
+            expect(createResult).toBeAnError(/.*/, "error.runtime.validation.notBothPasswordAndPin");
         });
 
         test("create a token for a password-protected template", async () => {
