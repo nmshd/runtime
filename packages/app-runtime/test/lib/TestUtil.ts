@@ -1,7 +1,7 @@
 /* eslint-disable jest/no-standalone-expect */
 import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
-import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import {
@@ -16,18 +16,18 @@ import {
 } from "@nmshd/runtime";
 import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
-import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
+import { AppConfig, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
 import { FakeNativeBootstrapper } from "./natives/FakeNativeBootstrapper";
 
 export class TestUtil {
-    public static async createRuntime(configOverride?: any): Promise<AppRuntime> {
+    public static async createRuntime(configOverride?: any, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
         const nativeBootstrapper = new FakeNativeBootstrapper();
         await nativeBootstrapper.init();
-        const runtime = await AppRuntime.create(nativeBootstrapper, config);
-        runtime.registerUIBridge(new FakeUIBridge());
+        const runtime = await AppRuntime.create(nativeBootstrapper, config, eventBus);
+        runtime.registerUIBridge(uiBridge);
 
         return runtime;
     }
