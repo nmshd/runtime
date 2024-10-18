@@ -9,6 +9,7 @@ import { CachedToken, ICachedToken } from "./CachedToken";
 export interface IToken extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
+    password?: string;
     cache?: ICachedToken;
     cachedAt?: ICoreDate;
     metadata?: any;
@@ -18,7 +19,7 @@ export interface IToken extends ICoreSynchronizable {
 @type("Token")
 export class Token extends CoreSynchronizable implements IToken {
     public override readonly technicalProperties = ["@type", "@context", nameof<Token>((r) => r.secretKey), nameof<Token>((r) => r.isOwn)];
-
+    public override readonly userdataProperties = [nameof<Token>((r) => r.password)];
     public override readonly metadataProperties = [nameof<Token>((r) => r.metadata), nameof<Token>((r) => r.metadataModifiedAt)];
 
     @validate()
@@ -28,6 +29,10 @@ export class Token extends CoreSynchronizable implements IToken {
     @validate()
     @serialize()
     public isOwn: boolean;
+
+    @validate({ nullable: true })
+    @serialize()
+    public password?: string;
 
     @validate({ nullable: true })
     @serialize()
@@ -50,7 +55,11 @@ export class Token extends CoreSynchronizable implements IToken {
     }
 
     public toTokenReference(): TokenReference {
-        return TokenReference.from({ id: this.id, key: this.secretKey, forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4) });
+        return TokenReference.from({ id: this.id, key: this.secretKey, forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4), passwordType: this.passwordType });
+    }
+
+    public get passwordType(): number | undefined {
+        return !this.password ? undefined : /^\d+$/.test(this.password) ? this.password.length : 1;
     }
 
     public truncate(): string {

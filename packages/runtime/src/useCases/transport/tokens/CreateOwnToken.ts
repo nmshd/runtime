@@ -14,6 +14,7 @@ export interface CreateOwnTokenRequest {
     expiresAt: ISO8601DateTimeString;
     ephemeral: boolean;
     forIdentity?: AddressString;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<CreateOwnTokenRequest> {
@@ -30,6 +31,17 @@ class Validator extends SchemaValidator<CreateOwnTokenRequest> {
                 new ValidationFailure(
                     RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateOwnTokenRequest>((r) => r.expiresAt)}' must be in the future`),
                     nameof<CreateOwnTokenRequest>((r) => r.expiresAt)
+                )
+            );
+        }
+
+        if (input.password && /^\d+$/.test(input.password) && (input.password.length > 12 || input.password.length < 2)) {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(
+                        `Your chosen '${nameof<CreateOwnTokenRequest>((r) => r.password)}' is a PIN (consists of numbers only) and PINs must be at least 2 and at most 12 digits long`
+                    ),
+                    nameof<CreateOwnTokenRequest>((r) => r.password)
                 )
             );
         }
@@ -59,7 +71,8 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
             content: tokenContent,
             expiresAt: CoreDate.from(request.expiresAt),
             ephemeral: request.ephemeral,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            password: request.password
         });
 
         if (!request.ephemeral) {

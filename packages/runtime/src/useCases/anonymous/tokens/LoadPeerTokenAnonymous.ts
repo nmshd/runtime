@@ -7,6 +7,7 @@ import { TokenMapper } from "../../transport/tokens/TokenMapper";
 
 export interface LoadPeerTokenAnonymousRequest {
     reference: TokenReferenceString;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<LoadPeerTokenAnonymousRequest> {
@@ -24,7 +25,7 @@ export class LoadPeerTokenAnonymousUseCase extends UseCase<LoadPeerTokenAnonymou
     }
 
     protected async executeInternal(request: LoadPeerTokenAnonymousRequest): Promise<Result<TokenDTO>> {
-        const createdToken = await this.anonymousTokenController.loadPeerTokenByTruncated(request.reference);
+        const createdToken = await this.anonymousTokenController.loadPeerTokenByTruncated(request.reference, request.password);
         return Result.ok(TokenMapper.toTokenDTO(createdToken, true));
     }
 }
