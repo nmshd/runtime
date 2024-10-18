@@ -123,6 +123,13 @@ export class RelationshipsController extends TransportController {
         return Relationship.from(newestRelationship);
     }
 
+    public async getActiveOrTerminatedRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
+        if (!(await this.getRelationshipToIdentity(address, RelationshipStatus.Active))) {
+            return await this.getRelationshipToIdentity(address, RelationshipStatus.Terminated);
+        }
+        return await this.getRelationshipToIdentity(address, RelationshipStatus.Active);
+    }
+
     public async getActiveRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
         return await this.getRelationshipToIdentity(address, RelationshipStatus.Active);
     }

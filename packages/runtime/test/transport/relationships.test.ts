@@ -1,13 +1,11 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { ConsumptionIds } from "@nmshd/consumption";
-import { Notification, RelationshipAttributeConfidentiality } from "@nmshd/content";
+import { RelationshipAttributeConfidentiality } from "@nmshd/content";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
     LocalAttributeDTO,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
-    PeerToBeDeletedEvent,
     RelationshipAuditLogEntryReason,
     RelationshipChangedEvent,
     RelationshipDTO,
@@ -19,7 +17,6 @@ import {
 import {
     QueryParamConditions,
     RuntimeServiceProvider,
-    TestNotificationItem,
     TestRuntimeServices,
     createTemplate,
     emptyRelationshipCreationContent,
@@ -34,7 +31,6 @@ import {
     getRelationship,
     sendAndReceiveNotification,
     sendMessageToMultipleRecipients,
-    syncUntilHasEvent,
     syncUntilHasMessageWithNotification,
     syncUntilHasRelationships
 } from "../lib";
@@ -225,7 +221,7 @@ describe("tests on active relationship", () => {
     test("messages with multiple recipients should fail if there is no active Relationship to the recipients", async () => {
         const result = await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
         expect(result).toBeAnError(
-            `An active Relationship with the given addresses '${services2.address.toString()},${services3.address.toString()}' do not exist, so you cannot send them a Message.`,
+            `An active Relationship with the given addresses '${services2.address.toString()},${services3.address.toString()}' does not exist, so you cannot send them a Message.`,
             "error.transport.messages.missingOrInactiveRelationship"
         );
     });
@@ -528,17 +524,6 @@ describe("RelationshipTermination", () => {
             }
         });
         expect(result).toBeAnError(/.*/, "error.transport.messages.missingOrInactiveRelationship");
-    });
-
-    // eslint-disable-next-line jest/no-disabled-tests
-    test.skip("sending Notification results in an error redirected from the Backbone", async () => {
-        const id = await ConsumptionIds.notification.generate();
-        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
-        const result = await services1.transport.messages.sendMessage({ recipients: [services2.address], content: notificationToSend.toJSON() });
-        expect(result).toBeAnError(
-            `Cannot send message to ${services1.address.toString()} because the relationship to it is not active. In order to be able to send messages again, you have to reactivate the relationship.`,
-            "error.platform.validation.message.relationshipToRecipientNotActive"
-        );
     });
 
     test.todo("should be able to send a Notification");
@@ -992,39 +977,4 @@ describe("Relationship existence check", () => {
     test("should not decompose a relationship", async function () {
         expect(await services1.transport.relationships.decomposeRelationship({ relationshipId: fakeRelationshipId })).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
-});
-describe("", () => {
-    const serviceProvider = new RuntimeServiceProvider();
-    let services1: TestRuntimeServices;
-    let services2: TestRuntimeServices;
-    let services4: TestRuntimeServices;
-
-    beforeAll(async () => {
-        const runtimeServices = await serviceProvider.launch(4, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
-        services1 = runtimeServices[0];
-        services2 = runtimeServices[1];
-        services4 = runtimeServices[3];
-        const relationship1 = await ensureActiveRelationship(services1.transport, services2.transport);
-
-        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationship1.id);
-        await services2.eventBus.waitForRunningEventHandlers();
-
-        await establishRelationship(services2.transport, services4.transport);
-    }, 30000);
-
-    afterAll(() => serviceProvider.stop());
-
-    // eslint-disable-next-line jest/no-disabled-tests
-    test.skip("sending Notification to an Identity which is in status 'ToBeDeleted' results in an error redirected from the Backbone", async () => {
-        const id = await ConsumptionIds.notification.generate();
-        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
-        const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
-        expect(result).toBeAnError(
-            "Cannot send message to 1 of the recipients because they are in status 'ToBeDeleted'.",
-            "error.platform.validation.message.recipientToBeDeleted"
-        );
-    });
-
-    test.todo("should be able to send a Notification to an Identity which is in status 'toBeDeleted'");
 });

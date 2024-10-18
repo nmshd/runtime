@@ -83,7 +83,7 @@ class Messages {
         if (typeof address !== "string" && address.length > 1) {
             return new CoreError(
                 "error.transport.messages.missingOrInactiveRelationship",
-                `An active Relationship with the given addresses '${address}' do not exist, so you cannot send them a Message.`
+                `An active Relationship with the given addresses '${address}' does not exist, so you cannot send them a Message.`
             );
         }
         if (typeof address === "string") {

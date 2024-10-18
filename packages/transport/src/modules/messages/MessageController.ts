@@ -297,12 +297,8 @@ export class MessageController extends TransportController {
         const deletedPeers: string[] = [];
         const peersWithMissingOrInactiveRelationship: string[] = [];
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getRelationshipToIdentity(recipient);
-            if (
-                relationship &&
-                (relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active) &&
-                relationship.peerDeletionInfo?.deletionStatus !== "Deleted"
-            ) {
+            const relationship = await this.relationships.getActiveOrTerminatedRelationshipToIdentity(recipient);
+            if (relationship && relationship.peerDeletionInfo?.deletionStatus !== "Deleted") {
                 const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
                 envelopeRecipients.push(
                     MessageEnvelopeRecipient.from({
@@ -312,7 +308,7 @@ export class MessageController extends TransportController {
                 );
                 addressArray.push(recipient);
             }
-            if (!(relationship && (relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active))) {
+            if (!relationship) {
                 peersWithMissingOrInactiveRelationship.push(recipient.address);
             }
             if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {

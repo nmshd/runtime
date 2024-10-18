@@ -226,10 +226,7 @@ describe("MessageController", function () {
             await TestUtil.terminateRelationship(sender, recipient);
         });
 
-        // eslint-disable-next-line jest/no-disabled-tests
-        test.skip("should not send a message on a terminated relationship", async function () {
-            await expect(TestUtil.sendMessage(sender, recipient)).rejects.toThrow("error.platform.validation.message.relationshipToRecipientNotActive");
-        });
+        test.todo("should be able to send a Notification on a terminated relationship");
 
         test("should still decrypt the message", async function () {
             await expect(sender.messages.fetchCaches([messageId])).resolves.not.toThrow();
