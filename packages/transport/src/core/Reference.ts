@@ -46,7 +46,9 @@ export class Reference extends Serializable implements IReference {
         const splitted = truncatedBuffer.toUtf8().split("|");
 
         if (![3, 5].includes(splitted.length)) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("A TruncatedReference must consist of either exactly 3 or exactly 5 components.");
+            throw TransportCoreErrors.general.invalidTruncatedReference(
+                `A TruncatedReference must consist of either exactly 3 or exactly 5 components, but it consists of '${splitted.length}'.`
+            );
         }
 
         const idPart = splitted[0];
