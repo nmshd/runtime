@@ -182,9 +182,9 @@ export class TestObjectFactory {
                     deletionStatus: PeerDeletionStatus.Deleted,
                     deletionDate: CoreDate.from("2022-01-03T00:00:00.000Z")
                 }),
-            status: properties?.status ?? RelationshipStatus.Active,
+            status: properties?.status ?? RelationshipStatus.DeletionProposed,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-03T00:00:00.000Z"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2022-01-03T00:00:00.000Z"),
             cache:
                 properties?.cache ??
                 CachedRelationship.from({
@@ -205,6 +205,16 @@ export class TestObjectFactory {
                             reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
                             oldStatus: RelationshipStatus.Pending,
                             newStatus: RelationshipStatus.Active
+                        },
+
+                        {
+                            createdAt: CoreDate.from("2022-01-03T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            // must be DecompositionDueToIdentityDeletion in the future
+                            reason: RelationshipAuditLogEntryReason.Decomposition,
+                            oldStatus: RelationshipStatus.Active,
+                            newStatus: RelationshipStatus.DeletionProposed
                         }
                     ],
                     template: this.createIncomingRelationshipTemplate()

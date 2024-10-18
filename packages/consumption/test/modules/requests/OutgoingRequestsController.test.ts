@@ -237,9 +237,9 @@ describe("OutgoingRequestsController", function () {
                     ]
                 }
             });
-            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerHasDeletionInfo");
+            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.wrongRelationshipStatus");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer is in status 'Deleted'."
+                "You cannot create a request to 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
             );
         });
 
