@@ -6,7 +6,7 @@ export interface ITokenContentRelationshipTemplate extends ISerializable {
     templateId: ICoreId;
     secretKey: ICryptoSecretKey;
     forIdentity?: ICoreAddress;
-    passwordType?: number;
+    passwordType?: string;
 }
 
 @type("TokenContentRelationshipTemplate")
@@ -23,9 +23,9 @@ export class TokenContentRelationshipTemplate extends Serializable implements IT
     @serialize()
     public forIdentity?: CoreAddress;
 
-    @validate({ nullable: true, min: 1, max: 12, customValidator: (v) => (!Number.isInteger(v) ? "must be an integer" : undefined) })
+    @validate({ nullable: true, regExp: /^(pw|pin(4|5|6|7|8|9|10|11|12|13|14|15|16))$/ })
     @serialize()
-    public passwordType?: number;
+    public passwordType?: string;
 
     public static from(value: ITokenContentRelationshipTemplate): TokenContentRelationshipTemplate {
         return this.fromAny(value);
