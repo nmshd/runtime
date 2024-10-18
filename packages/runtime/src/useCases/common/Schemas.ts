@@ -7,6 +7,9 @@ export const LoadPeerTokenAnonymousRequest: any = {
             "properties": {
                 "reference": {
                     "$ref": "#/definitions/TokenReferenceString"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -21241,6 +21244,9 @@ export const CreateTokenForFileRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -21279,6 +21285,9 @@ export const CreateTokenQRCodeForFileRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -22024,6 +22033,9 @@ export const CreateTokenForOwnTemplateRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -22062,6 +22074,9 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -22638,6 +22653,9 @@ export const CreateOwnTokenRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -22801,6 +22819,9 @@ export const LoadPeerTokenRequest: any = {
                 },
                 "ephemeral": {
                     "type": "boolean"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
