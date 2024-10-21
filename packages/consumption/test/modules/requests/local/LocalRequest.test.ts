@@ -77,8 +77,9 @@ describe("LocalRequest", function () {
     });
 
     describe("updateExpirationDateBasedOnTemplateExpiration", function () {
-        test("sets the expiration date", function () {
+        test("sets the expiration date if the Request doesn't have an expiration date", function () {
             const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({});
+            expect(request.content.expiresAt).toBeUndefined();
             const timestamp = CoreDate.utc().subtract({ days: 1 });
 
             request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
@@ -88,15 +89,6 @@ describe("LocalRequest", function () {
         test("sets the expiration date if the Request has already been rejected", function () {
             const request = TestObjectFactory.createRejectedLocalRequestBasedOnTemplateWith({});
 
-            const timestamp = CoreDate.utc().subtract({ days: 1 });
-
-            request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
-            expect(request.content.expiresAt).toStrictEqual(timestamp);
-        });
-
-        test("sets the expiration date if the Request doesn't have an expiration date", function () {
-            const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({});
-            expect(request.content.expiresAt).toBeUndefined();
             const timestamp = CoreDate.utc().subtract({ days: 1 });
 
             request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
