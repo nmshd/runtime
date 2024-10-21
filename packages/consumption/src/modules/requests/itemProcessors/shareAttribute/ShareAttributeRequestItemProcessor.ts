@@ -90,8 +90,9 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
             }
+
             if (requestItem.thirdPartyAddress) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("Identity attributes are not allowed to have a thirdPartyAddress"));
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("When sharing a RepositoryAttribute, no thirdPartyAddress may be specified."));
             }
         }
 
