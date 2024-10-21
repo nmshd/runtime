@@ -238,7 +238,7 @@ describe("Template Tests", () => {
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
-                password: "1234"
+                pin: "1234"
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("pin:1234");
@@ -294,6 +294,34 @@ describe("Template Tests", () => {
                 pin: "1234"
             });
             expect(createResult).toBeAnError(/.*/, "error.runtime.validation.notBothPasswordAndPin");
+        });
+
+        test("validation error when loading a template with no password", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password"
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference
+            });
+            expect(loadResult).toBeAnError(/.*/, "error.runtime.validation.noPasswordProvided");
+        });
+
+        test("validation error when loading a template with no PIN", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                pin: "1234"
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference
+            });
+            expect(loadResult).toBeAnError(/.*/, "error.runtime.validation.noPINProvided");
         });
 
         test("create a token for a password-protected template", async () => {

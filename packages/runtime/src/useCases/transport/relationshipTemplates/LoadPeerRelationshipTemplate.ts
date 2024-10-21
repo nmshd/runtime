@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, RelationshipTemplateController, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
+import { AccountController, RelationshipTemplateController, RelationshipTemplateReference, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
 import { Base64ForIdPrefix, PINString, RelationshipTemplateReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
@@ -50,7 +50,15 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         throw RuntimeErrors.relationshipTemplates.invalidReference(reference);
     }
 
-    private async loadRelationshipTemplateFromRelationshipTemplateReference(relationshipTemplateReference: string, password?: string, pin?: string) {
+    private async loadRelationshipTemplateFromRelationshipTemplateReference(
+        relationshipTemplateReference: string,
+        password?: string,
+        pin?: string
+    ): Promise<Result<RelationshipTemplateDTO>> {
+        const reference = RelationshipTemplateReference.from(relationshipTemplateReference);
+        if (reference.passwordType?.startsWith("pw") && !password) return Result.fail(RuntimeErrors.general.noPasswordProvided());
+        if (reference.passwordType?.startsWith("pin") && !pin) return Result.fail(RuntimeErrors.general.noPINProvided());
+
         const template = await this.templateController.loadPeerRelationshipTemplateByTruncated(relationshipTemplateReference, password, pin);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
@@ -67,6 +75,9 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         }
 
         const content = token.cache.content;
+        if (content.passwordType?.startsWith("pw") && !password) return Result.fail(RuntimeErrors.general.noPasswordProvided());
+        if (content.passwordType?.startsWith("pin") && !pin) return Result.fail(RuntimeErrors.general.noPINProvided());
+
         const template = await this.templateController.loadPeerRelationshipTemplate(content.templateId, content.secretKey, content.forIdentity?.toString(), password, pin);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }

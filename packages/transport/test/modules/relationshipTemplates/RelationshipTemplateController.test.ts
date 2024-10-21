@@ -207,6 +207,22 @@ describe("RelationshipTemplateController", function () {
         );
     });
 
+    test("should throw an error if loaded with a wrong or missing PIN", async function () {
+        const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
+            content: { a: "A" },
+            expiresAt: CoreDate.utc().add({ minutes: 1 }),
+            pin: "1234"
+        });
+        expect(ownTemplate).toBeDefined();
+
+        await expect(
+            recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate(), undefined, "12345")
+        ).rejects.toThrow("error.platform.inputCannotBeParsed");
+        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
+            "error.platform.recordNotFound"
+        );
+    });
+
     test("should fetch multiple password-protected templates", async function () {
         const ownTemplate1 = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
