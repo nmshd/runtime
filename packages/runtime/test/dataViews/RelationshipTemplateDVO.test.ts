@@ -170,7 +170,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.isOwn).toBe(true);
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
-        expect(dvo.password).toBe("password");
+        expect(dvo.password).toBe("password:password");
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);
@@ -211,7 +211,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.isOwn).toBe(false);
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
-        expect(dvo.password).toBe("password");
+        expect(dvo.password).toBe("password:password");
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);
@@ -269,8 +269,12 @@ describe("RelationshipTemplateDVO", () => {
                 "source.reference": templateId
             }
         });
-        const requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference }))
-            .value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
+        const requestorTemplate = (
+            await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: templatorTemplate.truncatedReference,
+                password: "password"
+            })
+        ).value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
         if (requestResult.value.length === 0) {
             await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             requestResult = await requestor.consumption.incomingRequests.getRequests({

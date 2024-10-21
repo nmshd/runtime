@@ -217,7 +217,7 @@ describe("Template Tests", () => {
                 password: "password"
             });
             expect(createResult).toBeSuccessful();
-            expect(createResult.value.password).toBe("password");
+            expect(createResult.value.password).toBe("password:password");
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -363,7 +363,7 @@ describe("Template Tests", () => {
                 await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                     content: emptyRelationshipTemplateContent,
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                    password: "password"
+                    pin: "1234"
                 })
             ).value.id;
             const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
