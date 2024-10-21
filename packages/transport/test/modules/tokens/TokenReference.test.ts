@@ -72,7 +72,7 @@ describe("TokenReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
         expect(deserialized.backboneBaseUrl).toBe("localhost");
         expect(deserialized.forIdentityTruncated).toBe("1234");
-        expect(deserialized.passwordType).toBe(10);
+        expect(deserialized.passwordType).toBe("pin10");
     });
 
     test("should serialize and deserialize correctly (from unknown type, with backbone, identity, password)", async function () {
@@ -101,7 +101,7 @@ describe("TokenReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
         expect(deserialized.backboneBaseUrl).toBe("localhost");
         expect(deserialized.forIdentityTruncated).toBe("1234");
-        expect(deserialized.passwordType).toBe(10);
+        expect(deserialized.passwordType).toBe("pw");
     });
 
     test("should truncate and read in correctly", async function () {
@@ -141,7 +141,7 @@ describe("TokenReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
         expect(deserialized.backboneBaseUrl).toBe("localhost");
         expect(deserialized.forIdentityTruncated).toBe("1234");
-        expect(deserialized.passwordType).toBe(10);
+        expect(deserialized.passwordType).toBe("pin10");
     });
 
     test("should read a reference in the old format", async function () {
@@ -185,10 +185,10 @@ describe("TokenReference", function () {
         await expect(async () => {
             TokenReference.from({
                 key: await CryptoEncryption.generateKey(),
-                id: await BackboneIds.file.generateUnsafe(),
+                id: await BackboneIds.token.generateUnsafe(),
                 passwordType: "pc"
             });
-        }).rejects.toThrow("FileReference.passwordType");
+        }).rejects.toThrow("TokenReference.passwordType");
     });
 
     test("should not create a reference with too long personalization", async function () {

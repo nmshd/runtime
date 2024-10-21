@@ -199,6 +199,14 @@ class General {
     public accountControllerInitialSyncFailed() {
         return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
     }
+
+    public noPasswordProvided() {
+        return new CoreError("error.transport.noPasswordProvided", "You need to provide a password. Maybe you have given a PIN instead.");
+    }
+
+    public noPINProvided() {
+        return new CoreError("error.transport.noPINProvided", "You need to provide a PIN. Maybe you have given a password instead.");
+    }
 }
 
 export class TransportCoreErrors {

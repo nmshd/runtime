@@ -141,7 +141,7 @@ describe("RelationshipTemplateReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
         expect(deserialized.backboneBaseUrl).toBe("localhost");
         expect(deserialized.forIdentityTruncated).toBe("1234");
-        expect(deserialized.passwordType).toBe(10);
+        expect(deserialized.passwordType).toBe("pin10");
     });
 
     test("should read a reference in the old format", async function () {
@@ -185,7 +185,7 @@ describe("RelationshipTemplateReference", function () {
         await expect(async () => {
             RelationshipTemplateReference.from({
                 key: await CryptoEncryption.generateKey(),
-                id: await BackboneIds.file.generateUnsafe(),
+                id: await BackboneIds.relationshipTemplate.generateUnsafe(),
                 passwordType: "pc"
             });
         }).rejects.toThrow("FileReference.passwordType");

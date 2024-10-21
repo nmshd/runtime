@@ -175,7 +175,7 @@ describe("RelationshipTemplateController", function () {
         const reference = ownTemplate.toRelationshipTemplateReference();
         expect(reference.passwordType).toBe("pin4");
 
-        const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference.truncate(), "password");
+        const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference.truncate(), undefined, "1234");
         expect(peerTemplate).toBeDefined();
         expect(peerTemplate.pin).toBe("1234");
     });
@@ -203,8 +203,9 @@ describe("RelationshipTemplateController", function () {
             recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate(), "wrongPassword")
         ).rejects.toThrow("error.platform.inputCannotBeParsed");
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
-            "error.platform.recordNotFound"
+            "error.transport.noPasswordProvided"
         );
+        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey)).rejects.toThrow("error.platform.recordNotFound");
     });
 
     test("should throw an error if loaded with a wrong or missing PIN", async function () {
@@ -219,8 +220,9 @@ describe("RelationshipTemplateController", function () {
             recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate(), undefined, "12345")
         ).rejects.toThrow("error.platform.inputCannotBeParsed");
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
-            "error.platform.recordNotFound"
+            "error.transport.noPINProvided"
         );
+        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplate(ownTemplate.id, ownTemplate.secretKey)).rejects.toThrow("error.platform.recordNotFound");
     });
 
     test("should fetch multiple password-protected templates", async function () {
