@@ -32,7 +32,7 @@ import {
     OwnSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
     SharedAttributeCopyCreatedEvent,
-    ThirdPartyOwnedRelationshipAttributeSucceededEvent
+    ThirdPartyRelationshipAttributeSucceededEvent
 } from "./events";
 import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
 import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } from "./local/CreateRepositoryAttributeParams";
@@ -535,7 +535,7 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
-    public async succeedThirdPartyOwnedRelationshipAttribute(
+    public async succeedThirdPartyRelationshipAttribute(
         predecessorId: CoreId,
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
         validate = true
@@ -543,7 +543,7 @@ export class AttributesController extends ConsumptionBaseController {
         const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
 
         if (validate) {
-            const validationResult = await this.validateThirdPartyOwnedRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
+            const validationResult = await this.validateThirdPartyRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
             if (validationResult.isError()) {
                 throw validationResult.error;
             }
@@ -554,12 +554,13 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             succeeds: predecessorId,
             shareInfo: parsedSuccessorParams.shareInfo,
+            // TODO: remove parentId or add isDefault (maybe also in other places)
             parentId: parsedSuccessorParams.parentId,
             createdAt: parsedSuccessorParams.createdAt,
             succeededBy: parsedSuccessorParams.succeededBy
         });
 
-        this.eventBus.publish(new ThirdPartyOwnedRelationshipAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        this.eventBus.publish(new ThirdPartyRelationshipAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -887,7 +888,7 @@ export class AttributesController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
-    public async validateThirdPartyOwnedRelationshipAttributeSuccession(
+    public async validateThirdPartyRelationshipAttributeSuccession(
         predecessorId: CoreId,
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
     ): Promise<ValidationResult> {
@@ -909,15 +910,16 @@ export class AttributesController extends ConsumptionBaseController {
             succeeds: parsedSuccessorParams.succeeds,
             succeededBy: parsedSuccessorParams.succeededBy,
             shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId
+            parentId: parsedSuccessorParams.parentId,
+            isDefault: parsedSuccessorParams.isDefault
         });
 
-        if (!predecessor.isThirdPartyOwnedRelationshipAttribute(this.identity.address)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotThirdPartyOwnedRelationshipAttribute());
+        if (!predecessor.isThirdPartyRelationshipAttribute()) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotThirdPartyRelationshipAttribute());
         }
 
-        if (!successor.isThirdPartyOwnedRelationshipAttribute(this.identity.address)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotThirdPartyOwnedRelationshipAttribute());
+        if (!successor.isThirdPartyRelationshipAttribute()) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotThirdPartyRelationshipAttribute());
         }
 
         if (successor.content.key !== predecessor.content.key) {
@@ -926,6 +928,10 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
+        }
+
+        if (!predecessor.shareInfo.thirdPartyAddress.equals(successor.shareInfo.thirdPartyAddress)) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeThirdParty());
         }
 
         return ValidationResult.success();

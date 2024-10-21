@@ -44,6 +44,10 @@ export class AttributeSuccessorParams extends Serializable implements IAttribute
     @serialize()
     public parentId?: CoreId;
 
+    @validate({ nullable: true })
+    @serialize()
+    public isDefault?: true;
+
     public static from(value: IAttributeSuccessorParams | AttributeSuccessorParamsJSON): AttributeSuccessorParams {
         return this.fromAny(value);
     }

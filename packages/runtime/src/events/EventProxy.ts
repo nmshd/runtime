@@ -17,8 +17,8 @@ import {
     PeerSharedAttributeDeletedByPeerEvent,
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
-    ThirdPartyOwnedRelationshipAttributeSucceededEvent,
-    ThirdPartyRelationshipAttributeDeletedByPeerEvent
+    ThirdPartyRelationshipAttributeDeletedByPeerEvent,
+    ThirdPartyRelationshipAttributeSucceededEvent
 } from "./consumption";
 import {
     IdentityDeletionProcessStatusChangedEvent,
@@ -147,9 +147,9 @@ export class EventProxy {
             );
         });
 
-        this.subscribeToSourceEvent(consumption.ThirdPartyOwnedRelationshipAttributeSucceededEvent, (event) => {
+        this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeSucceededEvent, (event) => {
             this.targetEventBus.publish(
-                new ThirdPartyOwnedRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
+                new ThirdPartyRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
                     predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
                     successor: AttributeMapper.toAttributeDTO(event.data.successor)
                 })

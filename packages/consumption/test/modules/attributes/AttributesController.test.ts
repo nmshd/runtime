@@ -2414,7 +2414,7 @@ describe("AttributesController", function () {
                     }
                 };
 
-                const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(
+                const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedThirdPartyRelationshipAttribute(
                     predecessor.id,
                     successorParams
                 );
