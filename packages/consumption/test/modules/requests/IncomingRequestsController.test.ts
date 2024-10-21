@@ -76,14 +76,20 @@ describe("IncomingRequestsController", function () {
         test("takes the expiration date from the Template if the Request has a later expiration date", async function () {
             const timestamp = CoreDate.utc().add({ days: 1 });
             const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
-            await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
+            await When.iCreateAnIncomingRequestWith({
+                requestSourceObject: incomingTemplate,
+                receivedRequest: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp.add({ days: 1 }) })
+            });
             await Then.theRequestHasExpirationDate(timestamp);
         });
 
         test("takes the expiration date from the Request if the Template has a later expiration date", async function () {
             const timestamp = CoreDate.utc().add({ days: 1 });
-            const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
-            await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
+            const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp.add({ days: 1 }));
+            await When.iCreateAnIncomingRequestWith({
+                requestSourceObject: incomingTemplate,
+                receivedRequest: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp })
+            });
             await Then.theRequestHasExpirationDate(timestamp);
         });
 
