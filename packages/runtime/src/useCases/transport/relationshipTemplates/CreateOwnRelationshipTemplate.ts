@@ -19,6 +19,9 @@ export interface CreateOwnRelationshipTemplateRequest {
      */
     maxNumberOfAllocations?: number;
     forIdentity?: AddressString;
+    /**
+     * @minLength 1
+     */
     password?: string;
     pin?: PINString;
 }
@@ -37,15 +40,6 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
                 new ValidationFailure(
                     RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)}' must be in the future`),
                     nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)
-                )
-            );
-        }
-
-        if (input.password === "") {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateOwnRelationshipTemplateRequest>((r) => r.password)}' must not be the empty string`),
-                    nameof<CreateOwnRelationshipTemplateRequest>((r) => r.password)
                 )
             );
         }

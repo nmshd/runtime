@@ -2379,6 +2379,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "sourceAttributeId": {
                     "type": "string"
+                },
+                "thirdPartyAddress": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -5407,6 +5410,9 @@ export const CompleteOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/RelationshipAttributeJSON"
                         }
                     ]
+                },
+                "thirdPartyAddress": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -7837,6 +7843,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                             "$ref": "#/definitions/RelationshipAttributeJSON"
                         }
                     ]
+                },
+                "thirdPartyAddress": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -10196,6 +10205,9 @@ export const CreateOutgoingRequestRequest: any = {
                     ]
                 },
                 "sourceAttributeId": {
+                    "type": "string"
+                },
+                "thirdPartyAddress": {
                     "type": "string"
                 }
             },
@@ -13525,6 +13537,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     ]
                 },
                 "sourceAttributeId": {
+                    "type": "string"
+                },
+                "thirdPartyAddress": {
                     "type": "string"
                 }
             },
@@ -17034,6 +17049,19 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
+                "shareInfo.thirdPartyAddress": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "deletionInfo": {
                     "anyOf": [
                         {
@@ -17264,6 +17292,19 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
+                "shareInfo.thirdPartyAddress": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "deletionInfo": {
                     "anyOf": [
                         {
@@ -17469,6 +17510,19 @@ export const GetPeerSharedAttributesRequest: any = {
                     ]
                 },
                 "shareInfo.notificationReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "shareInfo.thirdPartyAddress": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -21965,7 +22019,8 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                     "$ref": "#/definitions/AddressString"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1
                 },
                 "pin": {
                     "$ref": "#/definitions/PINString"
