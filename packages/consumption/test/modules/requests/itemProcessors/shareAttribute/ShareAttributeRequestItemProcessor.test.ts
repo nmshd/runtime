@@ -1099,7 +1099,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             mustBeAccepted: true,
             attribute: sourceAttribute.content,
             sourceAttributeId: sourceAttribute.id,
-            thirdPartyAddress: sourceAttribute.shareInfo?.peer
+            thirdPartyAddress: sourceAttribute.isRelationshipAttribute() ? sourceAttribute.shareInfo.peer : undefined
         });
         const requestId = await ConsumptionIds.request.generate();
         const peer = CoreAddress.from("did:e:a-domain:dids:anidentity");

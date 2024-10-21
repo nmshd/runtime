@@ -90,6 +90,9 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
             }
+            if (requestItem.thirdPartyAddress) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("Identity attributes are not allowed to have a thirdPartyAddress"));
+            }
         }
 
         if (requestItem.attribute instanceof RelationshipAttribute) {
