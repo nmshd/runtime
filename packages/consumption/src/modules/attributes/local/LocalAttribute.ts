@@ -52,12 +52,6 @@ export type OwnSharedRelationshipAttribute = LocalAttribute & {
     isDefault: undefined;
 };
 
-export type OwnSharedThirdPartyRelationshipAttribute = OwnSharedRelationshipAttribute & {
-    shareInfo: OwnSharedRelationshipAttribute["shareInfo"] & {
-        thirdPartyAddress: CoreAddress;
-    };
-};
-
 export type PeerSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
@@ -72,15 +66,9 @@ export type PeerSharedRelationshipAttribute = LocalAttribute & {
     isDefault: undefined;
 };
 
-export type PeerSharedThirdPartyRelationshipAttribute = PeerSharedRelationshipAttribute & {
-    shareInfo: PeerSharedRelationshipAttribute["shareInfo"] & {
-        thirdPartyAddress: CoreAddress;
-    };
-};
-
-export type ThirdPartyOwnedRelationshipAttribute = LocalAttribute & {
+export type ThirdPartyRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
-    shareInfo: LocalAttribute["shareInfo"] & {
+    shareInfo: LocalAttributeShareInfo & {
         thirdPartyAddress: CoreAddress;
     };
     parentId: undefined;
@@ -157,8 +145,8 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return this.isRelationshipAttribute() && this.isPeerSharedAttribute(peerAddress);
     }
 
-    public isThirdPartyOwnedRelationshipAttribute(ownAddress: CoreAddress, thirdPartyAddress?: CoreAddress): this is ThirdPartyOwnedRelationshipAttribute {
-        return this.isRelationshipAttribute() && this.isThirdPartyOwnedAttribute(ownAddress, thirdPartyAddress);
+    public isThirdPartyRelationshipAttribute(): this is ThirdPartyRelationshipAttribute {
+        return this.isRelationshipAttribute() && !!this.shareInfo.thirdPartyAddress;
     }
 
     public isRepositoryAttribute(ownAddress: CoreAddress): this is RepositoryAttribute {
@@ -213,10 +201,13 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         return this.content instanceof IdentityAttribute;
     }
 
-    public isRelationshipAttribute(): this is LocalAttribute & { content: RelationshipAttribute } & {
-        shareInfo: LocalAttributeShareInfo;
-    } {
-        return this.content instanceof RelationshipAttribute && this.isShared();
+    public isRelationshipAttribute(): this is LocalAttribute & { content: RelationshipAttribute; shareInfo: LocalAttributeShareInfo } {
+        let isRelationshipAttribute = this.content instanceof RelationshipAttribute && this.isShared();
+
+        isRelationshipAttribute &&= !this.parentId;
+        isRelationshipAttribute &&= !this.isDefault;
+
+        return isRelationshipAttribute;
     }
 
     public isComplexAttribute(): boolean {
@@ -244,7 +235,8 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
             throw ConsumptionCoreErrors.attributes.invalidDeletionInfoOfPeerSharedAttribute();
         }
 
-        if (this.isThirdPartyOwnedRelationshipAttribute(ownAddress) && !this.isThirdPartyOwnedRelationshipAttributeDeletionInfo(deletionInfo)) {
+        if (this.isThirdPartyRelationshipAttribute() && !this.isThirdPartyRelationshipAttributeDeletionInfo(deletionInfo)) {
+            // TODO: error
             throw ConsumptionCoreErrors.attributes.invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute();
         }
 
@@ -265,7 +257,8 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         );
     }
 
-    private isThirdPartyOwnedRelationshipAttributeDeletionInfo(deletionInfo: LocalAttributeDeletionInfo): boolean {
+    // TODO:
+    private isThirdPartyRelationshipAttributeDeletionInfo(deletionInfo: LocalAttributeDeletionInfo): boolean {
         return deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer;
     }
 
