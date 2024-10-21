@@ -53,15 +53,16 @@ beforeAll(async () => {
 
 afterEach(async () => {
     const activeIdentityDeletionProcess = await services3.transport.identityDeletionProcesses.getActiveIdentityDeletionProcess();
+
     if (!activeIdentityDeletionProcess.isSuccess) {
         return;
     }
+
     let abortResult;
     if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
         abortResult = await services3.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
+        if (abortResult.isError) throw abortResult.error;
     }
-
-    if (abortResult?.isError) throw abortResult.error;
 });
 
 afterAll(() => serviceProvider.stop());
@@ -140,6 +141,9 @@ describe("Can Create / Create Relationship", () => {
         expect(canCreateRelationshipResponse.message).toBe(`The RelationshipTemplate '${templateId}' is already expired and therefore cannot be used to create a Relationship.`);
         expect(canCreateRelationshipResponse.code).toBe("error.transport.relationships.relationshipTemplateIsExpired");
 
+        const expiredRequest = (await services2.consumption.incomingRequests.getRequest({ id: incomingRequest.id })).value;
+        expect(expiredRequest.status).toBe(LocalRequestStatus.Expired);
+
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
             creationContent: emptyRelationshipCreationContent
@@ -149,9 +153,6 @@ describe("Can Create / Create Relationship", () => {
             `The RelationshipTemplate '${templateId}' is already expired and therefore cannot be used to create a Relationship.`,
             "error.transport.relationships.relationshipTemplateIsExpired"
         );
-
-        const expiredRequest = (await services2.consumption.incomingRequests.getRequest({ id: incomingRequest.id })).value;
-        expect(expiredRequest.status).toBe(LocalRequestStatus.Expired);
     });
 
     test("should not create Relationship if templator has active IdentityDeletionProcess", async () => {
