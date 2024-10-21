@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { Notification, RelationshipAttribute, RelationshipAttributeConfidentiality, ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
+import { Notification, RelationshipAttribute, RelationshipAttributeConfidentiality, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
@@ -8,15 +8,15 @@ import {
     LocalNotification,
     LocalNotificationSource,
     LocalNotificationStatus,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor
+    ThirdPartyRelationshipAttributeDeletedByPeerEvent,
+    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { MockEventBus } from "../../../MockEventBus";
 
 const mockEventBus = new MockEventBus();
 
-describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor", function () {
+describe("ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -53,8 +53,8 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
         }
     });
 
-    test("runs all processor methods for a third party owned relationship attribute", async function () {
-        const thirdPartyOwnedRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+    test("runs all processor methods for a ThirdPartyRelationshipAttribute", async function () {
+        const thirdPartyRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
             content: RelationshipAttribute.from({
                 key: "customerId",
                 value: {
@@ -67,12 +67,13 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef")
+                requestReference: CoreId.from("reqRef"),
+                thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
             }
         });
 
-        const notificationItem = ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem.from({
-            attributeId: thirdPartyOwnedRelationshipAttribute.id
+        const notificationItem = ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem.from({
+            attributeId: thirdPartyRelationshipAttribute.id
         });
         const notification = LocalNotification.from({
             id: CoreId.from("notificationRef"),
@@ -90,7 +91,7 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
             }),
             receivedByDevice: CoreId.from("deviceId")
         });
-        const processor = new ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
+        const processor = new ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
 
         /* Run and check validation. */
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
@@ -98,8 +99,8 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
 
         /* Run process() and validate its results. */
         const event = await processor.process(notificationItem, notification);
-        expect(event).toBeInstanceOf(ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent);
-        const updatedAttribute = (event as ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent).data;
+        expect(event).toBeInstanceOf(ThirdPartyRelationshipAttributeDeletedByPeerEvent);
+        const updatedAttribute = (event as ThirdPartyRelationshipAttributeDeletedByPeerEvent).data;
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
         expect(updatedAttribute.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
 
@@ -115,7 +116,7 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
     test("runs all processor methods for an unknown attribute", async function () {
         const unknownAttributeId = CoreId.from("ATT");
 
-        const notificationItem = ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem.from({
+        const notificationItem = ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem.from({
             attributeId: unknownAttributeId
         });
         const notification = LocalNotification.from({
@@ -134,7 +135,7 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
             }),
             receivedByDevice: CoreId.from("deviceId")
         });
-        const processor = new ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
+        const processor = new ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
 
         /* Run and check validation. */
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
@@ -153,7 +154,7 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
         /* A naughty peer is trying to delete attributes shared
          * not with them, but with another peer. This must be
          * caught by the validation. */
-        const thirdPartyOwnedRelationshipAttributeSharedWithOtherPeer = await consumptionController.attributes.createAttributeUnsafe({
+        const thirdPartyRelationshipAttributeSharedWithOtherPeer = await consumptionController.attributes.createAttributeUnsafe({
             content: RelationshipAttribute.from({
                 key: "customerId",
                 value: {
@@ -166,12 +167,13 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
             }),
             shareInfo: {
                 peer: CoreAddress.from("otherPeer"),
-                requestReference: CoreId.from("reqRef")
+                requestReference: CoreId.from("reqRef"),
+                thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
             }
         });
 
-        const notificationItem = ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem.from({
-            attributeId: thirdPartyOwnedRelationshipAttributeSharedWithOtherPeer.id
+        const notificationItem = ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem.from({
+            attributeId: thirdPartyRelationshipAttributeSharedWithOtherPeer.id
         });
 
         const notification = LocalNotification.from({
@@ -190,7 +192,7 @@ describe("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProce
             }),
             receivedByDevice: CoreId.from("deviceId")
         });
-        const processor = new ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
+        const processor = new ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
 
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
         expect(checkResult).errorValidationResult({

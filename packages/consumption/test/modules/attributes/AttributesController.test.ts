@@ -2376,7 +2376,7 @@ describe("AttributesController", function () {
                 expect((successor.content.value.toJSON() as any).value).toBe("1337");
             });
 
-            test("should succeed a third party owned relationship attribute", async function () {
+            test("should succeed a ThirdPartyRelationshipAttribute", async function () {
                 const predecessor = await consumptionController.attributes.createAttributeUnsafe({
                     content: RelationshipAttribute.from({
                         key: "customerId",
