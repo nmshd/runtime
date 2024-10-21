@@ -554,7 +554,6 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             succeeds: predecessorId,
             shareInfo: parsedSuccessorParams.shareInfo,
-            // TODO: remove parentId or add isDefault (maybe also in other places)
             parentId: parsedSuccessorParams.parentId,
             createdAt: parsedSuccessorParams.createdAt,
             succeededBy: parsedSuccessorParams.succeededBy
@@ -910,8 +909,7 @@ export class AttributesController extends ConsumptionBaseController {
             succeeds: parsedSuccessorParams.succeeds,
             succeededBy: parsedSuccessorParams.succeededBy,
             shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId,
-            isDefault: parsedSuccessorParams.isDefault
+            parentId: parsedSuccessorParams.parentId
         });
 
         if (!predecessor.isThirdPartyRelationshipAttribute()) {
