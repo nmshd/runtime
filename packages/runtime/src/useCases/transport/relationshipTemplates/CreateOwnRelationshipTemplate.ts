@@ -51,7 +51,7 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
         }
 
         if (!!input.password && !!input.pin) {
-            validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.onlyOneOfPinAndPassword()));
+            validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.notBothPasswordAndPin()));
         }
 
         return validationResult;

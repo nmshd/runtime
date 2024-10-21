@@ -21966,6 +21966,9 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                 },
                 "password": {
                     "type": "string"
+                },
+                "pin": {
+                    "$ref": "#/definitions/PINString"
                 }
             },
             "required": [
@@ -21982,6 +21985,10 @@ export const CreateOwnRelationshipTemplateRequest: any = {
         "AddressString": {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        },
+        "PINString": {
+            "type": "string",
+            "pattern": "^[0-9]{4,16}$"
         }
     }
 }
