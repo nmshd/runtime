@@ -277,6 +277,15 @@ describe("Template Tests", () => {
             expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
         });
 
+        test("validation error when creating a template with empty string as the password", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: ""
+            });
+            expect(createResult).toBeAnError("must not be the empty string", "error.runtime.validation.invalidPropertyValue");
+        });
+
         test("validation error when creating a template with both a password and a PIN", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
@@ -300,7 +309,7 @@ describe("Template Tests", () => {
             expect(createTokenResult).toBeSuccessful();
             const loadTokenResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createTokenResult.value.truncatedReference, ephemeral: true });
             expect(loadTokenResult).toBeSuccessful();
-            expect(loadTokenResult.value.content.passwordType).toBe(1);
+            expect(loadTokenResult.value.content.passwordType).toBe("pw");
         });
     });
 });

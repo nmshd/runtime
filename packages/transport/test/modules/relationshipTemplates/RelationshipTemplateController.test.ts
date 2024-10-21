@@ -168,16 +168,16 @@ describe("RelationshipTemplateController", function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            password: "1234"
+            pin: "1234"
         });
         expect(ownTemplate).toBeDefined();
-        expect(ownTemplate.password).toBe("1234");
+        expect(ownTemplate.pin).toBe("1234");
         const reference = ownTemplate.toRelationshipTemplateReference();
         expect(reference.passwordType).toBe("pin4");
 
         const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference.truncate(), "password");
         expect(peerTemplate).toBeDefined();
-        expect(peerTemplate.password).toBe("1234");
+        expect(peerTemplate.pin).toBe("1234");
     });
 
     test("should throw an error if created with password and PIN", async function () {
@@ -249,7 +249,7 @@ describe("RelationshipTemplateController", function () {
             const template = await sender.relationshipTemplates.sendRelationshipTemplate({
                 content: { a: "A" },
                 expiresAt: CoreDate.utc().add({ minutes: 1 }),
-                password: "1234"
+                pin: "1234"
             });
             const reference = template.toRelationshipTemplateReference();
             expect(reference.passwordType).toBe("pin4");

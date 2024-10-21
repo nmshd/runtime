@@ -72,7 +72,7 @@ describe("RelationshipTemplateReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
         expect(deserialized.backboneBaseUrl).toBe("localhost");
         expect(deserialized.forIdentityTruncated).toBe("1234");
-        expect(deserialized.passwordType).toBe(10);
+        expect(deserialized.passwordType).toBe("pin10");
     });
 
     test("should serialize and deserialize correctly (from unknown type, with backbone, identity, password)", async function () {
@@ -81,7 +81,7 @@ describe("RelationshipTemplateReference", function () {
             id: await BackboneIds.relationshipTemplate.generateUnsafe(),
             backboneBaseUrl: "localhost",
             forIdentityTruncated: "1234",
-            passwordType: "pin10"
+            passwordType: "pw"
         });
         expect(reference).toBeInstanceOf(Serializable);
         expect(reference).toBeInstanceOf(RelationshipTemplateReference);
@@ -90,7 +90,7 @@ describe("RelationshipTemplateReference", function () {
         const serialized = reference.serialize();
         expect(typeof serialized).toBe("string");
         expect(serialized).toBe(
-            `{"@type":"RelationshipTemplateReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":"pin10"}`
+            `{"@type":"RelationshipTemplateReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":"pw"}`
         );
         const deserialized = Serializable.deserializeUnknown(serialized) as RelationshipTemplateReference;
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -101,7 +101,7 @@ describe("RelationshipTemplateReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
         expect(deserialized.backboneBaseUrl).toBe("localhost");
         expect(deserialized.forIdentityTruncated).toBe("1234");
-        expect(deserialized.passwordType).toBe(10);
+        expect(deserialized.passwordType).toBe("pw");
     });
 
     test("should truncate and read in correctly", async function () {
@@ -171,8 +171,6 @@ describe("RelationshipTemplateReference", function () {
         }).rejects.toThrow("RelationshipTemplateReference.passwordType");
     });
 
-    test.todo("non-pw non-pin");
-
     test("should not create a reference with non-integer passwordType", async function () {
         await expect(async () => {
             RelationshipTemplateReference.from({
@@ -181,6 +179,16 @@ describe("RelationshipTemplateReference", function () {
                 passwordType: "pin2.4"
             });
         }).rejects.toThrow("RelationshipTemplateReference.passwordType");
+    });
+
+    test("should not create a reference starting with neither pw nor pin", async function () {
+        await expect(async () => {
+            RelationshipTemplateReference.from({
+                key: await CryptoEncryption.generateKey(),
+                id: await BackboneIds.file.generateUnsafe(),
+                passwordType: "pc"
+            });
+        }).rejects.toThrow("FileReference.passwordType");
     });
 
     test("should not create a reference with too long personalization", async function () {

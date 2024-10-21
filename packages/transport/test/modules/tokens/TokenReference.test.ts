@@ -81,7 +81,7 @@ describe("TokenReference", function () {
             id: await BackboneIds.token.generateUnsafe(),
             backboneBaseUrl: "localhost",
             forIdentityTruncated: "1234",
-            passwordType: "pin10"
+            passwordType: "pw"
         });
         expect(reference).toBeInstanceOf(Serializable);
         expect(reference).toBeInstanceOf(TokenReference);
@@ -90,7 +90,7 @@ describe("TokenReference", function () {
         const serialized = reference.serialize();
         expect(typeof serialized).toBe("string");
         expect(serialized).toBe(
-            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":"pin10"}`
+            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":"pw"}`
         );
         const deserialized = Serializable.deserializeUnknown(serialized) as TokenReference;
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -179,6 +179,16 @@ describe("TokenReference", function () {
                 passwordType: "pin2.4"
             });
         }).rejects.toThrow("TokenReference.passwordType");
+    });
+
+    test("should not create a reference starting with neither pw nor pin", async function () {
+        await expect(async () => {
+            TokenReference.from({
+                key: await CryptoEncryption.generateKey(),
+                id: await BackboneIds.file.generateUnsafe(),
+                passwordType: "pc"
+            });
+        }).rejects.toThrow("FileReference.passwordType");
     });
 
     test("should not create a reference with too long personalization", async function () {
