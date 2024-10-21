@@ -181,13 +181,13 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     }
 
     public isOwnSharedThirdPartyRelationshipAttribute(ownAddress: CoreAddress): this is OwnSharedThirdPartyRelationshipAttribute {
-        const isThirdPartyAttribute = this.shareInfo?.thirdPartyAddress !== undefined;
+        const isThirdPartyAttribute = !!this.shareInfo?.thirdPartyAddress;
         const isOwnShared = this.isOwnedBy(ownAddress);
         return isThirdPartyAttribute && isOwnShared;
     }
 
     public isPeerSharedThirdPartyRelationshipAttribute(peerAddress: CoreAddress): this is PeerSharedThirdPartyRelationshipAttribute {
-        const isThirdPartyAttribute = this.shareInfo?.thirdPartyAddress !== undefined;
+        const isThirdPartyAttribute = !!this.shareInfo?.thirdPartyAddress;
         const isPeerShared = this.isOwnedBy(peerAddress);
         return isThirdPartyAttribute && isPeerShared;
     }

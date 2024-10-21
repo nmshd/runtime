@@ -131,16 +131,12 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
             }
 
-            if (!requestItem.thirdPartyAddress) {
+            if (!requestItem.thirdPartyAddress?.equals(foundAttribute.shareInfo.peer)) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The source attribute provided is a RelationshipAttribute. You must provide a third party address that is the original peer when sharing with a third party."
+                        "When sharing a RelationshipAttribute with another Identity, the address of the peer of the Relationship in which the RelationshipAttribute exists must be specified as thirdPartyAddress."
                     )
                 );
-            }
-
-            if (!requestItem.thirdPartyAddress.equals(foundAttribute.shareInfo.peer)) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The third party address must be the peer of the RelationshipAttribute."));
             }
         }
 

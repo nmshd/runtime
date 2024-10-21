@@ -40,6 +40,7 @@ describe("LocalAttributeShareInfo", function () {
         expect(shareInfo.notificationReference?.toJSON()).toStrictEqual(shareInfoParams.notificationReference);
         expect(shareInfo.peer.toJSON()).toStrictEqual(shareInfoParams.peer);
         expect(shareInfo.sourceAttribute?.toJSON()).toStrictEqual(shareInfoParams.sourceAttribute);
+        expect(shareInfo.thirdPartyAddress?.toJSON()).toStrictEqual(shareInfoParams.thirdPartyAddress);
     });
 
     const invalidShareInfoJsonParams: LocalAttributeShareInfoJSON[] = [

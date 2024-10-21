@@ -387,11 +387,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
                 return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
             }
+
             const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
 
             if (successorParams.shareInfo) {
                 successorParams.shareInfo.thirdPartyAddress = predecessor?.shareInfo?.thirdPartyAddress;
             }
+
             if (responseItem.successorContent.owner === requestInfo.peer) {
                 await this.consumptionController.attributes.succeedPeerSharedRelationshipAttribute(responseItem.predecessorId, successorParams);
             } else {

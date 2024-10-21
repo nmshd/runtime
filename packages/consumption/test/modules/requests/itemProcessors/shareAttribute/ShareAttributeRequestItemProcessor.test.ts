@@ -1062,6 +1062,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.shareInfo!.sourceAttribute?.toString()).toStrictEqual(sourceAttribute.id.toString());
             expect(createdAttribute!.content.owner.toString()).toStrictEqual(testAccount.identity.address.toString());
         });
+
         test("in case of a RelationshipAttribute, creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the Request", async function () {
             const attributeOwner = testAccount.identity.address.toString();
 
@@ -1097,7 +1098,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
         const requestItem = ShareAttributeRequestItem.from({
             mustBeAccepted: true,
             attribute: sourceAttribute.content,
-            sourceAttributeId: sourceAttribute.id
+            sourceAttributeId: sourceAttribute.id,
+            thirdPartyAddress: sourceAttribute.shareInfo?.peer
         });
         const requestId = await ConsumptionIds.request.generate();
         const peer = CoreAddress.from("did:e:a-domain:dids:anidentity");
