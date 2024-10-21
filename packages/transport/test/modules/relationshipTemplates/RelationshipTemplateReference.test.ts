@@ -188,7 +188,7 @@ describe("RelationshipTemplateReference", function () {
                 id: await BackboneIds.relationshipTemplate.generateUnsafe(),
                 passwordType: "pc"
             });
-        }).rejects.toThrow("FileReference.passwordType");
+        }).rejects.toThrow("RelationshipTemplateReference.passwordType");
     });
 
     test("should not create a reference with too long personalization", async function () {
