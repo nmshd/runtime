@@ -209,10 +209,10 @@ class Attributes {
         );
     }
 
-    public invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute() {
+    public invalidDeletionInfoOfThirdPartyRelationshipAttribute() {
         return new CoreError(
-            "error.consumption.attributes.invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute",
-            "The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'."
+            "error.consumption.attributes.invalidDeletionInfoOfThirdPartyRelationshipAttribute",
+            "The only valid deletionStatus for ThirdPartyRelationshipAttributes is 'DeletedByPeer'."
         );
     }
 
@@ -239,11 +239,8 @@ class Attributes {
         return new CoreError("error.consumption.attributes.isNotPeerSharedAttribute", `The Attribute (id: '${attributeId}') is not a peer shared Attribute.`);
     }
 
-    public isNotThirdPartyOwnedRelationshipAttribute(attributeId: string | CoreId) {
-        return new CoreError(
-            "error.consumption.attributes.isNotThirdPartyOwnedRelationshipAttribute",
-            `The Attribute (id: '${attributeId}') is not a third party owned RelationshipAttribute.`
-        );
+    public isNotThirdPartyRelationshipAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotThirdPartyRelationshipAttribute", `The Attribute (id: '${attributeId}') is not a ThirdPartyRelationshipAttribute.`);
     }
 
     public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {

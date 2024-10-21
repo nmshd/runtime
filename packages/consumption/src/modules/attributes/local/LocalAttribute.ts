@@ -236,8 +236,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         }
 
         if (this.isThirdPartyRelationshipAttribute() && !this.isThirdPartyRelationshipAttributeDeletionInfo(deletionInfo)) {
-            // TODO: error
-            throw ConsumptionCoreErrors.attributes.invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute();
+            throw ConsumptionCoreErrors.attributes.invalidDeletionInfoOfThirdPartyRelationshipAttribute();
         }
 
         this.deletionInfo = deletionInfo;
@@ -257,7 +256,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         );
     }
 
-    // TODO:
     private isThirdPartyRelationshipAttributeDeletionInfo(deletionInfo: LocalAttributeDeletionInfo): boolean {
         return deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer;
     }
