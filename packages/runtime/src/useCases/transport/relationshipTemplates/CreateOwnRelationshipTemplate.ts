@@ -8,7 +8,7 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { RelationshipTemplateDTO } from "../../../types";
-import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { AddressString, ISO8601DateTimeString, PINString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
@@ -20,7 +20,7 @@ export interface CreateOwnRelationshipTemplateRequest {
     maxNumberOfAllocations?: number;
     forIdentity?: AddressString;
     password?: string;
-    pin?: string;
+    pin?: PINString;
 }
 
 class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
@@ -37,6 +37,15 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
                 new ValidationFailure(
                     RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)}' must be in the future`),
                     nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)
+                )
+            );
+        }
+
+        if (input.password === "") {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateOwnRelationshipTemplateRequest>((r) => r.password)}' must not be the empty string`),
+                    nameof<CreateOwnRelationshipTemplateRequest>((r) => r.password)
                 )
             );
         }
@@ -68,7 +77,8 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            password: request.password
+            password: request.password,
+            pin: request.pin
         });
 
         await this.accountController.syncDatawallet();

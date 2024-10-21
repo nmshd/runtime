@@ -69,7 +69,9 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
     }
 
     public get passwordType(): string | undefined {
-        return this.password ? "pw" : this.password ? `pin${this.password.length}` : undefined;
+        if (this.password) return "pw";
+        if (this.pin) return `pin${this.pin.length}`;
+        return undefined;
     }
 
     public truncate(): string {

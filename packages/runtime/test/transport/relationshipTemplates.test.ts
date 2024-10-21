@@ -221,10 +221,10 @@ describe("Template Tests", () => {
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
-                passwordOrPin: "password"
+                password: "password"
             });
             expect(loadResult).toBeSuccessful();
-            expect(loadResult.value.password).toBe("password");
+            expect(loadResult.value.password).toBe("password:password");
         });
 
         test("send and receive a PIN-protected template", async () => {
@@ -238,10 +238,10 @@ describe("Template Tests", () => {
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
-                passwordOrPin: "1234"
+                password: "1234"
             });
             expect(loadResult).toBeSuccessful();
-            expect(loadResult.value.pin).toBe("1234");
+            expect(loadResult.value.password).toBe("pin:1234");
         });
 
         test("send and receive a password-protected template via a token", async () => {
@@ -256,10 +256,10 @@ describe("Template Tests", () => {
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
-                passwordOrPin: "password"
+                password: "password"
             });
             expect(loadResult).toBeSuccessful();
-            expect(loadResult.value.password).toBe("password");
+            expect(loadResult.value.password).toBe("password:password");
         });
 
         test("error when loading a template with a wrong password", async () => {
@@ -272,7 +272,7 @@ describe("Template Tests", () => {
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
-                passwordOrPin: "wrong-password"
+                password: "wrong-password"
             });
             expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
         });

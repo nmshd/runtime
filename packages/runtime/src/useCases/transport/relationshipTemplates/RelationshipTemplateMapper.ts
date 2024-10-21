@@ -17,8 +17,7 @@ export class RelationshipTemplateMapper {
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
             forIdentity: template.cache.forIdentity?.toString(),
-            password: template.password,
-            pin: template.pin,
+            password: this.toPassword(template.password, template.pin),
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
@@ -28,6 +27,12 @@ export class RelationshipTemplateMapper {
 
     public static toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {
         return responseItems.map((i) => this.toRelationshipTemplateDTO(i));
+    }
+
+    private static toPassword(password?: string, pin?: string) {
+        if (password) return `password:${password}`;
+        if (pin) return `pin:${pin}`;
+        return;
     }
 
     private static toTemplateContent(content: Serializable) {

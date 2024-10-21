@@ -10,7 +10,6 @@ export interface RelationshipTemplateDTO {
     createdAt: string;
     forIdentity?: string;
     password?: string;
-    pin?: string;
     content: RelationshipTemplateContentDerivation;
     expiresAt?: string;
     maxNumberOfAllocations?: number;

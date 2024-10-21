@@ -123,8 +123,8 @@ export class RelationshipTemplateController extends TransportController {
             await this.client.getRelationshipTemplates({
                 templates: await Promise.all(
                     templates.map(async (t) => {
-                        const passwordOrPin = t.password ?? t.pin;
-                        return { id: t.id.toString(), password: passwordOrPin ? await this.hashPassword(passwordOrPin) : undefined };
+                        const password = t.password ?? t.pin;
+                        return { id: t.id.toString(), password: password ? await this.hashPassword(password) : undefined };
                     })
                 )
             })
@@ -145,8 +145,8 @@ export class RelationshipTemplateController extends TransportController {
             await this.client.getRelationshipTemplates({
                 templates: await Promise.all(
                     templates.map(async (t) => {
-                        const passwordOrPin = t.password ?? t.pin;
-                        return { id: t.id.toString(), password: passwordOrPin ? await this.hashPassword(passwordOrPin) : undefined };
+                        const password = t.password ?? t.pin;
+                        return { id: t.id.toString(), password: password ? await this.hashPassword(password) : undefined };
                     })
                 )
             })
@@ -194,8 +194,8 @@ export class RelationshipTemplateController extends TransportController {
 
     private async updateCacheOfTemplate(template: RelationshipTemplate, response?: BackboneGetRelationshipTemplatesResponse) {
         if (!response) {
-            const passwordOrPin = template.password ?? template.pin;
-            response = (await this.client.getRelationshipTemplate(template.id.toString(), passwordOrPin ? await this.hashPassword(passwordOrPin) : undefined)).value;
+            const password = template.password ?? template.pin;
+            response = (await this.client.getRelationshipTemplate(template.id.toString(), password ? await this.hashPassword(password) : undefined)).value;
         }
 
         const cachedTemplate = await this.decryptRelationshipTemplate(response, template.secretKey);
@@ -261,12 +261,12 @@ export class RelationshipTemplateController extends TransportController {
         return template;
     }
 
-    public async loadPeerRelationshipTemplateByTruncated(truncated: string, passwordOrPin?: string): Promise<RelationshipTemplate> {
+    public async loadPeerRelationshipTemplateByTruncated(truncated: string, password?: string): Promise<RelationshipTemplate> {
         const reference = RelationshipTemplateReference.fromTruncated(truncated);
-        return await this.loadPeerRelationshipTemplate(reference.id, reference.key, reference.forIdentityTruncated, passwordOrPin);
+        return await this.loadPeerRelationshipTemplate(reference.id, reference.key, reference.forIdentityTruncated, password);
     }
 
-    public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, passwordOrPin?: string): Promise<RelationshipTemplate> {
+    public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, password?: string): Promise<RelationshipTemplate> {
         const templateDoc = await this.templates.read(id.toString());
         if (!templateDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
@@ -286,7 +286,7 @@ export class RelationshipTemplateController extends TransportController {
             id: id,
             secretKey: secretKey,
             isOwn: false,
-            password: passwordOrPin
+            password: password
         });
         await this.updateCacheOfTemplate(relationshipTemplate);
 
