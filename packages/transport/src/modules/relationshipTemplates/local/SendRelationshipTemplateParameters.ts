@@ -29,7 +29,7 @@ export class SendRelationshipTemplateParameters extends Serializable implements 
     @serialize()
     public forIdentity?: CoreAddress;
 
-    @validate({ nullable: true })
+    @validate({ nullable: true, disallowedValues: [""] })
     @serialize()
     public password?: string;
 
