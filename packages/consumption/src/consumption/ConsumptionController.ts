@@ -116,8 +116,7 @@ export class ConsumptionController {
             this,
             this.transport.eventBus,
             this.accountController.identity,
-            this.accountController.relationships,
-            this.accountController.relationshipTemplates
+            this.accountController.relationships
         ).init();
         this._incomingRequests = await new IncomingRequestsController(
             await this.accountController.getSynchronizedCollection("Requests"),

@@ -99,11 +99,7 @@ export class RequestsTestsContext {
             context.mockEventBus,
             { address: account.accountController.identity.address },
             {
-                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity),
-                getExistingRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetExistingRelationshipToIdentity)
-            },
-            {
-                getRelationshipTemplate: () => Promise.resolve(context.templateToReturnFromGetTemplate)
+                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
             }
         );
 

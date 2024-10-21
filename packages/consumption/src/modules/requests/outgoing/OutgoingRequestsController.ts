@@ -33,10 +33,6 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         private readonly identity: { address: CoreAddress },
         private readonly relationshipResolver: {
             getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
-            getExistingRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
-        },
-        private readonly relationshipTemplateResolver: {
-            getRelationshipTemplate(id: CoreId): Promise<RelationshipTemplate | undefined>;
         }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
