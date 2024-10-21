@@ -1,8 +1,19 @@
 import { Result } from "@js-soft/ts-utils";
 import { AccountController, RelationshipTemplateController, RelationshipTemplateReference, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import { nameof } from "ts-simple-nameof";
 import { RelationshipTemplateDTO } from "../../../types";
-import { Base64ForIdPrefix, PINString, RelationshipTemplateReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
+import {
+    Base64ForIdPrefix,
+    RelationshipTemplateReferenceString,
+    RuntimeErrors,
+    SchemaRepository,
+    SchemaValidator,
+    TokenReferenceString,
+    UseCase,
+    ValidationFailure,
+    ValidationResult
+} from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 /**
@@ -11,12 +22,32 @@ import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 export interface LoadPeerRelationshipTemplateRequest {
     reference: TokenReferenceString | RelationshipTemplateReferenceString;
     password?: string;
-    pin?: PINString;
+    pin?: string;
 }
 
 class Validator extends SchemaValidator<LoadPeerRelationshipTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("LoadPeerRelationshipTemplateRequest"));
+    }
+
+    public override validate(input: LoadPeerRelationshipTemplateRequest): ValidationResult {
+        const validationResult = super.validate(input);
+        if (!validationResult.isValid()) return validationResult;
+
+        if (input.pin && !/^[0-9]{4,16}$/.test(input.pin)) {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<LoadPeerRelationshipTemplateRequest>((r) => r.pin)}' must consist of 4 to 16 numbers`),
+                    nameof<LoadPeerRelationshipTemplateRequest>((r) => r.pin)
+                )
+            );
+        }
+
+        if (!!input.password && !!input.pin) {
+            validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.notBothPasswordAndPin()));
+        }
+
+        return validationResult;
     }
 }
 

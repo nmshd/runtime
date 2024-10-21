@@ -342,6 +342,21 @@ describe("Template Tests", () => {
             expect(loadResult).toBeAnError(/.*/, "error.runtime.validation.noPINProvided");
         });
 
+        test("validation error when loading a template with invalid PIN", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                pin: "1234"
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                pin: "123"
+            });
+            expect(loadResult).toBeAnError("must consist of 4 to 16 numbers", "error.runtime.validation.invalidPropertyValue");
+        });
+
         test("validation error when loading a template via token with no password", async () => {
             const templateId = (
                 await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
