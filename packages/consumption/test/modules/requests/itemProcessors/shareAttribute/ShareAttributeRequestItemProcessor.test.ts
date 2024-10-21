@@ -171,7 +171,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: sourceAttribute.content,
                 sourceAttributeId: sourceAttribute.id,
-                thirdPartyAddress: aThirdParty
+                thirdPartyAddress: !(testParams.attribute instanceof IdentityAttribute) ? aThirdParty : undefined
             });
             const request = Request.from({ items: [requestItem] });
 
