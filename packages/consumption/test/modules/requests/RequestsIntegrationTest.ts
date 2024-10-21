@@ -57,6 +57,7 @@ export class RequestsTestsContext {
     public currentIdentity: CoreAddress;
     public mockEventBus = new MockEventBus();
     public relationshipToReturnFromGetRelationshipToIdentity: Relationship | undefined;
+    public relationshipToReturnFromGetExistingRelationshipToIdentity: Relationship | undefined;
     public templateToReturnFromGetTemplate: RelationshipTemplate | undefined;
     public consumptionController: ConsumptionController;
 
@@ -99,7 +100,7 @@ export class RequestsTestsContext {
             { address: account.accountController.identity.address },
             {
                 getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity),
-                getExistingRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
+                getExistingRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetExistingRelationshipToIdentity)
             },
             {
                 getRelationshipTemplate: () => Promise.resolve(context.templateToReturnFromGetTemplate)
@@ -116,7 +117,7 @@ export class RequestsTestsContext {
             },
             {
                 getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity),
-                getExistingRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
+                getExistingRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetExistingRelationshipToIdentity)
             },
             {
                 getRelationshipTemplate: () => Promise.resolve(context.templateToReturnFromGetTemplate)
@@ -141,6 +142,7 @@ export class RequestsTestsContext {
         this.validationResult = undefined;
         this.actionToTry = undefined;
         this.relationshipToReturnFromGetRelationshipToIdentity = undefined;
+        this.relationshipToReturnFromGetExistingRelationshipToIdentity = undefined;
         this.templateToReturnFromGetTemplate = undefined;
 
         TestRequestItemProcessor.numberOfApplyIncomingResponseItemCalls = 0;
