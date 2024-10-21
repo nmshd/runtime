@@ -234,7 +234,7 @@ describe("Template Tests", () => {
                 pin: "1234"
             });
             expect(createResult).toBeSuccessful();
-            expect(createResult.value.password).toBe("password");
+            expect(createResult.value.password).toBe("pin:1234");
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,

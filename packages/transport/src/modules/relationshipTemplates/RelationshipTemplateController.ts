@@ -65,12 +65,14 @@ export class RelationshipTemplateController extends TransportController {
 
         const cipher = await CoreCrypto.encrypt(signedTemplateBuffer, secretKey);
 
+        const password = parameters.password ?? parameters.pin;
+
         const backboneResponse = (
             await this.client.createRelationshipTemplate({
                 expiresAt: parameters.expiresAt.toString(),
                 maxNumberOfAllocations: parameters.maxNumberOfAllocations,
                 forIdentity: parameters.forIdentity?.address.toString(),
-                password: parameters.password ? await this.hashPassword(parameters.password) : undefined,
+                password: password ? await this.hashPassword(password) : undefined,
                 content: cipher.toBase64()
             })
         ).value;
@@ -91,7 +93,8 @@ export class RelationshipTemplateController extends TransportController {
             id: CoreId.from(backboneResponse.id),
             secretKey: secretKey,
             isOwn: true,
-            password: parameters.password,
+            password: password,
+            pin: parameters.pin,
             cache: templateCache,
             cachedAt: CoreDate.utc()
         });
@@ -261,12 +264,18 @@ export class RelationshipTemplateController extends TransportController {
         return template;
     }
 
-    public async loadPeerRelationshipTemplateByTruncated(truncated: string, password?: string): Promise<RelationshipTemplate> {
+    public async loadPeerRelationshipTemplateByTruncated(truncated: string, password?: string, pin?: string): Promise<RelationshipTemplate> {
         const reference = RelationshipTemplateReference.fromTruncated(truncated);
-        return await this.loadPeerRelationshipTemplate(reference.id, reference.key, reference.forIdentityTruncated, password);
+        return await this.loadPeerRelationshipTemplate(reference.id, reference.key, reference.forIdentityTruncated, password, pin);
     }
 
-    public async loadPeerRelationshipTemplate(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, password?: string): Promise<RelationshipTemplate> {
+    public async loadPeerRelationshipTemplate(
+        id: CoreId,
+        secretKey: CryptoSecretKey,
+        forIdentityTruncated?: string,
+        password?: string,
+        pin?: string
+    ): Promise<RelationshipTemplate> {
         const templateDoc = await this.templates.read(id.toString());
         if (!templateDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
@@ -286,7 +295,8 @@ export class RelationshipTemplateController extends TransportController {
             id: id,
             secretKey: secretKey,
             isOwn: false,
-            password: password
+            password: password,
+            pin: pin
         });
         await this.updateCacheOfTemplate(relationshipTemplate);
 
