@@ -6,6 +6,7 @@ import {
     ReadAttributeRequestItem,
     RelationshipAttributeConfidentiality,
     RequestItemJSONDerivations,
+    ShareAttributeRequestItem,
     StreetJSON,
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner,
@@ -56,7 +57,8 @@ import {
     executeFullCreateAndShareRelationshipAttributeFlow,
     executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullNotifyPeerAboutAttributeSuccessionFlow,
-    executeFullRequestAndShareThirdPartyRelationshipAttributeFlow,
+    executeFullRequestAndAcceptExistingAttributeFlow,
+    executeFullShareAndAcceptAttributeRequestFlow,
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     syncUntilHasMessageWithNotification,
@@ -1841,7 +1843,7 @@ describe("Get (shared) versions of attribute", () => {
                     ]
                 }
             };
-            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestAndAcceptExistingAttributeFlow(
                 services1,
                 services3,
                 requestParams,
@@ -2066,7 +2068,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+            const ownSharedThirdPartyRelationshipAttribute = await executeFullRequestAndAcceptExistingAttributeFlow(
                 services1,
                 services2,
                 requestParams,
@@ -2174,7 +2176,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            const thirdPartyOwnedRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
+            const thirdPartyOwnedRelationshipAttribute = await executeFullRequestAndAcceptExistingAttributeFlow(
                 services1,
                 services2,
                 requestParams,
@@ -2269,12 +2271,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            thirdPartyOwnedRelationshipAttribute = await executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
-                services1,
-                services2,
-                requestParams,
-                peerSharedRelationshipAttribute.id
-            );
+            thirdPartyOwnedRelationshipAttribute = await executeFullRequestAndAcceptExistingAttributeFlow(services1, services2, requestParams, peerSharedRelationshipAttribute.id);
         });
 
         test("should delete a third party owned RelationshipAttribute as the sender of it", async () => {
@@ -2340,5 +2337,118 @@ describe("DeleteAttributeUseCases", () => {
             expect(updatedAttribute.deletionInfo?.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
             expect(CoreDate.from(updatedAttribute.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
         });
+    });
+});
+
+describe("ThirdPartyRelationshipAttributes", () => {
+    let localAttribute: LocalAttributeDTO;
+    beforeAll(async () => {
+        await cleanupAttributes();
+        localAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
+            content: {
+                key: "ThirdPartyKey",
+                confidentiality: RelationshipAttributeConfidentiality.Public,
+                value: {
+                    "@type": "ProprietaryString",
+                    value: "ThirdPartyValue",
+                    title: "ThirdPartyTitle"
+                },
+                isTechnical: true
+            }
+        });
+    });
+
+    test("should share a RelationshipAttribute that was created by the sharing identity", async () => {
+        const localThirdPartyAttribute = await executeFullShareAndAcceptAttributeRequestFlow(
+            services1,
+            services3,
+            ShareAttributeRequestItem.from({
+                attribute: localAttribute.content,
+                sourceAttributeId: localAttribute.id,
+                thirdPartyAddress: services2.address,
+                mustBeAccepted: true
+            })
+        );
+
+        const services1AttributesResult = (await services1.consumption.attributes.getAttribute({ id: localThirdPartyAttribute.id })).value;
+        const services3AttributesResult = (await services3.consumption.attributes.getAttribute({ id: localThirdPartyAttribute.id })).value;
+
+        expect(services1AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services2.address);
+        expect(services3AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services2.address);
+    });
+
+    test("should share a RelationshipAttribute that was shared with the sharing identity", async () => {
+        const localThirdPartyAttribute = await executeFullShareAndAcceptAttributeRequestFlow(
+            services2,
+            services3,
+            ShareAttributeRequestItem.from({
+                attribute: localAttribute.content,
+                sourceAttributeId: localAttribute.id,
+                thirdPartyAddress: services1.address,
+                mustBeAccepted: true
+            })
+        );
+
+        const services2AttributesResult = (await services2.consumption.attributes.getAttribute({ id: localThirdPartyAttribute.id })).value;
+        const services3AttributesResult = (await services3.consumption.attributes.getAttribute({ id: localThirdPartyAttribute.id })).value;
+
+        expect(services2AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services1.address);
+        expect(services3AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services1.address);
+    });
+
+    test("should request a ThirdPartyRelationshipAttribute from the initial owner", async () => {
+        const localThirdPartyAttribute = await executeFullRequestAndAcceptExistingAttributeFlow(
+            services1,
+            services3,
+            {
+                peer: services1.address,
+                content: {
+                    items: [
+                        ReadAttributeRequestItem.from({
+                            query: ThirdPartyRelationshipAttributeQuery.from({
+                                key: "ThirdPartyKey",
+                                owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                                thirdParty: [services2.address]
+                            }),
+                            mustBeAccepted: true
+                        }).toJSON()
+                    ]
+                }
+            },
+            localAttribute.id
+        );
+        const services1AttributesResult = (await services1.consumption.attributes.getAttribute({ id: localThirdPartyAttribute.id })).value;
+        const services3AttributesResult = (await services3.consumption.attributes.getAttribute({ id: localThirdPartyAttribute.id })).value;
+
+        expect(services1AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services2.address);
+        expect(services3AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services2.address);
+    });
+
+    test("should request a ThirdPartyRelationshipAttribute from the initial peer", async () => {
+        const localThirdPartyAttribute = await executeFullRequestAndAcceptExistingAttributeFlow(
+            services2,
+            services3,
+            {
+                peer: services2.address,
+                content: {
+                    items: [
+                        ReadAttributeRequestItem.from({
+                            query: ThirdPartyRelationshipAttributeQuery.from({
+                                key: "ThirdPartyKey",
+                                owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
+                                thirdParty: [services1.address]
+                            }),
+                            mustBeAccepted: true
+                        }).toJSON()
+                    ]
+                }
+            },
+            localAttribute.id
+        );
+        const services2AttributesResult = (await services2.consumption.attributes.getAttribute({ id: localThirdPartyAttribute.id })).value;
+        const services3AttributesResult = (await services3.consumption.attributes.getAttribute({ id: localThirdPartyAttribute.id })).value;
+
+        expect(services2AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services1.address);
+        expect(services3AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services1.address);
     });
 });
