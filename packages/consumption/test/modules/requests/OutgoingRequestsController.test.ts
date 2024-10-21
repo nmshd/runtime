@@ -255,7 +255,7 @@ describe("OutgoingRequestsController", function () {
                     ]
                 }
             });
-            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerHasDeletionInfo");
+            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsToBeDeleted");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
                 "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer is in status 'ToBeDeleted'."
             );

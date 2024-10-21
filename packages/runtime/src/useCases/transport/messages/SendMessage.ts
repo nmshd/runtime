@@ -39,7 +39,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
     }
 
     protected async executeInternal(request: SendMessageRequest): Promise<Result<MessageDTO>> {
-        const validationError = await this.validateMessageContent(request.content, request.recipients);
+        const validationError = await this.validateMessage(request.content, request.recipients);
         if (validationError) return Result.fail(validationError);
 
         const transformAttachmentsResult = await this.transformAttachments(request.attachments);
@@ -58,7 +58,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         return Result.ok(MessageMapper.toMessageDTO(result));
     }
 
-    private async validateMessageContent(content: any, recipients: string[]) {
+    private async validateMessage(content: any, recipients: string[]) {
         const transformedContent = Serializable.fromUnknown(content);
         if (
             !(
@@ -78,11 +78,11 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
         const deletedPeers: string[] = [];
         const peersInDeletion: string[] = [];
-        const peersWithMissingOrInactiveRelationship: string[] = [];
+        const peersWithNoActiveRelationship: string[] = [];
         for (const recipient of recipients) {
             const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
             if (!relationship) {
-                peersWithMissingOrInactiveRelationship.push(recipient);
+                peersWithNoActiveRelationship.push(recipient);
                 continue;
             }
             if (relationship.peerDeletionInfo?.deletionStatus === "Deleted") {
@@ -93,17 +93,11 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             }
         }
 
-        if (deletedPeers.length > 0) {
-            return TransportCoreErrors.messages.peerDeleted(deletedPeers);
-        }
+        if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
 
-        if (peersInDeletion.length > 0) {
-            return TransportCoreErrors.messages.peerInDeletion(peersInDeletion);
-        }
+        if (peersInDeletion.length > 0) return TransportCoreErrors.messages.peerIsToBeDeleted(peersInDeletion);
 
-        if (peersWithMissingOrInactiveRelationship.length > 0) {
-            return TransportCoreErrors.messages.missingRelationshipOrWrongRelationshipStatus(peersWithMissingOrInactiveRelationship);
-        }
+        if (peersWithNoActiveRelationship.length > 0) return TransportCoreErrors.messages.hasNoActiveRelationship(peersWithNoActiveRelationship);
 
         if (transformedContent instanceof Request) {
             if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");

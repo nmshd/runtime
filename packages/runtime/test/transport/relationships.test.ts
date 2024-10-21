@@ -203,7 +203,7 @@ describe("Relationship status validations on active relationship", () => {
     });
 });
 
-describe("tests on active relationship", () => {
+describe("tests on inactive relationships", () => {
     const serviceProvider = new RuntimeServiceProvider();
     let services1: TestRuntimeServices;
     let services2: TestRuntimeServices;
@@ -221,17 +221,37 @@ describe("tests on active relationship", () => {
     test("messages with multiple recipients should fail if there is no active Relationship to the recipients", async () => {
         const result = await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
         expect(result).toBeAnError(
-            `A Relationship with the given addresses '${services2.address.toString()},${services3.address.toString()}' does not exist or has the wrong status, so you cannot send them a Message.`,
-            "error.transport.messages.missingRelationshipOrWrongRelationshipStatus"
+            `An active Relationship with the given addresses '${services2.address.toString()},${services3.address.toString()}' does not exist, so you cannot send them a Message.`,
+            "error.transport.messages.hasNoActiveRelationship"
         );
     });
 
-    test("messages with multiple recipients should also fail if only one Relationship is not active", async () => {
+    test("messages with multiple recipients should also fail if only one Relationship is missing", async () => {
         await ensureActiveRelationship(services1.transport, services2.transport);
         const result = await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
         expect(result).toBeAnError(
-            `A Relationship with the given address '${services3.address.toString()}' does not exist or has the wrong status, so you cannot send them a Message.`,
-            "error.transport.messages.missingRelationshipOrWrongRelationshipStatus"
+            `An active Relationship with the given address '${services3.address.toString()}' does not exist, so you cannot send them a Message.`,
+            "error.transport.messages.hasNoActiveRelationship"
+        );
+    });
+
+    test("messages with multiple recipients should also fail if only one Relationship is pending", async () => {
+        await ensureActiveRelationship(services1.transport, services2.transport);
+        const templateId = (await exchangeTemplate(services1.transport, services3.transport)).id;
+
+        const createRelationshipResponse = await services3.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: emptyRelationshipCreationContent
+        });
+        expect(createRelationshipResponse).toBeSuccessful();
+
+        const relationships1 = await syncUntilHasRelationships(services1.transport);
+        expect(relationships1).toHaveLength(1);
+
+        const sendResult = await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address]);
+        expect(sendResult).toBeAnError(
+            `An active Relationship with the given address '${services3.address.toString()}' does not exist, so you cannot send them a Message.`,
+            "error.transport.messages.hasNoActiveRelationship"
         );
     });
 });
@@ -523,7 +543,7 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.transport.messages.missingRelationshipOrWrongRelationshipStatus");
+        expect(result).toBeAnError(/.*/, "error.transport.messages.hasNoActiveRelationship");
     });
 
     test.todo("should be able to send a Notification");
