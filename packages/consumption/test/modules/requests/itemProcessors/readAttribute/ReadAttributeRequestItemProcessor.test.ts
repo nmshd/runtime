@@ -859,7 +859,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     shareInfo: {
                         peer: aThirdParty,
                         requestReference: await ConsumptionIds.request.generate(),
-                        sourceAttribute: CoreId.from("sourceAttributeId")
+                        sourceAttribute: CoreId.from("sourceAttributeId"),
+                        thirdPartyAddress: CoreAddress.from("aThirdParty")
                     }
                 });
 
@@ -1620,6 +1621,50 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.deletionInfo).toBeUndefined();
         });
 
+        test("accept with existing peer shared RelationshipAttribute that exists in the context of a Relationship with a third party", async function () {
+            const peerAddress = CoreAddress.from("peerAddress");
+            const sender = CoreAddress.from("Sender");
+
+            const localRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({
+                    owner: accountController.identity.address
+                }),
+                peer: peerAddress,
+                requestReference: CoreId.from("reqRef")
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: ThirdPartyRelationshipAttributeQuery.from({
+                    key: "AKey",
+                    owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                    thirdParty: [peerAddress.toString()]
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: localRelationshipAttribute.id.toString()
+            };
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+
+            expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+            expect((result as ReadAttributeAcceptResponseItem).thirdPartyAddress?.toString()).toBe(peerAddress.toString());
+        });
+
         test("accept with existing own shared RelationshipAttribute that exists in the context of a Relationship with a third party whose predecessor was already shared", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const sender = CoreAddress.from("Sender");
@@ -1691,6 +1736,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(successorOwnSharedRelationshipAttribute!.shareInfo).toBeDefined();
             expect(successorOwnSharedRelationshipAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             expect(successorOwnSharedRelationshipAttribute?.shareInfo!.sourceAttribute).toStrictEqual(successorSourceAttribute.id);
+            expect(successorOwnSharedRelationshipAttribute?.shareInfo?.thirdPartyAddress).toStrictEqual(thirdPartyAddress);
             expect(successorOwnSharedRelationshipAttribute!.succeeds).toStrictEqual(predecessorOwnSharedRelationshipAttribute.id);
 
             const updatedPredecessorOwnSharedRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedRelationshipAttribute.id);
@@ -1768,6 +1814,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(successorOwnSharedRelationshipAttribute!.shareInfo).toBeDefined();
             expect(successorOwnSharedRelationshipAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             expect(successorOwnSharedRelationshipAttribute?.shareInfo!.sourceAttribute).toStrictEqual(successorSourceAttribute.id);
+            expect(successorOwnSharedRelationshipAttribute?.shareInfo!.thirdPartyAddress).toStrictEqual(thirdPartyAddress);
             expect(successorOwnSharedRelationshipAttribute!.succeeds).toStrictEqual(predecessorOwnSharedRelationshipAttribute.id);
 
             const updatedPredecessorOwnSharedRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedRelationshipAttribute.id);
@@ -1878,7 +1925,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: thirdPartyAddress
                 }),
                 peer: recipient,
-                requestReference: CoreId.from("oldReqRef")
+                requestReference: CoreId.from("oldReqRef"),
+                thirdPartyAddress: thirdPartyAddress
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -1921,6 +1969,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(successorPeerSharedRelationshipAttribute!.shareInfo).toBeDefined();
             expect(successorPeerSharedRelationshipAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             expect(successorPeerSharedRelationshipAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+            expect(successorPeerSharedRelationshipAttribute!.shareInfo!.thirdPartyAddress).toStrictEqual(thirdPartyAddress);
             expect(successorPeerSharedRelationshipAttribute!.succeeds).toStrictEqual(predecessorPeerSharedRelationshipAttribute.id);
 
             const updatedPredecessorPeerSharedRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(predecessorPeerSharedRelationshipAttribute.id);

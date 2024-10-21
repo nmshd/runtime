@@ -100,6 +100,10 @@ export class AttributeListenerModule extends RuntimeModule {
             metadata: { attributeListenerId: attributeListener.id }
         };
 
+        if (attribute.content["@type"] === "RelationshipAttribute" && attributeListener.peer !== attribute.shareInfo?.peer) {
+            requestItem.thirdPartyAddress = attribute.shareInfo?.peer;
+        }
+
         const validationResult = await services.consumptionServices.outgoingRequests.canCreate({
             content: { items: [requestItem] },
             peer: attributeListener.peer
