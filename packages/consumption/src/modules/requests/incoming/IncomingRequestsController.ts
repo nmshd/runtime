@@ -448,6 +448,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
 
         const statusUpdated = request.updateStatusBasedOnExpiration();
+
         if (expirationDateUpdated ?? statusUpdated) await this.update(request);
         return request;
     }
