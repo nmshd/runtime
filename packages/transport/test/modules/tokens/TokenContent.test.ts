@@ -86,7 +86,7 @@ describe("TokenContent", function () {
             expect(deserialized.secretKey.toBase64()).toStrictEqual(token.secretKey.toBase64());
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
             expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
-            expect(deserialized.passwordType).toBe(1);
+            expect(deserialized.passwordType).toBe("pw");
         });
 
         test("should serialize and deserialize correctly (no type information)", async function () {
@@ -94,7 +94,7 @@ describe("TokenContent", function () {
                 secretKey: await CryptoEncryption.generateKey(),
                 templateId: await CoreIdHelper.notPrefixed.generate(),
                 forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                passwordType: "pw"
+                passwordType: "pin10"
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -111,7 +111,7 @@ describe("TokenContent", function () {
             expect(deserialized.secretKey.toBase64()).toStrictEqual(token.secretKey.toBase64());
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
             expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
-            expect(deserialized.passwordType).toBe(1);
+            expect(deserialized.passwordType).toBe("pin10");
         });
 
         test("should serialize and deserialize correctly (from unknown type)", async function () {
@@ -139,7 +139,7 @@ describe("TokenContent", function () {
             expect(deserialized.secretKey.toBase64()).toStrictEqual(token.secretKey.toBase64());
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
             expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
-            expect(deserialized.passwordType).toBe(1);
+            expect(deserialized.passwordType).toBe("pw");
         });
     });
 
