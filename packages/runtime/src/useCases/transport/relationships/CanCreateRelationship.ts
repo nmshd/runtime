@@ -8,10 +8,16 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { RuntimeErrors, UseCase } from "../../common";
 import { CreateRelationshipRequest } from "./CreateRelationship";
 
-export interface CanCreateRelationshipResponse {
-    isSuccess: boolean;
-    code?: string;
-    message?: string;
+export type CanCreateRelationshipResponse = CanCreateRelationshipSuccessResponse | CanCreateRelationshipFailureResponse;
+
+export interface CanCreateRelationshipSuccessResponse {
+    isSuccess: true;
+}
+
+export interface CanCreateRelationshipFailureResponse {
+    isSuccess: false;
+    code: string;
+    message: string;
 }
 
 export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequest, CanCreateRelationshipResponse> {
@@ -28,12 +34,12 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
 
         if (!template) {
             const error = RuntimeErrors.general.recordNotFound(RelationshipTemplate);
-            return Result.ok({ isSuccess: false, code: error.code, message: error.message } as CanCreateRelationshipResponse);
+            return Result.ok({ isSuccess: false, code: error.code, message: error.message } as CanCreateRelationshipFailureResponse);
         }
 
         if (!template.cache) {
             const error = RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString());
-            return Result.ok({ isSuccess: false, code: error.code, message: error.message } as CanCreateRelationshipResponse);
+            return Result.ok({ isSuccess: false, code: error.code, message: error.message } as CanCreateRelationshipFailureResponse);
         }
 
         const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
@@ -41,7 +47,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
             const error = RuntimeErrors.general.invalidPropertyValue(
                 "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
             );
-            return Result.ok({ isSuccess: false, code: error.code, message: error.message } as CanCreateRelationshipResponse);
+            return Result.ok({ isSuccess: false, code: error.code, message: error.message } as CanCreateRelationshipFailureResponse);
         }
 
         const canSendRelationship = await this.relationshipController.canSendRelationship({ creationContent: request.creationContent, template });
@@ -55,7 +61,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
                 }
             }
 
-            const errorResponse: CanCreateRelationshipResponse = {
+            const errorResponse: CanCreateRelationshipFailureResponse = {
                 isSuccess: false,
                 code: canSendRelationship.error.code,
                 message: canSendRelationship.error.reason
@@ -64,7 +70,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
             return Result.ok(errorResponse);
         }
 
-        const successResponse: CanCreateRelationshipResponse = { isSuccess: true };
+        const successResponse: CanCreateRelationshipSuccessResponse = { isSuccess: true };
         return Result.ok(successResponse);
     }
 }
