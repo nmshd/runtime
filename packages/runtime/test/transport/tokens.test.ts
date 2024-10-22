@@ -95,3 +95,33 @@ describe("Personalized tokens", () => {
         expect(loadResult).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
 });
+
+describe("Password-protected tokens", () => {
+    test("send and receive a password-protected token", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            password: "password"
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.password).toBe("password");
+
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "password" });
+        expect(loadResult).toBeSuccessful();
+        expect(loadResult.value.password).toBe("password");
+    });
+
+    test("error when loading a token with a wrong password", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            password: "password"
+        });
+        expect(createResult).toBeSuccessful();
+
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "wrong-password" });
+        expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
+    });
+});

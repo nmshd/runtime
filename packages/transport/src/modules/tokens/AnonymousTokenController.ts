@@ -13,17 +13,17 @@ export class AnonymousTokenController {
         this.client = new AnonymousTokenClient(config, correlator);
     }
 
-    public async loadPeerTokenByTruncated(truncated: string): Promise<Token> {
+    public async loadPeerTokenByTruncated(truncated: string, password?: string): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerToken(reference.id, reference.key, reference.forIdentityTruncated);
+        return await this.loadPeerToken(reference.id, reference.key, reference.forIdentityTruncated, password);
     }
 
-    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string): Promise<Token> {
+    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, password?: string): Promise<Token> {
         if (forIdentityTruncated) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
 
-        const response = (await this.client.getToken(id.toString())).value;
+        const response = (await this.client.getToken(id.toString(), password)).value;
 
         const cipher = CryptoCipher.fromBase64(response.content);
         const plaintextTokenBuffer = await CoreCrypto.decrypt(cipher, secretKey);
@@ -35,7 +35,8 @@ export class AnonymousTokenController {
         const token = Token.from({
             id: id,
             secretKey: secretKey,
-            isOwn: false
+            isOwn: false,
+            password
         });
 
         const cachedToken = CachedToken.from({

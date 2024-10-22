@@ -8,6 +8,7 @@ export interface CreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> {
@@ -56,7 +57,8 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral: true,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            password: request.password
         });
 
         const qrCode = await QRCode.forTruncateable(token);

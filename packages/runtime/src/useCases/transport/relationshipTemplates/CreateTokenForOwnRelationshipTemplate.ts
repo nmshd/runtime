@@ -11,6 +11,7 @@ export interface CreateTokenForOwnTemplateRequest {
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
     forIdentity?: AddressString;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<CreateTokenForOwnTemplateRequest> {
@@ -57,7 +58,8 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            password: request.password
         });
 
         if (!ephemeral) {
