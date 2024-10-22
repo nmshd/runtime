@@ -2,6 +2,7 @@ import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
 import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { DateTime } from "luxon";
+import { CanCreateRelationshipFailureResponse } from "src/useCases/transport/relationships/CanCreateRelationship";
 import {
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
@@ -87,10 +88,10 @@ describe("Can Create / Create Relationship", () => {
             })
         ).value;
         expect(canCreateRelationshipResponse.isSuccess).toBe(false);
-        expect(canCreateRelationshipResponse.message).toBe(
+        expect((canCreateRelationshipResponse as CanCreateRelationshipFailureResponse).message).toBe(
             "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
         );
-        expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
+        expect((canCreateRelationshipResponse as CanCreateRelationshipFailureResponse).code).toBe("error.runtime.validation.invalidPropertyValue");
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
@@ -138,8 +139,10 @@ describe("Can Create / Create Relationship", () => {
         ).value;
 
         expect(canCreateRelationshipResponse.isSuccess).toBe(false);
-        expect(canCreateRelationshipResponse.message).toBe(`The RelationshipTemplate '${templateId}' is already expired and therefore cannot be used to create a Relationship.`);
-        expect(canCreateRelationshipResponse.code).toBe("error.transport.relationships.relationshipTemplateIsExpired");
+        expect((canCreateRelationshipResponse as CanCreateRelationshipFailureResponse).message).toBe(
+            `The RelationshipTemplate '${templateId}' is already expired and therefore cannot be used to create a Relationship.`
+        );
+        expect((canCreateRelationshipResponse as CanCreateRelationshipFailureResponse).code).toBe("error.transport.relationships.relationshipTemplateIsExpired");
 
         const expiredRequest = (await services2.consumption.incomingRequests.getRequest({ id: incomingRequest.id })).value;
         expect(expiredRequest.status).toBe(LocalRequestStatus.Expired);
@@ -166,10 +169,12 @@ describe("Can Create / Create Relationship", () => {
             })
         ).value;
         expect(canCreateRelationshipResponse.isSuccess).toBe(false);
-        expect(canCreateRelationshipResponse.message).toBe(
+        expect((canCreateRelationshipResponse as CanCreateRelationshipFailureResponse).message).toBe(
             "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
         );
-        expect(canCreateRelationshipResponse.code).toBe("error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate");
+        expect((canCreateRelationshipResponse as CanCreateRelationshipFailureResponse).code).toBe(
+            "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
+        );
 
         const createRelationshipResponse = await services2.transport.relationships.createRelationship({
             templateId: templateId,
@@ -215,8 +220,10 @@ describe("Can Create / Create Relationship", () => {
                 })
             ).value;
             expect(canCreateResult.isSuccess).toBe(false);
-            expect(canCreateResult.message).toBe(`No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Pending}' currently exists.`);
-            expect(canCreateResult.code).toBe("error.transport.relationships.relationshipCurrentlyExists");
+            expect((canCreateResult as CanCreateRelationshipFailureResponse).message).toBe(
+                `No new Relationship to the peer can be created as a Relationship in status '${RelationshipStatus.Pending}' currently exists.`
+            );
+            expect((canCreateResult as CanCreateRelationshipFailureResponse).code).toBe("error.transport.relationships.relationshipCurrentlyExists");
 
             const result = await services2.transport.relationships.createRelationship({
                 templateId: templateId,
@@ -968,8 +975,10 @@ describe("RelationshipDecomposition", () => {
             })
         ).value;
         expect(canCreateResult.isSuccess).toBe(false);
-        expect(canCreateResult.message).toBe("No new Relationship can be created as the former Relationship is not yet decomposed by the peer.");
-        expect(canCreateResult.code).toBe("error.transport.relationships.relationshipNotYetDecomposedByPeer");
+        expect((canCreateResult as CanCreateRelationshipFailureResponse).message).toBe(
+            "No new Relationship can be created as the former Relationship is not yet decomposed by the peer."
+        );
+        expect((canCreateResult as CanCreateRelationshipFailureResponse).code).toBe("error.transport.relationships.relationshipNotYetDecomposedByPeer");
 
         const result = await services1.transport.relationships.createRelationship({
             templateId: templateId,
