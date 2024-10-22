@@ -437,7 +437,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
     private async updateRequestExpiry(request: LocalRequest) {
         const statusUpdated = request.updateStatusBasedOnExpiration();
-
         if (statusUpdated) await this.update(request);
         return request;
     }
