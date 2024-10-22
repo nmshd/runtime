@@ -169,18 +169,7 @@ export class RelationshipsController extends TransportController {
             creationContent: creationContentCipher.toBase64(),
             relationshipTemplateId: template.id.toString()
         });
-
-        if (result.isError) {
-            if (result.error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
-                throw TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate();
-            }
-
-            if (result.error.code.match(/^error.platform.validation.(relationship|relationshipRequest).relationshipToTargetAlreadyExists$/)) {
-                throw TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer();
-            }
-
-            throw result.error;
-        }
+        if (result.isError) throw result.error;
 
         const backboneResponse = result.value;
 
@@ -213,7 +202,7 @@ export class RelationshipsController extends TransportController {
         const result = await this.client.canCreateRelationship(peerAddress.toString());
 
         if (!result.value.canCreate) {
-            if (result.value.code.match(/^error.platform.validation.(relationship|relationshipRequest).relationshipToTargetAlreadyExists$/)) {
+            if (result.value.code === "error.platform.validation.relationship.relationshipToTargetAlreadyExists") {
                 return Result.fail(TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer());
             }
 
