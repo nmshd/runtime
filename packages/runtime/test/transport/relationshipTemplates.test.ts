@@ -14,8 +14,8 @@ beforeAll(async () => {
 }, 30000);
 afterAll(() => serviceProvider.stop());
 
-describe("Template Tests", () => {
-    test("create a template", async () => {
+describe("RelationshipTemplate Tests", () => {
+    test("create a RelationshipTemplate", async () => {
         const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             maxNumberOfAllocations: 1,
             expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
@@ -25,7 +25,7 @@ describe("Template Tests", () => {
         expect(response).toBeSuccessful();
     });
 
-    test("create a template with undefined expiresAt", async () => {
+    test("error when creating a RelationshipTemplate with undefined expiresAt", async () => {
         const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: emptyRelationshipTemplateContent,
             expiresAt: undefined as unknown as string
@@ -52,7 +52,7 @@ describe("Template Tests", () => {
         expect((response.value.content as RelationshipTemplateContentJSON).onNewRelationship.expiresAt).toStrictEqual(relationshipTemplateExpirationDate);
     });
 
-    test("create a RelationshipTemplate with Request for new Relationship that expires after the RelationshipTemplate", async () => {
+    test("error when creating a RelationshipTemplate with Request for new Relationship that expires after the RelationshipTemplate", async () => {
         const relationshipTemplateContent = RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
