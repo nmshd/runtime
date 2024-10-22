@@ -90,7 +90,7 @@
         "@js-soft/node-logger": "1.2.0",
         "@js-soft/ts-serval": "2.0.11",
         "@types/json-stringify-safe": "^5.0.3",
-        "@types/lodash": "^4.17.10",
+        "@types/lodash": "^4.17.12",
         "@types/luxon": "^3.4.2",
         "@types/qs": "^6.9.16",
         "@types/uuid": "^10.0.0",
