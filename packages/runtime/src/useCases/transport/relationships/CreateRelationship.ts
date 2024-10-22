@@ -59,7 +59,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             ) {
                 const dbQuery: any = {};
                 dbQuery["source.reference"] = { $eq: template.id.toString() };
-                await this.incomingRequestsController.getIncomingRequestsWithUpdatedExpiry(dbQuery);
+                await this.incomingRequestsController.getIncomingRequests(dbQuery);
             }
             throw error;
         }

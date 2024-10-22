@@ -387,7 +387,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    public async getIncomingRequestsWithUpdatedExpiry(query?: any): Promise<LocalRequest[]> {
+    public async getIncomingRequests(query?: any): Promise<LocalRequest[]> {
         const requestDocs = await this.localRequests.find({
             ...query,
             isOwn: false
@@ -397,7 +397,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return await Promise.all(requestPromises);
     }
 
-    public async getIncomingRequestWithUpdatedExpiry(idIncomingRequest: ICoreId): Promise<LocalRequest | undefined> {
+    public async getIncomingRequest(idIncomingRequest: ICoreId): Promise<LocalRequest | undefined> {
         const requestDoc = await this.localRequests.findOne({ id: idIncomingRequest.toString(), isOwn: false });
         if (!requestDoc) return;
 
@@ -407,7 +407,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     private async getOrThrow(id: CoreId | string) {
-        const request = await this.getIncomingRequestWithUpdatedExpiry(CoreId.from(id));
+        const request = await this.getIncomingRequest(CoreId.from(id));
         if (!request) {
             throw TransportCoreErrors.general.recordNotFound(LocalRequest, id.toString());
         }
@@ -423,7 +423,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     public async deleteRequestsFromPeer(peer: CoreAddress): Promise<void> {
-        const requests = await this.getIncomingRequestsWithUpdatedExpiry({ peer: peer.toString() });
+        const requests = await this.getIncomingRequests({ peer: peer.toString() });
         for (const request of requests) {
             await this.localRequests.delete(request);
         }

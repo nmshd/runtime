@@ -320,7 +320,7 @@ export class RequestsGiven {
     }
 
     private async moveOutgoingRequestToStatus(localRequest: LocalRequest, status: LocalRequestStatus) {
-        const updatedRequest = await this.context.outgoingRequestsController.getOutgoingRequestWithUpdatedExpiry(localRequest.id);
+        const updatedRequest = await this.context.outgoingRequestsController.getOutgoingRequest(localRequest.id);
 
         if (updatedRequest!.status === status) return;
 
@@ -850,15 +850,15 @@ export class RequestsWhen {
     }
 
     public async iGetIncomingRequestsWithTheQuery(query?: any): Promise<void> {
-        this.context.localRequestsAfterAction = await this.context.incomingRequestsController.getIncomingRequestsWithUpdatedExpiry(query);
+        this.context.localRequestsAfterAction = await this.context.incomingRequestsController.getIncomingRequests(query);
     }
 
     public async iGetOutgoingRequestsWithTheQuery(query?: any): Promise<void> {
-        this.context.localRequestsAfterAction = await this.context.outgoingRequestsController.getOutgoingRequestsWithUpdatedExpiry(query);
+        this.context.localRequestsAfterAction = await this.context.outgoingRequestsController.getOutgoingRequests(query);
     }
 
     public async iGetTheIncomingRequestWith(id: CoreId): Promise<void> {
-        this.context.localRequestAfterAction = await this.context.incomingRequestsController.getIncomingRequestWithUpdatedExpiry(id);
+        this.context.localRequestAfterAction = await this.context.incomingRequestsController.getIncomingRequest(id);
     }
 
     public async iGetTheOutgoingRequest(): Promise<void> {
@@ -866,11 +866,11 @@ export class RequestsWhen {
     }
 
     public async iGetTheOutgoingRequestWith(id: CoreId): Promise<void> {
-        this.context.localRequestAfterAction = await this.context.outgoingRequestsController.getOutgoingRequestWithUpdatedExpiry(id);
+        this.context.localRequestAfterAction = await this.context.outgoingRequestsController.getOutgoingRequest(id);
     }
 
     public async iTryToGetARequestWithANonExistentId(): Promise<void> {
-        this.context.localRequestAfterAction = (await this.context.incomingRequestsController.getIncomingRequestWithUpdatedExpiry(await CoreIdHelper.notPrefixed.generate()))!;
+        this.context.localRequestAfterAction = (await this.context.incomingRequestsController.getIncomingRequest(await CoreIdHelper.notPrefixed.generate()))!;
     }
 
     public iTryToCompleteTheIncomingRequestWith(params: Partial<ICompleteIncomingRequestParameters>): Promise<void> {
