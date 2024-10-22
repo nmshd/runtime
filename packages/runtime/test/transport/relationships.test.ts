@@ -733,7 +733,7 @@ describe("RelationshipDecomposition", () => {
     beforeAll(async () => {
         const relationship = await ensureActiveRelationship(services1.transport, services2.transport);
         relationshipId = relationship.id;
-        templateId = relationship.template.id;
+        templateId = relationship.templateId;
 
         await createRelationshipData(services1, services2);
 
@@ -741,7 +741,7 @@ describe("RelationshipDecomposition", () => {
         services3 = runtimeServices[0];
         const relationship2 = await establishRelationship(services1.transport, services3.transport);
         relationshipId2 = relationship2.id;
-        templateId2 = relationship2.template.id;
+        templateId2 = relationship2.templateId;
 
         await createRelationshipData(services1, services3);
         multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).id;
