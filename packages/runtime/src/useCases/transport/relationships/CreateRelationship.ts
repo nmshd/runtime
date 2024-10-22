@@ -1,9 +1,9 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController } from "@nmshd/consumption";
-import { ArbitraryRelationshipCreationContent, RelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { AccountController, Relationship, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
+import { AccountController, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -47,22 +47,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             );
         }
 
-        let sendRelationshipResult: Relationship;
-        try {
-            sendRelationshipResult = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
-        } catch (error) {
-            if (
-                error instanceof ApplicationError &&
-                error.code === "error.transport.relationships.relationshipTemplateIsExpired" &&
-                template.cache?.content instanceof RelationshipTemplateContent &&
-                template.cache.expiresAt
-            ) {
-                const dbQuery: any = {};
-                dbQuery["source.reference"] = { $eq: template.id.toString() };
-                await this.incomingRequestsController.getIncomingRequests(dbQuery);
-            }
-            throw error;
-        }
+        const sendRelationshipResult = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
 
         await this.accountController.syncDatawallet();
 

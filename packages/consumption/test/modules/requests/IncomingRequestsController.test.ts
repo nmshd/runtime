@@ -982,37 +982,6 @@ describe("IncomingRequestsController", function () {
             await Then.theNumberOfReturnedRequestsIs(2);
         });
 
-        test("updates the expiration date if the Template expires before the Request", async function () {
-            const timestamp = CoreDate.utc();
-            const request = await Given.anIncomingRequestWith({
-                content: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp.add({ days: 1 }) }),
-                requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp)
-            });
-            await When.iGetTheIncomingRequestWith(request.id);
-            await Then.theRequestHasExpirationDate(timestamp);
-            await Then.theRequestIsInStatus(LocalRequestStatus.Expired);
-        });
-
-        test("updates the expiration date if the Request has no expiration date", async function () {
-            const timestamp = CoreDate.utc().add({ days: 1 });
-            const request = await Given.anIncomingRequestWith({
-                content: TestObjectFactory.createRequestWithOneItem(),
-                requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp)
-            });
-            await When.iGetTheIncomingRequestWith(request.id);
-            await Then.theRequestHasExpirationDate(timestamp);
-        });
-
-        test("doesn't update the expiration date if the Request expires before the Template", async function () {
-            const timestamp = CoreDate.utc().add({ days: 1 });
-            const request = await Given.anIncomingRequestWith({
-                content: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp }),
-                requestSource: TestObjectFactory.createIncomingRelationshipTemplate(timestamp.add({ days: 1 }))
-            });
-            await When.iGetTheIncomingRequestWith(request.id);
-            await Then.theRequestHasExpirationDate(timestamp);
-        });
-
         test("moves the Request to status 'Expired' when expiredAt is reached", async function () {
             const outgoingRequest = await Given.anIncomingRequestWith({
                 status: LocalRequestStatus.Draft,

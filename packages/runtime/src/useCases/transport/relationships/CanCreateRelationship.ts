@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController } from "@nmshd/consumption";
-import { ArbitraryRelationshipCreationContent, RelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
+import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -53,14 +53,6 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
         const canSendRelationship = await this.relationshipController.canSendRelationship({ creationContent: request.creationContent, template });
 
         if (!canSendRelationship.isSuccess) {
-            if (canSendRelationship.error.code === "error.transport.relationships.relationshipTemplateIsExpired") {
-                if (template.cache.content instanceof RelationshipTemplateContent && template.cache.expiresAt) {
-                    const dbQuery: any = {};
-                    dbQuery["source.reference"] = { $eq: template.id.toString() };
-                    await this.incomingRequestsController.getIncomingRequests(dbQuery);
-                }
-            }
-
             const errorResponse: CanCreateRelationshipFailureResponse = {
                 isSuccess: false,
                 code: canSendRelationship.error.code,
