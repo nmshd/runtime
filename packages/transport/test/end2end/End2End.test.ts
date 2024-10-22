@@ -311,7 +311,7 @@ describe("RelationshipTest: Revoke", function () {
         expect(revokedRelationshipSelf.cache?.auditLog).toHaveLength(2);
         expect(revokedRelationshipSelf.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Revoked);
         expect(revokedRelationshipSelf.peer).toBeDefined();
-        expect(revokedRelationshipSelf.peer.address.toString()).toStrictEqual(revokedRelationshipSelf.cache!.auditLog[0].createdBy.toString());
+        expect(revokedRelationshipSelf.peer.address.toString()).toStrictEqual(revokedRelationshipSelf.cache!.auditLog[1].createdBy.toString());
 
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(templator);
         expect(syncedRelationshipsPeer).toHaveLength(1);
