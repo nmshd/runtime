@@ -13,6 +13,7 @@ import { File } from "../files/local/File";
 import { FileReference } from "../files/transmission/FileReference";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
+import { PeerDeletionStatus } from "../relationships/local/PeerDeletionInfo";
 import { Relationship } from "../relationships/local/Relationship";
 import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
@@ -302,7 +303,7 @@ export class MessageController extends TransportController {
             const relationship = await this.relationships.getRelationshipToIdentity(recipient);
 
             if (!relationship) {
-                throw TransportCoreErrors.messages.hasNoActiveRelationship(recipient.toString());
+                throw TransportCoreErrors.messages.missingRelationship(recipient.toString());
             }
 
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
@@ -342,7 +343,7 @@ export class MessageController extends TransportController {
             const relationship = await this.relationships.getRelationshipToIdentity(CoreAddress.from(recipient));
 
             if (!relationship) {
-                throw TransportCoreErrors.messages.hasNoActiveRelationship(recipient.toString());
+                throw TransportCoreErrors.messages.missingRelationship(recipient.toString());
             }
 
             const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
@@ -426,20 +427,24 @@ export class MessageController extends TransportController {
         for (const recipient of recipients) {
             const relationship = await this.relationships.getRelationshipToIdentity(recipient);
 
-            if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
-                deletedPeers.push(recipient.address);
-                continue;
-            }
-
             if (!relationship) {
                 peersWithMissingRelationship.push(recipient.address);
                 continue;
             }
 
-            if (!(relationship.status === "Terminated" || relationship.status === "Active")) {
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+                deletedPeers.push(recipient.address);
+                continue;
+            }
+
+            if (!(relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active)) {
                 peersWithWrongRelationshipStatus.push(recipient.address);
                 continue;
             }
+        }
+
+        if (peersWithMissingRelationship.length > 0) {
+            return TransportCoreErrors.messages.missingRelationship(peersWithMissingRelationship);
         }
 
         if (deletedPeers.length > 0) {
@@ -448,10 +453,6 @@ export class MessageController extends TransportController {
 
         if (peersWithWrongRelationshipStatus.length > 0) {
             return TransportCoreErrors.messages.wrongRelationshipStatus(peersWithWrongRelationshipStatus);
-        }
-
-        if (peersWithMissingRelationship.length > 0) {
-            return TransportCoreErrors.messages.missingRelationship(peersWithMissingRelationship);
         }
 
         return;

@@ -3,7 +3,7 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { AccountController, File, FileController, MessageController, RelationshipsController, TransportCoreErrors } from "@nmshd/transport";
+import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, TransportCoreErrors } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
 import { MessageDTO } from "../../../types";
@@ -85,10 +85,10 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
                 peersWithNoActiveRelationship.push(recipient);
                 continue;
             }
-            if (relationship.peerDeletionInfo?.deletionStatus === "Deleted") {
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
                 deletedPeers.push(recipient);
             }
-            if (relationship.peerDeletionInfo?.deletionStatus === "ToBeDeleted") {
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
                 peersInDeletion.push(recipient);
             }
         }

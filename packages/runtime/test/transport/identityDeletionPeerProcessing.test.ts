@@ -177,10 +177,12 @@ describe("IdentityDeletionProcess", () => {
         const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
         expect(updatedRelationship.peerDeletionInfo?.deletionStatus).toBe("ToBeDeleted");
 
-        const canAcceptResultAfterPeerDeletion = (await services2.consumption.incomingRequests.canAccept({ requestId: requestId, items: [{ accept: true }] })).value;
-        expect(canAcceptResultAfterPeerDeletion.isSuccess).toBe(false);
-        expect(canAcceptResultAfterPeerDeletion.code).toBe("error.consumption.requests.peerIsToBeDeleted");
-        expect(canAcceptResultAfterPeerDeletion.message).toContain(`You cannot decide a Request from '${services1.address.toString()}' since the peer is in status 'ToBeDeleted'`);
+        const canAcceptResultAfterPeerInitiatedDeletion = (await services2.consumption.incomingRequests.canAccept({ requestId: requestId, items: [{ accept: true }] })).value;
+        expect(canAcceptResultAfterPeerInitiatedDeletion.isSuccess).toBe(false);
+        expect(canAcceptResultAfterPeerInitiatedDeletion.code).toBe("error.consumption.requests.peerIsToBeDeleted");
+        expect(canAcceptResultAfterPeerInitiatedDeletion.message).toContain(
+            `You cannot decide a Request from '${services1.address.toString()}' since the peer is in status 'ToBeDeleted'`
+        );
     });
 
     test.todo("should be able to send a Notification to an Identity which is in status 'ToBeDeleted'");

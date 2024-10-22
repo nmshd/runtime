@@ -2,7 +2,7 @@ import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
 import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
-import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
+import { Message, PeerDeletionStatus, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
@@ -174,7 +174,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         const relationship = await this.relationshipResolver.getRelationshipToIdentity(request.peer);
         // It is safe to decide an incoming Request when no Relationship is found as this is the case when the Request origins from onNewRelationship of the RelationshipTemplateContent
 
-        if (relationship?.peerDeletionInfo?.deletionStatus === "Deleted") {
+        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.peerIsDeleted(
                     `You cannot decide a Request from '${request.peer.toString()}' since the peer is in status '${relationship.peerDeletionInfo.deletionStatus}'.`
@@ -182,7 +182,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             );
         }
 
-        if (relationship?.peerDeletionInfo?.deletionStatus === "ToBeDeleted") {
+        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.peerIsToBeDeleted(
                     `You cannot decide a Request from '${request.peer.toString()}' since the peer is in status '${relationship.peerDeletionInfo.deletionStatus}'.`

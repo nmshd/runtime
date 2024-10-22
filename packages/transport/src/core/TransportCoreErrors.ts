@@ -100,11 +100,18 @@ class Messages {
         );
     }
 
-    public missingRelationship(address: string[]) {
-        if (address.length > 1) {
+    public missingRelationship(address: string[] | string) {
+        if (typeof address !== "string" && address.length > 1) {
             return new CoreError(
                 "error.transport.messages.missingRelationship",
                 `A Relationship with the given addresses '${address}' does not exist, so you cannot send them a Message.`
+            );
+        }
+
+        if (typeof address === "string") {
+            return new CoreError(
+                "error.transport.messages.missingRelationship",
+                `A Relationship with the given address '${address}' does not exist, so you cannot send them a Message.`
             );
         }
 
