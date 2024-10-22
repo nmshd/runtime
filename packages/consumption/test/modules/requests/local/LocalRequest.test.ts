@@ -35,7 +35,7 @@ describe("LocalRequest", function () {
         });
 
         test("adds a status log entry on status change", function () {
-            const request = TestObjectFactory.createLocalRequestWith({});
+            const request = TestObjectFactory.createLocalRequestWith({ status: LocalRequestStatus.Draft });
             request.changeStatus(LocalRequestStatus.Open);
 
             expect(request.statusLog).toHaveLength(1);
@@ -50,7 +50,7 @@ describe("LocalRequest", function () {
     });
 
     describe("updateStatusBasedOnExpiration", function () {
-        test("sets the status to expired when the request is expired", function () {
+        test("sets the status to expired when the Request is expired", function () {
             const request = TestObjectFactory.createLocalRequestWith({
                 contentProperties: {
                     expiresAt: CoreDate.utc().subtract({ days: 1 })
@@ -61,18 +61,84 @@ describe("LocalRequest", function () {
             expect(request.status).toStrictEqual(LocalRequestStatus.Expired);
         });
 
-        test("does not change the status when the request is expired but already completed", function () {
+        test("does not change the status when the Request is expired but already completed", function () {
             const request = TestObjectFactory.createLocalRequestWith({ status: LocalRequestStatus.Completed });
 
             request.updateStatusBasedOnExpiration();
             expect(request.status).toStrictEqual(LocalRequestStatus.Completed);
         });
 
-        test("does not change the status when the request is expired but already expired", function () {
+        test("does not change the status when the Request is expired but already expired", function () {
             const request = TestObjectFactory.createLocalRequestWith({ status: LocalRequestStatus.Expired });
 
             request.updateStatusBasedOnExpiration();
             expect(request.status).toStrictEqual(LocalRequestStatus.Expired);
+        });
+    });
+
+    describe("updateExpirationDateBasedOnTemplateExpiration", function () {
+        test("sets the expiration date if the Request doesn't have an expiration date", function () {
+            const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({});
+            expect(request.content.expiresAt).toBeUndefined();
+            const timestamp = CoreDate.utc().subtract({ days: 1 });
+
+            request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
+            expect(request.content.expiresAt).toStrictEqual(timestamp);
+        });
+
+        test("sets the expiration date if the Request has already been rejected", function () {
+            const request = TestObjectFactory.createRejectedLocalRequestBasedOnTemplateWith({});
+
+            const timestamp = CoreDate.utc().subtract({ days: 1 });
+
+            request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
+            expect(request.content.expiresAt).toStrictEqual(timestamp);
+        });
+
+        test("does not change the expiration date when the Request expires before the Template", function () {
+            const timestamp = CoreDate.utc().add({ days: 1 });
+            const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({
+                contentProperties: {
+                    expiresAt: timestamp
+                }
+            });
+
+            request.updateExpirationDateBasedOnTemplateExpiration(timestamp.add({ days: 1 }));
+            expect(request.content.expiresAt).toStrictEqual(timestamp);
+        });
+
+        test("does not change the expiration date when the Request is already completed", function () {
+            const request = TestObjectFactory.createRejectedLocalRequestBasedOnTemplateWith({
+                status: LocalRequestStatus.Completed
+            });
+
+            const timestamp = CoreDate.utc().subtract({ days: 1 });
+
+            request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
+            expect(request.content.expiresAt).toBeUndefined();
+        });
+
+        test("does not change the expiration date when the Request is already expired", function () {
+            const timestamp = CoreDate.utc().subtract({ days: 1 });
+
+            const request = TestObjectFactory.createUnansweredLocalRequestBasedOnTemplateWith({
+                status: LocalRequestStatus.Expired,
+                contentProperties: {
+                    expiresAt: timestamp
+                }
+            });
+
+            request.updateExpirationDateBasedOnTemplateExpiration(timestamp.subtract({ days: 1 }));
+            expect(request.content.expiresAt).toStrictEqual(timestamp);
+        });
+
+        test("does not set the expiration date when Message instead of RelationshipTemplate is used", function () {
+            const request = TestObjectFactory.createLocalRequestWith({});
+
+            const timestamp = CoreDate.utc().subtract({ days: 1 });
+
+            request.updateExpirationDateBasedOnTemplateExpiration(timestamp);
+            expect(request.content.expiresAt).toBeUndefined();
         });
     });
 });
