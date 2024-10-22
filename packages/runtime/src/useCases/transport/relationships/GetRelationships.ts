@@ -10,7 +10,7 @@ import { RelationshipMapper } from "./RelationshipMapper";
 export interface GetRelationshipsQuery {
     peer?: string | string[];
     status?: string | string[];
-    "template.id"?: string | string[];
+    templateId?: string | string[];
 }
 
 export interface GetRelationshipsRequest {

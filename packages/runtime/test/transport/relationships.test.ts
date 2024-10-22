@@ -238,7 +238,7 @@ describe("Relationships query", () => {
         const conditions = new QueryParamConditions<GetRelationshipsQuery>(relationship, services1.transport)
             .addStringSet("peer")
             .addStringSet("status")
-            .addStringSet("template.id");
+            .addStringSet("templateId");
         await conditions.executeTests((c, q) => c.relationships.getRelationships({ query: q }));
     });
 });

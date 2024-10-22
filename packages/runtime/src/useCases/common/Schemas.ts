@@ -22519,7 +22519,7 @@ export const GetRelationshipsRequest: any = {
                         }
                     ]
                 },
-                "template.id": {
+                "templateId": {
                     "anyOf": [
                         {
                             "type": "string"
