@@ -20,6 +20,13 @@ class Relationships {
         );
     }
 
+    public relationshipTemplateIsExpired(templateId: string) {
+        return new CoreError(
+            "error.transport.relationships.relationshipTemplateIsExpired",
+            `The RelationshipTemplate '${templateId}' is already expired and therefore cannot be used to create a Relationship.`
+        );
+    }
+
     public relationshipNotYetDecomposedByPeer() {
         return new CoreError(
             "error.transport.relationships.relationshipNotYetDecomposedByPeer",
