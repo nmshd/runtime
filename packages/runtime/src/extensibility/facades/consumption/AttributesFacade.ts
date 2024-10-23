@@ -183,6 +183,15 @@ export class AttributesFacade {
         return await this.deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase.execute(request);
     }
 
+    /**
+     * @deprecated deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer will be removed in the next major version. Use deleteThirdPartyRelationshipAttributeAndNotifyPeer instead.
+     */
+    public async deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer(
+        request: DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest
+    ): Promise<Result<DeleteThirdPartyRelationshipAttributeAndNotifyPeerResponse>> {
+        return await this.deleteThirdPartyRelationshipAttributeAndNotifyPeer(request);
+    }
+
     public async deleteRepositoryAttribute(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
         return await this.deleteRepositoryAttributeUseCase.execute(request);
     }
