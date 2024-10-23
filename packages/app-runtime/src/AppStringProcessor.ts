@@ -3,7 +3,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress } from "@nmshd/core-types";
 import { AnonymousServices, Base64ForIdPrefix, DeviceMapper } from "@nmshd/runtime";
-import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
+import { Reference, TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
 import { IUIBridge } from "./extensibility";
@@ -17,8 +17,8 @@ export class AppStringProcessor {
     public constructor(
         protected readonly runtime: {
             get anonymousServices(): AnonymousServices;
-            requestAccountSelection(title?: string, description?: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>>;
-            uiBridge(): Promise<IUIBridge>;
+            requestAccountSelection(title?: string, description?: string, forIdentityTruncated?: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>>;
+            uiBridge(): Promise<IUIBridge> | IUIBridge;
             getServices(accountReference: string | ICoreAddress): Promise<AppRuntimeServices>;
             translate(key: string, ...values: any[]): Promise<Result<string>>;
             get eventBus(): EventBus;
@@ -40,11 +40,20 @@ export class AppStringProcessor {
     }
 
     public async processTruncatedReference(truncatedReference: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
-        if (account) return await this._handleTruncatedReference(truncatedReference, account);
+        let reference: Reference;
+        try {
+            reference = Reference.fromTruncated(truncatedReference);
+        } catch (_) {
+            return UserfriendlyResult.fail(
+                new UserfriendlyApplicationError("error.appStringProcessor.truncatedReferenceInvalid", "The given code does not contain a valid truncated reference.")
+            );
+        }
+
+        if (account) return await this._handleReference(reference, account);
 
         // process Files and RelationshipTemplates and ask for an account
         if (truncatedReference.startsWith(Base64ForIdPrefix.File) || truncatedReference.startsWith(Base64ForIdPrefix.RelationshipTemplate)) {
-            const result = await this.runtime.requestAccountSelection();
+            const result = await this.runtime.requestAccountSelection(undefined, undefined, reference.forIdentityTruncated);
             if (result.isError) {
                 this.logger.error("Could not query account", result.error);
                 return UserfriendlyResult.fail(result.error);
@@ -55,13 +64,29 @@ export class AppStringProcessor {
                 return UserfriendlyResult.ok(undefined);
             }
 
-            return await this._handleTruncatedReference(truncatedReference, result.value);
+            return await this._handleReference(reference, result.value);
         }
 
         if (!truncatedReference.startsWith(Base64ForIdPrefix.Token)) {
             const error = AppRuntimeErrors.startup.wrongCode();
             return UserfriendlyResult.fail(error);
         }
+
+        const promiseOrUiBridge = this.runtime.uiBridge();
+        const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
+
+        let password: string | undefined;
+        if (reference.passwordType) {
+            const passwordResult = await uiBridge.enterPassword(reference.passwordType);
+            if (passwordResult.isError) {
+                return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
+            }
+
+            password = passwordResult.value;
+        }
+
+        // TODO: use password to load the item from the truncated reference
+        this.logger.error(`user entered password: ${password}`);
 
         const tokenResult = await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference });
         if (tokenResult.isError) {
@@ -76,7 +101,6 @@ export class AppStringProcessor {
         }
 
         if (tokenContent instanceof TokenContentDeviceSharedSecret) {
-            const uiBridge = await this.runtime.uiBridge();
             await uiBridge.showDeviceOnboarding(DeviceMapper.toDeviceOnboardingInfoDTO(tokenContent.sharedSecret));
             return UserfriendlyResult.ok(undefined);
         }
@@ -92,16 +116,28 @@ export class AppStringProcessor {
             return UserfriendlyResult.ok(undefined);
         }
 
-        return await this._handleTruncatedReference(truncatedReference, selectedAccount);
+        return await this._handleReference(reference, selectedAccount);
     }
 
-    private async _handleTruncatedReference(truncatedReference: string, account: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
+    private async _handleReference(reference: Reference, account: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         const services = await this.runtime.getServices(account.id);
-        const uiBridge = await this.runtime.uiBridge();
+        const promiseOrUiBridge = this.runtime.uiBridge();
+        const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
 
-        const result = await services.transportServices.account.loadItemFromTruncatedReference({
-            reference: truncatedReference
-        });
+        let password: string | undefined;
+        if (reference.passwordType) {
+            const passwordResult = await uiBridge.enterPassword(reference.passwordType);
+            if (passwordResult.isError) {
+                return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
+            }
+
+            password = passwordResult.value;
+        }
+
+        // TODO: use password to load the item from the truncated reference
+        this.logger.error(`user entered password: ${password}`);
+
+        const result = await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate() });
         if (result.isError) {
             if (result.error.code === "error.runtime.validation.invalidPropertyValue") {
                 return UserfriendlyResult.fail(

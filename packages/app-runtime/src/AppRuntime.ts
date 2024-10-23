@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
-import { Result } from "@js-soft/ts-utils";
+import { EventBus, Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
 import { CoreId, ICoreAddress } from "@nmshd/core-types";
 import { ModuleConfiguration, Runtime, RuntimeHealth } from "@nmshd/runtime";
@@ -31,9 +31,10 @@ import { UserfriendlyResult } from "./UserfriendlyResult";
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(
         private readonly _nativeEnvironment: INativeEnvironment,
-        appConfig: AppConfig
+        appConfig: AppConfig,
+        eventBus?: EventBus
     ) {
-        super(appConfig, _nativeEnvironment.loggerFactory);
+        super(appConfig, _nativeEnvironment.loggerFactory, eventBus);
 
         this._stringProcessor = new AppStringProcessor(this, this.loggerFactory);
     }
@@ -45,16 +46,17 @@ export class AppRuntime extends Runtime<AppConfig> {
     private _uiBridge: IUIBridge | undefined;
     private _uiBridgeResolver?: { promise: Promise<IUIBridge>; resolve(uiBridge: IUIBridge): void };
 
-    public async uiBridge(): Promise<IUIBridge> {
+    public uiBridge(): Promise<IUIBridge> | IUIBridge {
         if (this._uiBridge) return this._uiBridge;
-        if (this._uiBridgeResolver) return await this._uiBridgeResolver.promise;
+
+        if (this._uiBridgeResolver) return this._uiBridgeResolver.promise;
 
         let resolve: (uiBridge: IUIBridge) => void = () => "";
         const promise = new Promise<IUIBridge>((r) => (resolve = r));
         this._uiBridgeResolver = { promise, resolve };
 
         try {
-            return await this._uiBridgeResolver.promise;
+            return this._uiBridgeResolver.promise;
         } finally {
             this._uiBridgeResolver = undefined;
         }
@@ -195,10 +197,23 @@ export class AppRuntime extends Runtime<AppConfig> {
 
     public async requestAccountSelection(
         title = "i18n://uibridge.accountSelection.title",
-        description = "i18n://uibridge.accountSelection.description"
+        description = "i18n://uibridge.accountSelection.description",
+        forIdentityTruncated?: string
     ): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
         const accounts = await this.accountServices.getAccounts();
 
+        if (!forIdentityTruncated) return await this.selectAccountViaBridge(accounts, title, description);
+
+        const accountsWithPostfix = accounts.filter((account) => account.address?.endsWith(forIdentityTruncated));
+        if (accountsWithPostfix.length === 0) return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailableForIdentityTruncated());
+        if (accountsWithPostfix.length === 1) return UserfriendlyResult.ok(accountsWithPostfix[0]);
+
+        // This catches the extremely rare case where two accounts are available that have the same last 4 characters in their address. In that case
+        // the user will have to decide which account to use, which could not work because it is not the exactly same address specified when personalizing the object.
+        return await this.selectAccountViaBridge(accountsWithPostfix, title, description);
+    }
+
+    private async selectAccountViaBridge(accounts: LocalAccountDTO[], title: string, description: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
         const bridge = await this.uiBridge();
         const accountSelectionResult = await bridge.requestAccountSelection(accounts, title, description);
         if (accountSelectionResult.isError) {
@@ -237,7 +252,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         this._accountServices = new AccountServices(this._multiAccountController);
     }
 
-    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
+    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite, eventBus?: EventBus): Promise<AppRuntime> {
         // TODO: JSSNMSHDD-2524 (validate app config)
 
         if (!nativeBootstrapper.isInitialized) {
@@ -270,7 +285,7 @@ export class AppRuntime extends Runtime<AppConfig> {
                   databaseFolder: databaseFolder
               });
 
-        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig);
+        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig, eventBus);
         await runtime.init();
         runtime.logger.trace("Runtime initialized");
 
