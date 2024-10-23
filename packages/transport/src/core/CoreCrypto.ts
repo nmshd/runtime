@@ -86,27 +86,18 @@ export abstract class CoreCrypto {
      * Careful, the symmetric algorithm possibly needs to be manually changed depending on the version in addition to
      * the version.
      *
-     * v1: blake2b with 150000 iterations
-     *
-     * @param master The master password as utf-8 encoded string
+     * @param password The master password as utf-8 encoded string
      * @param salt A salt which is unique to this user/password instance.
-     * @param keyAlgorithm The [[CryptoSymmetricAlgorithm]] for which the key should be generated.
-     *                     Default is AES256_GCM.
      * @param version The version which should be used, "latest" is the default.
      * @returns A Promise object resolving in a [[CryptoSecretKey]].
      */
-    public static async generatePassword(
-        master: string,
-        salt = "enmeshed",
-        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
-        version: TransportVersion = TransportVersion.Latest
-    ): Promise<CryptoSecretKey> {
-        const masterBuffer = CoreBuffer.fromString(master, Encoding.Utf8);
+    public static async deriveKeyFromPassword(password: string, salt = "enmeshed", version: TransportVersion = TransportVersion.Latest): Promise<CryptoSecretKey> {
+        const passwordBuffer = CoreBuffer.fromString(password, Encoding.Utf8);
         const saltBuffer = CoreBuffer.fromString(salt, Encoding.Utf8);
         switch (version) {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
-                return await CryptoDerivation.deriveKeyFromMaster(masterBuffer, 150000, keyAlgorithm, saltBuffer);
+                return await CryptoDerivation.deriveKeyFromPassword(passwordBuffer, saltBuffer);
             default:
                 throw this.invalidVersion(version);
         }
