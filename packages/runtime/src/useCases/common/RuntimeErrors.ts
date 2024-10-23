@@ -98,16 +98,16 @@ class RelationshipTemplates {
             `The given reference '${reference}' is not valid. The reference for a RelationshipTemplate must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.RelationshipTemplate}'.`
         );
     }
+
+    public requestCannotExpireAfterRelationshipTemplate(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationshipTemplates.requestCannotExpireAfterRelationshipTemplate",
+            "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set such that the expiration date of the RelationshipTemplate is not exceeded."
+        );
+    }
 }
 
 class Relationships {
-    public wrongRelationshipStatus(relationshipId: string, status: string): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.relationships.wrongRelationshipStatus",
-            `The Relationship '${relationshipId}' has the wrong status ('${status}') to run this operation.`
-        );
-    }
-
     public isNeitherRejectedNorRevoked(): ApplicationError {
         return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", "The status of the Relationship is neither 'Rejected' nor 'Revoked'.");
     }

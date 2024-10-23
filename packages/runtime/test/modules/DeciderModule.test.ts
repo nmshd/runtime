@@ -314,7 +314,7 @@ describe("DeciderModule", () => {
                     content: RelationshipTemplateContent.from({
                         onNewRelationship: request
                     }).toJSON(),
-                    expiresAt: CoreDate.utc().add({ minutes: 5 }).toISOString()
+                    expiresAt: requestExpirationDate.add({ minutes: 5 }).toISOString()
                 })
             ).value;
             await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
