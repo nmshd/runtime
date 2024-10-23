@@ -1,11 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import {
-    Notification,
-    RelationshipAttribute,
-    RelationshipAttributeConfidentiality,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem,
-    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem
-} from "@nmshd/content";
+import { Notification, RelationshipAttribute, RelationshipAttributeConfidentiality, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
@@ -79,67 +73,6 @@ describe("ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor"
         });
 
         const notificationItem = ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem.from({
-            attributeId: thirdPartyRelationshipAttribute.id
-        });
-        const notification = LocalNotification.from({
-            id: CoreId.from("notificationRef"),
-            source: LocalNotificationSource.from({
-                type: "Message",
-                reference: CoreId.from("messageRef")
-            }),
-            status: LocalNotificationStatus.Open,
-            isOwn: false,
-            peer: CoreAddress.from("peer"),
-            createdAt: CoreDate.utc(),
-            content: Notification.from({
-                id: CoreId.from("notificationRef"),
-                items: [notificationItem]
-            }),
-            receivedByDevice: CoreId.from("deviceId")
-        });
-        const processor = new ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
-
-        /* Run and check validation. */
-        const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
-        expect(checkResult.isError()).toBe(false);
-
-        /* Run process() and validate its results. */
-        const event = await processor.process(notificationItem, notification);
-        expect(event).toBeInstanceOf(ThirdPartyRelationshipAttributeDeletedByPeerEvent);
-        const updatedAttribute = (event as ThirdPartyRelationshipAttributeDeletedByPeerEvent).data;
-        expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
-
-        const databaseAttribute = await consumptionController.attributes.getLocalAttribute(updatedAttribute.id);
-        expect(databaseAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
-
-        /* Manually trigger and verify rollback. */
-        await processor.rollback(notificationItem, notification);
-        const attributeAfterRollback = await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        expect(attributeAfterRollback!.deletionInfo).toBeUndefined();
-    });
-
-    // The ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem is deprecated and will be removed in the next major version.
-    test("runs all processor methods for a ThirdPartyRelationshipAttribute with a ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem", async function () {
-        const thirdPartyRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
-            content: RelationshipAttribute.from({
-                key: "customerId",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
-                },
-                owner: CoreAddress.from("thirdParty"),
-                confidentiality: RelationshipAttributeConfidentiality.Public
-            }),
-            shareInfo: {
-                peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef"),
-                thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
-            }
-        });
-
-        const notificationItem = ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem.from({
             attributeId: thirdPartyRelationshipAttribute.id
         });
         const notification = LocalNotification.from({
