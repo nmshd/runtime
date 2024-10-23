@@ -11,6 +11,7 @@ import {
     ReadAttributeRequestItem,
     RegisterAttributeListenerRequestItem,
     ShareAttributeRequestItem,
+    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem,
     ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
@@ -167,7 +168,9 @@ export class ConsumptionController {
             [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
             [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor],
             [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
-            [ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor]
+            [ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor],
+            // The ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem is deprecated and will be removed in the next major version.
+            [ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor]
         ]);
     }
 
