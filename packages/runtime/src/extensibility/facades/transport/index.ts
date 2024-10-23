@@ -4,6 +4,7 @@ export * from "./DevicesFacade";
 export * from "./FilesFacade";
 export * from "./IdentityDeletionProcessesFacade";
 export * from "./MessagesFacade";
-export * from "./RelationshipTemplatesFacade";
 export * from "./RelationshipsFacade";
+export * from "./RelationshipTemplatesFacade";
+export * from "./TagsFacade";
 export * from "./TokensFacade";
