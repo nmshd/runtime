@@ -1916,7 +1916,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(updatedPredecessorPeerSharedIdentityAttribute!.succeededBy).toStrictEqual(successorPeerSharedIdentityAttribute!.id);
         });
 
-        test("succeeds an existing third party owned RelationshipAttribute with the Attribute received in the ResponseItem", async function () {
+        test("succeeds an existing ThirdPartyRelationshipAttribute with the Attribute received in the ResponseItem", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const recipient = CoreAddress.from("Recipient");
 
