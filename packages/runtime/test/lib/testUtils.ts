@@ -14,16 +14,19 @@ import {
     Notification,
     RelationshipCreationContentJSON,
     RelationshipTemplateContentJSON,
+    Request,
     RequestItemGroupJSON,
     RequestItemJSONDerivations,
     RequestJSON,
     ResponseWrapperJSON,
-    ShareAttributeAcceptResponseItemJSON
+    ShareAttributeAcceptResponseItemJSON,
+    ShareAttributeRequestItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
+import _ from "lodash";
 import { DateTime } from "luxon";
 import {
     ConsumptionServices,
@@ -210,11 +213,13 @@ export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateCont
 
 export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON();
 
-export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON): Promise<RelationshipTemplateDTO> {
+export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON, templateExpiresAt?: DateTime): Promise<RelationshipTemplateDTO> {
+    const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
+
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
-        expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
-        content: body ?? emptyRelationshipTemplateContent
+        expiresAt: templateExpiresAt ? templateExpiresAt.toString() : defaultExpirationDateTime,
+        content: _.cloneDeep(body) ?? emptyRelationshipTemplateContent
     });
 
     expect(response).toBeSuccessful();
@@ -234,9 +239,10 @@ export async function getFileToken(transportServices: TransportServices): Promis
 export async function exchangeTemplate(
     transportServicesCreator: TransportServices,
     transportServicesRecipient: TransportServices,
-    content?: RelationshipTemplateContentJSON
+    content?: RelationshipTemplateContentJSON,
+    templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
-    const template = await createTemplate(transportServicesCreator, content);
+    const template = await createTemplate(transportServicesCreator, content, templateExpiresAt);
 
     const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
     expect(response).toBeSuccessful();
@@ -699,38 +705,68 @@ export async function waitForRecipientToReceiveNotification(
 }
 
 /**
- * The owner of a RelationshipAttribute receives a Request of a
- * peer and forwards them the ThirdPartyRelationshipAttribute,
+ * The requestor asks the responder for a RepositoryAttribute or a RelationshipAttribute from another Relationship.
+ * The responder sends them an own shared IdentityAttribute or ThirdPartyRelationshipAttribute,
  * waiting for all communication and event processing to finish.
  *
- * Returns the sender's own shared ThirdPartyRelationshipAttribute.
+ * Returns the responder's own shared Attribute.
  */
-export async function executeFullRequestAndShareThirdPartyRelationshipAttributeFlow(
-    owner: TestRuntimeServices,
-    peer: TestRuntimeServices,
+export async function executeFullRequestAndAcceptExistingAttributeFlow(
+    responder: TestRuntimeServices,
+    requestor: TestRuntimeServices,
     request: CreateOutgoingRequestRequest,
     attributeId: string
 ): Promise<LocalAttributeDTO> {
-    const localRequest = (await peer.consumption.outgoingRequests.create(request)).value;
-    await peer.transport.messages.sendMessage({ recipients: [owner.address], content: localRequest.content });
+    const localRequest = (await requestor.consumption.outgoingRequests.create(request)).value;
+    await requestor.transport.messages.sendMessage({ recipients: [responder.address], content: localRequest.content });
 
-    await syncUntilHasMessageWithRequest(owner.transport, localRequest.id);
-    await owner.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
+    await syncUntilHasMessageWithRequest(responder.transport, localRequest.id);
+    await responder.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
     });
-    await owner.consumption.incomingRequests.accept({
+    await responder.consumption.incomingRequests.accept({
         requestId: localRequest.id,
         items: [{ accept: true, existingAttributeId: attributeId } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON]
     });
 
-    const responseMessage = await syncUntilHasMessageWithResponse(peer.transport, localRequest.id);
+    const responseMessage = await syncUntilHasMessageWithResponse(requestor.transport, localRequest.id);
     const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
-    await peer.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
+    await requestor.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });
 
-    const ownSharedThirdPartyRelationshipAttribute = (await owner.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-    return ownSharedThirdPartyRelationshipAttribute;
+    const ownSharedAttribute = (await responder.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    return ownSharedAttribute;
+}
+
+export async function executeFullShareAndAcceptAttributeRequestFlow(
+    owner: TestRuntimeServices,
+    peer: TestRuntimeServices,
+    requestItem: ShareAttributeRequestItem
+): Promise<LocalAttributeDTO> {
+    const request = Request.from({
+        items: [requestItem]
+    });
+
+    const canCreateResult = await owner.consumption.outgoingRequests.canCreate({
+        content: request.toJSON(),
+        peer: peer.address
+    });
+
+    expect(canCreateResult.value.isSuccess).toBe(true);
+
+    const createRequestResult = await owner.consumption.outgoingRequests.create({
+        content: request.toJSON(),
+        peer: peer.address
+    });
+
+    await owner.transport.messages.sendMessage({
+        recipients: [peer.address],
+        content: createRequestResult.value.content
+    });
+
+    const ownSharedAttribute = await acceptIncomingShareAttributeRequest(owner, peer, createRequestResult.value.id);
+    return ownSharedAttribute;
 }
 
 /**

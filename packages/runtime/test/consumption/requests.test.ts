@@ -1,7 +1,8 @@
-import { EventBus } from "@js-soft/ts-utils";
+import { EventBus, sleep } from "@js-soft/ts-utils";
 import { TestRequestItemJSON } from "@nmshd/consumption/test/modules/requests/testHelpers/TestRequestItem";
 import { RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
+import { DateTime } from "luxon";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -12,13 +13,13 @@ import {
 } from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import {
-    RuntimeServiceProvider,
-    TestRuntimeServices,
     establishRelationship,
     exchangeMessageWithRequest,
     exchangeTemplate,
+    RuntimeServiceProvider,
     sendMessageWithRequest,
-    syncUntilHasRelationships
+    syncUntilHasRelationships,
+    TestRuntimeServices
 } from "../lib";
 import {
     exchangeMessageWithRequestAndRequireManualDecision,
@@ -71,7 +72,7 @@ describe("Requests", () => {
                             mustBeAccepted: false
                         }
                     ],
-                    expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                    expiresAt: CoreDate.utc().add({ minute: 10 }).toISOString()
                 },
                 peer: (await rTransportServices.account.getIdentityInfo()).value.address
             };
@@ -366,7 +367,7 @@ describe("Requests", () => {
                         mustBeAccepted: false
                     }
                 ],
-                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                expiresAt: CoreDate.utc().add({ minute: 10 }).toISOString()
             }
         };
 
@@ -385,7 +386,7 @@ describe("Requests", () => {
         test("sender: create a Relationship Template with the Request", async () => {
             const result = await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: templateContent,
-                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                expiresAt: CoreDate.utc().add({ minute: 10 }).toISOString()
             });
 
             expect(result).toBeSuccessful();
@@ -595,6 +596,123 @@ describe("Requests", () => {
 
             expect(triggeredEvent).toBeDefined();
             expect(triggeredEvent!.data).toBeDefined();
+        });
+    });
+
+    describe("Request expired due to expired RelationshipTemplate", () => {
+        const runtimeServiceProvider = new RuntimeServiceProvider();
+        let sRuntimeServices: TestRuntimeServices;
+        let rRuntimeServices: TestRuntimeServices;
+        let rConsumptionServices: ConsumptionServices;
+        let rEventBus: EventBus;
+
+        const templateContent = {
+            "@type": "RelationshipTemplateContent",
+            onNewRelationship: {
+                "@type": "Request",
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            }
+        };
+
+        beforeAll(async () => {
+            const runtimeServices = await runtimeServiceProvider.launch(2);
+            sRuntimeServices = runtimeServices[0];
+            rRuntimeServices = runtimeServices[1];
+            rConsumptionServices = rRuntimeServices.consumption;
+            rEventBus = rRuntimeServices.eventBus;
+        }, 30000);
+
+        afterAll(async () => await runtimeServiceProvider.stop());
+
+        test("change status of Request when querying it if the underlying RelationshipTemplate is expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                .request;
+
+            let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+            rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
+                triggeredEvent = event;
+            });
+
+            expect(request.status).not.toBe(LocalRequestStatus.Expired);
+
+            await sleep(3000);
+
+            const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
+
+            expect(rLocalRequest).toBeDefined();
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+            expect(rLocalRequest.response).toBeUndefined();
+
+            expect(triggeredEvent).toBeUndefined();
+        });
+
+        test("change status of Request when querying Requests if the underlying RelationshipTemplate is expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                .request;
+
+            let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+            rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
+                triggeredEvent = event;
+            });
+
+            expect(request.status).not.toBe(LocalRequestStatus.Expired);
+
+            await sleep(3000);
+
+            const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequests({})).value[0];
+
+            expect(rLocalRequest).toBeDefined();
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+            expect(rLocalRequest.response).toBeUndefined();
+
+            expect(triggeredEvent).toBeUndefined();
+        });
+
+        describe.each([
+            {
+                action: "Accept"
+            },
+            {
+                action: "Reject"
+            }
+        ] as TestCase[])("Cannot respond to Request of expired RelationshipTemplate: $action Request throws error", ({ action }) => {
+            const actionLowerCase = action.toLowerCase() as "accept" | "reject";
+
+            test(`recipient: cannot ${actionLowerCase} incoming Request`, async () => {
+                const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                    .request;
+
+                let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+                rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
+                    triggeredEvent = event;
+                });
+
+                await sleep(3000);
+
+                const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
+                    requestId: request.id,
+                    items: [
+                        {
+                            accept: action === "Accept"
+                        }
+                    ]
+                });
+
+                expect(result).toBeAnError("Local Request has to be in status 'DecisionRequired/ManualDecisionRequired", "error.runtime.unknown");
+
+                const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
+
+                expect(rLocalRequest).toBeDefined();
+                expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+                expect(rLocalRequest.response).toBeUndefined();
+
+                expect(triggeredEvent).toBeUndefined();
+            });
         });
     });
 });

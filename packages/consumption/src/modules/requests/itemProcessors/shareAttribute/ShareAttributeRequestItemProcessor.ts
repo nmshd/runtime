@@ -90,6 +90,10 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
             }
+
+            if (requestItem.thirdPartyAddress) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("When sharing a RepositoryAttribute, no thirdPartyAddress may be specified."));
+            }
         }
 
         if (requestItem.attribute instanceof RelationshipAttribute) {
@@ -129,6 +133,14 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
             if (nonPendingRelationshipsToPeer.length === 0) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
+            }
+
+            if (!requestItem.thirdPartyAddress?.equals(foundAttribute.shareInfo.peer)) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "When sharing a RelationshipAttribute with another Identity, the address of the peer of the Relationship in which the RelationshipAttribute exists must be specified as thirdPartyAddress."
+                    )
+                );
             }
         }
 
@@ -172,7 +184,8 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         const localAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
             content: requestItem.attribute,
             peer: requestInfo.peer,
-            requestReference: requestInfo.id
+            requestReference: requestInfo.id,
+            thirdPartyAddress: requestItem.thirdPartyAddress
         });
 
         return ShareAttributeAcceptResponseItem.from({
