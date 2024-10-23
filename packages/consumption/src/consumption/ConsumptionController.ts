@@ -11,7 +11,7 @@ import {
     ReadAttributeRequestItem,
     RegisterAttributeListenerRequestItem,
     ShareAttributeRequestItem,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem
+    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
@@ -41,7 +41,7 @@ import {
     RequestItemProcessorRegistry,
     SettingsController,
     ShareAttributeRequestItemProcessor,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor
+    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor
 } from "../modules";
 import { ConsumptionConfig } from "./ConsumptionConfig";
 
@@ -168,7 +168,7 @@ export class ConsumptionController {
             [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
             [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor],
             [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
-            [ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor]
+            [ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor]
         ]);
     }
 
