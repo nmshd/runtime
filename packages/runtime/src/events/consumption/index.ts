@@ -19,5 +19,6 @@ export * from "./RelationshipTemplateProcessedEvent";
 export * from "./RepositoryAttributeSucceededEvent";
 export * from "./SuccessionEventData";
 export * from "./ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent";
+export * from "./ThirdPartyOwnedRelationshipAttributeSucceededEvent";
 export * from "./ThirdPartyRelationshipAttributeDeletedByPeerEvent";
 export * from "./ThirdPartyRelationshipAttributeSucceededEvent";

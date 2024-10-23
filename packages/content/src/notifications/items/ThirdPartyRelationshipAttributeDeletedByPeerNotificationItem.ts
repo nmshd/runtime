@@ -11,7 +11,7 @@ export interface IThirdPartyRelationshipAttributeDeletedByPeerNotificationItem e
     attributeId: ICoreId;
 }
 
-// The ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem is deprecated and will be removed in the next major version.
+// deprecated
 @type("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem")
 @type("ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem")
 export class ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem extends NotificationItem implements IThirdPartyRelationshipAttributeDeletedByPeerNotificationItem {

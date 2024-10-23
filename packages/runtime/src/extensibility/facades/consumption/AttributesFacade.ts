@@ -184,7 +184,7 @@ export class AttributesFacade {
     }
 
     /**
-     * @deprecated deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer will be removed in the next major version. Use deleteThirdPartyRelationshipAttributeAndNotifyPeer instead.
+     * @deprecated use deleteThirdPartyRelationshipAttributeAndNotifyPeer instead
      */
     public async deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer(
         request: DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest

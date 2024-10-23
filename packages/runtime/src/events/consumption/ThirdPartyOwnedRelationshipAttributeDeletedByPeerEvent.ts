@@ -1,4 +1,3 @@
-// This file is deprecated and will be removed in the next major version. Use ThirdPartyRelationshipAttributeDeletedByPeerEvent instead.
 import { LocalAttributeDTO } from "../../types";
 import { DataEvent } from "../DataEvent";
 
