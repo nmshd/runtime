@@ -16265,11 +16265,11 @@ export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any 
     }
 }
 
-export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any = {
+export const DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest",
+    "$ref": "#/definitions/DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest",
     "definitions": {
-        "DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest": {
+        "DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -16288,37 +16288,15 @@ export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any
     }
 }
 
-export const ExecuteIQLQueryRequest: any = {
+export const ExecuteIdentityAttributeQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ExecuteIQLQueryRequest",
+    "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",
     "definitions": {
-        "ExecuteIQLQueryRequest": {
+        "ExecuteIdentityAttributeQueryRequest": {
             "type": "object",
             "properties": {
                 "query": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "@type": {
-                            "type": "string",
-                            "const": "IQLQuery"
-                        },
-                        "queryString": {
-                            "type": "string"
-                        },
-                        "attributeCreationHints": {
-                            "$ref": "#/definitions/IQLQueryCreationHintsJSON"
-                        },
-                        "@context": {
-                            "type": "string"
-                        },
-                        "@version": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "queryString"
-                    ]
+                    "$ref": "#/definitions/IdentityAttributeQueryJSON"
                 }
             },
             "required": [
@@ -16326,9 +16304,19 @@ export const ExecuteIQLQueryRequest: any = {
             ],
             "additionalProperties": false
         },
-        "IQLQueryCreationHintsJSON": {
+        "IdentityAttributeQueryJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttributeQuery"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
@@ -16337,9 +16325,16 @@ export const ExecuteIQLQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
+                },
+                "validFrom": {
+                    "type": "string"
+                },
+                "validTo": {
+                    "type": "string"
                 }
             },
             "required": [
+                "@type",
                 "valueType"
             ],
             "additionalProperties": false
@@ -16409,15 +16404,37 @@ export const ExecuteIQLQueryRequest: any = {
     }
 }
 
-export const ExecuteIdentityAttributeQueryRequest: any = {
+export const ExecuteIQLQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",
+    "$ref": "#/definitions/ExecuteIQLQueryRequest",
     "definitions": {
-        "ExecuteIdentityAttributeQueryRequest": {
+        "ExecuteIQLQueryRequest": {
             "type": "object",
             "properties": {
                 "query": {
-                    "$ref": "#/definitions/IdentityAttributeQueryJSON"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "@type": {
+                            "type": "string",
+                            "const": "IQLQuery"
+                        },
+                        "queryString": {
+                            "type": "string"
+                        },
+                        "attributeCreationHints": {
+                            "$ref": "#/definitions/IQLQueryCreationHintsJSON"
+                        },
+                        "@context": {
+                            "type": "string"
+                        },
+                        "@version": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "queryString"
+                    ]
                 }
             },
             "required": [
@@ -16425,19 +16442,9 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
             ],
             "additionalProperties": false
         },
-        "IdentityAttributeQueryJSON": {
+        "IQLQueryCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttributeQuery"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
@@ -16446,16 +16453,9 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
-                "@type",
                 "valueType"
             ],
             "additionalProperties": false
