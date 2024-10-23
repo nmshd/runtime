@@ -116,7 +116,11 @@ export class RequestModule extends RuntimeModule {
 
         const otherRequestsThatWouldLeadToARelationship = (
             await services.consumptionServices.incomingRequests.getRequests({
-                query: { "source.type": "RelationshipTemplate", status: [LocalRequestStatus.Open, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired] }
+                query: {
+                    "source.type": "RelationshipTemplate",
+                    status: [LocalRequestStatus.Open, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired],
+                    peer: template.createdBy
+                }
             })
         ).value;
         if (otherRequestsThatWouldLeadToARelationship.length !== 0) {
