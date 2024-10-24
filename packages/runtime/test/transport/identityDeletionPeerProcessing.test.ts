@@ -188,6 +188,11 @@ describe("IdentityDeletionProcess", () => {
     });
 
     test("should be able to send a Notification to an Identity which is in status 'ToBeDeleted'", async () => {
+        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
+        await services2.eventBus.waitForRunningEventHandlers();
+        const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
+        expect(updatedRelationship.peerDeletionInfo?.deletionStatus).toBe("ToBeDeleted");
         const id = await ConsumptionIds.notification.generate();
         const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
         const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
