@@ -27,6 +27,7 @@ import {
     MessageController,
     RelationshipsController,
     RelationshipTemplateController,
+    TagController,
     TokenController,
     Transport
 } from "@nmshd/transport";
@@ -256,6 +257,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(TokenController)
             .factory(() => this.getAccountController().tokens)
+            .scope(Scope.Request);
+
+        Container.bind(TagController)
+            .factory(() => this.getAccountController().tags)
             .scope(Scope.Request);
 
         Container.bind(ChallengeController)

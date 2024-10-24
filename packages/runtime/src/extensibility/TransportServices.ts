@@ -8,6 +8,7 @@ import {
     MessagesFacade,
     RelationshipsFacade,
     RelationshipTemplatesFacade,
+    TagsFacade,
     TokensFacade
 } from "./facades/transport";
 
@@ -21,6 +22,7 @@ export class TransportServices {
         @Inject public readonly account: AccountFacade,
         @Inject public readonly devices: DevicesFacade,
         @Inject public readonly challenges: ChallengesFacade,
-        @Inject public readonly identityDeletionProcesses: IdentityDeletionProcessesFacade
+        @Inject public readonly identityDeletionProcesses: IdentityDeletionProcessesFacade,
+        @Inject public readonly tags: TagsFacade
     ) {}
 }

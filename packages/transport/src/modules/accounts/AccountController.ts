@@ -31,6 +31,7 @@ import { SecretController } from "../secrets/SecretController";
 import { ChangedItems } from "../sync/ChangedItems";
 import { SyncController } from "../sync/SyncController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
+import { TagController } from "../tags/TagController";
 import { TokenController } from "../tokens/TokenController";
 import { IdentityController } from "./IdentityController";
 import { IdentityDeletionProcessController } from "./IdentityDeletionProcessController";
@@ -63,6 +64,7 @@ export class AccountController {
     public relationshipTemplates: RelationshipTemplateController;
     private synchronization: SyncController;
     public tokens: TokenController;
+    public tags: TagController;
 
     private relationshipSecrets: RelationshipSecretController;
     private readonly _log: ILogger;
@@ -213,6 +215,7 @@ export class AccountController {
         this.relationshipTemplates = await new RelationshipTemplateController(this, this.relationshipSecrets).init();
         this.messages = await new MessageController(this).init();
         this.tokens = await new TokenController(this).init();
+        this.tags = await new TagController(this).init();
 
         this.synchronization = await new SyncController(this, this.dependencyOverrides, this.unpushedDatawalletModifications, this.config.datawalletEnabled).init();
 
