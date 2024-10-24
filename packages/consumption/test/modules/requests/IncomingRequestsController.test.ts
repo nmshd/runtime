@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { IRequest, IRequestItemGroup, RejectResponseItem, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreIdHelper, RelationshipTemplate, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreIdHelper, TransportLoggerFactory } from "@nmshd/transport";
 import {
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
@@ -1027,7 +1027,6 @@ describe("IncomingRequestsController", function () {
                 items: [TestRequestItem.from({ mustBeAccepted: false })]
             });
             const template = TestObjectFactory.createIncomingIRelationshipTemplate();
-            context.templateToReturnFromGetTemplate = RelationshipTemplate.from(template);
 
             let cnsRequest = await context.incomingRequestsController.received({
                 receivedRequest: request,
