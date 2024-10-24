@@ -1,5 +1,5 @@
 import { ISerializable } from "@js-soft/ts-serval";
-import { log } from "@js-soft/ts-utils";
+import { log, Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -13,6 +13,7 @@ import { File } from "../files/local/File";
 import { FileReference } from "../files/transmission/FileReference";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
+import { PeerDeletionStatus } from "../relationships/local/PeerDeletionInfo";
 import { Relationship } from "../relationships/local/Relationship";
 import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
@@ -105,7 +106,7 @@ export class MessageController extends TransportController {
     public async getMessagesByAddress(address: CoreAddress): Promise<Message[]> {
         const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(address);
         if (!relationship) {
-            throw TransportCoreErrors.messages.missingOrInactiveRelationship(address.toString());
+            throw TransportCoreErrors.messages.hasNoActiveRelationship(address.toString());
         }
         return await this.getMessagesByRelationshipId(relationship.id);
     }
@@ -287,16 +288,22 @@ export class MessageController extends TransportController {
     @log()
     public async sendMessage(parameters: ISendMessageParameters): Promise<Message> {
         const parsedParams = SendMessageParameters.from(parameters);
+
         if (!parsedParams.attachments) parsedParams.attachments = [];
+
+        const validationError = await this.validateRecipients(parsedParams.recipients);
+        if (validationError) throw Result.fail(validationError);
 
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
+
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
+            const relationship = await this.relationships.getRelationshipToIdentity(recipient);
+
             if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+                throw TransportCoreErrors.messages.missingRelationship(recipient.toString());
             }
 
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
@@ -333,9 +340,10 @@ export class MessageController extends TransportController {
         const addressToRelationshipId: Record<string, ICoreId> = {};
 
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
+            const relationship = await this.relationships.getRelationshipToIdentity(CoreAddress.from(recipient));
+
             if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+                throw TransportCoreErrors.messages.missingRelationship(recipient.toString());
             }
 
             const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
@@ -409,6 +417,45 @@ export class MessageController extends TransportController {
         this.eventBus.publish(new MessageSentEvent(this.parent.identity.address.toString(), message));
 
         return message;
+    }
+
+    private async validateRecipients(recipients: CoreAddress[]) {
+        const deletedPeers: string[] = [];
+        const peersWithMissingRelationship: string[] = [];
+        const peersWithWrongRelationshipStatus: string[] = [];
+
+        for (const recipient of recipients) {
+            const relationship = await this.relationships.getRelationshipToIdentity(recipient);
+
+            if (!relationship) {
+                peersWithMissingRelationship.push(recipient.address);
+                continue;
+            }
+
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+                deletedPeers.push(recipient.address);
+                continue;
+            }
+
+            if (!(relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active)) {
+                peersWithWrongRelationshipStatus.push(recipient.address);
+                continue;
+            }
+        }
+
+        if (peersWithMissingRelationship.length > 0) {
+            return TransportCoreErrors.messages.missingRelationship(peersWithMissingRelationship);
+        }
+
+        if (deletedPeers.length > 0) {
+            return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
+        }
+
+        if (peersWithWrongRelationshipStatus.length > 0) {
+            return TransportCoreErrors.messages.wrongRelationshipStatus(peersWithWrongRelationshipStatus);
+        }
+
+        return;
     }
 
     private async decryptOwnEnvelope(envelope: MessageEnvelope, secretKey: CryptoSecretKey): Promise<MessageContentWrapper> {

@@ -86,8 +86,85 @@ class Messages {
         );
     }
 
-    public missingOrInactiveRelationship(address: string) {
-        return new CoreError("error.transport.messages.missingOrInactiveRelationship", `An active Relationship with the given address '${address}' does not exist.`);
+    public hasNoActiveRelationship(address: string[] | string) {
+        if (typeof address !== "string" && address.length > 1) {
+            return new CoreError(
+                "error.transport.messages.hasNoActiveRelationship",
+                `An active Relationship with the given addresses '${address}' does not exist, so you cannot send them a Message.`
+            );
+        }
+
+        if (typeof address === "string") {
+            return new CoreError(
+                "error.transport.messages.hasNoActiveRelationship",
+                `An active Relationship with the given address '${address}' does not exist, so you cannot send them a Message.`
+            );
+        }
+
+        return new CoreError(
+            "error.transport.messages.hasNoActiveRelationship",
+            `An active Relationship with the given address '${address[0]}' does not exist, so you cannot send them a Message.`
+        );
+    }
+
+    public missingRelationship(address: string[] | string) {
+        if (typeof address !== "string" && address.length > 1) {
+            return new CoreError(
+                "error.transport.messages.missingRelationship",
+                `A Relationship with the given addresses '${address}' does not exist, so you cannot send them a Message.`
+            );
+        }
+
+        if (typeof address === "string") {
+            return new CoreError(
+                "error.transport.messages.missingRelationship",
+                `A Relationship with the given address '${address}' does not exist, so you cannot send them a Message.`
+            );
+        }
+
+        return new CoreError(
+            "error.transport.messages.missingRelationship",
+            `A Relationship with the given address '${address[0]}' does not exist, so you cannot send them a Message.`
+        );
+    }
+
+    public wrongRelationshipStatus(address: string[]) {
+        if (address.length > 1) {
+            return new CoreError(
+                "error.transport.messages.wrongRelationshipStatus",
+                `A Relationship with the given addresses '${address}' has the wrong status, so you cannot send them a Message.`
+            );
+        }
+
+        return new CoreError(
+            "error.transport.messages.wrongRelationshipStatus",
+            `A Relationship with the given address '${address[0]}' has the wrong status, so you cannot send them a Message.`
+        );
+    }
+
+    public peerIsDeleted(address: string[]) {
+        if (address.length > 1) {
+            return new CoreError(
+                "error.transport.messages.peerIsDeleted",
+                `The recipients with the following addresses '${address}' are deleted, so you cannot send them a Message.`
+            );
+        }
+
+        return new CoreError("error.transport.messages.peerIsDeleted", `The recipient with the address '${address[0]}' is deleted, so you cannot send them a Message.`);
+    }
+
+    public peerIsToBeDeleted(address: string[]) {
+        if (address.length > 1) {
+            return new CoreError(
+                "error.transport.messages.peerIsToBeDeleted",
+                `The recipients with the following addresses '${address}' have the status 'ToBeDeleted', so you cannot send them a Message.`
+            );
+        }
+
+        return new CoreError(
+            "error.transport.messages.peerIsToBeDeleted",
+            `The recipient with the address '${address[0]}' has the status 'ToBeDeleted', so you cannot send them a Message.`
+        );
     }
 }
 
