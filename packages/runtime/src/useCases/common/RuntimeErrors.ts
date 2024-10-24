@@ -51,6 +51,18 @@ class General {
     public cacheEmpty(entityName: string | Function, id: string) {
         return new ApplicationError("error.runtime.cacheEmpty", `The cache of ${entityName instanceof Function ? entityName.name : entityName} with id '${id}' is empty.`);
     }
+
+    public notBothPasswordAndPin(): ApplicationError {
+        return new ApplicationError("error.runtime.validation.notBothPasswordAndPin", "It is not possible to protect an object with both a password and a PIN.");
+    }
+
+    public noPasswordProvided(): ApplicationError {
+        return new ApplicationError("error.runtime.validation.noPasswordProvided", "You need to provide a password. Maybe you have given a PIN instead.");
+    }
+
+    public noPINProvided(): ApplicationError {
+        return new ApplicationError("error.runtime.validation.noPINProvided", "You need to provide a PIN. Maybe you have given a password instead.");
+    }
 }
 
 class Serval {

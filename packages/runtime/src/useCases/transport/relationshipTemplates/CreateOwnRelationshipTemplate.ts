@@ -8,7 +8,7 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { RelationshipTemplateDTO } from "../../../types";
-import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { AddressString, ISO8601DateTimeString, PINString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
@@ -19,6 +19,11 @@ export interface CreateOwnRelationshipTemplateRequest {
      */
     maxNumberOfAllocations?: number;
     forIdentity?: AddressString;
+    /**
+     * @minLength 1
+     */
+    password?: string;
+    pin?: PINString;
 }
 
 class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
@@ -37,6 +42,10 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
                     nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)
                 )
             );
+        }
+
+        if (!!input.password && !!input.pin) {
+            validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.notBothPasswordAndPin()));
         }
 
         return validationResult;
@@ -67,7 +76,9 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            password: request.password,
+            pin: request.pin
         });
 
         await this.accountController.syncDatawallet();

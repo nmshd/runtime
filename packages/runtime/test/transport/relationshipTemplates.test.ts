@@ -247,6 +247,203 @@ describe("RelationshipTemplate Tests", () => {
             expect(createQRCodeWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
         });
     });
+
+    describe("Password-protected templates", () => {
+        test("send and receive a password-protected template", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password"
+            });
+            expect(createResult).toBeSuccessful();
+            expect(createResult.value.password).toBe("password:password");
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                password: "password"
+            });
+            expect(loadResult).toBeSuccessful();
+            expect(loadResult.value.password).toBe("password:password");
+        });
+
+        test("send and receive a PIN-protected template", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                pin: "1234"
+            });
+            expect(createResult).toBeSuccessful();
+            expect(createResult.value.password).toBe("pin:1234");
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                pin: "1234"
+            });
+            expect(loadResult).toBeSuccessful();
+            expect(loadResult.value.password).toBe("pin:1234");
+        });
+
+        test("send and receive a password-protected template via a token", async () => {
+            const templateId = (
+                await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: emptyRelationshipTemplateContent,
+                    expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                    password: "password"
+                })
+            ).value.id;
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                password: "password"
+            });
+            expect(loadResult).toBeSuccessful();
+            expect(loadResult.value.password).toBe("password:password");
+        });
+
+        test("send and receive a PIN-protected template via a token", async () => {
+            const templateId = (
+                await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: emptyRelationshipTemplateContent,
+                    expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                    pin: "1234"
+                })
+            ).value.id;
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                pin: "1234"
+            });
+            expect(loadResult).toBeSuccessful();
+            expect(loadResult.value.password).toBe("pin:1234");
+        });
+
+        test("error when loading a template with a wrong password", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password"
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                password: "wrong-password"
+            });
+            expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
+        });
+
+        test("validation error when creating a template with empty string as the password", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: ""
+            });
+            expect(createResult).toBeAnError("password must NOT have fewer than 1 characters", "error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("validation error when creating a template with both a password and a PIN", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password",
+                pin: "1234"
+            });
+            expect(createResult).toBeAnError(/.*/, "error.runtime.validation.notBothPasswordAndPin");
+        });
+
+        test("validation error when loading a template with no password", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password"
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference
+            });
+            expect(loadResult).toBeAnError(/.*/, "error.runtime.validation.noPasswordProvided");
+        });
+
+        test("validation error when loading a template with no PIN", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                pin: "1234"
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference
+            });
+            expect(loadResult).toBeAnError(/.*/, "error.runtime.validation.noPINProvided");
+        });
+
+        test("validation error when loading a template with invalid PIN", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                pin: "1234"
+            });
+            expect(createResult).toBeSuccessful();
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference,
+                pin: "123"
+            });
+            expect(loadResult).toBeAnError("must consist of 4 to 16 numbers", "error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("validation error when loading a template via token with no password", async () => {
+            const templateId = (
+                await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: emptyRelationshipTemplateContent,
+                    expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                    password: "password"
+                })
+            ).value.id;
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference
+            });
+            expect(loadResult).toBeAnError(/.*/, "error.runtime.validation.noPasswordProvided");
+        });
+
+        test("validation error when loading a template via token with no PIN", async () => {
+            const templateId = (
+                await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: emptyRelationshipTemplateContent,
+                    expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                    pin: "1234"
+                })
+            ).value.id;
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+
+            const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: createResult.value.truncatedReference
+            });
+            expect(loadResult).toBeAnError(/.*/, "error.runtime.validation.noPINProvided");
+        });
+
+        test("create a token for a password-protected template", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                password: "password"
+            });
+            expect(createResult).toBeSuccessful();
+            const createTokenResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId: createResult.value.id
+            });
+            expect(createTokenResult).toBeSuccessful();
+            const loadTokenResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createTokenResult.value.truncatedReference, ephemeral: true });
+            expect(loadTokenResult).toBeSuccessful();
+            expect(loadTokenResult.value.content.passwordType).toBe("pw");
+        });
+    });
 });
 
 describe("Serialization Errors", () => {

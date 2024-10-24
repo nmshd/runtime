@@ -9,6 +9,8 @@ import { CachedRelationshipTemplate, ICachedRelationshipTemplate } from "./Cache
 export interface IRelationshipTemplate extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
+    password?: string;
+    pin?: string;
     cache?: ICachedRelationshipTemplate;
     cachedAt?: ICoreDate;
     metadata?: any;
@@ -18,7 +20,7 @@ export interface IRelationshipTemplate extends ICoreSynchronizable {
 @type("RelationshipTemplate")
 export class RelationshipTemplate extends CoreSynchronizable implements IRelationshipTemplate {
     public override readonly technicalProperties = ["@type", "@context", nameof<RelationshipTemplate>((r) => r.secretKey), nameof<RelationshipTemplate>((r) => r.isOwn)];
-
+    public override readonly userdataProperties = [nameof<RelationshipTemplate>((r) => r.password)];
     public override readonly metadataProperties = [nameof<RelationshipTemplate>((r) => r.metadata), nameof<RelationshipTemplate>((r) => r.metadataModifiedAt)];
 
     @validate()
@@ -28,6 +30,14 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
     @validate()
     @serialize()
     public isOwn: boolean;
+
+    @validate({ nullable: true })
+    @serialize()
+    public password?: string;
+
+    @validate({ nullable: true })
+    @serialize()
+    public pin?: string;
 
     @validate({ nullable: true })
     @serialize()
@@ -50,7 +60,18 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
     }
 
     public toRelationshipTemplateReference(): RelationshipTemplateReference {
-        return RelationshipTemplateReference.from({ id: this.id, key: this.secretKey, forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4) });
+        return RelationshipTemplateReference.from({
+            id: this.id,
+            key: this.secretKey,
+            forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
+            passwordType: this.passwordType
+        });
+    }
+
+    public get passwordType(): string | undefined {
+        if (this.password) return "pw";
+        if (this.pin) return `pin${this.pin.length}`;
+        return undefined;
     }
 
     public truncate(): string {
