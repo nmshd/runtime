@@ -58,7 +58,7 @@ export class RequestsTestsContext {
     public mockEventBus = new MockEventBus();
     public relationshipToReturnFromGetRelationshipToIdentity: Relationship | undefined;
     public relationshipToReturnFromGetExistingRelationshipToIdentity: Relationship | undefined;
-    public templateToReturnFromGetTemplate: RelationshipTemplate | undefined;
+
     public consumptionController: ConsumptionController;
 
     private constructor() {
@@ -114,9 +114,6 @@ export class RequestsTestsContext {
             {
                 getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity),
                 getExistingRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetExistingRelationshipToIdentity)
-            },
-            {
-                getRelationshipTemplate: () => Promise.resolve(context.templateToReturnFromGetTemplate)
             }
         );
 
@@ -139,7 +136,6 @@ export class RequestsTestsContext {
         this.actionToTry = undefined;
         this.relationshipToReturnFromGetRelationshipToIdentity = undefined;
         this.relationshipToReturnFromGetExistingRelationshipToIdentity = undefined;
-        this.templateToReturnFromGetTemplate = undefined;
 
         TestRequestItemProcessor.numberOfApplyIncomingResponseItemCalls = 0;
 
@@ -241,12 +237,6 @@ export class RequestsGiven {
             receivedRequest: params.content,
             requestSourceObject: params.requestSource
         });
-
-        try {
-            this.context.templateToReturnFromGetTemplate = RelationshipTemplate.from(params.requestSource as any);
-        } catch (_) {
-            // the source is not a template
-        }
 
         await this.moveIncomingRequestToStatus(localRequest, params.status);
 

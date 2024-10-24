@@ -40,9 +40,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         private readonly relationshipResolver: {
             getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
             getExistingRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
-        },
-        private readonly relationshipTemplateResolver: {
-            getRelationshipTemplate(id: CoreId): Promise<RelationshipTemplate | undefined>;
         }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
