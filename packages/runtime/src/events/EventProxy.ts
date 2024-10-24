@@ -18,7 +18,9 @@ import {
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
     ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent,
-    ThirdPartyOwnedRelationshipAttributeSucceededEvent
+    ThirdPartyOwnedRelationshipAttributeSucceededEvent,
+    ThirdPartyRelationshipAttributeDeletedByPeerEvent,
+    ThirdPartyRelationshipAttributeSucceededEvent
 } from "./consumption";
 import {
     IdentityDeletionProcessStatusChangedEvent,
@@ -125,7 +127,8 @@ export class EventProxy {
             this.targetEventBus.publish(new PeerSharedAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent, (event) => {
+        this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeDeletedByPeerEvent, (event) => {
+            this.targetEventBus.publish(new ThirdPartyRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
             this.targetEventBus.publish(new ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
@@ -147,7 +150,13 @@ export class EventProxy {
             );
         });
 
-        this.subscribeToSourceEvent(consumption.ThirdPartyOwnedRelationshipAttributeSucceededEvent, (event) => {
+        this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeSucceededEvent, (event) => {
+            this.targetEventBus.publish(
+                new ThirdPartyRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
+                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
+                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
+                })
+            );
             this.targetEventBus.publish(
                 new ThirdPartyOwnedRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
                     predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),

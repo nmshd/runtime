@@ -92,8 +92,8 @@ class Attributes {
         return new CoreError("error.consumption.attributes.predecessorIsNotPeerSharedRelationshipAttribute", "Predecessor is not a peer shared RelationshipAttribute.");
     }
 
-    public predecessorIsNotThirdPartyOwnedRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.predecessorIsNotThirdPartyOwnedRelationshipAttribute", "Predecessor is not a third party owned RelationshipAttribute.");
+    public predecessorIsNotThirdPartyRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotThirdPartyRelationshipAttribute", "Predecessor is not a ThirdPartyRelationshipAttribute.");
     }
 
     public successorIsNotRepositoryAttribute() {
@@ -116,8 +116,8 @@ class Attributes {
         return new CoreError("error.consumption.attributes.successorIsNotPeerSharedRelationshipAttribute", "Successor is not a peer shared RelationshipAttribute.");
     }
 
-    public successorIsNotThirdPartyOwnedRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotThirdPartyOwnedRelationshipAttribute", "Successor is not a third party owned RelationshipAttribute.");
+    public successorIsNotThirdPartyRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.successorIsNotThirdPartyRelationshipAttribute", "Successor is not a ThirdPartyRelationshipAttribute.");
     }
 
     public setPredecessorIdDoesNotMatchActualPredecessorId() {
@@ -170,6 +170,12 @@ class Attributes {
         return new CoreError("error.consumption.attributes.successionMustNotChangePeer", errorMessage);
     }
 
+    public successionMustNotChangeThirdParty(comment?: string) {
+        let errorMessage = "The thirdPartyAddress of the shared Attribute must not change.";
+        if (comment) errorMessage += ` ${comment}`;
+        return new CoreError("error.consumption.attributes.successionMustNotChangeThirdParty", errorMessage);
+    }
+
     public cannotSucceedAttributesWithASuccessor(successorId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.cannotSucceedAttributesWithASuccessor",
@@ -209,10 +215,10 @@ class Attributes {
         );
     }
 
-    public invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute() {
+    public invalidDeletionInfoOfThirdPartyRelationshipAttribute() {
         return new CoreError(
-            "error.consumption.attributes.invalidDeletionInfoOfThirdPartyOwnedRelationshipAttribute",
-            "The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'."
+            "error.consumption.attributes.invalidDeletionInfoOfThirdPartyRelationshipAttribute",
+            "The only valid deletionStatus for ThirdPartyRelationshipAttributes is 'DeletedByPeer'."
         );
     }
 
@@ -239,11 +245,8 @@ class Attributes {
         return new CoreError("error.consumption.attributes.isNotPeerSharedAttribute", `The Attribute (id: '${attributeId}') is not a peer shared Attribute.`);
     }
 
-    public isNotThirdPartyOwnedRelationshipAttribute(attributeId: string | CoreId) {
-        return new CoreError(
-            "error.consumption.attributes.isNotThirdPartyOwnedRelationshipAttribute",
-            `The Attribute (id: '${attributeId}') is not a third party owned RelationshipAttribute.`
-        );
+    public isNotThirdPartyRelationshipAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotThirdPartyRelationshipAttribute", `The Attribute (id: '${attributeId}') is not a ThirdPartyRelationshipAttribute.`);
     }
 
     public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {

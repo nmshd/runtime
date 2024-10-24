@@ -39,6 +39,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         private readonly identity: { address: CoreAddress },
         private readonly relationshipResolver: {
             getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+            getExistingRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+        },
+        private readonly relationshipTemplateResolver: {
+            getRelationshipTemplate(id: CoreId): Promise<RelationshipTemplate | undefined>;
         }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
@@ -59,6 +63,11 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             source: infoFromSource.source,
             statusLog: []
         });
+
+        if (!(await this.relationshipResolver.getExistingRelationshipToIdentity(CoreAddress.from(infoFromSource.peer))) && infoFromSource.expiresAt) {
+            request.content.expiresAt = CoreDate.min(infoFromSource.expiresAt, request.content.expiresAt);
+            request.updateStatusBasedOnExpiration();
+        }
 
         await this.localRequests.create(request);
 
@@ -95,7 +104,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             source: {
                 reference: template.id,
                 type: "RelationshipTemplate"
-            }
+            },
+            expiresAt: template.cache!.expiresAt
         };
     }
 
@@ -409,6 +419,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         if (!requestDoc) return;
 
         const localRequest = LocalRequest.from(requestDoc);
+
         return await this.updateRequestExpiry(localRequest);
     }
 
@@ -451,4 +462,5 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 interface InfoFromSource {
     peer: ICoreAddress;
     source: ILocalRequestSource;
+    expiresAt?: CoreDate;
 }

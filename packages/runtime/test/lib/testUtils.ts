@@ -26,6 +26,7 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
+import _ from "lodash";
 import { DateTime } from "luxon";
 import {
     ConsumptionServices,
@@ -212,11 +213,13 @@ export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateCont
 
 export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON();
 
-export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON): Promise<RelationshipTemplateDTO> {
+export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON, templateExpiresAt?: DateTime): Promise<RelationshipTemplateDTO> {
+    const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
+
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
-        expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
-        content: body ?? emptyRelationshipTemplateContent
+        expiresAt: templateExpiresAt ? templateExpiresAt.toString() : defaultExpirationDateTime,
+        content: _.cloneDeep(body) ?? emptyRelationshipTemplateContent
     });
 
     expect(response).toBeSuccessful();
@@ -236,9 +239,10 @@ export async function getFileToken(transportServices: TransportServices): Promis
 export async function exchangeTemplate(
     transportServicesCreator: TransportServices,
     transportServicesRecipient: TransportServices,
-    content?: RelationshipTemplateContentJSON
+    content?: RelationshipTemplateContentJSON,
+    templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
-    const template = await createTemplate(transportServicesCreator, content);
+    const template = await createTemplate(transportServicesCreator, content, templateExpiresAt);
 
     const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
     expect(response).toBeSuccessful();

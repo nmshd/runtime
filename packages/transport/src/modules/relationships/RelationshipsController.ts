@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
-import { log } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { log, Result } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { ControllerName, CoreCrypto, TransportController, TransportError } from "../../core";
@@ -151,43 +151,25 @@ export class RelationshipsController extends TransportController {
     }
 
     public async sendRelationship(parameters: ISendRelationshipParameters): Promise<Relationship> {
-        parameters = SendRelationshipParameters.from(parameters);
+        const canSendRelationship = await this.canSendRelationship(parameters);
+
+        if (!canSendRelationship.isSuccess) {
+            throw canSendRelationship.error;
+        }
+
         const template = (parameters as SendRelationshipParameters).template;
         if (!template.cache) {
             throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
         }
 
-        const queryForExistingRelationships = {
-            "peer.address": template.cache.createdBy.toString(),
-            status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
-        };
-
-        const existingRelationshipsToPeer = await this.getRelationships(queryForExistingRelationships);
-
-        if (existingRelationshipsToPeer.length !== 0) {
-            throw TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipsToPeer[0].status);
-        }
-
         const secretId = await TransportIds.relationshipSecret.generate();
-
         const creationContentCipher = await this.prepareCreationContent(secretId, template, parameters.creationContent);
 
         const result = await this.client.createRelationship({
             creationContent: creationContentCipher.toBase64(),
             relationshipTemplateId: template.id.toString()
         });
-
-        if (result.isError) {
-            if (result.error.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
-                throw TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate();
-            }
-
-            if (result.error.code.match(/^error.platform.validation.(relationship|relationshipRequest).relationshipToTargetAlreadyExists$/)) {
-                throw TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer();
-            }
-
-            throw result.error;
-        }
+        if (result.isError) throw result.error;
 
         const backboneResponse = result.value;
 
@@ -198,6 +180,51 @@ export class RelationshipsController extends TransportController {
         this.eventBus.publish(new RelationshipChangedEvent(this.parent.identity.address.toString(), newRelationship));
 
         return newRelationship;
+    }
+
+    public async canSendRelationship(parameters: ISendRelationshipParameters): Promise<Result<void, CoreError>> {
+        const template = (parameters as SendRelationshipParameters).template;
+        if (!template.cache) {
+            throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
+        }
+
+        const peerAddress = template.cache.createdBy;
+        const existingRelationshipToPeer = await this.getExistingRelationshipToIdentity(peerAddress);
+
+        if (existingRelationshipToPeer) {
+            return Result.fail(TransportCoreErrors.relationships.relationshipCurrentlyExists(existingRelationshipToPeer.status));
+        }
+
+        if (template.isExpired()) {
+            return Result.fail(TransportCoreErrors.relationships.relationshipTemplateIsExpired(template.id.toString()));
+        }
+
+        const result = await this.client.canCreateRelationship(peerAddress.toString());
+
+        if (!result.value.canCreate) {
+            if (result.value.code === "error.platform.validation.relationship.relationshipToTargetAlreadyExists") {
+                return Result.fail(TransportCoreErrors.relationships.relationshipNotYetDecomposedByPeer());
+            }
+
+            if (result.value.code === "error.platform.validation.relationship.peerIsToBeDeleted") {
+                return Result.fail(TransportCoreErrors.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate());
+            }
+
+            return Result.fail(new CoreError(result.error.code));
+        }
+
+        return Result.ok(undefined);
+    }
+
+    public async getExistingRelationshipToIdentity(address: CoreAddress): Promise<Relationship | undefined> {
+        const queryForExistingRelationships = {
+            "peer.address": address.toString(),
+            status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
+        };
+
+        const existingRelationshipsToIdentity = await this.getRelationships(queryForExistingRelationships);
+
+        return existingRelationshipsToIdentity.length === 0 ? undefined : existingRelationshipsToIdentity[0];
     }
 
     @log()
