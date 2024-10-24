@@ -1,9 +1,10 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AttributeMapper, GetAttributesRequestQuery, GetAttributesUseCase } from "..";
 import { LocalAttributeDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase, flattenObject } from "../../common";
+import { AttributeMapper } from "./AttributeMapper";
+import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
 
 export interface GetRepositoryAttributesRequest {
     /**

@@ -1,6 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { TagController } from "@nmshd/transport/src/modules/tags/TagController";
-import { BackboneGetTag } from "@nmshd/transport/src/modules/tags/backbone/BackboneGetTag";
+import { BackboneGetTag, TagController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { UseCase } from "../../common";
 

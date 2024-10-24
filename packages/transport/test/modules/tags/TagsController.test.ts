@@ -1,7 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, ClientResult, Transport } from "../../../src";
-import { BackboneGetTag } from "../../../src/modules/tags/backbone/BackboneGetTag";
-import { TagClient } from "../../../src/modules/tags/backbone/TagClient";
+import { AccountController, BackboneGetTag, ClientResult, TagClient, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("AccountController", function () {

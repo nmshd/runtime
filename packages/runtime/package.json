@@ -41,7 +41,7 @@
             "cobertura",
             "lcov"
         ],
-        "maxWorkers": 1,
+        "maxWorkers": "50%",
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",

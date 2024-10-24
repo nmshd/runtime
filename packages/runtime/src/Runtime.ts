@@ -27,10 +27,10 @@ import {
     MessageController,
     RelationshipsController,
     RelationshipTemplateController,
+    TagController,
     TokenController,
     Transport
 } from "@nmshd/transport";
-import { TagController } from "@nmshd/transport/src/modules/tags/TagController";
 import { Container, Scope } from "@nmshd/typescript-ioc";
 import { buildInformation } from "./buildInformation";
 import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
@@ -251,16 +251,16 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             .factory(() => this.getAccountController().relationshipTemplates)
             .scope(Scope.Request);
 
-        Container.bind(TagController)
-            .factory(() => this.getAccountController().tags)
-            .scope(Scope.Request);
-
         Container.bind(RelationshipsController)
             .factory(() => this.getAccountController().relationships)
             .scope(Scope.Request);
 
         Container.bind(TokenController)
             .factory(() => this.getAccountController().tokens)
+            .scope(Scope.Request);
+
+        Container.bind(TagController)
+            .factory(() => this.getAccountController().tags)
             .scope(Scope.Request);
 
         Container.bind(ChallengeController)
