@@ -1,5 +1,6 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
-import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { ConsumptionIds } from "@nmshd/consumption";
+import { Notification, ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import assert from "assert";
 import { DateTime } from "luxon";
@@ -22,6 +23,7 @@ import {
 import {
     QueryParamConditions,
     RuntimeServiceProvider,
+    TestNotificationItem,
     TestRuntimeServices,
     createTemplate,
     emptyRelationshipCreationContent,
@@ -665,7 +667,12 @@ describe("RelationshipTermination", () => {
         expect(result).toBeAnError(/.*/, "error.transport.messages.hasNoActiveRelationship");
     });
 
-    test.todo("should be able to send a Notification");
+    test("should be able to send a Notification", async () => {
+        const id = await ConsumptionIds.notification.generate();
+        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+        const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
+        expect(result).toBeSuccessful();
+    });
 
     test("should not decide a request", async () => {
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
