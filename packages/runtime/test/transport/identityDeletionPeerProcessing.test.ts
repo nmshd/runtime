@@ -2,7 +2,15 @@ import { ConsumptionIds } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "../../src";
-import { establishRelationship, RuntimeServiceProvider, sendMessageToMultipleRecipients, syncUntilHasEvent, TestNotificationItem, TestRuntimeServices } from "../lib";
+import {
+    establishRelationship,
+    RuntimeServiceProvider,
+    sendMessageToMultipleRecipients,
+    syncUntilHasEvent,
+    syncUntilHasMessageWithNotification,
+    TestNotificationItem,
+    TestRuntimeServices
+} from "../lib";
 import { exchangeMessageWithRequestAndRequireManualDecision } from "../lib/testUtilsWithInactiveModules";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -123,7 +131,7 @@ describe("IdentityDeletionProcess", () => {
         };
         const result = await services2.consumption.outgoingRequests.create(requestContent);
         expect(result).toBeAnError(
-            `You cannot create a Request to '${services1.address.toString()}' since the peer is in status 'ToBeDeleted'.`,
+            `You cannot create a Request to '${services1.address.toString()}' since the peer has the status 'ToBeDeleted'.`,
             "error.consumption.requests.peerIsToBeDeleted"
         );
     });
@@ -183,7 +191,7 @@ describe("IdentityDeletionProcess", () => {
         expect(canAcceptResultAfterPeerInitiatedDeletion.isSuccess).toBe(false);
         expect(canAcceptResultAfterPeerInitiatedDeletion.code).toBe("error.consumption.requests.peerIsToBeDeleted");
         expect(canAcceptResultAfterPeerInitiatedDeletion.message).toContain(
-            `You cannot decide a Request from '${services1.address.toString()}' since the peer is in status 'ToBeDeleted'`
+            `You cannot decide a Request from '${services1.address.toString()}' since the peer has the status 'ToBeDeleted'.`
         );
     });
 
@@ -191,11 +199,37 @@ describe("IdentityDeletionProcess", () => {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
         await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
         await services2.eventBus.waitForRunningEventHandlers();
+
         const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
         expect(updatedRelationship.peerDeletionInfo?.deletionStatus).toBe("ToBeDeleted");
+
         const id = await ConsumptionIds.notification.generate();
         const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
         const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
         expect(result).toBeSuccessful();
+    });
+
+    test("should be able to receive a Notification after the IdentityDeletionProcess has been cancelled.", async () => {
+        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
+        await services2.eventBus.waitForRunningEventHandlers();
+
+        const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
+        expect(updatedRelationship.peerDeletionInfo?.deletionStatus).toBe("ToBeDeleted");
+
+        const id = await ConsumptionIds.notification.generate();
+        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+
+        const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
+        expect(result).toBeSuccessful();
+
+        await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
+        await syncUntilHasEvent(services2, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
+        await services2.eventBus.waitForRunningEventHandlers();
+
+        const message = await syncUntilHasMessageWithNotification(services1.transport, id);
+
+        const notification = await services1.consumption.notifications.receivedNotification({ messageId: message.id });
+        expect(notification).toBeSuccessful();
     });
 });

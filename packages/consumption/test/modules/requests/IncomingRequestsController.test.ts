@@ -434,7 +434,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanAccept();
             expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsDeleted");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in status 'Deleted'"
+                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is deleted."
             );
         });
 
@@ -444,7 +444,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanAccept();
             expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsToBeDeleted");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in status 'ToBeDeleted'."
+                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer has the status 'ToBeDeleted'."
             );
         });
     });
@@ -648,7 +648,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanReject();
             expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsDeleted");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in status 'Deleted'."
+                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is deleted."
             );
         });
 
@@ -658,7 +658,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanReject();
             expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsToBeDeleted");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in status 'ToBeDeleted'."
+                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer has the status 'ToBeDeleted'."
             );
         });
     });

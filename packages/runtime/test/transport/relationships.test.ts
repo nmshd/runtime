@@ -670,8 +670,12 @@ describe("RelationshipTermination", () => {
     test("should be able to send a Notification", async () => {
         const id = await ConsumptionIds.notification.generate();
         const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+
         const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
         expect(result).toBeSuccessful();
+
+        const notification = await services1.consumption.notifications.getNotification({ id: id.toString() });
+        expect(notification).toBeAnError(/.*/, "error.transport.recordNotFound");
     });
 
     test("should not decide a request", async () => {
@@ -901,6 +905,29 @@ describe("RelationshipTermination", () => {
             RelationshipReactivationCompletedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.AcceptanceOfReactivation
         );
+    });
+
+    test("should be able to send a Notification and after the reactiviation of the Relationship receive the Notification", async () => {
+        terminationResult = await services1.transport.relationships.terminateRelationship({ relationshipId });
+
+        const id = await ConsumptionIds.notification.generate();
+        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+
+        const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
+        expect(result).toBeSuccessful();
+
+        await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
+        await syncUntilHasRelationships(services2.transport);
+
+        const acceptanceResult = await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId });
+        expect(acceptanceResult).toBeSuccessful();
+        expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
+
+        const relationship1 = (await syncUntilHasRelationships(services1.transport))[0];
+        expect(relationship1.status).toBe(RelationshipStatus.Active);
+
+        const notification = await services1.consumption.notifications.getNotification({ id: id.toString() });
+        expect(notification).toBeSuccessful();
     });
 });
 
