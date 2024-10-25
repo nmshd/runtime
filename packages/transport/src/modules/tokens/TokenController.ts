@@ -1,7 +1,7 @@
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
+import { CoreBuffer, CryptoCipher, CryptoRandom, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, TransportCoreErrors, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
@@ -39,6 +39,8 @@ export class TokenController extends TransportController {
     public async sendToken(parameters: ISendTokenParameters): Promise<Token> {
         const input = SendTokenParameters.from(parameters);
         const secretKey = await CoreCrypto.generateSecretKey();
+        const salt = await CryptoRandom.bytes(16)
+        const passwordHashForBackbone = await CoreCrypto.deriveHashOutOfPassword("parameters.password", salt)
         const serializedToken = input.content.serialize();
         const serializedTokenBuffer = CoreBuffer.fromUtf8(serializedToken);
 
