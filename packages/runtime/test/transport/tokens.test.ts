@@ -52,11 +52,12 @@ describe("Tokens errors", () => {
 
 describe("Tokens query", () => {
     test("query own tokens", async () => {
-        const token = await uploadOwnToken(runtimeServices1.transport);
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address);
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
             .addDateSet("expiresAt")
             .addDateSet("createdAt")
-            .addStringSet("createdByDevice");
+            .addStringSet("createdByDevice")
+            .addStringSet("forIdentity");
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
 
