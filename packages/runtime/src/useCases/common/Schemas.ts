@@ -22258,6 +22258,19 @@ export const GetRelationshipTemplatesRequest: any = {
                             }
                         }
                     ]
+                },
+                "forIdentity": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -22818,6 +22831,19 @@ export const GetTokensRequest: any = {
                     ]
                 },
                 "expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forIdentity": {
                     "anyOf": [
                         {
                             "type": "string"
