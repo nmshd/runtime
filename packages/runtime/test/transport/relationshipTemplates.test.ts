@@ -276,7 +276,8 @@ describe("RelationshipTemplates query", () => {
             await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
-                content: emptyRelationshipTemplateContent
+                content: emptyRelationshipTemplateContent,
+                forIdentity: runtimeServices1.address
             })
         ).value;
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
@@ -285,7 +286,8 @@ describe("RelationshipTemplates query", () => {
             .addDateSet("expiresAt")
             .addStringSet("createdBy")
             .addStringSet("createdByDevice")
-            .addNumberSet("maxNumberOfAllocations");
+            .addNumberSet("maxNumberOfAllocations")
+            .addStringSet("forIdentity");
 
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q }));
     });
