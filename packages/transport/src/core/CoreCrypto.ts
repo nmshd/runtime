@@ -2,6 +2,7 @@ import {
     CoreBuffer,
     CryptoCipher,
     CryptoDerivation,
+    CryptoDerivationAlgorithm,
     CryptoEncryption,
     CryptoEncryptionAlgorithm,
     CryptoExchange,
@@ -81,26 +82,47 @@ export abstract class CoreCrypto {
     }
 
     /**
-     * Generates a password derived from a human readable/memorable master password, a unique salt, the given symmetric
-     * algorithm and the version. Depending on the given version, different key derivation algorithms are used.
+     * Generates a high entropy key / hash derived from a low entropy human readable/memorable master password, a unique salt, 
+     * the given symmetric algorithm and the version. Depending on the given version, different key derivation algorithms are used.
      * Careful, the symmetric algorithm possibly needs to be manually changed depending on the version in addition to
      * the version.
      *
      * @param password The master password as utf-8 encoded string
-     * @param salt A salt which is unique to this user/password instance.
+     * @param salt A salt which is unique to this user/password instance, needs to by 16 byte long.
+     * @param algorithm The CryptoEncryptionAlgorithm for which the secret needs to be created
      * @param version The version which should be used, "latest" is the default.
      * @returns A Promise object resolving in a [[CryptoSecretKey]].
      */
-    public static async deriveKeyFromPassword(password: string, salt = "enmeshed", version: TransportVersion = TransportVersion.Latest): Promise<CryptoSecretKey> {
+    public static async deriveKeyFromPassword(password: string, salt:CoreBuffer, algorithm:CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305, version: TransportVersion = TransportVersion.Latest): Promise<CryptoSecretKey> {
         const passwordBuffer = CoreBuffer.fromString(password, Encoding.Utf8);
-        const saltBuffer = CoreBuffer.fromString(salt, Encoding.Utf8);
+        
         switch (version) {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
-                return await CryptoDerivation.deriveKeyFromPassword(passwordBuffer, saltBuffer);
+                // See https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html for recommendations of default values
+                // Libsodium uses Argon2id as the pwhash function, we need to look at the minimum setup for Apps (smartphones) and virtualized
+                // environments like Connectors. Thus, we cannot expect high end pcs to make the pw derivation.
+                const opslimit = 3
+                const memlimit = 20 * 1024 * 1024 // 20MB
+                return await CryptoDerivation.deriveKeyFromPassword(passwordBuffer, salt, algorithm, CryptoDerivationAlgorithm.ARGON2ID, opslimit, memlimit);
             default:
                 throw this.invalidVersion(version);
         }
+    }
+
+
+    public static async deriveHashOutOfPassword(password:string, salt:CoreBuffer, version: TransportVersion = TransportVersion.Latest):Promise<CoreBuffer> {
+        switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            case TransportVersion.V1:
+                const pwhash = await this.deriveKeyFromPassword(password, salt)
+
+                // No pepper required, as even the salt is not stored in the Backbone
+                return pwhash.secretKey
+            default:
+                throw this.invalidVersion(version);
+        }
+        
     }
 
     public static async deriveKeyFromBase(
