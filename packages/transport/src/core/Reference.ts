@@ -36,11 +36,11 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public passwordType?: number;
 
-    @validate({ nullable: true})
+    @validate({ nullable: true })
     @serialize()
-    public version?:number
+    public version?: number;
 
-    @validate({ nullable: true})
+    @validate({ nullable: true })
     @serialize()
     public salt?: CoreBuffer;
 
@@ -49,6 +49,7 @@ export class Reference extends Serializable implements IReference {
         const truncatedReference = CoreBuffer.fromUtf8(
             `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ? this.forIdentityTruncated : ""}|${this.version}|${this.salt?.toString()}|${this.passwordType ? this.passwordType.toString() : ""}`
         );
+
         return truncatedReference.toBase64URL();
     }
 
@@ -91,13 +92,12 @@ export class Reference extends Serializable implements IReference {
     }
 
     private static parseSalt(value: string): CoreBuffer | undefined {
-
-        const regexp = new RegExp("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$")
+        const regexp = new RegExp("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
         if (!regexp.test(value)) {
             throw TransportCoreErrors.general.invalidTruncatedReference("The salt needs to be a Base64 value.");
         }
 
-        return CoreBuffer.fromBase64(value)
+        return CoreBuffer.fromBase64(value);
     }
 
     private static parsePasswordType(value: string): number | undefined {
