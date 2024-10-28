@@ -1,6 +1,7 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
 import { ConsumptionIds } from "@nmshd/consumption";
-import { Notification, ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { IdentityFileReferenceJSON, Notification, ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import assert from "assert";
 import { DateTime } from "luxon";
@@ -39,6 +40,7 @@ import {
     sendAndReceiveNotification,
     sendMessageToMultipleRecipients,
     syncUntilHasMessageWithNotification,
+    syncUntilHasMessagesWithNotification,
     syncUntilHasRelationships
 } from "../lib";
 
@@ -928,6 +930,72 @@ describe("RelationshipTermination", () => {
 
         const notification = await services1.consumption.notifications.getNotification({ id: id.toString() });
         expect(notification).toBeSuccessful();
+    });
+
+    test("should be able to send a Notification and after the reactiviation of the Relationship receive the Notifications in the right order", async () => {
+        const ownSharedIdentityAttributeV0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Own name"
+                }
+            }
+        });
+
+        const createdAttribut = await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
+        expect(createdAttribut).toBeDefined();
+
+        terminationResult = await services1.transport.relationships.terminateRelationship({ relationshipId });
+        await syncUntilHasRelationships(services2.transport);
+
+        const { successor: ownSharedIdentityAttributeV1 } = (
+            await services1.consumption.attributes.succeedRepositoryAttribute({
+                predecessorId: ownSharedIdentityAttributeV0.shareInfo!.sourceAttribute!,
+                successorContent: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "New own name"
+                    }
+                }
+            })
+        ).value;
+
+        const result = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+            attributeId: ownSharedIdentityAttributeV1.id,
+            peer: services2.address
+        });
+
+        const notification = await services2.consumption.notifications.getNotification({ id: result.value.notificationId });
+        expect(notification).toBeAnError(/.*/, "error.transport.recordNotFound");
+
+        const createdAttribut0 = await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
+        expect(createdAttribut0.value.succeededBy).toBeUndefined();
+
+        await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttributeV0.id });
+
+        await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
+        await syncUntilHasRelationships(services2.transport);
+
+        const acceptanceResult = await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId });
+        expect(acceptanceResult).toBeSuccessful();
+        expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
+
+        const relationship1 = (await syncUntilHasRelationships(services1.transport))[0];
+        expect(relationship1.status).toBe(RelationshipStatus.Active);
+
+        await syncUntilHasMessagesWithNotification(services2.transport);
+
+        const updatedAttribute = await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
+        expect(updatedAttribute).toBeDefined();
+
+        const successor = await services2.consumption.attributes.getAttribute({ id: updatedAttribute.value.succeededBy! });
+        expect(successor).toBeDefined();
+
+        expect((successor.value.content.value as IdentityFileReferenceJSON).value).toBe("New own name");
+
+        expect(CoreDate.from(acceptanceResult.value.auditLog[acceptanceResult.value.auditLog.length - 1].createdAt).isBefore(CoreDate.from(successor.value.createdAt))).toBe(true);
+
+        expect(CoreDate.from(successor.value.createdAt).isBefore(CoreDate.from(updatedAttribute.value.deletionInfo!.deletionDate))).toBe(true);
     });
 });
 
