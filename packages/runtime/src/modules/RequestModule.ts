@@ -118,7 +118,7 @@ export class RequestModule extends RuntimeModule {
             await services.consumptionServices.incomingRequests.getRequests({
                 query: {
                     "source.type": "RelationshipTemplate",
-                    status: [LocalRequestStatus.Open, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired],
+                    status: [LocalRequestStatus.Open, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired, LocalRequestStatus.Decided],
                     peer: template.createdBy
                 }
             })
