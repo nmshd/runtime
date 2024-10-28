@@ -6,6 +6,7 @@ import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
+import { PeerCertificate, checkServerIdentity } from "tls";
 import { ICorrelator } from "./ICorrelator";
 import { TransportCoreErrors } from "./TransportCoreErrors";
 import { TransportError } from "./TransportError";
@@ -31,6 +32,7 @@ export interface IConfig {
     datawalletEnabled: boolean;
     httpAgentOptions: AgentOptions;
     httpsAgentOptions: HTTPSAgentOptions;
+    pinnedPublicKeys?: Record<string, string[]>;
 }
 
 export interface IConfigOverwrite {
@@ -48,6 +50,7 @@ export interface IConfigOverwrite {
     datawalletEnabled?: boolean;
     httpAgentOptions?: AgentOptions;
     httpsAgentOptions?: HTTPSAgentOptions;
+    pinnedPublicKeys?: Record<string, string[]>;
 }
 
 export class Transport {
@@ -89,8 +92,30 @@ export class Transport {
         loggerFactory: ILoggerFactory = new SimpleLoggerFactory(),
         public readonly correlator?: ICorrelator
     ) {
+        if (customConfig.pinnedPublicKeys && customConfig.httpsAgentOptions?.checkServerIdentity) {
+            throw TransportCoreErrors.general.conflictingServerIdentityChecks().logWith(log);
+        }
+
         this.databaseConnection = databaseConnection;
         this._config = _.defaultsDeep({}, customConfig, Transport.defaultConfig);
+
+        if (this._config.pinnedPublicKeys) {
+            this._config.httpsAgentOptions = {
+                ...this._config.httpsAgentOptions,
+                checkServerIdentity: (host: string, certificate: PeerCertificate) => {
+                    const error = checkServerIdentity(host, certificate);
+                    if (error) {
+                        return error;
+                    }
+
+                    const subject = certificate.subject.CN;
+                    if (!(subject in this._config.pinnedPublicKeys!)) return;
+                    if (this._config.pinnedPublicKeys![subject].includes(certificate.pubkey!.toString("base64"))) return;
+
+                    return new Error(`Certificate verification error: The public key of ${certificate.subject.CN} doesn't match a pinned public key`);
+                }
+            };
+        }
 
         TransportLoggerFactory.init(loggerFactory);
         log = TransportLoggerFactory.getLogger(Transport);

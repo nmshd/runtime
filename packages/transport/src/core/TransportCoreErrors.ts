@@ -160,6 +160,12 @@ class Tokens {
 }
 
 class General {
+    public conflictingServerIdentityChecks() {
+        return new CoreError(
+            "error.transport.general.conflictingServerIdentityChecks",
+            "Both httpsAgentOptions.checkServerIdentity and pinnedPublicKeys were configured. Because pinnedPublicKeys works by setting checkServerIdentity, you may only use one of them."
+        );
+    }
     public baseUrlNotSet() {
         return new CoreError("error.transport.general.baseUrlNotSet", "The baseUrl was not set.");
     }
