@@ -102,7 +102,7 @@ export class RequestModule extends RuntimeModule {
             }
 
             this.logger.info(
-                `There is already an open Relationship for the RelationshipTemplate '${template.id}' and onExistingRelationship is not defined. Skipping creation of a new request.`
+                `There is already an active Relationship to the creator of the RelationshipTemplate '${template.id}' and an onExistingRelationship Request is not defined. Skipping creation of a new Request.`
             );
             this.runtime.eventBus.publish(
                 new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {

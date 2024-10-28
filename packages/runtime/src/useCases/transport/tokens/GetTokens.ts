@@ -12,6 +12,7 @@ export interface GetTokensQuery {
     createdBy?: string | string[];
     createdByDevice?: string | string[];
     expiresAt?: string | string[];
+    forIdentity?: string | string[];
 }
 
 export interface GetTokensRequest {
@@ -31,13 +32,15 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
             [nameof<TokenDTO>((t) => t.createdAt)]: true,
             [nameof<TokenDTO>((t) => t.createdBy)]: true,
             [nameof<TokenDTO>((t) => t.createdByDevice)]: true,
-            [nameof<TokenDTO>((t) => t.expiresAt)]: true
+            [nameof<TokenDTO>((t) => t.expiresAt)]: true,
+            [nameof<TokenDTO>((t) => t.forIdentity)]: true
         },
         alias: {
             [nameof<TokenDTO>((t) => t.createdAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdAt)]}`,
             [nameof<TokenDTO>((t) => t.createdBy)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdBy)]}`,
             [nameof<TokenDTO>((t) => t.createdByDevice)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdByDevice)]}`,
-            [nameof<TokenDTO>((t) => t.expiresAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.expiresAt)]}`
+            [nameof<TokenDTO>((t) => t.expiresAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.expiresAt)]}`,
+            [nameof<TokenDTO>((t) => t.forIdentity)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.forIdentity)]}`
         }
     });
 

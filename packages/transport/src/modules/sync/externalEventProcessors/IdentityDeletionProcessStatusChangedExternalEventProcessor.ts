@@ -3,15 +3,15 @@ import { IdentityDeletionProcess } from "../../accounts/data/IdentityDeletionPro
 import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
 import { ExternalEventProcessor } from "./ExternalEventProcessor";
 
-class IdentityDeletionProcessChangedEventData extends Serializable {
+class IdentityDeletionProcessStatusChangedEventData extends Serializable {
     @serialize()
     @validate()
     public deletionProcessId: string;
 }
 
-export class IdentityDeletionProcessChangedExternalEventProcessor extends ExternalEventProcessor {
+export class IdentityDeletionProcessStatusChangedExternalEventProcessor extends ExternalEventProcessor {
     public override async execute(externalEvent: BackboneExternalEvent): Promise<IdentityDeletionProcess> {
-        const messageReceivedPayload = IdentityDeletionProcessChangedEventData.fromAny(externalEvent.payload);
+        const messageReceivedPayload = IdentityDeletionProcessStatusChangedEventData.fromAny(externalEvent.payload);
 
         const newIdentityDeletionProcess = await this.accountController.identityDeletionProcess.updateCacheOfExistingIdentityDeletionProcess(
             messageReceivedPayload.deletionProcessId
