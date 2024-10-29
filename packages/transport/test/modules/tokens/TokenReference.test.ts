@@ -46,7 +46,7 @@ describe("TokenReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
     });
 
-    test("should serialize and deserialize correctly (verbose, with backbone, identity, password, salt)", async function () {
+    test("should serialize and deserialize correctly (verbose, with backbone, identity, password, salt, version)", async function () {
         const reference = TokenReference.from({
             key: await CryptoEncryption.generateKey(),
             id: await BackboneIds.token.generateUnsafe(),
@@ -80,7 +80,7 @@ describe("TokenReference", function () {
         expect(deserialized.version).toBe(1);
     });
 
-    test("should serialize and deserialize correctly (from unknown type, with backbone, identity, password, salt)", async function () {
+    test("should serialize and deserialize correctly (from unknown type, with backbone, identity, password, salt, version)", async function () {
         const reference = TokenReference.from({
             key: await CryptoEncryption.generateKey(),
             id: await BackboneIds.token.generateUnsafe(),
@@ -131,7 +131,7 @@ describe("TokenReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
     });
 
-    test("should truncate and read in correctly with backbone, identity, password, salt", async function () {
+    test("should truncate and read in correctly with backbone, identity, password, salt, version", async function () {
         const reference = TokenReference.from({
             key: await CryptoEncryption.generateKey(),
             id: await BackboneIds.token.generateUnsafe(),

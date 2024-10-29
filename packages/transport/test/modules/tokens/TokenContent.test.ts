@@ -157,7 +157,6 @@ describe("TokenContent", function () {
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
             expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
             expect(deserialized.passwordType).toBe("pw");
-            expect(deserialized.passwordType).toBe("pw");
             expect(deserialized.salt).toStrictEqual(token.salt);
         });
     });
