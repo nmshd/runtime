@@ -309,8 +309,8 @@ class Requests {
         return new CoreError("error.consumption.requests.peerIsDeleted", message);
     }
 
-    public peerIsToBeDeleted(message: string) {
-        return new CoreError("error.consumption.requests.peerIsToBeDeleted", message);
+    public peerIsInDeletion(message: string) {
+        return new CoreError("error.consumption.requests.peerIsInDeletion", message);
     }
 
     public missingRelationship(message: string) {

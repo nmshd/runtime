@@ -187,7 +187,9 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.peerIsToBeDeleted(`You cannot decide a Request from '${request.peer.toString()}' since the peer has the status 'ToBeDeleted'.`)
+                ConsumptionCoreErrors.requests.peerIsInDeletion(
+                    `You cannot decide a Request from '${request.peer.toString()}' since the peer has an active IdentityDeletionProcess.`
+                )
             );
         }
 

@@ -442,9 +442,9 @@ describe("IncomingRequestsController", function () {
             await Given.aRelationshipToPeerInDeletion();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanAccept();
-            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsToBeDeleted");
+            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsInDeletion");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer has the status 'ToBeDeleted'."
+                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer has an active IdentityDeletionProcess."
             );
         });
     });
@@ -656,9 +656,9 @@ describe("IncomingRequestsController", function () {
             await Given.aRelationshipToPeerInDeletion();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanReject();
-            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsToBeDeleted");
+            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsInDeletion");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer has the status 'ToBeDeleted'."
+                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer has an active IdentityDeletionProcess."
             );
         });
     });

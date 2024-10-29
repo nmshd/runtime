@@ -243,7 +243,7 @@ describe("OutgoingRequestsController", function () {
             );
         });
 
-        test("returns a validation result that contains an error for requests to a peer which is toBeDeleted", async function () {
+        test("returns a validation result that contains an error for requests to a peer which has an active IdentityDeletionProcess", async function () {
             await Given.aRelationshipToPeerInDeletion();
             const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
                 content: {
@@ -255,9 +255,9 @@ describe("OutgoingRequestsController", function () {
                     ]
                 }
             });
-            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsToBeDeleted");
+            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsInDeletion");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer has the status 'ToBeDeleted'."
+                "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer has an active IdentityDeletionProcess."
             );
         });
     });
