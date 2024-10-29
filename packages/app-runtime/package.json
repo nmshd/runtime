@@ -8,7 +8,7 @@
         "directory": "packages/app-runtime"
     },
     "license": "MIT",
-    "author": "j&s-soft GmbH",
+    "author": "j&s-soft AG",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -57,7 +57,7 @@
     },
     "devDependencies": {
         "@js-soft/web-logger": "^1.0.4",
-        "@types/lodash": "^4.17.10",
+        "@types/lodash": "^4.17.12",
         "@types/lokijs": "^1.5.14",
         "@types/luxon": "^3.4.2"
     },

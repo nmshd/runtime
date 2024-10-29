@@ -63,11 +63,17 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
     }
 
     protected async executeInternal(request: CreateOwnRelationshipTemplateRequest): Promise<Result<RelationshipTemplateDTO>> {
-        const validationError = await this.validateRelationshipTemplateContent(request.content);
+        const content = request.content;
+
+        const validationError = await this.validateRelationshipTemplateContent(content, CoreDate.from(request.expiresAt));
         if (validationError) return Result.fail(validationError);
 
+        if (Serializable.fromUnknown(content) instanceof RelationshipTemplateContent && !content.onNewRelationship.expiresAt) {
+            content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
+        }
+
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
-            content: request.content,
+            content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
@@ -80,7 +86,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(relationshipTemplate));
     }
 
-    private async validateRelationshipTemplateContent(content: any) {
+    private async validateRelationshipTemplateContent(content: any, templateExpiresAt: CoreDate) {
         const transformedContent = Serializable.fromUnknown(content);
 
         if (!(transformedContent instanceof RelationshipTemplateContent || transformedContent instanceof ArbitraryRelationshipTemplateContent)) {
@@ -90,6 +96,10 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         }
 
         if (!(transformedContent instanceof RelationshipTemplateContent)) return;
+
+        if (transformedContent.onNewRelationship.expiresAt?.isAfter(templateExpiresAt)) {
+            return RuntimeErrors.relationshipTemplates.requestCannotExpireAfterRelationshipTemplate();
+        }
 
         const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
         if (validationResult.isError()) return validationResult.error;
