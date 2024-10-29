@@ -99,7 +99,7 @@ export class Reference extends Serializable implements IReference {
         }
 
         const buffer = CoreBuffer.fromBase64(value);
-        if (buffer.buffer.length !== 16) {
+        if (buffer.buffer.byteLength !== 16) {
             throw TransportCoreErrors.general.invalidTruncatedReference("The salt needs to be 16 bytes long.");
         }
         return buffer;

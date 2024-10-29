@@ -29,7 +29,7 @@ export class TokenContentRelationshipTemplate extends Serializable implements IT
     @serialize()
     public passwordType?: string;
 
-    @validate({ nullable: true })
+    @validate({ nullable: true, customValidator: (v: ICoreBuffer) => (v.buffer.byteLength === 16 ? undefined : "must be 16 bytes long") })
     @serialize()
     public salt?: CoreBuffer;
 
