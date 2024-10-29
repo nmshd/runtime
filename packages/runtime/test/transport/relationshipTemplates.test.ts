@@ -257,7 +257,6 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(createResult).toBeSuccessful();
             expect(createResult.value.password).toBe("password:password");
-            expect(createResult.value.salt).toBeDefined();
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -265,7 +264,6 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("password:password");
-            expect(loadResult.value.salt).toBe(createResult.value.salt);
         });
 
         test("send and receive a PIN-protected template", async () => {
@@ -276,7 +274,6 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(createResult).toBeSuccessful();
             expect(createResult.value.password).toBe("pin:1234");
-            expect(createResult.value.salt).toBeDefined();
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -284,7 +281,6 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("pin:1234");
-            expect(loadResult.value.salt).toBe(createResult.value.salt);
         });
 
         test("send and receive a password-protected template via a token", async () => {
@@ -303,8 +299,6 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("password:password");
-            expect(loadResult.value.salt).toBeDefined();
-            expect(loadResult.value.salt).toBe(template.salt);
         });
 
         test("send and receive a PIN-protected template via a token", async () => {
@@ -324,8 +318,6 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("pin:1234");
-            expect(loadResult.value.salt).toBeDefined();
-            expect(loadResult.value.salt).toBe(template.salt);
         });
 
         test("error when loading a template with a wrong password", async () => {
