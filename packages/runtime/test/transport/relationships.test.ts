@@ -11,6 +11,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalRequestStatus,
+    OwnSharedAttributeDeletedByOwnerEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
     RelationshipAuditLogEntryReason,
@@ -909,7 +910,7 @@ describe("RelationshipTermination", () => {
         );
     });
 
-    test("should be able to send a Notification and after the reactiviation of the Relationship receive the Notification", async () => {
+    test("should be able to send a Notification and the peer should receive the Notification only after the reactiviation of the Relationship", async () => {
         terminationResult = await services1.transport.relationships.terminateRelationship({ relationshipId });
 
         const id = await ConsumptionIds.notification.generate();
@@ -932,7 +933,7 @@ describe("RelationshipTermination", () => {
         expect(notification).toBeSuccessful();
     });
 
-    test("should be able to send a Notification and after the reactiviation of the Relationship receive the Notifications in the right order", async () => {
+    test("should be able to send Notifications and the peer should receive the Notifications in the right order after the reactiviation of the Relationship", async () => {
         const ownSharedIdentityAttributeV0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
                 value: {
@@ -965,6 +966,10 @@ describe("RelationshipTermination", () => {
             peer: services2.address
         });
 
+        await services1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
+            return e.data.successor.id === result.value.successor.id;
+        });
+
         const notification = await services2.consumption.notifications.getNotification({ id: result.value.notificationId });
         expect(notification).toBeAnError(/.*/, "error.transport.recordNotFound");
 
@@ -985,8 +990,17 @@ describe("RelationshipTermination", () => {
 
         await syncUntilHasMessagesWithNotification(services2.transport);
 
+        await services2.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
+            return e.data.successor.id === result.value.successor.id;
+        });
+
+        await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+            return e.data.id.toString() === ownSharedIdentityAttributeV0.id;
+        });
+
         const updatedAttribute = await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
         expect(updatedAttribute).toBeDefined();
+        expect(updatedAttribute.value.succeededBy).toBeDefined();
 
         const successor = await services2.consumption.attributes.getAttribute({ id: updatedAttribute.value.succeededBy! });
         expect(successor).toBeDefined();
