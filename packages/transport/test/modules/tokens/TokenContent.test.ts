@@ -1,8 +1,17 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreIdHelper, DeviceSharedSecret, TokenContentDeviceSharedSecret, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
+import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
+import {
+    AccountController,
+    CoreCrypto,
+    CoreIdHelper,
+    DeviceSharedSecret,
+    TokenContentDeviceSharedSecret,
+    TokenContentFile,
+    TokenContentRelationshipTemplate,
+    Transport
+} from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenContent", function () {
@@ -66,7 +75,8 @@ describe("TokenContent", function () {
                 secretKey: await CryptoEncryption.generateKey(),
                 templateId: await CoreIdHelper.notPrefixed.generate(),
                 forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                passwordType: "pw"
+                passwordType: "pw",
+                salt: await CoreCrypto.random(16)
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -75,7 +85,7 @@ describe("TokenContent", function () {
             const serialized = token.serialize();
             expect(typeof serialized).toBe("string");
             expect(serialized).toBe(
-                `{"@type":"TokenContentRelationshipTemplate","forIdentity":"${token.forIdentity!.serialize()}","passwordType":"${token.passwordType}","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`
+                `{"@type":"TokenContentRelationshipTemplate","forIdentity":"${token.forIdentity!.serialize()}","passwordType":"${token.passwordType}","salt":"${token.salt?.toBase64URL()}","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`
             );
             const deserialized = TokenContentRelationshipTemplate.deserialize(serialized);
             expect(deserialized).toBeInstanceOf(Serializable);
@@ -83,10 +93,12 @@ describe("TokenContent", function () {
             expect(deserialized.secretKey).toBeInstanceOf(CryptoSecretKey);
             expect(deserialized.templateId).toBeInstanceOf(CoreId);
             expect(deserialized.forIdentity).toBeInstanceOf(CoreAddress);
+            expect(deserialized.salt).toBeInstanceOf(CoreBuffer);
             expect(deserialized.secretKey.toBase64()).toStrictEqual(token.secretKey.toBase64());
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
             expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
             expect(deserialized.passwordType).toBe("pw");
+            expect(deserialized.salt).toStrictEqual(token.salt);
         });
 
         test("should serialize and deserialize correctly (no type information)", async function () {
@@ -94,7 +106,8 @@ describe("TokenContent", function () {
                 secretKey: await CryptoEncryption.generateKey(),
                 templateId: await CoreIdHelper.notPrefixed.generate(),
                 forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                passwordType: "pin10"
+                passwordType: "pin10",
+                salt: await CoreCrypto.random(16)
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -108,10 +121,12 @@ describe("TokenContent", function () {
             expect(deserialized.secretKey).toBeInstanceOf(CryptoSecretKey);
             expect(deserialized.templateId).toBeInstanceOf(CoreId);
             expect(deserialized.forIdentity).toBeInstanceOf(CoreAddress);
+            expect(deserialized.salt).toBeInstanceOf(CoreBuffer);
             expect(deserialized.secretKey.toBase64()).toStrictEqual(token.secretKey.toBase64());
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
             expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
             expect(deserialized.passwordType).toBe("pin10");
+            expect(deserialized.salt).toStrictEqual(token.salt);
         });
 
         test("should serialize and deserialize correctly (from unknown type)", async function () {
@@ -119,7 +134,8 @@ describe("TokenContent", function () {
                 secretKey: await CryptoEncryption.generateKey(),
                 templateId: await CoreIdHelper.notPrefixed.generate(),
                 forIdentity: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                passwordType: "pw"
+                passwordType: "pw",
+                salt: await CoreCrypto.random(16)
             });
             expect(token).toBeInstanceOf(Serializable);
             expect(token).toBeInstanceOf(TokenContentRelationshipTemplate);
@@ -128,7 +144,7 @@ describe("TokenContent", function () {
             const serialized = token.serialize();
             expect(typeof serialized).toBe("string");
             expect(serialized).toBe(
-                `{"@type":"TokenContentRelationshipTemplate","forIdentity":"${token.forIdentity!.serialize()}","passwordType":"${token.passwordType}","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`
+                `{"@type":"TokenContentRelationshipTemplate","forIdentity":"${token.forIdentity!.serialize()}","passwordType":"${token.passwordType}","salt":"${token.salt?.toBase64URL()}","secretKey":${token.secretKey.serialize(false)},"templateId":"${token.templateId.toString()}"}`
             );
             const deserialized = Serializable.deserializeUnknown(serialized) as TokenContentRelationshipTemplate;
             expect(deserialized).toBeInstanceOf(Serializable);
@@ -136,10 +152,13 @@ describe("TokenContent", function () {
             expect(deserialized.secretKey).toBeInstanceOf(CryptoSecretKey);
             expect(deserialized.templateId).toBeInstanceOf(CoreId);
             expect(deserialized.forIdentity).toBeInstanceOf(CoreAddress);
+            expect(deserialized.salt).toBeInstanceOf(CoreBuffer);
             expect(deserialized.secretKey.toBase64()).toStrictEqual(token.secretKey.toBase64());
             expect(deserialized.templateId.toString()).toStrictEqual(token.templateId.toString());
             expect(deserialized.forIdentity!.toString()).toStrictEqual(token.forIdentity!.toString());
             expect(deserialized.passwordType).toBe("pw");
+            expect(deserialized.passwordType).toBe("pw");
+            expect(deserialized.salt).toStrictEqual(token.salt);
         });
     });
 

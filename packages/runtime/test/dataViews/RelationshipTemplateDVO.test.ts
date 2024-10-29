@@ -171,6 +171,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
         expect(dvo.password).toBe("password:password");
+        expect(dvo.salt).toBeDefined();
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);
@@ -212,6 +213,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
         expect(dvo.password).toBe("password:password");
+        expect(dvo.salt).toBeDefined();
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);

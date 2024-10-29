@@ -18,6 +18,7 @@ export class RelationshipTemplateMapper {
             createdAt: template.cache.createdAt.toString(),
             forIdentity: template.cache.forIdentity?.toString(),
             password: this.toPassword(template.password, template.pin),
+            salt: template.salt?.toBase64(),
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,

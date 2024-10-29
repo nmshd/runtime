@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
-import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
+import { CoreBuffer, CryptoSecretKey, ICoreBuffer, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { RelationshipTemplateReference } from "../transmission/RelationshipTemplateReference";
@@ -11,6 +11,7 @@ export interface IRelationshipTemplate extends ICoreSynchronizable {
     isOwn: boolean;
     password?: string;
     pin?: string;
+    salt?: ICoreBuffer;
     cache?: ICachedRelationshipTemplate;
     cachedAt?: ICoreDate;
     metadata?: any;
@@ -41,6 +42,10 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
 
     @validate({ nullable: true })
     @serialize()
+    public salt?: CoreBuffer;
+
+    @validate({ nullable: true })
+    @serialize()
     public cache?: CachedRelationshipTemplate;
 
     @validate({ nullable: true })
@@ -64,7 +69,8 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
             id: this.id,
             key: this.secretKey,
             forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
-            passwordType: this.passwordType
+            passwordType: this.passwordType,
+            salt: this.salt
         });
     }
 

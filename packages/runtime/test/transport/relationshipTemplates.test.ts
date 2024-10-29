@@ -257,6 +257,7 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(createResult).toBeSuccessful();
             expect(createResult.value.password).toBe("password:password");
+            expect(createResult.value.salt).toBeDefined();
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -264,6 +265,7 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("password:password");
+            expect(loadResult.value.salt).toBe(createResult.value.salt);
         });
 
         test("send and receive a PIN-protected template", async () => {
@@ -274,6 +276,7 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(createResult).toBeSuccessful();
             expect(createResult.value.password).toBe("pin:1234");
+            expect(createResult.value.salt).toBeDefined();
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -281,17 +284,18 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("pin:1234");
+            expect(loadResult.value.salt).toBe(createResult.value.salt);
         });
 
         test("send and receive a password-protected template via a token", async () => {
-            const templateId = (
+            const template = (
                 await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                     content: emptyRelationshipTemplateContent,
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                     password: "password"
                 })
-            ).value.id;
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+            ).value;
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId: template.id });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -299,17 +303,20 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("password:password");
+            expect(loadResult.value.salt).toBeDefined();
+            expect(loadResult.value.salt).toBe(template.salt);
         });
 
         test("send and receive a PIN-protected template via a token", async () => {
-            const templateId = (
+            const template = (
                 await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                     content: emptyRelationshipTemplateContent,
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                     pin: "1234"
                 })
-            ).value.id;
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+            ).value;
+
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId: template.id });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -317,6 +324,8 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.password).toBe("pin:1234");
+            expect(loadResult.value.salt).toBeDefined();
+            expect(loadResult.value.salt).toBe(template.salt);
         });
 
         test("error when loading a template with a wrong password", async () => {
@@ -331,7 +340,7 @@ describe("RelationshipTemplate Tests", () => {
                 reference: createResult.value.truncatedReference,
                 password: "wrong-password"
             });
-            expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
+            expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
         test("validation error when creating a template with empty string as the password", async () => {

@@ -66,13 +66,14 @@ export class RelationshipTemplateController extends TransportController {
         const cipher = await CoreCrypto.encrypt(signedTemplateBuffer, secretKey);
 
         const password = parameters.password ?? parameters.pin;
+        const salt = password ? await CoreCrypto.random(16) : undefined;
 
         const backboneResponse = (
             await this.client.createRelationshipTemplate({
                 expiresAt: parameters.expiresAt.toString(),
                 maxNumberOfAllocations: parameters.maxNumberOfAllocations,
                 forIdentity: parameters.forIdentity?.address.toString(),
-                password: password ? await this.hashPassword(password) : undefined,
+                password: password ? (await CoreCrypto.deriveHashOutOfPassword(password, salt!)).toBase64() : undefined,
                 content: cipher.toBase64()
             })
         ).value;
@@ -95,6 +96,7 @@ export class RelationshipTemplateController extends TransportController {
             isOwn: true,
             password: parameters.password,
             pin: parameters.pin,
+            salt,
             cache: templateCache,
             cachedAt: CoreDate.utc()
         });
@@ -127,7 +129,7 @@ export class RelationshipTemplateController extends TransportController {
                 templates: await Promise.all(
                     templates.map(async (t) => {
                         const password = t.password ?? t.pin;
-                        return { id: t.id.toString(), password: password ? await this.hashPassword(password) : undefined };
+                        return { id: t.id.toString(), password: password ? (await CoreCrypto.deriveHashOutOfPassword(password, t.salt!)).toBase64() : undefined };
                     })
                 )
             })
@@ -149,7 +151,7 @@ export class RelationshipTemplateController extends TransportController {
                 templates: await Promise.all(
                     templates.map(async (t) => {
                         const password = t.password ?? t.pin;
-                        return { id: t.id.toString(), password: password ? await this.hashPassword(password) : undefined };
+                        return { id: t.id.toString(), password: password ? (await CoreCrypto.deriveHashOutOfPassword(password, t.salt!)).toBase64() : undefined };
                     })
                 )
             })
@@ -198,7 +200,12 @@ export class RelationshipTemplateController extends TransportController {
     private async updateCacheOfTemplate(template: RelationshipTemplate, response?: BackboneGetRelationshipTemplatesResponse) {
         if (!response) {
             const password = template.password ?? template.pin;
-            response = (await this.client.getRelationshipTemplate(template.id.toString(), password ? await this.hashPassword(password) : undefined)).value;
+            response = (
+                await this.client.getRelationshipTemplate(
+                    template.id.toString(),
+                    password ? (await CoreCrypto.deriveHashOutOfPassword(password, template.salt!)).toBase64() : undefined
+                )
+            ).value;
         }
 
         const cachedTemplate = await this.decryptRelationshipTemplate(response, template.secretKey);
@@ -269,7 +276,7 @@ export class RelationshipTemplateController extends TransportController {
         if (reference.passwordType?.startsWith("pw") && !password) throw TransportCoreErrors.general.noPasswordProvided();
         if (reference.passwordType?.startsWith("pin") && !pin) throw TransportCoreErrors.general.noPINProvided();
 
-        return await this.loadPeerRelationshipTemplate(reference.id, reference.key, reference.forIdentityTruncated, password, pin);
+        return await this.loadPeerRelationshipTemplate(reference.id, reference.key, reference.forIdentityTruncated, password, pin, reference.salt);
     }
 
     public async loadPeerRelationshipTemplate(
@@ -277,7 +284,8 @@ export class RelationshipTemplateController extends TransportController {
         secretKey: CryptoSecretKey,
         forIdentityTruncated?: string,
         password?: string,
-        pin?: string
+        pin?: string,
+        salt?: CoreBuffer
     ): Promise<RelationshipTemplate> {
         const templateDoc = await this.templates.read(id.toString());
         if (!templateDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
@@ -299,7 +307,8 @@ export class RelationshipTemplateController extends TransportController {
             secretKey: secretKey,
             isOwn: false,
             password: password,
-            pin: pin
+            pin: pin,
+            salt
         });
         await this.updateCacheOfTemplate(relationshipTemplate);
 
@@ -324,12 +333,5 @@ export class RelationshipTemplateController extends TransportController {
         for (const template of otherTemplatesOfPeer) {
             await this.templates.delete(template);
         }
-    }
-
-    private async hashPassword(password: string): Promise<string> {
-        await Promise.resolve();
-        return password;
-        // code commented out because it's failing
-        // return (await CoreCrypto.generatePassword(password)).toBase64();
     }
 }

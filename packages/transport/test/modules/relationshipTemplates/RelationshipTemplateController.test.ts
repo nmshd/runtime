@@ -156,12 +156,16 @@ describe("RelationshipTemplateController", function () {
         });
         expect(ownTemplate).toBeDefined();
         expect(ownTemplate.password).toBe("password");
+        expect(ownTemplate.salt).toBeDefined();
+        expect(ownTemplate.salt?.length).toBe(16);
         const reference = ownTemplate.toRelationshipTemplateReference();
         expect(reference.passwordType).toBe("pw");
+        expect(reference.salt).toStrictEqual(ownTemplate.salt);
 
         const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference.truncate(), "password");
         expect(peerTemplate).toBeDefined();
         expect(peerTemplate.password).toBe("password");
+        expect(peerTemplate.salt).toStrictEqual(ownTemplate.salt);
     });
 
     test("should create and load a PIN-protected template", async function () {
@@ -172,12 +176,16 @@ describe("RelationshipTemplateController", function () {
         });
         expect(ownTemplate).toBeDefined();
         expect(ownTemplate.pin).toBe("1234");
+        expect(ownTemplate.salt).toBeDefined();
+        expect(ownTemplate.salt?.length).toBe(16);
         const reference = ownTemplate.toRelationshipTemplateReference();
         expect(reference.passwordType).toBe("pin4");
+        expect(reference.salt).toStrictEqual(ownTemplate.salt);
 
         const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference.truncate(), undefined, "1234");
         expect(peerTemplate).toBeDefined();
         expect(peerTemplate.pin).toBe("1234");
+        expect(peerTemplate.salt).toStrictEqual(ownTemplate.salt);
     });
 
     test("should throw an error if created with password and PIN", async function () {
@@ -201,7 +209,7 @@ describe("RelationshipTemplateController", function () {
 
         await expect(
             recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate(), "wrongPassword")
-        ).rejects.toThrow("error.platform.inputCannotBeParsed");
+        ).rejects.toThrow("error.platform.recordNotFound");
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
             "error.transport.noPasswordProvided"
         );
@@ -218,7 +226,7 @@ describe("RelationshipTemplateController", function () {
 
         await expect(
             recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate(), undefined, "12345")
-        ).rejects.toThrow("error.platform.inputCannotBeParsed");
+        ).rejects.toThrow("error.platform.recordNotFound");
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
             "error.transport.noPINProvided"
         );

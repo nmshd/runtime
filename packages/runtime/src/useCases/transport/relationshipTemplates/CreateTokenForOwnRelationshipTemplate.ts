@@ -48,7 +48,8 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             templateId: template.id,
             secretKey: template.secretKey,
             forIdentity: template.cache?.forIdentity,
-            passwordType: template.passwordType
+            passwordType: template.passwordType,
+            salt: template.salt
         });
 
         const ephemeral = request.ephemeral ?? true;

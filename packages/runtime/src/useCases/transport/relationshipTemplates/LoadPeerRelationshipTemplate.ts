@@ -109,7 +109,14 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         if (content.passwordType?.startsWith("pw") && !password) return Result.fail(RuntimeErrors.general.noPasswordProvided());
         if (content.passwordType?.startsWith("pin") && !pin) return Result.fail(RuntimeErrors.general.noPINProvided());
 
-        const template = await this.templateController.loadPeerRelationshipTemplate(content.templateId, content.secretKey, content.forIdentity?.toString(), password, pin);
+        const template = await this.templateController.loadPeerRelationshipTemplate(
+            content.templateId,
+            content.secretKey,
+            content.forIdentity?.toString(),
+            password,
+            pin,
+            content.salt
+        );
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
 }
