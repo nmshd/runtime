@@ -4,7 +4,7 @@
     "description": "The enmeshed Monorepo.",
     "homepage": "https://enmeshed.eu",
     "license": "MIT",
-    "author": "j&s-soft GmbH",
+    "author": "j&s-soft AG",
     "workspaces": [
         "packages/core-types",
         "packages/transport",
