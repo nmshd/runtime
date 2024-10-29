@@ -44,6 +44,8 @@ describe("IdentityMetadata", () => {
         expect(result).toBeSuccessful();
 
         const identityMetadata = result.value;
+        expect(identityMetadata.reference.toString()).toStrictEqual(data.reference);
+        expect(identityMetadata.key).toStrictEqual(data.key);
         expect(identityMetadata.value).toStrictEqual(data.value);
     });
 
