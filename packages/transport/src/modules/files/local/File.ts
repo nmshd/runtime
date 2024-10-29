@@ -49,7 +49,7 @@ export class File extends CoreSynchronizable implements IFile {
     }
 
     public toFileReference(): FileReference {
-        return FileReference.from({ id: this.id, key: this.secretKey });
+        return FileReference.from({ id: this.id, key: this.secretKey, version: 1 });
     }
 
     public truncate(): string {

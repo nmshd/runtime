@@ -133,9 +133,6 @@ export class Reference extends Serializable implements IReference {
     }
 
     public static from(value: IReference | string): Reference {
-        if (!(typeof value === "string") && !value.version) {
-            value.version = 1;
-        }
         const reference = typeof value === "string" ? this.fromTruncated(value) : this.fromAny(value);
         if (!reference.passwordType !== !reference.salt) {
             throw TransportCoreErrors.general.invalidTruncatedReference("It's not possible to have only one of passwordType and salt set.");

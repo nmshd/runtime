@@ -285,6 +285,7 @@ describe("RelationshipTemplateController", function () {
     test("should send and receive a RelationshipTemplate using a truncated RelationshipTemplateReference", async function () {
         tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
         const sentRelationshipTemplate = await TestUtil.sendRelationshipTemplate(sender);
+        expect(sentRelationshipTemplate.toRelationshipTemplateReference().version).toBe(1);
 
         const receivedRelationshipTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(sentRelationshipTemplate.truncate());
 

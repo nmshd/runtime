@@ -70,7 +70,8 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
             key: this.secretKey,
             forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
             passwordType: this.passwordType,
-            salt: this.salt
+            salt: this.salt,
+            version: 1
         });
     }
 

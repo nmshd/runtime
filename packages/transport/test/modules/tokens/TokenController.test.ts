@@ -59,8 +59,9 @@ describe("TokenController", function () {
             expiresAt,
             ephemeral: false
         });
-        const reference = sentToken.toTokenReference().truncate();
-        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+        const reference = sentToken.toTokenReference();
+        expect(reference.version).toBe(1);
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference.truncate(), false);
         tempId1 = sentToken.id;
 
         testTokens(sentToken, receivedToken, tempDate);

@@ -50,7 +50,7 @@ export class Token extends CoreSynchronizable implements IToken {
     }
 
     public toTokenReference(): TokenReference {
-        return TokenReference.from({ id: this.id, key: this.secretKey, forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4) });
+        return TokenReference.from({ id: this.id, key: this.secretKey, forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4), version: 1 });
     }
 
     public truncate(): string {
