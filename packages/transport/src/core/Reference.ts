@@ -82,7 +82,7 @@ export class Reference extends Serializable implements IReference {
 
     private static parseVersion(value: string): number | undefined {
         try {
-            if (value === "") return undefined;
+            if (value === "") return;
 
             return parseInt(value);
         } catch (_) {
@@ -91,13 +91,15 @@ export class Reference extends Serializable implements IReference {
     }
 
     private static parseSalt(value: string): CoreBuffer | undefined {
+        if (value === "") return;
+
         const regexp = new RegExp("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
         if (!regexp.test(value)) {
             throw TransportCoreErrors.general.invalidTruncatedReference("The salt needs to be a Base64 value.");
         }
 
         const buffer = CoreBuffer.fromBase64(value);
-        if (!(buffer.buffer.length === 16)) {
+        if (buffer.buffer.length !== 16) {
             throw TransportCoreErrors.general.invalidTruncatedReference("The salt needs to be 16 bytes long.");
         }
         return buffer;
@@ -136,7 +138,7 @@ export class Reference extends Serializable implements IReference {
         }
         const reference = typeof value === "string" ? this.fromTruncated(value) : this.fromAny(value);
         if (!reference.passwordType !== !reference.salt) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("It's not possible to have only one of password and salt.");
+            throw TransportCoreErrors.general.invalidTruncatedReference("It's not possible to have only one of passwordType and salt set.");
         }
         return reference;
     }
