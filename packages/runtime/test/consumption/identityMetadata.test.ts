@@ -44,6 +44,8 @@ describe("IdentityMetadata", () => {
         expect(result).toBeSuccessful();
 
         const identityMetadata = result.value;
+        expect(identityMetadata.reference.toString()).toStrictEqual(data.reference);
+        expect(identityMetadata.key).toStrictEqual(data.key);
         expect(identityMetadata.value).toStrictEqual(data.value);
     });
 
@@ -66,7 +68,7 @@ describe("IdentityMetadata", () => {
         expect(result).toBeSuccessful();
 
         const getResult = await consumptionServices.identityMetadata.getIdentityMetadata({ reference: reference });
-        expect(getResult).toBeAnError("", "");
+        expect(getResult).toBeAnError("IdentityMetadata not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 });
 
