@@ -584,3 +584,61 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         return sRelationship;
     }
 });
+
+describe("Handle Multiple RelationshipTemplate loadings", () => {
+    const runtimeServiceProvider = new RuntimeServiceProvider();
+    let sRuntimeServices: TestRuntimeServices;
+    let rRuntimeServices: TestRuntimeServices;
+
+    beforeAll(async () => {
+        const runtimeServices = await runtimeServiceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true });
+
+        sRuntimeServices = runtimeServices[0];
+        rRuntimeServices = runtimeServices[1];
+    }, 30000);
+
+    beforeEach(() => {
+        sRuntimeServices.eventBus.reset();
+        rRuntimeServices.eventBus.reset();
+    });
+
+    afterEach(() => {
+        sRuntimeServices.eventBus.reset();
+        rRuntimeServices.eventBus.reset();
+    });
+
+    afterAll(async () => await runtimeServiceProvider.stop());
+
+    test("no multiple open Requests that lead to a Relationship can exist for the same Identity", async () => {
+        const relationshipTemplateContent = RelationshipTemplateContent.from({
+            onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] }
+        }).toJSON();
+
+        const firstTemplate = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, relationshipTemplateContent);
+        await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+        await expect(rRuntimeServices.eventBus).toHavePublished(
+            RelationshipTemplateProcessedEvent,
+            (e) => e.data.result === RelationshipTemplateProcessedResult.ManualRequestDecisionRequired
+        );
+
+        const requestForTemplate = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": firstTemplate.id } })).value[0];
+
+        rRuntimeServices.eventBus.reset();
+
+        const secondTemplate = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, relationshipTemplateContent);
+        await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+        await expect(rRuntimeServices.eventBus).not.toHavePublished(
+            RelationshipTemplateProcessedEvent,
+            (e) => e.data.result === RelationshipTemplateProcessedResult.ManualRequestDecisionRequired
+        );
+
+        await expect(rRuntimeServices.eventBus).toHavePublished(
+            RelationshipTemplateProcessedEvent,
+            (e) =>
+                e.data.result === RelationshipTemplateProcessedResult.NonCompletedRequestExists &&
+                e.data.template.id === secondTemplate.id &&
+                e.data.requestId === requestForTemplate.id
+        );
+    });
+});

@@ -14,6 +14,7 @@ export interface GetRelationshipTemplatesQuery {
     createdBy?: string | string[];
     createdByDevice?: string | string[];
     maxNumberOfAllocations?: string | string[];
+    forIdentity?: string | string[];
 }
 
 export interface GetRelationshipTemplatesRequest {
@@ -35,7 +36,8 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             [nameof<RelationshipTemplateDTO>((r) => r.expiresAt)]: true,
             [nameof<RelationshipTemplateDTO>((r) => r.createdBy)]: true,
             [nameof<RelationshipTemplateDTO>((r) => r.createdByDevice)]: true,
-            [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: true
+            [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: true,
+            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: true
         },
         alias: {
             [nameof<RelationshipTemplateDTO>((r) => r.isOwn)]: nameof<RelationshipTemplate>((r) => r.isOwn),
@@ -47,7 +49,8 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             )}`,
             [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>(
                 (t) => t.maxNumberOfAllocations
-            )}`
+            )}`,
+            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.forIdentity)}`
         }
     });
 
