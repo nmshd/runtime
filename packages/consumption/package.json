@@ -8,7 +8,7 @@
         "directory": "packages/consumption"
     },
     "license": "MIT",
-    "author": "j&s-soft GmbH",
+    "author": "j&s-soft AG",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -73,7 +73,7 @@
         "@js-soft/docdb-access-loki": "1.1.0",
         "@js-soft/docdb-access-mongo": "1.1.9",
         "@js-soft/node-logger": "1.2.0",
-        "@nmshd/crypto": "2.0.7",
+        "@nmshd/crypto": "2.1.0",
         "@types/lodash": "^4.17.12"
     },
     "publishConfig": {
