@@ -1,4 +1,7 @@
-import { AccountController, BackboneGetTag, ControllerName, TagClient, TransportController } from "../..";
+import { ControllerName, TransportController } from "../../core/TransportController";
+import { AccountController } from "../accounts/AccountController";
+import { BackboneGetTag } from "./backbone/BackboneGetTag";
+import { TagClient } from "./backbone/TagClient";
 
 export class TagController extends TransportController {
     private client: TagClient;
