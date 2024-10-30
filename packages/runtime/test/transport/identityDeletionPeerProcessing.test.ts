@@ -89,7 +89,7 @@ describe("IdentityDeletionProcess", () => {
 
         const result = await sendMessageToMultipleRecipients(services2.transport, [services1.address, services3.address]);
         expect(result).toBeAnError(
-            `The recipient with the address '${services1.address.toString()}' has an active IdentityDeletionProcess, so you cannot send them a Message.`,
+            `The recipient with the address '${services1.address.toString()}' is in deletion, so you cannot send them a Message.`,
             "error.transport.messages.peerIsInDeletion"
         );
     });
@@ -107,7 +107,7 @@ describe("IdentityDeletionProcess", () => {
 
         const result = await sendMessageToMultipleRecipients(services2.transport, [services3.address, services1.address]);
         expect(result).toBeAnError(
-            `The recipients with the following addresses '${services3.address.toString()},${services1.address.toString()}' have an active IdentityDeletionProcess, so you cannot send them a Message.`,
+            `The recipients with the following addresses '${services3.address.toString()},${services1.address.toString()}' are in deletion, so you cannot send them a Message.`,
             "error.transport.messages.peerIsInDeletion"
         );
     });
@@ -131,7 +131,7 @@ describe("IdentityDeletionProcess", () => {
         };
         const result = await services2.consumption.outgoingRequests.create(requestContent);
         expect(result).toBeAnError(
-            `You cannot create a Request to '${services1.address.toString()}' since the peer has an active IdentityDeletionProcess.`,
+            `You cannot create a Request to '${services1.address.toString()}' since the peer is in deletion.`,
             "error.consumption.requests.peerIsInDeletion"
         );
     });
@@ -158,7 +158,7 @@ describe("IdentityDeletionProcess", () => {
         const messageResult = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: result.value.content });
 
         expect(messageResult).toBeAnError(
-            `The recipient with the address '${services1.address.toString()}' has an active IdentityDeletionProcess, so you cannot send them a Message.`,
+            `The recipient with the address '${services1.address.toString()}' is in deletion, so you cannot send them a Message.`,
             "error.transport.messages.peerIsInDeletion"
         );
     });
@@ -190,9 +190,7 @@ describe("IdentityDeletionProcess", () => {
         const canAcceptResultAfterPeerInitiatedDeletion = (await services2.consumption.incomingRequests.canAccept({ requestId: requestId, items: [{ accept: true }] })).value;
         expect(canAcceptResultAfterPeerInitiatedDeletion.isSuccess).toBe(false);
         expect(canAcceptResultAfterPeerInitiatedDeletion.code).toBe("error.consumption.requests.peerIsInDeletion");
-        expect(canAcceptResultAfterPeerInitiatedDeletion.message).toContain(
-            `You cannot decide a Request from '${services1.address.toString()}' since the peer has an active IdentityDeletionProcess.`
-        );
+        expect(canAcceptResultAfterPeerInitiatedDeletion.message).toContain(`You cannot decide a Request from '${services1.address.toString()}' since the peer is in deletion.`);
     });
 
     test("should be able to send a Notification to an Identity which is in status 'ToBeDeleted'", async () => {
@@ -209,7 +207,7 @@ describe("IdentityDeletionProcess", () => {
         expect(result).toBeSuccessful();
     });
 
-    test("should be able to receive a Notification after the IdentityDeletionProcess has been cancelled.", async () => {
+    test("should be able to receive a Notification after the IdentityDeletionProcess has been cancelled", async () => {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
         await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
         await services2.eventBus.waitForRunningEventHandlers();

@@ -157,14 +157,11 @@ class Messages {
         if (address.length > 1) {
             return new CoreError(
                 "error.transport.messages.peerIsInDeletion",
-                `The recipients with the following addresses '${address}' have an active IdentityDeletionProcess, so you cannot send them a Message.`
+                `The recipients with the following addresses '${address}' are in deletion, so you cannot send them a Message.`
             );
         }
 
-        return new CoreError(
-            "error.transport.messages.peerIsInDeletion",
-            `The recipient with the address '${address[0]}' has an active IdentityDeletionProcess, so you cannot send them a Message.`
-        );
+        return new CoreError("error.transport.messages.peerIsInDeletion", `The recipient with the address '${address[0]}' is in deletion, so you cannot send them a Message.`);
     }
 }
 

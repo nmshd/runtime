@@ -257,7 +257,7 @@ describe("OutgoingRequestsController", function () {
             });
             expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsInDeletion");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer has an active IdentityDeletionProcess."
+                "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
             );
         });
     });

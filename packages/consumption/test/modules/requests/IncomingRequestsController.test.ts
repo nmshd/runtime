@@ -444,7 +444,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanAccept();
             expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsInDeletion");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer has an active IdentityDeletionProcess."
+                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
             );
         });
     });
@@ -658,7 +658,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanReject();
             expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsInDeletion");
             expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer has an active IdentityDeletionProcess."
+                "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
             );
         });
     });
