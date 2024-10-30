@@ -239,7 +239,7 @@ describe("IdentityAttribute", function () {
     test("should allow the creation of nested attributes", function () {
         const affiliation = {
             "@type": "Affiliation",
-            organization: "j&s-soft GmbH",
+            organization: "j&s-soft AG",
             role: "Developer",
             unit: "enmeshed"
         };

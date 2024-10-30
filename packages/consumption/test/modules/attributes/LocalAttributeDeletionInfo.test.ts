@@ -16,7 +16,7 @@ describe("LocalAttributeDeletionInfo", function () {
     let repositoryAttribute: LocalAttribute;
     let ownSharedIdentityAttribute: LocalAttribute;
     let peerSharedIdentityAttribute: LocalAttribute;
-    let thirdPartyOwnedRelationshipAttribute: LocalAttribute;
+    let thirdPartyRelationshipAttribute: LocalAttribute;
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
@@ -59,7 +59,7 @@ describe("LocalAttributeDeletionInfo", function () {
             requestReference: CoreId.from("request")
         });
 
-        thirdPartyOwnedRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+        thirdPartyRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
             content: RelationshipAttribute.from({
                 value: ProprietaryEMailAddress.from({
                     value: "thirdParty@email.com",
@@ -70,7 +70,8 @@ describe("LocalAttributeDeletionInfo", function () {
                 owner: CoreAddress.from("thirdParty")
             }),
             peer: CoreAddress.from("peer"),
-            requestReference: CoreId.from("request")
+            requestReference: CoreId.from("request"),
+            thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
         });
     });
 
@@ -194,55 +195,55 @@ describe("LocalAttributeDeletionInfo", function () {
         });
     });
 
-    describe("DeletionInfo of third party owned RelationshipAttributes", function () {
-        test("should set the deletionInfo of a third party owned RelationshipAttribute to DeletedByPeer", async function () {
+    describe("DeletionInfo of ThirdPartyRelationshipAttributes", function () {
+        test("should set the deletionInfo of a ThirdPartyRelationshipAttribute to DeletedByPeer", async function () {
             const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc() });
 
-            thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            await consumptionController.attributes.updateAttributeUnsafe(thirdPartyOwnedRelationshipAttribute);
+            thirdPartyRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            await consumptionController.attributes.updateAttributeUnsafe(thirdPartyRelationshipAttribute);
 
-            const updatedThirdPartyOwnedRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(thirdPartyOwnedRelationshipAttribute.id);
-            expect(updatedThirdPartyOwnedRelationshipAttribute!.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
+            const updatedThirdPartyRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(thirdPartyRelationshipAttribute.id);
+            expect(updatedThirdPartyRelationshipAttribute!.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
         });
 
-        test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to DeletedByOwner", function () {
+        test("should throw trying to set the deletionInfo of a ThirdPartyRelationshipAttribute to DeletedByOwner", function () {
             const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.DeletedByOwner, deletionDate: CoreDate.utc() });
 
             expect(() => {
-                thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+                thirdPartyRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("The only valid deletionStatus for ThirdPartyRelationshipAttributes is 'DeletedByPeer'.");
         });
 
-        test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to DeletionRequestSent", function () {
+        test("should throw trying to set the deletionInfo of a ThirdPartyRelationshipAttribute to DeletionRequestSent", function () {
             const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.DeletionRequestSent, deletionDate: CoreDate.utc() });
 
             expect(() => {
-                thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+                thirdPartyRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("The only valid deletionStatus for ThirdPartyRelationshipAttributes is 'DeletedByPeer'.");
         });
 
-        test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to DeletionRequestRejected", function () {
+        test("should throw trying to set the deletionInfo of a ThirdPartyRelationshipAttribute to DeletionRequestRejected", function () {
             const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.DeletionRequestRejected, deletionDate: CoreDate.utc() });
 
             expect(() => {
-                thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+                thirdPartyRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("The only valid deletionStatus for ThirdPartyRelationshipAttributes is 'DeletedByPeer'.");
         });
 
-        test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to ToBeDeletedByPeer", function () {
+        test("should throw trying to set the deletionInfo of a ThirdPartyRelationshipAttribute to ToBeDeletedByPeer", function () {
             const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc() });
 
             expect(() => {
-                thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+                thirdPartyRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("The only valid deletionStatus for ThirdPartyRelationshipAttributes is 'DeletedByPeer'.");
         });
 
-        test("should throw trying to set the deletionInfo of a third party owned RelationshipAttribute to ToBeDeleted", function () {
+        test("should throw trying to set the deletionInfo of a ThirdPartyRelationshipAttribute to ToBeDeleted", function () {
             const deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeleted, deletionDate: CoreDate.utc() });
 
             expect(() => {
-                thirdPartyOwnedRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
-            }).toThrow("The only valid deletionStatus for third party owned RelationshipAttributes is 'DeletedByPeer'.");
+                thirdPartyRelationshipAttribute.setDeletionInfo(deletionInfo, testAccount.identity.address);
+            }).toThrow("The only valid deletionStatus for ThirdPartyRelationshipAttributes is 'DeletedByPeer'.");
         });
     });
 
