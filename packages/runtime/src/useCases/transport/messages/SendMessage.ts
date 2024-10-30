@@ -77,18 +77,22 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         // Notifications can be sent to peers of any kind. The Transport library will validate below if it's really possible to send the notification.
         if (transformedContent instanceof Notification) return;
 
-        const recipientValidationError = await this.validateRecipients(recipients);
+        const recipientValidationError = await this.validateRecipients(transformedContent, recipients);
         if (recipientValidationError) return recipientValidationError;
 
         if (transformedContent instanceof Request) {
-            const requestValidationError = await this.validateRequest(transformedContent, recipients);
+            const requestValidationError = await this.validateRequest(transformedContent, CoreAddress.from(recipients[0]));
             if (requestValidationError) return requestValidationError;
         }
 
         return;
     }
 
-    private async validateRecipients(recipients: string[]): Promise<CoreError | undefined> {
+    private async validateRecipients(content: Serializable, recipients: string[]): Promise<CoreError | ApplicationError | undefined> {
+        if (content instanceof Request && recipients.length !== 1) {
+            return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
+        }
+
         const deletedPeers: string[] = [];
         const peersInDeletion: string[] = [];
         const peersWithNoActiveRelationship: string[] = [];
@@ -117,19 +121,16 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         return undefined;
     }
 
-    private async validateRequest(transformedContent: Request, recipients: string[]): Promise<ApplicationError | undefined> {
-        if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
+    private async validateRequest(request: Request, recipient: CoreAddress): Promise<ApplicationError | undefined> {
+        if (!request.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
-        const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
+        const localRequest = await this.outgoingRequestsController.getOutgoingRequest(request.id);
         if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
 
-        if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
+        if (!_.isEqual(request.toJSON(), localRequest.content.toJSON())) {
             return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
         }
 
-        if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
-
-        const recipient = CoreAddress.from(recipients[0]);
         if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
 
         return;
