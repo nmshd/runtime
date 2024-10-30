@@ -237,10 +237,10 @@ describe("OutgoingRequestsController", function () {
                     ]
                 }
             });
-            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.wrongRelationshipStatus");
-            expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot create a request to 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
-            );
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot create a request to 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
+            });
         });
 
         test("returns a validation result that contains an error for requests to a peer which has an active IdentityDeletionProcess", async function () {
@@ -255,10 +255,11 @@ describe("OutgoingRequestsController", function () {
                     ]
                 }
             });
-            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.peerIsInDeletion");
-            expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
-            );
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.peerIsInDeletion",
+                message: "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
+            });
         });
     });
 
@@ -854,10 +855,11 @@ describe("OutgoingRequestsController", function () {
                     ]
                 }
             });
-            expect((validationResult as ErrorValidationResult).error.code).toBe("error.consumption.requests.wrongRelationshipStatus");
-            expect((validationResult as ErrorValidationResult).error.message).toContain(
-                "You cannot create a request to 'did:e:a-domain:dids:anidentity' since the relationship is in status 'Terminated'"
-            );
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot create a request to 'did:e:a-domain:dids:anidentity' since the relationship is in status 'Terminated'"
+            });
         });
     });
 });
