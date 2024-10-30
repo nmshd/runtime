@@ -240,7 +240,7 @@ describe("RelationshipTemplateReference", function () {
     test("should not load a reference with a non-base64 salt", async function () {
         const reference = RelationshipTemplateReference.from({
             key: await CryptoEncryption.generateKey(),
-            id: await BackboneIds.file.generateUnsafe()
+            id: await BackboneIds.relationshipTemplate.generateUnsafe()
         });
 
         const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}|||pw|wrong-salt`).toBase64URL();
@@ -251,7 +251,7 @@ describe("RelationshipTemplateReference", function () {
         await expect(async () => {
             RelationshipTemplateReference.from({
                 key: await CryptoEncryption.generateKey(),
-                id: await BackboneIds.file.generateUnsafe(),
+                id: await BackboneIds.relationshipTemplate.generateUnsafe(),
                 passwordType: "pw",
                 salt: await CoreCrypto.random(8)
             });
@@ -262,7 +262,7 @@ describe("RelationshipTemplateReference", function () {
         await expect(async () => {
             RelationshipTemplateReference.from({
                 key: await CryptoEncryption.generateKey(),
-                id: await BackboneIds.file.generateUnsafe(),
+                id: await BackboneIds.relationshipTemplate.generateUnsafe(),
                 version: 1.5
             });
         }).rejects.toThrow("must be an integer");

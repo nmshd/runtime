@@ -240,7 +240,7 @@ describe("TokenReference", function () {
     test("should not load a reference with a non-base64 salt", async function () {
         const reference = TokenReference.from({
             key: await CryptoEncryption.generateKey(),
-            id: await BackboneIds.file.generateUnsafe()
+            id: await BackboneIds.token.generateUnsafe()
         });
 
         const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}|||pw|wrong-salt`).toBase64URL();
@@ -251,7 +251,7 @@ describe("TokenReference", function () {
         await expect(async () => {
             TokenReference.from({
                 key: await CryptoEncryption.generateKey(),
-                id: await BackboneIds.file.generateUnsafe(),
+                id: await BackboneIds.token.generateUnsafe(),
                 passwordType: "pw",
                 salt: await CoreCrypto.random(8)
             });
@@ -262,7 +262,7 @@ describe("TokenReference", function () {
         await expect(async () => {
             TokenReference.from({
                 key: await CryptoEncryption.generateKey(),
-                id: await BackboneIds.file.generateUnsafe(),
+                id: await BackboneIds.token.generateUnsafe(),
                 version: 1.5
             });
         }).rejects.toThrow("must be an integer");
