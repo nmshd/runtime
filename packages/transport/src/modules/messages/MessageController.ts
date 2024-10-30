@@ -1,5 +1,5 @@
 import { ISerializable } from "@js-soft/ts-serval";
-import { log, Result } from "@js-soft/ts-utils";
+import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -292,7 +292,7 @@ export class MessageController extends TransportController {
         if (!parsedParams.attachments) parsedParams.attachments = [];
 
         const validationError = await this.validateRecipients(parsedParams.recipients);
-        if (validationError) throw Result.fail(validationError);
+        if (validationError) throw validationError;
 
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
