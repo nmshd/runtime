@@ -36,11 +36,11 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public passwordType?: string;
 
-    @validate({ nullable: true, min: 1, customValidator: (v) => (Number.isInteger(v) ? undefined : "must be an integer") })
+    @validate({ nullable: true, min: 1, customValidator: (v: number) => (Number.isInteger(v) ? undefined : "must be an integer") })
     @serialize()
     public version?: number;
 
-    @validate({ nullable: true })
+    @validate({ nullable: true, customValidator: (v: ICoreBuffer) => (v.buffer.byteLength === 16 ? undefined : "must be 16 bytes long") })
     @serialize()
     public salt?: CoreBuffer;
 
@@ -91,18 +91,13 @@ export class Reference extends Serializable implements IReference {
     }
 
     private static parseSalt(value: string): CoreBuffer | undefined {
-        if (value === "") return;
+        try {
+            if (value === "") return;
 
-        const regexp = new RegExp("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
-        if (!regexp.test(value)) {
+            return CoreBuffer.fromBase64(value);
+        } catch (_) {
             throw TransportCoreErrors.general.invalidTruncatedReference("The salt needs to be a Base64 value.");
         }
-
-        const buffer = CoreBuffer.fromBase64(value);
-        if (buffer.buffer.byteLength !== 16) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("The salt needs to be 16 bytes long.");
-        }
-        return buffer;
     }
 
     private static parseSecretKey(alg: string, secretKey: string): CryptoSecretKey {

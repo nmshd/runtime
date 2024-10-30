@@ -237,6 +237,37 @@ describe("RelationshipTemplateReference", function () {
         }).rejects.toThrow("It's not possible to have only one of passwordType and salt set.");
     });
 
+    test("should not load a reference with a non-base64 salt", async function () {
+        const reference = RelationshipTemplateReference.from({
+            key: await CryptoEncryption.generateKey(),
+            id: await BackboneIds.file.generateUnsafe()
+        });
+
+        const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}|||pw|wrong-salt`).toBase64URL();
+        expect(() => RelationshipTemplateReference.fromTruncated(truncated)).toThrow("The salt needs to be a Base64 value.");
+    });
+
+    test("should not create a reference with a salt of wrong length", async function () {
+        await expect(async () => {
+            RelationshipTemplateReference.from({
+                key: await CryptoEncryption.generateKey(),
+                id: await BackboneIds.file.generateUnsafe(),
+                passwordType: "pw",
+                salt: await CoreCrypto.random(8)
+            });
+        }).rejects.toThrow("must be 16 bytes long");
+    });
+
+    test("should not create a reference with an invalid version", async function () {
+        await expect(async () => {
+            RelationshipTemplateReference.from({
+                key: await CryptoEncryption.generateKey(),
+                id: await BackboneIds.file.generateUnsafe(),
+                version: 1.5
+            });
+        }).rejects.toThrow("must be an integer");
+    });
+
     test("should not create a reference with too long personalization", async function () {
         await expect(async () => {
             RelationshipTemplateReference.from({

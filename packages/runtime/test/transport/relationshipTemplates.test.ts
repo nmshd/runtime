@@ -284,14 +284,14 @@ describe("RelationshipTemplate Tests", () => {
         });
 
         test("send and receive a password-protected template via a token", async () => {
-            const template = (
+            const templateId = (
                 await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                     content: emptyRelationshipTemplateContent,
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                     password: "password"
                 })
-            ).value;
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId: template.id });
+            ).value.id;
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -302,15 +302,15 @@ describe("RelationshipTemplate Tests", () => {
         });
 
         test("send and receive a PIN-protected template via a token", async () => {
-            const template = (
+            const templateId = (
                 await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                     content: emptyRelationshipTemplateContent,
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                     pin: "1234"
                 })
-            ).value;
+            ).value.id;
 
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId: template.id });
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,

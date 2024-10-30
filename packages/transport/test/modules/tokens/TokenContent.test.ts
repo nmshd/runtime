@@ -159,6 +159,70 @@ describe("TokenContent", function () {
             expect(deserialized.passwordType).toBe("pw");
             expect(deserialized.salt).toStrictEqual(token.salt);
         });
+
+        test("should not create a tokenContentt with too large passwordType", async function () {
+            await expect(async () => {
+                TokenContentRelationshipTemplate.from({
+                    secretKey: await CryptoEncryption.generateKey(),
+                    templateId: await CoreIdHelper.notPrefixed.generate(),
+                    passwordType: "pin20",
+                    salt: await CoreCrypto.random(16)
+                });
+            }).rejects.toThrow("TokenContentRelationshipTemplate.passwordType");
+        });
+
+        test("should not create a reference with non-integer passwordType", async function () {
+            await expect(async () => {
+                TokenContentRelationshipTemplate.from({
+                    secretKey: await CryptoEncryption.generateKey(),
+                    templateId: await CoreIdHelper.notPrefixed.generate(),
+                    passwordType: "pin2.4",
+                    salt: await CoreCrypto.random(16)
+                });
+            }).rejects.toThrow("TokenContentRelationshipTemplate.passwordType");
+        });
+
+        test("should not create a reference starting with neither pw nor pin", async function () {
+            await expect(async () => {
+                TokenContentRelationshipTemplate.from({
+                    secretKey: await CryptoEncryption.generateKey(),
+                    templateId: await CoreIdHelper.notPrefixed.generate(),
+                    passwordType: "pc",
+                    salt: await CoreCrypto.random(16)
+                });
+            }).rejects.toThrow("TokenContentRelationshipTemplate.passwordType");
+        });
+
+        test("should not create a reference with salt and no passwordType", async function () {
+            await expect(async () => {
+                TokenContentRelationshipTemplate.from({
+                    secretKey: await CryptoEncryption.generateKey(),
+                    templateId: await CoreIdHelper.notPrefixed.generate(),
+                    salt: await CoreCrypto.random(16)
+                });
+            }).rejects.toThrow("It's not possible to have only one of passwordType and salt set.");
+        });
+
+        test("should not create a reference with passwordType and no salt", async function () {
+            await expect(async () => {
+                TokenContentRelationshipTemplate.from({
+                    secretKey: await CryptoEncryption.generateKey(),
+                    templateId: await CoreIdHelper.notPrefixed.generate(),
+                    passwordType: "pw"
+                });
+            }).rejects.toThrow("It's not possible to have only one of passwordType and salt set.");
+        });
+
+        test("should not create a reference with a salt of wrong length", async function () {
+            await expect(async () => {
+                TokenContentRelationshipTemplate.from({
+                    secretKey: await CryptoEncryption.generateKey(),
+                    templateId: await CoreIdHelper.notPrefixed.generate(),
+                    passwordType: "pw",
+                    salt: await CoreCrypto.random(8)
+                });
+            }).rejects.toThrow("must be 16 bytes long");
+        });
     });
 
     describe("TokenContentDeviceSharedSecret", function () {
