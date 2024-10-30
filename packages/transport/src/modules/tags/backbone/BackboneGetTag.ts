@@ -1,9 +1,9 @@
-export interface BackboneGetTag {
+export interface BackboneTagList {
     supportedLanguages: string[];
-    tagsForAttributeValueTypes: Record<string, Record<string, Tag>>;
+    tagsForAttributeValueTypes: Record<string, Record<string, BackboneTag>>;
 }
 
-interface Tag {
+interface BackboneTag {
     displayNames: Record<string, string>;
-    children?: Record<string, Tag>;
+    children?: Record<string, BackboneTag>;
 }
