@@ -1,8 +1,8 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { Result } from "@js-soft/ts-utils";
+import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreError, CoreId } from "@nmshd/core-types";
 import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, TransportCoreErrors } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
@@ -74,8 +74,21 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             );
         }
 
+        // Notifications can be sent to peers of any kind. The Transport library will validate below if it's really possible to send the notification.
         if (transformedContent instanceof Notification) return;
 
+        const recipientValidationError = await this.validateRecipients(recipients);
+        if (recipientValidationError) return recipientValidationError;
+
+        if (transformedContent instanceof Request) {
+            const requestValidationError = await this.validateRequest(transformedContent, recipients);
+            if (requestValidationError) return requestValidationError;
+        }
+
+        return;
+    }
+
+    private async validateRecipients(recipients: string[]): Promise<CoreError | undefined> {
         const deletedPeers: string[] = [];
         const peersInDeletion: string[] = [];
         const peersWithNoActiveRelationship: string[] = [];
@@ -101,22 +114,23 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
         if (peersWithNoActiveRelationship.length > 0) return TransportCoreErrors.messages.hasNoActiveRelationship(peersWithNoActiveRelationship);
 
-        if (transformedContent instanceof Request) {
-            if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
+        return undefined;
+    }
 
-            const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
-            if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
+    private async validateRequest(transformedContent: Request, recipients: string[]): Promise<ApplicationError | undefined> {
+        if (!transformedContent.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
-            if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
-                return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
-            }
+        const localRequest = await this.outgoingRequestsController.getOutgoingRequest(transformedContent.id);
+        if (!localRequest) return RuntimeErrors.general.recordNotFound(Request);
 
-            if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
-
-            const recipient = CoreAddress.from(recipients[0]);
-            if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
-            return;
+        if (!_.isEqual(transformedContent.toJSON(), localRequest.content.toJSON())) {
+            return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
         }
+
+        if (recipients.length > 1) return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
+
+        const recipient = CoreAddress.from(recipients[0]);
+        if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
 
         return;
     }
