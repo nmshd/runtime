@@ -385,6 +385,19 @@ export class TestUtil {
         return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
     }
 
+    public static async reactivateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ reactivatedRelationshipFromSelf: Relationship; reactivatedRelationshipPeer: Relationship }> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
+        await from.relationships.requestReactivation(relationshipId);
+        await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
+        const reactivatedRelationshipFromSelf = await to.relationships.acceptReactivation(relationshipId);
+        const reactivatedRelationshipPeer = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { reactivatedRelationshipFromSelf, reactivatedRelationshipPeer };
+    }
+
     public static async decomposeRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
         const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
         await from.relationships.decompose(relationship.id);

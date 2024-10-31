@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Message, Relationship, Transport } from "../../../src";
+import { AccountController, Message, PeerDeletionStatus, Relationship, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("MessageController", function () {
@@ -220,19 +220,55 @@ describe("MessageController", function () {
 
     describe("Relationship Termination", function () {
         let messageId: CoreId;
+        let messageAfterRelationshipTerminationId: CoreId;
 
         beforeAll(async function () {
             messageId = (await TestUtil.sendMessage(sender, recipient)).id;
             await TestUtil.terminateRelationship(sender, recipient);
         });
 
-        test("should be able to send a message on a terminated relationship", async function () {
-            await expect(TestUtil.sendMessage(sender, recipient)).resolves.not.toThrow();
-        });
-
         test("should still decrypt the message", async function () {
             await expect(sender.messages.fetchCaches([messageId])).resolves.not.toThrow();
             await expect(recipient.messages.fetchCaches([messageId])).resolves.not.toThrow();
+        });
+
+        test("should be able to send a message on a terminated relationship", async function () {
+            messageAfterRelationshipTerminationId = (await TestUtil.sendMessage(sender, recipient)).id;
+            expect(messageAfterRelationshipTerminationId).toBeDefined();
+        });
+
+        test("should be able to receive a message when the relationship is reactivated", async function () {
+            await TestUtil.reactivateRelationship(sender, recipient);
+            //    await TestUtil.acceptRelationshipReactivation(recipient, sender);
+
+            const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
+            const receivedMessage = messages[0];
+            expect(receivedMessage.id).toStrictEqual(messageAfterRelationshipTerminationId);
+        });
+    });
+
+    describe("IdentityDeletionPeerProcessing", function () {
+        let identityDeletionProcessId: CoreId;
+        let messageId: CoreId;
+        beforeAll(async function () {
+            identityDeletionProcessId = (await recipient.identityDeletionProcess.initiateIdentityDeletionProcess()).id;
+        });
+
+        test("should be able to send a message when the peer is in deletion", async function () {
+            const syncedRelationships = await TestUtil.syncUntilHasRelationships(sender);
+            expect(syncedRelationships).toHaveLength(1);
+            expect(syncedRelationships[0].peerDeletionInfo?.deletionStatus).toStrictEqual(PeerDeletionStatus.ToBeDeleted);
+
+            messageId = (await TestUtil.sendMessage(sender, recipient)).id;
+            expect(messageId).toBeDefined();
+        });
+
+        test("should be able to receive a message when the peer is not in deletion anymore", async function () {
+            await recipient.identityDeletionProcess.cancelIdentityDeletionProcess(identityDeletionProcessId.toString());
+
+            const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
+            const receivedMessage = messages[0];
+            expect(receivedMessage.id).toStrictEqual(messageId);
         });
     });
 });
