@@ -254,7 +254,6 @@ describe("Message errors", () => {
                 to: [client5.address]
             }
         });
-        //   const result = await sendMessageToMultipleRecipients(client1.transport, [client4.address, client5.address]);
         expect(result).toBeAnError(
             `An active Relationship with the given addresses '${client4.address.toString()},${client5.address.toString()}' does not exist, so you cannot send them a Message.`,
             "error.transport.messages.hasNoActiveRelationship"
@@ -272,7 +271,6 @@ describe("Message errors", () => {
                 to: [client5.address]
             }
         });
-        //   const result = await sendMessageToMultipleRecipients(client1.transport, [client4.address, client5.address]);
         expect(result).toBeAnError(
             `An active Relationship with the given address '${client5.address.toString()}' does not exist, so you cannot send them a Message.`,
             "error.transport.messages.hasNoActiveRelationship"
