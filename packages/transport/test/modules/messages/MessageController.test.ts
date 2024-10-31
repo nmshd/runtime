@@ -239,7 +239,6 @@ describe("MessageController", function () {
 
         test("should be able to receive a message when the relationship is reactivated", async function () {
             await TestUtil.reactivateRelationship(sender, recipient);
-            //    await TestUtil.acceptRelationshipReactivation(recipient, sender);
 
             const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
             const receivedMessage = messages[0];
