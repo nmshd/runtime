@@ -5,12 +5,15 @@ import {
     QueryParamConditions,
     RuntimeServiceProvider,
     TestRuntimeServices,
+    emptyRelationshipCreationContent,
     ensureActiveRelationship,
     establishRelationship,
     exchangeMessage,
     exchangeMessageWithAttachment,
+    exchangeTemplate,
     sendMessage,
     syncUntilHasMessage,
+    syncUntilHasRelationships,
     uploadFile
 } from "../lib";
 
@@ -18,12 +21,16 @@ const serviceProvider = new RuntimeServiceProvider();
 let client1: TestRuntimeServices;
 let client2: TestRuntimeServices;
 let client3: TestRuntimeServices;
+let client4: TestRuntimeServices;
+let client5: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(3);
+    const runtimeServices = await serviceProvider.launch(5);
     client1 = runtimeServices[0];
     client2 = runtimeServices[1];
     client3 = runtimeServices[2];
+    client4 = runtimeServices[3];
+    client5 = runtimeServices[4];
     await ensureActiveRelationship(client1.transport, client2.transport);
     await ensureActiveRelationship(client1.transport, client3.transport);
 }, 30000);
@@ -234,6 +241,71 @@ describe("Message errors", () => {
             }
         });
         expect(result).toBeAnError("The recipient does not match the Request's peer.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("messages with multiple recipients should fail if there is no active Relationship to the recipients", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client4.address, client5.address],
+            content: {
+                "@type": "Mail",
+                body: "b",
+                cc: [client4.address],
+                subject: "a",
+                to: [client5.address]
+            }
+        });
+        //   const result = await sendMessageToMultipleRecipients(client1.transport, [client4.address, client5.address]);
+        expect(result).toBeAnError(
+            `An active Relationship with the given addresses '${client4.address.toString()},${client5.address.toString()}' does not exist, so you cannot send them a Message.`,
+            "error.transport.messages.hasNoActiveRelationship"
+        );
+    });
+
+    test("messages with multiple recipients should also fail if only one Relationship is missing", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address, client5.address],
+            content: {
+                "@type": "Mail",
+                body: "b",
+                cc: [client2.address],
+                subject: "a",
+                to: [client5.address]
+            }
+        });
+        //   const result = await sendMessageToMultipleRecipients(client1.transport, [client4.address, client5.address]);
+        expect(result).toBeAnError(
+            `An active Relationship with the given address '${client5.address.toString()}' does not exist, so you cannot send them a Message.`,
+            "error.transport.messages.hasNoActiveRelationship"
+        );
+    });
+
+    test("messages with multiple recipients should also fail if only one Relationship is pending", async () => {
+        const templateId = (await exchangeTemplate(client1.transport, client4.transport)).id;
+
+        const createRelationshipResponse = await client4.transport.relationships.createRelationship({
+            templateId: templateId,
+            creationContent: emptyRelationshipCreationContent
+        });
+        expect(createRelationshipResponse).toBeSuccessful();
+
+        const relationships1 = await syncUntilHasRelationships(client1.transport);
+        expect(relationships1).toHaveLength(1);
+
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address, client4.address],
+            content: {
+                "@type": "Mail",
+                body: "b",
+                cc: [client2.address],
+                subject: "a",
+                to: [client4.address]
+            }
+        });
+
+        expect(result).toBeAnError(
+            `An active Relationship with the given address '${client4.address.toString()}' does not exist, so you cannot send them a Message.`,
+            "error.transport.messages.hasNoActiveRelationship"
+        );
     });
 });
 
