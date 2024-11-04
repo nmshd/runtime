@@ -1242,7 +1242,7 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
     test("should create and share a relationship attribute", async () => {
         const createAndShareRelationshipAttributeRequest: CreateAndShareRelationshipAttributeRequest = {
             content: {
-                key: "test",
+                key: "test key",
                 value: {
                     "@type": "ProprietaryString",
                     value: "AString",
@@ -1267,7 +1267,7 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
         const expiresAt = CoreDate.utc().add({ days: 1 }).toString();
         const createAndShareRelationshipAttributeRequest: CreateAndShareRelationshipAttributeRequest = {
             content: {
-                key: "test",
+                key: "test key for metadata",
                 value: {
                     "@type": "ProprietaryString",
                     value: "AString",
@@ -1311,7 +1311,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
     beforeEach(async () => {
         sOwnSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
-                key: "test",
+                key: "test key for succession",
                 value: {
                     "@type": "ProprietaryString",
                     value: "AString",
@@ -1320,6 +1320,10 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }
         });
+    });
+
+    afterEach(async () => {
+        await cleanupAttributes();
     });
 
     test("should succeed a relationship attribute and notify peer", async () => {
@@ -1679,6 +1683,10 @@ describe("Get (shared) versions of attribute", () => {
     }
 
     describe(GetVersionsOfAttributeUseCase.name, () => {
+        afterEach(async () => {
+            await cleanupAttributes();
+        });
+
         test("should get all versions of a repository attribute", async () => {
             await setUpRepositoryAttributeVersions();
             for (const version of sRepositoryAttributeVersions) {
@@ -1760,8 +1768,12 @@ describe("Get (shared) versions of attribute", () => {
     });
 
     describe(GetSharedVersionsOfAttributeUseCase.name, () => {
-        beforeAll(async () => {
+        beforeEach(async () => {
             await setUpIdentityAttributeVersions();
+        });
+
+        afterEach(async () => {
+            await cleanupAttributes();
         });
 
         test("should get only latest shared version per peer of a repository attribute", async () => {
@@ -1913,6 +1925,10 @@ describe("DeleteAttributeUseCases", () => {
             }
         ));
         repositoryAttributeVersion1 = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.shareInfo!.sourceAttribute! })).value;
+    });
+
+    afterEach(async () => {
+        await cleanupAttributes();
     });
 
     describe(DeleteRepositoryAttributeUseCase.name, () => {

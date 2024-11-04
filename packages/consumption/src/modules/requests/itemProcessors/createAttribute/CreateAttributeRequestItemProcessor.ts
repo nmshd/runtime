@@ -58,10 +58,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (typeof recipient !== "undefined") {
+            const attributeToBeCreated = requestItem.attribute;
             const queryForAttributesWithSameKey = {
                 "content.@type": "RelationshipAttribute",
-                "content.owner": requestItem.attribute.owner.toString(),
-                "content.key": requestItem.attribute.key,
+                "content.owner": attributeToBeCreated.owner.toString(),
+                "content.key": attributeToBeCreated.key,
                 "shareInfo.peer": recipient.toString(),
                 "shareInfo.thirdPartyAddress": undefined
             };
