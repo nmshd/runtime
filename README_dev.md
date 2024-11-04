@@ -3,8 +3,7 @@
 1. Download and install [Node JS](https://nodejs.org/en/download/)
 2. run `npm i`
 3. run `npm run -ws build`
-
-Optionally, run `npm run build:watch`. This is also added as a VSCode task that is configured to [run on folder open](https://code.visualstudio.com/updates/v1_30#_run-on-folder-open).
+4. run `npm run build:watch` (this is also added as a VSCode task that is configured to [run on folder open](https://code.visualstudio.com/updates/v1_30#_run-on-folder-open))
 
 ## Running scripts
 
