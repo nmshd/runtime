@@ -8,41 +8,37 @@ import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export class CreateAttributeRequestItemProcessor extends GenericRequestItemProcessor<CreateAttributeRequestItem> {
-    public override canCreateOutgoingRequestItem(
-        requestItem: CreateAttributeRequestItem,
-        _request?: Request,
-        recipient?: CoreAddress
-    ): ValidationResult | Promise<ValidationResult> {
+    public override async canCreateOutgoingRequestItem(requestItem: CreateAttributeRequestItem, _request?: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const recipientIsAttributeOwner = requestItem.attribute.owner.equals(recipient);
         const senderIsAttributeOwner = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
         if (requestItem.attribute instanceof IdentityAttribute) {
-            if (!(recipientIsAttributeOwner || ownerIsEmptyString)) {
-                if (senderIsAttributeOwner) {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.invalidRequestItem(
-                            "Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
-                        )
-                    );
-                }
+            if (recipientIsAttributeOwner || ownerIsEmptyString) {
+                return ValidationResult.success();
+            }
 
-                if (typeof recipient !== "undefined") {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.invalidRequestItem(
-                            "The owner of the provided IdentityAttribute for the `attribute` property can only be the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
-                        )
-                    );
-                }
-
+            if (senderIsAttributeOwner) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The owner of the provided IdentityAttribute for the `attribute` property can only be an empty string. It will default to the Recipient's Address."
+                        "Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
                     )
                 );
             }
 
-            return ValidationResult.success();
+            if (typeof recipient !== "undefined") {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "The owner of the provided IdentityAttribute for the `attribute` property can only be the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
+                    )
+                );
+            }
+
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
+                    "The owner of the provided IdentityAttribute for the `attribute` property can only be an empty string. It will default to the Recipient's Address."
+                )
+            );
         }
 
         if (!(recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString)) {
@@ -59,6 +55,24 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                     "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
                 )
             );
+        }
+
+        if (typeof recipient !== "undefined") {
+            const queryForAttributesWithSameKey = {
+                "content.@type": "RelationshipAttribute",
+                "content.key": requestItem.attribute.key,
+                "shareInfo.peer": recipient.toString(),
+                "shareInfo.thirdPartyAddress": undefined
+            };
+            const attributesWithSameKey = await this.consumptionController.attributes.getLocalAttributes(queryForAttributesWithSameKey);
+
+            if (attributesWithSameKey.length !== 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    )
+                );
+            }
         }
 
         return ValidationResult.success();
