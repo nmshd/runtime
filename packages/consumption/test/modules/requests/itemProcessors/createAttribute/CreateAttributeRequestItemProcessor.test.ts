@@ -132,6 +132,43 @@ describe("CreateAttributeRequestItemProcessor", function () {
                     "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
             });
         });
+
+        test("returns Error when passing a Relationship Attribute with same key as an already existing Relationship Attribute of this Relationship", async function () {
+            const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER,
+                key: "UniqueKey"
+            });
+
+            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+
+            const relationshipAttributeWithSameKey = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER,
+                key: "UniqueKey"
+            });
+
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKey }, TestIdentity.RECIPIENT);
+            await Then.theResultShouldBeAnErrorWith({
+                message:
+                    "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+            });
+        });
+
+        test("returns Success when passing a Relationship Attribute with same key as an already existing ThirdPartyRelationshipAttribute", async function () {
+            const thirdPartyRelationshipAttribute = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER,
+                key: "RelationshipSpecificUniqueKey"
+            });
+
+            await When.iCreateAThirdPartyRelationshipAttribute(thirdPartyRelationshipAttribute);
+
+            const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER,
+                key: "RelationshipSpecificUniqueKey"
+            });
+
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSender }, TestIdentity.RECIPIENT);
+            await Then.theResultShouldBeASuccess();
+        });
     });
 
     describe("accept", function () {
