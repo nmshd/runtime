@@ -180,6 +180,7 @@ export class WhenSteps {
         relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
             owner: this.context.accountController.identity.address
         });
+        this.context.fillTestIdentitiesOfObject(relationshipAttribute);
 
         await this.context.consumptionController.attributes.createSharedLocalAttribute({
             content: relationshipAttribute,
@@ -192,6 +193,7 @@ export class WhenSteps {
         relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
             owner: this.context.accountController.identity.address
         });
+        this.context.fillTestIdentitiesOfObject(relationshipAttribute);
 
         await this.context.consumptionController.attributes.createSharedLocalAttribute({
             content: relationshipAttribute,
