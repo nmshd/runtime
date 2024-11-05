@@ -1289,11 +1289,12 @@ export class AttributesController extends ConsumptionBaseController {
         return ownSharedAttributeSuccessors;
     }
 
-    public async getRelationshipAttributesToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, peer: CoreAddress): Promise<LocalAttribute[]> {
+    public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
         const queryForRelationshipAttributesWithSameKey = {
             "content.@type": "RelationshipAttribute",
             "content.owner": owner.toString(),
             "content.key": key,
+            "content.value.@type": valueType,
             "shareInfo.peer": peer.toString(),
             "shareInfo.thirdPartyAddress": { $exists: false },
             "deletionInfo.deletionStatus": {

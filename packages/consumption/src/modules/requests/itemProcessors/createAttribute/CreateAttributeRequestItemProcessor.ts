@@ -59,9 +59,10 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (typeof recipient !== "undefined") {
-            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesToPeerWithGivenKeyAndOwner(
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
                 requestItem.attribute.key,
                 requestItem.attribute.owner,
+                requestItem.attribute.value.toJSON()["@type"],
                 recipient
             );
 
@@ -99,9 +100,10 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 sourceAttributeId: repositoryAttribute.id
             });
         } else {
-            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesToPeerWithGivenKeyAndOwner(
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
                 requestItem.attribute.key,
                 requestItem.attribute.owner,
+                requestItem.attribute.value.toJSON()["@type"],
                 requestInfo.peer
             );
 

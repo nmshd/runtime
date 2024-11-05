@@ -1,4 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { ProprietaryInteger, ProprietaryString } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -164,6 +165,25 @@ describe("CreateAttributeRequestItemProcessor", function () {
             const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.RECIPIENT,
                 key: "OwnerSpecificUniqueKey"
+            });
+
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfRecipient }, TestIdentity.RECIPIENT);
+            await Then.theResultShouldBeASuccess();
+        });
+
+        test("returns Success when passing a Relationship Attribute with same key but different value type", async function () {
+            const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER,
+                key: "ValueTypeSpecificUniqueKey",
+                value: ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" })
+            });
+
+            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+
+            const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER,
+                key: "ValueTypeSpecificUniqueKey",
+                value: ProprietaryInteger.from({ title: "ATitle", value: 1 })
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfRecipient }, TestIdentity.RECIPIENT);
