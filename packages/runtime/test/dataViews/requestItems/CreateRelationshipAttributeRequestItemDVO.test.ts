@@ -86,9 +86,11 @@ beforeAll(async () => {
 
 afterAll(() => serviceProvider.stop());
 
-beforeEach(function () {
+beforeEach(async () => {
     rEventBus.reset();
     sEventBus.reset();
+
+    await cleanupAttributes();
 });
 
 afterEach(async () => {
