@@ -67,7 +67,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
     describe("canCreateOutgoingRequestItem", function () {
         describe("IdentityAttributeQuery", function () {
-            test("simple query", function () {
+            test("simple query", async () => {
                 const query = IdentityAttributeQuery.from({
                     valueType: "GivenName"
                 });
@@ -77,7 +77,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     query: query
                 });
 
-                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
 
                 expect(result).successfulValidationResult();
             });
@@ -190,7 +190,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }
                 }
             ];
-            test.each(testParams)("$description", function (testParams: TestParams) {
+            test.each(testParams)("$description", async (testParams: TestParams) => {
                 function translateTestIdentityToAddress(testIdentity: TestIdentity) {
                     switch (testIdentity) {
                         case TestIdentity.Self:
@@ -234,7 +234,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     query: query
                 });
 
-                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
 
                 if (testParams.expectedOutput.hasOwnProperty("success")) {
                     // eslint-disable-next-line jest/no-conditional-expect
@@ -280,7 +280,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 });
 
-                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
 
                 expect(result).errorValidationResult({
                     message:
