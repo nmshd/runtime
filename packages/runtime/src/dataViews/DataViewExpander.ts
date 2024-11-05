@@ -130,7 +130,7 @@ import {
     RelationshipAttributeQueryDVO,
     ThirdPartyRelationshipAttributeQueryDVO
 } from "./content/AttributeDVOs";
-import { MailDVO, RequestMessageDVO } from "./content/MailDVOs";
+import { MailDVO, RequestMessageDVO, RequestMessageErrorDVO } from "./content/MailDVOs";
 import { RequestDVO } from "./content/RequestDVO";
 import {
     AttributeAlreadySharedAcceptResponseItemDVO,
@@ -235,7 +235,7 @@ export class DataViewExpander {
         }
     }
 
-    public async expandMessageDTO(message: MessageDTO | MessageWithAttachmentsDTO): Promise<MessageDVO | MailDVO | RequestMessageDVO> {
+    public async expandMessageDTO(message: MessageDTO | MessageWithAttachmentsDTO): Promise<MessageDVO | MailDVO | RequestMessageDVO | RequestMessageErrorDVO> {
         const recipientRelationships = await this.expandRecipientDTOs(message.recipients);
         const addressMap: Record<string, RecipientDVO> = {};
         recipientRelationships.forEach((value) => (addressMap[value.id] = value));
@@ -314,31 +314,29 @@ export class DataViewExpander {
         }
 
         if (message.content["@type"] === "Request") {
-            let localRequest: LocalRequestDTO;
-            if (isOwn) {
-                const localRequestsResult = await this.consumption.outgoingRequests.getRequests({
-                    query: { "source.reference": message.id }
-                });
-                if (localRequestsResult.value.length === 0) {
-                    throw new Error("No LocalRequest has been found for this message id.");
-                }
-                if (localRequestsResult.value.length > 1) {
-                    throw new Error("More than one LocalRequest has been found for this message id.");
-                }
-                localRequest = localRequestsResult.value[0];
-            } else {
-                const localRequestsResult = await this.consumption.incomingRequests.getRequests({
-                    query: { "source.reference": message.id }
-                });
-                if (localRequestsResult.value.length === 0) {
-                    throw new Error("No LocalRequest has been found for this message id.");
-                }
-                if (localRequestsResult.value.length > 1) {
-                    throw new Error("More than one LocalRequest has been found for this message id.");
-                }
-                localRequest = localRequestsResult.value[0];
+            const query = { "source.reference": message.id };
+
+            const localRequestsResult = isOwn ? await this.consumption.outgoingRequests.getRequests({ query }) : await this.consumption.incomingRequests.getRequests({ query });
+
+            if (localRequestsResult.value.length === 0) {
+                return {
+                    ...messageDVO,
+                    type: "RequestMessageErrorDVO",
+                    code: "dvo.requestMessage.error.noLocalRequest",
+                    message: "No LocalRequest has been found for this message id."
+                };
             }
 
+            if (localRequestsResult.value.length > 1) {
+                return {
+                    ...messageDVO,
+                    type: "RequestMessageErrorDVO",
+                    code: "dvo.requestMessage.error.multipleLocalRequests",
+                    message: "More than one LocalRequest has been found for this message id."
+                };
+            }
+
+            const localRequest = localRequestsResult.value[0];
             const requestMessageDVO: RequestMessageDVO = {
                 ...messageDVO,
                 type: "RequestMessageDVO",
@@ -348,31 +346,13 @@ export class DataViewExpander {
         }
 
         if (message.content["@type"] === "ResponseWrapper") {
-            let localRequest: LocalRequestDTO;
-            if (isOwn) {
-                const localRequestsResult = await this.consumption.incomingRequests.getRequests({
-                    query: { id: message.content.requestId }
-                });
+            const query = { id: message.content.requestId };
+            const localRequestsResult = isOwn ? await this.consumption.outgoingRequests.getRequests({ query }) : await this.consumption.incomingRequests.getRequests({ query });
 
-                if (localRequestsResult.value.length === 0) {
-                    throw new Error("No LocalRequest has been found for this message id.");
-                }
-                if (localRequestsResult.value.length > 1) {
-                    throw new Error("More than one LocalRequest has been found for this message id.");
-                }
-                localRequest = localRequestsResult.value[0];
-            } else {
-                const localRequestsResult = await this.consumption.outgoingRequests.getRequests({
-                    query: { id: message.content.requestId }
-                });
-                if (localRequestsResult.value.length === 0) {
-                    throw new Error("No LocalRequest has been found for this message id.");
-                }
-                if (localRequestsResult.value.length > 1) {
-                    throw new Error("More than one LocalRequest has been found for this message id.");
-                }
-                localRequest = localRequestsResult.value[0];
-            }
+            if (localRequestsResult.value.length === 0) throw new Error("No LocalRequest has been found for this message id.");
+            if (localRequestsResult.value.length > 1) throw new Error("More than one LocalRequest has been found for this message id.");
+
+            const localRequest = localRequestsResult.value[0];
 
             const requestMessageDVO: RequestMessageDVO = {
                 ...messageDVO,
@@ -385,7 +365,7 @@ export class DataViewExpander {
         return messageDVO;
     }
 
-    public async expandMessageDTOs(messages: MessageDTO[]): Promise<(MessageDVO | MailDVO | RequestMessageDVO)[]> {
+    public async expandMessageDTOs(messages: MessageDTO[]): Promise<(MessageDVO | MailDVO | RequestMessageDVO | RequestMessageErrorDVO)[]> {
         const messagePromises = messages.map((message) => this.expandMessageDTO(message));
         return await Promise.all(messagePromises);
     }
@@ -1063,9 +1043,8 @@ export class DataViewExpander {
     ): Promise<RepositoryAttributeDVO | SharedToPeerAttributeDVO | PeerAttributeDVO | PeerRelationshipAttributeDVO | OwnRelationshipAttributeDVO> {
         const valueType = attribute.content.value["@type"];
         const localAttribute = await this.consumptionController.attributes.getLocalAttribute(CoreId.from(attribute.id));
-        if (!localAttribute) {
-            throw new Error("Attribute not found");
-        }
+        if (!localAttribute) throw new Error("Attribute not found");
+
         const owner = attribute.content.owner;
 
         let name = `i18n://dvo.attribute.name.${valueType}`;
@@ -1553,11 +1532,9 @@ export class DataViewExpander {
 
     public async expandAttribute(attribute: IdentityAttributeJSON | RelationshipAttributeJSON): Promise<DraftIdentityAttributeDVO | DraftRelationshipAttributeDVO> {
         const attributeInstance = Serializable.fromUnknown(attribute);
-        if (attributeInstance instanceof IdentityAttribute) {
-            return await this.expandIdentityAttribute(attribute as IdentityAttributeJSON, attributeInstance);
-        } else if (attributeInstance instanceof RelationshipAttribute) {
-            return await this.expandRelationshipAttribute(attribute as RelationshipAttributeJSON, attributeInstance);
-        }
+        if (attributeInstance instanceof IdentityAttribute) return await this.expandIdentityAttribute(attribute as IdentityAttributeJSON, attributeInstance);
+        if (attributeInstance instanceof RelationshipAttribute) return await this.expandRelationshipAttribute(attribute as RelationshipAttributeJSON, attributeInstance);
+
         throw new Error("Wrong attribute instance");
     }
 
