@@ -248,6 +248,45 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     });
                 }
             });
+
+            test("cannot query another RelationshipAttribute with same key", async function () {
+                const sender = accountController.identity.address;
+                const recipient = CoreAddress.from("Recipient");
+
+                await consumptionController.attributes.createSharedLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "UniqueKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: sender,
+                        value: ProprietaryString.from({
+                            title: "ATitle",
+                            value: "AStringValue"
+                        })
+                    }),
+                    peer: recipient,
+                    requestReference: await ConsumptionIds.request.generate()
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        key: "UniqueKey",
+                        owner: sender,
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "AnotherTitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+                expect(result).errorValidationResult({
+                    message:
+                        "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                });
+            });
         });
     });
 

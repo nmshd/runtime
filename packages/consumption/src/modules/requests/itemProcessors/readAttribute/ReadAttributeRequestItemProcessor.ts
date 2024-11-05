@@ -27,8 +27,8 @@ import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
 
 export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcessor<ReadAttributeRequestItem, AcceptReadAttributeRequestItemParametersJSON> {
-    public override canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient?: CoreAddress): ValidationResult {
-        const queryValidationResult = this.validateQuery(requestItem, recipient);
+    public override async canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
+        const queryValidationResult = await this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
         }
@@ -36,18 +36,36 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         return ValidationResult.success();
     }
 
-    private validateQuery(requestItem: ReadAttributeRequestItem, recipient?: CoreAddress) {
+    private async validateQuery(requestItem: ReadAttributeRequestItem, recipient?: CoreAddress) {
         const commonQueryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
         if (commonQueryValidationResult.isError()) {
             return commonQueryValidationResult;
         }
 
-        if (requestItem.query instanceof RelationshipAttributeQuery && !["", this.currentIdentityAddress.toString()].includes(requestItem.query.owner.toString())) {
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(
-                    "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically will become the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
-                )
-            );
+        if (requestItem.query instanceof RelationshipAttributeQuery) {
+            if (!["", this.currentIdentityAddress.toString()].includes(requestItem.query.owner.toString())) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically will become the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
+                    )
+                );
+            }
+
+            if (typeof recipient !== "undefined") {
+                const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesToPeerWithGivenKeyAndOwner(
+                    requestItem.query.key,
+                    requestItem.query.owner,
+                    recipient
+                );
+
+                if (relationshipAttributesWithSameKey.length !== 0) {
+                    return ValidationResult.error(
+                        ConsumptionCoreErrors.requests.invalidRequestItem(
+                            "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                        )
+                    );
+                }
+            }
         }
 
         return ValidationResult.success();
