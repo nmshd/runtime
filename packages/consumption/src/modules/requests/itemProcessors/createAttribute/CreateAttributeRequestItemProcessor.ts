@@ -59,7 +59,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (typeof recipient !== "undefined") {
-            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesWithSameKey(requestItem.attribute, recipient);
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesToPeerWithGivenKeyAndOwner(
+                requestItem.attribute.key,
+                requestItem.attribute.owner,
+                recipient
+            );
 
             if (relationshipAttributesWithSameKey.length !== 0) {
                 return ValidationResult.error(
@@ -95,7 +99,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 sourceAttributeId: repositoryAttribute.id
             });
         } else {
-            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesWithSameKey(requestItem.attribute, requestInfo.peer);
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesToPeerWithGivenKeyAndOwner(
+                requestItem.attribute.key,
+                requestItem.attribute.owner,
+                requestInfo.peer
+            );
 
             if (relationshipAttributesWithSameKey.length !== 0) {
                 throw new ConsumptionError(
