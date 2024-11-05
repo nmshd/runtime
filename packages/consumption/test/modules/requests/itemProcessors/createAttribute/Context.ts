@@ -1,8 +1,16 @@
 /* eslint-disable jest/no-standalone-expect */
 import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, RelationshipAttribute, ResponseItemResult } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
-import { ConsumptionController, ConsumptionIds, CreateAttributeRequestItemProcessor, LocalAttribute, ValidationResult } from "../../../../../src";
+import {
+    ConsumptionController,
+    ConsumptionIds,
+    CreateAttributeRequestItemProcessor,
+    LocalAttribute,
+    LocalAttributeDeletionInfo,
+    LocalAttributeDeletionStatus,
+    ValidationResult
+} from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 import { TestIdentity } from "./TestIdentity";
@@ -176,13 +184,13 @@ export class ThenSteps {
 export class WhenSteps {
     public constructor(private readonly context: Context) {}
 
-    public async iCreateARelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<void> {
+    public async iCreateARelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<LocalAttribute> {
         relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
             owner: this.context.accountController.identity.address
         });
         this.context.fillTestIdentitiesOfObject(relationshipAttribute);
 
-        await this.context.consumptionController.attributes.createSharedLocalAttribute({
+        return await this.context.consumptionController.attributes.createSharedLocalAttribute({
             content: relationshipAttribute,
             requestReference: CoreId.from("reqRef"),
             peer: CoreAddress.from("peer")
@@ -201,6 +209,14 @@ export class WhenSteps {
             peer: CoreAddress.from("peer"),
             thirdPartyAddress: CoreAddress.from("AThirdParty")
         });
+    }
+
+    public async iMarkMyAttributeAsToBeDeleted(attribute: LocalAttribute): Promise<void> {
+        this.context.fillTestIdentitiesOfObject(attribute);
+
+        attribute.deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeleted, deletionDate: CoreDate.utc().add({ minutes: 5 }) });
+
+        await this.context.consumptionController.attributes.updateAttributeUnsafe(attribute);
     }
 
     public async iCallCanCreateOutgoingRequestItemWith(partialRequestItem: Partial<CreateAttributeRequestItem>, recipient: CoreAddress = TestIdentity.RECIPIENT): Promise<void> {

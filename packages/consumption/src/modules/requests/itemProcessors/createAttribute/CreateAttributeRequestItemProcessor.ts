@@ -1,7 +1,7 @@
 import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, IdentityAttribute, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { LocalAttribute } from "../../../attributes";
+import { LocalAttribute, LocalAttributeDeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -64,7 +64,15 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 "content.owner": attributeToBeCreated.owner.toString(),
                 "content.key": attributeToBeCreated.key,
                 "shareInfo.peer": recipient.toString(),
-                "shareInfo.thirdPartyAddress": { $exists: false }
+                "shareInfo.thirdPartyAddress": { $exists: false },
+                "deletionInfo.deletionStatus": {
+                    $nin: [
+                        LocalAttributeDeletionStatus.ToBeDeleted,
+                        LocalAttributeDeletionStatus.ToBeDeletedByPeer,
+                        LocalAttributeDeletionStatus.DeletedByPeer,
+                        LocalAttributeDeletionStatus.DeletedByOwner
+                    ]
+                }
             };
             const attributesWithSameKey = await this.consumptionController.attributes.getLocalAttributes(queryForAttributesWithSameKey);
 

@@ -170,6 +170,24 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theResultShouldBeASuccess();
         });
 
+        test("returns Success when passing a Relationship Attribute with same key as a Relationship Attribute in deletion", async function () {
+            const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER,
+                key: "PersistenceSpecificUniqueKey"
+            });
+
+            const createdAttribute = await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+            await When.iMarkMyAttributeAsToBeDeleted(createdAttribute);
+
+            const relationshipAttributeWithSameKey = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER,
+                key: "PersistenceSpecificUniqueKey"
+            });
+
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKey }, TestIdentity.RECIPIENT);
+            await Then.theResultShouldBeASuccess();
+        });
+
         test("returns Success when passing a Relationship Attribute with same key as an already existing ThirdPartyRelationshipAttribute", async function () {
             const thirdPartyRelationshipAttribute = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
