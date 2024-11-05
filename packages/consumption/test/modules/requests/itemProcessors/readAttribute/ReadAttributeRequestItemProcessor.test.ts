@@ -274,7 +274,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: sender,
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
-                            title: "AnotherTitle",
+                            title: "ATitle",
                             confidentiality: RelationshipAttributeConfidentiality.Public
                         }
                     })
@@ -752,6 +752,66 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     code: "error.consumption.requests.invalidAcceptParameters",
                     message: "When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided."
                 });
+            });
+
+            test("throws an error when another RelationshipAttribute with same key was queried", async function () {
+                const sender = CoreAddress.from("Sender");
+                const recipient = accountController.identity.address;
+
+                await consumptionController.attributes.createSharedLocalAttribute({
+                    content: TestObjectFactory.createRelationshipAttribute({
+                        key: "UniqueKey",
+                        owner: recipient,
+                        value: ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" })
+                    }),
+                    peer: sender,
+                    requestReference: CoreId.from("reqRef")
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        key: "UniqueKey",
+                        owner: recipient,
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "ATitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "UniqueKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "ATitle",
+                            value: "AStringValue"
+                        }
+                    }
+                };
+
+                await expect(processor.canAccept(requestItem, acceptParams, incomingRequest)).rejects.toThrow(
+                    "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                );
             });
 
             test("can be called when a RelationshipAttribute of Value Type Consent is queried even though title and description is specified", async function () {
