@@ -64,7 +64,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 "content.owner": attributeToBeCreated.owner.toString(),
                 "content.key": attributeToBeCreated.key,
                 "shareInfo.peer": recipient.toString(),
-                "shareInfo.thirdPartyAddress": undefined
+                "shareInfo.thirdPartyAddress": { $exists: false }
             };
             const attributesWithSameKey = await this.consumptionController.attributes.getLocalAttributes(queryForAttributesWithSameKey);
 
