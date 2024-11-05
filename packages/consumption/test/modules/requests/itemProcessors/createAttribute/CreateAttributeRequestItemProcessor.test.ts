@@ -153,6 +153,23 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
+        test("returns Success when passing a Relationship Attribute with same key but different owner", async function () {
+            const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER,
+                key: "OwnerSpecificUniqueKey"
+            });
+
+            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+
+            const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.RECIPIENT,
+                key: "OwnerSpecificUniqueKey"
+            });
+
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfRecipient }, TestIdentity.RECIPIENT);
+            await Then.theResultShouldBeASuccess();
+        });
+
         test("returns Success when passing a Relationship Attribute with same key as an already existing ThirdPartyRelationshipAttribute", async function () {
             const thirdPartyRelationshipAttribute = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
