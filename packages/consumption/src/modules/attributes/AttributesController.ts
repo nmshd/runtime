@@ -9,6 +9,7 @@ import {
     IIQLQuery,
     IRelationshipAttributeQuery,
     IThirdPartyRelationshipAttributeQuery,
+    RelationshipAttribute,
     RelationshipAttributeJSON,
     RelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQuery,
@@ -1287,5 +1288,25 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         return ownSharedAttributeSuccessors;
+    }
+
+    public async getRelationshipAttributesWithSameKey(relationshipAttribute: RelationshipAttribute, peer: CoreAddress): Promise<LocalAttribute[]> {
+        const queryForRelationshipAttributesWithSameKey = {
+            "content.@type": "RelationshipAttribute",
+            "content.owner": relationshipAttribute.owner.toString(),
+            "content.key": relationshipAttribute.key,
+            "shareInfo.peer": peer.toString(),
+            "shareInfo.thirdPartyAddress": { $exists: false },
+            "deletionInfo.deletionStatus": {
+                $nin: [
+                    LocalAttributeDeletionStatus.ToBeDeleted,
+                    LocalAttributeDeletionStatus.ToBeDeletedByPeer,
+                    LocalAttributeDeletionStatus.DeletedByPeer,
+                    LocalAttributeDeletionStatus.DeletedByOwner
+                ]
+            }
+        };
+
+        return await this.getLocalAttributes(queryForRelationshipAttributesWithSameKey);
     }
 }

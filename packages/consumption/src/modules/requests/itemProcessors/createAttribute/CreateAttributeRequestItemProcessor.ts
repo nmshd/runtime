@@ -1,7 +1,7 @@
 import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, IdentityAttribute, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { LocalAttribute, LocalAttributeDeletionStatus } from "../../../attributes";
+import { LocalAttribute } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -58,25 +58,9 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (typeof recipient !== "undefined") {
-            const attributeToBeCreated = requestItem.attribute;
-            const queryForAttributesWithSameKey = {
-                "content.@type": "RelationshipAttribute",
-                "content.owner": attributeToBeCreated.owner.toString(),
-                "content.key": attributeToBeCreated.key,
-                "shareInfo.peer": recipient.toString(),
-                "shareInfo.thirdPartyAddress": { $exists: false },
-                "deletionInfo.deletionStatus": {
-                    $nin: [
-                        LocalAttributeDeletionStatus.ToBeDeleted,
-                        LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                        LocalAttributeDeletionStatus.DeletedByPeer,
-                        LocalAttributeDeletionStatus.DeletedByOwner
-                    ]
-                }
-            };
-            const attributesWithSameKey = await this.consumptionController.attributes.getLocalAttributes(queryForAttributesWithSameKey);
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesWithSameKey(requestItem.attribute, recipient);
 
-            if (attributesWithSameKey.length !== 0) {
+            if (relationshipAttributesWithSameKey.length !== 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
                         "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
