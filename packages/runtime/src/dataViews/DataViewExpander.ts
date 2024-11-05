@@ -55,26 +55,7 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { IdentityController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
-import {
-    AuthenticationRequestItemDVO,
-    ConsentRequestItemDVO,
-    CreateAttributeRequestItemDVO,
-    DVOError,
-    DeleteAttributeRequestItemDVO,
-    FileDVO,
-    FreeTextRequestItemDVO,
-    IdentityDVO,
-    ProposeAttributeRequestItemDVO,
-    ReadAttributeRequestItemDVO,
-    RegisterAttributeListenerRequestItemDVO,
-    RelationshipTemplateDVO,
-    RequestItemDVO,
-    RequestItemGroupDVO,
-    ResponseDVO,
-    ShareAttributeRequestItemDVO
-} from "..";
-import { TransportServices } from "../extensibility";
-import { ConsumptionServices } from "../extensibility/ConsumptionServices";
+import { ConsumptionServices, TransportServices } from "../extensibility";
 import {
     FileDTO,
     IdentityDTO,
@@ -92,7 +73,17 @@ import {
 import { RuntimeErrors } from "../useCases";
 import { DataViewObject } from "./DataViewObject";
 import { DataViewTranslateable } from "./DataViewTranslateable";
+import { DVOError } from "./common";
 import {
+    DecidableAuthenticationRequestItemDVO,
+    DecidableConsentRequestItemDVO,
+    DecidableCreateAttributeRequestItemDVO,
+    DecidableDeleteAttributeRequestItemDVO,
+    DecidableFreeTextRequestItemDVO,
+    DecidableProposeAttributeRequestItemDVO,
+    DecidableReadAttributeRequestItemDVO,
+    DecidableRegisterAttributeListenerRequestItemDVO,
+    DecidableShareAttributeRequestItemDVO,
     LocalAttributeDVO,
     LocalAttributeListenerDVO,
     LocalRequestDVO,
@@ -100,6 +91,7 @@ import {
     OwnRelationshipAttributeDVO,
     PeerAttributeDVO,
     PeerRelationshipAttributeDVO,
+    PeerRelationshipTemplateDVO,
     ProcessedAttributeQueryDVO,
     ProcessedIQLQueryDVO,
     ProcessedIdentityAttributeQueryDVO,
@@ -110,45 +102,44 @@ import {
     SharedToPeerAttributeDVO
 } from "./consumption";
 import {
-    DecidableAuthenticationRequestItemDVO,
-    DecidableConsentRequestItemDVO,
-    DecidableCreateAttributeRequestItemDVO,
-    DecidableDeleteAttributeRequestItemDVO,
-    DecidableFreeTextRequestItemDVO,
-    DecidableProposeAttributeRequestItemDVO,
-    DecidableReadAttributeRequestItemDVO,
-    DecidableRegisterAttributeListenerRequestItemDVO,
-    DecidableShareAttributeRequestItemDVO
-} from "./consumption/DecidableRequestItemDVOs";
-import { PeerRelationshipTemplateDVO } from "./consumption/PeerRelationshipTemplateDVO";
-import {
+    AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeQueryDVO,
+    AttributeSuccessionAcceptResponseItemDVO,
+    AuthenticationRequestItemDVO,
+    ConsentRequestItemDVO,
+    CreateAttributeAcceptResponseItemDVO,
+    CreateAttributeRequestItemDVO,
+    DeleteAttributeAcceptResponseItemDVO,
+    DeleteAttributeRequestItemDVO,
     DraftIdentityAttributeDVO,
     DraftRelationshipAttributeDVO,
-    IQLQueryDVO,
-    IdentityAttributeQueryDVO,
-    RelationshipAttributeQueryDVO,
-    ThirdPartyRelationshipAttributeQueryDVO
-} from "./content/AttributeDVOs";
-import { MailDVO, RequestMessageDVO, RequestMessageErrorDVO } from "./content/MailDVOs";
-import { RequestDVO } from "./content/RequestDVO";
-import {
-    AttributeAlreadySharedAcceptResponseItemDVO,
-    AttributeSuccessionAcceptResponseItemDVO,
-    CreateAttributeAcceptResponseItemDVO,
-    DeleteAttributeAcceptResponseItemDVO,
     ErrorResponseItemDVO,
     FreeTextAcceptResponseItemDVO,
+    FreeTextRequestItemDVO,
+    IQLQueryDVO,
+    IdentityAttributeQueryDVO,
+    MailDVO,
     ProposeAttributeAcceptResponseItemDVO,
+    ProposeAttributeRequestItemDVO,
     ReadAttributeAcceptResponseItemDVO,
+    ReadAttributeRequestItemDVO,
     RegisterAttributeListenerAcceptResponseItemDVO,
+    RegisterAttributeListenerRequestItemDVO,
     RejectResponseItemDVO,
+    RelationshipAttributeQueryDVO,
+    RequestDVO,
+    RequestItemDVO,
+    RequestItemGroupDVO,
+    RequestMessageDVO,
+    RequestMessageErrorDVO,
+    ResponseDVO,
     ResponseItemDVO,
     ResponseItemGroupDVO,
-    ShareAttributeAcceptResponseItemDVO
-} from "./content/ResponseItemDVOs";
-import { MessageDVO, MessageStatus, RecipientDVO } from "./transport/MessageDVO";
-import { RelationshipDVO, RelationshipDirection } from "./transport/RelationshipDVO";
+    ShareAttributeAcceptResponseItemDVO,
+    ShareAttributeRequestItemDVO,
+    ThirdPartyRelationshipAttributeQueryDVO
+} from "./content";
+import { FileDVO, IdentityDVO, MessageDVO, MessageStatus, RecipientDVO, RelationshipDVO, RelationshipDirection, RelationshipTemplateDVO } from "./transport";
 
 export class DataViewExpander {
     public constructor(
