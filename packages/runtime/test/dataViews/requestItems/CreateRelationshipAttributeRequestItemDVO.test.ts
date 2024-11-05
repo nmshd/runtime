@@ -93,10 +93,6 @@ beforeEach(async () => {
     await cleanupAttributes();
 });
 
-afterEach(async () => {
-    await cleanupAttributes();
-});
-
 async function cleanupAttributes() {
     await Promise.all(
         [sRuntimeServices, rRuntimeServices].map(async (services) => {
@@ -111,6 +107,10 @@ async function cleanupAttributes() {
 }
 
 describe("CreateRelationshipAttributeRequestItemDVO", () => {
+    afterEach(async () => {
+        await cleanupAttributes();
+    });
+
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
