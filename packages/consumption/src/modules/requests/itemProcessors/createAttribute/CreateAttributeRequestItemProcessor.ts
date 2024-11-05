@@ -1,6 +1,7 @@
 import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, IdentityAttribute, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { ConsumptionError } from "../../../../consumption/ConsumptionError";
 import { LocalAttribute } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
@@ -94,6 +95,14 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 sourceAttributeId: repositoryAttribute.id
             });
         } else {
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesWithSameKey(requestItem.attribute, requestInfo.peer);
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                throw new ConsumptionError(
+                    "The RelationshipAttribute to be created cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                );
+            }
+
             sharedAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
                 content: requestItem.attribute,
                 peer: requestInfo.peer,
