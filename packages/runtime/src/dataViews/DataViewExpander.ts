@@ -323,7 +323,8 @@ export class DataViewExpander {
                     ...messageDVO,
                     type: "RequestMessageErrorDVO",
                     code: "dvo.requestMessage.error.noLocalRequest",
-                    message: "No LocalRequest has been found for this message id."
+                    message:
+                        "No LocalRequest has been found for this message id. This could be caused by an invalid Request in the Message content which could not be processed by the Request Module."
                 };
             }
 
