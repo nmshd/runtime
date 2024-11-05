@@ -55,26 +55,7 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { IdentityController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
-import {
-    AuthenticationRequestItemDVO,
-    ConsentRequestItemDVO,
-    CreateAttributeRequestItemDVO,
-    DVOError,
-    DeleteAttributeRequestItemDVO,
-    FileDVO,
-    FreeTextRequestItemDVO,
-    IdentityDVO,
-    ProposeAttributeRequestItemDVO,
-    ReadAttributeRequestItemDVO,
-    RegisterAttributeListenerRequestItemDVO,
-    RelationshipTemplateDVO,
-    RequestItemDVO,
-    RequestItemGroupDVO,
-    ResponseDVO,
-    ShareAttributeRequestItemDVO
-} from "..";
-import { TransportServices } from "../extensibility";
-import { ConsumptionServices } from "../extensibility/ConsumptionServices";
+import { ConsumptionServices, TransportServices } from "../extensibility";
 import {
     FileDTO,
     IdentityDTO,
@@ -92,7 +73,17 @@ import {
 import { RuntimeErrors } from "../useCases";
 import { DataViewObject } from "./DataViewObject";
 import { DataViewTranslateable } from "./DataViewTranslateable";
+import { DVOError } from "./common";
 import {
+    DecidableAuthenticationRequestItemDVO,
+    DecidableConsentRequestItemDVO,
+    DecidableCreateAttributeRequestItemDVO,
+    DecidableDeleteAttributeRequestItemDVO,
+    DecidableFreeTextRequestItemDVO,
+    DecidableProposeAttributeRequestItemDVO,
+    DecidableReadAttributeRequestItemDVO,
+    DecidableRegisterAttributeListenerRequestItemDVO,
+    DecidableShareAttributeRequestItemDVO,
     LocalAttributeDVO,
     LocalAttributeListenerDVO,
     LocalRequestDVO,
@@ -100,6 +91,7 @@ import {
     OwnRelationshipAttributeDVO,
     PeerAttributeDVO,
     PeerRelationshipAttributeDVO,
+    PeerRelationshipTemplateDVO,
     ProcessedAttributeQueryDVO,
     ProcessedIQLQueryDVO,
     ProcessedIdentityAttributeQueryDVO,
@@ -110,45 +102,44 @@ import {
     SharedToPeerAttributeDVO
 } from "./consumption";
 import {
-    DecidableAuthenticationRequestItemDVO,
-    DecidableConsentRequestItemDVO,
-    DecidableCreateAttributeRequestItemDVO,
-    DecidableDeleteAttributeRequestItemDVO,
-    DecidableFreeTextRequestItemDVO,
-    DecidableProposeAttributeRequestItemDVO,
-    DecidableReadAttributeRequestItemDVO,
-    DecidableRegisterAttributeListenerRequestItemDVO,
-    DecidableShareAttributeRequestItemDVO
-} from "./consumption/DecidableRequestItemDVOs";
-import { PeerRelationshipTemplateDVO } from "./consumption/PeerRelationshipTemplateDVO";
-import {
+    AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeQueryDVO,
+    AttributeSuccessionAcceptResponseItemDVO,
+    AuthenticationRequestItemDVO,
+    ConsentRequestItemDVO,
+    CreateAttributeAcceptResponseItemDVO,
+    CreateAttributeRequestItemDVO,
+    DeleteAttributeAcceptResponseItemDVO,
+    DeleteAttributeRequestItemDVO,
     DraftIdentityAttributeDVO,
     DraftRelationshipAttributeDVO,
-    IQLQueryDVO,
-    IdentityAttributeQueryDVO,
-    RelationshipAttributeQueryDVO,
-    ThirdPartyRelationshipAttributeQueryDVO
-} from "./content/AttributeDVOs";
-import { MailDVO, RequestMessageDVO } from "./content/MailDVOs";
-import { RequestDVO } from "./content/RequestDVO";
-import {
-    AttributeAlreadySharedAcceptResponseItemDVO,
-    AttributeSuccessionAcceptResponseItemDVO,
-    CreateAttributeAcceptResponseItemDVO,
-    DeleteAttributeAcceptResponseItemDVO,
     ErrorResponseItemDVO,
     FreeTextAcceptResponseItemDVO,
+    FreeTextRequestItemDVO,
+    IQLQueryDVO,
+    IdentityAttributeQueryDVO,
+    MailDVO,
     ProposeAttributeAcceptResponseItemDVO,
+    ProposeAttributeRequestItemDVO,
     ReadAttributeAcceptResponseItemDVO,
+    ReadAttributeRequestItemDVO,
     RegisterAttributeListenerAcceptResponseItemDVO,
+    RegisterAttributeListenerRequestItemDVO,
     RejectResponseItemDVO,
+    RelationshipAttributeQueryDVO,
+    RequestDVO,
+    RequestItemDVO,
+    RequestItemGroupDVO,
+    RequestMessageDVO,
+    RequestMessageErrorDVO,
+    ResponseDVO,
     ResponseItemDVO,
     ResponseItemGroupDVO,
-    ShareAttributeAcceptResponseItemDVO
-} from "./content/ResponseItemDVOs";
-import { MessageDVO, MessageStatus, RecipientDVO } from "./transport/MessageDVO";
-import { RelationshipDVO, RelationshipDirection } from "./transport/RelationshipDVO";
+    ShareAttributeAcceptResponseItemDVO,
+    ShareAttributeRequestItemDVO,
+    ThirdPartyRelationshipAttributeQueryDVO
+} from "./content";
+import { FileDVO, IdentityDVO, MessageDVO, MessageStatus, RecipientDVO, RelationshipDVO, RelationshipDirection, RelationshipTemplateDVO } from "./transport";
 
 export class DataViewExpander {
     public constructor(
@@ -235,7 +226,7 @@ export class DataViewExpander {
         }
     }
 
-    public async expandMessageDTO(message: MessageDTO | MessageWithAttachmentsDTO): Promise<MessageDVO | MailDVO | RequestMessageDVO> {
+    public async expandMessageDTO(message: MessageDTO | MessageWithAttachmentsDTO): Promise<MessageDVO | MailDVO | RequestMessageDVO | RequestMessageErrorDVO> {
         const recipientRelationships = await this.expandRecipientDTOs(message.recipients);
         const addressMap: Record<string, RecipientDVO> = {};
         recipientRelationships.forEach((value) => (addressMap[value.id] = value));
@@ -314,31 +305,30 @@ export class DataViewExpander {
         }
 
         if (message.content["@type"] === "Request") {
-            let localRequest: LocalRequestDTO;
-            if (isOwn) {
-                const localRequestsResult = await this.consumption.outgoingRequests.getRequests({
-                    query: { "source.reference": message.id }
-                });
-                if (localRequestsResult.value.length === 0) {
-                    throw new Error("No LocalRequest has been found for this message id.");
-                }
-                if (localRequestsResult.value.length > 1) {
-                    throw new Error("More than one LocalRequest has been found for this message id.");
-                }
-                localRequest = localRequestsResult.value[0];
-            } else {
-                const localRequestsResult = await this.consumption.incomingRequests.getRequests({
-                    query: { "source.reference": message.id }
-                });
-                if (localRequestsResult.value.length === 0) {
-                    throw new Error("No LocalRequest has been found for this message id.");
-                }
-                if (localRequestsResult.value.length > 1) {
-                    throw new Error("More than one LocalRequest has been found for this message id.");
-                }
-                localRequest = localRequestsResult.value[0];
+            const query = { "source.reference": message.id };
+
+            const localRequestsResult = isOwn ? await this.consumption.outgoingRequests.getRequests({ query }) : await this.consumption.incomingRequests.getRequests({ query });
+
+            if (localRequestsResult.value.length === 0) {
+                return {
+                    ...messageDVO,
+                    type: "RequestMessageErrorDVO",
+                    code: "dvo.requestMessage.error.noLocalRequest",
+                    message:
+                        "No LocalRequest has been found for this message id. This could be caused by an invalid Request in the Message content which could not be processed by the Request Module."
+                };
             }
 
+            if (localRequestsResult.value.length > 1) {
+                return {
+                    ...messageDVO,
+                    type: "RequestMessageErrorDVO",
+                    code: "dvo.requestMessage.error.multipleLocalRequests",
+                    message: "More than one LocalRequest has been found for this message id."
+                };
+            }
+
+            const localRequest = localRequestsResult.value[0];
             const requestMessageDVO: RequestMessageDVO = {
                 ...messageDVO,
                 type: "RequestMessageDVO",
@@ -348,31 +338,13 @@ export class DataViewExpander {
         }
 
         if (message.content["@type"] === "ResponseWrapper") {
-            let localRequest: LocalRequestDTO;
-            if (isOwn) {
-                const localRequestsResult = await this.consumption.incomingRequests.getRequests({
-                    query: { id: message.content.requestId }
-                });
+            const query = { id: message.content.requestId };
+            const localRequestsResult = isOwn ? await this.consumption.outgoingRequests.getRequests({ query }) : await this.consumption.incomingRequests.getRequests({ query });
 
-                if (localRequestsResult.value.length === 0) {
-                    throw new Error("No LocalRequest has been found for this message id.");
-                }
-                if (localRequestsResult.value.length > 1) {
-                    throw new Error("More than one LocalRequest has been found for this message id.");
-                }
-                localRequest = localRequestsResult.value[0];
-            } else {
-                const localRequestsResult = await this.consumption.outgoingRequests.getRequests({
-                    query: { id: message.content.requestId }
-                });
-                if (localRequestsResult.value.length === 0) {
-                    throw new Error("No LocalRequest has been found for this message id.");
-                }
-                if (localRequestsResult.value.length > 1) {
-                    throw new Error("More than one LocalRequest has been found for this message id.");
-                }
-                localRequest = localRequestsResult.value[0];
-            }
+            if (localRequestsResult.value.length === 0) throw new Error("No LocalRequest has been found for this message id.");
+            if (localRequestsResult.value.length > 1) throw new Error("More than one LocalRequest has been found for this message id.");
+
+            const localRequest = localRequestsResult.value[0];
 
             const requestMessageDVO: RequestMessageDVO = {
                 ...messageDVO,
@@ -385,7 +357,7 @@ export class DataViewExpander {
         return messageDVO;
     }
 
-    public async expandMessageDTOs(messages: MessageDTO[]): Promise<(MessageDVO | MailDVO | RequestMessageDVO)[]> {
+    public async expandMessageDTOs(messages: MessageDTO[]): Promise<(MessageDVO | MailDVO | RequestMessageDVO | RequestMessageErrorDVO)[]> {
         const messagePromises = messages.map((message) => this.expandMessageDTO(message));
         return await Promise.all(messagePromises);
     }
@@ -1063,9 +1035,8 @@ export class DataViewExpander {
     ): Promise<RepositoryAttributeDVO | SharedToPeerAttributeDVO | PeerAttributeDVO | PeerRelationshipAttributeDVO | OwnRelationshipAttributeDVO> {
         const valueType = attribute.content.value["@type"];
         const localAttribute = await this.consumptionController.attributes.getLocalAttribute(CoreId.from(attribute.id));
-        if (!localAttribute) {
-            throw new Error("Attribute not found");
-        }
+        if (!localAttribute) throw new Error("Attribute not found");
+
         const owner = attribute.content.owner;
 
         let name = `i18n://dvo.attribute.name.${valueType}`;
@@ -1553,11 +1524,9 @@ export class DataViewExpander {
 
     public async expandAttribute(attribute: IdentityAttributeJSON | RelationshipAttributeJSON): Promise<DraftIdentityAttributeDVO | DraftRelationshipAttributeDVO> {
         const attributeInstance = Serializable.fromUnknown(attribute);
-        if (attributeInstance instanceof IdentityAttribute) {
-            return await this.expandIdentityAttribute(attribute as IdentityAttributeJSON, attributeInstance);
-        } else if (attributeInstance instanceof RelationshipAttribute) {
-            return await this.expandRelationshipAttribute(attribute as RelationshipAttributeJSON, attributeInstance);
-        }
+        if (attributeInstance instanceof IdentityAttribute) return await this.expandIdentityAttribute(attribute as IdentityAttributeJSON, attributeInstance);
+        if (attributeInstance instanceof RelationshipAttribute) return await this.expandRelationshipAttribute(attribute as RelationshipAttributeJSON, attributeInstance);
+
         throw new Error("Wrong attribute instance");
     }
 
