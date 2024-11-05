@@ -1,7 +1,5 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
-import { ConsumptionIds } from "@nmshd/consumption";
-import { IdentityFileReferenceJSON, Notification, ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
-import { CoreDate } from "@nmshd/core-types";
+import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import assert from "assert";
 import { DateTime } from "luxon";
@@ -11,7 +9,6 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalRequestStatus,
-    OwnSharedAttributeDeletedByOwnerEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
     RelationshipAuditLogEntryReason,
@@ -25,7 +22,6 @@ import {
 import {
     QueryParamConditions,
     RuntimeServiceProvider,
-    TestNotificationItem,
     TestRuntimeServices,
     createTemplate,
     emptyRelationshipCreationContent,
@@ -41,7 +37,6 @@ import {
     sendAndReceiveNotification,
     sendMessageToMultipleRecipients,
     syncUntilHasMessageWithNotification,
-    syncUntilHasMessagesWithNotification,
     syncUntilHasRelationships
 } from "../lib";
 
@@ -617,17 +612,6 @@ describe("RelationshipTermination", () => {
         expect(result).toBeAnError(/.*/, "error.transport.messages.hasNoActiveRelationship");
     });
 
-    test("should be able to send a Notification", async () => {
-        const id = await ConsumptionIds.notification.generate();
-        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
-
-        const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
-        expect(result).toBeSuccessful();
-
-        const notification = await services1.consumption.notifications.getNotification({ id: id.toString() });
-        expect(notification).toBeAnError(/.*/, "error.transport.recordNotFound");
-    });
-
     test("should not decide a request", async () => {
         const incomingRequest = (await services2.eventBus.waitForEvent(IncomingRequestReceivedEvent)).data;
 
@@ -855,108 +839,6 @@ describe("RelationshipTermination", () => {
             RelationshipReactivationCompletedEvent,
             (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.AcceptanceOfReactivation
         );
-    });
-
-    test("should be able to send a Notification and the peer should receive the Notification only after the reactiviation of the Relationship", async () => {
-        terminationResult = await services1.transport.relationships.terminateRelationship({ relationshipId });
-
-        const id = await ConsumptionIds.notification.generate();
-        const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
-
-        const result = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: notificationToSend.toJSON() });
-        expect(result).toBeSuccessful();
-
-        await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
-        await syncUntilHasRelationships(services2.transport);
-
-        const acceptanceResult = await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId });
-        expect(acceptanceResult).toBeSuccessful();
-        expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
-
-        const relationship1 = (await syncUntilHasRelationships(services1.transport))[0];
-        expect(relationship1.status).toBe(RelationshipStatus.Active);
-
-        const notification = await services1.consumption.notifications.getNotification({ id: id.toString() });
-        expect(notification).toBeSuccessful();
-    });
-
-    test("should be able to send Notifications and the peer should receive the Notifications in the right order after the reactiviation of the Relationship", async () => {
-        const ownSharedIdentityAttributeV0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "Own name"
-                }
-            }
-        });
-
-        const createdAttribut = await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
-        expect(createdAttribut).toBeDefined();
-
-        terminationResult = await services1.transport.relationships.terminateRelationship({ relationshipId });
-        await syncUntilHasRelationships(services2.transport);
-
-        const { successor: ownSharedIdentityAttributeV1 } = (
-            await services1.consumption.attributes.succeedRepositoryAttribute({
-                predecessorId: ownSharedIdentityAttributeV0.shareInfo!.sourceAttribute!,
-                successorContent: {
-                    value: {
-                        "@type": "GivenName",
-                        value: "New own name"
-                    }
-                }
-            })
-        ).value;
-
-        const result = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
-            attributeId: ownSharedIdentityAttributeV1.id,
-            peer: services2.address
-        });
-
-        await services1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
-            return e.data.successor.id === result.value.successor.id;
-        });
-
-        const notification = await services2.consumption.notifications.getNotification({ id: result.value.notificationId });
-        expect(notification).toBeAnError(/.*/, "error.transport.recordNotFound");
-
-        const createdAttribut0 = await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
-        expect(createdAttribut0.value.succeededBy).toBeUndefined();
-
-        await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttributeV0.id });
-
-        await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
-        await syncUntilHasRelationships(services2.transport);
-
-        const acceptanceResult = await services2.transport.relationships.acceptRelationshipReactivation({ relationshipId });
-        expect(acceptanceResult).toBeSuccessful();
-        expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
-
-        const relationship1 = (await syncUntilHasRelationships(services1.transport))[0];
-        expect(relationship1.status).toBe(RelationshipStatus.Active);
-
-        await syncUntilHasMessagesWithNotification(services2.transport);
-
-        await services2.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
-            return e.data.successor.id === result.value.successor.id;
-        });
-
-        await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
-            return e.data.id.toString() === ownSharedIdentityAttributeV0.id;
-        });
-
-        const updatedAttribute = await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
-        expect(updatedAttribute).toBeDefined();
-        expect(updatedAttribute.value.succeededBy).toBeDefined();
-
-        const successor = await services2.consumption.attributes.getAttribute({ id: updatedAttribute.value.succeededBy! });
-        expect(successor).toBeDefined();
-
-        expect((successor.value.content.value as IdentityFileReferenceJSON).value).toBe("New own name");
-
-        expect(CoreDate.from(acceptanceResult.value.auditLog[acceptanceResult.value.auditLog.length - 1].createdAt).isBefore(CoreDate.from(successor.value.createdAt))).toBe(true);
-
-        expect(CoreDate.from(successor.value.createdAt).isBefore(CoreDate.from(updatedAttribute.value.deletionInfo!.deletionDate))).toBe(true);
     });
 });
 

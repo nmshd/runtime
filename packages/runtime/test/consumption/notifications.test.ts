@@ -1,35 +1,53 @@
 import { ConsumptionIds } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
-import { CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreIdHelper } from "@nmshd/transport";
-import { ConsumptionServices, LocalNotificationStatus, RuntimeErrors, TransportServices } from "../../src";
+import {
+    ConsumptionServices,
+    LocalNotificationStatus,
+    OwnSharedAttributeSucceededEvent,
+    RelationshipReactivationCompletedEvent,
+    RelationshipStatus,
+    RuntimeErrors,
+    TransportServices
+} from "../../src";
 import {
     establishRelationship,
+    executeFullCreateAndShareRepositoryAttributeFlow,
     RuntimeServiceProvider,
     sendAndReceiveNotification,
+    syncUntilHasEvent,
+    syncUntilHasMessages,
     syncUntilHasMessageWithNotification,
+    syncUntilHasRelationships,
     TestNotificationItem,
-    TestNotificationItemProcessor
+    TestNotificationItemProcessor,
+    TestRuntimeServices
 } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
 let sConsumptionServices: ConsumptionServices;
+let sRuntimeServices: TestRuntimeServices;
 
+let rRuntimeServices: TestRuntimeServices;
 let rTransportServices: TransportServices;
 let rConsumptionServices: ConsumptionServices;
 let rAddress: string;
+let relationshipId: string;
 
 beforeAll(async () => {
-    const runtimeServices = await runtimeServiceProvider.launch(2);
+    const runtimeServices = await runtimeServiceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true });
+    sRuntimeServices = runtimeServices[1];
     sTransportServices = runtimeServices[1].transport;
     sConsumptionServices = runtimeServices[1].consumption;
 
+    rRuntimeServices = runtimeServices[0];
     rTransportServices = runtimeServices[0].transport;
     rConsumptionServices = runtimeServices[0].consumption;
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
-    await establishRelationship(sTransportServices, rTransportServices);
+    relationshipId = (await establishRelationship(sTransportServices, rTransportServices)).id;
 }, 30000);
 afterAll(async () => await runtimeServiceProvider.stop());
 
@@ -186,6 +204,157 @@ describe("Notifications", () => {
             expect(TestNotificationItemProcessor.rollbackedItems).toHaveLength(2);
 
             expect(TestNotificationItemProcessor.rollbackedItems.map((item) => item.identifier)).toStrictEqual(["b", "a"]);
+        });
+
+        test("should be able to send a Notification", async () => {
+            await rTransportServices.relationships.terminateRelationship({ relationshipId });
+            const syncedRelationship = (await syncUntilHasRelationships(sTransportServices))[0];
+            expect(syncedRelationship.status).toBe(RelationshipStatus.Terminated);
+
+            const id = await ConsumptionIds.notification.generate();
+            const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+
+            const result = await sTransportServices.messages.sendMessage({ recipients: [rAddress], content: notificationToSend.toJSON() });
+            expect(result).toBeSuccessful();
+
+            const notificationSent = await sConsumptionServices.notifications.sentNotification({ messageId: result.value.id });
+            expect(notificationSent).toBeSuccessful();
+
+            const response = await rTransportServices.messages.getMessages({});
+            expect(response).toBeSuccessful();
+            expect(response.value.length !== 1).toBe(true);
+
+            const notification = await rConsumptionServices.notifications.receivedNotification({ messageId: response.value[response.value.length - 1].id });
+            expect(notification).toBeSuccessful();
+            expect(notification.value.id.toString() !== id.toString()).toBe(true);
+
+            const getNotificationResult1 = await rConsumptionServices.notifications.getNotification({ id: id.toString() });
+            expect(getNotificationResult1).toBeAnError(/.*/, "error.transport.recordNotFound");
+        });
+
+        test("should be able to send a Notification and the peer should receive the Notification only after the reactiviation of the Relationship", async () => {
+            const id = await ConsumptionIds.notification.generate();
+            const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+
+            const result = await sTransportServices.messages.sendMessage({ recipients: [rAddress], content: notificationToSend.toJSON() });
+            expect(result).toBeSuccessful();
+
+            const notificationSent = await sConsumptionServices.notifications.sentNotification({ messageId: result.value.id });
+            expect(notificationSent).toBeSuccessful();
+
+            await rTransportServices.relationships.requestRelationshipReactivation({ relationshipId });
+            await syncUntilHasRelationships(sTransportServices);
+
+            const acceptanceResult = await sTransportServices.relationships.acceptRelationshipReactivation({ relationshipId });
+            expect(acceptanceResult).toBeSuccessful();
+            expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
+
+            const relationship1 = (await syncUntilHasRelationships(rTransportServices))[0];
+            expect(relationship1.status).toBe(RelationshipStatus.Active);
+
+            await syncUntilHasEvent(sRuntimeServices, RelationshipReactivationCompletedEvent, (e) => e.data.id === relationshipId);
+            await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+            await syncUntilHasEvent(rRuntimeServices, RelationshipReactivationCompletedEvent, (e) => e.data.id === relationshipId);
+            await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+            const response = await rTransportServices.messages.getMessages({});
+            expect(response).toBeSuccessful();
+            expect(response.value.length !== 1).toBe(true);
+
+            const notification = await rConsumptionServices.notifications.receivedNotification({ messageId: response.value[response.value.length - 1].id });
+            expect(notification).toBeSuccessful();
+            expect(notification.value.id.toString() === id.toString()).toBe(true);
+
+            const getNotificationResult0 = await rConsumptionServices.notifications.getNotification({ id: id.toString() });
+            expect(getNotificationResult0).toBeSuccessful();
+        });
+
+        test("should be able to send Notifications and the peer should receive the Notifications in the right order after the reactiviation of the Relationship", async () => {
+            const ownSharedIdentityAttributeV0 = await executeFullCreateAndShareRepositoryAttributeFlow(rRuntimeServices, sRuntimeServices, {
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "Own name"
+                    }
+                }
+            });
+
+            const createdAttribut = await sConsumptionServices.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
+            expect(createdAttribut).toBeDefined();
+
+            await rTransportServices.relationships.terminateRelationship({ relationshipId });
+            const syncedRelationship = (await syncUntilHasRelationships(sTransportServices))[0];
+            expect(syncedRelationship.status).toBe(RelationshipStatus.Terminated);
+
+            const { successor: ownSharedIdentityAttributeV1 } = (
+                await rConsumptionServices.attributes.succeedRepositoryAttribute({
+                    predecessorId: ownSharedIdentityAttributeV0.shareInfo!.sourceAttribute!,
+                    successorContent: {
+                        value: {
+                            "@type": "GivenName",
+                            value: "New own name"
+                        }
+                    }
+                })
+            ).value;
+
+            const result = await rConsumptionServices.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+                attributeId: ownSharedIdentityAttributeV1.id,
+                peer: sRuntimeServices.address
+            });
+
+            await rRuntimeServices.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
+                return e.data.successor.id === result.value.successor.id;
+            });
+
+            const notification = await sConsumptionServices.notifications.getNotification({ id: result.value.notificationId });
+            expect(notification).toBeAnError(/.*/, "error.transport.recordNotFound");
+
+            const createdAttribute = await sConsumptionServices.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
+            expect(createdAttribute.value.succeededBy).toBeUndefined();
+
+            await rConsumptionServices.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttributeV0.id });
+
+            await rTransportServices.relationships.requestRelationshipReactivation({ relationshipId });
+            await syncUntilHasRelationships(sTransportServices);
+
+            const acceptanceResult = await sTransportServices.relationships.acceptRelationshipReactivation({ relationshipId });
+            expect(acceptanceResult).toBeSuccessful();
+            expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
+
+            const relationship1 = (await syncUntilHasRelationships(rTransportServices))[0];
+            expect(relationship1.status).toBe(RelationshipStatus.Active);
+
+            const messages = await syncUntilHasMessages(sTransportServices);
+            expect(messages.length === 2).toBe(true);
+
+            const notification0 = await sConsumptionServices.notifications.receivedNotification({ messageId: messages[0].id });
+            expect(notification0).toBeSuccessful();
+
+            const notification1 = await sConsumptionServices.notifications.receivedNotification({ messageId: messages[1].id });
+            expect(notification1).toBeSuccessful();
+
+            await sConsumptionServices.notifications.processNotificationById({ notificationId: notification0.value.id });
+
+            const createdAttribute0 = await sConsumptionServices.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
+            expect(createdAttribute0.value.succeededBy).toBeDefined();
+            expect(createdAttribute0.value.deletionInfo).toBeUndefined();
+
+            await sConsumptionServices.notifications.processNotificationById({ notificationId: notification1.value.id });
+
+            const createdAttribute1 = await sConsumptionServices.attributes.getAttribute({ id: ownSharedIdentityAttributeV0.id });
+            expect(createdAttribute1.value.succeededBy).toBeDefined();
+            expect(createdAttribute1.value.deletionInfo).toBeDefined();
+
+            const successor = await sConsumptionServices.attributes.getAttribute({ id: createdAttribute1.value.succeededBy! });
+            expect(successor).toBeDefined();
+
+            expect(CoreDate.from(acceptanceResult.value.auditLog[acceptanceResult.value.auditLog.length - 1].createdAt).isBefore(CoreDate.from(successor.value.createdAt))).toBe(
+                true
+            );
+
+            expect(CoreDate.from(successor.value.createdAt).isBefore(CoreDate.from(createdAttribute1.value.deletionInfo!.deletionDate))).toBe(true);
         });
     });
 });
