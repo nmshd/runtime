@@ -7,6 +7,13 @@ export interface RequestMessageDVO extends Omit<MessageDVO, "type"> {
     request: LocalRequestDVO;
 }
 
+export interface RequestMessageErrorDVO extends Omit<MessageDVO, "type"> {
+    type: "RequestMessageErrorDVO";
+
+    code: string;
+    message: string;
+}
+
 export interface MailDVO extends Omit<MessageDVO, "type"> {
     type: "MailDVO";
 
