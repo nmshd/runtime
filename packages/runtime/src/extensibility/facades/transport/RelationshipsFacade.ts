@@ -6,6 +6,9 @@ import {
     AcceptRelationshipReactivationUseCase,
     AcceptRelationshipRequest,
     AcceptRelationshipUseCase,
+    CanCreateRelationshipRequest,
+    CanCreateRelationshipResponse,
+    CanCreateRelationshipUseCase,
     CreateRelationshipRequest,
     CreateRelationshipUseCase,
     DecomposeRelationshipRequest,
@@ -32,7 +35,6 @@ import {
     TerminateRelationshipRequest,
     TerminateRelationshipUseCase
 } from "../../../useCases";
-import { CanCreateRelationshipRequest, CanCreateRelationshipResponse, CanCreateRelationshipUseCase } from "../../../useCases/transport/relationships/CanCreateRelationship";
 
 export class RelationshipsFacade {
     public constructor(
