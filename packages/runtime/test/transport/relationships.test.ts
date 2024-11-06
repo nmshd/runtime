@@ -136,8 +136,7 @@ describe("Can Create / Create Relationship", () => {
 
         const canCreateRelationshipResponse = (
             await services2.transport.relationships.canCreateRelationship({
-                templateId: templateId,
-                creationContent: emptyRelationshipCreationContent
+                templateId: templateId
             })
         ).value;
 
@@ -167,8 +166,7 @@ describe("Can Create / Create Relationship", () => {
 
         const canCreateRelationshipResponse = (
             await services2.transport.relationships.canCreateRelationship({
-                templateId: templateId,
-                creationContent: emptyRelationshipCreationContent
+                templateId: templateId
             })
         ).value;
 
@@ -219,8 +217,7 @@ describe("Can Create / Create Relationship", () => {
 
             const canCreateRelationshipResponse = (
                 await services2.transport.relationships.canCreateRelationship({
-                    templateId: templateId,
-                    creationContent: emptyRelationshipCreationContent
+                    templateId: templateId
                 })
             ).value;
 
@@ -978,8 +975,7 @@ describe("RelationshipDecomposition", () => {
 
         const canCreateRelationshipResponse = (
             await services1.transport.relationships.canCreateRelationship({
-                templateId: templateId,
-                creationContent: emptyRelationshipCreationContent
+                templateId: templateId
             })
         ).value;
 
