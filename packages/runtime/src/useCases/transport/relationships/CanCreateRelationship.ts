@@ -29,9 +29,10 @@ export type CanCreateRelationshipResponse =
 export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipRequest, CanCreateRelationshipResponse> {
     public constructor(
         @Inject private readonly relationshipController: RelationshipsController,
-        @Inject private readonly relationshipTemplateController: RelationshipTemplateController
+        @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
+        @Inject validator: Validator
     ) {
-        super();
+        super(validator);
     }
 
     protected async executeInternal(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse>> {
