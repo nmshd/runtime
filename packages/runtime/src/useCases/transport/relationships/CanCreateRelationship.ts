@@ -4,8 +4,19 @@ import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } fro
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, UseCase } from "../../common";
-import { CreateRelationshipRequest } from "./CreateRelationship";
+import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import {} from "./CreateRelationship";
+
+export interface CanCreateRelationshipRequest {
+    templateId: RelationshipTemplateIdString;
+    creationContent?: any;
+}
+
+class Validator extends SchemaValidator<CanCreateRelationshipRequest> {
+    public constructor(@Inject schemaRepository: SchemaRepository) {
+        super(schemaRepository.getSchema("CanCreateRelationshipRequest"));
+    }
+}
 
 export type CanCreateRelationshipResponse =
     | { isSuccess: true }
@@ -15,7 +26,7 @@ export type CanCreateRelationshipResponse =
           message: string;
       };
 
-export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequest, CanCreateRelationshipResponse> {
+export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipRequest, CanCreateRelationshipResponse> {
     public constructor(
         @Inject private readonly relationshipController: RelationshipsController,
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController
@@ -23,7 +34,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
         super();
     }
 
-    protected async executeInternal(request: CreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse>> {
+    protected async executeInternal(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse>> {
         const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
         if (!template) {
             const error = RuntimeErrors.general.recordNotFound(RelationshipTemplate);
@@ -35,12 +46,14 @@ export class CanCreateRelationshipUseCase extends UseCase<CreateRelationshipRequ
             return Result.ok({ isSuccess: false, code: error.code, message: error.message });
         }
 
-        const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
-        if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
-            const error = RuntimeErrors.general.invalidPropertyValue(
-                "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
-            );
-            return Result.ok({ isSuccess: false, code: error.code, message: error.message });
+        if (request.creationContent) {
+            const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
+            if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
+                const error = RuntimeErrors.general.invalidPropertyValue(
+                    "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
+                );
+                return Result.ok({ isSuccess: false, code: error.code, message: error.message });
+            }
         }
 
         const canSendRelationship = await this.relationshipController.canSendRelationship({ creationContent: request.creationContent, template });
