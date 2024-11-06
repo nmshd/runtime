@@ -5,7 +5,6 @@ import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import {} from "./CreateRelationship";
 
 export interface CanCreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
