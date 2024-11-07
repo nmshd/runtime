@@ -22383,6 +22383,30 @@ export const AcceptRelationshipReactivationRequest: any = {
     }
 }
 
+export const CanCreateRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CanCreateRelationshipRequest",
+    "definitions": {
+        "CanCreateRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                },
+                "creationContent": {}
+            },
+            "required": [
+                "templateId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const CreateRelationshipRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateRelationshipRequest",
@@ -22910,30 +22934,6 @@ export const LoadPeerTokenRequest: any = {
         "TokenReferenceString": {
             "type": "string",
             "pattern": "VE9L.{84}"
-        }
-    }
-}
-
-export const CanCreateRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CanCreateRelationshipRequest",
-    "definitions": {
-        "CanCreateRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "creationContent": {}
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
         }
     }
 }
