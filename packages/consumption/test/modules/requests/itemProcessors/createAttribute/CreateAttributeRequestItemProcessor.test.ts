@@ -254,12 +254,15 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await When.iCallCanAccept();
             await Then.theCanAcceptResultShouldBeASuccess();
-
-            await When.iCallAccept();
-            await Then.aLocalRelationshipAttributeWithShareInfoForThePeerIsCreated();
         });
 
         test("cannot create another RelationshipAttribute with same key", async function () {
+            const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.RECIPIENT
+            });
+
+            await When.iCreateARelationshipAttribute(relationshipAttributeOfRecipient);
+
             await Given.aRequestItemWithARelationshipAttribute({
                 attributeOwner: TestIdentity.RECIPIENT
             });
@@ -270,6 +273,12 @@ describe("CreateAttributeRequestItemProcessor", function () {
         });
 
         test("cannot create another RelationshipAttribute with same key even if the owner of the provided Relationship Attribute is an empty string", async function () {
+            const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER
+            });
+
+            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+
             await Given.aRequestItemWithARelationshipAttribute({
                 attributeOwner: TestIdentity.EMPTY
             });
