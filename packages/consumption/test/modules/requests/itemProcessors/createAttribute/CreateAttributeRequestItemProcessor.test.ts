@@ -251,6 +251,10 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Given.aRequestItemWithARelationshipAttribute({
                 attributeOwner: TestIdentity.RECIPIENT
             });
+
+            const canAcceptResult = await When.iCallCanAccept();
+            expect(canAcceptResult.isSuccess).toBe(true);
+
             await When.iCallAccept();
             await Then.aLocalRelationshipAttributeWithShareInfoForThePeerIsCreated();
         });
@@ -260,7 +264,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 attributeOwner: TestIdentity.RECIPIENT
             });
 
-            await expect(When.iCallAccept()).rejects.toThrow(
+            await expect(When.iCallCanAccept()).rejects.toThrow(
                 "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
             );
         });
@@ -270,7 +274,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 attributeOwner: TestIdentity.EMPTY
             });
 
-            await expect(When.iCallAccept()).rejects.toThrow(
+            await expect(When.iCallCanAccept()).rejects.toThrow(
                 "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
             );
         });

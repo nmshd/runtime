@@ -234,6 +234,13 @@ export class WhenSteps {
         this.context.canCreateResult = await this.context.processor.canCreateOutgoingRequestItem(requestItem, null!, this.context.translateTestIdentity(recipient));
     }
 
+    public async iCallCanAccept(): Promise<ValidationResult> {
+        return await this.context.processor.canAccept(this.context.givenRequestItem, null!, {
+            id: CoreId.from("request-id"),
+            peer: this.context.peerAddress
+        });
+    }
+
     public async iCallAccept(): Promise<void> {
         this.context.responseItemAfterAction = await this.context.processor.accept(this.context.givenRequestItem, null!, {
             id: CoreId.from("request-id"),
