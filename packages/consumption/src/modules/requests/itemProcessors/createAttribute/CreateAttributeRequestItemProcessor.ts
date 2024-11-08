@@ -1,4 +1,12 @@
-import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, IdentityAttribute, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
+import {
+    CreateAttributeAcceptResponseItem,
+    CreateAttributeRequestItem,
+    IdentityAttribute,
+    RejectResponseItem,
+    RelationshipAttribute,
+    Request,
+    ResponseItemResult
+} from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../../consumption/ConsumptionError";
@@ -78,6 +86,27 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         return ValidationResult.success();
     }
 
+    public override async canAccept(requestItem: CreateAttributeRequestItem, _params: AcceptRequestItemParametersJSON, requestInfo: LocalRequestInfo): Promise<ValidationResult> {
+        if (requestItem.attribute instanceof RelationshipAttribute) {
+            const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
+
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                requestItem.attribute.key,
+                ownerIsEmptyString ? this.currentIdentityAddress : requestItem.attribute.owner,
+                requestItem.attribute.value.toJSON()["@type"],
+                requestInfo.peer
+            );
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                throw new ConsumptionError(
+                    "The RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                );
+            }
+        }
+
+        return ValidationResult.success();
+    }
+
     public override async accept(
         requestItem: CreateAttributeRequestItem,
         _params: AcceptRequestItemParametersJSON,
@@ -100,19 +129,6 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 sourceAttributeId: repositoryAttribute.id
             });
         } else {
-            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
-                requestItem.attribute.key,
-                requestItem.attribute.owner,
-                requestItem.attribute.value.toJSON()["@type"],
-                requestInfo.peer
-            );
-
-            if (relationshipAttributesWithSameKey.length !== 0) {
-                throw new ConsumptionError(
-                    "The RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
-                );
-            }
-
             sharedAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
                 content: requestItem.attribute,
                 peer: requestInfo.peer,
