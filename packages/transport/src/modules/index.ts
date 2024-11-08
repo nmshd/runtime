@@ -114,7 +114,7 @@ export * from "./sync/SyncController";
 export * from "./sync/SynchronizedCollection";
 export * from "./tags/backbone/BackboneGetTag";
 export * from "./tags/backbone/TagClient";
-export * from "./tags/TagController";
+export * from "./tags/TagsController";
 export * from "./tokens/AnonymousTokenController";
 export * from "./tokens/backbone/BackboneGetTokens";
 export * from "./tokens/backbone/BackbonePostTokens";

@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
-describe("AccountController", function () {
+describe("TagsController", function () {
     let connection: IDatabaseConnection;
 
     let transport: Transport;
@@ -25,7 +25,7 @@ describe("AccountController", function () {
         await connection.close();
     });
 
-    test("should receive the legal tags", async function () {
+    test("should receive the legal tags from backbone", async function () {
         const tags = await account.tags.getTags();
 
         expect(tags).toBeDefined();
