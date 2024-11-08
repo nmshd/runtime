@@ -25,7 +25,7 @@ import validateQuery from "../utility/validateQuery";
 import { AcceptProposeAttributeRequestItemParameters, AcceptProposeAttributeRequestItemParametersJSON } from "./AcceptProposeAttributeRequestItemParameters";
 
 export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProcessor<ProposeAttributeRequestItem, AcceptProposeAttributeRequestItemParametersJSON> {
-    public override canCreateOutgoingRequestItem(requestItem: ProposeAttributeRequestItem, _request: Request, recipient?: CoreAddress): ValidationResult {
+    public override async canCreateOutgoingRequestItem(requestItem: ProposeAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const queryValidationResult = this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
@@ -44,6 +44,23 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         );
         if (proposedAttributeMatchesWithQueryValidationResult.isError()) {
             return proposedAttributeMatchesWithQueryValidationResult;
+        }
+
+        if (requestItem.attribute instanceof RelationshipAttribute && typeof recipient !== "undefined") {
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                requestItem.attribute.key,
+                recipient,
+                requestItem.attribute.value.toJSON()["@type"],
+                recipient
+            );
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "The proposed RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    )
+                );
+            }
         }
 
         return ValidationResult.success();
