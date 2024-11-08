@@ -61,7 +61,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         if (typeof recipient !== "undefined") {
             const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
                 requestItem.attribute.key,
-                requestItem.attribute.owner,
+                ownerIsEmptyString ? recipient : requestItem.attribute.owner,
                 requestItem.attribute.value.toJSON()["@type"],
                 recipient
             );

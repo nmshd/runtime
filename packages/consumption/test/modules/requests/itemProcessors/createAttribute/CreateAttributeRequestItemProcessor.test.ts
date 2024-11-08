@@ -154,6 +154,26 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
+        test("returns Error on violation of key uniqueness even if the owner of the provided Relationship Attribute is an empty string as long as the Recipient is known", async function () {
+            const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.RECIPIENT,
+                key: "UniqueKey"
+            });
+
+            await When.iCreateARelationshipAttribute(relationshipAttributeOfRecipient);
+
+            const relationshipAttributeWithSameKeyAndEmptyOwner = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.EMPTY,
+                key: "UniqueKey"
+            });
+
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKeyAndEmptyOwner }, TestIdentity.RECIPIENT);
+            await Then.theResultShouldBeAnErrorWith({
+                message:
+                    "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+            });
+        });
+
         test("returns Success when passing a Relationship Attribute with same key but different owner", async function () {
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
