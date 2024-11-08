@@ -1,19 +1,38 @@
-import { ConsentRequestItemJSON } from "@nmshd/content";
-import { CoreDate } from "@nmshd/core-types";
-import { GetMessagesQuery, MessageReceivedEvent, MessageSentEvent, MessageWasReadAtChangedEvent } from "../../src";
+import { ConsumptionIds } from "@nmshd/consumption";
+import { ConsentRequestItemJSON, Notification, ResponseWrapperJSON, ShareAttributeAcceptResponseItemJSON } from "@nmshd/content";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import {
-    QueryParamConditions,
-    RuntimeServiceProvider,
-    TestRuntimeServices,
+    GetMessagesQuery,
+    IncomingRequestStatusChangedEvent,
+    LocalRequestStatus,
+    MessageDTO,
+    MessageReceivedEvent,
+    MessageSentEvent,
+    MessageWasReadAtChangedEvent,
+    OutgoingRequestStatusChangedEvent,
+    OwnSharedAttributeSucceededEvent,
+    RelationshipReactivationCompletedEvent,
+    RelationshipStatus,
+    ShareRepositoryAttributeRequest
+} from "../../src";
+import {
     emptyRelationshipCreationContent,
     ensureActiveRelationship,
     establishRelationship,
     exchangeMessage,
     exchangeMessageWithAttachment,
     exchangeTemplate,
+    QueryParamConditions,
+    RuntimeServiceProvider,
     sendMessage,
+    syncUntilHasEvent,
     syncUntilHasMessage,
+    syncUntilHasMessages,
+    syncUntilHasMessageWithRequest,
+    syncUntilHasMessageWithResponse,
     syncUntilHasRelationships,
+    TestNotificationItem,
+    TestRuntimeServices,
     uploadFile
 } from "../lib";
 
@@ -132,6 +151,8 @@ describe("Messaging", () => {
 describe("Message errors", () => {
     let requestItem: ConsentRequestItemJSON;
     let requestId: string;
+    let relationshipIdToClient5: string;
+    let notificationId: CoreId;
     beforeAll(async () => {
         requestItem = {
             "@type": "ConsentRequestItem",
@@ -304,6 +325,233 @@ describe("Message errors", () => {
             `An active Relationship with the given address '${client4.address.toString()}' does not exist, so you cannot send them a Message.`,
             "error.transport.messages.hasNoActiveRelationship"
         );
+    });
+
+    test("should not send a message when the Relationship is terminated", async () => {
+        relationshipIdToClient5 = (await ensureActiveRelationship(client5.transport, client1.transport)).id;
+        const getRelationshipsResult = await client5.transport.relationships.getRelationships({});
+        expect(getRelationshipsResult).toBeSuccessful();
+        expect(getRelationshipsResult.value).toHaveLength(1);
+        expect(getRelationshipsResult.value[0].status).toBe(RelationshipStatus.Active);
+
+        await client1.transport.relationships.terminateRelationship({ relationshipId: relationshipIdToClient5 });
+        const syncedRelationship = (await syncUntilHasRelationships(client5.transport))[0];
+        expect(syncedRelationship.status).toBe(RelationshipStatus.Terminated);
+
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client5.address],
+            content: {
+                "@type": "Mail",
+                body: "b",
+                cc: [],
+                subject: "a",
+                to: [client5.address]
+            }
+        });
+        expect(result).toBeAnError(/.*/, "error.transport.messages.hasNoActiveRelationship");
+    });
+
+    test("should be able to send a Notification when the Relationship is terminated", async () => {
+        notificationId = await ConsumptionIds.notification.generate();
+        const notificationToSend = Notification.from({ id: notificationId, items: [TestNotificationItem.from({})] });
+
+        const result = await client1.transport.messages.sendMessage({ recipients: [client5.address], content: notificationToSend.toJSON() });
+        expect(result).toBeSuccessful();
+
+        const notificationSent = await client1.consumption.notifications.sentNotification({ messageId: result.value.id });
+        expect(notificationSent).toBeSuccessful();
+
+        const response = await client5.transport.messages.getMessages({});
+        expect(response).toBeSuccessful();
+        expect(response.value.length === 0).toBe(true);
+
+        const getNotificationResult1 = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
+        expect(getNotificationResult1).toBeAnError(/.*/, "error.transport.recordNotFound");
+    });
+
+    test("should be able to send a Notification and the peer should receive the Notification only after the reactiviation of the Relationship", async () => {
+        await client1.transport.relationships.requestRelationshipReactivation({ relationshipId: relationshipIdToClient5 });
+        await syncUntilHasRelationships(client5.transport);
+
+        const acceptanceResult = await client5.transport.relationships.acceptRelationshipReactivation({ relationshipId: relationshipIdToClient5 });
+        expect(acceptanceResult).toBeSuccessful();
+        expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
+
+        const relationship1 = await syncUntilHasRelationships(client1.transport);
+        expect(relationship1[relationship1.length - 1].status).toBe(RelationshipStatus.Active);
+
+        await syncUntilHasEvent(client1, RelationshipReactivationCompletedEvent, (e) => e.data.id === relationshipIdToClient5);
+        await client1.eventBus.waitForRunningEventHandlers();
+
+        await syncUntilHasEvent(client5, RelationshipReactivationCompletedEvent, (e) => e.data.id === relationshipIdToClient5);
+        await client5.eventBus.waitForRunningEventHandlers();
+
+        const response = await client5.transport.messages.getMessages({});
+        expect(response).toBeSuccessful();
+        expect(response.value.length === 1).toBe(true);
+
+        const notification = await client5.consumption.notifications.receivedNotification({ messageId: response.value[response.value.length - 1].id });
+        expect(notification).toBeSuccessful();
+        expect(notification.value.id.toString() === notificationId.toString()).toBe(true);
+
+        const getNotificationResult0 = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
+        expect(getNotificationResult0).toBeSuccessful();
+    });
+
+    test("should be able to send Notifications and the peer should receive the Notifications in the right order after the reactiviation of the Relationship", async () => {
+        const ownSharedIdentityAttribute = (
+            await client1.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "Own name"
+                    }
+                }
+            })
+        ).value;
+
+        const createdAttribute = client1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id });
+        expect(createdAttribute).toBeDefined();
+
+        const shareRequest: ShareRepositoryAttributeRequest = {
+            attributeId: ownSharedIdentityAttribute.id,
+            peer: client5.address
+        };
+        const shareRequestResult = await client1.consumption.attributes.shareRepositoryAttribute(shareRequest);
+        expect(shareRequestResult.isSuccess).toBe(true);
+
+        const shareMessage = await syncUntilHasMessageWithRequest(client5.transport, shareRequestResult.value.id);
+        expect(shareMessage.id).toBeDefined();
+
+        await client1.consumption.outgoingRequests.sent({ requestId: shareRequestResult.value.id, messageId: shareMessage.id });
+
+        await client5.consumption.incomingRequests.received({
+            receivedRequest: shareMessage.content,
+            requestSourceId: shareMessage.id
+        });
+
+        await client5.consumption.incomingRequests.checkPrerequisites({
+            requestId: shareMessage.content.id!
+        });
+
+        await client5.consumption.incomingRequests.requireManualDecision({
+            requestId: shareMessage.content.id!
+        });
+
+        await client5.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.ManualDecisionRequired);
+
+        const shareRequestId = shareRequestResult.value.id;
+        expect(shareRequestId).toBeDefined();
+
+        const acceptedRequest = await client5.consumption.incomingRequests.accept({ requestId: shareMessage.content.id!, items: [{ accept: true }] });
+        expect(acceptedRequest.isSuccess).toBe(true);
+
+        const rResponseMessage = (
+            await client5.transport.messages.sendMessage({
+                content: {
+                    "@type": "ResponseWrapper",
+                    requestId: shareRequestId,
+                    requestSourceReference: shareMessage.id,
+                    requestSourceType: "Message",
+                    response: acceptedRequest.value.response!.content
+                },
+                recipients: [(await client1.transport.account.getIdentityInfo()).value.address]
+            })
+        ).value as MessageDTO & { content: ResponseWrapperJSON };
+        expect(rResponseMessage).toBeDefined();
+
+        await client5.consumption.incomingRequests.complete({
+            requestId: rResponseMessage.content.requestId,
+            responseSourceId: rResponseMessage.id
+        });
+
+        const sResponseMessage = await syncUntilHasMessageWithResponse(client1.transport, shareRequestId);
+
+        await client1.consumption.outgoingRequests.complete({
+            messageId: sResponseMessage.id,
+            receivedResponse: sResponseMessage.content.response
+        });
+        await client1.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+
+        const sharedAttributeId = (sResponseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
+
+        const sharedAttribute = (await client5.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+        expect(sharedAttribute.shareInfo).toBeDefined();
+        const sharedAttribute1 = (await client1.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+        expect(sharedAttribute1).toBeDefined();
+
+        await client1.transport.relationships.terminateRelationship({ relationshipId: relationshipIdToClient5 });
+        const syncedRelationship = (await syncUntilHasRelationships(client5.transport))[0];
+        expect(syncedRelationship.status).toBe(RelationshipStatus.Terminated);
+
+        const { successor: ownSharedIdentityAttributeV1 } = (
+            await client1.consumption.attributes.succeedRepositoryAttribute({
+                predecessorId: ownSharedIdentityAttribute.id,
+                successorContent: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "New own name"
+                    }
+                }
+            })
+        ).value;
+        expect(ownSharedIdentityAttributeV1).toBeDefined();
+
+        const result = await client1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+            attributeId: ownSharedIdentityAttributeV1.id,
+            peer: client5.address
+        });
+        expect(result).toBeSuccessful();
+
+        await client1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
+            return e.data.successor.id === result.value.successor.id;
+        });
+
+        const notification = await client5.consumption.notifications.getNotification({ id: result.value.notificationId });
+        expect(notification).toBeAnError(/.*/, "error.transport.recordNotFound");
+        const succeededAttribute = await client5.consumption.attributes.getAttribute({ id: sharedAttributeId });
+        expect(succeededAttribute.value.succeededBy).toBeUndefined();
+
+        const resultDeletion = await client1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+        expect(resultDeletion).toBeSuccessful();
+
+        await client1.transport.relationships.requestRelationshipReactivation({ relationshipId: relationshipIdToClient5 });
+        await syncUntilHasRelationships(client5.transport);
+
+        const acceptanceResult = await client5.transport.relationships.acceptRelationshipReactivation({ relationshipId: relationshipIdToClient5 });
+        expect(acceptanceResult).toBeSuccessful();
+        expect(acceptanceResult.value.status).toBe(RelationshipStatus.Active);
+
+        const relationship1 = await syncUntilHasRelationships(client1.transport);
+        expect(relationship1[relationship1.length - 1].status).toBe(RelationshipStatus.Active);
+
+        const messages = await syncUntilHasMessages(client5.transport);
+        expect(messages.length === 2).toBe(true);
+
+        const notification0 = await client5.consumption.notifications.receivedNotification({ messageId: messages[0].id });
+        expect(notification0).toBeSuccessful();
+
+        const notification1 = await client5.consumption.notifications.receivedNotification({ messageId: messages[1].id });
+        expect(notification1).toBeSuccessful();
+
+        await client5.consumption.notifications.processNotificationById({ notificationId: notification0.value.id });
+
+        const createdAttribute0 = await client5.consumption.attributes.getAttribute({ id: sharedAttributeId });
+        expect(createdAttribute0.value.succeededBy).toBeDefined();
+        expect(createdAttribute0.value.deletionInfo).toBeUndefined();
+
+        await client5.consumption.notifications.processNotificationById({ notificationId: notification1.value.id });
+
+        const createdAttribute1 = await client5.consumption.attributes.getAttribute({ id: sharedAttributeId });
+        expect(createdAttribute1.value.succeededBy).toBeDefined();
+        expect(createdAttribute1.value.deletionInfo).toBeDefined();
+
+        const successor = await client5.consumption.attributes.getAttribute({ id: createdAttribute1.value.succeededBy! });
+        expect(successor).toBeDefined();
+
+        expect(CoreDate.from(acceptanceResult.value.auditLog[acceptanceResult.value.auditLog.length - 1].createdAt).isBefore(CoreDate.from(successor.value.createdAt))).toBe(true);
+
+        expect(CoreDate.from(successor.value.createdAt).isBefore(CoreDate.from(createdAttribute1.value.deletionInfo!.deletionDate))).toBe(true);
     });
 });
 
