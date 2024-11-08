@@ -37,7 +37,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfRecipient });
-            await Then.theResultShouldBeASuccess();
+            await Then.theCanCreateResultShouldBeASuccess();
         });
 
         test("returns an Error when passing an Identity Attribute with owner={{Sender}}", async function () {
@@ -46,7 +46,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSender });
-            await Then.theResultShouldBeAnErrorWith({
+            await Then.theCanCreateResultShouldBeAnErrorWith({
                 message: "Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
             });
         });
@@ -57,7 +57,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeWithEmptyOwner });
-            await Then.theResultShouldBeASuccess();
+            await Then.theCanCreateResultShouldBeASuccess();
         });
 
         test("returns an Error when passing an Identity Attribute with owner={{SomeoneElse}}", async function () {
@@ -66,7 +66,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSomeoneElse });
-            await Then.theResultShouldBeAnErrorWith({
+            await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
                     "The owner of the provided IdentityAttribute for the `attribute` property can only be the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
             });
@@ -78,7 +78,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSomeoneElse }, TestIdentity.UNDEFINED);
-            await Then.theResultShouldBeAnErrorWith({
+            await Then.theCanCreateResultShouldBeAnErrorWith({
                 message: "The owner of the provided IdentityAttribute for the `attribute` property can only be an empty string. It will default to the Recipient's Address."
             });
         });
@@ -89,7 +89,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfRecipient });
-            await Then.theResultShouldBeASuccess();
+            await Then.theCanCreateResultShouldBeASuccess();
         });
 
         test("returns Success when passing a Relationship Attribute with owner={{Sender}}", async function () {
@@ -98,7 +98,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSender });
-            await Then.theResultShouldBeASuccess();
+            await Then.theCanCreateResultShouldBeASuccess();
         });
 
         test("returns Success when passing a Relationship Attribute with owner={{Empty}}", async function () {
@@ -107,7 +107,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithEmptyOwner });
-            await Then.theResultShouldBeASuccess();
+            await Then.theCanCreateResultShouldBeASuccess();
         });
 
         test("returns an Error when passing a Relationship Attribute with owner={{SomeoneElse}}", async function () {
@@ -116,7 +116,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSomeoneElse });
-            await Then.theResultShouldBeAnErrorWith({
+            await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
                     "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address, the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
             });
@@ -128,7 +128,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSomeoneElse }, TestIdentity.UNDEFINED);
-            await Then.theResultShouldBeAnErrorWith({
+            await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
                     "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
             });
@@ -148,7 +148,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKey }, TestIdentity.RECIPIENT);
-            await Then.theResultShouldBeAnErrorWith({
+            await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
                     "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
             });
@@ -168,7 +168,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKeyAndEmptyOwner }, TestIdentity.RECIPIENT);
-            await Then.theResultShouldBeAnErrorWith({
+            await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
                     "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
             });
@@ -188,7 +188,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfRecipient }, TestIdentity.RECIPIENT);
-            await Then.theResultShouldBeASuccess();
+            await Then.theCanCreateResultShouldBeASuccess();
         });
 
         test("returns Success when passing a Relationship Attribute with same key but different value type", async function () {
@@ -207,7 +207,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfRecipient }, TestIdentity.RECIPIENT);
-            await Then.theResultShouldBeASuccess();
+            await Then.theCanCreateResultShouldBeASuccess();
         });
 
         test("returns Success when passing a Relationship Attribute with same key as a Relationship Attribute in deletion", async function () {
@@ -225,7 +225,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKey }, TestIdentity.RECIPIENT);
-            await Then.theResultShouldBeASuccess();
+            await Then.theCanCreateResultShouldBeASuccess();
         });
 
         test("returns Success when passing a Relationship Attribute with same key as an already existing ThirdPartyRelationshipAttribute", async function () {
@@ -242,7 +242,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSender }, TestIdentity.RECIPIENT);
-            await Then.theResultShouldBeASuccess();
+            await Then.theCanCreateResultShouldBeASuccess();
         });
     });
 
@@ -252,8 +252,8 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 attributeOwner: TestIdentity.RECIPIENT
             });
 
-            const canAcceptResult = await When.iCallCanAccept();
-            expect(canAcceptResult.isSuccess).toBe(true);
+            await When.iCallCanAccept();
+            await Then.theCanAcceptResultShouldBeASuccess();
 
             await When.iCallAccept();
             await Then.aLocalRelationshipAttributeWithShareInfoForThePeerIsCreated();

@@ -23,6 +23,7 @@ export class Context {
     public givenResponseItem: CreateAttributeAcceptResponseItem;
     public givenRequestItem: CreateAttributeRequestItem;
     public canCreateResult: ValidationResult;
+    public canAcceptResult: ValidationResult;
     public peerAddress: CoreAddress;
     public responseItemAfterAction: CreateAttributeAcceptResponseItem;
     public createdAttributeAfterAction: LocalAttribute;
@@ -125,13 +126,18 @@ export class GivenSteps {
 export class ThenSteps {
     public constructor(private readonly context: Context) {}
 
-    public theResultShouldBeASuccess(): Promise<void> {
+    public theCanCreateResultShouldBeASuccess(): Promise<void> {
         expect(this.context.canCreateResult).successfulValidationResult();
         return Promise.resolve();
     }
 
-    public theResultShouldBeAnErrorWith(error: { message?: string | RegExp; code?: string }): Promise<void> {
+    public theCanCreateResultShouldBeAnErrorWith(error: { message?: string | RegExp; code?: string }): Promise<void> {
         expect(this.context.canCreateResult).errorValidationResult(error);
+        return Promise.resolve();
+    }
+
+    public theCanAcceptResultShouldBeASuccess(): Promise<void> {
+        expect(this.context.canAcceptResult).successfulValidationResult();
         return Promise.resolve();
     }
 
@@ -234,8 +240,8 @@ export class WhenSteps {
         this.context.canCreateResult = await this.context.processor.canCreateOutgoingRequestItem(requestItem, null!, this.context.translateTestIdentity(recipient));
     }
 
-    public async iCallCanAccept(): Promise<ValidationResult> {
-        return await this.context.processor.canAccept(this.context.givenRequestItem, null!, {
+    public async iCallCanAccept(): Promise<void> {
+        this.context.canAcceptResult = await this.context.processor.canAccept(this.context.givenRequestItem, null!, {
             id: CoreId.from("request-id"),
             peer: this.context.peerAddress
         });
