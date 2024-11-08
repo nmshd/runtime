@@ -44,7 +44,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         }
 
         if (requestItem.query instanceof RelationshipAttributeQuery) {
-            if (!["", this.currentIdentityAddress.toString()].includes(requestItem.query.owner.toString())) {
+            const senderIsAttributeOwner = requestItem.query.owner.equals(this.currentIdentityAddress);
+            const ownerIsEmptyString = requestItem.query.owner.toString() === "";
+
+            if (!(senderIsAttributeOwner || ownerIsEmptyString)) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
                         "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically will become the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
@@ -55,7 +58,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (typeof recipient !== "undefined") {
                 const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
                     requestItem.query.key,
-                    requestItem.query.owner,
+                    ownerIsEmptyString ? recipient : requestItem.query.owner,
                     requestItem.query.attributeCreationHints.valueType,
                     recipient
                 );
@@ -181,9 +184,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
 
             if (requestItem.query instanceof RelationshipAttributeQuery) {
+                const ownerOfQueriedAttributeIsEmptyString = requestItem.query.owner.toString() === "";
+
                 const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
                     requestItem.query.key,
-                    requestItem.query.owner,
+                    ownerOfQueriedAttributeIsEmptyString ? this.currentIdentityAddress : requestItem.query.owner,
                     requestItem.query.attributeCreationHints.valueType,
                     requestInfo.peer
                 );
@@ -197,8 +202,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             attribute = parsedParams.newAttribute;
 
-            const ownerIsEmpty = attribute.owner.equals("");
-            if (ownerIsEmpty) {
+            const ownerIsEmptyString = attribute.owner.equals("");
+            if (ownerIsEmptyString) {
                 attribute.owner = this.currentIdentityAddress;
             }
         }
