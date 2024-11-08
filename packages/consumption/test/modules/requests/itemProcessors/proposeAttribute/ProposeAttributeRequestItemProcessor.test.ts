@@ -82,7 +82,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    value: ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" }),
+                    value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }),
                     owner: CoreAddress.from("")
                 }),
                 query: RelationshipAttributeQuery.from({
@@ -107,7 +107,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    value: ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" }),
+                    value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }),
                     owner: recipient
                 }),
                 query: RelationshipAttributeQuery.from({
@@ -134,7 +134,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    value: ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" }),
+                    value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }),
                     owner: CoreAddress.from("")
                 }),
                 query: RelationshipAttributeQuery.from({
@@ -194,7 +194,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                         mustBeAccepted: false,
                         query: query,
                         attribute: TestObjectFactory.createRelationshipAttribute({
-                            value: ProprietaryString.fromAny({ title: "ATitle", value: "AProprietaryStringValue" }),
+                            value: ProprietaryString.fromAny({ title: "ATitle", value: "AStringValue" }),
                             owner: CoreAddress.from("")
                         })
                     });
@@ -235,7 +235,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                         mustBeAccepted: false,
                         query: query,
                         attribute: TestObjectFactory.createRelationshipAttribute({
-                            value: ProprietaryString.fromAny({ title: "ATitle", value: "AProprietaryStringValue" }),
+                            value: ProprietaryString.fromAny({ title: "ATitle", value: "AStringValue" }),
                             owner: CoreAddress.from(""),
                             key: "UniqueKey"
                         })
@@ -246,7 +246,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidRequestItem",
                         message:
-                            "The proposed RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                            "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
                     });
                 });
             });
@@ -579,6 +579,75 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 code: "error.consumption.requests.invalidAcceptParameters",
                 message: "When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided."
             });
+        });
+
+        test("throws an error when another RelationshipAttribute with same key was queried", async function () {
+            const sender = CoreAddress.from("Sender");
+            const recipient = accountController.identity.address;
+
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({
+                    key: "UniqueKey",
+                    owner: recipient,
+                    value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" })
+                }),
+                peer: sender,
+                requestReference: CoreId.from("reqRef")
+            });
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: RelationshipAttributeQuery.from({
+                    key: "UniqueKey",
+                    owner: "",
+                    attributeCreationHints: {
+                        valueType: "ProprietaryString",
+                        title: "ATitle",
+                        confidentiality: RelationshipAttributeConfidentiality.Public
+                    }
+                }),
+                attribute: RelationshipAttribute.from({
+                    key: "UniqueKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: CoreAddress.from(""),
+                    value: ProprietaryString.from({
+                        title: "ATitle",
+                        value: "AStringValue"
+                    })
+                })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                attribute: {
+                    "@type": "RelationshipAttribute",
+                    key: "UniqueKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    owner: recipient.toString(),
+                    value: {
+                        "@type": "ProprietaryString",
+                        title: "ATitle",
+                        value: "AStringValue"
+                    }
+                }
+            };
+
+            await expect(processor.canAccept(requestItem, acceptParams, incomingRequest)).rejects.toThrow(
+                "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+            );
         });
 
         test("returns an error trying to share the predecessor of an already shared Attribute", async function () {

@@ -15,6 +15,7 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { ConsumptionError } from "../../../../consumption/ConsumptionError";
 import { AttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
@@ -46,18 +47,18 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             return proposedAttributeMatchesWithQueryValidationResult;
         }
 
-        if (requestItem.attribute instanceof RelationshipAttribute && typeof recipient !== "undefined") {
+        if (requestItem.query instanceof RelationshipAttributeQuery && typeof recipient !== "undefined") {
             const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
-                requestItem.attribute.key,
+                requestItem.query.key,
                 recipient,
-                requestItem.attribute.value.toJSON()["@type"],
+                requestItem.query.attributeCreationHints.valueType,
                 recipient
             );
 
             if (relationshipAttributesWithSameKey.length !== 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The proposed RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                        "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
                     )
                 );
             }
@@ -173,6 +174,21 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
+
+        if (requestItem.query instanceof RelationshipAttributeQuery) {
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                requestItem.query.key,
+                this.currentIdentityAddress,
+                requestItem.query.attributeCreationHints.valueType,
+                requestInfo.peer
+            );
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                throw new ConsumptionError(
+                    "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                );
+            }
+        }
 
         return ValidationResult.success();
     }

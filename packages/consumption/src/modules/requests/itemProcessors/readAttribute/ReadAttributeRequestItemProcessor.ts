@@ -183,23 +183,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 );
             }
 
-            if (requestItem.query instanceof RelationshipAttributeQuery) {
-                const ownerOfQueriedAttributeIsEmptyString = requestItem.query.owner.toString() === "";
-
-                const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
-                    requestItem.query.key,
-                    ownerOfQueriedAttributeIsEmptyString ? this.currentIdentityAddress : requestItem.query.owner,
-                    requestItem.query.attributeCreationHints.valueType,
-                    requestInfo.peer
-                );
-
-                if (relationshipAttributesWithSameKey.length !== 0) {
-                    throw new ConsumptionError(
-                        "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
-                    );
-                }
-            }
-
             attribute = parsedParams.newAttribute;
 
             const ownerIsEmptyString = attribute.owner.equals("");
@@ -220,6 +203,23 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
+
+        if (requestItem.query instanceof RelationshipAttributeQuery) {
+            const ownerOfQueriedAttributeIsEmptyString = requestItem.query.owner.toString() === "";
+
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                requestItem.query.key,
+                ownerOfQueriedAttributeIsEmptyString ? this.currentIdentityAddress : requestItem.query.owner,
+                requestItem.query.attributeCreationHints.valueType,
+                requestInfo.peer
+            );
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                throw new ConsumptionError(
+                    "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                );
+            }
+        }
 
         if (
             requestItem.query instanceof ThirdPartyRelationshipAttributeQuery &&
