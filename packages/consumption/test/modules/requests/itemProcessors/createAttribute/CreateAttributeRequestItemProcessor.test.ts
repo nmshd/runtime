@@ -261,7 +261,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await expect(When.iCallAccept()).rejects.toThrow(
-                "The RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
             );
         });
 
