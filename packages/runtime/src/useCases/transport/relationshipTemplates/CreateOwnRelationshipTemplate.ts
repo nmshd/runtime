@@ -72,18 +72,26 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
         }
 
+        const passwordType = this.computePasswordType(request.password, request.pin);
+
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
             content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            password: request.password,
-            pin: request.pin
+            password: request.password ?? request.pin,
+            passwordType
         });
 
         await this.accountController.syncDatawallet();
 
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(relationshipTemplate));
+    }
+
+    private computePasswordType(password?: string, pin?: string): string | undefined {
+        if (password) return "pw";
+        if (pin) return `pin${pin.length}`;
+        return undefined;
     }
 
     private async validateRelationshipTemplateContent(content: any, templateExpiresAt: CoreDate) {

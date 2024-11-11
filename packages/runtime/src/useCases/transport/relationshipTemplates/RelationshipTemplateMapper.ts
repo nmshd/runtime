@@ -17,7 +17,7 @@ export class RelationshipTemplateMapper {
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
             forIdentity: template.cache.forIdentity?.toString(),
-            password: this.toPassword(template.password, template.pin),
+            password: this.toPassword(template.password, template.passwordType),
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
@@ -29,9 +29,9 @@ export class RelationshipTemplateMapper {
         return responseItems.map((i) => this.toRelationshipTemplateDTO(i));
     }
 
-    private static toPassword(password?: string, pin?: string) {
-        if (password) return `password:${password}`;
-        if (pin) return `pin:${pin}`;
+    private static toPassword(password?: string, passwordType?: string) {
+        if (passwordType?.startsWith("pw")) return `password:${password}`;
+        if (passwordType?.startsWith("pin")) return `pin:${password}`;
         return;
     }
 

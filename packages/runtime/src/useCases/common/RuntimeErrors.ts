@@ -57,11 +57,7 @@ class General {
     }
 
     public noPasswordProvided(): ApplicationError {
-        return new ApplicationError("error.runtime.validation.noPasswordProvided", "You need to provide a password. Maybe you have given a PIN instead.");
-    }
-
-    public noPINProvided(): ApplicationError {
-        return new ApplicationError("error.runtime.validation.noPINProvided", "You need to provide a PIN. Maybe you have given a password instead.");
+        return new ApplicationError("error.runtime.validation.noPasswordProvided", "You need to provide a password or PIN.");
     }
 }
 
