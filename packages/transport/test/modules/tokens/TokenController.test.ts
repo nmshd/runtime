@@ -60,7 +60,6 @@ describe("TokenController", function () {
             ephemeral: false
         });
         const reference = sentToken.toTokenReference();
-        expect(reference.version).toBe(1);
         const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference.truncate(), false);
         tempId1 = sentToken.id;
 

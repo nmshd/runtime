@@ -63,7 +63,6 @@ describe("FileController", function () {
         const sentFile = await TestUtil.uploadFile(sender, content);
 
         const reference = sentFile.toFileReference();
-        expect(reference.version).toBe(1);
         const receivedFile = await recipient.files.getOrLoadFileByTruncated(reference.truncate());
         tempId1 = sentFile.id;
 

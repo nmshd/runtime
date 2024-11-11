@@ -10,7 +10,6 @@ export interface IReference extends ISerializable {
     key: ICryptoSecretKey;
     forIdentityTruncated?: string;
     passwordType?: string;
-    version?: number;
     salt?: ICoreBuffer;
 }
 
@@ -36,10 +35,6 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public passwordType?: string;
 
-    @validate({ nullable: true, min: 1, customValidator: (v: number) => (Number.isInteger(v) ? undefined : "must be an integer") })
-    @serialize()
-    public version?: number;
-
     @validate({ nullable: true, customValidator: (v: ICoreBuffer) => (v.buffer.byteLength === 16 ? undefined : "must be 16 bytes long") })
     @serialize()
     public salt?: CoreBuffer;
@@ -47,7 +42,7 @@ export class Reference extends Serializable implements IReference {
     public truncate(): string {
         const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
         const truncatedReference = CoreBuffer.fromUtf8(
-            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ? this.forIdentityTruncated : ""}|${this.version ? this.version : ""}|${this.salt ? this.salt.toBase64() : ""}|${this.passwordType ? this.passwordType : ""}`
+            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ? this.forIdentityTruncated : ""}|${this.salt ? this.salt.toBase64() : ""}|${this.passwordType ? this.passwordType : ""}`
         );
         return truncatedReference.toBase64URL();
     }
@@ -56,8 +51,8 @@ export class Reference extends Serializable implements IReference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
 
-        if (![3, 5, 7].includes(splitted.length)) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("A TruncatedReference must consist of either exactly 3 or exactly 5 or exactly 7 components.");
+        if (![3, 5, 6].includes(splitted.length)) {
+            throw TransportCoreErrors.general.invalidTruncatedReference("A TruncatedReference must consist of either exactly 3 or exactly 5 or exactly 6 components.");
         }
 
         const idPart = splitted[0];
@@ -65,9 +60,8 @@ export class Reference extends Serializable implements IReference {
 
         const secretKey = this.parseSecretKey(splitted[1], splitted[2]);
         const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
-        const version = splitted[4] ? this.parseVersion(splitted[4]) : undefined;
-        const salt = splitted[5] ? this.parseSalt(splitted[5]) : undefined;
-        const passwordType = splitted[6] ? splitted[6] : undefined;
+        const salt = splitted[4] ? this.parseSalt(splitted[4]) : undefined;
+        const passwordType = splitted[5] ? splitted[5] : undefined;
 
         return this.from({
             id: CoreId.from(id),
@@ -75,19 +69,8 @@ export class Reference extends Serializable implements IReference {
             key: secretKey,
             forIdentityTruncated,
             passwordType,
-            version,
             salt
         });
-    }
-
-    private static parseVersion(value: string): number | undefined {
-        try {
-            if (value === "") return;
-
-            return parseInt(value);
-        } catch (_) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("The version must be indicated by an integer in the TruncatedReference.");
-        }
     }
 
     private static parseSalt(value: string): CoreBuffer | undefined {
