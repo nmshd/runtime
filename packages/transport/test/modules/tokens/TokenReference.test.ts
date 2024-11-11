@@ -237,7 +237,7 @@ describe("TokenReference", function () {
             id: await BackboneIds.token.generateUnsafe()
         });
 
-        const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}||pw|wrong-salt`).toBase64URL();
+        const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}||wrong-salt|pw`).toBase64URL();
         expect(() => TokenReference.fromTruncated(truncated)).toThrow("The salt needs to be a Base64 value.");
     });
 
