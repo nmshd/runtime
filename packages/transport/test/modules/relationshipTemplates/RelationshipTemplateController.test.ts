@@ -213,37 +213,6 @@ describe("RelationshipTemplateController", function () {
         expect(fetchCachesResult).toHaveLength(2);
     });
 
-    describe.skip("should correctly compute the password type", function () {
-        test("should get password type undefined if no password is given", async function () {
-            const template = await sender.relationshipTemplates.sendRelationshipTemplate({
-                content: { a: "A" },
-                expiresAt: CoreDate.utc().add({ minutes: 1 })
-            });
-            const reference = template.toRelationshipTemplateReference();
-            expect(reference.passwordType).toBeUndefined();
-        });
-
-        test("should get password type pw if a password is given", async function () {
-            const template = await sender.relationshipTemplates.sendRelationshipTemplate({
-                content: { a: "A" },
-                expiresAt: CoreDate.utc().add({ minutes: 1 }),
-                password: "password"
-            });
-            const reference = template.toRelationshipTemplateReference();
-            expect(reference.passwordType).toBe("pw");
-        });
-
-        // test("should get the PIN length if a PIN is given", async function () {
-        //     const template = await sender.relationshipTemplates.sendRelationshipTemplate({
-        //         content: { a: "A" },
-        //         expiresAt: CoreDate.utc().add({ minutes: 1 }),
-        //         pin: "1234"
-        //     });
-        //     const reference = template.toRelationshipTemplateReference();
-        //     expect(reference.passwordType).toBe("pin4");
-        // });
-    });
-
     test("should send and receive a RelationshipTemplate using a truncated RelationshipTemplateReference", async function () {
         tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
         const sentRelationshipTemplate = await TestUtil.sendRelationshipTemplate(sender);

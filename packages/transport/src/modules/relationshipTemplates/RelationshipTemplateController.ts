@@ -104,12 +104,6 @@ export class RelationshipTemplateController extends TransportController {
         return template;
     }
 
-    public getPasswordType(password?: string, pin?: string): string | undefined {
-        if (password) return "pw";
-        if (pin) return `pin${pin.length}`;
-        return undefined;
-    }
-
     public async deleteRelationshipTemplate(template: RelationshipTemplate): Promise<void> {
         const response = await this.client.deleteRelationshipTemplate(template.id.toString());
         if (response.isError) throw response.error;

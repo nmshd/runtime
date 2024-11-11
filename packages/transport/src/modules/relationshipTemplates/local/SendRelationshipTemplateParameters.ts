@@ -1,6 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
-import { TransportCoreErrors } from "../../../core";
 import { validateMaxNumberOfAllocations } from "./CachedRelationshipTemplate";
 
 export interface ISendRelationshipTemplateParameters extends ISerializable {
@@ -39,14 +38,6 @@ export class SendRelationshipTemplateParameters extends Serializable implements 
     public passwordType?: string;
 
     public static from(value: ISendRelationshipTemplateParameters): SendRelationshipTemplateParameters {
-        const parameters = this.fromAny(value);
-        if (parameters.password && !parameters.passwordType) {
-            throw TransportCoreErrors.general.passwordTypeMissing();
-        }
-        if (!parameters.password && parameters.passwordType) {
-            throw TransportCoreErrors.general.unnecessaryPasswordType();
-        }
-
-        return parameters;
+        return this.fromAny(value);
     }
 }

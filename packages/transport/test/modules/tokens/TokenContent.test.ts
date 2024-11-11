@@ -160,7 +160,7 @@ describe("TokenContent", function () {
             expect(deserialized.salt).toStrictEqual(token.salt);
         });
 
-        test("should not create a tokenContentt with too large passwordType", async function () {
+        test("should not create a tokenContent with too large passwordType", async function () {
             await expect(async () => {
                 TokenContentRelationshipTemplate.from({
                     secretKey: await CryptoEncryption.generateKey(),
@@ -171,7 +171,7 @@ describe("TokenContent", function () {
             }).rejects.toThrow("TokenContentRelationshipTemplate.passwordType");
         });
 
-        test("should not create a reference with non-integer passwordType", async function () {
+        test("should not create a tokenContent with non-integer passwordType", async function () {
             await expect(async () => {
                 TokenContentRelationshipTemplate.from({
                     secretKey: await CryptoEncryption.generateKey(),
@@ -182,7 +182,7 @@ describe("TokenContent", function () {
             }).rejects.toThrow("TokenContentRelationshipTemplate.passwordType");
         });
 
-        test("should not create a reference starting with neither pw nor pin", async function () {
+        test("should not create a tokenContent starting with neither pw nor pin", async function () {
             await expect(async () => {
                 TokenContentRelationshipTemplate.from({
                     secretKey: await CryptoEncryption.generateKey(),
@@ -193,7 +193,7 @@ describe("TokenContent", function () {
             }).rejects.toThrow("TokenContentRelationshipTemplate.passwordType");
         });
 
-        test("should not create a reference with salt and no passwordType", async function () {
+        test("should not create a tokenContent with salt and no passwordType", async function () {
             await expect(async () => {
                 TokenContentRelationshipTemplate.from({
                     secretKey: await CryptoEncryption.generateKey(),
@@ -203,7 +203,7 @@ describe("TokenContent", function () {
             }).rejects.toThrow("It's not possible to have only one of passwordType and salt set.");
         });
 
-        test("should not create a reference with passwordType and no salt", async function () {
+        test("should not create a tokenContent with passwordType and no salt", async function () {
             await expect(async () => {
                 TokenContentRelationshipTemplate.from({
                     secretKey: await CryptoEncryption.generateKey(),
@@ -213,7 +213,7 @@ describe("TokenContent", function () {
             }).rejects.toThrow("It's not possible to have only one of passwordType and salt set.");
         });
 
-        test("should not create a reference with a salt of wrong length", async function () {
+        test("should not create a tokenContent with a salt of wrong length", async function () {
             await expect(async () => {
                 TokenContentRelationshipTemplate.from({
                     secretKey: await CryptoEncryption.generateKey(),
