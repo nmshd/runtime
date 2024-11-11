@@ -207,12 +207,16 @@ class General {
         return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
     }
 
-    public noPasswordProvided() {
-        return new CoreError("error.transport.noPasswordProvided", "You need to provide a password. Maybe you have given a PIN instead.");
+    public passwordTypeMissing() {
+        return new CoreError("error.transport.passwordTypeMissing", "You need to also set a passwordType when setting a password.");
     }
 
-    public noPINProvided() {
-        return new CoreError("error.transport.noPINProvided", "You need to provide a PIN. Maybe you have given a password instead.");
+    public unnecessaryPasswordType() {
+        return new CoreError("error.transport.unnecessaryPasswordType", "A passwordType can only be set if a password is also being set.");
+    }
+
+    public noPasswordProvided() {
+        return new CoreError("error.transport.noPasswordProvided", "You need to provide a password.");
     }
 }
 

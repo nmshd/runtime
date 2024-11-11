@@ -36,7 +36,7 @@ export class TokenContentRelationshipTemplate extends Serializable implements IT
     public static from(value: ITokenContentRelationshipTemplate): TokenContentRelationshipTemplate {
         const content = this.fromAny(value);
         if (!content.passwordType !== !content.salt) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("It's not possible to have only one of passwordType and salt set..");
+            throw TransportCoreErrors.general.invalidTruncatedReference("It's not possible to have only one of passwordType and salt set.");
         }
         return content;
     }

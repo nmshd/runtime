@@ -10,7 +10,7 @@ export interface IRelationshipTemplate extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
     password?: string;
-    pin?: string;
+    passwordType?: string;
     salt?: ICoreBuffer;
     cache?: ICachedRelationshipTemplate;
     cachedAt?: ICoreDate;
@@ -21,7 +21,11 @@ export interface IRelationshipTemplate extends ICoreSynchronizable {
 @type("RelationshipTemplate")
 export class RelationshipTemplate extends CoreSynchronizable implements IRelationshipTemplate {
     public override readonly technicalProperties = ["@type", "@context", nameof<RelationshipTemplate>((r) => r.secretKey), nameof<RelationshipTemplate>((r) => r.isOwn)];
-    public override readonly userdataProperties = [nameof<RelationshipTemplate>((r) => r.password)];
+    public override readonly userdataProperties = [
+        nameof<RelationshipTemplate>((r) => r.password),
+        nameof<RelationshipTemplate>((r) => r.salt),
+        nameof<RelationshipTemplate>((r) => r.passwordType)
+    ];
     public override readonly metadataProperties = [nameof<RelationshipTemplate>((r) => r.metadata), nameof<RelationshipTemplate>((r) => r.metadataModifiedAt)];
 
     @validate()
@@ -38,7 +42,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
 
     @validate({ nullable: true })
     @serialize()
-    public pin?: string;
+    public passwordType?: string;
 
     @validate({ nullable: true })
     @serialize()
@@ -72,12 +76,6 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
             passwordType: this.passwordType,
             salt: this.salt
         });
-    }
-
-    public get passwordType(): string | undefined {
-        if (this.password) return "pw";
-        if (this.pin) return `pin${this.pin.length}`;
-        return undefined;
     }
 
     public truncate(): string {
