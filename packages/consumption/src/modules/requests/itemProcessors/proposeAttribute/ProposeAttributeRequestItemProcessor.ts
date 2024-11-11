@@ -185,7 +185,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             if (relationshipAttributesWithSameKey.length !== 0) {
                 throw new ConsumptionError(
-                    "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    "The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
                 );
             }
         }

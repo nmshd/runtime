@@ -77,7 +77,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             if (relationshipAttributesWithSameKey.length !== 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                        "The provided RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
                     )
                 );
             }

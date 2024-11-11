@@ -150,7 +150,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKey }, TestIdentity.RECIPIENT);
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
-                    "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    "The provided RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
             });
         });
 
@@ -170,7 +170,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKeyAndEmptyOwner }, TestIdentity.RECIPIENT);
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
-                    "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    "The provided RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
             });
         });
 
