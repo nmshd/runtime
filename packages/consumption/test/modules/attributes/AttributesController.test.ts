@@ -376,7 +376,7 @@ describe("AttributesController", function () {
                     value: {
                         "@type": "ProprietaryString",
                         value: "AStringValue",
-                        title: "ATtitle"
+                        title: "ATitle"
                     },
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
