@@ -2,9 +2,7 @@
 
 set -e
 
-git config core.fileMode false
-
-if ! git diff-index --quiet HEAD; then
+if [[ "$(git diff --name-only)" ]]; then
     echo 'These files changed when running the command:'
     git diff --name-only | sed 's/^/* /'
 
