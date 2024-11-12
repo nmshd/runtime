@@ -22315,9 +22315,6 @@ export const LoadPeerRelationshipTemplateRequest: any = {
                 },
                 "password": {
                     "type": "string"
-                },
-                "pin": {
-                    "type": "string"
                 }
             },
             "required": [
