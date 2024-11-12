@@ -13,7 +13,7 @@ describe("AttributeListenersController", function () {
     let transport: Transport;
 
     const dummyQuery = ThirdPartyRelationshipAttributeQuery.from({
-        key: "AKey",
+        key: "aKey",
         owner: "",
         thirdParty: ["aThirdParty"]
     });
