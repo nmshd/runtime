@@ -2,7 +2,7 @@
 
 set -e
 
-git diff-index HEAD --name-only
+git config core.fileMode false
 
 if ! git diff-index --quiet HEAD; then
     echo 'These files changed when running the command:'
