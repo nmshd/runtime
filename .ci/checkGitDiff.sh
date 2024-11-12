@@ -3,13 +3,8 @@
 set -e
 
 if ! git diff-index --quiet HEAD; then
-    printf 'These files changed when running the command:\n\n'
-
-    git diff --name-only | while read -r n; do
-        echo "* $n"
-    done
+    echo 'These files changed when running the command:'
+    git diff --name-only | sed 's/^/* /'
 
     exit 1
-else
-    exit 0
 fi
