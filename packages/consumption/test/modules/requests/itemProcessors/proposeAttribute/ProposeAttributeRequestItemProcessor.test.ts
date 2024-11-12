@@ -63,7 +63,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createIdentityAttribute({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 }),
                 query: IdentityAttributeQuery.from({
@@ -82,15 +82,15 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }),
+                    value: ProprietaryString.from({ title: "aTitle", value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 }),
                 query: RelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: CoreAddress.from(""),
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -107,15 +107,15 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }),
+                    value: ProprietaryString.from({ title: "aTitle", value: "aGivenName" }),
                     owner: recipient
                 }),
                 query: RelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: CoreAddress.from(""),
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -134,15 +134,15 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
-                    value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }),
+                    value: ProprietaryString.from({ title: "aTitle", value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 }),
                 query: RelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: recipient,
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -182,10 +182,10 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
                     const query = RelationshipAttributeQuery.from({
                         owner: "",
-                        key: "AKey",
+                        key: "aKey",
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
-                            title: "ATitle",
+                            title: "aTitle",
                             confidentiality: RelationshipAttributeConfidentiality.Public
                         }
                     });
@@ -194,7 +194,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                         mustBeAccepted: false,
                         query: query,
                         attribute: TestObjectFactory.createRelationshipAttribute({
-                            value: ProprietaryString.fromAny({ title: "ATitle", value: "AStringValue" }),
+                            value: ProprietaryString.fromAny({ title: "aTitle", value: "aGivenName" }),
                             owner: CoreAddress.from("")
                         })
                     });
@@ -267,7 +267,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createIdentityAttribute({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 }),
                 query: IdentityAttributeQuery.from({
@@ -328,7 +328,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: recipient.toString(),
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             };
@@ -345,7 +345,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 })
             });
@@ -523,20 +523,20 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: recipient.toString(),
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 }),
                 attribute: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient,
                     value: ProprietaryString.from({
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     })
                 })
             });
@@ -556,11 +556,11 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient,
                     value: ProprietaryString.from({
-                        title: "ATitle",
+                        title: "aTitle",
                         value: "AnotherStringValue"
                     })
                 }),
@@ -759,7 +759,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 })
             });
@@ -822,7 +822,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: recipient.toString(),
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             };
@@ -846,11 +846,11 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: "",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 }),
@@ -874,13 +874,13 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 accept: true,
                 attribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: "",
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -924,7 +924,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 })
             });
@@ -1000,7 +1000,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 })
             });
@@ -1068,7 +1068,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 })
             });
@@ -1120,7 +1120,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 })
             });
@@ -1173,7 +1173,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 })
             });
@@ -1226,7 +1226,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 })
             });

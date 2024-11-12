@@ -374,7 +374,7 @@ describe("RequestModule", () => {
                             mustBeAccepted: false,
                             attribute: IdentityAttribute.from({
                                 owner: CoreAddress.from(""),
-                                value: GivenName.from("AGivenName").toJSON()
+                                value: GivenName.from("aGivenName").toJSON()
                             }).toJSON()
                         }
                     ]
@@ -485,11 +485,11 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         await ensureActiveRelationship(sRuntimeServices.transport, tRuntimeServices.transport);
         createdRelationshipAttributeForFurtherSharing = await executeFullCreateAndShareRelationshipAttributeFlow(sRuntimeServices, tRuntimeServices, {
             content: {
-                key: "AKey",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "AStringValue",
-                    title: "ATitle"
+                    value: "aStringValue",
+                    title: "aTitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }
@@ -551,7 +551,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                     attribute: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
-                            value: "AGivenName"
+                            value: "aGivenName"
                         },
                         owner: ""
                     }).toJSON()
@@ -560,11 +560,11 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                     "@type": "CreateAttributeRequestItem",
                     mustBeAccepted: true,
                     attribute: RelationshipAttribute.from({
-                        key: "AKey",
+                        key: "aKey",
                         value: {
                             "@type": "ProprietaryString",
-                            value: "AStringValue",
-                            title: "ATitle"
+                            value: "aStringValue",
+                            title: "aTitle"
                         },
                         owner: CoreAddress.from(""),
                         confidentiality: RelationshipAttributeConfidentiality.Public

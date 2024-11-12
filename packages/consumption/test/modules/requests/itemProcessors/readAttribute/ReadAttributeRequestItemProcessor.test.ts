@@ -214,16 +214,16 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 if (testParams.input.thirdParty !== undefined) {
                     query = ThirdPartyRelationshipAttributeQuery.from({
                         owner: translateTestIdentityToAddress(testParams.input.owner) as any,
-                        key: "AKey",
+                        key: "aKey",
                         thirdParty: [translateTestIdentityToAddress(testParams.input.thirdParty)]
                     });
                 } else {
                     query = RelationshipAttributeQuery.from({
                         owner: translateTestIdentityToAddress(testParams.input.owner),
-                        key: "AKey",
+                        key: "aKey",
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
-                            title: "ATitle",
+                            title: "aTitle",
                             confidentiality: RelationshipAttributeConfidentiality.Public
                         }
                     });
@@ -362,9 +362,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: recipient.toString(),
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     },
-                    tags: ["ATag"]
+                    tags: ["aTag"]
                 }
             };
 
@@ -378,12 +378,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             const attribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: aThirdParty,
                     value: ProprietaryString.from({
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     })
                 }),
                 peer: aThirdParty,
@@ -393,7 +393,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
                     thirdParty: [aThirdParty.toString()]
                 })
@@ -619,7 +619,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["ATag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["aTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const request = LocalRequest.from({
@@ -640,10 +640,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     newAttribute: {
                         "@type": "IdentityAttribute",
                         owner: recipient.toString(),
-                        tags: ["ATag", "AnotherTag"],
+                        tags: ["aTag", "AnotherTag"],
                         value: {
                             "@type": "GivenName",
-                            value: "AGivenName"
+                            value: "aGivenName"
                         }
                     }
                 };
@@ -685,7 +685,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         tags: ["tagA", "tagD", "tagE"],
                         value: {
                             "@type": "GivenName",
-                            value: "AGivenName"
+                            value: "aGivenName"
                         }
                     }
                 };
@@ -705,10 +705,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     mustBeAccepted: true,
                     query: RelationshipAttributeQuery.from({
                         owner: recipient.toString(),
-                        key: "AKey",
+                        key: "aKey",
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
-                            title: "ATitle",
+                            title: "aTitle",
                             confidentiality: RelationshipAttributeConfidentiality.Public
                         }
                     })
@@ -729,12 +729,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
-                        key: "AKey",
+                        key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: recipient,
                         value: ProprietaryString.from({
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         })
                     }),
                     peer: sender,
@@ -821,11 +821,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     mustBeAccepted: true,
                     query: RelationshipAttributeQuery.from({
                         owner: sender.toString(),
-                        key: "AKey",
+                        key: "aKey",
                         attributeCreationHints: {
                             valueType: "Consent",
-                            title: "ATitle",
-                            description: "ADescription",
+                            title: "aTitle",
+                            description: "aDescription",
                             confidentiality: RelationshipAttributeConfidentiality.Private
                         }
                     })
@@ -848,12 +848,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     accept: true,
                     newAttribute: {
                         "@type": "RelationshipAttribute",
-                        key: "AKey",
+                        key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Private,
                         owner: sender.toString(),
                         value: {
                             "@type": "Consent",
-                            consent: "AConsent"
+                            consent: "aConsent"
                         }
                     }
                 };
@@ -870,12 +870,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     mustBeAccepted: true,
                     query: RelationshipAttributeQuery.from({
                         owner: sender.toString(),
-                        key: "AKey",
+                        key: "aKey",
                         validFrom: "2024-02-14T08:47:35.077Z",
                         validTo: "2024-02-14T09:35:12.824Z",
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
-                            title: "ATitle",
+                            title: "aTitle",
                             confidentiality: RelationshipAttributeConfidentiality.Public
                         }
                     })
@@ -898,15 +898,15 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     accept: true,
                     newAttribute: {
                         "@type": "RelationshipAttribute",
-                        key: "AKey",
+                        key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: sender.toString(),
                         validFrom: "2024-02-14T08:40:35.077Z",
                         validTo: "2024-02-14T09:35:12.824Z",
                         value: {
                             "@type": "ProprietaryString",
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         }
                     }
                 };
@@ -926,7 +926,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
                         owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
-                        key: "AKey",
+                        key: "aKey",
                         thirdParty: [aThirdParty.toString()]
                     })
                 });
@@ -947,12 +947,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const localAttribute = await consumptionController.attributes.createAttributeUnsafe({
                     content: RelationshipAttribute.from({
-                        key: "AKey",
+                        key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: recipient,
                         value: ProprietaryString.from({
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         })
                     }),
                     shareInfo: {
@@ -985,7 +985,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
                         owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
-                        key: "AKey",
+                        key: "aKey",
                         thirdParty: [aThirdParty.toString()]
                     })
                 });
@@ -1005,12 +1005,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
-                        key: "AKey",
+                        key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: recipient,
                         value: ProprietaryString.from({
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         })
                     }),
                     peer: anUninvolvedThirdParty,
@@ -1040,7 +1040,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
                         owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
-                        key: "AKey",
+                        key: "aKey",
                         thirdParty: [aThirdParty.toString()]
                     })
                 });
@@ -1060,12 +1060,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
-                        key: "AKey",
+                        key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: recipient,
                         value: ProprietaryString.from({
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         })
                     }),
                     peer: aThirdParty,
@@ -1092,7 +1092,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
                         owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
-                        key: "AKey",
+                        key: "aKey",
                         thirdParty: [aThirdParty.toString()]
                     })
                 });
@@ -1114,13 +1114,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     accept: true,
                     newAttribute: {
                         "@type": "RelationshipAttribute",
-                        key: "AKey",
+                        key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: aThirdParty.toString(),
                         value: {
                             "@type": "ProprietaryString",
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         }
                     }
                 };
@@ -1135,13 +1135,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             test("can be called with an arbitrary third party if the thirdParty string array of the ThirdPartyRelationshipAttributeQuery contains an empty string", async function () {
                 const sender = CoreAddress.from("Sender");
-                const aQueriedThirdParty = CoreAddress.from("AQueriedThirdParty");
+                const aQueriedThirdParty = CoreAddress.from("aQueriedThirdParty");
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
                         owner: "",
-                        key: "AKey",
+                        key: "aKey",
                         thirdParty: ["", aQueriedThirdParty.toString()]
                     })
                 });
@@ -1162,12 +1162,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
-                        key: "AKey",
+                        key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: aThirdParty,
                         value: ProprietaryString.from({
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         })
                     }),
                     peer: aThirdParty,
@@ -1192,7 +1192,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     mustBeAccepted: true,
                     query: ThirdPartyRelationshipAttributeQuery.from({
                         owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
-                        key: "AKey",
+                        key: "aKey",
                         thirdParty: [aThirdParty.toString()]
                     })
                 });
@@ -1212,12 +1212,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
-                        key: "AKey",
+                        key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Private,
                         owner: recipient,
                         value: ProprietaryString.from({
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         })
                     }),
                     peer: aThirdParty,
@@ -1309,7 +1309,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: recipient.toString(),
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             };
@@ -1333,11 +1333,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: recipient,
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -1360,13 +1360,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -1735,7 +1735,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                     thirdParty: [peerAddress.toString()]
                 })
@@ -1786,11 +1786,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 content: RelationshipAttribute.from({
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ANewTitle",
-                        value: "ANewValue"
+                        title: "aNewTitle",
+                        value: "aNewValue"
                     },
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey",
+                    key: "aKey",
                     owner: accountController.identity.address
                 }),
                 shareInfo: LocalAttributeShareInfo.from({
@@ -1802,7 +1802,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                     thirdParty: [thirdPartyAddress.toString()]
                 })
@@ -1864,11 +1864,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 content: RelationshipAttribute.from({
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ANewTitle",
-                        value: "ANewValue"
+                        title: "aNewTitle",
+                        value: "aNewValue"
                     },
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey",
+                    key: "aKey",
                     owner: thirdPartyAddress
                 }),
                 shareInfo: LocalAttributeShareInfo.from({
@@ -1880,7 +1880,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                     thirdParty: [thirdPartyAddress.toString()]
                 })
@@ -2031,7 +2031,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
                     thirdParty: [thirdPartyAddress.toString()]
                 })
