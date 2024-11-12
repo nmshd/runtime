@@ -162,9 +162,7 @@ export async function syncUntilHasEvent<TEvent extends Event>(
 
 export async function uploadOwnToken(transportServices: TransportServices, forIdentity?: string): Promise<TokenDTO> {
     const response = await transportServices.tokens.createOwnToken({
-        content: {
-            content: "Hello"
-        },
+        content: { aKey: "aValue" },
         expiresAt: DateTime.utc().plus({ days: 1 }).toString(),
         ephemeral: false,
         forIdentity
