@@ -46,7 +46,7 @@ beforeAll(async () => {
                         "@type": "RegisterAttributeListenerRequestItem",
                         query: {
                             "@type": "ThirdPartyRelationshipAttributeQuery",
-                            key: "AKey",
+                            key: "aKey",
                             owner: "thirdParty",
                             thirdParty: [thirdParty.address]
                         },
@@ -83,13 +83,13 @@ describe("AttributeListenerModule", () => {
         const attributeContent: RelationshipAttributeJSON = {
             "@type": "RelationshipAttribute",
             owner: thirdParty.address,
-            key: "AKey",
+            key: "aKey",
             confidentiality: RelationshipAttributeConfidentiality.Public,
             isTechnical: false,
             value: {
                 "@type": "ProprietaryString",
-                title: "ATitle",
-                value: "AProprietaryStringValue"
+                title: "aTitle",
+                value: "aProprietaryStringValue"
             }
         };
 
@@ -130,11 +130,11 @@ describe("Handling of delayed sharing of RelationshipAttributes during the ongoi
         recipient = runtimeServices[1];
         thirdParty = runtimeServices[2];
         inputForCreatingRelationshipAttribute = RelationshipAttribute.from({
-            key: "AKey",
+            key: "aKey",
             value: {
                 "@type": "ProprietaryString",
-                value: "AStringValue",
-                title: "ATitle"
+                value: "aStringValue",
+                title: "aTitle"
             },
             owner: CoreAddress.from(""),
             confidentiality: RelationshipAttributeConfidentiality.Public
@@ -152,7 +152,7 @@ describe("Handling of delayed sharing of RelationshipAttributes during the ongoi
                             "@type": "RegisterAttributeListenerRequestItem",
                             query: {
                                 "@type": "ThirdPartyRelationshipAttributeQuery",
-                                key: "AKey",
+                                key: "aKey",
                                 owner: "",
                                 thirdParty: [sender.address]
                             },
@@ -209,7 +209,7 @@ describe("Handling of delayed sharing of RelationshipAttributes during the ongoi
             recipient,
             (
                 await recipient.consumption.attributes.getAttributes({
-                    query: { "content.@type": "RelationshipAttribute", "content.key": "AKey", "content.owner": recipient.address, "shareInfo.peer": sender.address }
+                    query: { "content.@type": "RelationshipAttribute", "content.key": "aKey", "content.owner": recipient.address, "shareInfo.peer": sender.address }
                 })
             ).value[0].content
         );
@@ -307,7 +307,7 @@ describe("Handling of delayed sharing of RelationshipAttributes during the ongoi
             recipient,
             (
                 await recipient.consumption.attributes.getAttributes({
-                    query: { "content.@type": "RelationshipAttribute", "content.key": "AKey", "content.owner": recipient.address, "shareInfo.peer": sender.address }
+                    query: { "content.@type": "RelationshipAttribute", "content.key": "aKey", "content.owner": recipient.address, "shareInfo.peer": sender.address }
                 })
             ).value[0].content
         );
