@@ -1,5 +1,19 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
+import {
+    CreateAttributeRequestItem,
+    DeleteAttributeRequestItem,
+    ProposeAttributeRequestItem,
+    ReadAttributeRequestItem,
+    RelationshipAttribute,
+    RelationshipAttributeQuery,
+    RelationshipTemplateContent,
+    Request,
+    RequestItem,
+    RequestItemGroup,
+    Response,
+    ResponseItem,
+    ResponseItemGroup
+} from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
@@ -72,10 +86,14 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     }
 
     private async canCreateItems(request: Request, recipient?: CoreAddress) {
+        const relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
         const results: ValidationResult[] = [];
 
         for (const requestItem of request.items) {
             if (requestItem instanceof RequestItem) {
+                const relationshipAttributeFragment = OutgoingRequestsController.extractRelationshipAttributeFragment(requestItem);
+                if (relationshipAttributeFragment) relationshipAttributeFragments.push(relationshipAttributeFragment);
+
                 const canCreateItem = await this.canCreateItem(requestItem, request, recipient);
                 results.push(canCreateItem);
             } else {
@@ -84,7 +102,43 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             }
         }
 
+        if (OutgoingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragments)) {
+            throw ConsumptionCoreErrors.requests.invalidRequestItem(
+                "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+            );
+        }
+
         return results;
+    }
+
+    private static extractRelationshipAttributeFragment(requestItem: RequestItem) {
+        if (requestItem instanceof CreateAttributeRequestItem && requestItem.attribute instanceof RelationshipAttribute) {
+            return { owner: requestItem.attribute.owner.toString(), key: requestItem.attribute.key, value: { "@type": requestItem.attribute.value.toJSON()["@type"] } };
+        } else if (
+            (requestItem instanceof ReadAttributeRequestItem || requestItem instanceof ProposeAttributeRequestItem) &&
+            requestItem.query instanceof RelationshipAttributeQuery
+        ) {
+            return { owner: requestItem.query.owner.toString(), key: requestItem.query.key, value: { "@type": requestItem.query.attributeCreationHints.valueType } };
+        }
+
+        return;
+    }
+
+    private static containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[]) {
+        const seen = new Set<string>();
+
+        for (const fragment of relationshipAttributeFragments) {
+            const separator = "-%-unmistakable-separator-%-";
+            const identifier = `${fragment.owner}${separator}${fragment.key}${separator}${fragment.value["@type"]}`;
+
+            if (seen.has(identifier)) {
+                return true;
+            }
+
+            seen.add(identifier);
+        }
+
+        return false;
     }
 
     private async canCreateItem(requestItem: RequestItem, request: Request, recipient?: CoreAddress) {

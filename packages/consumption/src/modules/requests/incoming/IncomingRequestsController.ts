@@ -1,6 +1,18 @@
 import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
-import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
+import {
+    CreateAttributeRequestItem,
+    ProposeAttributeRequestItem,
+    ReadAttributeRequestItem,
+    RelationshipAttribute,
+    RelationshipAttributeQuery,
+    RequestItem,
+    RequestItemGroup,
+    Response,
+    ResponseItemDerivations,
+    ResponseItemGroup,
+    ResponseResult
+} from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
@@ -211,6 +223,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         items: (RequestItem | RequestItemGroup)[],
         request: LocalRequest
     ) {
+        const relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
         const validationResults: ValidationResult[] = [];
 
         for (let i = 0; i < params.length; i++) {
@@ -221,12 +234,51 @@ export class IncomingRequestsController extends ConsumptionBaseController {
                 const groupResult = await this.canDecideGroup(decideItemParams as DecideRequestItemGroupParametersJSON, requestItem, request);
                 validationResults.push(groupResult);
             } else {
+                const relationshipAttributeFragment = IncomingRequestsController.extractRelationshipAttributeFragment(requestItem);
+                if (relationshipAttributeFragment) relationshipAttributeFragments.push(relationshipAttributeFragment);
+
                 const itemResult = await this.canDecideItem(decideItemParams as DecideRequestItemParametersJSON, requestItem, request);
                 validationResults.push(itemResult);
             }
         }
 
+        if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragments)) {
+            throw ConsumptionCoreErrors.requests.invalidRequestItem(
+                "The Request cannot be accepted because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+            );
+        }
+
         return validationResults;
+    }
+
+    private static extractRelationshipAttributeFragment(requestItem: RequestItem) {
+        if (requestItem instanceof CreateAttributeRequestItem && requestItem.attribute instanceof RelationshipAttribute) {
+            return { owner: requestItem.attribute.owner.toString(), key: requestItem.attribute.key, value: { "@type": requestItem.attribute.value.toJSON()["@type"] } };
+        } else if (
+            (requestItem instanceof ReadAttributeRequestItem || requestItem instanceof ProposeAttributeRequestItem) &&
+            requestItem.query instanceof RelationshipAttributeQuery
+        ) {
+            return { owner: requestItem.query.owner.toString(), key: requestItem.query.key, value: { "@type": requestItem.query.attributeCreationHints.valueType } };
+        }
+
+        return;
+    }
+
+    private static containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[]) {
+        const seen = new Set<string>();
+
+        for (const fragment of relationshipAttributeFragments) {
+            const separator = "-%-unmistakable-separator-%-";
+            const identifier = `${fragment.owner}${separator}${fragment.key}${separator}${fragment.value["@type"]}`;
+
+            if (seen.has(identifier)) {
+                return true;
+            }
+
+            seen.add(identifier);
+        }
+
+        return false;
     }
 
     private async canDecideItem(params: DecideRequestItemParametersJSON, requestItem: RequestItem, request: LocalRequest) {
