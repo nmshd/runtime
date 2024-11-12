@@ -87,13 +87,13 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -174,7 +174,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     owner: aThirdParty.toString(),
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             };
@@ -213,7 +213,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     owner: recipient.toString(),
                     value: {
                         "@type": "DisplayName",
-                        value: "ADisplayName"
+                        value: "aDisplayName"
                     }
                 }
             };
@@ -229,7 +229,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         test("returns an error when an IdentityAttribute has no tag but at least one tag was queried by IdentityAttributeQuery", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName", tags: ["ATag"] })
+                query: IdentityAttributeQuery.from({ valueType: "GivenName", tags: ["aTag"] })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -252,7 +252,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     owner: recipient.toString(),
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             };
@@ -292,7 +292,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     tags: ["tagD", "tagE", "tagF"],
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             };
@@ -333,7 +333,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     validTo: "2024-02-14T09:35:12.824Z",
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             };
@@ -375,13 +375,13 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -420,7 +420,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     owner: sender.toString(),
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             };
@@ -444,10 +444,10 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: recipient.toString(),
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -473,7 +473,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     owner: recipient.toString(),
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             };
@@ -491,10 +491,10 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: recipient.toString(),
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -517,12 +517,12 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient.toString(),
                     value: {
                         "@type": "ProprietaryInteger",
-                        title: "ATitle",
+                        title: "aTitle",
                         value: 1
                     }
                 }
@@ -541,10 +541,10 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: sender.toString(),
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -567,13 +567,13 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -593,10 +593,10 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: "",
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -619,13 +619,13 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: sender.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -643,10 +643,10 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: sender.toString(),
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -674,8 +674,8 @@ describe("validateAttributeMatchesWithQuery", function () {
                     owner: sender.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -693,10 +693,10 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: sender.toString(),
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Protected
                     }
                 })
@@ -719,13 +719,13 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Private,
                     owner: sender.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -743,11 +743,11 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: sender.toString(),
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
-                        description: "ADescription",
+                        title: "aTitle",
+                        description: "aDescription",
                         confidentiality: RelationshipAttributeConfidentiality.Private
                     }
                 })
@@ -770,14 +770,14 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Private,
                     owner: sender.toString(),
                     value: {
                         "@type": "ProprietaryString",
                         title: "AnotherTitle",
-                        description: "ADescription",
-                        value: "AStringValue"
+                        description: "aDescription",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -795,11 +795,11 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: sender.toString(),
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
-                        description: "ADescription",
+                        title: "aTitle",
+                        description: "aDescription",
                         confidentiality: RelationshipAttributeConfidentiality.Private
                     }
                 })
@@ -822,13 +822,13 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Private,
                     owner: sender.toString(),
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -846,12 +846,12 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
                     owner: sender.toString(),
-                    key: "AKey",
+                    key: "aKey",
                     validFrom: "2024-02-14T08:47:35.077Z",
                     validTo: "2024-02-14T09:35:12.824Z",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -874,15 +874,15 @@ describe("validateAttributeMatchesWithQuery", function () {
                 accept: true,
                 newAttribute: {
                     "@type": "RelationshipAttribute",
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: sender.toString(),
                     validFrom: "2024-02-14T08:47:35.077Z",
                     validTo: "2024-02-14T09:30:00.000Z",
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     }
                 }
             };
@@ -906,7 +906,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
-                    key: "AKey",
+                    key: "aKey",
                     thirdParty: [aThirdParty.toString()]
                 })
             });
@@ -948,7 +948,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
-                    key: "AKey",
+                    key: "aKey",
                     thirdParty: [aThirdParty.toString()]
                 })
             });
@@ -969,12 +969,12 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: aThirdParty,
                     value: ProprietaryString.from({
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     })
                 }),
                 peer: aThirdParty,
@@ -995,13 +995,13 @@ describe("validateAttributeMatchesWithQuery", function () {
         });
 
         test("returns an error when a RelationshipAttribute that was queried by a ThirdPartyRelationshipAttributeQuery does not belong to the Recipient or one of the queried third parties, but an empty string was specified for the owner of the query", async function () {
-            const aQueriedThirdParty = CoreAddress.from("AQueriedThirdParty");
+            const aQueriedThirdParty = CoreAddress.from("aQueriedThirdParty");
 
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
-                    key: "AKey",
+                    key: "aKey",
                     thirdParty: [aQueriedThirdParty.toString()]
                 })
             });
@@ -1022,12 +1022,12 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: aThirdParty,
                     value: ProprietaryString.from({
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     })
                 }),
                 peer: aThirdParty,
@@ -1053,7 +1053,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
-                    key: "AKey",
+                    key: "aKey",
                     thirdParty: [aThirdParty.toString()]
                 })
             });
@@ -1077,8 +1077,8 @@ describe("validateAttributeMatchesWithQuery", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient,
                     value: ProprietaryString.from({
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     })
                 }),
                 peer: aThirdParty,
@@ -1105,7 +1105,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                     validFrom: "2024-02-14T08:47:35.077Z",
                     validTo: "2024-02-14T09:35:12.824Z",
-                    key: "AKey",
+                    key: "aKey",
                     thirdParty: [aThirdParty.toString()]
                 })
             });
@@ -1126,14 +1126,14 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient,
                     validFrom: CoreDate.from("2024-02-14T08:47:35.077Z"),
                     validTo: CoreDate.from("2024-02-14T09:30:00.000Z"),
                     value: ProprietaryString.from({
-                        title: "ATitle",
-                        value: "AStringValue"
+                        title: "aTitle",
+                        value: "aStringValue"
                     })
                 }),
                 peer: aThirdParty,
