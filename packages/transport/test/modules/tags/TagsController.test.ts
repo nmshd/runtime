@@ -25,7 +25,7 @@ describe("TagsController", function () {
         await connection.close();
     });
 
-    test("should receive the legal tags from backbone", async function () {
+    test("should receive the legal tags from the Backbone", async function () {
         const tags = await account.tags.getTags();
 
         expect(tags).toBeDefined();
