@@ -40,7 +40,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
         test("creates an AttributeListener and persists it to the DB", async function () {
             const requestItem = RegisterAttributeListenerRequestItem.from({
                 query: ThirdPartyRelationshipAttributeQuery.from({
-                    key: "AKey",
+                    key: "aKey",
                     owner: "",
                     thirdParty: ["aThirdParty"]
                 }),

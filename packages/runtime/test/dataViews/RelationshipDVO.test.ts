@@ -51,7 +51,7 @@ beforeAll(async () => {
                         attributeId: await CoreIdHelper.notPrefixed.generate(),
                         attribute: IdentityAttribute.from({
                             owner: CoreAddress.from((await runtimeServices1.transport.account.getIdentityInfo()).value.address),
-                            value: GivenName.from("AGivenName")
+                            value: GivenName.from("aGivenName")
                         })
                     }).toJSON()
                 ]
