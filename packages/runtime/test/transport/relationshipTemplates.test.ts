@@ -355,7 +355,7 @@ describe("RelationshipTemplate Tests", () => {
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                 pin: "invalid-pin"
             });
-            expect(createResult).toBeAnError("password must NOT have fewer than 1 characters", "error.runtime.validation.invalidPropertyValue");
+            expect(createResult).toBeAnError("pin must match pattern", "error.runtime.validation.invalidPropertyValue");
         });
 
         test("validation error when creating a template with both a password and a PIN", async () => {
