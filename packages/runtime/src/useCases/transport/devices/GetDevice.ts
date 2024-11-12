@@ -8,7 +8,6 @@ import { DeviceMapper } from "./DeviceMapper";
 
 export interface GetDeviceRequest {
     id: DeviceIdString;
-    asd?: string;
 }
 
 class Validator extends SchemaValidator<GetDeviceRequest> {
