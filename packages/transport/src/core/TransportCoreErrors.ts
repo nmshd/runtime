@@ -211,6 +211,10 @@ class General {
         return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
     }
 
+    public onlyOneOfPasswordTypeAndPasswordSet() {
+        return new CoreError("error.transport.onlyOneOfPasswordTypeAndPasswordSet", "You only set one of passwordType and password. You can set either none or both of them.");
+    }
+
     public noPasswordProvided() {
         return new CoreError("error.transport.noPasswordProvided", "You need to provide a password.");
     }
