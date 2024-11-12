@@ -1,0 +1,22 @@
+name: Check Runtime Schemas
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  check-runtime-schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: current
+      - run: npm ci
+      - run: npm run build:node
+      - run: npm run build:schemas --workspace=@nmshd/runtime
+      - name: Check git diff
+        run: .ci/checkGitDiff.sh
