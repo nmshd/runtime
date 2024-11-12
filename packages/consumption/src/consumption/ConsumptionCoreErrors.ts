@@ -309,6 +309,10 @@ class Requests {
         return new CoreError("error.consumption.requests.missingRelationship", message);
     }
 
+    public relationshipAttributesWithSameKey(message: string) {
+        return new CoreError("error.consumption.requests.relationshipAttributesWithSameKey", message);
+    }
+
     public inheritedFromItem(message: string) {
         return new ApplicationError("error.consumption.requests.validation.inheritedFromItem", message);
     }

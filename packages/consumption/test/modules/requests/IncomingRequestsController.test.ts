@@ -453,20 +453,22 @@ describe("IncomingRequestsController", function () {
                 },
                 status: LocalRequestStatus.DecisionRequired
             });
-            await expect(
-                When.iCallCanAcceptWith({
-                    items: [
-                        {
-                            accept: true
-                        },
-                        {
-                            accept: true
-                        }
-                    ]
-                })
-            ).rejects.toThrow(
-                "The Request cannot be accepted in this way because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
-            );
+            const validationResult = await When.iCallCanAcceptWith({
+                items: [
+                    {
+                        accept: true
+                    },
+                    {
+                        accept: true
+                    }
+                ]
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.relationshipAttributesWithSameKey",
+                message:
+                    "The Request cannot be accepted in this way because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+            });
         });
 
         test("returns 'error' on terminated relationship", async function () {

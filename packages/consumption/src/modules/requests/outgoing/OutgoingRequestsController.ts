@@ -80,6 +80,10 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
 
+        if (innerResults instanceof ValidationResult) {
+            return innerResults;
+        }
+
         const result = ValidationResult.fromItems(innerResults);
 
         return result;
@@ -103,8 +107,10 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         }
 
         if (OutgoingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragments)) {
-            throw ConsumptionCoreErrors.requests.invalidRequestItem(
-                "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.relationshipAttributesWithSameKey(
+                    "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+                )
             );
         }
 

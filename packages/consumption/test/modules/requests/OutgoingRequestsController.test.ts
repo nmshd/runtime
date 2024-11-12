@@ -259,7 +259,7 @@ describe("OutgoingRequestsController", function () {
             });
 
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem",
+                code: "error.consumption.requests.relationshipAttributesWithSameKey",
                 message:
                     "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
             });
