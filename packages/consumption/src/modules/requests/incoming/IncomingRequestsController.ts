@@ -210,11 +210,24 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const itemResults = await this.canDecideItems(params.items, request.content.items, request);
 
+        if (itemResults instanceof ValidationResult) {
+            return itemResults;
+        }
+
         return ValidationResult.fromItems(itemResults);
     }
 
     private async canDecideGroup(params: DecideRequestItemGroupParametersJSON, requestItemGroup: RequestItemGroup, request: LocalRequest) {
-        const itemResults = await this.canDecideItems(params.items, requestItemGroup.items, request);
+        const itemResults: ValidationResult[] = [];
+
+        for (let i = 0; i < params.items.length; i++) {
+            const decideItemParams = params.items[i];
+            const innerRequestItem = requestItemGroup.items[i];
+
+            const canDecideItem = await this.canDecideItem(decideItemParams, innerRequestItem, request);
+            itemResults.push(canDecideItem);
+        }
+
         return ValidationResult.fromItems(itemResults);
     }
 
@@ -245,8 +258,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
 
         if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragments)) {
-            throw new ConsumptionError(
-                "The Request cannot be accepted in this way because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.relationshipAttributesWithSameKey(
+                    "The Request cannot be accepted in this way because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+                )
             );
         }
 
