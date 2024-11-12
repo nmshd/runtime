@@ -97,10 +97,10 @@ describe("creation of ProposeAttributeRequestItem", () => {
                 }),
                 query: RelationshipAttributeQuery.from({
                     owner: "",
-                    key: "AKey",
+                    key: "aKey",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }
                 })
@@ -121,10 +121,10 @@ describe("creation of ProposeAttributeRequestItem", () => {
                     }),
                     query: RelationshipAttributeQuery.from({
                         owner: "",
-                        key: "AKey",
+                        key: "aKey",
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
-                            title: "ATitle",
+                            title: "aTitle",
                             confidentiality: RelationshipAttributeConfidentiality.Public
                         }
                     })
@@ -148,10 +148,10 @@ describe("creation of ProposeAttributeRequestItem", () => {
                     }),
                     query: RelationshipAttributeQuery.from({
                         owner: "",
-                        key: "AKey",
+                        key: "aKey",
                         attributeCreationHints: {
                             valueType: "ProprietaryInteger",
-                            title: "ATitle",
+                            title: "aTitle",
                             confidentiality: RelationshipAttributeConfidentiality.Public
                         }
                     })
@@ -170,16 +170,16 @@ describe("creation of ProposeAttributeRequestItem", () => {
 
 function createIdentityAttribute(properties?: Partial<IIdentityAttribute>): IdentityAttribute {
     return IdentityAttribute.from({
-        value: properties?.value ?? GivenName.fromAny({ value: "AGivenName" }),
+        value: properties?.value ?? GivenName.fromAny({ value: "aGivenName" }),
         owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
     });
 }
 
 function createRelationshipAttribute(properties?: Partial<IRelationshipAttribute>): RelationshipAttribute {
     return RelationshipAttribute.from({
-        value: properties?.value ?? ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" }),
+        value: properties?.value ?? ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" }),
         confidentiality: RelationshipAttributeConfidentiality.Public,
-        key: "AKey",
+        key: "aKey",
         isTechnical: false,
         owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
     });
