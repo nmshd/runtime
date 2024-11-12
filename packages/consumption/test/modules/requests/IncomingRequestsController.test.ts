@@ -1,5 +1,20 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { IRequest, IRequestItemGroup, RejectResponseItem, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
+import {
+    CreateAttributeRequestItem,
+    IRequest,
+    IRequestItemGroup,
+    ProprietaryString,
+    ReadAttributeRequestItem,
+    RejectResponseItem,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    RelationshipAttributeQuery,
+    Request,
+    RequestItemGroup,
+    ResponseItem,
+    ResponseItemGroup,
+    ResponseItemResult
+} from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreIdHelper, TransportLoggerFactory } from "@nmshd/transport";
 import {
@@ -406,6 +421,52 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[0].isError()).toBe(true);
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
+        });
+
+        test("throws error for requests whose acceptance would lead to the creation of more than one RelationshipAttribute with the same key", async function () {
+            await Given.anIncomingRequestWith({
+                content: {
+                    items: [
+                        CreateAttributeRequestItem.from({
+                            attribute: RelationshipAttribute.from({
+                                "@type": "RelationshipAttribute",
+                                owner: context.currentIdentity.toString(),
+                                key: "UniqueKey",
+                                confidentiality: RelationshipAttributeConfidentiality.Public,
+                                value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
+                            }),
+                            mustBeAccepted: true
+                        }),
+                        ReadAttributeRequestItem.from({
+                            query: RelationshipAttributeQuery.from({
+                                owner: context.currentIdentity.toString(),
+                                key: "UniqueKey",
+                                attributeCreationHints: {
+                                    valueType: "ProprietaryString",
+                                    title: "ATitle",
+                                    confidentiality: RelationshipAttributeConfidentiality.Public
+                                }
+                            }),
+                            mustBeAccepted: false
+                        })
+                    ]
+                },
+                status: LocalRequestStatus.DecisionRequired
+            });
+            await expect(
+                When.iCallCanAcceptWith({
+                    items: [
+                        {
+                            accept: true
+                        },
+                        {
+                            accept: true
+                        }
+                    ]
+                })
+            ).rejects.toThrow(
+                "The Request cannot be accepted in this way because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+            );
         });
 
         test("returns 'error' on terminated relationship", async function () {
