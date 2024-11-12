@@ -210,24 +210,21 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const itemResults = await this.canDecideItems(params.items, request.content.items, request);
 
-        if (itemResults instanceof ValidationResult) {
-            return itemResults;
+        const result = ValidationResult.fromItems(itemResults);
+
+        const potentialNewRelationshipAttributesWithSameKeyResult = IncomingRequestsController.checkForPotentialNewRelationshipAttributesWithSameKey(
+            params.items,
+            request.content.items
+        );
+        if (potentialNewRelationshipAttributesWithSameKeyResult.isError() && result.isSuccess()) {
+            return potentialNewRelationshipAttributesWithSameKeyResult;
         }
 
-        return ValidationResult.fromItems(itemResults);
+        return result;
     }
 
     private async canDecideGroup(params: DecideRequestItemGroupParametersJSON, requestItemGroup: RequestItemGroup, request: LocalRequest) {
-        const itemResults: ValidationResult[] = [];
-
-        for (let i = 0; i < params.items.length; i++) {
-            const decideItemParams = params.items[i];
-            const innerRequestItem = requestItemGroup.items[i];
-
-            const canDecideItem = await this.canDecideItem(decideItemParams, innerRequestItem, request);
-            itemResults.push(canDecideItem);
-        }
-
+        const itemResults = await this.canDecideItems(params.items, requestItemGroup.items, request);
         return ValidationResult.fromItems(itemResults);
     }
 
@@ -236,7 +233,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         items: (RequestItem | RequestItemGroup)[],
         request: LocalRequest
     ) {
-        const relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
         const validationResults: ValidationResult[] = [];
 
         for (let i = 0; i < params.length; i++) {
@@ -247,13 +243,31 @@ export class IncomingRequestsController extends ConsumptionBaseController {
                 const groupResult = await this.canDecideGroup(decideItemParams as DecideRequestItemGroupParametersJSON, requestItem, request);
                 validationResults.push(groupResult);
             } else {
-                const relationshipAttributeFragment = IncomingRequestsController.extractRelationshipAttributeFragment(requestItem);
+                const itemResult = await this.canDecideItem(decideItemParams as DecideRequestItemParametersJSON, requestItem, request);
+                validationResults.push(itemResult);
+            }
+        }
+
+        return validationResults;
+    }
+
+    private static checkForPotentialNewRelationshipAttributesWithSameKey(
+        params: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[],
+        items: (RequestItem | RequestItemGroup)[]
+    ) {
+        const relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
+        for (let i = 0; i < params.length; i++) {
+            const decideItemParams = params[i];
+            const requestItem = items[i];
+
+            if (requestItem instanceof RequestItemGroup) {
+                const relationshipAttributeFragmentsOfGroup = IncomingRequestsController.extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItem);
+                if (relationshipAttributeFragmentsOfGroup) relationshipAttributeFragments.push(...relationshipAttributeFragmentsOfGroup);
+            } else {
+                const relationshipAttributeFragment = IncomingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
                 if (relationshipAttributeFragment && (decideItemParams as DecideRequestItemParametersJSON).accept) {
                     relationshipAttributeFragments.push(relationshipAttributeFragment);
                 }
-
-                const itemResult = await this.canDecideItem(decideItemParams as DecideRequestItemParametersJSON, requestItem, request);
-                validationResults.push(itemResult);
             }
         }
 
@@ -265,10 +279,28 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             );
         }
 
-        return validationResults;
+        return ValidationResult.success();
     }
 
-    private static extractRelationshipAttributeFragment(requestItem: RequestItem) {
+    private static extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItemGroup: RequestItemGroup) {
+        const groupFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
+
+        for (const requestItem of requestItemGroup.items) {
+            if (requestItem instanceof RequestItemGroup) {
+                const relationshipAttributeFragments = this.extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItem);
+                if (relationshipAttributeFragments) groupFragments.push(...relationshipAttributeFragments);
+            } else {
+                const relationshipAttributeFragment = IncomingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
+                if (relationshipAttributeFragment) groupFragments.push(relationshipAttributeFragment);
+            }
+        }
+
+        if (groupFragments.length !== 0) return groupFragments;
+
+        return;
+    }
+
+    private static extractRelationshipAttributeFragmentFromRequestItem(requestItem: RequestItem) {
         if (requestItem instanceof CreateAttributeRequestItem && requestItem.attribute instanceof RelationshipAttribute) {
             return { owner: requestItem.attribute.owner.toString(), key: requestItem.attribute.key, value: { "@type": requestItem.attribute.value.toJSON()["@type"] } };
         } else if (
