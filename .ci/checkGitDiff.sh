@@ -2,9 +2,10 @@
 
 set -e
 
-if [[ "$(git diff --name-only)" ]]; then
+diff="$(git diff --name-only)"
+if [[ "$diff" ]]; then
     echo 'These files changed when running the command:'
-    git diff --name-only | sed 's/^/* /'
+    echo "$diff" | sed 's/^/* /'
 
     exit 1
 fi
