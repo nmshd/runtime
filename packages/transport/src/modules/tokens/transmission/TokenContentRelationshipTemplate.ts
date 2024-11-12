@@ -1,7 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICoreBuffer, ICryptoSecretKey } from "@nmshd/crypto";
-import { TransportCoreErrors } from "../../../core";
+import { TransportCoreErrors } from "../../../core/TransportCoreErrors";
 
 export interface ITokenContentRelationshipTemplate extends ISerializable {
     templateId: ICoreId;
