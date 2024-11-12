@@ -89,7 +89,7 @@ describe("AttributesController", function () {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "DisplayName",
-                        value: "ADisplayName"
+                        value: "aDisplayName"
                     },
                     owner: consumptionController.accountController.identity.address
                 })
@@ -109,11 +109,11 @@ describe("AttributesController", function () {
             const identityAttribute = IdentityAttribute.from({
                 value: {
                     "@type": "StreetAddress",
-                    recipient: "ARecipient",
-                    street: "AStreet",
-                    houseNo: "AHouseNo",
-                    zipCode: "AZipCode",
-                    city: "ACity",
+                    recipient: "aRecipient",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
                     country: "DE"
                 },
                 validTo: CoreDate.utc(),
@@ -147,11 +147,11 @@ describe("AttributesController", function () {
             const identityAttribute = IdentityAttribute.from({
                 value: {
                     "@type": "StreetAddress",
-                    recipient: "ARecipient",
-                    street: "AStreet",
-                    houseNo: "AHouseNo",
-                    zipCode: "AZipCode",
-                    city: "ACity",
+                    recipient: "aRecipient",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
                     country: "DE"
                 },
                 validTo: CoreDate.utc(),
@@ -372,11 +372,11 @@ describe("AttributesController", function () {
         test("should allow to query relationship attributes with empty owner", async function () {
             const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     value: {
                         "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
+                        value: "aStringValue",
+                        title: "aTitle"
                     },
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
@@ -387,11 +387,11 @@ describe("AttributesController", function () {
             await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
 
             const query: IRelationshipAttributeQuery = {
-                key: "AKey",
+                key: "aKey",
                 owner: CoreAddress.from(""),
                 attributeCreationHints: {
                     valueType: "ProprietaryString",
-                    title: "ATitle",
+                    title: "aTitle",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             };
@@ -574,11 +574,11 @@ describe("AttributesController", function () {
             const recipient = testAccount.identity.address;
             await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     value: {
                         "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
+                        value: "aStringValue",
+                        title: "aTitle"
                     },
                     owner: recipient,
                     confidentiality: RelationshipAttributeConfidentiality.Public
@@ -588,7 +588,7 @@ describe("AttributesController", function () {
             });
 
             const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
-                key: "AKey",
+                key: "aKey",
                 owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                 thirdParty: [CoreAddress.from("thirdPartyAddress")]
             });
@@ -598,11 +598,11 @@ describe("AttributesController", function () {
         test("can call executeThirdPartyRelationshipAttributeQuery with ThirdPartyRelationshipAttributeQueryOwner.ThirdParty", async function () {
             await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     value: {
                         "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
+                        value: "aStringValue",
+                        title: "aTitle"
                     },
                     owner: CoreAddress.from("thirdPartyAddress"),
                     confidentiality: RelationshipAttributeConfidentiality.Public
@@ -612,7 +612,7 @@ describe("AttributesController", function () {
             });
 
             const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
-                key: "AKey",
+                key: "aKey",
                 owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
                 thirdParty: [CoreAddress.from("thirdPartyAddress")]
             });
@@ -623,11 +623,11 @@ describe("AttributesController", function () {
             const recipient = testAccount.identity.address;
             await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     value: {
                         "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
+                        value: "aStringValue",
+                        title: "aTitle"
                     },
                     owner: recipient,
                     confidentiality: RelationshipAttributeConfidentiality.Public
@@ -638,11 +638,11 @@ describe("AttributesController", function () {
 
             await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     value: {
                         "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
+                        value: "aStringValue",
+                        title: "aTitle"
                     },
                     owner: CoreAddress.from("thirdPartyAddress"),
                     confidentiality: RelationshipAttributeConfidentiality.Public
@@ -653,11 +653,11 @@ describe("AttributesController", function () {
 
             await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     value: {
                         "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
+                        value: "aStringValue",
+                        title: "aTitle"
                     },
                     owner: CoreAddress.from("uninvolvedThirdPartyAddress"),
                     confidentiality: RelationshipAttributeConfidentiality.Public
@@ -667,7 +667,7 @@ describe("AttributesController", function () {
             });
 
             const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
-                key: "AKey",
+                key: "aKey",
                 owner: ThirdPartyRelationshipAttributeQueryOwner.Empty,
                 thirdParty: [CoreAddress.from("thirdPartyAddress"), CoreAddress.from("anotherThirdPartyAddress")]
             });
@@ -754,7 +754,7 @@ describe("AttributesController", function () {
                     key: "displayName",
                     value: {
                         "@type": "ProprietaryString",
-                        title: "ATitle",
+                        title: "aTitle",
                         value: "DE"
                     },
                     owner: testAccount.identity.address,
@@ -1387,7 +1387,7 @@ describe("AttributesController", function () {
                         key: "DisplayName",
                         value: {
                             "@type": "ProprietaryString",
-                            value: "ADisplayName",
+                            value: "aDisplayName",
                             title: "Display Name"
                         },
                         owner: consumptionController.accountController.identity.address,
@@ -1871,12 +1871,12 @@ describe("AttributesController", function () {
                 let repoVersion0: LocalAttribute;
                 let repoVersion1Params: IAttributeSuccessorParams;
                 beforeEach(async function () {
-                    version0ChildValues = ["AStreet", "AHouseNo", "AZipCode", "ACity", "DE"];
+                    version0ChildValues = ["aStreet", "aHouseNo", "aZipCode", "aCity", "DE"];
 
                     const identityAttribute = IdentityAttribute.from({
                         value: {
                             "@type": "StreetAddress",
-                            recipient: "ARecipient",
+                            recipient: "aRecipient",
                             street: version0ChildValues[0],
                             houseNo: version0ChildValues[1],
                             zipCode: version0ChildValues[2],
@@ -1890,13 +1890,13 @@ describe("AttributesController", function () {
                         content: identityAttribute
                     });
 
-                    version1ChildValues = ["ANewStreet", "ANewHouseNo", "ANewZipCode", "ANewCity", "DE"];
+                    version1ChildValues = ["aNewStreet", "aNewHouseNo", "aNewZipCode", "aNewCity", "DE"];
 
                     repoVersion1Params = {
                         content: IdentityAttribute.from({
                             value: {
                                 "@type": "StreetAddress",
-                                recipient: "ANewRecipient",
+                                recipient: "aNewRecipient",
                                 street: version1ChildValues[0],
                                 houseNo: version1ChildValues[1],
                                 zipCode: version1ChildValues[2],
@@ -1919,8 +1919,8 @@ describe("AttributesController", function () {
                     expect(updatedRepoVersion0.succeededBy!.equals(repoVersion1.id)).toBe(true);
                     expect(repoVersion1.succeeds!.equals(updatedRepoVersion0.id)).toBe(true);
 
-                    expect((updatedRepoVersion0.content.value as StreetAddress).recipient).toBe("ARecipient");
-                    expect((repoVersion1.content.value as StreetAddress).recipient).toBe("ANewRecipient");
+                    expect((updatedRepoVersion0.content.value as StreetAddress).recipient).toBe("aRecipient");
+                    expect((repoVersion1.content.value as StreetAddress).recipient).toBe("aNewRecipient");
 
                     const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
                         parentId: repoVersion0.id.toString()
@@ -1950,7 +1950,7 @@ describe("AttributesController", function () {
                         content: IdentityAttribute.from({
                             value: {
                                 "@type": "StreetAddress",
-                                recipient: "ANewRecipient",
+                                recipient: "aNewRecipient",
                                 street: version1ChildValues[0],
                                 houseNo: version1ChildValues[1],
                                 zipCode: version1ChildValues[2],
@@ -1992,7 +1992,7 @@ describe("AttributesController", function () {
                     const identityAttribute = IdentityAttribute.from({
                         value: {
                             "@type": "StreetAddress",
-                            recipient: "ARecipient",
+                            recipient: "aRecipient",
                             street: version0ChildValues[0],
                             houseNo: version0ChildValues[1],
                             zipCode: version0ChildValues[2],
@@ -2038,7 +2038,7 @@ describe("AttributesController", function () {
                     const identityAttribute = IdentityAttribute.from({
                         value: {
                             "@type": "StreetAddress",
-                            recipient: "ARecipient",
+                            recipient: "aRecipient",
                             street: version0ChildValues[0],
                             houseNo: version0ChildValues[1],
                             zipCode: version0ChildValues[2],
@@ -2058,7 +2058,7 @@ describe("AttributesController", function () {
                         content: IdentityAttribute.from({
                             value: {
                                 "@type": "StreetAddress",
-                                recipient: "ANewRecipient",
+                                recipient: "aNewRecipient",
                                 street: version1ChildValues[0],
                                 houseNo: version1ChildValues[1],
                                 zipCode: version1ChildValues[2],
@@ -2121,7 +2121,7 @@ describe("AttributesController", function () {
                     expect(updatedOwnSharedVersion0.succeededBy!.equals(ownSharedVersion1.id)).toBe(true);
                     expect(ownSharedVersion1.succeeds!.equals(updatedOwnSharedVersion0.id)).toBe(true);
 
-                    expect((ownSharedVersion1.content.value as StreetAddress).recipient).toBe("ANewRecipient");
+                    expect((ownSharedVersion1.content.value as StreetAddress).recipient).toBe("aNewRecipient");
                     expect((ownSharedVersion1.content.value as StreetAddress).street.toString()).toBe(version1ChildValues[0]);
                     expect((ownSharedVersion1.content.value as StreetAddress).houseNo.toString()).toBe(version1ChildValues[1]);
                     expect((ownSharedVersion1.content.value as StreetAddress).zipCode.toString()).toBe(version1ChildValues[2]);
@@ -2134,13 +2134,13 @@ describe("AttributesController", function () {
                     repoVersion0 = interimSuccessionResult.predecessor;
                     let repoVersion1 = interimSuccessionResult.successor;
 
-                    const version2ChildValues = ["ANewNewStreet", "ANewNewHouseNo", "ANewNewZipCode", "ANewNewCity", "DE"];
+                    const version2ChildValues = ["aNewNewStreet", "aNewNewHouseNo", "aNewNewZipCode", "aNewNewCity", "DE"];
 
                     const repoVersion2Params: IAttributeSuccessorParams = {
                         content: IdentityAttribute.from({
                             value: {
                                 "@type": "StreetAddress",
-                                recipient: "ANewNewRecipient",
+                                recipient: "aNewNewRecipient",
                                 street: version2ChildValues[0],
                                 houseNo: version2ChildValues[1],
                                 zipCode: version2ChildValues[2],
@@ -2180,7 +2180,7 @@ describe("AttributesController", function () {
                     expect(updatedOwnSharedVersion0.succeededBy!.equals(ownSharedVersion2.id)).toBe(true);
                     expect(ownSharedVersion2.succeeds!.equals(updatedOwnSharedVersion0.id)).toBe(true);
 
-                    expect((ownSharedVersion2.content.value as StreetAddress).recipient).toBe("ANewNewRecipient");
+                    expect((ownSharedVersion2.content.value as StreetAddress).recipient).toBe("aNewNewRecipient");
                     expect((ownSharedVersion2.content.value as StreetAddress).street.toString()).toBe(version2ChildValues[0]);
                     expect((ownSharedVersion2.content.value as StreetAddress).houseNo.toString()).toBe(version2ChildValues[1]);
                     expect((ownSharedVersion2.content.value as StreetAddress).zipCode.toString()).toBe(version2ChildValues[2]);
@@ -2192,7 +2192,7 @@ describe("AttributesController", function () {
                     const identityAttribute = IdentityAttribute.from({
                         value: {
                             "@type": "StreetAddress",
-                            recipient: "ARecipient",
+                            recipient: "aRecipient",
                             street: version0ChildValues[0],
                             houseNo: version0ChildValues[1],
                             zipCode: version0ChildValues[2],
@@ -2213,7 +2213,7 @@ describe("AttributesController", function () {
                         content: IdentityAttribute.from({
                             value: {
                                 "@type": "StreetAddress",
-                                recipient: "ANewRecipient",
+                                recipient: "aNewRecipient",
                                 street: version1ChildValues[0],
                                 houseNo: version1ChildValues[1],
                                 zipCode: version1ChildValues[2],
@@ -2239,7 +2239,7 @@ describe("AttributesController", function () {
                     expect(updatedPeerSharedVersion0.succeededBy!.equals(peerSharedVersion1.id)).toBe(true);
                     expect(peerSharedVersion1.succeeds!.equals(updatedPeerSharedVersion0.id)).toBe(true);
 
-                    expect((peerSharedVersion1.content.value as StreetAddress).recipient).toBe("ANewRecipient");
+                    expect((peerSharedVersion1.content.value as StreetAddress).recipient).toBe("aNewRecipient");
                     expect((peerSharedVersion1.content.value as StreetAddress).street.toString()).toBe(version1ChildValues[0]);
                     expect((peerSharedVersion1.content.value as StreetAddress).houseNo.toString()).toBe(version1ChildValues[1]);
                     expect((peerSharedVersion1.content.value as StreetAddress).zipCode.toString()).toBe(version1ChildValues[2]);
@@ -3105,7 +3105,7 @@ describe("AttributesController", function () {
         test("should return an empty list if a relationship attribute without associated third party relationship attributes is queried", async function () {
             const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
-                    key: "AKey",
+                    key: "aKey",
                     value: {
                         "@type": "ProprietaryString",
                         value: "Some value",
@@ -3126,7 +3126,7 @@ describe("AttributesController", function () {
     test("should delete attributes exchanged with peer", async function () {
         const ownRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
             content: RelationshipAttribute.from({
-                key: "AKey",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
                     value: "Some value",
@@ -3141,7 +3141,7 @@ describe("AttributesController", function () {
 
         const peerRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
             content: RelationshipAttribute.from({
-                key: "AKey",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
                     value: "Some value",

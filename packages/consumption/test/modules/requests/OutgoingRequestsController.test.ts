@@ -1,11 +1,15 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ApplicationError } from "@js-soft/ts-utils";
 import {
+    CreateAttributeRequestItem,
     IAcceptResponseItem,
     IRequest,
     IRequestItemGroup,
     IResponse,
     IResponseItemGroup,
+    ProprietaryString,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
     RelationshipTemplateContent,
     RequestItemGroup,
     ResponseItemResult,
@@ -222,6 +226,42 @@ describe("OutgoingRequestsController", function () {
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.cannotShareRequestWithYourself",
                 message: "You cannot share a Request with yourself."
+            });
+        });
+
+        test("returns a validation result that contains an error for requests that would lead to the creation of more than one RelationshipAttribute with the same key", async function () {
+            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
+                content: {
+                    items: [
+                        CreateAttributeRequestItem.from({
+                            attribute: RelationshipAttribute.from({
+                                "@type": "RelationshipAttribute",
+                                owner: "did:e:a-domain:dids:anidentity",
+                                key: "UniqueKey",
+                                confidentiality: RelationshipAttributeConfidentiality.Public,
+                                value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
+                            }),
+                            mustBeAccepted: true
+                        }),
+                        CreateAttributeRequestItem.from({
+                            attribute: RelationshipAttribute.from({
+                                "@type": "RelationshipAttribute",
+                                owner: "did:e:a-domain:dids:anidentity",
+                                key: "UniqueKey",
+                                confidentiality: RelationshipAttributeConfidentiality.Public,
+                                value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
+                            }),
+                            mustBeAccepted: true
+                        })
+                    ]
+                },
+                peer: "did:e:a-domain:dids:anidentity"
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message:
+                    "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
             });
         });
     });

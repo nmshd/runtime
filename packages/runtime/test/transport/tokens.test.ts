@@ -39,9 +39,7 @@ describe("Tokens", () => {
 describe("Tokens errors", () => {
     test("create a token with 'expiresAt' set to undefined", async () => {
         const response = await runtimeServices1.transport.tokens.createOwnToken({
-            content: {
-                content: "Hello"
-            },
+            content: { aKey: "aValue" },
             expiresAt: undefined as unknown as string,
             ephemeral: false
         });

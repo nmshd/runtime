@@ -92,7 +92,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         for (const requestItem of request.items) {
             if (requestItem instanceof RequestItem) {
                 const relationshipAttributeFragment = OutgoingRequestsController.extractRelationshipAttributeFragment(requestItem);
-                if (relationshipAttributeFragment) relationshipAttributeFragments.push(relationshipAttributeFragment);
+                if (relationshipAttributeFragment && requestItem.mustBeAccepted) relationshipAttributeFragments.push(relationshipAttributeFragment);
 
                 const canCreateItem = await this.canCreateItem(requestItem, request, recipient);
                 results.push(canCreateItem);
