@@ -414,9 +414,7 @@ describe("RequestModule", () => {
         test("the incoming request is created and moved to status DecisionRequired", async () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
 
-            await rRuntimeServices.eventBus.waitForEvent(IncomingRequestReceivedEvent, (e) => {
-                return e.data.id === message.content.id;
-            });
+            await rRuntimeServices.eventBus.waitForEvent(IncomingRequestReceivedEvent, (e) => e.data.id === message.content.id);
             const incomingRequestStatusChangedEvent = await rRuntimeServices.eventBus.waitForEvent(
                 IncomingRequestStatusChangedEvent,
                 (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired
