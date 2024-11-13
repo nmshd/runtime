@@ -62,8 +62,8 @@ describe("FileController", function () {
         const content = CoreBuffer.fromUtf8("Test");
         const sentFile = await TestUtil.uploadFile(sender, content);
 
-        const reference = sentFile.toFileReference();
-        const receivedFile = await recipient.files.getOrLoadFileByTruncated(reference.truncate());
+        const reference = sentFile.toFileReference().truncate();
+        const receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
         tempId1 = sentFile.id;
 
         expectValidFiles(sentFile, receivedFile, tempDate);

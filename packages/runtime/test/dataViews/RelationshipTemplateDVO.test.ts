@@ -28,7 +28,6 @@ import { RuntimeServiceProvider, TestRuntimeServices, syncUntilHasRelationships 
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;
 let requestor: TestRuntimeServices;
-let templateContent: RelationshipTemplateContentJSON;
 let templatorTemplate: RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
 let templateId: string;
 let responseItems: DecideRequestItemGroupParametersJSON[];
@@ -70,7 +69,7 @@ describe("RelationshipTemplateDVO", () => {
             key: "surname",
             confidentiality: "protected" as RelationshipAttributeConfidentiality
         };
-        templateContent = RelationshipTemplateContent.from({
+        const templateContent = RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [

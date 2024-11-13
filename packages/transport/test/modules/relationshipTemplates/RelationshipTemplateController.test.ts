@@ -155,7 +155,7 @@ describe("RelationshipTemplateController", function () {
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(tokenContent)).rejects.toThrow("error.platform.recordNotFound");
     });
 
-    test.only("should create and load a password-protected template", async function () {
+    test("should create and load a password-protected template", async function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
