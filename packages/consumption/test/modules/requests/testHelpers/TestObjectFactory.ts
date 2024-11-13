@@ -235,7 +235,7 @@ export class TestObjectFactory {
         return RelationshipAttribute.from({
             value: properties?.value ?? ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" }),
             confidentiality: properties?.confidentiality ?? RelationshipAttributeConfidentiality.Public,
-            key: properties?.key ?? "AKey",
+            key: properties?.key ?? "aKey",
             isTechnical: properties?.isTechnical ?? false,
             owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
