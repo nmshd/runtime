@@ -211,10 +211,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         const itemResults = await this.canDecideItems(params.items, request.content.items, request);
         const result = ValidationResult.fromItems(itemResults);
 
-        const potentialNewRelationshipAttributesWithSameKeyResult = IncomingRequestsController.checkForPotentialNewRelationshipAttributesWithSameKey(
-            params.items,
-            request.content.items
-        );
+        const potentialNewRelationshipAttributesWithSameKeyResult = this.checkForPotentialNewRelationshipAttributesWithSameKey(params.items, request.content.items);
         if (potentialNewRelationshipAttributesWithSameKeyResult.isError() && result.isSuccess()) {
             return potentialNewRelationshipAttributesWithSameKeyResult;
         }
@@ -250,7 +247,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return validationResults;
     }
 
-    private static checkForPotentialNewRelationshipAttributesWithSameKey(
+    private checkForPotentialNewRelationshipAttributesWithSameKey(
         params: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[],
         items: (RequestItem | RequestItemGroup)[]
     ) {
@@ -260,10 +257,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             const requestItem = items[i];
 
             if (requestItem instanceof RequestItemGroup) {
-                const relationshipAttributeFragmentsOfGroup = IncomingRequestsController.extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItem);
+                const relationshipAttributeFragmentsOfGroup = this.extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItem);
                 if (relationshipAttributeFragmentsOfGroup) relationshipAttributeFragments.push(...relationshipAttributeFragmentsOfGroup);
             } else {
-                const relationshipAttributeFragment = IncomingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
+                const relationshipAttributeFragment = this.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
                 if (relationshipAttributeFragment && (decideItemParams as DecideRequestItemParametersJSON).accept) {
                     relationshipAttributeFragments.push(relationshipAttributeFragment);
                 }
@@ -281,7 +278,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
-    private static extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItemGroup: RequestItemGroup) {
+    private extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItemGroup: RequestItemGroup) {
         const groupFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
 
         for (const requestItem of requestItemGroup.items) {
@@ -289,7 +286,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
                 const relationshipAttributeFragments = this.extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItem);
                 if (relationshipAttributeFragments) groupFragments.push(...relationshipAttributeFragments);
             } else {
-                const relationshipAttributeFragment = IncomingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
+                const relationshipAttributeFragment = this.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
                 if (relationshipAttributeFragment) groupFragments.push(relationshipAttributeFragment);
             }
         }
@@ -299,14 +296,24 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return;
     }
 
-    private static extractRelationshipAttributeFragmentFromRequestItem(requestItem: RequestItem) {
+    private extractRelationshipAttributeFragmentFromRequestItem(requestItem: RequestItem) {
         if (requestItem instanceof CreateAttributeRequestItem && requestItem.attribute instanceof RelationshipAttribute) {
-            return { owner: requestItem.attribute.owner.toString(), key: requestItem.attribute.key, value: { "@type": requestItem.attribute.value.toJSON()["@type"] } };
+            const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
+            return {
+                owner: ownerIsEmptyString ? this.identity.address.toString() : requestItem.attribute.owner.toString(),
+                key: requestItem.attribute.key,
+                value: { "@type": requestItem.attribute.value.toJSON()["@type"] }
+            };
         } else if (
             (requestItem instanceof ReadAttributeRequestItem || requestItem instanceof ProposeAttributeRequestItem) &&
             requestItem.query instanceof RelationshipAttributeQuery
         ) {
-            return { owner: requestItem.query.owner.toString(), key: requestItem.query.key, value: { "@type": requestItem.query.attributeCreationHints.valueType } };
+            const ownerIsEmptyString = requestItem.query.owner.toString() === "";
+            return {
+                owner: ownerIsEmptyString ? this.identity.address.toString() : requestItem.query.owner.toString(),
+                key: requestItem.query.key,
+                value: { "@type": requestItem.query.attributeCreationHints.valueType }
+            };
         }
 
         return;
