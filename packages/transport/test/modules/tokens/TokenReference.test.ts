@@ -197,7 +197,7 @@ describe("TokenReference", function () {
                     salt: await CoreCrypto.random(16)
                 }
             });
-        }).rejects.toThrow("ReducedPasswordInfo.passwordType");
+        }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
     });
 
     test("should not create a reference with non-integer passwordType", async function () {
@@ -210,7 +210,7 @@ describe("TokenReference", function () {
                     salt: await CoreCrypto.random(16)
                 }
             });
-        }).rejects.toThrow("ReducedPasswordInfo.passwordType");
+        }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
     });
 
     test("should not create a reference starting with neither pw nor pin", async function () {
@@ -223,7 +223,7 @@ describe("TokenReference", function () {
                     salt: await CoreCrypto.random(16)
                 }
             });
-        }).rejects.toThrow("ReducedPasswordInfo.passwordType");
+        }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
     });
 
     test("should not load a reference with a non-base64 salt", async function () {
