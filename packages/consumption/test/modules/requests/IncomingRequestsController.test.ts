@@ -18,6 +18,7 @@ import {
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreIdHelper, TransportLoggerFactory } from "@nmshd/transport";
 import {
+    AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
     DecideRequestParametersJSON,
@@ -459,8 +460,15 @@ describe("IncomingRequestsController", function () {
                         accept: true
                     },
                     {
-                        accept: true
-                    }
+                        accept: true,
+                        newAttribute: RelationshipAttribute.from({
+                            "@type": "RelationshipAttribute",
+                            owner: context.currentIdentity.toString(),
+                            key: "UniqueKey",
+                            confidentiality: RelationshipAttributeConfidentiality.Public,
+                            value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
+                        }).toJSON()
+                    } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
                 ]
             });
 
