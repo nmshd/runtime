@@ -15,7 +15,6 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { ConsumptionError } from "../../../../consumption/ConsumptionError";
 import { AttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
@@ -184,7 +183,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             );
 
             if (relationshipAttributesWithSameKey.length !== 0) {
-                throw new ConsumptionError(
+                throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
                     "The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
                 );
             }

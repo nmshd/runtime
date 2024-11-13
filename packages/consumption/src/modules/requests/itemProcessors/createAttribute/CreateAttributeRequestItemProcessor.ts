@@ -9,7 +9,6 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { ConsumptionError } from "../../../../consumption/ConsumptionError";
 import { LocalAttribute } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
@@ -98,7 +97,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             );
 
             if (relationshipAttributesWithSameKey.length !== 0) {
-                throw new ConsumptionError(
+                throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
                     "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
                 );
             }
