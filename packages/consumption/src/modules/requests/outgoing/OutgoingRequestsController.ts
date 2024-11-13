@@ -62,7 +62,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         if (parsedParams.peer) {
             const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
 
-            // there should at minimum be a Pending relationship to the peer
+            // there should at minimum be a pending Relationship to the peer
             if (!relationship) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
@@ -79,30 +79,41 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         }
 
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
-
-        if (innerResults instanceof ValidationResult) {
-            return innerResults;
-        }
-
         const result = ValidationResult.fromItems(innerResults);
+
+        const potentialNewRelationshipAttributesWithSameKeyResult = OutgoingRequestsController.checkForPotentialNewRelationshipAttributesWithSameKey(parsedParams.content.items);
+        if (potentialNewRelationshipAttributesWithSameKeyResult.isError() && result.isSuccess()) {
+            return potentialNewRelationshipAttributesWithSameKeyResult;
+        }
 
         return result;
     }
 
     private async canCreateItems(request: Request, recipient?: CoreAddress) {
-        const relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
         const results: ValidationResult[] = [];
 
         for (const requestItem of request.items) {
             if (requestItem instanceof RequestItem) {
-                const relationshipAttributeFragment = OutgoingRequestsController.extractRelationshipAttributeFragment(requestItem);
-                if (relationshipAttributeFragment && requestItem.mustBeAccepted) relationshipAttributeFragments.push(relationshipAttributeFragment);
-
                 const canCreateItem = await this.canCreateItem(requestItem, request, recipient);
                 results.push(canCreateItem);
             } else {
                 const result = await this.canCreateItemGroup(requestItem, request, recipient);
                 results.push(result);
+            }
+        }
+
+        return results;
+    }
+
+    private static checkForPotentialNewRelationshipAttributesWithSameKey(items: (RequestItem | RequestItemGroup)[]) {
+        const relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
+        for (const requestItem of items) {
+            if (requestItem instanceof RequestItemGroup) {
+                const relationshipAttributeFragmentsOfGroup = OutgoingRequestsController.extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItem);
+                if (relationshipAttributeFragmentsOfGroup) relationshipAttributeFragments.push(...relationshipAttributeFragmentsOfGroup);
+            } else {
+                const relationshipAttributeFragment = OutgoingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
+                if (relationshipAttributeFragment && requestItem.mustBeAccepted) relationshipAttributeFragments.push(relationshipAttributeFragment);
             }
         }
 
@@ -114,10 +125,28 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             );
         }
 
-        return results;
+        return ValidationResult.success();
     }
 
-    private static extractRelationshipAttributeFragment(requestItem: RequestItem) {
+    private static extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItemGroup: RequestItemGroup) {
+        const groupFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
+
+        for (const requestItem of requestItemGroup.items) {
+            if (requestItem instanceof RequestItemGroup) {
+                const relationshipAttributeFragments = this.extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItem);
+                if (relationshipAttributeFragments) groupFragments.push(...relationshipAttributeFragments);
+            } else {
+                const relationshipAttributeFragment = OutgoingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
+                if (relationshipAttributeFragment) groupFragments.push(relationshipAttributeFragment);
+            }
+        }
+
+        if (groupFragments.length !== 0) return groupFragments;
+
+        return;
+    }
+
+    private static extractRelationshipAttributeFragmentFromRequestItem(requestItem: RequestItem) {
         if (requestItem instanceof CreateAttributeRequestItem && requestItem.attribute instanceof RelationshipAttribute) {
             return { owner: requestItem.attribute.owner.toString(), key: requestItem.attribute.key, value: { "@type": requestItem.attribute.value.toJSON()["@type"] } };
         } else if (

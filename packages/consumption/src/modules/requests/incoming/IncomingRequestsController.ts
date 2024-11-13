@@ -209,7 +209,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         if (validationResult.isError()) return validationResult;
 
         const itemResults = await this.canDecideItems(params.items, request.content.items, request);
-
         const result = ValidationResult.fromItems(itemResults);
 
         const potentialNewRelationshipAttributesWithSameKeyResult = IncomingRequestsController.checkForPotentialNewRelationshipAttributesWithSameKey(
