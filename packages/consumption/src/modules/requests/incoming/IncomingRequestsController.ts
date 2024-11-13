@@ -301,10 +301,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
 
         if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragmentsBasedOnRequest)) {
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-                    "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
-                )
+            throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
+                "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
             );
         } else if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragmentsBasedOnParams)) {
             return ValidationResult.error(
