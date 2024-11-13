@@ -3,7 +3,7 @@ import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { IPasswordInfo, PasswordInfo } from "../../../core/types/PasswordInfo";
+import { IPasswordInfo, PasswordInfo, PasswordInfoMinusPassword } from "../../../core/types/PasswordInfo";
 import { RelationshipTemplateReference } from "../transmission/RelationshipTemplateReference";
 import { CachedRelationshipTemplate, ICachedRelationshipTemplate } from "./CachedRelationshipTemplate";
 
@@ -60,7 +60,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
             id: this.id,
             key: this.secretKey,
             forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
-            passwordInfo: this.passwordInfo
+            passwordInfo: this.passwordInfo ? PasswordInfoMinusPassword.from(this.passwordInfo) : undefined
         });
     }
 
