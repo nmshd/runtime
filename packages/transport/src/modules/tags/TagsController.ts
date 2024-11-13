@@ -19,7 +19,7 @@ export class TagsController extends TransportController {
     }
 
     public async getTags(): Promise<TagList> {
-        const backBoneTagList = (await this.client.getTags()).value;
-        return TagList.fromAny(backBoneTagList);
+        const backboneTagList = (await this.client.getTags()).value;
+        return TagList.fromAny(backboneTagList);
     }
 }
