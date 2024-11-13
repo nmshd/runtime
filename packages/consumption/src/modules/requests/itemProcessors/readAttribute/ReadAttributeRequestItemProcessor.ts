@@ -213,9 +213,15 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 requestInfo.peer
             );
 
-            if (relationshipAttributesWithSameKey.length !== 0) {
+            if (relationshipAttributesWithSameKey.length !== 0 && requestItem.mustBeAccepted) {
                 throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
                     "The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                );
+            } else if (relationshipAttributesWithSameKey.length !== 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                        "This ReadAttributeRequestItem cannot be accepted as the queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    )
                 );
             }
         }

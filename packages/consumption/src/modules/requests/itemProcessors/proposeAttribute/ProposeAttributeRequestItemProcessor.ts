@@ -182,9 +182,15 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 requestInfo.peer
             );
 
-            if (relationshipAttributesWithSameKey.length !== 0) {
+            if (relationshipAttributesWithSameKey.length !== 0 && requestItem.mustBeAccepted) {
                 throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
                     "The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                );
+            } else if (relationshipAttributesWithSameKey.length !== 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                        "This ProposeAttributeRequestItem cannot be accepted as the queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    )
                 );
             }
         }
