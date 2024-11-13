@@ -255,12 +255,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 await consumptionController.attributes.createSharedLocalAttribute({
                     content: RelationshipAttribute.from({
-                        key: "UniqueKey",
+                        key: "uniqueKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: sender,
                         value: ProprietaryString.from({
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         })
                     }),
                     peer: recipient,
@@ -270,11 +270,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: RelationshipAttributeQuery.from({
-                        key: "UniqueKey",
+                        key: "uniqueKey",
                         owner: sender,
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
-                            title: "ATitle",
+                            title: "aTitle",
                             confidentiality: RelationshipAttributeConfidentiality.Public
                         }
                     })
@@ -760,9 +760,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 await consumptionController.attributes.createSharedLocalAttribute({
                     content: TestObjectFactory.createRelationshipAttribute({
-                        key: "UniqueKey",
+                        key: "uniqueKey",
                         owner: recipient,
-                        value: ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" })
+                        value: ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" })
                     }),
                     peer: sender,
                     requestReference: CoreId.from("reqRef")
@@ -771,11 +771,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: RelationshipAttributeQuery.from({
-                        key: "UniqueKey",
+                        key: "uniqueKey",
                         owner: recipient,
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
-                            title: "ATitle",
+                            title: "aTitle",
                             confidentiality: RelationshipAttributeConfidentiality.Public
                         }
                     })
@@ -798,13 +798,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     accept: true,
                     newAttribute: {
                         "@type": "RelationshipAttribute",
-                        key: "UniqueKey",
+                        key: "uniqueKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: recipient.toString(),
                         value: {
                             "@type": "ProprietaryString",
-                            title: "ATitle",
-                            value: "AStringValue"
+                            title: "aTitle",
+                            value: "aStringValue"
                         }
                     }
                 };

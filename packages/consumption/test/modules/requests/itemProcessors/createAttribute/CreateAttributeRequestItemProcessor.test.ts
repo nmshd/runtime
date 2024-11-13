@@ -137,14 +137,14 @@ describe("CreateAttributeRequestItemProcessor", function () {
         test("returns Error when passing a Relationship Attribute with same key as an already existing Relationship Attribute of this Relationship", async function () {
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
-                key: "UniqueKey"
+                key: "uniqueKey"
             });
 
             await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
 
             const relationshipAttributeWithSameKey = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
-                key: "UniqueKey"
+                key: "uniqueKey"
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKey }, TestIdentity.RECIPIENT);
@@ -157,14 +157,14 @@ describe("CreateAttributeRequestItemProcessor", function () {
         test("returns Error on violation of key uniqueness even if the owner of the provided Relationship Attribute is an empty string as long as the Recipient is known", async function () {
             const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.RECIPIENT,
-                key: "UniqueKey"
+                key: "uniqueKey"
             });
 
             await When.iCreateARelationshipAttribute(relationshipAttributeOfRecipient);
 
             const relationshipAttributeWithSameKeyAndEmptyOwner = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.EMPTY,
-                key: "UniqueKey"
+                key: "uniqueKey"
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKeyAndEmptyOwner }, TestIdentity.RECIPIENT);
@@ -177,14 +177,14 @@ describe("CreateAttributeRequestItemProcessor", function () {
         test("returns Success when passing a Relationship Attribute with same key but different owner", async function () {
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
-                key: "OwnerSpecificUniqueKey"
+                key: "ownerSpecificUniqueKey"
             });
 
             await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
 
             const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.RECIPIENT,
-                key: "OwnerSpecificUniqueKey"
+                key: "ownerSpecificUniqueKey"
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfRecipient }, TestIdentity.RECIPIENT);
@@ -194,16 +194,16 @@ describe("CreateAttributeRequestItemProcessor", function () {
         test("returns Success when passing a Relationship Attribute with same key but different value type", async function () {
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
-                key: "ValueTypeSpecificUniqueKey",
-                value: ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" })
+                key: "valueTypeSpecificUniqueKey",
+                value: ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" })
             });
 
             await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
 
             const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
-                key: "ValueTypeSpecificUniqueKey",
-                value: ProprietaryInteger.from({ title: "ATitle", value: 1 })
+                key: "valueTypeSpecificUniqueKey",
+                value: ProprietaryInteger.from({ title: "aTitle", value: 1 })
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfRecipient }, TestIdentity.RECIPIENT);
@@ -213,7 +213,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
         test("returns Success when passing a Relationship Attribute with same key as a Relationship Attribute in deletion", async function () {
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
-                key: "PersistenceSpecificUniqueKey"
+                key: "persistenceSpecificUniqueKey"
             });
 
             const createdAttribute = await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
@@ -221,7 +221,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             const relationshipAttributeWithSameKey = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
-                key: "PersistenceSpecificUniqueKey"
+                key: "persistenceSpecificUniqueKey"
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKey }, TestIdentity.RECIPIENT);
@@ -231,14 +231,14 @@ describe("CreateAttributeRequestItemProcessor", function () {
         test("returns Success when passing a Relationship Attribute with same key as an already existing ThirdPartyRelationshipAttribute", async function () {
             const thirdPartyRelationshipAttribute = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
-                key: "RelationshipSpecificUniqueKey"
+                key: "relationshipSpecificUniqueKey"
             });
 
             await When.iCreateAThirdPartyRelationshipAttribute(thirdPartyRelationshipAttribute);
 
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SENDER,
-                key: "RelationshipSpecificUniqueKey"
+                key: "relationshipSpecificUniqueKey"
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSender }, TestIdentity.RECIPIENT);

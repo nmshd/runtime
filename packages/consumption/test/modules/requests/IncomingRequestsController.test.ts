@@ -433,9 +433,9 @@ describe("IncomingRequestsController", function () {
                             attribute: RelationshipAttribute.from({
                                 "@type": "RelationshipAttribute",
                                 owner: context.currentIdentity.toString(),
-                                key: "UniqueKey",
+                                key: "uniqueKey",
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
-                                value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
+                                value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
                             })
                         }),
                         {
@@ -445,10 +445,10 @@ describe("IncomingRequestsController", function () {
                                     mustBeAccepted: false,
                                     query: RelationshipAttributeQuery.from({
                                         owner: context.currentIdentity.toString(),
-                                        key: "UniqueKey",
+                                        key: "uniqueKey",
                                         attributeCreationHints: {
                                             valueType: "ProprietaryString",
-                                            title: "ATitle",
+                                            title: "aTitle",
                                             confidentiality: RelationshipAttributeConfidentiality.Public
                                         }
                                     })
@@ -471,9 +471,9 @@ describe("IncomingRequestsController", function () {
                                 newAttribute: RelationshipAttribute.from({
                                     "@type": "RelationshipAttribute",
                                     owner: context.currentIdentity.toString(),
-                                    key: "UniqueKey",
+                                    key: "uniqueKey",
                                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                                    value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
+                                    value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
                                 }).toJSON()
                             } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
                         ]

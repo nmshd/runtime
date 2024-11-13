@@ -240,9 +240,9 @@ describe("OutgoingRequestsController", function () {
                             attribute: RelationshipAttribute.from({
                                 "@type": "RelationshipAttribute",
                                 owner: "did:e:a-domain:dids:anidentity",
-                                key: "UniqueKey",
+                                key: "uniqueKey",
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
-                                value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
+                                value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
                             })
                         }),
                         {
@@ -252,19 +252,19 @@ describe("OutgoingRequestsController", function () {
                                     mustBeAccepted: true,
                                     query: RelationshipAttributeQuery.from({
                                         owner: "",
-                                        key: "UniqueKey",
+                                        key: "uniqueKey",
                                         attributeCreationHints: {
                                             valueType: "ProprietaryString",
-                                            title: "ATitle",
+                                            title: "aTitle",
                                             confidentiality: RelationshipAttributeConfidentiality.Public
                                         }
                                     }),
                                     attribute: RelationshipAttribute.from({
                                         "@type": "RelationshipAttribute",
                                         owner: "",
-                                        key: "UniqueKey",
+                                        key: "uniqueKey",
                                         confidentiality: RelationshipAttributeConfidentiality.Public,
-                                        value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
+                                        value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
                                     })
                                 })
                             ]
