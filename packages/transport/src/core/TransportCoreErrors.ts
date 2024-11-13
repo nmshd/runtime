@@ -208,7 +208,7 @@ class General {
     }
 
     public noPasswordProvided() {
-        return new CoreError("error.transport.noPasswordProvided", "You need to provide a password.");
+        return new CoreError("error.transport.noPasswordProvided", "You need to provide a password to perform this operation.");
     }
 }
 
