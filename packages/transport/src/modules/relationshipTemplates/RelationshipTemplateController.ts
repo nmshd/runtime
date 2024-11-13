@@ -5,7 +5,7 @@ import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
-import { PasswordInfo } from "../../core/types/PasswordInfo";
+import { IPasswordInfo, PasswordInfo } from "../../core/types/PasswordInfo";
 import { PeerRelationshipTemplateLoadedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { Relationship } from "../relationships/local/Relationship";
@@ -90,10 +90,11 @@ export class RelationshipTemplateController extends TransportController {
         });
 
         const passwordInfo = parameters.passwordInfo
-            ? {
-                  ...parameters.passwordInfo,
+            ? ({
+                  password: parameters.passwordInfo.password,
+                  passwordType: parameters.passwordInfo.passwordType,
                   salt: salt!
-              }
+              } as IPasswordInfo)
             : undefined;
 
         const template = RelationshipTemplate.from({
@@ -279,7 +280,8 @@ export class RelationshipTemplateController extends TransportController {
         if (reference.passwordInfo && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordInfo = reference.passwordInfo
             ? PasswordInfo.from({
-                  ...reference.passwordInfo,
+                  salt: reference.passwordInfo.salt,
+                  passwordType: reference.passwordInfo.passwordType,
                   password: password!
               })
             : undefined;
@@ -291,7 +293,8 @@ export class RelationshipTemplateController extends TransportController {
         if (tokenContent.passwordInfo && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordInfo = tokenContent.passwordInfo
             ? PasswordInfo.from({
-                  ...tokenContent.passwordInfo,
+                  salt: tokenContent.passwordInfo.salt,
+                  passwordType: tokenContent.passwordInfo.passwordType,
                   password: password!
               })
             : undefined;

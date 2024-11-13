@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
-import { IPasswordInfo, PasswordInfo } from "../../../core/types/PasswordInfo";
+import { IInitialPasswordInfo, InitialPasswordInfo } from "../../../core/types/PasswordInfo";
 import { validateMaxNumberOfAllocations } from "./CachedRelationshipTemplate";
 
 export interface ISendRelationshipTemplateParameters extends ISerializable {
@@ -8,7 +8,7 @@ export interface ISendRelationshipTemplateParameters extends ISerializable {
     expiresAt: ICoreDate;
     maxNumberOfAllocations?: number;
     forIdentity?: ICoreAddress;
-    passwordInfo?: IPasswordInfo;
+    passwordInfo?: IInitialPasswordInfo;
 }
 
 @type("SendRelationshipTemplateParameters")
@@ -31,7 +31,7 @@ export class SendRelationshipTemplateParameters extends Serializable implements 
 
     @validate({ nullable: true })
     @serialize()
-    public passwordInfo?: PasswordInfo;
+    public passwordInfo?: InitialPasswordInfo;
 
     public static from(value: ISendRelationshipTemplateParameters): SendRelationshipTemplateParameters {
         return this.fromAny(value);

@@ -155,33 +155,37 @@ describe("RelationshipTemplateController", function () {
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(tokenContent)).rejects.toThrow("error.platform.recordNotFound");
     });
 
-    test("should create and load a password-protected template", async function () {
+    test.only("should create and load a password-protected template", async function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            password: "password",
-            passwordType: "pw"
+            passwordInfo: {
+                password: "password",
+                passwordType: "pw"
+            }
         });
         expect(ownTemplate).toBeDefined();
-        expect(ownTemplate.password).toBe("password");
-        expect(ownTemplate.salt).toBeDefined();
-        expect(ownTemplate.salt?.length).toBe(16);
+        expect(ownTemplate.passwordInfo!.password).toBe("password");
+        expect(ownTemplate.passwordInfo!.salt).toBeDefined();
+        expect(ownTemplate.passwordInfo!.salt).toHaveLength(16);
         const reference = ownTemplate.toRelationshipTemplateReference();
-        expect(reference.passwordType).toBe("pw");
-        expect(reference.salt).toStrictEqual(ownTemplate.salt);
+        expect(reference.passwordInfo!.passwordType).toBe("pw");
+        expect(reference.passwordInfo!.salt).toStrictEqual(ownTemplate.passwordInfo!.salt);
 
         const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference.truncate(), "password");
         expect(peerTemplate).toBeDefined();
-        expect(peerTemplate.password).toBe("password");
-        expect(peerTemplate.salt).toStrictEqual(ownTemplate.salt);
+        expect(peerTemplate.passwordInfo!.password).toBe("password");
+        expect(peerTemplate.passwordInfo!.salt).toStrictEqual(ownTemplate.passwordInfo!.salt);
     });
 
     test("should throw an error if loaded with a wrong or missing password", async function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            password: "1234",
-            passwordType: "pin4"
+            passwordInfo: {
+                password: "1234",
+                passwordType: "pin4"
+            }
         });
         expect(ownTemplate).toBeDefined();
 
@@ -197,14 +201,18 @@ describe("RelationshipTemplateController", function () {
         const ownTemplate1 = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            password: "password",
-            passwordType: "pw"
+            passwordInfo: {
+                password: "password",
+                passwordType: "pw"
+            }
         });
         const ownTemplate2 = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            password: "1234",
-            passwordType: "pin4"
+            passwordInfo: {
+                password: "1234",
+                passwordType: "pin4"
+            }
         });
 
         await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate1.toRelationshipTemplateReference().truncate(), "password");

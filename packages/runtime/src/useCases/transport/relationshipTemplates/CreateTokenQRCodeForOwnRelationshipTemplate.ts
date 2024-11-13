@@ -44,12 +44,18 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
+        const passwordInfo = template.passwordInfo
+            ? {
+                  passwordType: template.passwordInfo.passwordType,
+                  salt: template.passwordInfo.salt
+              }
+            : undefined;
+
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
             secretKey: template.secretKey,
             forIdentity: template.cache!.forIdentity,
-            passwordType: template.passwordType,
-            salt: template.salt
+            passwordInfo
         });
 
         const defaultTokenExpiry = template.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });

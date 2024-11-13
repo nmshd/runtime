@@ -44,12 +44,18 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
+        const passwordInfo = template.passwordInfo
+            ? {
+                  passwordType: template.passwordInfo.passwordType,
+                  salt: template.passwordInfo.salt
+              }
+            : undefined;
+
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
             secretKey: template.secretKey,
             forIdentity: template.cache?.forIdentity,
-            passwordType: template.passwordType,
-            salt: template.salt
+            passwordInfo
         });
 
         const ephemeral = request.ephemeral ?? true;

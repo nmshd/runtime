@@ -33,3 +33,22 @@ export class PasswordInfo extends ReducedPasswordInfo implements IPasswordInfo {
         return this.fromAny(value);
     }
 }
+
+export interface IInitialPasswordInfo extends ISerializable {
+    passwordType: string;
+    password: string;
+}
+
+export class InitialPasswordInfo extends Serializable implements IInitialPasswordInfo {
+    @validate({ regExp: /^(pw|pin(4|5|6|7|8|9|10|11|12|13|14|15|16))$/ })
+    @serialize()
+    public passwordType: string;
+
+    @validate({ disallowedValues: [""] })
+    @serialize()
+    public password: string;
+
+    public static from(value: IInitialPasswordInfo): InitialPasswordInfo {
+        return this.fromAny(value);
+    }
+}

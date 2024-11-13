@@ -38,7 +38,7 @@ export class Reference extends Serializable implements IReference {
 
     public truncate(): string {
         const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
-        const passwordPart = this.passwordInfo ? `${this.passwordInfo.passwordType}&${this.passwordInfo.salt.toBase64()}` : undefined;
+        const passwordPart = this.passwordInfo ? `${this.passwordInfo.passwordType}&${this.passwordInfo.salt.toBase64()}` : "";
 
         const truncatedReference = CoreBuffer.fromUtf8(
             `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ? this.forIdentityTruncated : ""}|${passwordPart}`
@@ -72,7 +72,7 @@ export class Reference extends Serializable implements IReference {
     }
 
     private static parsePasswordPart(value: string): IReducedPasswordInfo | undefined {
-        if (value === "") return;
+        if (!value) return;
         const splittedPasswordParts = value.split("&");
         if (splittedPasswordParts.length !== 2) {
             throw TransportCoreErrors.general.invalidTruncatedReference("The password part of a TruncatedReference must consist of exactly 2 components.");
