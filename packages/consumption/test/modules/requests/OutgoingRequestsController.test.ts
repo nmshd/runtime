@@ -243,16 +243,21 @@ describe("OutgoingRequestsController", function () {
                             }),
                             mustBeAccepted: true
                         }),
-                        CreateAttributeRequestItem.from({
-                            attribute: RelationshipAttribute.from({
-                                "@type": "RelationshipAttribute",
-                                owner: "",
-                                key: "UniqueKey",
-                                confidentiality: RelationshipAttributeConfidentiality.Public,
-                                value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
-                            }),
-                            mustBeAccepted: true
-                        })
+                        {
+                            "@type": "RequestItemGroup",
+                            items: [
+                                CreateAttributeRequestItem.from({
+                                    attribute: RelationshipAttribute.from({
+                                        "@type": "RelationshipAttribute",
+                                        owner: "",
+                                        key: "UniqueKey",
+                                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                                        value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
+                                    }),
+                                    mustBeAccepted: true
+                                })
+                            ]
+                        } as IRequestItemGroup
                     ]
                 },
                 peer: "did:e:a-domain:dids:anidentity"

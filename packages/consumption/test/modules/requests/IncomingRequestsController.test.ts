@@ -438,18 +438,23 @@ describe("IncomingRequestsController", function () {
                             }),
                             mustBeAccepted: true
                         }),
-                        ReadAttributeRequestItem.from({
-                            query: RelationshipAttributeQuery.from({
-                                owner: context.currentIdentity.toString(),
-                                key: "UniqueKey",
-                                attributeCreationHints: {
-                                    valueType: "ProprietaryString",
-                                    title: "ATitle",
-                                    confidentiality: RelationshipAttributeConfidentiality.Public
-                                }
-                            }),
-                            mustBeAccepted: false
-                        })
+                        {
+                            "@type": "RequestItemGroup",
+                            items: [
+                                ReadAttributeRequestItem.from({
+                                    query: RelationshipAttributeQuery.from({
+                                        owner: context.currentIdentity.toString(),
+                                        key: "UniqueKey",
+                                        attributeCreationHints: {
+                                            valueType: "ProprietaryString",
+                                            title: "ATitle",
+                                            confidentiality: RelationshipAttributeConfidentiality.Public
+                                        }
+                                    }),
+                                    mustBeAccepted: false
+                                })
+                            ]
+                        } as IRequestItemGroup
                     ]
                 },
                 status: LocalRequestStatus.DecisionRequired
