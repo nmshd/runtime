@@ -182,9 +182,9 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const request = await this.getOrThrow(params.requestId);
 
-        const potentialNewRelationshipAttributesWithSameKeyResult = this.checkForPotentialNewRelationshipAttributesWithSameKey(params.items, request.content.items);
-        if (potentialNewRelationshipAttributesWithSameKeyResult.isError() && canDecideResult.isSuccess()) {
-            return potentialNewRelationshipAttributesWithSameKeyResult;
+        const keyUniquenessValidationResult = this.validateKeyUniquenessOfRelationshipAttributesWithinRequest(params.items, request.content.items);
+        if (keyUniquenessValidationResult.isError() && canDecideResult.isSuccess()) {
+            return keyUniquenessValidationResult;
         }
 
         return canDecideResult;
@@ -251,7 +251,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return validationResults;
     }
 
-    private checkForPotentialNewRelationshipAttributesWithSameKey(
+    private validateKeyUniquenessOfRelationshipAttributesWithinRequest(
         params: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[],
         items: (RequestItem | RequestItemGroup)[]
     ) {

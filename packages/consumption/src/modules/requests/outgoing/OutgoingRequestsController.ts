@@ -81,12 +81,9 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
         const result = ValidationResult.fromItems(innerResults);
 
-        const potentialNewRelationshipAttributesWithSameKeyResult = OutgoingRequestsController.checkForPotentialNewRelationshipAttributesWithSameKey(
-            parsedParams.content.items,
-            parsedParams.peer
-        );
-        if (potentialNewRelationshipAttributesWithSameKeyResult.isError() && result.isSuccess()) {
-            return potentialNewRelationshipAttributesWithSameKeyResult;
+        const keyUniquenessValidationResult = OutgoingRequestsController.validateKeyUniquenessOfRelationshipAttributesWithinRequest(parsedParams.content.items, parsedParams.peer);
+        if (keyUniquenessValidationResult.isError() && result.isSuccess()) {
+            return keyUniquenessValidationResult;
         }
 
         return result;
@@ -108,7 +105,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return results;
     }
 
-    private static checkForPotentialNewRelationshipAttributesWithSameKey(items: (RequestItem | RequestItemGroup)[], recipient?: CoreAddress) {
+    private static validateKeyUniquenessOfRelationshipAttributesWithinRequest(items: (RequestItem | RequestItemGroup)[], recipient?: CoreAddress) {
         const relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
         for (const requestItem of items) {
             if (requestItem instanceof RequestItemGroup) {
