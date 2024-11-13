@@ -7,9 +7,11 @@ import {
     IRequestItemGroup,
     IResponse,
     IResponseItemGroup,
+    ProposeAttributeRequestItem,
     ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
+    RelationshipAttributeQuery,
     RelationshipTemplateContent,
     RequestItemGroup,
     ResponseItemResult,
@@ -234,27 +236,36 @@ describe("OutgoingRequestsController", function () {
                 content: {
                     items: [
                         CreateAttributeRequestItem.from({
+                            mustBeAccepted: true,
                             attribute: RelationshipAttribute.from({
                                 "@type": "RelationshipAttribute",
                                 owner: "did:e:a-domain:dids:anidentity",
                                 key: "UniqueKey",
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
                                 value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
-                            }),
-                            mustBeAccepted: true
+                            })
                         }),
                         {
                             "@type": "RequestItemGroup",
                             items: [
-                                CreateAttributeRequestItem.from({
+                                ProposeAttributeRequestItem.from({
+                                    mustBeAccepted: true,
+                                    query: RelationshipAttributeQuery.from({
+                                        owner: "",
+                                        key: "UniqueKey",
+                                        attributeCreationHints: {
+                                            valueType: "ProprietaryString",
+                                            title: "ATitle",
+                                            confidentiality: RelationshipAttributeConfidentiality.Public
+                                        }
+                                    }),
                                     attribute: RelationshipAttribute.from({
                                         "@type": "RelationshipAttribute",
                                         owner: "",
                                         key: "UniqueKey",
                                         confidentiality: RelationshipAttributeConfidentiality.Public,
                                         value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
-                                    }),
-                                    mustBeAccepted: true
+                                    })
                                 })
                             ]
                         } as IRequestItemGroup

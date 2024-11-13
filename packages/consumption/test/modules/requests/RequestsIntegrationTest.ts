@@ -8,6 +8,7 @@ import {
     IRequest,
     IResponse,
     IdentityAttribute,
+    ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
     RelationshipTemplateContent,
     Request,
@@ -40,6 +41,7 @@ import {
     LocalRequestStatus,
     LocalResponse,
     OutgoingRequestsController,
+    ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
     ReceivedIncomingRequestParameters,
     RequestItemConstructor,
@@ -92,6 +94,7 @@ export class RequestsTestsContext {
                 [TestRequestItem, TestRequestItemProcessor],
                 [CreateAttributeRequestItem, CreateAttributeRequestItemProcessor],
                 [ReadAttributeRequestItem, ReadAttributeRequestItemProcessor],
+                [ProposeAttributeRequestItem, ProposeAttributeRequestItemProcessor],
                 [DeleteAttributeRequestItem, DeleteAttributeRequestItemProcessor]
             ])
         );

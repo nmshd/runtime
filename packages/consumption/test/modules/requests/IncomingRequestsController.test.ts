@@ -429,19 +429,20 @@ describe("IncomingRequestsController", function () {
                 content: {
                     items: [
                         CreateAttributeRequestItem.from({
+                            mustBeAccepted: true,
                             attribute: RelationshipAttribute.from({
                                 "@type": "RelationshipAttribute",
                                 owner: context.currentIdentity.toString(),
                                 key: "UniqueKey",
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
                                 value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
-                            }),
-                            mustBeAccepted: true
+                            })
                         }),
                         {
                             "@type": "RequestItemGroup",
                             items: [
                                 ReadAttributeRequestItem.from({
+                                    mustBeAccepted: false,
                                     query: RelationshipAttributeQuery.from({
                                         owner: context.currentIdentity.toString(),
                                         key: "UniqueKey",
@@ -450,8 +451,7 @@ describe("IncomingRequestsController", function () {
                                             title: "ATitle",
                                             confidentiality: RelationshipAttributeConfidentiality.Public
                                         }
-                                    }),
-                                    mustBeAccepted: false
+                                    })
                                 })
                             ]
                         } as IRequestItemGroup
