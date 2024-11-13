@@ -424,7 +424,71 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[2].isError()).toBe(true);
         });
 
-        test("throws error for requests whose acceptance would lead to the creation of more than one RelationshipAttribute with the same key", async function () {
+        test("throws error for requests whose acceptance always would lead to the creation of more than one RelationshipAttribute with the same key", async function () {
+            await Given.anIncomingRequestWith({
+                content: {
+                    items: [
+                        CreateAttributeRequestItem.from({
+                            mustBeAccepted: true,
+                            attribute: RelationshipAttribute.from({
+                                "@type": "RelationshipAttribute",
+                                owner: context.currentIdentity.toString(),
+                                key: "uniqueKey",
+                                confidentiality: RelationshipAttributeConfidentiality.Public,
+                                value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                            })
+                        }),
+                        {
+                            "@type": "RequestItemGroup",
+                            items: [
+                                ReadAttributeRequestItem.from({
+                                    mustBeAccepted: true,
+                                    query: RelationshipAttributeQuery.from({
+                                        owner: context.currentIdentity.toString(),
+                                        key: "uniqueKey",
+                                        attributeCreationHints: {
+                                            valueType: "ProprietaryString",
+                                            title: "aTitle",
+                                            confidentiality: RelationshipAttributeConfidentiality.Public
+                                        }
+                                    })
+                                })
+                            ]
+                        } as IRequestItemGroup
+                    ]
+                },
+                status: LocalRequestStatus.DecisionRequired
+            });
+            const validationResult = await When.iCallCanAcceptWith({
+                items: [
+                    {
+                        accept: true
+                    },
+                    {
+                        items: [
+                            {
+                                accept: true,
+                                newAttribute: RelationshipAttribute.from({
+                                    "@type": "RelationshipAttribute",
+                                    owner: context.currentIdentity.toString(),
+                                    key: "uniqueKey",
+                                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                                    value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                                }).toJSON()
+                            } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
+                        ]
+                    }
+                ]
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.violatedKeyUniquenessOfRelationshipAttributes",
+                message:
+                    "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+            });
+        });
+
+        test("throws error for requests whose acceptance only would lead to the creation of more than one RelationshipAttribute with the same key with some parameters", async function () {
             await Given.anIncomingRequestWith({
                 content: {
                     items: [
@@ -482,9 +546,9 @@ describe("IncomingRequestsController", function () {
             });
 
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.violatedKeyUniquenessOfRelationshipAttributes",
+                code: "error.consumption.requests.invalidAcceptParameters",
                 message:
-                    "The Request cannot be accepted in this way because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+                    "The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
             });
         });
 
