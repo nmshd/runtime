@@ -1,7 +1,7 @@
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
-import { BackboneTagList } from "./backbone/BackboneGetTag";
 import { TagClient } from "./backbone/TagClient";
+import { TagList } from "./data/TagList";
 
 export class TagsController extends TransportController {
     private client: TagClient;
@@ -18,8 +18,8 @@ export class TagsController extends TransportController {
         return this;
     }
 
-    public async getTags(): Promise<BackboneTagList> {
-        const tags = (await this.client.getTags()).value;
-        return tags;
+    public async getTags(): Promise<TagList> {
+        const backBoneTagList = (await this.client.getTags()).value;
+        return TagList.fromAny(backBoneTagList);
     }
 }
