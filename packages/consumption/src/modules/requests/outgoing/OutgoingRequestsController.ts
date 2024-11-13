@@ -105,6 +105,24 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return results;
     }
 
+    private async canCreateItem(requestItem: RequestItem, request: Request, recipient?: CoreAddress) {
+        const processor = this.processorRegistry.getProcessorForItem(requestItem);
+        return await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+    }
+
+    private async canCreateItemGroup(requestItem: RequestItemGroup, request: Request, recipient?: CoreAddress) {
+        const innerResults: ValidationResult[] = [];
+
+        for (const innerRequestItem of requestItem.items) {
+            const canCreateItem = await this.canCreateItem(innerRequestItem, request, recipient);
+            innerResults.push(canCreateItem);
+        }
+
+        const result = ValidationResult.fromItems(innerResults);
+
+        return result;
+    }
+
     private static validateKeyUniquenessOfRelationshipAttributesWithinRequest(items: (RequestItem | RequestItemGroup)[], recipient?: CoreAddress) {
         const relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
         for (const requestItem of items) {
@@ -184,24 +202,6 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         }
 
         return false;
-    }
-
-    private async canCreateItem(requestItem: RequestItem, request: Request, recipient?: CoreAddress) {
-        const processor = this.processorRegistry.getProcessorForItem(requestItem);
-        return await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
-    }
-
-    private async canCreateItemGroup(requestItem: RequestItemGroup, request: Request, recipient?: CoreAddress) {
-        const innerResults: ValidationResult[] = [];
-
-        for (const innerRequestItem of requestItem.items) {
-            const canCreateItem = await this.canCreateItem(innerRequestItem, request, recipient);
-            innerResults.push(canCreateItem);
-        }
-
-        const result = ValidationResult.fromItems(innerResults);
-
-        return result;
     }
 
     public async create(params: ICreateOutgoingRequestParameters): Promise<LocalRequest> {

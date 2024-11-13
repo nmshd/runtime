@@ -251,6 +251,22 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return validationResults;
     }
 
+    private async canDecideItem(params: DecideRequestItemParametersJSON, requestItem: RequestItem, request: LocalRequest) {
+        const processor = this.processorRegistry.getProcessorForItem(requestItem);
+
+        try {
+            if (params.accept) return await processor.canAccept(requestItem, params, request);
+
+            return await processor.canReject(requestItem, params, request);
+        } catch (e) {
+            if (e instanceof ServalError) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.servalErrorDuringRequestItemProcessing(e));
+            }
+
+            return ValidationResult.error(ConsumptionCoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(e));
+        }
+    }
+
     private validateKeyUniquenessOfRelationshipAttributesWithinRequest(
         params: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[],
         items: (RequestItem | RequestItemGroup)[]
@@ -338,22 +354,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
 
         return false;
-    }
-
-    private async canDecideItem(params: DecideRequestItemParametersJSON, requestItem: RequestItem, request: LocalRequest) {
-        const processor = this.processorRegistry.getProcessorForItem(requestItem);
-
-        try {
-            if (params.accept) return await processor.canAccept(requestItem, params, request);
-
-            return await processor.canReject(requestItem, params, request);
-        } catch (e) {
-            if (e instanceof ServalError) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.servalErrorDuringRequestItemProcessing(e));
-            }
-
-            return ValidationResult.error(ConsumptionCoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(e));
-        }
     }
 
     public async accept(params: DecideRequestParametersJSON): Promise<LocalRequest> {
