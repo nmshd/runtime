@@ -246,7 +246,7 @@ describe("OutgoingRequestsController", function () {
                         CreateAttributeRequestItem.from({
                             attribute: RelationshipAttribute.from({
                                 "@type": "RelationshipAttribute",
-                                owner: "did:e:a-domain:dids:anidentity",
+                                owner: "",
                                 key: "UniqueKey",
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
                                 value: ProprietaryString.from({ title: "ATitle", value: "AStringValue" }).toJSON()
