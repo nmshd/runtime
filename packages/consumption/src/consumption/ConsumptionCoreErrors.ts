@@ -309,8 +309,8 @@ class Requests {
         return new CoreError("error.consumption.requests.missingRelationship", message);
     }
 
-    public relationshipAttributesWithSameKey(message: string) {
-        return new CoreError("error.consumption.requests.relationshipAttributesWithSameKey", message);
+    public violatedKeyUniquenessOfRelationshipAttributes(message: string) {
+        return new CoreError("error.consumption.requests.violatedKeyUniquenessOfRelationshipAttributes", message);
     }
 
     public inheritedFromItem(message: string) {
