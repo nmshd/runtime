@@ -374,7 +374,7 @@ describe("RequestModule", () => {
                             mustBeAccepted: false,
                             attribute: IdentityAttribute.from({
                                 owner: CoreAddress.from(""),
-                                value: GivenName.from("AGivenName").toJSON()
+                                value: GivenName.from("aGivenName").toJSON()
                             }).toJSON()
                         }
                     ]
@@ -414,18 +414,7 @@ describe("RequestModule", () => {
         test("the incoming request is created and moved to status DecisionRequired", async () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
 
-            // kick every event created from requests of previous tests
-            const receivedEvents = rRuntimeServices.eventBus.publishedEvents;
-            const lastEvent = receivedEvents[receivedEvents.length - 1];
-            const secondToLastEvent = receivedEvents[receivedEvents.length - 2];
-            rRuntimeServices.eventBus.reset();
-            rRuntimeServices.eventBus.publish(secondToLastEvent);
-            rRuntimeServices.eventBus.publish(lastEvent);
-
-            const incomingRequestReceivedEvent = await rRuntimeServices.eventBus.waitForEvent(IncomingRequestReceivedEvent);
-            const request = incomingRequestReceivedEvent.data;
-            expect(request.id).toBe(message.content.id);
-
+            await rRuntimeServices.eventBus.waitForEvent(IncomingRequestReceivedEvent, (e) => e.data.id === message.content.id);
             const incomingRequestStatusChangedEvent = await rRuntimeServices.eventBus.waitForEvent(
                 IncomingRequestStatusChangedEvent,
                 (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired
@@ -485,11 +474,11 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         await ensureActiveRelationship(sRuntimeServices.transport, tRuntimeServices.transport);
         createdRelationshipAttributeForFurtherSharing = await executeFullCreateAndShareRelationshipAttributeFlow(sRuntimeServices, tRuntimeServices, {
             content: {
-                key: "AKey",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "AStringValue",
-                    title: "ATitle"
+                    value: "aStringValue",
+                    title: "aTitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }
@@ -551,7 +540,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                     attribute: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
-                            value: "AGivenName"
+                            value: "aGivenName"
                         },
                         owner: ""
                     }).toJSON()
@@ -560,11 +549,11 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                     "@type": "CreateAttributeRequestItem",
                     mustBeAccepted: true,
                     attribute: RelationshipAttribute.from({
-                        key: "AKey",
+                        key: "aKey",
                         value: {
                             "@type": "ProprietaryString",
-                            value: "AStringValue",
-                            title: "ATitle"
+                            value: "aStringValue",
+                            title: "aTitle"
                         },
                         owner: CoreAddress.from(""),
                         confidentiality: RelationshipAttributeConfidentiality.Public
