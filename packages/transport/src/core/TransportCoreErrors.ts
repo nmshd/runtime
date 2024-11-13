@@ -157,10 +157,6 @@ class Tokens {
     public invalidTokenContent(id: string) {
         return new CoreError("error.transport.tokens.invalidTokenContent", `The content of Token '${id}' is not of type TokenContent.`);
     }
-
-    public invalidTokenContentRelationshipTemplate(message: string) {
-        return new CoreError("error.transport.tokens.invalidTokenContentRelationshipTemplate", message);
-    }
 }
 
 class General {
@@ -209,10 +205,6 @@ class General {
 
     public accountControllerInitialSyncFailed() {
         return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
-    }
-
-    public onlyOneOfPasswordTypeAndPasswordSet() {
-        return new CoreError("error.transport.onlyOneOfPasswordTypeAndPasswordSet", "You only set one of passwordType and password. You can set either none or both of them.");
     }
 
     public noPasswordProvided() {
