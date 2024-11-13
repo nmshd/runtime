@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, RelationshipTemplateController, RelationshipTemplateReference, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
+import { AccountController, RelationshipTemplateController, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
 import { Base64ForIdPrefix, RelationshipTemplateReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
@@ -50,9 +50,6 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
     }
 
     private async loadRelationshipTemplateFromRelationshipTemplateReference(relationshipTemplateReference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
-        const reference = RelationshipTemplateReference.from(relationshipTemplateReference);
-        if (reference.passwordType && !password) return Result.fail(RuntimeErrors.general.noPasswordProvided());
-
         const template = await this.templateController.loadPeerRelationshipTemplateByTruncated(relationshipTemplateReference, password);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
@@ -69,8 +66,6 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         }
 
         const content = token.cache.content;
-        if (content.passwordType && !password) return Result.fail(RuntimeErrors.general.noPasswordProvided());
-
         const template = await this.templateController.loadPeerRelationshipTemplateByTokenContent(content, password);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }

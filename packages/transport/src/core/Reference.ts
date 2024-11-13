@@ -3,13 +3,14 @@ import { CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICoreBuffer, ICryptoSecretKey } from "@nmshd/crypto";
 import { CoreIdHelper } from "./CoreIdHelper";
 import { TransportCoreErrors } from "./TransportCoreErrors";
+import { IReducedPasswordInfo, ReducedPasswordInfo } from "./types/PasswordInfo";
 
 export interface IReference extends ISerializable {
     id: ICoreId;
     backboneBaseUrl?: string;
     key: ICryptoSecretKey;
     forIdentityTruncated?: string;
-    passwordType?: string;
+    passwordInfo?: IReducedPasswordInfo;
     salt?: ICoreBuffer;
 }
 
@@ -31,18 +32,16 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public forIdentityTruncated?: string;
 
-    @validate({ nullable: true, regExp: /^(pw|pin(4|5|6|7|8|9|10|11|12|13|14|15|16))$/ })
+    @validate({ nullable: true })
     @serialize()
-    public passwordType?: string;
-
-    @validate({ nullable: true, customValidator: (v: ICoreBuffer) => (v.buffer.byteLength === 16 ? undefined : "must be 16 bytes long") })
-    @serialize()
-    public salt?: CoreBuffer;
+    public passwordInfo?: ReducedPasswordInfo;
 
     public truncate(): string {
         const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
+        const passwordPart = this.passwordInfo ? `${this.passwordInfo.passwordType}&${this.passwordInfo.salt.toBase64()}` : undefined;
+
         const truncatedReference = CoreBuffer.fromUtf8(
-            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ? this.forIdentityTruncated : ""}|${this.salt ? this.salt.toBase64() : ""}|${this.passwordType ? this.passwordType : ""}`
+            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ? this.forIdentityTruncated : ""}|${passwordPart}`
         );
         return truncatedReference.toBase64URL();
     }
@@ -51,8 +50,8 @@ export class Reference extends Serializable implements IReference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
 
-        if (![3, 5, 6].includes(splitted.length)) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("A TruncatedReference must consist of either exactly 3 or exactly 5 or exactly 6 components.");
+        if (![3, 5].includes(splitted.length)) {
+            throw TransportCoreErrors.general.invalidTruncatedReference("A TruncatedReference must consist of either exactly 3 or exactly 5 components.");
         }
 
         const idPart = splitted[0];
@@ -60,24 +59,29 @@ export class Reference extends Serializable implements IReference {
 
         const secretKey = this.parseSecretKey(splitted[1], splitted[2]);
         const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
-        const salt = splitted[4] ? this.parseSalt(splitted[4]) : undefined;
-        const passwordType = splitted[5] ? splitted[5] : undefined;
+
+        const passwordInfo = this.parsePasswordPart(splitted[4]);
 
         return this.from({
             id: CoreId.from(id),
             backboneBaseUrl,
             key: secretKey,
             forIdentityTruncated,
-            passwordType,
-            salt
+            passwordInfo
         });
     }
 
-    private static parseSalt(value: string): CoreBuffer | undefined {
-        try {
-            if (value === "") return;
+    private static parsePasswordPart(value: string): IReducedPasswordInfo | undefined {
+        if (value === "") return;
+        const splittedPasswordParts = value.split("&");
+        if (splittedPasswordParts.length !== 2) {
+            throw TransportCoreErrors.general.invalidTruncatedReference("The password part of a TruncatedReference must consist of exactly 2 components.");
+        }
 
-            return CoreBuffer.fromBase64(value);
+        const passwordType = splittedPasswordParts[0];
+        try {
+            const salt = CoreBuffer.fromBase64(splittedPasswordParts[1]);
+            return { passwordType, salt };
         } catch (_) {
             throw TransportCoreErrors.general.invalidTruncatedReference("The salt needs to be a Base64 value.");
         }
@@ -111,10 +115,8 @@ export class Reference extends Serializable implements IReference {
     }
 
     public static from(value: IReference | string): Reference {
-        const reference = typeof value === "string" ? this.fromTruncated(value) : this.fromAny(value);
-        if (!reference.passwordType !== !reference.salt) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("It's not possible to have only one of passwordType and salt set.");
-        }
-        return reference;
+        if (typeof value === "string") return this.fromTruncated(value);
+
+        return this.fromAny(value);
     }
 }

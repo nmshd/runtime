@@ -1,17 +1,16 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
-import { CoreBuffer, CryptoSecretKey, ICoreBuffer, ICryptoSecretKey } from "@nmshd/crypto";
+import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
+import { IPasswordInfo, PasswordInfo } from "../../../core/types/PasswordInfo";
 import { RelationshipTemplateReference } from "../transmission/RelationshipTemplateReference";
 import { CachedRelationshipTemplate, ICachedRelationshipTemplate } from "./CachedRelationshipTemplate";
 
 export interface IRelationshipTemplate extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
-    password?: string;
-    passwordType?: string;
-    salt?: ICoreBuffer;
+    passwordInfo?: IPasswordInfo;
     cache?: ICachedRelationshipTemplate;
     cachedAt?: ICoreDate;
     metadata?: any;
@@ -21,11 +20,7 @@ export interface IRelationshipTemplate extends ICoreSynchronizable {
 @type("RelationshipTemplate")
 export class RelationshipTemplate extends CoreSynchronizable implements IRelationshipTemplate {
     public override readonly technicalProperties = ["@type", "@context", nameof<RelationshipTemplate>((r) => r.secretKey), nameof<RelationshipTemplate>((r) => r.isOwn)];
-    public override readonly userdataProperties = [
-        nameof<RelationshipTemplate>((r) => r.password),
-        nameof<RelationshipTemplate>((r) => r.salt),
-        nameof<RelationshipTemplate>((r) => r.passwordType)
-    ];
+    public override readonly userdataProperties = [nameof<RelationshipTemplate>((r) => r.passwordInfo)];
     public override readonly metadataProperties = [nameof<RelationshipTemplate>((r) => r.metadata), nameof<RelationshipTemplate>((r) => r.metadataModifiedAt)];
 
     @validate()
@@ -38,15 +33,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
 
     @validate({ nullable: true })
     @serialize()
-    public password?: string;
-
-    @validate({ nullable: true })
-    @serialize()
-    public passwordType?: string;
-
-    @validate({ nullable: true })
-    @serialize()
-    public salt?: CoreBuffer;
+    public passwordInfo?: PasswordInfo;
 
     @validate({ nullable: true })
     @serialize()
@@ -73,8 +60,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
             id: this.id,
             key: this.secretKey,
             forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
-            passwordType: this.passwordType,
-            salt: this.salt
+            passwordInfo: this.passwordInfo
         });
     }
 

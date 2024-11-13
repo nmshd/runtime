@@ -55,10 +55,6 @@ class General {
     public notBothPasswordAndPin(): ApplicationError {
         return new ApplicationError("error.runtime.validation.notBothPasswordAndPin", "It is not possible to protect an object with both a password and a PIN.");
     }
-
-    public noPasswordProvided(): ApplicationError {
-        return new ApplicationError("error.runtime.validation.noPasswordProvided", "You need to provide a password or PIN.");
-    }
 }
 
 class Serval {
