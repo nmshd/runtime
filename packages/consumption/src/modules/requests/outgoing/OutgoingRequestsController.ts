@@ -176,7 +176,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const seen = new Set<string>();
 
         for (const fragment of relationshipAttributeFragments) {
-            const separator = "-%-unmistakable-separator-%-";
+            const separator = "+%+separation-sequence+%+";
             const identifier = `${fragment.owner}${separator}${fragment.key}${separator}${fragment.value["@type"]}`;
 
             if (seen.has(identifier)) {
