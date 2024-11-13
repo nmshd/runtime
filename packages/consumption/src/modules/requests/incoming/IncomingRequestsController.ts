@@ -178,7 +178,16 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     public async canAccept(params: DecideRequestParametersJSON): Promise<ValidationResult> {
-        return await this.canDecide({ ...params, accept: true });
+        const canDecideResult = await this.canDecide({ ...params, accept: true });
+
+        const request = await this.getOrThrow(params.requestId);
+
+        const potentialNewRelationshipAttributesWithSameKeyResult = this.checkForPotentialNewRelationshipAttributesWithSameKey(params.items, request.content.items);
+        if (potentialNewRelationshipAttributesWithSameKeyResult.isError() && canDecideResult.isSuccess()) {
+            return potentialNewRelationshipAttributesWithSameKeyResult;
+        }
+
+        return canDecideResult;
     }
 
     public async canReject(params: DecideRequestParametersJSON): Promise<ValidationResult> {
@@ -210,11 +219,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const itemResults = await this.canDecideItems(params.items, request.content.items, request);
         const result = ValidationResult.fromItems(itemResults);
-
-        const potentialNewRelationshipAttributesWithSameKeyResult = this.checkForPotentialNewRelationshipAttributesWithSameKey(params.items, request.content.items);
-        if (potentialNewRelationshipAttributesWithSameKeyResult.isError() && result.isSuccess()) {
-            return potentialNewRelationshipAttributesWithSameKeyResult;
-        }
 
         return result;
     }
