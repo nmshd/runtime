@@ -218,9 +218,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         if (validationResult.isError()) return validationResult;
 
         const itemResults = await this.canDecideItems(params.items, request.content.items, request);
-        const result = ValidationResult.fromItems(itemResults);
 
-        return result;
+        return ValidationResult.fromItems(itemResults);
     }
 
     private async canDecideGroup(params: DecideRequestItemGroupParametersJSON, requestItemGroup: RequestItemGroup, request: LocalRequest) {
@@ -271,40 +270,41 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         params: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[],
         items: (RequestItem | RequestItemGroup)[]
     ) {
-        const relationshipAttributeFragmentsBasedOnRequest: { owner: string; key: string; value: { "@type": string } }[] = [];
-        const relationshipAttributeFragmentsBasedOnParams: { owner: string; key: string; value: { "@type": string } }[] = [];
+        const relationshipAttributeFragmentsBasedOnMustBeAcceptedItems: { owner: string; key: string; value: { "@type": string } }[] = [];
+        const relationshipAttributeFragmentsBasedOnAcceptedItems: { owner: string; key: string; value: { "@type": string } }[] = [];
         for (let i = 0; i < params.length; i++) {
             const decideItemParams = params[i];
             const requestItem = items[i];
 
             if (requestItem instanceof RequestItemGroup) {
-                const relationshipAttributeFragmentsOfGroupBasedOnRequest = this.extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnRequest(requestItem);
-                if (relationshipAttributeFragmentsOfGroupBasedOnRequest) {
-                    relationshipAttributeFragmentsBasedOnRequest.push(...relationshipAttributeFragmentsOfGroupBasedOnRequest);
+                const relationshipAttributeFragmentsOfGroupBasedOnMustBeAcceptedItems =
+                    this.extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnMustBeAcceptedItems(requestItem);
+                if (relationshipAttributeFragmentsOfGroupBasedOnMustBeAcceptedItems) {
+                    relationshipAttributeFragmentsBasedOnMustBeAcceptedItems.push(...relationshipAttributeFragmentsOfGroupBasedOnMustBeAcceptedItems);
                 }
-                const relationshipAttributeFragmentsOfGroupBasedOnParams = this.extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnParams(
+                const relationshipAttributeFragmentsOfGroupBasedOnAcceptedItems = this.extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnAcceptedItems(
                     requestItem,
                     decideItemParams as DecideRequestItemGroupParametersJSON
                 );
-                if (relationshipAttributeFragmentsOfGroupBasedOnParams) {
-                    relationshipAttributeFragmentsBasedOnParams.push(...relationshipAttributeFragmentsOfGroupBasedOnParams);
+                if (relationshipAttributeFragmentsOfGroupBasedOnAcceptedItems) {
+                    relationshipAttributeFragmentsBasedOnAcceptedItems.push(...relationshipAttributeFragmentsOfGroupBasedOnAcceptedItems);
                 }
             } else {
                 const relationshipAttributeFragment = this.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
                 if (relationshipAttributeFragment && requestItem.mustBeAccepted) {
-                    relationshipAttributeFragmentsBasedOnRequest.push(relationshipAttributeFragment);
+                    relationshipAttributeFragmentsBasedOnMustBeAcceptedItems.push(relationshipAttributeFragment);
                 }
                 if (relationshipAttributeFragment && (decideItemParams as DecideRequestItemParametersJSON).accept) {
-                    relationshipAttributeFragmentsBasedOnParams.push(relationshipAttributeFragment);
+                    relationshipAttributeFragmentsBasedOnAcceptedItems.push(relationshipAttributeFragment);
                 }
             }
         }
 
-        if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragmentsBasedOnRequest)) {
+        if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragmentsBasedOnMustBeAcceptedItems)) {
             throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
                 "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
             );
-        } else if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragmentsBasedOnParams)) {
+        } else if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragmentsBasedOnAcceptedItems)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
                     "The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
@@ -315,12 +315,12 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
-    private extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnRequest(requestItemGroup: RequestItemGroup) {
+    private extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnMustBeAcceptedItems(requestItemGroup: RequestItemGroup) {
         const groupFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
 
         for (const requestItem of requestItemGroup.items) {
             if (requestItem instanceof RequestItemGroup) {
-                const relationshipAttributeFragments = this.extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnRequest(requestItem);
+                const relationshipAttributeFragments = this.extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnMustBeAcceptedItems(requestItem);
                 if (relationshipAttributeFragments) groupFragments.push(...relationshipAttributeFragments);
             } else {
                 const relationshipAttributeFragment = this.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
@@ -333,7 +333,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return;
     }
 
-    private extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnParams(requestItemGroup: RequestItemGroup, params: DecideRequestItemGroupParametersJSON) {
+    private extractRelationshipAttributeFragmentsFromRequestItemGroupBasedOnAcceptedItems(requestItemGroup: RequestItemGroup, params: DecideRequestItemGroupParametersJSON) {
         const groupFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
 
         for (let i = 0; i < params.items.length; i++) {
