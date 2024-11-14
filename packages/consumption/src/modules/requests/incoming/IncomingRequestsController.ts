@@ -325,37 +325,37 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     private extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(requestItemGroup: RequestItemGroup) {
-        const groupFragments: RelationshipAttributeFragment[] = [];
+        const fragmentsOfMustBeAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
 
         for (const item of requestItemGroup.items) {
             if (item instanceof RequestItemGroup) {
-                const fragmentsOfMustBeAcceptedItemsOfGroup = this.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item);
-                if (fragmentsOfMustBeAcceptedItemsOfGroup) groupFragments.push(...fragmentsOfMustBeAcceptedItemsOfGroup);
+                const fragments = this.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item);
+                if (fragments) fragmentsOfMustBeAcceptedItemsOfGroup.push(...fragments);
             } else {
-                const fragmentOfMustBeAcceptedRequestItem = this.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item);
-                if (fragmentOfMustBeAcceptedRequestItem) groupFragments.push(fragmentOfMustBeAcceptedRequestItem);
+                const fragment = this.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item);
+                if (fragment) fragmentsOfMustBeAcceptedItemsOfGroup.push(fragment);
             }
         }
 
-        if (groupFragments.length !== 0) return groupFragments;
+        if (fragmentsOfMustBeAcceptedItemsOfGroup.length !== 0) return fragmentsOfMustBeAcceptedItemsOfGroup;
 
         return;
     }
 
     private extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(requestItemGroup: RequestItemGroup, decideGroupParams: DecideRequestItemGroupParametersJSON) {
-        const groupFragments: RelationshipAttributeFragment[] = [];
+        const fragmentsOfAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
 
         for (let i = 0; i < decideGroupParams.items.length; i++) {
             const decideItemParams = decideGroupParams.items[i];
             const item = requestItemGroup.items[i];
 
             if (item instanceof RequestItem) {
-                const fragmentOfAcceptedRequestItem = this.extractRelationshipAttributeFragmentFromAcceptedRequestItem(item, decideItemParams);
-                if (fragmentOfAcceptedRequestItem) groupFragments.push(fragmentOfAcceptedRequestItem);
+                const fragment = this.extractRelationshipAttributeFragmentFromAcceptedRequestItem(item, decideItemParams);
+                if (fragment) fragmentsOfAcceptedItemsOfGroup.push(fragment);
             }
         }
 
-        if (groupFragments.length !== 0) return groupFragments;
+        if (fragmentsOfAcceptedItemsOfGroup.length !== 0) return fragmentsOfAcceptedItemsOfGroup;
 
         return;
     }

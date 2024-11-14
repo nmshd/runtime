@@ -130,18 +130,18 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     }
 
     private static validateKeyUniquenessOfRelationshipAttributesWithinRequest(items: (RequestItem | RequestItemGroup)[], recipient?: CoreAddress) {
-        const fragmentsOfRequest: RelationshipAttributeFragment[] = [];
+        const fragmentsOfMustBeAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
         for (const item of items) {
             if (item instanceof RequestItemGroup) {
-                const fragmentsOfGroup = OutgoingRequestsController.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item, recipient);
-                if (fragmentsOfGroup) fragmentsOfRequest.push(...fragmentsOfGroup);
+                const fragmentsOfMustBeAcceptedItemsOfGroup = OutgoingRequestsController.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item, recipient);
+                if (fragmentsOfMustBeAcceptedItemsOfGroup) fragmentsOfMustBeAcceptedItemsOfRequest.push(...fragmentsOfMustBeAcceptedItemsOfGroup);
             } else {
-                const fragmentOfRequestItem = OutgoingRequestsController.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item, recipient);
-                if (fragmentOfRequestItem) fragmentsOfRequest.push(fragmentOfRequestItem);
+                const fragmentOfMustBeAcceptedRequestItem = OutgoingRequestsController.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item, recipient);
+                if (fragmentOfMustBeAcceptedRequestItem) fragmentsOfMustBeAcceptedItemsOfRequest.push(fragmentOfMustBeAcceptedRequestItem);
             }
         }
 
-        if (OutgoingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfRequest)) {
+        if (OutgoingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
                     "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
@@ -153,19 +153,19 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     }
 
     private static extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(requestItemGroup: RequestItemGroup, recipient?: CoreAddress) {
-        const fragmentsOfGroup: RelationshipAttributeFragment[] = [];
+        const fragmentsOfMustBeAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
 
         for (const item of requestItemGroup.items) {
             if (item instanceof RequestItemGroup) {
                 const fragments = OutgoingRequestsController.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item, recipient);
-                if (fragments) fragmentsOfGroup.push(...fragments);
+                if (fragments) fragmentsOfMustBeAcceptedItemsOfGroup.push(...fragments);
             } else {
                 const fragment = OutgoingRequestsController.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item, recipient);
-                if (fragment) fragmentsOfGroup.push(fragment);
+                if (fragment) fragmentsOfMustBeAcceptedItemsOfGroup.push(fragment);
             }
         }
 
-        if (fragmentsOfGroup.length !== 0) return fragmentsOfGroup;
+        if (fragmentsOfMustBeAcceptedItemsOfGroup.length !== 0) return fragmentsOfMustBeAcceptedItemsOfGroup;
 
         return;
     }
