@@ -287,6 +287,27 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
             );
         });
+
+        test("cannot accept because it would lead to the creation of another RelationshipAttribute with same key but rejecting of the CreateAttributeRequestItem would be permitted", async function () {
+            const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
+                owner: TestIdentity.SENDER
+            });
+
+            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+
+            await Given.aRequestItemWithARelationshipAttribute({
+                attributeOwner: TestIdentity.EMPTY,
+                itemMustBeAccepted: false
+            });
+
+            const validationResult = await When.iCallCanAccept();
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message:
+                    "This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+            });
+        });
     });
 
     describe("accept", function () {

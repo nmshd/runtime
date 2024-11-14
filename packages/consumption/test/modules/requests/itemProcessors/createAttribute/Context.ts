@@ -89,7 +89,7 @@ export class Context {
 export class GivenSteps {
     public constructor(private readonly context: Context) {}
 
-    public aRequestItemWithARelationshipAttribute(params: { attributeOwner: CoreAddress }): Promise<void> {
+    public aRequestItemWithARelationshipAttribute(params: { attributeOwner: CoreAddress; itemMustBeAccepted?: boolean }): Promise<void> {
         const attribute = TestObjectFactory.createRelationshipAttribute({
             owner: this.context.translateTestIdentity(params.attributeOwner)
         });
@@ -97,7 +97,7 @@ export class GivenSteps {
 
         this.context.givenRequestItem = CreateAttributeRequestItem.from({
             attribute: attribute,
-            mustBeAccepted: true
+            mustBeAccepted: typeof params.itemMustBeAccepted !== "undefined" ? params.itemMustBeAccepted : true
         });
         return Promise.resolve();
     }
