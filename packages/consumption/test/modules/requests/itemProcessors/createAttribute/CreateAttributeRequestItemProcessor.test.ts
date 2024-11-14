@@ -300,9 +300,9 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 itemMustBeAccepted: false
             });
 
-            const validationResult = await When.iCallCanAccept();
+            await When.iCallCanAccept();
 
-            expect(validationResult).errorValidationResult({
+            await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidAcceptParameters",
                 message:
                     "This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."

@@ -141,6 +141,11 @@ export class ThenSteps {
         return Promise.resolve();
     }
 
+    public theCanAcceptResultShouldBeAnErrorWith(error: { message?: string | RegExp; code?: string }): Promise<void> {
+        expect(this.context.canAcceptResult).errorValidationResult(error);
+        return Promise.resolve();
+    }
+
     public async aLocalRepositoryAttributeIsCreated(): Promise<void> {
         expect(this.context.responseItemAfterAction.attributeId).toBeDefined();
 
