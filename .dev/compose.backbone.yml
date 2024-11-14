@@ -124,6 +124,10 @@ services:
       Database__Provider: Postgres
       Database__ConnectionString: "Server=postgres;Database=enmeshed;User Id=devices;Password=Passw0rd;Port=5432"
 
+networks:
+  default:
+    name: backbone
+
 configs:
   Config:
     file: appsettings.override.json
