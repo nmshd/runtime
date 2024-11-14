@@ -38,6 +38,12 @@ import { CanCreateOutgoingRequestParameters, ICanCreateOutgoingRequestParameters
 import { CreateOutgoingRequestParameters, ICreateOutgoingRequestParameters } from "./createOutgoingRequest/CreateOutgoingRequestParameters";
 import { ISentOutgoingRequestParameters, SentOutgoingRequestParameters } from "./sentOutgoingRequest/SentOutgoingRequestParameters";
 
+interface RelationshipAttributeFragment {
+    owner: string;
+    key: string;
+    value: { "@type": string };
+}
+
 export class OutgoingRequestsController extends ConsumptionBaseController {
     public constructor(
         private readonly localRequests: SynchronizedCollection,
@@ -124,18 +130,18 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     }
 
     private static validateKeyUniquenessOfRelationshipAttributesWithinRequest(items: (RequestItem | RequestItemGroup)[], recipient?: CoreAddress) {
-        const relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
-        for (const requestItem of items) {
-            if (requestItem instanceof RequestItemGroup) {
-                const relationshipAttributeFragmentsOfGroup = OutgoingRequestsController.extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItem, recipient);
-                if (relationshipAttributeFragmentsOfGroup) relationshipAttributeFragments.push(...relationshipAttributeFragmentsOfGroup);
+        const fragmentsOfRequest: RelationshipAttributeFragment[] = [];
+        for (const item of items) {
+            if (item instanceof RequestItemGroup) {
+                const fragmentsOfGroup = OutgoingRequestsController.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item, recipient);
+                if (fragmentsOfGroup) fragmentsOfRequest.push(...fragmentsOfGroup);
             } else {
-                const relationshipAttributeFragment = OutgoingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem, recipient);
-                if (relationshipAttributeFragment && requestItem.mustBeAccepted) relationshipAttributeFragments.push(relationshipAttributeFragment);
+                const fragmentOfRequestItem = OutgoingRequestsController.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item, recipient);
+                if (fragmentOfRequestItem) fragmentsOfRequest.push(fragmentOfRequestItem);
             }
         }
 
-        if (OutgoingRequestsController.containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragments)) {
+        if (OutgoingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfRequest)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
                     "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
@@ -146,20 +152,28 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
-    private static extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItemGroup: RequestItemGroup, recipient?: CoreAddress) {
-        const groupFragments: { owner: string; key: string; value: { "@type": string } }[] = [];
+    private static extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(requestItemGroup: RequestItemGroup, recipient?: CoreAddress) {
+        const fragmentsOfGroup: RelationshipAttributeFragment[] = [];
 
-        for (const requestItem of requestItemGroup.items) {
-            if (requestItem instanceof RequestItemGroup) {
-                const relationshipAttributeFragments = this.extractRelationshipAttributeFragmentsFromRequestItemGroup(requestItem, recipient);
-                if (relationshipAttributeFragments) groupFragments.push(...relationshipAttributeFragments);
+        for (const item of requestItemGroup.items) {
+            if (item instanceof RequestItemGroup) {
+                const fragments = OutgoingRequestsController.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item, recipient);
+                if (fragments) fragmentsOfGroup.push(...fragments);
             } else {
-                const relationshipAttributeFragment = OutgoingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem, recipient);
-                if (relationshipAttributeFragment) groupFragments.push(relationshipAttributeFragment);
+                const fragment = OutgoingRequestsController.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item, recipient);
+                if (fragment) fragmentsOfGroup.push(fragment);
             }
         }
 
-        if (groupFragments.length !== 0) return groupFragments;
+        if (fragmentsOfGroup.length !== 0) return fragmentsOfGroup;
+
+        return;
+    }
+
+    private static extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(requestItem: RequestItem, recipient?: CoreAddress) {
+        if (requestItem.mustBeAccepted) {
+            return OutgoingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem, recipient);
+        }
 
         return;
     }
@@ -187,18 +201,18 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return;
     }
 
-    private static containsDuplicateRelationshipAttributeFragments(relationshipAttributeFragments: { owner: string; key: string; value: { "@type": string } }[]) {
-        const seen = new Set<string>();
+    private static containsDuplicateRelationshipAttributeFragments(fragments: RelationshipAttributeFragment[]) {
+        const seenIdentifier = new Set<string>();
 
-        for (const fragment of relationshipAttributeFragments) {
+        for (const fragment of fragments) {
             const separator = "+%+separation-sequence+%+";
-            const identifier = `${fragment.owner}${separator}${fragment.key}${separator}${fragment.value["@type"]}`;
+            const identifierOfFragment = `${fragment.owner}${separator}${fragment.key}${separator}${fragment.value["@type"]}`;
 
-            if (seen.has(identifier)) {
+            if (seenIdentifier.has(identifierOfFragment)) {
                 return true;
             }
 
-            seen.add(identifier);
+            seenIdentifier.add(identifierOfFragment);
         }
 
         return false;
