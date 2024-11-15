@@ -605,13 +605,7 @@ export class TestUtil {
             .withWaitStrategy(Wait.forOneShotStartup())
             .withCommand(["--Worker", "ActualDeletionWorker"])
             .withNetworkMode("backbone")
-            .withCopyFilesToContainer([
-                {
-                    source: `${__dirname}/../../../../.dev/appsettings.override.json`,
-                    target: "/app/appsettings.override.json"
-                }
-            ])
-            // .withReuse() // uncomment this line in case the container doesn't do what you expect and you want to debug it
+            .withCopyFilesToContainer([{ source: `${__dirname}/../../../../.dev/appsettings.override.json`, target: "/app/appsettings.override.json" }])
             .start();
     }
 
