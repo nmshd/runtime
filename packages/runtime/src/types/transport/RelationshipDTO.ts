@@ -21,13 +21,14 @@ export enum RelationshipAuditLogEntryReason {
     AcceptanceOfReactivation = "AcceptanceOfReactivation",
     RejectionOfReactivation = "RejectionOfReactivation",
     RevocationOfReactivation = "RevocationOfReactivation",
-    Decomposition = "Decomposition"
+    Decomposition = "Decomposition",
+    DecompositionDueToIdentityDeletion = "DecompositionDueToIdentityDeletion"
 }
 
 export interface RelationshipAuditLogEntryDTO {
     createdAt: string;
     createdBy: string;
-    createdByDevice: string;
+    createdByDevice?: string;
     reason: RelationshipAuditLogEntryReason;
     oldStatus?: RelationshipStatus;
     newStatus: RelationshipStatus;
