@@ -15,6 +15,10 @@ describe("DeletionJobDemo", function () {
         await account.init();
     });
 
+    afterAll(async function () {
+        await account.close();
+    });
+
     // eslint-disable-next-line jest/expect-expect
     test("deletion job demo", async function () {
         await account.identityDeletionProcess.initiateIdentityDeletionProcess();
