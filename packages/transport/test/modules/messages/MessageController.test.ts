@@ -246,14 +246,15 @@ describe("MessageController", function () {
         });
     });
 
-    describe("IdentityDeletionPeerProcessing", function () {
+    describe("Peer Deletion", function () {
         let identityDeletionProcessId: CoreId;
         let messageId: CoreId;
+
         beforeAll(async function () {
             identityDeletionProcessId = (await recipient.identityDeletionProcess.initiateIdentityDeletionProcess()).id;
         });
 
-        test("should be able to send a message when the peer is in deletion", async function () {
+        test("should be able to send a message if the peer is in deletion", async function () {
             const syncedRelationships = await TestUtil.syncUntilHasRelationships(sender);
             expect(syncedRelationships).toHaveLength(1);
             expect(syncedRelationships[0].peerDeletionInfo?.deletionStatus).toStrictEqual(PeerDeletionStatus.ToBeDeleted);
@@ -262,7 +263,7 @@ describe("MessageController", function () {
             expect(messageId).toBeDefined();
         });
 
-        test("should be able to receive a message when the peer is not in deletion anymore", async function () {
+        test("should be able to receive a message if the peer is not in deletion anymore", async function () {
             await recipient.identityDeletionProcess.cancelIdentityDeletionProcess(identityDeletionProcessId.toString());
 
             const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
