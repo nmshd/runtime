@@ -49,17 +49,9 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             return ValidationResult.success();
         }
 
-        if (typeof recipient !== "undefined") {
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(
-                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address, the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
-                )
-            );
-        }
-
         return ValidationResult.error(
             ConsumptionCoreErrors.requests.invalidRequestItem(
-                "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
+                "The owner of the provided RelationshipAttribute for the `attribute` property can only be the address of the sender, recipient or an empty string. The latter will default to the address of the recipient."
             )
         );
     }
