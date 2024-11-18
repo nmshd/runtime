@@ -9,6 +9,7 @@ export interface ILocalAccount extends ISerializable {
     order: number;
     lastAccessedAt?: ICoreDate;
     devicePushIdentifier?: string;
+    deletionDate?: string;
 }
 
 @type("LocalAccount")
@@ -40,6 +41,10 @@ export class LocalAccount extends Serializable implements ILocalAccount {
     @validate({ nullable: true })
     @serialize()
     public devicePushIdentifier?: string;
+
+    @validate({ nullable: true })
+    @serialize()
+    public deletionDate?: string;
 
     public static from(value: ILocalAccount): LocalAccount {
         return this.fromAny(value);

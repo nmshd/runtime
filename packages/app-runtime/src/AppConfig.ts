@@ -70,6 +70,12 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
                 location: "relationshipTemplateProcessed",
                 enabled: true
             },
+            identityDeletionProcessStatusChanged: {
+                name: "identityDeletionProcessStatusChanged",
+                displayName: "Identity Deletion Process Status Changed Module",
+                location: "identityDeletionProcessStatusChanged",
+                enabled: true
+            },
             decider: {
                 displayName: "Decider Module",
                 name: "DeciderModule",

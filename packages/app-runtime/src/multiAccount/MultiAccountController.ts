@@ -42,6 +42,7 @@ export class MultiAccountController {
 
         this._dbClosed = false;
         this._localAccounts = await this._db.getCollection("LocalAccounts");
+
         return this;
     }
 
@@ -236,6 +237,23 @@ export class MultiAccountController {
         renamedAccount.name = name;
 
         await this._localAccounts.update(oldAccount, renamedAccount);
+    }
+
+    public async updateLocalAccountDeletionDate(address: string, deletionDate?: string): Promise<void> {
+        const oldAccount = await this._localAccounts.findOne({ address });
+
+        if (!oldAccount) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAccount, address).logWith(this._log);
+        }
+
+        const account = LocalAccount.from(oldAccount);
+        if (deletionDate === undefined) {
+            delete account.deletionDate;
+        } else {
+            account.deletionDate = deletionDate;
+        }
+
+        await this._localAccounts.update(oldAccount, account);
     }
 
     public async updateLastAccessedAt(accountId: string): Promise<void> {

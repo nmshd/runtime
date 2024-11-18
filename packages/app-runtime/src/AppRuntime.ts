@@ -16,6 +16,7 @@ import {
     AppRuntimeModuleConfiguration,
     AppSyncModule,
     IAppRuntimeModuleConstructor,
+    IdentityDeletionProcessStatusChangedModule,
     MailReceivedModule,
     MessageReceivedModule,
     OnboardingChangeReceivedModule,
@@ -300,7 +301,8 @@ export class AppRuntime extends Runtime<AppConfig> {
         onboardingChangeReceived: OnboardingChangeReceivedModule,
         messageReceived: MessageReceivedModule,
         relationshipChanged: RelationshipChangedModule,
-        relationshipTemplateProcessed: RelationshipTemplateProcessedModule
+        relationshipTemplateProcessed: RelationshipTemplateProcessedModule,
+        identityDeletionProcessStatusChanged: IdentityDeletionProcessStatusChangedModule
     };
 
     public static registerModule(moduleName: string, ctor: IAppRuntimeModuleConstructor): void {
