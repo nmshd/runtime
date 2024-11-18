@@ -9,7 +9,7 @@ export class RelationshipAuditLog {
             return RelationshipAuditLogEntry.from({
                 createdAt: CoreDate.from(entry.createdAt),
                 createdBy: CoreAddress.from(entry.createdBy),
-                createdByDevice: CoreId.from(entry.createdByDevice),
+                createdByDevice: entry.createdByDevice ? CoreId.from(entry.createdByDevice) : undefined,
                 reason: entry.reason,
                 oldStatus: entry.oldStatus,
                 newStatus: entry.newStatus

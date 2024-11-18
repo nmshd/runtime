@@ -6,7 +6,7 @@ import { RelationshipStatus } from "../transmission/RelationshipStatus";
 export interface IRelationshipAuditLogEntry extends ISerializable {
     createdAt: ICoreDate;
     createdBy: ICoreAddress;
-    createdByDevice: ICoreId;
+    createdByDevice?: ICoreId;
     reason: RelationshipAuditLogEntryReason;
     oldStatus?: RelationshipStatus;
     newStatus: RelationshipStatus;
@@ -22,9 +22,9 @@ export class RelationshipAuditLogEntry extends Serializable implements IRelation
     @serialize()
     public createdBy: CoreAddress;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
-    public createdByDevice: CoreId;
+    public createdByDevice?: CoreId;
 
     @validate({
         customValidator: (v) => (!Object.values(RelationshipAuditLogEntryReason).includes(v) ? `must be one of: ${Object.values(RelationshipAuditLogEntryReason)}` : undefined)
