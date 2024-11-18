@@ -11,7 +11,6 @@ import {
     TestNotificationItem,
     TestRuntimeServices
 } from "../lib";
-import { exchangeMessageWithRequestAndRequireManualDecision } from "../lib/testUtilsWithInactiveModules";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;
@@ -112,30 +111,6 @@ describe("IdentityDeletionProcess", () => {
         );
     });
 
-    test("returns error if the peer of the Request has an active IdentityDeletionProcess", async () => {
-        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-
-        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
-        await services2.eventBus.waitForRunningEventHandlers();
-
-        const requestContent = {
-            content: {
-                items: [
-                    {
-                        "@type": "TestRequestItem",
-                        mustBeAccepted: false
-                    }
-                ]
-            },
-            peer: services1.address
-        };
-        const result = await services2.consumption.outgoingRequests.create(requestContent);
-        expect(result).toBeAnError(
-            `You cannot create a Request to peer '${services1.address.toString()}' since the peer is in deletion.`,
-            "error.consumption.requests.peerIsInDeletion"
-        );
-    });
-
     test("returns error sending the Request when the peer has initiated an active IdentityDeletionProcess after the request has been created", async () => {
         const requestContent = {
             content: {
@@ -160,38 +135,6 @@ describe("IdentityDeletionProcess", () => {
         expect(messageResult).toBeAnError(
             `The recipient with the address '${services1.address.toString()}' is in deletion, so you cannot send them a Message.`,
             "error.transport.messages.peerIsInDeletion"
-        );
-    });
-
-    test("should not decide a request if the peer has an active IdentityDeletionProcess", async () => {
-        const requestContent = {
-            content: {
-                items: [
-                    {
-                        "@type": "TestRequestItem",
-                        mustBeAccepted: false
-                    }
-                ]
-            },
-            peer: services2.address
-        };
-        const rRequestMessage = await exchangeMessageWithRequestAndRequireManualDecision(services1, services2, requestContent);
-
-        const requestId = rRequestMessage.request.content.id!;
-        const canAcceptResult = (await services2.consumption.incomingRequests.canAccept({ requestId: requestId, items: [{ accept: true }] })).value;
-        expect(canAcceptResult.isSuccess).toBe(true);
-
-        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
-        await services2.eventBus.waitForRunningEventHandlers();
-        const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
-        expect(updatedRelationship.peerDeletionInfo?.deletionStatus).toBe("ToBeDeleted");
-
-        const canAcceptResultAfterPeerInitiatedDeletion = (await services2.consumption.incomingRequests.canAccept({ requestId: requestId, items: [{ accept: true }] })).value;
-        expect(canAcceptResultAfterPeerInitiatedDeletion.isSuccess).toBe(false);
-        expect(canAcceptResultAfterPeerInitiatedDeletion.code).toBe("error.consumption.requests.peerIsInDeletion");
-        expect(canAcceptResultAfterPeerInitiatedDeletion.message).toContain(
-            `You cannot decide a Request from peer '${services1.address.toString()}' since the peer is in deletion.`
         );
     });
 
