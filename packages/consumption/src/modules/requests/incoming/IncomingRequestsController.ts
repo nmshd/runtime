@@ -194,15 +194,15 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         this.assertRequestStatus(request, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired);
 
-        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot decide a Request from peer '${request.peer.toString()}' since the peer is deleted.`)
-            );
-        }
-
         if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.peerIsInDeletion(`You cannot decide a Request from peer '${request.peer.toString()}' since the peer is in deletion.`)
+            );
+        }
+
+        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot decide a Request from peer '${request.peer.toString()}' since the peer is deleted.`)
             );
         }
 

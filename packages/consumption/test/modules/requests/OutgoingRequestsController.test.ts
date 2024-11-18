@@ -224,6 +224,48 @@ describe("OutgoingRequestsController", function () {
                 message: "You cannot share a Request with yourself."
             });
         });
+    });
+
+    describe("CanCreate (on terminated relationship", function () {
+        test("returns 'error' when the relationship is terminated", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
+                content: {
+                    items: [
+                        TestRequestItem.from({
+                            mustBeAccepted: false,
+                            shouldFailAtCanCreateOutgoingRequestItem: true
+                        })
+                    ]
+                }
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot create a request to 'did:e:a-domain:dids:anidentity' since the relationship is in status 'Terminated'"
+            });
+        });
+    });
+
+    describe("CanCreate (with peer in deletion or deleted peer)", function () {
+        test("returns a validation result that contains an error for requests to a peer which is in deletion", async function () {
+            await Given.aRelationshipToPeerInDeletion();
+            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
+                content: {
+                    items: [
+                        TestRequestItem.from({
+                            mustBeAccepted: false,
+                            shouldFailAtCanCreateOutgoingRequestItem: true
+                        })
+                    ]
+                }
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.peerIsInDeletion",
+                message: "You cannot create a Request to peer 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
+            });
+        });
 
         test("returns a validation result that contains an error for requests to a peer which is deleted", async function () {
             await Given.aRelationshipToDeletedPeer();
@@ -240,25 +282,6 @@ describe("OutgoingRequestsController", function () {
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.wrongRelationshipStatus",
                 message: "You cannot create a request to 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
-            });
-        });
-
-        test("returns a validation result that contains an error for requests to a peer which has an active IdentityDeletionProcess", async function () {
-            await Given.aRelationshipToPeerInDeletion();
-            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
-                content: {
-                    items: [
-                        TestRequestItem.from({
-                            mustBeAccepted: false,
-                            shouldFailAtCanCreateOutgoingRequestItem: true
-                        })
-                    ]
-                }
-            });
-
-            expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.peerIsInDeletion",
-                message: "You cannot create a Request to 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
             });
         });
     });
@@ -839,27 +862,6 @@ describe("OutgoingRequestsController", function () {
             await Given.anOutgoingRequestInStatus(LocalRequestStatus.Completed);
             await When.iTryToDiscardTheOutgoingRequest();
             await Then.itThrowsAnErrorWithTheErrorMessage("*Local Request has to be in status 'Draft'*");
-        });
-    });
-
-    describe("CanCreate (on terminated relationship)", function () {
-        test("returns 'error' when the relationship is terminated", async function () {
-            await Given.aTerminatedRelationshipToIdentity();
-            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
-                content: {
-                    items: [
-                        TestRequestItem.from({
-                            mustBeAccepted: false,
-                            shouldFailAtCanCreateOutgoingRequestItem: true
-                        })
-                    ]
-                }
-            });
-
-            expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.wrongRelationshipStatus",
-                message: "You cannot create a request to 'did:e:a-domain:dids:anidentity' since the relationship is in status 'Terminated'"
-            });
         });
     });
 });

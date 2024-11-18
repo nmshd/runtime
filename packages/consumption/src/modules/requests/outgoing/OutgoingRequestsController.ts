@@ -63,15 +63,15 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
                 );
             }
 
-            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
                 return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot create a Request to '${parsedParams.peer.toString()}' since the peer is deleted.`)
+                    ConsumptionCoreErrors.requests.peerIsInDeletion(`You cannot create a Request to peer '${parsedParams.peer.toString()}' since the peer is in deletion.`)
                 );
             }
 
-            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
                 return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.peerIsInDeletion(`You cannot create a Request to '${parsedParams.peer.toString()}' since the peer is in deletion.`)
+                    ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot create a Request to peer '${parsedParams.peer.toString()}' since the peer is deleted.`)
                 );
             }
         }

@@ -437,7 +437,7 @@ describe("IncomingRequestsController", function () {
             });
         });
 
-        test("returns 'error' on relationship with peer which is toBeDeleted", async function () {
+        test("returns 'error' on relationship with peer which is in deletion", async function () {
             await Given.aRelationshipToPeerInDeletion();
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanAccept();

@@ -131,7 +131,7 @@ describe("IdentityDeletionProcess", () => {
         };
         const result = await services2.consumption.outgoingRequests.create(requestContent);
         expect(result).toBeAnError(
-            `You cannot create a Request to '${services1.address.toString()}' since the peer is in deletion.`,
+            `You cannot create a Request to peer '${services1.address.toString()}' since the peer is in deletion.`,
             "error.consumption.requests.peerIsInDeletion"
         );
     });
