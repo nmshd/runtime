@@ -433,7 +433,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanAccept();
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.peerIsDeleted",
-                message: "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is deleted."
+                message: "You cannot decide a Request from peer 'did:e:a-domain:dids:anidentity' since the peer is deleted."
             });
         });
 
@@ -443,7 +443,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanAccept();
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.peerIsInDeletion",
-                message: "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
+                message: "You cannot decide a Request from peer 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
             });
         });
     });
@@ -647,7 +647,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.peerIsDeleted",
-                message: "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is deleted."
+                message: "You cannot decide a Request from peer 'did:e:a-domain:dids:anidentity' since the peer is deleted."
             });
         });
 
@@ -657,7 +657,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.peerIsInDeletion",
-                message: "You cannot decide a Request from 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
+                message: "You cannot decide a Request from peer 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
             });
         });
     });

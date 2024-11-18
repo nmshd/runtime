@@ -181,16 +181,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         const relationship = await this.relationshipResolver.getRelationshipToIdentity(request.peer);
         // It is safe to decide an incoming Request when no Relationship is found as this is the case when the Request origins from onNewRelationship of the RelationshipTemplateContent
 
-        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot decide a Request from '${request.peer.toString()}' since the peer is deleted.`));
-        }
-
-        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.peerIsInDeletion(`You cannot decide a Request from '${request.peer.toString()}' since the peer is in deletion.`)
-            );
-        }
-
         const possibleStatuses =
             request.source?.type === "RelationshipTemplate" ? [RelationshipStatus.Active, RelationshipStatus.Rejected, RelationshipStatus.Revoked] : [RelationshipStatus.Active];
 
@@ -203,6 +193,18 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
 
         this.assertRequestStatus(request, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired);
+
+        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot decide a Request from peer '${request.peer.toString()}' since the peer is deleted.`)
+            );
+        }
+
+        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.peerIsInDeletion(`You cannot decide a Request from peer '${request.peer.toString()}' since the peer is in deletion.`)
+            );
+        }
 
         const validationResult = this.decideRequestParamsValidator.validate(params, request);
         if (validationResult.isError()) return validationResult;

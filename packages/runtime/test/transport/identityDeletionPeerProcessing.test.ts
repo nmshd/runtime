@@ -190,7 +190,9 @@ describe("IdentityDeletionProcess", () => {
         const canAcceptResultAfterPeerInitiatedDeletion = (await services2.consumption.incomingRequests.canAccept({ requestId: requestId, items: [{ accept: true }] })).value;
         expect(canAcceptResultAfterPeerInitiatedDeletion.isSuccess).toBe(false);
         expect(canAcceptResultAfterPeerInitiatedDeletion.code).toBe("error.consumption.requests.peerIsInDeletion");
-        expect(canAcceptResultAfterPeerInitiatedDeletion.message).toContain(`You cannot decide a Request from '${services1.address.toString()}' since the peer is in deletion.`);
+        expect(canAcceptResultAfterPeerInitiatedDeletion.message).toContain(
+            `You cannot decide a Request from peer '${services1.address.toString()}' since the peer is in deletion.`
+        );
     });
 
     test("should be able to send a Notification to an Identity which is in status 'ToBeDeleted'", async () => {
