@@ -1,21 +1,18 @@
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "../../src";
-import { establishRelationship, RuntimeServiceProvider, sendMessageToMultipleRecipients, syncUntilHasEvent, TestRuntimeServices } from "../lib";
+import { establishRelationship, RuntimeServiceProvider, syncUntilHasEvent, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;
 let services2: TestRuntimeServices;
-let services3: TestRuntimeServices;
 let relationshipId: string;
-let relationshipId2: string;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(3);
+    const runtimeServices = await serviceProvider.launch(2);
     services1 = runtimeServices[0];
     services2 = runtimeServices[1];
-    services3 = runtimeServices[2];
+
     relationshipId = (await establishRelationship(services1.transport, services2.transport)).id;
-    relationshipId2 = (await establishRelationship(services3.transport, services2.transport)).id;
 }, 30000);
 
 afterAll(async () => {
@@ -25,7 +22,6 @@ afterAll(async () => {
 beforeEach(() => {
     services1.eventBus.reset();
     services2.eventBus.reset();
-    services3.eventBus.reset();
 });
 
 afterEach(async () => {
@@ -68,63 +64,5 @@ describe("IdentityDeletionProcess", () => {
 
         const updatedRelationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
         expect(updatedRelationship.peerDeletionInfo).toBeUndefined();
-    });
-
-    test("messages with multiple recipients should fail if one of the recipients is ToBeDeleted", async () => {
-        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-
-        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
-        await services2.eventBus.waitForRunningEventHandlers();
-
-        const result = await sendMessageToMultipleRecipients(services2.transport, [services1.address, services3.address]);
-        expect(result).toBeAnError(
-            `The recipient with the address '${services1.address.toString()}' is in deletion, so you cannot send them a Message.`,
-            "error.transport.messages.peerIsInDeletion"
-        );
-    });
-
-    test("messages with multiple recipients should fail with another ErrorMessage if more than one of the recipients has an active IdentityDeletionProcess", async () => {
-        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-
-        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
-        await services2.eventBus.waitForRunningEventHandlers();
-
-        await services3.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-
-        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId2);
-        await services2.eventBus.waitForRunningEventHandlers();
-
-        const result = await sendMessageToMultipleRecipients(services2.transport, [services3.address, services1.address]);
-        expect(result).toBeAnError(
-            `The recipients with the following addresses '${services3.address.toString()},${services1.address.toString()}' are in deletion, so you cannot send them a Message.`,
-            "error.transport.messages.peerIsInDeletion"
-        );
-    });
-
-    test("returns error sending the Request when the peer has initiated an active IdentityDeletionProcess after the request has been created", async () => {
-        const requestContent = {
-            content: {
-                items: [
-                    {
-                        "@type": "TestRequestItem",
-                        mustBeAccepted: false
-                    }
-                ]
-            },
-            peer: services1.address
-        };
-        const result = await services2.consumption.outgoingRequests.create(requestContent);
-        expect(result).toBeSuccessful();
-
-        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-        await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
-        await services2.eventBus.waitForRunningEventHandlers();
-
-        const messageResult = await services2.transport.messages.sendMessage({ recipients: [services1.address], content: result.value.content });
-
-        expect(messageResult).toBeAnError(
-            `The recipient with the address '${services1.address.toString()}' is in deletion, so you cannot send them a Message.`,
-            "error.transport.messages.peerIsInDeletion"
-        );
     });
 });

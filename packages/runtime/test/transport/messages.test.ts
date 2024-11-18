@@ -7,6 +7,7 @@ import {
     GetMessagesQuery,
     IdentityDeletionProcessStatus,
     LocalAttributeDeletionStatus,
+    LocalRequestDTO,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
@@ -27,6 +28,7 @@ import {
     QueryParamConditions,
     RuntimeServiceProvider,
     sendMessage,
+    sendMessageToMultipleRecipients,
     syncUntilHasEvent,
     syncUntilHasMessage,
     syncUntilHasMessages,
@@ -156,6 +158,7 @@ describe("Messaging", () => {
 describe("Message errors", () => {
     let requestItem: ConsentRequestItemJSON;
     let requestId: string;
+    let createRequestResult: LocalRequestDTO;
 
     beforeAll(async () => {
         requestItem = {
@@ -163,13 +166,15 @@ describe("Message errors", () => {
             consent: "I consent to this RequestItem",
             mustBeAccepted: true
         };
-        const createRequestResult = await client1.consumption.outgoingRequests.create({
-            content: {
-                items: [requestItem]
-            },
-            peer: client2.address
-        });
-        requestId = createRequestResult.value.id;
+        createRequestResult = (
+            await client1.consumption.outgoingRequests.create({
+                content: {
+                    items: [requestItem]
+                },
+                peer: client2.address
+            })
+        ).value;
+        requestId = createRequestResult.id;
     });
 
     test("should throw correct error for empty 'to' in the Message", async () => {
@@ -268,86 +273,156 @@ describe("Message errors", () => {
         expect(result).toBeAnError("The recipient does not match the Request's peer.", "error.runtime.validation.invalidPropertyValue");
     });
 
-    test("should throw correct error for Messages with multiple recipients if there is no active Relationship to any of the recipients", async () => {
-        const result = await client1.transport.messages.sendMessage({
-            recipients: [client4.address, client5.address],
-            content: {
-                "@type": "Mail",
-                body: "b",
-                cc: [client4.address],
-                subject: "a",
-                to: [client5.address]
-            }
+    describe("Message errors for Relationships that are not active", () => {
+        test("should throw correct error for trying to send a Message if the Relationship is terminated", async () => {
+            const getRelationshipResult = (await client1.transport.relationships.getRelationshipByAddress({ address: client3.address })).value;
+            expect(getRelationshipResult.status).toBe(RelationshipStatus.Active);
+
+            await client1.transport.relationships.terminateRelationship({ relationshipId: getRelationshipResult.id });
+            const terminatedRelationship = (await syncUntilHasRelationships(client3.transport))[0];
+            expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
+
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client3.address],
+                content: {
+                    "@type": "Mail",
+                    body: "b",
+                    cc: [],
+                    subject: "a",
+                    to: [client3.address]
+                }
+            });
+            expect(result).toBeAnError(/.*/, "error.transport.messages.hasNoActiveRelationship");
         });
-        expect(result).toBeAnError(
-            `An active Relationship with the given addresses '${client4.address.toString()},${client5.address.toString()}' does not exist, so you cannot send them a Message.`,
-            "error.transport.messages.hasNoActiveRelationship"
-        );
+
+        test("should throw correct error for Messages with multiple recipients if there is no active Relationship to any of the recipients", async () => {
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client4.address, client5.address],
+                content: {
+                    "@type": "Mail",
+                    body: "b",
+                    cc: [client4.address],
+                    subject: "a",
+                    to: [client5.address]
+                }
+            });
+            expect(result).toBeAnError(
+                `An active Relationship with the given addresses '${client4.address.toString()},${client5.address.toString()}' does not exist, so you cannot send them a Message.`,
+                "error.transport.messages.hasNoActiveRelationship"
+            );
+        });
+
+        test("should throw correct error for Messages with multiple recipients if there is no active Relationship to only some of the recipients", async () => {
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client2.address, client5.address],
+                content: {
+                    "@type": "Mail",
+                    body: "b",
+                    cc: [client2.address],
+                    subject: "a",
+                    to: [client5.address]
+                }
+            });
+            expect(result).toBeAnError(
+                `An active Relationship with the given address '${client5.address.toString()}' does not exist, so you cannot send them a Message.`,
+                "error.transport.messages.hasNoActiveRelationship"
+            );
+        });
+
+        test("should throw correct error for Messages with multiple recipients if there is only a pending Relationship to some of the recipients", async () => {
+            const templateId = (await exchangeTemplate(client1.transport, client4.transport)).id;
+
+            await client4.transport.relationships.createRelationship({
+                templateId: templateId,
+                creationContent: emptyRelationshipCreationContent
+            });
+
+            const relationships = await syncUntilHasRelationships(client1.transport);
+            expect(relationships[0].status).toBe(RelationshipStatus.Pending);
+
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client2.address, client4.address],
+                content: {
+                    "@type": "Mail",
+                    body: "b",
+                    cc: [client2.address],
+                    subject: "a",
+                    to: [client4.address]
+                }
+            });
+            expect(result).toBeAnError(
+                `An active Relationship with the given address '${client4.address.toString()}' does not exist, so you cannot send them a Message.`,
+                "error.transport.messages.hasNoActiveRelationship"
+            );
+        });
     });
 
-    test("should throw correct error for Messages with multiple recipients if there is no active Relationship to only some of the recipients", async () => {
-        const result = await client1.transport.messages.sendMessage({
-            recipients: [client2.address, client5.address],
-            content: {
-                "@type": "Mail",
-                body: "b",
-                cc: [client2.address],
-                subject: "a",
-                to: [client5.address]
+    describe("Message errors for peers that are in deletion", () => {
+        let relationshipIdToClient2: string;
+        let relationshipIdToClient5: string;
+
+        beforeAll(async () => {
+            relationshipIdToClient2 = (await client1.transport.relationships.getRelationshipByAddress({ address: client2.address })).value.id;
+            relationshipIdToClient5 = (await ensureActiveRelationship(client1.transport, client5.transport)).id;
+        });
+
+        afterEach(async () => {
+            for (const client of [client2, client5]) {
+                const activeIdentityDeletionProcess = await client.transport.identityDeletionProcesses.getActiveIdentityDeletionProcess();
+                if (!activeIdentityDeletionProcess.isSuccess) {
+                    return;
+                }
+                let abortResult;
+                if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+                    abortResult = await client.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
+                } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
+                    abortResult = await client.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
+                }
+                await syncUntilHasEvent(client1, PeerDeletionCancelledEvent);
+                if (abortResult?.isError) throw abortResult.error;
             }
         });
-        expect(result).toBeAnError(
-            `An active Relationship with the given address '${client5.address.toString()}' does not exist, so you cannot send them a Message.`,
-            "error.transport.messages.hasNoActiveRelationship"
-        );
-    });
 
-    test("should throw correct error for Messages with multiple recipients if there is only a pending Relationship to some of the recipients", async () => {
-        const templateId = (await exchangeTemplate(client1.transport, client4.transport)).id;
+        test("should throw correct error for Messages with multiple recipients if all recipients are in deletion", async () => {
+            await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
+            await client1.eventBus.waitForRunningEventHandlers();
 
-        await client4.transport.relationships.createRelationship({
-            templateId: templateId,
-            creationContent: emptyRelationshipCreationContent
+            await client5.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient5);
+            await client1.eventBus.waitForRunningEventHandlers();
+
+            const result = await sendMessageToMultipleRecipients(client1.transport, [client2.address, client5.address]);
+            expect(result).toBeAnError(
+                `The recipients with the following addresses '${client2.address.toString()},${client5.address.toString()}' are in deletion, so you cannot send them a Message.`,
+                "error.transport.messages.peerIsInDeletion"
+            );
         });
 
-        const relationships = await syncUntilHasRelationships(client1.transport);
-        expect(relationships[0].status).toBe(RelationshipStatus.Pending);
+        test("should throw correct error for Messages with multiple recipients if some of the recipients are in deletion", async () => {
+            await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
+            await client1.eventBus.waitForRunningEventHandlers();
 
-        const result = await client1.transport.messages.sendMessage({
-            recipients: [client2.address, client4.address],
-            content: {
-                "@type": "Mail",
-                body: "b",
-                cc: [client2.address],
-                subject: "a",
-                to: [client4.address]
-            }
+            const result = await sendMessageToMultipleRecipients(client1.transport, [client2.address, client5.address]);
+            expect(result).toBeAnError(
+                `The recipient with the address '${client2.address.toString()}' is in deletion, so you cannot send them a Message.`,
+                "error.transport.messages.peerIsInDeletion"
+            );
         });
-        expect(result).toBeAnError(
-            `An active Relationship with the given address '${client4.address.toString()}' does not exist, so you cannot send them a Message.`,
-            "error.transport.messages.hasNoActiveRelationship"
-        );
-    });
 
-    test("should throw correct error for trying to send a Message if the Relationship is terminated", async () => {
-        const getRelationshipResult = (await client1.transport.relationships.getRelationshipByAddress({ address: client3.address })).value;
-        expect(getRelationshipResult.status).toBe(RelationshipStatus.Active);
+        test("returns error sending the Request when the peer has initiated its deletion after the Request has been created", async () => {
+            await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
+            await client1.eventBus.waitForRunningEventHandlers();
 
-        await client1.transport.relationships.terminateRelationship({ relationshipId: getRelationshipResult.id });
-        const terminatedRelationship = (await syncUntilHasRelationships(client3.transport))[0];
-        expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
+            const messageResult = await client1.transport.messages.sendMessage({ recipients: [client2.address], content: createRequestResult.content });
 
-        const result = await client1.transport.messages.sendMessage({
-            recipients: [client3.address],
-            content: {
-                "@type": "Mail",
-                body: "b",
-                cc: [],
-                subject: "a",
-                to: [client3.address]
-            }
+            expect(messageResult).toBeAnError(
+                `The recipient with the address '${client2.address.toString()}' is in deletion, so you cannot send them a Message.`,
+                "error.transport.messages.peerIsInDeletion"
+            );
         });
-        expect(result).toBeAnError(/.*/, "error.transport.messages.hasNoActiveRelationship");
     });
 });
 
