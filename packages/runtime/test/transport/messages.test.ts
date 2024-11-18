@@ -5,11 +5,14 @@ import assert from "assert";
 import {
     AttributeDeletedEvent,
     GetMessagesQuery,
+    IdentityDeletionProcessStatus,
     LocalAttributeDeletionStatus,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
     OwnSharedAttributeSucceededEvent,
+    PeerDeletionCancelledEvent,
+    PeerToBeDeletedEvent,
     RelationshipReactivationCompletedEvent,
     RelationshipStatus
 } from "../../src";
@@ -27,6 +30,7 @@ import {
     syncUntilHasEvent,
     syncUntilHasMessage,
     syncUntilHasMessages,
+    syncUntilHasMessageWithNotification,
     syncUntilHasRelationships,
     TestNotificationItem,
     TestRuntimeServices,
@@ -347,117 +351,180 @@ describe("Message errors", () => {
     });
 });
 
-describe("Follow-up sending of Notifications via Messages for reactivated Relationships", () => {
-    let relationshipId: string;
-    let notificationId: CoreId;
-
-    beforeAll(async () => {
-        relationshipId = (await ensureActiveRelationship(client5.transport, client1.transport)).id;
-        notificationId = await ConsumptionIds.notification.generate();
-    });
-
+describe("Postponed Notifications via Messages", () => {
     beforeEach(() => {
         client1.eventBus.reset();
         client5.eventBus.reset();
     });
 
-    test("should be able to send a Notification even though the Relationship is terminated and the peer should receive it only after the reactiviation of the Relationship", async () => {
-        await client1.transport.relationships.terminateRelationship({ relationshipId: relationshipId });
-        const terminatedRelationship = (await syncUntilHasRelationships(client5.transport))[0];
-        expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
+    describe("Postponed Notifications for reactivated Relationships", () => {
+        let relationshipId: string;
+        let notificationId: CoreId;
 
-        const notificationToBeSent = Notification.from({ id: notificationId, items: [TestNotificationItem.from({})] });
-        const sendMessageResult = await client1.transport.messages.sendMessage({ recipients: [client5.address], content: notificationToBeSent.toJSON() });
-        expect(sendMessageResult).toBeSuccessful();
-        const notificationSentResult = await client1.consumption.notifications.sentNotification({ messageId: sendMessageResult.value.id });
-        expect(notificationSentResult).toBeSuccessful();
-
-        await client5.transport.account.syncEverything();
-        let getMessagesResponse = await client5.transport.messages.getMessages({});
-        expect(getMessagesResponse.value).toHaveLength(0);
-        const getNotificationResponse = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
-        expect(getNotificationResponse).toBeAnError(/.*/, "error.transport.recordNotFound");
-
-        await client1.transport.relationships.requestRelationshipReactivation({ relationshipId: relationshipId });
-        await syncUntilHasRelationships(client5.transport);
-        await client5.transport.relationships.acceptRelationshipReactivation({ relationshipId: relationshipId });
-        await syncUntilHasRelationships(client1.transport);
-        await syncUntilHasEvent(client1, RelationshipReactivationCompletedEvent, (e) => e.data.id === relationshipId);
-        await client1.eventBus.waitForRunningEventHandlers();
-        await syncUntilHasEvent(client5, RelationshipReactivationCompletedEvent, (e) => e.data.id === relationshipId);
-        await client5.eventBus.waitForRunningEventHandlers();
-
-        getMessagesResponse = await client5.transport.messages.getMessages({});
-        expect(getMessagesResponse.value).toHaveLength(1);
-        const postponedNotification = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
-        expect(postponedNotification).toBeSuccessful();
-    });
-
-    test("should be able to send Notifications and the peer should receive the Notifications in the right order after the reactiviation of the Relationship", async () => {
-        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(client1, client5, {
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "A given name"
-                }
-            }
+        beforeAll(async () => {
+            relationshipId = (await ensureActiveRelationship(client5.transport, client1.transport)).id;
+            notificationId = await ConsumptionIds.notification.generate();
         });
 
-        await client1.transport.relationships.terminateRelationship({ relationshipId: relationshipId });
-        const terminatedRelationship = (await syncUntilHasRelationships(client5.transport))[0];
-        expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
+        test("should be able to send a Notification even though the Relationship is terminated and the peer should receive it only after the reactiviation of the Relationship", async () => {
+            await client1.transport.relationships.terminateRelationship({ relationshipId: relationshipId });
+            const terminatedRelationship = (await syncUntilHasRelationships(client5.transport))[0];
+            expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
 
-        const { successor: successorOfRepositoryAttribute } = (
-            await client1.consumption.attributes.succeedRepositoryAttribute({
-                predecessorId: (await client1.consumption.attributes.getRepositoryAttributes({})).value[0].id,
-                successorContent: {
+            const notificationToBeSent = Notification.from({ id: notificationId, items: [TestNotificationItem.from({})] });
+            const sendMessageResult = await client1.transport.messages.sendMessage({ recipients: [client5.address], content: notificationToBeSent.toJSON() });
+            expect(sendMessageResult).toBeSuccessful();
+            const notificationSentResult = await client1.consumption.notifications.sentNotification({ messageId: sendMessageResult.value.id });
+            expect(notificationSentResult).toBeSuccessful();
+
+            await client5.transport.account.syncEverything();
+            let getMessagesResponse = await client5.transport.messages.getMessages({});
+            expect(getMessagesResponse.value).toHaveLength(0);
+            const getNotificationResponse = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
+            expect(getNotificationResponse).toBeAnError(/.*/, "error.transport.recordNotFound");
+
+            await client1.transport.relationships.requestRelationshipReactivation({ relationshipId: relationshipId });
+            await syncUntilHasRelationships(client5.transport);
+            await client5.transport.relationships.acceptRelationshipReactivation({ relationshipId: relationshipId });
+            await syncUntilHasRelationships(client1.transport);
+            await syncUntilHasEvent(client1, RelationshipReactivationCompletedEvent, (e) => e.data.id === relationshipId);
+            await client1.eventBus.waitForRunningEventHandlers();
+            await syncUntilHasEvent(client5, RelationshipReactivationCompletedEvent, (e) => e.data.id === relationshipId);
+            await client5.eventBus.waitForRunningEventHandlers();
+
+            getMessagesResponse = await client5.transport.messages.getMessages({});
+            expect(getMessagesResponse.value).toHaveLength(1);
+            const postponedNotification = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
+            expect(postponedNotification).toBeSuccessful();
+        });
+
+        test("should be able to send Notifications even though the Relationship is terminated and the peer should receive them in the right order after the reactiviation of the Relationship", async () => {
+            const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(client1, client5, {
+                content: {
                     value: {
                         "@type": "GivenName",
-                        value: "A new given name"
+                        value: "A given name"
                     }
                 }
-            })
-        ).value;
+            });
 
-        const notifyAboutSuccessionResult = (
-            await client1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({ attributeId: successorOfRepositoryAttribute.id, peer: client5.address })
-        ).value;
-        await client1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent);
-        await client5.transport.account.syncEverything();
-        const successionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
-        expect(successionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
+            await client1.transport.relationships.terminateRelationship({ relationshipId: relationshipId });
+            const terminatedRelationship = (await syncUntilHasRelationships(client5.transport))[0];
+            expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
 
-        const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttribute.id })).value;
-        await client1.eventBus.waitForEvent(AttributeDeletedEvent);
-        await client5.transport.account.syncEverything();
-        const deletionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId });
-        expect(deletionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
+            const { successor: successorOfRepositoryAttribute } = (
+                await client1.consumption.attributes.succeedRepositoryAttribute({
+                    predecessorId: (await client1.consumption.attributes.getRepositoryAttributes({})).value[0].id,
+                    successorContent: {
+                        value: {
+                            "@type": "GivenName",
+                            value: "A new given name"
+                        }
+                    }
+                })
+            ).value;
 
-        await client1.transport.relationships.requestRelationshipReactivation({ relationshipId: relationshipId });
-        await syncUntilHasRelationships(client5.transport);
-        const acceptReactivationResult = await client5.transport.relationships.acceptRelationshipReactivation({ relationshipId: relationshipId });
-        expect(acceptReactivationResult.value.status).toBe(RelationshipStatus.Active);
-        const timeOfAcceptanceOfReactivation = acceptReactivationResult.value.auditLog[acceptReactivationResult.value.auditLog.length - 1].createdAt;
-        const reactivatedRelationship = await syncUntilHasRelationships(client1.transport);
-        expect(reactivatedRelationship[reactivatedRelationship.length - 1].status).toBe(RelationshipStatus.Active);
+            const notifyAboutSuccessionResult = (
+                await client1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({ attributeId: successorOfRepositoryAttribute.id, peer: client5.address })
+            ).value;
+            await client1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent);
+            await client5.transport.account.syncEverything();
+            const successionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
+            expect(successionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
 
-        const postponedMessages = await syncUntilHasMessages(client5.transport);
-        expect(postponedMessages.length === 2).toBe(true);
+            const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttribute.id })).value;
+            await client1.eventBus.waitForEvent(AttributeDeletedEvent);
+            await client5.transport.account.syncEverything();
+            const deletionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId });
+            expect(deletionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
 
-        const postponedSuccessionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
-        expect(postponedSuccessionNotification).toBeSuccessful();
-        const postponedDeletionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId });
-        expect(postponedDeletionNotification).toBeSuccessful();
+            await client1.transport.relationships.requestRelationshipReactivation({ relationshipId: relationshipId });
+            await syncUntilHasRelationships(client5.transport);
+            const acceptReactivationResult = await client5.transport.relationships.acceptRelationshipReactivation({ relationshipId: relationshipId });
+            expect(acceptReactivationResult.value.status).toBe(RelationshipStatus.Active);
+            const timeOfAcceptanceOfReactivation = acceptReactivationResult.value.auditLog[acceptReactivationResult.value.auditLog.length - 1].createdAt;
+            const reactivatedRelationship = await syncUntilHasRelationships(client1.transport);
+            expect(reactivatedRelationship[reactivatedRelationship.length - 1].status).toBe(RelationshipStatus.Active);
 
-        const peerSharedIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
-        assert(peerSharedIdentityAttribute.succeededBy);
-        assert(peerSharedIdentityAttribute.deletionInfo?.deletionDate);
-        assert(peerSharedIdentityAttribute.deletionInfo?.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);
+            const postponedMessages = await syncUntilHasMessages(client5.transport);
+            expect(postponedMessages.length === 2).toBe(true);
 
-        const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerSharedIdentityAttribute.succeededBy })).value.createdAt;
-        const timeOfDeletionByOwner = peerSharedIdentityAttribute.deletionInfo.deletionDate;
-        expect(CoreDate.from(timeOfAcceptanceOfReactivation).isBefore(CoreDate.from(timeOfSuccession))).toBe(true);
-        expect(CoreDate.from(timeOfSuccession).isBefore(CoreDate.from(timeOfDeletionByOwner))).toBe(true);
+            const postponedSuccessionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
+            expect(postponedSuccessionNotification).toBeSuccessful();
+            const postponedDeletionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId });
+            expect(postponedDeletionNotification).toBeSuccessful();
+
+            const peerSharedIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
+            assert(peerSharedIdentityAttribute.succeededBy);
+            assert(peerSharedIdentityAttribute.deletionInfo?.deletionDate);
+            assert(peerSharedIdentityAttribute.deletionInfo?.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);
+
+            const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerSharedIdentityAttribute.succeededBy })).value.createdAt;
+            const timeOfDeletionByOwner = peerSharedIdentityAttribute.deletionInfo.deletionDate;
+            expect(CoreDate.from(timeOfAcceptanceOfReactivation).isBefore(CoreDate.from(timeOfSuccession))).toBe(true);
+            expect(CoreDate.from(timeOfSuccession).isBefore(CoreDate.from(timeOfDeletionByOwner))).toBe(true);
+        });
+    });
+
+    describe("Postponed Notifications for cancelled Identity deletion of peer", () => {
+        let relationshipId: string;
+
+        beforeAll(async () => {
+            relationshipId = (await ensureActiveRelationship(client5.transport, client1.transport)).id;
+        });
+
+        afterEach(async () => {
+            const activeIdentityDeletionProcess = await client1.transport.identityDeletionProcesses.getActiveIdentityDeletionProcess();
+            if (!activeIdentityDeletionProcess.isSuccess) {
+                return;
+            }
+            let abortResult;
+            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+                abortResult = await client1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
+            } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
+                abortResult = await client1.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
+            }
+            await syncUntilHasEvent(client5, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
+            if (abortResult?.isError) throw abortResult.error;
+        });
+
+        test("should be able to send a Notification to an Identity which is in deletion", async () => {
+            await client1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            await syncUntilHasEvent(client5, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
+            await client5.eventBus.waitForRunningEventHandlers();
+
+            const updatedRelationship = (await client5.transport.relationships.getRelationship({ id: relationshipId })).value;
+            expect(updatedRelationship.peerDeletionInfo?.deletionStatus).toBe("ToBeDeleted");
+
+            const id = await ConsumptionIds.notification.generate();
+            const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+            const result = await client5.transport.messages.sendMessage({ recipients: [client1.address], content: notificationToSend.toJSON() });
+            expect(result).toBeSuccessful();
+        });
+
+        test("should be able to receive a Notification after the IdentityDeletionProcess has been cancelled", async () => {
+            await client1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            await syncUntilHasEvent(client5, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
+            await client5.eventBus.waitForRunningEventHandlers();
+
+            const updatedRelationship = (await client5.transport.relationships.getRelationship({ id: relationshipId })).value;
+            expect(updatedRelationship.peerDeletionInfo?.deletionStatus).toBe("ToBeDeleted");
+
+            const id = await ConsumptionIds.notification.generate();
+            const notificationToSend = Notification.from({ id, items: [TestNotificationItem.from({})] });
+
+            const result = await client5.transport.messages.sendMessage({ recipients: [client1.address], content: notificationToSend.toJSON() });
+            expect(result).toBeSuccessful();
+
+            await client1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
+            await syncUntilHasEvent(client5, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
+            await client5.eventBus.waitForRunningEventHandlers();
+
+            const message = await syncUntilHasMessageWithNotification(client1.transport, id);
+
+            const notification = await client1.consumption.notifications.receivedNotification({ messageId: message.id });
+            expect(notification).toBeSuccessful();
+        });
     });
 });
 
