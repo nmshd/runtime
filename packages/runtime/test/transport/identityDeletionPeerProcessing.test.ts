@@ -11,7 +11,6 @@ beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
     services1 = runtimeServices[0];
     services2 = runtimeServices[1];
-
     relationshipId = (await establishRelationship(services1.transport, services2.transport)).id;
 }, 30000);
 
