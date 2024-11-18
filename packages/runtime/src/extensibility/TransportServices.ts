@@ -6,6 +6,7 @@ import {
     FilesFacade,
     IdentityDeletionProcessesFacade,
     MessagesFacade,
+    PublicRelationshipTemplateReferencesFacade,
     RelationshipsFacade,
     RelationshipTemplatesFacade,
     TokensFacade
@@ -21,6 +22,7 @@ export class TransportServices {
         @Inject public readonly account: AccountFacade,
         @Inject public readonly devices: DevicesFacade,
         @Inject public readonly challenges: ChallengesFacade,
-        @Inject public readonly identityDeletionProcesses: IdentityDeletionProcessesFacade
+        @Inject public readonly identityDeletionProcesses: IdentityDeletionProcessesFacade,
+        @Inject public readonly publicRelationshipTemplateReferences: PublicRelationshipTemplateReferencesFacade
     ) {}
 }

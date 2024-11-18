@@ -23,6 +23,7 @@ import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredential
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
+import { PublicRelationshipTemplateReferenceController } from "../publicRelationshipTemplatesReference/PublicRelationshipTemplateController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
@@ -63,6 +64,7 @@ export class AccountController {
     public relationshipTemplates: RelationshipTemplateController;
     private synchronization: SyncController;
     public tokens: TokenController;
+    public publicRelationshipTemplateReferenceController: PublicRelationshipTemplateReferenceController;
 
     private relationshipSecrets: RelationshipSecretController;
     private readonly _log: ILogger;
@@ -213,6 +215,7 @@ export class AccountController {
         this.relationshipTemplates = await new RelationshipTemplateController(this, this.relationshipSecrets).init();
         this.messages = await new MessageController(this).init();
         this.tokens = await new TokenController(this).init();
+        this.publicRelationshipTemplateReferenceController = await new PublicRelationshipTemplateReferenceController(this).init();
 
         this.synchronization = await new SyncController(this, this.dependencyOverrides, this.unpushedDatawalletModifications, this.config.datawalletEnabled).init();
 

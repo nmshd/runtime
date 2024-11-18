@@ -29,7 +29,8 @@ export enum ControllerName {
     RelationshipTemplator = "RelationshipTemplator",
     Secret = "Secret",
     Sync = "Sync",
-    Token = "Token"
+    Token = "Token",
+    PublicRelationshipTemplateController = "PublicRelationshipTemplateController"
 }
 
 export class TransportController {
