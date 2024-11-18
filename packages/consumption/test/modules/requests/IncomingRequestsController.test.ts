@@ -443,7 +443,7 @@ describe("IncomingRequestsController", function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanAccept();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.peerIsDeleted",
+                code: "error.consumption.requests.wrongRelationshipStatus",
                 message: "You cannot decide a request from 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
             });
         });
@@ -659,7 +659,7 @@ describe("IncomingRequestsController", function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
             const validationResult = await When.iCallCanReject();
             expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.peerIsDeleted",
+                code: "error.consumption.requests.wrongRelationshipStatus",
                 message: "You cannot decide a request from 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
             });
         });
