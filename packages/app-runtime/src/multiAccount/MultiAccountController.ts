@@ -247,12 +247,8 @@ export class MultiAccountController {
         }
 
         const account = LocalAccount.from(oldAccount);
-        if (deletionDate === undefined) {
-            delete account.deletionDate;
-        } else {
-            account.deletionDate = deletionDate;
-        }
 
+        account.deletionDate = deletionDate ?? undefined;
         await this._localAccounts.update(oldAccount, account);
     }
 
