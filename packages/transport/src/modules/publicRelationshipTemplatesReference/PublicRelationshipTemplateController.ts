@@ -1,10 +1,10 @@
 import { RequestError } from "../../core/backbone/RequestError";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
-import { PublicRelationshipTemplateReferenceClient } from "./backbone/PublicRelationshipTemplateClient";
+import { PublicRelationshipTemplateReferenceClient } from "./backbone/PublicRelationshipTemplateReferenceClient";
 import { PublicRelationshipTemplateReference } from "./data/PublicRelationshipTemplateReference";
 
-export class PublicRelationshipTemplateReferenceController extends TransportController {
+export class PublicRelationshipTemplateReferencesController extends TransportController {
     public constructor(parent: AccountController) {
         super(ControllerName.PublicRelationshipTemplateController, parent);
     }

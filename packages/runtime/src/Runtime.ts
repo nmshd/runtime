@@ -25,7 +25,7 @@ import {
     IdentityController,
     IdentityDeletionProcessController,
     MessageController,
-    PublicRelationshipTemplateReferenceController,
+    PublicRelationshipTemplateReferencesController,
     RelationshipsController,
     RelationshipTemplateController,
     TokenController,
@@ -259,8 +259,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             .factory(() => this.getAccountController().tokens)
             .scope(Scope.Request);
 
-        Container.bind(PublicRelationshipTemplateReferenceController)
-            .factory(() => this.getAccountController().publicRelationshipTemplateReferenceController)
+        Container.bind(PublicRelationshipTemplateReferencesController)
+            .factory(() => this.getAccountController().publicRelationshipTemplateReferences)
             .scope(Scope.Singleton);
 
         Container.bind(ChallengeController)
