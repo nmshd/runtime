@@ -94,8 +94,8 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         const peersWithNoActiveRelationship: string[] = [];
-        const deletedPeers: string[] = [];
         const peersInDeletion: string[] = [];
+        const deletedPeers: string[] = [];
 
         for (const recipient of recipients) {
             const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
@@ -105,20 +105,20 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
                 continue;
             }
 
-            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
-                deletedPeers.push(recipient);
-            }
-
             if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
                 peersInDeletion.push(recipient);
+            }
+
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+                deletedPeers.push(recipient);
             }
         }
 
         if (peersWithNoActiveRelationship.length > 0) return TransportCoreErrors.messages.hasNoActiveRelationship(peersWithNoActiveRelationship);
 
-        if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
-
         if (peersInDeletion.length > 0) return TransportCoreErrors.messages.peerIsInDeletion(peersInDeletion);
+
+        if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
 
         return undefined;
     }
