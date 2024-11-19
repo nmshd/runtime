@@ -261,7 +261,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(PublicRelationshipTemplateReferencesController)
             .factory(() => this.getAccountController().publicRelationshipTemplateReferences)
-            .scope(Scope.Singleton);
+            .scope(Scope.Request);
 
         Container.bind(ChallengeController)
             .factory(() => this.getAccountController().challenges)

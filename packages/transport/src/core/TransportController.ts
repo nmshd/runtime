@@ -20,6 +20,7 @@ export enum ControllerName {
     File = "File",
     Identity = "Identity",
     Message = "Message",
+    PublicRelationshipTemplateReferencesController = "PublicRelationshipTemplateReferencesController",
     Relationship = "Relationship",
     Relationships = "Relationships",
     RelationshipTemplate = "RelationshipTemplate",
@@ -29,8 +30,7 @@ export enum ControllerName {
     RelationshipTemplator = "RelationshipTemplator",
     Secret = "Secret",
     Sync = "Sync",
-    Token = "Token",
-    PublicRelationshipTemplateController = "PublicRelationshipTemplateController"
+    Token = "Token"
 }
 
 export class TransportController {
