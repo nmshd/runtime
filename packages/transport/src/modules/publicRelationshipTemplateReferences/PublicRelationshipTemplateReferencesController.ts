@@ -6,7 +6,7 @@ import { PublicRelationshipTemplateReference } from "./data/PublicRelationshipTe
 
 export class PublicRelationshipTemplateReferencesController extends TransportController {
     public constructor(parent: AccountController) {
-        super(ControllerName.PublicRelationshipTemplateReferencesController, parent);
+        super(ControllerName.PublicRelationshipTemplateReferences, parent);
     }
 
     private client: PublicRelationshipTemplateReferenceClient;
