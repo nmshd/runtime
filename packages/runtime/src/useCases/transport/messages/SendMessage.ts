@@ -74,30 +74,32 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             );
         }
 
-        // Notifications can be sent to peers of any kind. The Transport library will validate below if it's really possible to send the notification.
+        // Notifications can be sent to peers of any kind, especially to peers in deletion. The underlying Transport library will validate if it is really possible to send the Notification.
         if (transformedContent instanceof Notification) return;
 
-        const recipientValidationError = await this.validateRecipients(transformedContent, recipients);
-        if (recipientValidationError) return recipientValidationError;
+        const recipientsValidationError = await this.validateMessageRecipients(transformedContent, recipients);
+        if (recipientsValidationError) return recipientsValidationError;
 
         if (transformedContent instanceof Request) {
-            const requestValidationError = await this.validateRequest(transformedContent, CoreAddress.from(recipients[0]));
+            const requestValidationError = await this.validateRequestAsMessageContent(transformedContent, CoreAddress.from(recipients[0]));
             if (requestValidationError) return requestValidationError;
         }
 
         return;
     }
 
-    private async validateRecipients(content: Serializable, recipients: string[]): Promise<CoreError | ApplicationError | undefined> {
+    private async validateMessageRecipients(content: Serializable, recipients: string[]): Promise<CoreError | ApplicationError | undefined> {
         if (content instanceof Request && recipients.length !== 1) {
             return RuntimeErrors.general.invalidPropertyValue("Only one recipient is allowed for sending Requests.");
         }
 
+        const peersWithNoActiveRelationship: string[] = [];
         const deletedPeers: string[] = [];
         const peersInDeletion: string[] = [];
-        const peersWithNoActiveRelationship: string[] = [];
+
         for (const recipient of recipients) {
             const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
+
             if (!relationship) {
                 peersWithNoActiveRelationship.push(recipient);
                 continue;
@@ -112,16 +114,16 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             }
         }
 
+        if (peersWithNoActiveRelationship.length > 0) return TransportCoreErrors.messages.hasNoActiveRelationship(peersWithNoActiveRelationship);
+
         if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
 
         if (peersInDeletion.length > 0) return TransportCoreErrors.messages.peerIsInDeletion(peersInDeletion);
 
-        if (peersWithNoActiveRelationship.length > 0) return TransportCoreErrors.messages.hasNoActiveRelationship(peersWithNoActiveRelationship);
-
         return undefined;
     }
 
-    private async validateRequest(request: Request, recipient: CoreAddress): Promise<ApplicationError | undefined> {
+    private async validateRequestAsMessageContent(request: Request, recipient: CoreAddress): Promise<ApplicationError | undefined> {
         if (!request.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
         const localRequest = await this.outgoingRequestsController.getOutgoingRequest(request.id);

@@ -291,7 +291,7 @@ export class MessageController extends TransportController {
 
         if (!parsedParams.attachments) parsedParams.attachments = [];
 
-        const validationError = await this.validateRecipients(parsedParams.recipients);
+        const validationError = await this.validateMessageRecipients(parsedParams.recipients);
         if (validationError) throw validationError;
 
         const secret = await CoreCrypto.generateSecretKey();
@@ -419,7 +419,7 @@ export class MessageController extends TransportController {
         return message;
     }
 
-    private async validateRecipients(recipients: CoreAddress[]) {
+    private async validateMessageRecipients(recipients: CoreAddress[]) {
         const deletedPeers: string[] = [];
         const peersWithMissingRelationship: string[] = [];
         const peersWithWrongRelationshipStatus: string[] = [];
