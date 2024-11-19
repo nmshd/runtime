@@ -65,7 +65,7 @@ export * from "./messages/transmission/MessageEnvelope";
 export * from "./messages/transmission/MessageEnvelopeRecipient";
 export * from "./messages/transmission/MessageSignature";
 export * from "./messages/transmission/MessageSigned";
-export * from "./publicRelationshipTemplatesReference/backbone/PublicRelationshipTemplateClient";
+export * from "./publicRelationshipTemplatesReference/backbone/PublicRelationshipTemplateReferenceClient";
 export * from "./publicRelationshipTemplatesReference/data/PublicRelationshipTemplateReference";
 export * from "./publicRelationshipTemplatesReference/PublicRelationshipTemplateController";
 export * from "./relationships/backbone/BackboneGetRelationships";
