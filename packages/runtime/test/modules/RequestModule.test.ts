@@ -374,7 +374,7 @@ describe("RequestModule", () => {
                             mustBeAccepted: false,
                             attribute: IdentityAttribute.from({
                                 owner: CoreAddress.from(""),
-                                value: GivenName.from("AGivenName").toJSON()
+                                value: GivenName.from("aGivenName").toJSON()
                             }).toJSON()
                         }
                     ]
@@ -414,18 +414,7 @@ describe("RequestModule", () => {
         test("the incoming request is created and moved to status DecisionRequired", async () => {
             const message = await exchangeMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
 
-            // kick every event created from requests of previous tests
-            const receivedEvents = rRuntimeServices.eventBus.publishedEvents;
-            const lastEvent = receivedEvents[receivedEvents.length - 1];
-            const secondToLastEvent = receivedEvents[receivedEvents.length - 2];
-            rRuntimeServices.eventBus.reset();
-            rRuntimeServices.eventBus.publish(secondToLastEvent);
-            rRuntimeServices.eventBus.publish(lastEvent);
-
-            const incomingRequestReceivedEvent = await rRuntimeServices.eventBus.waitForEvent(IncomingRequestReceivedEvent);
-            const request = incomingRequestReceivedEvent.data;
-            expect(request.id).toBe(message.content.id);
-
+            await rRuntimeServices.eventBus.waitForEvent(IncomingRequestReceivedEvent, (e) => e.data.id === message.content.id);
             const incomingRequestStatusChangedEvent = await rRuntimeServices.eventBus.waitForEvent(
                 IncomingRequestStatusChangedEvent,
                 (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired
@@ -485,11 +474,11 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         await ensureActiveRelationship(sRuntimeServices.transport, tRuntimeServices.transport);
         createdRelationshipAttributeForFurtherSharing = await executeFullCreateAndShareRelationshipAttributeFlow(sRuntimeServices, tRuntimeServices, {
             content: {
-                key: "AKey",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "AStringValue",
-                    title: "ATitle"
+                    value: "aStringValue",
+                    title: "aTitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }
@@ -551,7 +540,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                     attribute: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
-                            value: "AGivenName"
+                            value: "aGivenName"
                         },
                         owner: ""
                     }).toJSON()
@@ -560,11 +549,11 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                     "@type": "CreateAttributeRequestItem",
                     mustBeAccepted: true,
                     attribute: RelationshipAttribute.from({
-                        key: "AKey",
+                        key: "aKey",
                         value: {
                             "@type": "ProprietaryString",
-                            value: "AStringValue",
-                            title: "ATitle"
+                            value: "aStringValue",
+                            title: "aTitle"
                         },
                         owner: CoreAddress.from(""),
                         confidentiality: RelationshipAttributeConfidentiality.Public
@@ -574,7 +563,8 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                     "@type": "ShareAttributeRequestItem",
                     mustBeAccepted: true,
                     sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
-                    attribute: existingRelationshipAttributeForFurtherSharing.content
+                    attribute: existingRelationshipAttributeForFurtherSharing.content,
+                    thirdPartyAddress: existingRelationshipAttributeForFurtherSharing.shareInfo?.peer
                 }
             ],
             [{ accept: true }, { accept: true }, { accept: true }]
@@ -582,4 +572,62 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
 
         return sRelationship;
     }
+});
+
+describe("Handle Multiple RelationshipTemplate loadings", () => {
+    const runtimeServiceProvider = new RuntimeServiceProvider();
+    let sRuntimeServices: TestRuntimeServices;
+    let rRuntimeServices: TestRuntimeServices;
+
+    beforeAll(async () => {
+        const runtimeServices = await runtimeServiceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true });
+
+        sRuntimeServices = runtimeServices[0];
+        rRuntimeServices = runtimeServices[1];
+    }, 30000);
+
+    beforeEach(() => {
+        sRuntimeServices.eventBus.reset();
+        rRuntimeServices.eventBus.reset();
+    });
+
+    afterEach(() => {
+        sRuntimeServices.eventBus.reset();
+        rRuntimeServices.eventBus.reset();
+    });
+
+    afterAll(async () => await runtimeServiceProvider.stop());
+
+    test("no multiple open Requests that lead to a Relationship can exist for the same Identity", async () => {
+        const relationshipTemplateContent = RelationshipTemplateContent.from({
+            onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }] }
+        }).toJSON();
+
+        const firstTemplate = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, relationshipTemplateContent);
+        await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+        await expect(rRuntimeServices.eventBus).toHavePublished(
+            RelationshipTemplateProcessedEvent,
+            (e) => e.data.result === RelationshipTemplateProcessedResult.ManualRequestDecisionRequired
+        );
+
+        const requestForTemplate = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": firstTemplate.id } })).value[0];
+
+        rRuntimeServices.eventBus.reset();
+
+        const secondTemplate = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, relationshipTemplateContent);
+        await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+        await expect(rRuntimeServices.eventBus).not.toHavePublished(
+            RelationshipTemplateProcessedEvent,
+            (e) => e.data.result === RelationshipTemplateProcessedResult.ManualRequestDecisionRequired
+        );
+
+        await expect(rRuntimeServices.eventBus).toHavePublished(
+            RelationshipTemplateProcessedEvent,
+            (e) =>
+                e.data.result === RelationshipTemplateProcessedResult.NonCompletedRequestExists &&
+                e.data.template.id === secondTemplate.id &&
+                e.data.requestId === requestForTemplate.id
+        );
+    });
 });

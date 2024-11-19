@@ -14,7 +14,7 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import { CoreAddress, CoreId, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreIdHelper, IConfigOverwrite, IMessage, IRelationshipTemplate, Message, Relationship, RelationshipTemplate, SynchronizedCollection, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
@@ -57,6 +57,8 @@ export class RequestsTestsContext {
     public currentIdentity: CoreAddress;
     public mockEventBus = new MockEventBus();
     public relationshipToReturnFromGetRelationshipToIdentity: Relationship | undefined;
+    public relationshipToReturnFromGetExistingRelationshipToIdentity: Relationship | undefined;
+
     public consumptionController: ConsumptionController;
 
     private constructor() {
@@ -110,7 +112,8 @@ export class RequestsTestsContext {
                 address: account.accountController.identity.address
             },
             {
-                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity)
+                getRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetRelationshipToIdentity),
+                getExistingRelationshipToIdentity: () => Promise.resolve(context.relationshipToReturnFromGetExistingRelationshipToIdentity)
             }
         );
 
@@ -132,6 +135,7 @@ export class RequestsTestsContext {
         this.validationResult = undefined;
         this.actionToTry = undefined;
         this.relationshipToReturnFromGetRelationshipToIdentity = undefined;
+        this.relationshipToReturnFromGetExistingRelationshipToIdentity = undefined;
 
         TestRequestItemProcessor.numberOfApplyIncomingResponseItemCalls = 0;
 
@@ -306,11 +310,13 @@ export class RequestsGiven {
     }
 
     private async moveOutgoingRequestToStatus(localRequest: LocalRequest, status: LocalRequestStatus) {
-        if (localRequest.status === status) return;
+        const updatedRequest = await this.context.outgoingRequestsController.getOutgoingRequest(localRequest.id);
+
+        if (updatedRequest!.status === status) return;
 
         if (isStatusAAfterStatusB(status, LocalRequestStatus.Draft)) {
             await this.context.outgoingRequestsController.sent({
-                requestId: localRequest.id,
+                requestId: updatedRequest!.id,
                 requestSourceObject: TestObjectFactory.createOutgoingIMessage(this.context.currentIdentity)
             });
         }
@@ -1039,6 +1045,12 @@ export class RequestsThen {
         return Promise.resolve();
     }
 
+    public theRequestHasExpirationDate(expiresAt: CoreDate): Promise<void> {
+        expect(this.context.localRequestAfterAction?.content.expiresAt).toStrictEqual(expiresAt);
+
+        return Promise.resolve();
+    }
+
     public theRequestHasCorrectItemCount(itemCount: number): Promise<void> {
         expect(this.context.localRequestAfterAction?.content.items).toHaveLength(itemCount);
 
@@ -1205,8 +1217,6 @@ function isStatusAAfterStatusB(a: LocalRequestStatus, b: LocalRequestStatus): bo
 
 function getIntegerValue(status: LocalRequestStatus): number {
     switch (status) {
-        case LocalRequestStatus.Expired:
-            return -1;
         case LocalRequestStatus.Draft:
             return 0;
         case LocalRequestStatus.Open:
@@ -1215,6 +1225,8 @@ function getIntegerValue(status: LocalRequestStatus): number {
             return 2;
         case LocalRequestStatus.ManualDecisionRequired:
             return 3;
+        case LocalRequestStatus.Expired:
+            return 4;
         case LocalRequestStatus.Decided:
             return 5;
         case LocalRequestStatus.Completed:

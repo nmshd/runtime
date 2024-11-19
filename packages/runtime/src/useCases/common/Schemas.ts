@@ -2382,6 +2382,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "sourceAttributeId": {
                     "type": "string"
+                },
+                "thirdPartyAddress": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -5410,6 +5413,9 @@ export const CompleteOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/RelationshipAttributeJSON"
                         }
                     ]
+                },
+                "thirdPartyAddress": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -7840,6 +7846,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                             "$ref": "#/definitions/RelationshipAttributeJSON"
                         }
                     ]
+                },
+                "thirdPartyAddress": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -10199,6 +10208,9 @@ export const CreateOutgoingRequestRequest: any = {
                     ]
                 },
                 "sourceAttributeId": {
+                    "type": "string"
+                },
+                "thirdPartyAddress": {
                     "type": "string"
                 }
             },
@@ -13529,6 +13541,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "sourceAttributeId": {
                     "type": "string"
+                },
+                "thirdPartyAddress": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -16253,11 +16268,11 @@ export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any 
     }
 }
 
-export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any = {
+export const DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest",
+    "$ref": "#/definitions/DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest",
     "definitions": {
-        "DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest": {
+        "DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -16276,37 +16291,15 @@ export const DeleteThirdPartyOwnedRelationshipAttributeAndNotifyPeerRequest: any
     }
 }
 
-export const ExecuteIQLQueryRequest: any = {
+export const ExecuteIdentityAttributeQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ExecuteIQLQueryRequest",
+    "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",
     "definitions": {
-        "ExecuteIQLQueryRequest": {
+        "ExecuteIdentityAttributeQueryRequest": {
             "type": "object",
             "properties": {
                 "query": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "@type": {
-                            "type": "string",
-                            "const": "IQLQuery"
-                        },
-                        "queryString": {
-                            "type": "string"
-                        },
-                        "attributeCreationHints": {
-                            "$ref": "#/definitions/IQLQueryCreationHintsJSON"
-                        },
-                        "@context": {
-                            "type": "string"
-                        },
-                        "@version": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "queryString"
-                    ]
+                    "$ref": "#/definitions/IdentityAttributeQueryJSON"
                 }
             },
             "required": [
@@ -16314,9 +16307,19 @@ export const ExecuteIQLQueryRequest: any = {
             ],
             "additionalProperties": false
         },
-        "IQLQueryCreationHintsJSON": {
+        "IdentityAttributeQueryJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttributeQuery"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
@@ -16325,9 +16328,16 @@ export const ExecuteIQLQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
+                },
+                "validFrom": {
+                    "type": "string"
+                },
+                "validTo": {
+                    "type": "string"
                 }
             },
             "required": [
+                "@type",
                 "valueType"
             ],
             "additionalProperties": false
@@ -16397,15 +16407,37 @@ export const ExecuteIQLQueryRequest: any = {
     }
 }
 
-export const ExecuteIdentityAttributeQueryRequest: any = {
+export const ExecuteIQLQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ExecuteIdentityAttributeQueryRequest",
+    "$ref": "#/definitions/ExecuteIQLQueryRequest",
     "definitions": {
-        "ExecuteIdentityAttributeQueryRequest": {
+        "ExecuteIQLQueryRequest": {
             "type": "object",
             "properties": {
                 "query": {
-                    "$ref": "#/definitions/IdentityAttributeQueryJSON"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "@type": {
+                            "type": "string",
+                            "const": "IQLQuery"
+                        },
+                        "queryString": {
+                            "type": "string"
+                        },
+                        "attributeCreationHints": {
+                            "$ref": "#/definitions/IQLQueryCreationHintsJSON"
+                        },
+                        "@context": {
+                            "type": "string"
+                        },
+                        "@version": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "queryString"
+                    ]
                 }
             },
             "required": [
@@ -16413,19 +16445,9 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
             ],
             "additionalProperties": false
         },
-        "IdentityAttributeQueryJSON": {
+        "IQLQueryCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttributeQuery"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
@@ -16434,16 +16456,9 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
-                "@type",
                 "valueType"
             ],
             "additionalProperties": false
@@ -17037,6 +17052,19 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
+                "shareInfo.thirdPartyAddress": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "deletionInfo": {
                     "anyOf": [
                         {
@@ -17267,6 +17295,19 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
+                "shareInfo.thirdPartyAddress": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "deletionInfo": {
                     "anyOf": [
                         {
@@ -17472,6 +17513,19 @@ export const GetPeerSharedAttributesRequest: any = {
                     ]
                 },
                 "shareInfo.notificationReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "shareInfo.thirdPartyAddress": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -22219,6 +22273,19 @@ export const GetRelationshipTemplatesRequest: any = {
                             }
                         }
                     ]
+                },
+                "forIdentity": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -22310,6 +22377,30 @@ export const AcceptRelationshipReactivationRequest: any = {
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const CanCreateRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CanCreateRelationshipRequest",
+    "definitions": {
+        "CanCreateRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                },
+                "creationContent": {}
+            },
+            "required": [
+                "templateId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
         }
     }
 }
@@ -22782,6 +22873,19 @@ export const GetTokensRequest: any = {
                     ]
                 },
                 "expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forIdentity": {
                     "anyOf": [
                         {
                             "type": "string"

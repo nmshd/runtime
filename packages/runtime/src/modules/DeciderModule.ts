@@ -1,7 +1,6 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { RuntimeErrors, RuntimeServices } from "..";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -10,7 +9,9 @@ import {
     RelationshipTemplateProcessedResult
 } from "../events";
 import { ModuleConfiguration, RuntimeModule } from "../extensibility";
+import { RuntimeServices } from "../Runtime";
 import { LocalRequestDTO } from "../types";
+import { RuntimeErrors } from "../useCases/common/RuntimeErrors";
 import {
     isAcceptResponseConfig,
     isDeleteAttributeAcceptResponseConfig,

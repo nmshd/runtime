@@ -20,6 +20,7 @@ import {
     ConsumptionIds,
     LocalAttribute,
     LocalAttributeDeletionStatus,
+    LocalAttributeShareInfo,
     LocalRequest,
     LocalRequestStatus,
     ShareAttributeRequestItemProcessor
@@ -70,7 +71,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 scenario: "an Identity Attribute with owner=sender",
                 result: "success",
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("Sender")
                 })
             },
@@ -82,7 +83,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
                 },
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("someOtherOwner")
                 })
             },
@@ -90,30 +91,30 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 scenario: "a Relationship Attribute with owner=sender",
                 result: "success",
                 attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     owner: CoreAddress.from("Sender"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 })
             },
             {
                 scenario: "a Relationship Attribute with owner=someOtherOwner",
                 result: "success",
                 attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     owner: CoreAddress.from("Sender"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 })
             },
             {
                 scenario: "a Relationship Attribute with confidentiality=private",
                 result: "error",
                 attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     owner: CoreAddress.from("Sender"),
                     confidentiality: RelationshipAttributeConfidentiality.Private,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
@@ -124,10 +125,10 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 scenario: "a Relationship Attribute with owner=recipient",
                 result: "error",
                 attribute: RelationshipAttribute.from({
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     owner: CoreAddress.from("Recipient"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
@@ -169,7 +170,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: sourceAttribute.content,
-                sourceAttributeId: sourceAttribute.id
+                sourceAttributeId: sourceAttribute.id,
+                thirdPartyAddress: !(testParams.attribute instanceof IdentityAttribute) ? aThirdParty : undefined
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -191,7 +193,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "AGivenName" }),
+                    value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: sender
                 }),
                 sourceAttributeId: CoreId.from("anIdThatDoesntExist")
@@ -211,7 +213,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const recipient = CoreAddress.from("Recipient");
 
             const attribute = IdentityAttribute.from({
-                value: GivenName.fromAny({ value: "AGivenName" }),
+                value: GivenName.fromAny({ value: "aGivenName" }),
                 owner: sender
             });
 
@@ -222,7 +224,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: IdentityAttribute.from({
                     ...sourceAttribute.content.toJSON(),
-                    value: Surname.from("ASurname").toJSON()
+                    value: Surname.from("aSurname").toJSON()
                 }),
                 sourceAttributeId: sourceAttribute.id
             });
@@ -244,7 +246,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 })
             });
@@ -254,7 +256,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 attribute: IdentityAttribute.from({
                     owner: CoreAddress.from(""),
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 }),
                 sourceAttributeId: sourceAttribute.id
@@ -277,7 +279,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 }),
                 shareInfo: {
@@ -309,7 +311,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 })
             });
@@ -344,7 +346,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 })
             });
@@ -353,7 +355,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 }),
                 shareInfo: {
@@ -388,7 +390,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 })
             });
@@ -397,7 +399,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 }),
                 shareInfo: {
@@ -491,7 +493,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 }),
                 shareInfo: {
@@ -542,7 +544,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 }),
                 shareInfo: {
@@ -639,7 +641,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 }),
                 shareInfo: {
@@ -690,7 +692,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({
-                        value: "AGivenName"
+                        value: "aGivenName"
                     })
                 }),
                 shareInfo: {
@@ -723,9 +725,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 shareInfo: {
                     peer: aThirdParty,
@@ -736,7 +738,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: relationshipAttribute.content,
-                sourceAttributeId: relationshipAttribute.id
+                sourceAttributeId: relationshipAttribute.id,
+                thirdPartyAddress: relationshipAttribute.shareInfo?.peer
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -755,9 +758,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 peer: recipient,
                 requestReference: await ConsumptionIds.request.generate()
@@ -784,9 +787,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 shareInfo: {
                     peer: aThirdParty,
@@ -797,13 +800,14 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 shareInfo: {
                     peer: recipient,
                     requestReference: await ConsumptionIds.request.generate(),
+                    thirdPartyAddress: aThirdParty,
                     sourceAttribute: initialRelationshipAttribute.id
                 }
             });
@@ -811,7 +815,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id
+                sourceAttributeId: initialRelationshipAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -830,9 +835,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 shareInfo: {
                     peer: aThirdParty,
@@ -843,13 +848,14 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 shareInfo: {
                     peer: recipient,
                     requestReference: await ConsumptionIds.request.generate(),
+                    thirdPartyAddress: aThirdParty,
                     sourceAttribute: initialRelationshipAttribute.id
                 },
                 deletionInfo: {
@@ -861,7 +867,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id
+                sourceAttributeId: initialRelationshipAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -877,9 +884,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 shareInfo: {
                     peer: aThirdParty,
@@ -890,14 +897,15 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 shareInfo: {
                     peer: recipient,
                     requestReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: initialRelationshipAttribute.id
+                    sourceAttribute: initialRelationshipAttribute.id,
+                    thirdPartyAddress: aThirdParty
                 },
                 deletionInfo: {
                     deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
@@ -908,7 +916,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id
+                sourceAttributeId: initialRelationshipAttribute.id,
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -926,9 +935,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: RelationshipAttribute.from({
                     owner: sender,
-                    value: ProprietaryString.fromAny({ value: "AGivenName", title: "ATitle" }),
+                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "AKey"
+                    key: "aKey"
                 }),
                 shareInfo: {
                     peer: aThirdParty,
@@ -939,7 +948,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: relationshipAttribute.content,
-                sourceAttributeId: relationshipAttribute.id
+                sourceAttributeId: relationshipAttribute.id,
+                thirdPartyAddress: relationshipAttribute.shareInfo?.peer
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -997,7 +1007,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 sourceAttributeId: CoreId.from("aSourceAttributeId"),
                 attribute: TestObjectFactory.createRelationshipAttribute({
                     owner: sender
-                })
+                }),
+                thirdPartyAddress: CoreAddress.from("aThirdParty")
             });
             const incomingRequest = LocalRequest.from({
                 id: await ConsumptionIds.request.generate(),
@@ -1027,53 +1038,68 @@ describe("ShareAttributeRequestItemProcessor", function () {
     });
 
     describe("applyIncomingResponseItem", function () {
-        test.each([
-            {
-                attributeType: "IdentityAttribute",
-                attributeOwner: "Sender"
-            },
-            {
-                attributeType: "RelationshipAttribute",
-                attributeOwner: "Sender"
-            }
-        ])(
-            "in case of a ${value.attributeType}, creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the Request",
+        test("in case of an IdentityAttribute, creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the Request", async function () {
+            const attributeOwner = testAccount.identity.address.toString();
 
-            async function (testParams) {
-                testParams.attributeOwner = testParams.attributeOwner.replace("Sender", testAccount.identity.address.toString());
+            const sourceAttributeContent = TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from(attributeOwner) });
 
-                const sourceAttributeContent =
-                    testParams.attributeType === "IdentityAttribute"
-                        ? TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from(testParams.attributeOwner) })
-                        : TestObjectFactory.createRelationshipAttribute({ owner: CoreAddress.from(testParams.attributeOwner) });
+            const sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: sourceAttributeContent
+            });
 
-                const sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                    content: sourceAttributeContent
-                });
+            const { localRequest, requestItem } = await createLocalRequest({ sourceAttribute });
 
-                const { localRequest, requestItem } = await createLocalRequest({ sourceAttribute });
+            const responseItem = ShareAttributeAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                attributeId: await ConsumptionIds.attribute.generate()
+            });
+            await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
+            expect(createdAttribute).toBeDefined();
+            expect(createdAttribute!.id.toString()).toBe(responseItem.attributeId.toString());
+            expect(createdAttribute!.shareInfo).toBeDefined();
+            expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(localRequest.peer.toString());
+            expect(createdAttribute!.shareInfo!.sourceAttribute?.toString()).toStrictEqual(sourceAttribute.id.toString());
+            expect(createdAttribute!.content.owner.toString()).toStrictEqual(testAccount.identity.address.toString());
+        });
 
-                const responseItem = ShareAttributeAcceptResponseItem.from({
-                    result: ResponseItemResult.Accepted,
-                    attributeId: await ConsumptionIds.attribute.generate()
-                });
-                await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
-                const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
-                expect(createdAttribute).toBeDefined();
-                expect(createdAttribute!.id.toString()).toBe(responseItem.attributeId.toString());
-                expect(createdAttribute!.shareInfo).toBeDefined();
-                expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(localRequest.peer.toString());
-                expect(createdAttribute!.shareInfo!.sourceAttribute?.toString()).toStrictEqual(sourceAttribute.id.toString());
-                expect(createdAttribute!.content.owner.toString()).toStrictEqual(testAccount.identity.address.toString());
-            }
-        );
+        test("in case of a RelationshipAttribute, creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the Request", async function () {
+            const attributeOwner = testAccount.identity.address.toString();
+
+            const sourceAttributeContent = TestObjectFactory.createRelationshipAttribute({ owner: CoreAddress.from(attributeOwner) });
+
+            const sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                content: sourceAttributeContent,
+                shareInfo: LocalAttributeShareInfo.from({
+                    requestReference: CoreId.from("REQ1"),
+                    peer: CoreAddress.from("thirdparty")
+                })
+            });
+
+            const { localRequest, requestItem } = await createLocalRequest({ sourceAttribute });
+
+            const responseItem = ShareAttributeAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                attributeId: await ConsumptionIds.attribute.generate()
+            });
+            await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
+            expect(createdAttribute).toBeDefined();
+            expect(createdAttribute!.id.toString()).toBe(responseItem.attributeId.toString());
+            expect(createdAttribute!.shareInfo).toBeDefined();
+            expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(localRequest.peer.toString());
+            expect(createdAttribute!.shareInfo!.sourceAttribute?.toString()).toStrictEqual(sourceAttribute.id.toString());
+            expect(createdAttribute!.content.owner.toString()).toStrictEqual(testAccount.identity.address.toString());
+            expect(createdAttribute!.shareInfo!.thirdPartyAddress?.toString()).toBe("thirdparty");
+        });
     });
 
     async function createLocalRequest({ sourceAttribute }: { sourceAttribute: LocalAttribute }): Promise<{ localRequest: LocalRequest; requestItem: ShareAttributeRequestItem }> {
         const requestItem = ShareAttributeRequestItem.from({
             mustBeAccepted: true,
             attribute: sourceAttribute.content,
-            sourceAttributeId: sourceAttribute.id
+            sourceAttributeId: sourceAttribute.id,
+            thirdPartyAddress: sourceAttribute.isRelationshipAttribute() ? sourceAttribute.shareInfo.peer : undefined
         });
         const requestId = await ConsumptionIds.request.generate();
         const peer = CoreAddress.from("did:e:a-domain:dids:anidentity");

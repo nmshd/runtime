@@ -9,10 +9,12 @@ import {
     IRequest,
     IResponse,
     ProprietaryString,
+    RejectResponseItem,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     Request,
     RequestItemGroup,
+    ResponseItemDerivations,
     ResponseItemResult,
     ResponseJSON,
     ResponseResult
@@ -224,16 +226,16 @@ export class TestObjectFactory {
 
     public static createIdentityAttribute(properties?: Partial<IIdentityAttribute>): IdentityAttribute {
         return IdentityAttribute.from({
-            value: properties?.value ?? GivenName.fromAny({ value: "AGivenName" }),
+            value: properties?.value ?? GivenName.fromAny({ value: "aGivenName" }),
             owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }
 
     public static createRelationshipAttribute(properties?: Partial<IRelationshipAttribute>): RelationshipAttribute {
         return RelationshipAttribute.from({
-            value: properties?.value ?? ProprietaryString.from({ title: "ATitle", value: "AProprietaryStringValue" }),
+            value: properties?.value ?? ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" }),
             confidentiality: RelationshipAttributeConfidentiality.Public,
-            key: "AKey",
+            key: "aKey",
             isTechnical: false,
             owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
@@ -260,7 +262,59 @@ export class TestObjectFactory {
                 content: TestObjectFactory.createResponse(),
                 source: { reference: CoreId.from("MSG2"), type: "Message" }
             },
-            status: params.status ?? LocalRequestStatus.Draft,
+            status: params.status ?? LocalRequestStatus.Decided,
+            statusLog: params.statusLogEntries ?? []
+        };
+
+        const request = LocalRequest.from(requestJSON);
+        return request;
+    }
+
+    public static createUnansweredLocalRequestBasedOnTemplateWith(params: {
+        contentProperties?: Partial<Request>;
+        status?: LocalRequestStatus;
+        statusLogEntries?: LocalRequestStatusLogEntry[];
+    }): LocalRequest {
+        if (params.status && [LocalRequestStatus.Decided, LocalRequestStatus.Completed].includes(params.status)) {
+            throw new Error("An unanswered LocalRequest cannot be 'Decided' or 'Completed'.");
+        }
+
+        const requestJSON: ILocalRequest = {
+            id: CoreId.from("REQ1"),
+            isOwn: false,
+            peer: CoreAddress.from("did:e:a-domain:dids:sender"),
+            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+            content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
+            source: { type: "RelationshipTemplate", reference: CoreId.from("RLT1") },
+            status: params.status ?? LocalRequestStatus.ManualDecisionRequired,
+            statusLog: params.statusLogEntries ?? []
+        };
+
+        const request = LocalRequest.from(requestJSON);
+        return request;
+    }
+
+    public static createRejectedLocalRequestBasedOnTemplateWith(params: {
+        contentProperties?: Partial<Request>;
+        status?: LocalRequestStatus;
+        statusLogEntries?: LocalRequestStatusLogEntry[];
+    }): LocalRequest {
+        if (params.status && ![LocalRequestStatus.Decided, LocalRequestStatus.Completed, LocalRequestStatus.Expired].includes(params.status)) {
+            throw new Error("A rejected LocalRequest must be 'Decided', 'Completed' or 'Expired'.");
+        }
+
+        const requestJSON: ILocalRequest = {
+            id: CoreId.from("REQ1"),
+            isOwn: false,
+            peer: CoreAddress.from("did:e:a-domain:dids:sender"),
+            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+            content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
+            source: { type: "RelationshipTemplate", reference: CoreId.from("RLT1") },
+            response: {
+                createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                content: TestObjectFactory.createResponse("REQ1", ResponseResult.Rejected)
+            },
+            status: params.status ?? LocalRequestStatus.Decided,
             statusLog: params.statusLogEntries ?? []
         };
 
@@ -318,15 +372,21 @@ export class TestObjectFactory {
         };
     }
 
-    public static createResponse(customRequestId = "REQ1"): IResponse {
+    public static createResponse(customRequestId = "REQ1", result: ResponseResult = ResponseResult.Accepted): IResponse {
+        let responseItem: ResponseItemDerivations = AcceptResponseItem.from({
+            result: ResponseItemResult.Accepted
+        });
+
+        if (result === ResponseResult.Rejected) {
+            responseItem = RejectResponseItem.from({
+                result: ResponseItemResult.Rejected
+            });
+        }
+
         return {
-            result: ResponseResult.Accepted,
+            result: result,
             requestId: CoreId.from(customRequestId),
-            items: [
-                AcceptResponseItem.from({
-                    result: ResponseItemResult.Accepted
-                })
-            ]
+            items: [responseItem]
         };
     }
 
@@ -415,11 +475,11 @@ export class TestObjectFactory {
         };
     }
 
-    public static createIncomingRelationshipTemplate(): RelationshipTemplate {
-        return RelationshipTemplate.from(this.createIncomingIRelationshipTemplate());
+    public static createIncomingRelationshipTemplate(expiresAt?: CoreDate): RelationshipTemplate {
+        return RelationshipTemplate.from(this.createIncomingIRelationshipTemplate(expiresAt));
     }
 
-    public static createIncomingIRelationshipTemplate(): IRelationshipTemplate {
+    public static createIncomingIRelationshipTemplate(expiresAt?: CoreDate): IRelationshipTemplate {
         return {
             // @ts-expect-error
             "@type": "RelationshipTemplate",
@@ -435,6 +495,7 @@ export class TestObjectFactory {
                 createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 createdByDevice: { id: "senderDeviceId" },
                 maxNumberOfAllocations: 1,
+                expiresAt,
                 identity: {
                     address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                     publicKey: CryptoSignaturePublicKey.from({

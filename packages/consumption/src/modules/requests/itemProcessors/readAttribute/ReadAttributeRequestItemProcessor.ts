@@ -230,7 +230,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: sharedLocalAttribute.id,
-                    attribute: sharedLocalAttribute.content
+                    attribute: sharedLocalAttribute.content,
+                    thirdPartyAddress: sharedLocalAttribute.shareInfo?.thirdPartyAddress
                 });
             }
 
@@ -256,10 +257,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     let successorSharedAttribute: LocalAttribute;
                     if (existingSourceAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
                         successorSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(sharedPredecessor.id, existingSourceAttribute, requestInfo);
-                    } else if (existingSourceAttribute.isOwnedBy(this.accountController.identity.address)) {
-                        successorSharedAttribute = await this.performOwnSharedThirdPartyRelationshipAttributeSuccession(sharedPredecessor.id, existingSourceAttribute, requestInfo);
                     } else {
-                        successorSharedAttribute = await this.performThirdPartyOwnedRelationshipAttributeSuccession(sharedPredecessor.id, existingSourceAttribute, requestInfo);
+                        successorSharedAttribute = await this.performThirdPartyRelationshipAttributeSuccession(sharedPredecessor.id, existingSourceAttribute, requestInfo);
                     }
 
                     return AttributeSuccessionAcceptResponseItem.from({
@@ -305,29 +304,19 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         return successor;
     }
 
-    private async performOwnSharedThirdPartyRelationshipAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
-        const successorParams = {
-            content: sourceSuccessor.content,
-            shareInfo: LocalAttributeShareInfo.from({
-                peer: requestInfo.peer,
-                requestReference: requestInfo.id,
-                sourceAttribute: sourceSuccessor.id
-            })
-        };
-        const { successor } = await this.consumptionController.attributes.succeedOwnSharedRelationshipAttribute(sharedPredecessorId, successorParams);
-        return successor;
-    }
+    private async performThirdPartyRelationshipAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
+        const predecessor = await this.consumptionController.attributes.getLocalAttribute(sharedPredecessorId);
 
-    private async performThirdPartyOwnedRelationshipAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
         const successorParams = {
             content: sourceSuccessor.content,
             shareInfo: LocalAttributeShareInfo.from({
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id,
-                sourceAttribute: sourceSuccessor.id
+                sourceAttribute: sourceSuccessor.id,
+                thirdPartyAddress: predecessor?.shareInfo?.thirdPartyAddress
             })
         };
-        const { successor } = await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(sharedPredecessorId, successorParams);
+        const { successor } = await this.consumptionController.attributes.succeedThirdPartyRelationshipAttribute(sharedPredecessorId, successorParams);
         return successor;
     }
 
@@ -361,7 +350,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 id: responseItem.attributeId,
                 content: responseItem.attribute,
                 peer: requestInfo.peer,
-                requestReference: requestInfo.id
+                requestReference: requestInfo.id,
+                thirdPartyAddress: responseItem.thirdPartyAddress
             });
         }
 
@@ -378,10 +368,18 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (responseItem.successorContent instanceof IdentityAttribute) {
                 const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
                 return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
-            } else if (responseItem.successorContent.owner === requestInfo.peer) {
+            }
+
+            const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
+
+            if (successorParams.shareInfo) {
+                successorParams.shareInfo.thirdPartyAddress = predecessor?.shareInfo?.thirdPartyAddress;
+            }
+
+            if (responseItem.successorContent.owner === requestInfo.peer) {
                 await this.consumptionController.attributes.succeedPeerSharedRelationshipAttribute(responseItem.predecessorId, successorParams);
             } else {
-                await this.consumptionController.attributes.succeedThirdPartyOwnedRelationshipAttribute(responseItem.predecessorId, successorParams);
+                await this.consumptionController.attributes.succeedThirdPartyRelationshipAttribute(responseItem.predecessorId, successorParams);
             }
         }
 

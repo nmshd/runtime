@@ -6,6 +6,9 @@ import {
     AcceptRelationshipReactivationUseCase,
     AcceptRelationshipRequest,
     AcceptRelationshipUseCase,
+    CanCreateRelationshipRequest,
+    CanCreateRelationshipResponse,
+    CanCreateRelationshipUseCase,
     CreateRelationshipRequest,
     CreateRelationshipUseCase,
     DecomposeRelationshipRequest,
@@ -38,6 +41,7 @@ export class RelationshipsFacade {
         @Inject private readonly getRelationshipsUseCase: GetRelationshipsUseCase,
         @Inject private readonly getRelationshipUseCase: GetRelationshipUseCase,
         @Inject private readonly getRelationshipByAddressUseCase: GetRelationshipByAddressUseCase,
+        @Inject private readonly canCreateRelationshipUseCase: CanCreateRelationshipUseCase,
         @Inject private readonly createRelationshipUseCase: CreateRelationshipUseCase,
         @Inject private readonly acceptRelationshipUseCase: AcceptRelationshipUseCase,
         @Inject private readonly rejectRelationshipUseCase: RejectRelationshipUseCase,
@@ -61,6 +65,10 @@ export class RelationshipsFacade {
 
     public async getRelationshipByAddress(request: GetRelationshipByAddressRequest): Promise<Result<RelationshipDTO>> {
         return await this.getRelationshipByAddressUseCase.execute(request);
+    }
+
+    public async canCreateRelationship(request: CanCreateRelationshipRequest): Promise<Result<CanCreateRelationshipResponse>> {
+        return await this.canCreateRelationshipUseCase.execute(request);
     }
 
     public async createRelationship(request: CreateRelationshipRequest): Promise<Result<RelationshipDTO>> {

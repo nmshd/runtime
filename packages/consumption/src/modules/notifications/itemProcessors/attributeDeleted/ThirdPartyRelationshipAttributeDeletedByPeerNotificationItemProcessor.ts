@@ -1,33 +1,33 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
+import { ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent } from "../../../attributes";
+import { ThirdPartyRelationshipAttributeDeletedByPeerEvent } from "../../../attributes";
 import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../../attributes/local/LocalAttributeDeletionInfo";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
 
-export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor extends AbstractNotificationItemProcessor<ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem> {
+export class ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor extends AbstractNotificationItemProcessor<ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem> {
     private readonly _logger: ILogger;
 
     public constructor(consumptionController: ConsumptionController) {
         super(consumptionController);
-        this._logger = TransportLoggerFactory.getLogger(ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor);
+        this._logger = TransportLoggerFactory.getLogger(ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor);
     }
 
     public override async checkPrerequisitesOfIncomingNotificationItem(
-        notificationItem: ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem,
+        notificationItem: ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem,
         notification: LocalNotification
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
 
         if (!attribute) return ValidationResult.success();
 
-        if (!attribute.isThirdPartyOwnedRelationshipAttribute(this.currentIdentityAddress)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotThirdPartyOwnedRelationshipAttribute(notificationItem.attributeId));
+        if (!attribute.isThirdPartyRelationshipAttribute()) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotThirdPartyRelationshipAttribute(notificationItem.attributeId));
         }
 
         if (!notification.peer.equals(attribute.shareInfo.peer)) {
@@ -38,9 +38,9 @@ export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemPr
     }
 
     public override async process(
-        notificationItem: ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem,
+        notificationItem: ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem,
         _notification: LocalNotification
-    ): Promise<ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent | void> {
+    ): Promise<ThirdPartyRelationshipAttributeDeletedByPeerEvent | void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 
@@ -57,10 +57,10 @@ export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemPr
             await this.consumptionController.attributes.updateAttributeUnsafe(attr);
         }
 
-        return new ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
+        return new ThirdPartyRelationshipAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
     }
 
-    public override async rollback(notificationItem: ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem, _notification: LocalNotification): Promise<void> {
+    public override async rollback(notificationItem: ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 

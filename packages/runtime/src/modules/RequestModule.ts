@@ -102,13 +102,36 @@ export class RequestModule extends RuntimeModule {
             }
 
             this.logger.info(
-                `There is already an open Relationship for the RelationshipTemplate '${template.id}' and onExistingRelationship is not defined. Skipping creation of a new request.`
+                `There is already an active Relationship to the creator of the RelationshipTemplate '${template.id}' and an onExistingRelationship Request is not defined. Skipping creation of a new Request.`
             );
             this.runtime.eventBus.publish(
                 new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
                     template,
                     result: RelationshipTemplateProcessedResult.RelationshipExists,
                     relationshipId: activeRelationships[0].id
+                })
+            );
+            return;
+        }
+
+        const otherRequestsThatWouldLeadToARelationship = (
+            await services.consumptionServices.incomingRequests.getRequests({
+                query: {
+                    "source.type": "RelationshipTemplate",
+                    status: [LocalRequestStatus.Open, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired, LocalRequestStatus.Decided],
+                    peer: template.createdBy
+                }
+            })
+        ).value;
+        if (otherRequestsThatWouldLeadToARelationship.length !== 0) {
+            this.logger.info(
+                `There is already an open Request for a RelationshipTemplate that would lead to a Relationship with the creator of the RelationshipTemplate '${template.id}'. Skipping creation of a new Request.`
+            );
+            this.runtime.eventBus.publish(
+                new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
+                    template,
+                    result: RelationshipTemplateProcessedResult.NonCompletedRequestExists,
+                    requestId: otherRequestsThatWouldLeadToARelationship[0].id
                 })
             );
             return;
