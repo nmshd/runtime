@@ -180,7 +180,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const relationship = await this.relationshipResolver.getRelationshipToIdentity(request.peer);
         // It is safe to decide an incoming Request when no Relationship is found as this is the case when the Request origins from onNewRelationship of the RelationshipTemplateContent
-
         const possibleStatuses =
             request.source?.type === "RelationshipTemplate" ? [RelationshipStatus.Active, RelationshipStatus.Rejected, RelationshipStatus.Revoked] : [RelationshipStatus.Active];
 
