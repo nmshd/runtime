@@ -3,7 +3,7 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, RelationshipTemplateController } from "@nmshd/transport";
+import { AccountController, PasswordInfoMinusSalt, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -73,7 +73,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         }
 
         const password = request.password ?? request.pin;
-        const passwordInfo = password ? { password, passwordType: this.computePasswordType(request.password, request.pin) } : undefined;
+        const passwordInfo = password ? PasswordInfoMinusSalt.from({ password, passwordType: this.computePasswordType(request.password, request.pin) }) : undefined;
 
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
             content: content,

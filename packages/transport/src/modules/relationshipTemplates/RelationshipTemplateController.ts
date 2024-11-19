@@ -5,7 +5,7 @@ import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
-import { IPasswordInfo, PasswordInfo } from "../../core/types/PasswordInfo";
+import { PasswordInfo } from "../../core/types/PasswordInfo";
 import { PeerRelationshipTemplateLoadedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { Relationship } from "../relationships/local/Relationship";
@@ -90,11 +90,11 @@ export class RelationshipTemplateController extends TransportController {
         });
 
         const passwordInfo = parameters.passwordInfo
-            ? ({
+            ? PasswordInfo.from({
                   password: parameters.passwordInfo.password,
                   passwordType: parameters.passwordInfo.passwordType,
                   salt: salt!
-              } as IPasswordInfo)
+              })
             : undefined;
 
         const template = RelationshipTemplate.from({

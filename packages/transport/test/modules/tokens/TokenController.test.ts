@@ -169,7 +169,6 @@ describe("TokenController", function () {
         expect(sentTokenContent.secretKey.toBase64()).toBe(content.secretKey.toBase64());
         expect(receivedTokenContent.templateId.toString()).toBe(sentTokenContent.templateId.toString());
         expect(receivedTokenContent.secretKey.toBase64()).toBe(sentTokenContent.secretKey.toBase64());
-        expect(sentTokenContent.forIdentity!.toString()).toBe(sentTokenContent.forIdentity!.toString());
         expect(receivedTokenContent.forIdentity!.toString()).toBe(sentTokenContent.forIdentity!.toString());
     });
 
@@ -198,6 +197,7 @@ describe("TokenController", function () {
         expect(sentTokenContent.templateId).toBeInstanceOf(CoreId);
         expect(sentTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
         expect(sentTokenContent.passwordInfo!.salt).toBeInstanceOf(CoreBuffer);
+        expect(sentTokenContent.passwordInfo!.passwordType).toBe("pw");
         expect(receivedToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
         const receivedTokenContent = receivedToken.cache?.content as TokenContentRelationshipTemplate;
         expect(receivedTokenContent.templateId).toBeInstanceOf(CoreId);
@@ -237,6 +237,7 @@ describe("TokenController", function () {
         expect(sentTokenContent.templateId).toBeInstanceOf(CoreId);
         expect(sentTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
         expect(sentTokenContent.passwordInfo!.salt).toBeInstanceOf(CoreBuffer);
+        expect(sentTokenContent.passwordInfo!.passwordType).toBe("pw");
         expect(receivedToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
         const receivedTokenContent = receivedToken.cache?.content as TokenContentRelationshipTemplate;
         expect(receivedTokenContent.templateId).toBeInstanceOf(CoreId);

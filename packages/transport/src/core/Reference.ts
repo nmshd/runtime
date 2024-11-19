@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
 import { CoreId, ICoreId } from "@nmshd/core-types";
-import { CoreBuffer, CryptoSecretKey, ICoreBuffer, ICryptoSecretKey } from "@nmshd/crypto";
+import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { CoreIdHelper } from "./CoreIdHelper";
 import { TransportCoreErrors } from "./TransportCoreErrors";
 import { IPasswordInfoMinusPassword, PasswordInfoMinusPassword } from "./types/PasswordInfo";
@@ -11,7 +11,6 @@ export interface IReference extends ISerializable {
     key: ICryptoSecretKey;
     forIdentityTruncated?: string;
     passwordInfo?: IPasswordInfoMinusPassword;
-    salt?: ICoreBuffer;
 }
 
 @type("Reference")
@@ -71,7 +70,7 @@ export class Reference extends Serializable implements IReference {
         });
     }
 
-    private static parsePasswordPart(value: string): IPasswordInfoMinusPassword | undefined {
+    private static parsePasswordPart(value?: string): IPasswordInfoMinusPassword | undefined {
         if (!value) return;
         const splittedPasswordParts = value.split("&");
         if (splittedPasswordParts.length !== 2) {

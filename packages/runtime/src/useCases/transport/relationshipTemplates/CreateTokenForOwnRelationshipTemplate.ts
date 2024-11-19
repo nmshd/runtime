@@ -1,6 +1,13 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
+import {
+    AccountController,
+    PasswordInfoMinusPassword,
+    RelationshipTemplate,
+    RelationshipTemplateController,
+    TokenContentRelationshipTemplate,
+    TokenController
+} from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -45,10 +52,10 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
         }
 
         const passwordInfo = template.passwordInfo
-            ? {
+            ? PasswordInfoMinusPassword.from({
                   passwordType: template.passwordInfo.passwordType,
                   salt: template.passwordInfo.salt
-              }
+              })
             : undefined;
 
         const tokenContent = TokenContentRelationshipTemplate.from({

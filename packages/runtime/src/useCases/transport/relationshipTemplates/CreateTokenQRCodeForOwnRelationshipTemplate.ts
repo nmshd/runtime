@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
+import { PasswordInfoMinusPassword, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -45,10 +45,10 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
         }
 
         const passwordInfo = template.passwordInfo
-            ? {
+            ? PasswordInfoMinusPassword.from({
                   passwordType: template.passwordInfo.passwordType,
                   salt: template.passwordInfo.salt
-              }
+              })
             : undefined;
 
         const tokenContent = TokenContentRelationshipTemplate.from({

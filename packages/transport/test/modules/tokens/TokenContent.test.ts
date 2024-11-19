@@ -192,7 +192,7 @@ describe("TokenContent", function () {
             }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
         });
 
-        test("should not create a tokenContent starting with neither pw nor pin", async function () {
+        test("should not create a tokenContent with passwordType starting with neither pw nor pin", async function () {
             await expect(async () => {
                 TokenContentRelationshipTemplate.from({
                     secretKey: await CryptoEncryption.generateKey(),
