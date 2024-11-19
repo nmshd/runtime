@@ -288,7 +288,6 @@ export class MessageController extends TransportController {
     @log()
     public async sendMessage(parameters: ISendMessageParameters): Promise<Message> {
         const parsedParams = SendMessageParameters.from(parameters);
-
         if (!parsedParams.attachments) parsedParams.attachments = [];
 
         const validationError = await this.validateMessageRecipients(parsedParams.recipients);
@@ -420,9 +419,9 @@ export class MessageController extends TransportController {
     }
 
     private async validateMessageRecipients(recipients: CoreAddress[]) {
-        const deletedPeers: string[] = [];
         const peersWithMissingRelationship: string[] = [];
         const peersWithWrongRelationshipStatus: string[] = [];
+        const deletedPeers: string[] = [];
 
         for (const recipient of recipients) {
             const relationship = await this.relationships.getRelationshipToIdentity(recipient);
@@ -432,13 +431,13 @@ export class MessageController extends TransportController {
                 continue;
             }
 
-            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
-                deletedPeers.push(recipient.address);
+            if (!(relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active)) {
+                peersWithWrongRelationshipStatus.push(recipient.address);
                 continue;
             }
 
-            if (!(relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active)) {
-                peersWithWrongRelationshipStatus.push(recipient.address);
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+                deletedPeers.push(recipient.address);
                 continue;
             }
         }
@@ -447,12 +446,12 @@ export class MessageController extends TransportController {
             return TransportCoreErrors.messages.missingRelationship(peersWithMissingRelationship);
         }
 
-        if (deletedPeers.length > 0) {
-            return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
-        }
-
         if (peersWithWrongRelationshipStatus.length > 0) {
             return TransportCoreErrors.messages.wrongRelationshipStatus(peersWithWrongRelationshipStatus);
+        }
+
+        if (deletedPeers.length > 0) {
+            return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
         }
 
         return;
