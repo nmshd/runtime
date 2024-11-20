@@ -958,10 +958,6 @@ export class AttributesController extends ConsumptionBaseController {
             if (successor) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotYetExist());
         }
 
-        if (successor.succeeds && !predecessorId.equals(successor.succeeds.toString())) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.setPredecessorIdDoesNotMatchActualPredecessorId());
-        }
-
         if (successor.succeededBy) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotHaveASuccessor());
         }
@@ -983,6 +979,14 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedChildOfComplexAttribute(predecessorId.toString()));
         }
 
+        if (predecessor.hasDeletionInfo() && predecessor.deletionInfo.deletionStatus !== LocalAttributeDeletionStatus.DeletionRequestRejected) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        }
+
+        if (_.isEqual(successor.content, predecessor.content)) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustChangeContent());
+        }
+
         if (!predecessor.content.owner.equals(CoreAddress.from(successor.content.owner))) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeOwner());
         }
@@ -995,12 +999,8 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeValueType());
         }
 
-        if (predecessor.hasDeletionInfo() && predecessor.deletionInfo.deletionStatus !== LocalAttributeDeletionStatus.DeletionRequestRejected) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
-        }
-
-        if (_.isEqual(successor.content, predecessor.content)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustChangeContent());
+        if (successor.succeeds && !predecessorId.equals(successor.succeeds.toString())) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.setPredecessorIdDoesNotMatchActualPredecessorId());
         }
 
         return ValidationResult.success();
