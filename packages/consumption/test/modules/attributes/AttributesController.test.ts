@@ -1504,7 +1504,7 @@ describe("AttributesController", function () {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "Nationality",
-                            value: "DE"
+                            value: "US"
                         },
                         owner: CoreAddress.from("address")
                     })
