@@ -4,42 +4,42 @@ import { AppRuntime, LocalAccountDeletionDateChangedEvent, LocalAccountSession }
 import { EventListener, TestUtil } from "../lib";
 
 describe("IdentityDeletionProcessStatusChanged", function () {
-    let runtime: AppRuntime;
-    let session: LocalAccountSession;
+    let runtimeDevice1: AppRuntime;
+    let sessionDevice1: LocalAccountSession;
 
     beforeAll(async function () {
-        runtime = await TestUtil.createRuntime();
-        await runtime.start();
+        runtimeDevice1 = await TestUtil.createRuntime();
+        await runtimeDevice1.start();
 
-        const accounts = await TestUtil.provideAccounts(runtime, 1);
+        const accounts = await TestUtil.provideAccounts(runtimeDevice1, 1);
 
-        session = await runtime.selectAccount(accounts[0].id);
+        sessionDevice1 = await runtimeDevice1.selectAccount(accounts[0].id);
     });
 
     afterEach(async () => {
-        const activeIdentityDeletionProcess = await session.transportServices.identityDeletionProcesses.getActiveIdentityDeletionProcess();
+        const activeIdentityDeletionProcess = await sessionDevice1.transportServices.identityDeletionProcesses.getActiveIdentityDeletionProcess();
         if (!activeIdentityDeletionProcess.isSuccess) {
             return;
         }
 
         let abortResult;
         if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
-            abortResult = await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
+            abortResult = await sessionDevice1.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
         }
         if (abortResult?.isError) throw abortResult.error;
     });
 
     afterAll(async function () {
-        await runtime.stop();
+        await runtimeDevice1.stop();
     });
 
     test("should fire an event and set the deletionDate of the LocalAccount initiating an IdentityDeletionProcess", async function () {
-        expect(session.account.deletionDate).toBeUndefined();
+        expect(sessionDevice1.account.deletionDate).toBeUndefined();
 
-        const eventListener = new EventListener(runtime, [LocalAccountDeletionDateChangedEvent, IdentityDeletionProcessStatusChangedEvent]);
+        const eventListener = new EventListener(runtimeDevice1, [LocalAccountDeletionDateChangedEvent, IdentityDeletionProcessStatusChangedEvent]);
         eventListener.start();
 
-        const initiateDeletionResult = await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        const initiateDeletionResult = await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
         eventListener.stop();
         const events = eventListener.getReceivedEvents();
@@ -55,17 +55,17 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         expect(localAccountDeletionDateChangedEvent.data).toBeDefined();
         expect(localAccountDeletionDateChangedEvent.data).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
 
-        expect(session.account.deletionDate).toBeDefined();
-        expect(session.account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
+        expect(sessionDevice1.account.deletionDate).toBeDefined();
+        expect(sessionDevice1.account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
     });
 
     test("should fire an event and set the deletionDate of the LocalAccount cancelling an IdentityDeletionProcess", async function () {
-        await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
-        const eventListener = new EventListener(runtime, [LocalAccountDeletionDateChangedEvent, IdentityDeletionProcessStatusChangedEvent]);
+        const eventListener = new EventListener(runtimeDevice1, [LocalAccountDeletionDateChangedEvent, IdentityDeletionProcessStatusChangedEvent]);
         eventListener.start();
 
-        const cancelDeletionResult = await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
+        const cancelDeletionResult = await sessionDevice1.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
 
         eventListener.stop();
         const events = eventListener.getReceivedEvents();
@@ -80,7 +80,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         expect(localAccountDeletionDateChangedEvent).toBeInstanceOf(LocalAccountDeletionDateChangedEvent);
         expect(localAccountDeletionDateChangedEvent.data).toBeUndefined();
 
-        expect(session.account.deletionDate).toBeUndefined();
+        expect(sessionDevice1.account.deletionDate).toBeUndefined();
     });
 
     describe("multiple devices", function () {
@@ -91,8 +91,8 @@ describe("IdentityDeletionProcessStatusChanged", function () {
             runtimeDevice2 = await TestUtil.createRuntime();
             await runtimeDevice2.start();
 
-            const newDevice = await session.transportServices.devices.createDevice({ name: "test", isAdmin: true });
-            const token = await session.transportServices.devices.getDeviceOnboardingToken({ id: newDevice.value.id, profileName: "Test" });
+            const newDevice = await sessionDevice1.transportServices.devices.createDevice({ name: "test", isAdmin: true });
+            const token = await sessionDevice1.transportServices.devices.getDeviceOnboardingToken({ id: newDevice.value.id, profileName: "Test" });
             const content: any = Serializable.fromUnknown(token.value.content);
 
             const [accountDevice2] = await runtimeDevice2.multiAccountController.onboardDevice(content.sharedSecret, "test");
@@ -104,7 +104,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         });
 
         test("should set the deletionDate of the LocalAccount on a second device that is online", async function () {
-            await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(sessionDevice2.account.deletionDate).toBeUndefined();
 
             await sessionDevice2.transportServices.account.syncDatawallet();
@@ -113,7 +113,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
 
         test("should set the deletionDate of the LocalAccount on a second device that was offline", async function () {
             await runtimeDevice2.stop();
-            await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+            await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(sessionDevice2.account.deletionDate).toBeUndefined();
 
             await runtimeDevice2.start();
