@@ -51,12 +51,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        const passwordInfo = template.passwordInfo
-            ? PasswordInfoMinusPassword.from({
-                  passwordType: template.passwordInfo.passwordType,
-                  salt: template.passwordInfo.salt
-              })
-            : undefined;
+        const passwordInfo = template.passwordInfo ? PasswordInfoMinusPassword.from(template.passwordInfo) : undefined;
 
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
