@@ -1,4 +1,3 @@
-import { Serializable } from "@js-soft/ts-serval";
 import { IdentityDeletionProcessStatus, IdentityDeletionProcessStatusChangedEvent } from "@nmshd/runtime";
 import { AppRuntime, LocalAccountDeletionDateChangedEvent, LocalAccountSession } from "../../src";
 import { EventListener, TestUtil } from "../lib";
@@ -11,9 +10,8 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         runtimeDevice1 = await TestUtil.createRuntime();
         await runtimeDevice1.start();
 
-        const accounts = await TestUtil.provideAccounts(runtimeDevice1, 1);
-
-        sessionDevice1 = await runtimeDevice1.selectAccount(accounts[0].id);
+        const [localAccountDevice1] = await TestUtil.provideAccounts(runtimeDevice1, 1);
+        sessionDevice1 = await runtimeDevice1.selectAccount(localAccountDevice1.id);
     });
 
     afterEach(async () => {
@@ -91,12 +89,14 @@ describe("IdentityDeletionProcessStatusChanged", function () {
             runtimeDevice2 = await TestUtil.createRuntime();
             await runtimeDevice2.start();
 
-            const newDevice = await sessionDevice1.transportServices.devices.createDevice({ name: "test", isAdmin: true });
-            const token = await sessionDevice1.transportServices.devices.getDeviceOnboardingToken({ id: newDevice.value.id, profileName: "Test" });
-            const content: any = Serializable.fromUnknown(token.value.content);
+            const createDeviceResult = await sessionDevice1.transportServices.devices.createDevice({ name: "test", isAdmin: true });
+            const onboardingInfoResult = await sessionDevice1.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id, profileName: "Test" });
 
-            const [accountDevice2] = await runtimeDevice2.multiAccountController.onboardDevice(content.sharedSecret, "test");
-            sessionDevice2 = await runtimeDevice2.selectAccount(accountDevice2.id.toString());
+            const localAccountDevice2 = await runtimeDevice2.accountServices.onboardAccount(onboardingInfoResult.value);
+            sessionDevice2 = await runtimeDevice2.selectAccount(localAccountDevice2.id.toString());
+
+            await sessionDevice1.transportServices.account.syncDatawallet();
+            await sessionDevice2.transportServices.account.syncDatawallet();
         });
 
         afterAll(async function () {
