@@ -8,7 +8,7 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { RelationshipTemplateDTO } from "../../../types";
-import { AddressString, ISO8601DateTimeString, PINString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
@@ -19,11 +19,13 @@ export interface CreateOwnRelationshipTemplateRequest {
      */
     maxNumberOfAllocations?: number;
     forIdentity?: AddressString;
-    /**
-     * @minLength 1
-     */
-    password?: string;
-    pin?: PINString;
+    passwordInfo?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin: boolean;
+    };
 }
 
 class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
@@ -44,8 +46,10 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
             );
         }
 
-        if (!!input.password && !!input.pin) {
-            validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.notBothPasswordAndPin()));
+        if (input.passwordInfo?.passwordIsPin) {
+            if (!/^[0-9]{4,16}$/.test(input.passwordInfo.password)) {
+                validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
+            }
         }
 
         return validationResult;
@@ -71,9 +75,12 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         if (Serializable.fromUnknown(content) instanceof RelationshipTemplateContent && !content.onNewRelationship.expiresAt) {
             content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
         }
-
-        const password = request.password ?? request.pin;
-        const passwordInfo = password ? PasswordInfoMinusSalt.from({ password, passwordType: this.computePasswordType(request.password, request.pin) }) : undefined;
+        const passwordInfo = request.passwordInfo
+            ? PasswordInfoMinusSalt.from({
+                  password: request.passwordInfo.password,
+                  passwordType: this.computePasswordType(request.passwordInfo.password, request.passwordInfo.passwordIsPin)
+              })
+            : undefined;
 
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
             content: content,
@@ -88,10 +95,9 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(relationshipTemplate));
     }
 
-    private computePasswordType(password?: string, pin?: string): string {
-        if (password) return "pw";
-        if (pin) return `pin${pin.length}`;
-        throw new Error("Only compute the password type if either password or PIN are set");
+    private computePasswordType(password: string, passwordIsPin: boolean): string {
+        if (passwordIsPin) return `pin${password.length}`;
+        return "pw";
     }
 
     private async validateRelationshipTemplateContent(content: any, templateExpiresAt: CoreDate) {

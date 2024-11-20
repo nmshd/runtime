@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
-import { PasswordInfoMinusSalt, RelationshipTemplate } from "@nmshd/transport";
+import { RelationshipTemplate } from "@nmshd/transport";
 import { RelationshipTemplateDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 
@@ -17,7 +17,12 @@ export class RelationshipTemplateMapper {
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
             forIdentity: template.cache.forIdentity?.toString(),
-            passwordInfo: template.passwordInfo ? PasswordInfoMinusSalt.from(template.passwordInfo).toJSON() : undefined,
+            passwordInfo: template.passwordInfo
+                ? {
+                      password: template.passwordInfo.password,
+                      passwordIsPin: this.isPasswordTypeAPin(template.passwordInfo.passwordType)
+                  }
+                : undefined,
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
@@ -27,6 +32,11 @@ export class RelationshipTemplateMapper {
 
     public static toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {
         return responseItems.map((i) => this.toRelationshipTemplateDTO(i));
+    }
+
+    public static isPasswordTypeAPin(passwordType: string): boolean {
+        if (passwordType === "pw") return true;
+        return false;
     }
 
     private static toTemplateContent(content: Serializable) {

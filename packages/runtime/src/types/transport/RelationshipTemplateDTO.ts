@@ -11,7 +11,7 @@ export interface RelationshipTemplateDTO {
     forIdentity?: string;
     passwordInfo?: {
         password: string;
-        passwordType: string;
+        passwordIsPin: boolean;
     };
     content: RelationshipTemplateContentDerivation;
     expiresAt?: string;
