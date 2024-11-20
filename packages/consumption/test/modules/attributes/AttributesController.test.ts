@@ -1177,6 +1177,7 @@ describe("AttributesController", function () {
                         tags: ["aTag"]
                     })
                 });
+
                 const successorData: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
@@ -1765,6 +1766,7 @@ describe("AttributesController", function () {
                         tags: ["aTag"]
                     })
                 });
+
                 const successorParams: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
