@@ -1166,6 +1166,34 @@ describe("AttributesController", function () {
 
     describe("succeed Attributes", function () {
         describe("Common validator", function () {
+            test("should catch if content doesn't change", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["aTag"]
+                    })
+                });
+                const successorData: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["aTag"]
+                    })
+                };
+
+                const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.successionMustChangeContent"
+                });
+            });
+
             test("should catch if the successor attribute already exist, if an explicit id is provided", async function () {
                 const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -1724,6 +1752,40 @@ describe("AttributesController", function () {
                 expect(successor.succeeds!.equals(updatedPredecessor.id)).toBe(true);
                 expect((predecessor.content.value.toJSON() as any).value).toBe("DE");
                 expect((successor.content.value.toJSON() as any).value).toBe("US");
+            });
+
+            test("should succeed a repository attribute updating tags but not the value", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["aTag"]
+                    })
+                });
+                const successorParams: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["aTag", "anotherTag"]
+                    })
+                };
+
+                const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
+                expect(successor).toBeDefined();
+                expect(updatedPredecessor).toBeDefined();
+                expect(predecessor.id.equals(updatedPredecessor.id)).toBe(true);
+                expect(updatedPredecessor.succeededBy!.equals(successor.id)).toBe(true);
+                expect(successor.succeeds!.equals(updatedPredecessor.id)).toBe(true);
+                expect((updatedPredecessor.content.value.toJSON() as any).value).toBe("DE");
+                expect((successor.content.value.toJSON() as any).value).toBe("DE");
+                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["aTag"]);
+                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["aTag", "anotherTag"]);
             });
 
             test("should make successor default succeeding a default repository attribute", async function () {

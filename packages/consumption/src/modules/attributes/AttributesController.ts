@@ -979,6 +979,10 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithASuccessor(predecessor.succeededBy.toString()));
         }
 
+        if (_.isEqual(parsedSuccessorParams.content, predecessor.content)) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustChangeContent());
+        }
+
         if (predecessor.parentId) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedChildOfComplexAttribute(predecessorId.toString()));
         }
