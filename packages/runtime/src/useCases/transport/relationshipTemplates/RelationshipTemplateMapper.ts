@@ -35,8 +35,8 @@ export class RelationshipTemplateMapper {
     }
 
     public static isPasswordTypeAPin(passwordType: string): boolean {
-        if (passwordType === "pw") return true;
-        return false;
+        if (passwordType === "pw") return false;
+        return true;
     }
 
     private static toTemplateContent(content: Serializable) {

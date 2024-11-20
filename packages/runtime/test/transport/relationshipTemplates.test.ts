@@ -305,7 +305,7 @@ describe("RelationshipTemplate Tests", () => {
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                     passwordInfo: {
                         password: "password",
-                        passwordIsPin: true
+                        passwordIsPin: false
                     }
                 })
             ).value.id;
@@ -382,7 +382,7 @@ describe("RelationshipTemplate Tests", () => {
                     passwordIsPin: true
                 }
             });
-            expect(createResult).toBeAnError(/.*/, "error.runtime.general.invalidPin");
+            expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
         });
 
         test("validation error when loading a template with no password", async () => {
