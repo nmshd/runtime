@@ -404,6 +404,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         await this.startInfrastructure();
         await this.startModules();
+        await this.startApp();
 
         this._isStarted = true;
     }
@@ -471,6 +472,11 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         this.eventBus.publish(new ModulesStartedEvent());
         this.logger.info("Started all modules.");
+    }
+
+    // TODO: naming
+    protected startApp(): void | Promise<void> {
+        return;
     }
 
     protected getModuleName(moduleConfiguration: ModuleConfiguration | RuntimeModule): string {

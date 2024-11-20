@@ -334,6 +334,20 @@ export class AppRuntime extends Runtime<AppConfig> {
         await this.lokiConnection.close().catch(logError);
     }
 
+    protected override async startApp(): Promise<void> {
+        const accounts = await this._multiAccountController.getAccounts();
+
+        for (const account of accounts) {
+            const session = await this.selectAccount(account.id.toString());
+            const syncResult = await session.transportServices.account.syncDatawallet();
+
+            if (syncResult.isSuccess) continue;
+            // TODO: call isDeleted, if isDeleted delete all local data
+        }
+
+        return;
+    }
+
     private translationProvider: INativeTranslationProvider = {
         translate: (key: string) => Promise.resolve(Result.ok(key))
     };
