@@ -124,7 +124,7 @@ class Messages {
     public peerIsInDeletion(addresses: string[]) {
         return new ApplicationError(
             "error.runtime.messages.peerIsInDeletion",
-            `The Message cannot be send as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: ${addresses.map((address) => `'${address}'`).join(", ")}.`
+            `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: ${addresses.map((address) => `'${address}'`).join(", ")}.`
         );
     }
 

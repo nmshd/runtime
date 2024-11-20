@@ -394,7 +394,7 @@ describe("Message errors", () => {
 
             const result = await sendMessageToMultipleRecipients(client1.transport, [client2.address, client5.address]);
             expect(result).toBeAnError(
-                `The Message cannot be send as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}', '${client5.address.toString()}'.`,
+                `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}', '${client5.address.toString()}'.`,
                 "error.runtime.messages.peerIsInDeletion"
             );
         });
@@ -406,7 +406,7 @@ describe("Message errors", () => {
 
             const result = await sendMessageToMultipleRecipients(client1.transport, [client2.address, client5.address]);
             expect(result).toBeAnError(
-                `The Message cannot be send as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'.`,
+                `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'.`,
                 "error.runtime.messages.peerIsInDeletion"
             );
         });
@@ -419,7 +419,7 @@ describe("Message errors", () => {
             const messageResult = await client1.transport.messages.sendMessage({ recipients: [client2.address], content: createRequestResult.content });
 
             expect(messageResult).toBeAnError(
-                `The Message cannot be send as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'.`,
+                `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'.`,
                 "error.runtime.messages.peerIsInDeletion"
             );
         });
