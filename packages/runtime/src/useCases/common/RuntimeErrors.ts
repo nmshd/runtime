@@ -114,6 +114,20 @@ class Relationships {
 }
 
 class Messages {
+    public hasNoActiveRelationship(addresses: string[]) {
+        return new ApplicationError(
+            "error.runtime.messages.hasNoActiveRelationship",
+            `The Message cannot be sent as its content is not a Notification and there is no active Relationship to the recipient(s) with the following address(es): ${addresses.map((address) => `'${address}'`).join(", ")}.`
+        );
+    }
+
+    public peerIsInDeletion(addresses: string[]) {
+        return new ApplicationError(
+            "error.runtime.messages.peerIsInDeletion",
+            `The Message cannot be send as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: ${addresses.map((address) => `'${address}'`).join(", ")}.`
+        );
+    }
+
     public fileNotFoundInMessage(attachmentId: string) {
         return new ApplicationError("error.runtime.messages.fileNotFoundInMessage", `The requested File '${attachmentId}' was not found in the given Message.`);
     }

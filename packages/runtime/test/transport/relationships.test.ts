@@ -595,7 +595,7 @@ describe("RelationshipTermination", () => {
         );
     });
 
-    test("should not send a message", async () => {
+    test("should not send a message whose content is not a notification", async () => {
         const result = await services1.transport.messages.sendMessage({
             recipients: [services2.address],
             content: {
@@ -606,7 +606,7 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.transport.messages.hasNoActiveRelationship");
+        expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
     });
 
     test("should not decide a request", async () => {

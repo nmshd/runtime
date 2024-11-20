@@ -3,7 +3,7 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreAddress, CoreError, CoreId } from "@nmshd/core-types";
-import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, TransportCoreErrors } from "@nmshd/transport";
+import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
 import { MessageDTO } from "../../../types";
@@ -74,9 +74,6 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             );
         }
 
-        // Notifications can be sent to peers of any kind, especially to peers in deletion. The underlying Transport library will validate if it is really possible to send the Notification.
-        if (transformedContent instanceof Notification) return;
-
         const recipientsValidationError = await this.validateMessageRecipients(transformedContent, recipients);
         if (recipientsValidationError) return recipientsValidationError;
 
@@ -94,14 +91,20 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         const peersWithNoActiveRelationship: string[] = [];
+        const peersWithNeitherActiveNorTerminatedRelationship: string[] = [];
         const peersInDeletion: string[] = [];
         const deletedPeers: string[] = [];
 
         for (const recipient of recipients) {
-            const relationship = await this.relationshipsController.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
+            const relationship = await this.relationshipsController.getRelationshipToIdentity(CoreAddress.from(recipient));
 
-            if (!relationship) {
+            if (!relationship || relationship.status !== RelationshipStatus.Active) {
                 peersWithNoActiveRelationship.push(recipient);
+
+                if (!relationship || relationship.status !== RelationshipStatus.Terminated) {
+                    peersWithNeitherActiveNorTerminatedRelationship.push(recipient);
+                }
+
                 continue;
             }
 
@@ -114,13 +117,19 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
             }
         }
 
-        if (peersWithNoActiveRelationship.length > 0) return TransportCoreErrors.messages.hasNoActiveRelationship(peersWithNoActiveRelationship);
+        if (!(content instanceof Notification)) {
+            if (peersWithNoActiveRelationship.length > 0) return RuntimeErrors.messages.hasNoActiveRelationship(peersWithNoActiveRelationship);
 
-        if (peersInDeletion.length > 0) return TransportCoreErrors.messages.peerIsInDeletion(peersInDeletion);
+            if (peersInDeletion.length > 0) return RuntimeErrors.messages.peerIsInDeletion(peersInDeletion);
+        }
+
+        if (peersWithNeitherActiveNorTerminatedRelationship.length > 0) {
+            return TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship(peersWithNeitherActiveNorTerminatedRelationship);
+        }
 
         if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
 
-        return undefined;
+        return;
     }
 
     private async validateRequestAsMessageContent(request: Request, recipient: CoreAddress): Promise<ApplicationError | undefined> {

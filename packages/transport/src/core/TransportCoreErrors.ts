@@ -86,82 +86,18 @@ class Messages {
         );
     }
 
-    public hasNoActiveRelationship(address: string[] | string) {
-        if (typeof address !== "string" && address.length > 1) {
-            return new CoreError(
-                "error.transport.messages.hasNoActiveRelationship",
-                `An active Relationship with the given addresses '${address}' does not exist, so you cannot send them a Message.`
-            );
-        }
-
-        if (typeof address === "string") {
-            return new CoreError(
-                "error.transport.messages.hasNoActiveRelationship",
-                `An active Relationship with the given address '${address}' does not exist, so you cannot send them a Message.`
-            );
-        }
-
+    public hasNeitherActiveNorTerminatedRelationship(addresses: string[]) {
         return new CoreError(
-            "error.transport.messages.hasNoActiveRelationship",
-            `An active Relationship with the given address '${address[0]}' does not exist, so you cannot send them a Message.`
+            "error.transport.messages.hasNeitherActiveNorTerminatedRelationship",
+            `The Message cannot be sent as there is neither an active nor a terminated Relationship to the recipient(s) with the following address(es): ${addresses.map((address) => `'${address}'`).join(", ")}.`
         );
     }
 
-    public missingRelationship(address: string[] | string) {
-        if (typeof address !== "string" && address.length > 1) {
-            return new CoreError(
-                "error.transport.messages.missingRelationship",
-                `A Relationship with the given addresses '${address}' does not exist, so you cannot send them a Message.`
-            );
-        }
-
-        if (typeof address === "string") {
-            return new CoreError(
-                "error.transport.messages.missingRelationship",
-                `A Relationship with the given address '${address}' does not exist, so you cannot send them a Message.`
-            );
-        }
-
+    public peerIsDeleted(addresses: string[]) {
         return new CoreError(
-            "error.transport.messages.missingRelationship",
-            `A Relationship with the given address '${address[0]}' does not exist, so you cannot send them a Message.`
+            "error.transport.messages.peerIsDeleted",
+            `The Message cannot be sent due to the deletion of the recipient(s) with the following address(es): ${addresses.map((address) => `'${address}'`).join(", ")}`
         );
-    }
-
-    public wrongRelationshipStatus(address: string[]) {
-        if (address.length > 1) {
-            return new CoreError(
-                "error.transport.messages.wrongRelationshipStatus",
-                `A Relationship with the given addresses '${address}' has the wrong status, so you cannot send them a Message.`
-            );
-        }
-
-        return new CoreError(
-            "error.transport.messages.wrongRelationshipStatus",
-            `A Relationship with the given address '${address[0]}' has the wrong status, so you cannot send them a Message.`
-        );
-    }
-
-    public peerIsDeleted(address: string[]) {
-        if (address.length > 1) {
-            return new CoreError(
-                "error.transport.messages.peerIsDeleted",
-                `The recipients with the following addresses '${address}' are deleted, so you cannot send them a Message.`
-            );
-        }
-
-        return new CoreError("error.transport.messages.peerIsDeleted", `The recipient with the address '${address[0]}' is deleted, so you cannot send them a Message.`);
-    }
-
-    public peerIsInDeletion(address: string[]) {
-        if (address.length > 1) {
-            return new CoreError(
-                "error.transport.messages.peerIsInDeletion",
-                `The recipients with the following addresses '${address}' are in deletion, so you cannot send them a Message.`
-            );
-        }
-
-        return new CoreError("error.transport.messages.peerIsInDeletion", `The recipient with the address '${address[0]}' is in deletion, so you cannot send them a Message.`);
     }
 }
 

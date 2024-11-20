@@ -104,9 +104,11 @@ export class MessageController extends TransportController {
 
     @log()
     public async getMessagesByAddress(address: CoreAddress): Promise<Message[]> {
-        const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(address);
-        if (!relationship) {
-            throw TransportCoreErrors.messages.hasNoActiveRelationship(address.toString());
+        const relationship = await this.parent.relationships.getExistingRelationshipToIdentity(address);
+        if (!relationship || relationship.status === RelationshipStatus.Pending) {
+            throw new TransportError(
+                `Due to the non-existence of a Relationship with 'Active', 'Terminated' or 'DeletionProposed' as status, there are no Messages to the peer with address '${address.toString()}' that could be displayed.`
+            );
         }
         return await this.getMessagesByRelationshipId(relationship.id);
     }
@@ -302,7 +304,7 @@ export class MessageController extends TransportController {
             const relationship = await this.relationships.getRelationshipToIdentity(recipient);
 
             if (!relationship) {
-                throw TransportCoreErrors.messages.missingRelationship(recipient.toString());
+                throw new TransportError(`Due to the non-existence of a Relationship to the recipient with address '${recipient.toString()}', the Message cannot be sent.`);
             }
 
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
@@ -342,7 +344,7 @@ export class MessageController extends TransportController {
             const relationship = await this.relationships.getRelationshipToIdentity(CoreAddress.from(recipient));
 
             if (!relationship) {
-                throw TransportCoreErrors.messages.missingRelationship(recipient.toString());
+                throw new TransportError(`Due to the non-existence of a Relationship to the recipient with address '${recipient.toString()}', the Message cannot be sent.`);
             }
 
             const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
@@ -419,20 +421,14 @@ export class MessageController extends TransportController {
     }
 
     private async validateMessageRecipients(recipients: CoreAddress[]) {
-        const peersWithMissingRelationship: string[] = [];
-        const peersWithWrongRelationshipStatus: string[] = [];
+        const peersWithNeitherActiveNorTerminatedRelationship: string[] = [];
         const deletedPeers: string[] = [];
 
         for (const recipient of recipients) {
             const relationship = await this.relationships.getRelationshipToIdentity(recipient);
 
-            if (!relationship) {
-                peersWithMissingRelationship.push(recipient.address);
-                continue;
-            }
-
-            if (!(relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active)) {
-                peersWithWrongRelationshipStatus.push(recipient.address);
+            if (!relationship || !(relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active)) {
+                peersWithNeitherActiveNorTerminatedRelationship.push(recipient.address);
                 continue;
             }
 
@@ -442,17 +438,11 @@ export class MessageController extends TransportController {
             }
         }
 
-        if (peersWithMissingRelationship.length > 0) {
-            return TransportCoreErrors.messages.missingRelationship(peersWithMissingRelationship);
+        if (peersWithNeitherActiveNorTerminatedRelationship.length > 0) {
+            return TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship(peersWithNeitherActiveNorTerminatedRelationship);
         }
 
-        if (peersWithWrongRelationshipStatus.length > 0) {
-            return TransportCoreErrors.messages.wrongRelationshipStatus(peersWithWrongRelationshipStatus);
-        }
-
-        if (deletedPeers.length > 0) {
-            return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
-        }
+        if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
 
         return;
     }
