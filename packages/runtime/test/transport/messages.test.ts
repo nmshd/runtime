@@ -306,9 +306,9 @@ describe("Message errors", () => {
                     to: [client5.address]
                 }
             });
-            expect(result).toBeAnError(
-                `The Message cannot be sent as its content is not a Notification and there is no active Relationship to the recipient(s) with the following address(es): '${client4.address.toString()}', '${client5.address.toString()}'.`,
-                "error.runtime.messages.hasNoActiveRelationship"
+            expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
+            expect(result.error.message).toBe(
+                `The Message cannot be sent as its content is not a Notification and there is no active Relationship to the recipient(s) with the following address(es): '${client4.address.toString()}', '${client5.address.toString()}'.`
             );
         });
 
@@ -323,9 +323,9 @@ describe("Message errors", () => {
                     to: [client5.address]
                 }
             });
-            expect(result).toBeAnError(
-                `The Message cannot be sent as its content is not a Notification and there is no active Relationship to the recipient(s) with the following address(es): '${client5.address.toString()}'.`,
-                "error.runtime.messages.hasNoActiveRelationship"
+            expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
+            expect(result.error.message).toBe(
+                `The Message cannot be sent as its content is not a Notification and there is no active Relationship to the recipient(s) with the following address(es): '${client5.address.toString()}'.`
             );
         });
 
@@ -350,9 +350,9 @@ describe("Message errors", () => {
                     to: [client4.address]
                 }
             });
-            expect(result).toBeAnError(
-                `The Message cannot be sent as its content is not a Notification and there is no active Relationship to the recipient(s) with the following address(es): '${client4.address.toString()}'.`,
-                "error.runtime.messages.hasNoActiveRelationship"
+            expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
+            expect(result.error.message).toBe(
+                `The Message cannot be sent as its content is not a Notification and there is no active Relationship to the recipient(s) with the following address(es): '${client4.address.toString()}'.`
             );
         });
     });
@@ -393,9 +393,9 @@ describe("Message errors", () => {
             await client1.eventBus.waitForRunningEventHandlers();
 
             const result = await sendMessageToMultipleRecipients(client1.transport, [client2.address, client5.address]);
-            expect(result).toBeAnError(
-                `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}', '${client5.address.toString()}'.`,
-                "error.runtime.messages.peerIsInDeletion"
+            expect(result).toBeAnError(/.*/, "error.runtime.messages.peerIsInDeletion");
+            expect(result.error.message).toBe(
+                `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}', '${client5.address.toString()}'.`
             );
         });
 
@@ -405,9 +405,9 @@ describe("Message errors", () => {
             await client1.eventBus.waitForRunningEventHandlers();
 
             const result = await sendMessageToMultipleRecipients(client1.transport, [client2.address, client5.address]);
-            expect(result).toBeAnError(
-                `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'.`,
-                "error.runtime.messages.peerIsInDeletion"
+            expect(result).toBeAnError(/.*/, "error.runtime.messages.peerIsInDeletion");
+            expect(result.error.message).toBe(
+                `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'.`
             );
         });
 
@@ -416,11 +416,10 @@ describe("Message errors", () => {
             await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
             await client1.eventBus.waitForRunningEventHandlers();
 
-            const messageResult = await client1.transport.messages.sendMessage({ recipients: [client2.address], content: createRequestResult.content });
-
-            expect(messageResult).toBeAnError(
-                `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'.`,
-                "error.runtime.messages.peerIsInDeletion"
+            const result = await client1.transport.messages.sendMessage({ recipients: [client2.address], content: createRequestResult.content });
+            expect(result).toBeAnError(/.*/, "error.runtime.messages.peerIsInDeletion");
+            expect(result.error.message).toBe(
+                `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'.`
             );
         });
     });
