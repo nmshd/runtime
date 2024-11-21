@@ -45,6 +45,6 @@ describe("PublicRelationshipTemplateReferences", () => {
 
         const publicRelationshipTemplates = await runtimeServices.transport.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
 
-        expect(publicRelationshipTemplates.value).toEqual(mockResponse);
+        expect(publicRelationshipTemplates.value).toStrictEqual(mockResponse);
     });
 });

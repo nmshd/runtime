@@ -1,8 +1,8 @@
 import { ClientResult, RESTClient } from "../../src";
 
 export class RestClientMocker<T extends RESTClient> {
-    private mockedMethods: { fnName: keyof T; originalProperty: any }[] = [];
-    constructor(private client: T) {}
+    private readonly mockedMethods: { fnName: keyof T; originalProperty: any }[] = [];
+    public constructor(private client: T) {}
     public mockMethod(fnName: keyof T, callback: () => ClientResult<any>): void {
         this.mockedMethods.push({ fnName, originalProperty: this.client[fnName] });
 
