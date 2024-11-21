@@ -10,7 +10,7 @@ export class PasswordProtectionCreationParameters extends Serializable implement
     @serialize()
     public passwordType: string;
 
-    @validate({ disallowedValues: [""] })
+    @validate({ min: 1 })
     @serialize()
     public password: string;
 
