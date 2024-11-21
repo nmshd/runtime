@@ -37,10 +37,9 @@ export class Reference extends Serializable implements IReference {
 
     public truncate(): string {
         const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
-        const passwordPart = this.passwordProtection ? `${this.passwordProtection.passwordType}&${this.passwordProtection.salt.toBase64()}` : "";
 
         const truncatedReference = CoreBuffer.fromUtf8(
-            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ? this.forIdentityTruncated : ""}|${passwordPart}`
+            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`
         );
         return truncatedReference.toBase64URL();
     }

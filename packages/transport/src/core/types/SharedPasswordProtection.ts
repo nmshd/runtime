@@ -18,4 +18,8 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     public static from(value: ISharedPasswordProtection): SharedPasswordProtection {
         return this.fromAny(value);
     }
+
+    public truncate(): string {
+        return `${this.passwordType}&${this.salt.toBase64()}`;
+    }
 }
