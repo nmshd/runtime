@@ -11,6 +11,8 @@ afterAll(() => serviceProvider.stop());
 describe("PublicRelationshipTemplateReferences", () => {
     test("get PublicRelationshipTemplateReferences", async () => {
         const publicRelationshipTemplates = await runtimeServices.transport.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
-        expect(publicRelationshipTemplates.value).toHaveLength(0);
+
+        expect(publicRelationshipTemplates.value).toBeDefined();
+        expect(publicRelationshipTemplates.value.length).toBeGreaterThan(0);
     });
 });

@@ -3,6 +3,10 @@ import { PublicRelationshipTemplateReferenceDTO } from "../../../types/transport
 
 export class PublicRelationshipTemplateReferenceMapper {
     public static toPublicRelationshipTemplateReferenceDTO(publicRelationshipTemplateReference: PublicRelationshipTemplateReference): PublicRelationshipTemplateReferenceDTO {
-        return publicRelationshipTemplateReference;
+        return {
+            title: publicRelationshipTemplateReference.title,
+            description: publicRelationshipTemplateReference.description,
+            truncatedReference: publicRelationshipTemplateReference.truncatedReference
+        };
     }
 }

@@ -22,7 +22,8 @@ export class PublicRelationshipTemplateReferencesController extends TransportCon
     public async getPublicRelationshipTemplateReferences(): Promise<PublicRelationshipTemplateReference[]> {
         let publicRelationshipTemplateReferences: PublicRelationshipTemplateReference[];
         try {
-            publicRelationshipTemplateReferences = (await this.client.getPublicRelationshipTemplateReferences()).value.map((reference) =>
+            const backbonePublicRelationshipTemplateReferencesResult = await this.client.getPublicRelationshipTemplateReferences();
+            publicRelationshipTemplateReferences = backbonePublicRelationshipTemplateReferencesResult.value.map((reference) =>
                 PublicRelationshipTemplateReference.fromAny(reference)
             );
         } catch (e) {
