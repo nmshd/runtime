@@ -150,8 +150,7 @@ describe("RelationshipTemplateDVO", () => {
                 content: templateContent,
                 forIdentity: requestor.address,
                 passwordProtection: {
-                    password: "password",
-                    passwordIsPin: false
+                    password: "password"
                 }
             })
         ).value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
@@ -173,7 +172,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
         expect(dvo.passwordProtection!.password).toBe("password");
-        expect(dvo.passwordProtection!.passwordIsPin).toBe(false);
+        expect(dvo.passwordProtection!.passwordIsPin).toBeUndefined();
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);
@@ -215,7 +214,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
         expect(dvo.passwordProtection!.password).toBe("password");
-        expect(dvo.passwordProtection!.passwordIsPin).toBe(false);
+        expect(dvo.passwordProtection!.passwordIsPin).toBeUndefined();
 
         expect(dvo.onNewRelationship!.type).toBe("RequestDVO");
         expect(dvo.onNewRelationship!.items).toHaveLength(2);

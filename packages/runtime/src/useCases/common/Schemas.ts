@@ -22026,12 +22026,12 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                             "minLength": 1
                         },
                         "passwordIsPin": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "const": true
                         }
                     },
                     "required": [
-                        "password",
-                        "passwordIsPin"
+                        "password"
                     ],
                     "additionalProperties": false
                 }

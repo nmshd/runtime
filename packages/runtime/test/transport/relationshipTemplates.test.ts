@@ -255,13 +255,12 @@ describe("RelationshipTemplate Tests", () => {
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                 passwordProtection: {
-                    password: "password",
-                    passwordIsPin: false
+                    password: "password"
                 }
             });
             expect(createResult).toBeSuccessful();
             expect(createResult.value.passwordProtection!.password).toBe("password");
-            expect(createResult.value.passwordProtection!.passwordIsPin).toBe(false);
+            expect(createResult.value.passwordProtection!.passwordIsPin).toBeUndefined();
             const reference = RelationshipTemplateReference.from(createResult.value.truncatedReference);
             expect(reference.passwordProtection!.passwordType).toBe("pw");
 
@@ -271,7 +270,7 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.passwordProtection!.password).toBe("password");
-            expect(loadResult.value.passwordProtection!.passwordIsPin).toBe(false);
+            expect(loadResult.value.passwordProtection!.passwordIsPin).toBeUndefined();
         });
 
         test("send and receive a PIN-protected template", async () => {
@@ -304,8 +303,7 @@ describe("RelationshipTemplate Tests", () => {
                     content: emptyRelationshipTemplateContent,
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                     passwordProtection: {
-                        password: "password",
-                        passwordIsPin: false
+                        password: "password"
                     }
                 })
             ).value.id;
@@ -317,7 +315,7 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.passwordProtection!.password).toBe("password");
-            expect(loadResult.value.passwordProtection!.passwordIsPin).toBe(false);
+            expect(loadResult.value.passwordProtection!.passwordIsPin).toBeUndefined();
         });
 
         test("send and receive a PIN-protected template via a token", async () => {
@@ -348,8 +346,7 @@ describe("RelationshipTemplate Tests", () => {
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                 passwordProtection: {
-                    password: "password",
-                    passwordIsPin: false
+                    password: "password"
                 }
             });
             expect(createResult).toBeSuccessful();
@@ -366,8 +363,7 @@ describe("RelationshipTemplate Tests", () => {
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                 passwordProtection: {
-                    password: "",
-                    passwordIsPin: false
+                    password: ""
                 }
             });
             expect(createResult).toBeAnError("password must NOT have fewer than 1 characters", "error.runtime.validation.invalidPropertyValue");
@@ -390,8 +386,7 @@ describe("RelationshipTemplate Tests", () => {
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                 passwordProtection: {
-                    password: "password",
-                    passwordIsPin: false
+                    password: "password"
                 }
             });
             expect(createResult).toBeSuccessful();
@@ -408,8 +403,7 @@ describe("RelationshipTemplate Tests", () => {
                     content: emptyRelationshipTemplateContent,
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                     passwordProtection: {
-                        password: "password",
-                        passwordIsPin: false
+                        password: "password"
                     }
                 })
             ).value.id;
