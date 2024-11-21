@@ -8,7 +8,7 @@ export interface CreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
-    password?: string;
+    passwordProtection?: { password: string; passwordIsPin?: true };
 }
 
 class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> {
@@ -43,6 +43,10 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
 
         if (template.cache?.forIdentity && request.forIdentity !== template.cache.forIdentity.toString()) {
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
+        }
+
+        if (template.passwordProtection && request.passwordProtection !== template.passwordProtection) {
+            return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 
         const tokenContent = TokenContentRelationshipTemplate.from({

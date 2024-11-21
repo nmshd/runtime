@@ -44,12 +44,16 @@ export class TokenController extends TransportController {
 
         const cipher = await CoreCrypto.encrypt(serializedTokenBuffer, secretKey);
 
+        const password = parameters.passwordProtection?.password;
+        const salt = password ? await CoreCrypto.random(16) : undefined;
+        const hashedPassword = password ? (await CoreCrypto.deriveHashOutOfPassword(password, salt!)).toBase64() : undefined;
+
         const response = (
             await this.client.createToken({
                 content: cipher.toBase64(),
                 expiresAt: input.expiresAt.toString(),
                 forIdentity: input.forIdentity?.toString(),
-                password: input.password
+                password: hashedPassword
             })
         ).value;
 
@@ -62,11 +66,19 @@ export class TokenController extends TransportController {
             forIdentity: input.forIdentity
         });
 
+        const passwordProtection = parameters.passwordProtection
+            ? PasswordProtection.from({
+                  password: parameters.passwordProtection.password,
+                  passwordType: parameters.passwordProtection.passwordType,
+                  salt: salt!
+              })
+            : undefined;
+
         const token = Token.from({
             id: CoreId.from(response.id),
             secretKey: secretKey,
             isOwn: true,
-            password: input.password,
+            passwordProtection,
             cache: cachedToken,
             cachedAt: CoreDate.utc()
         });
@@ -106,11 +118,17 @@ export class TokenController extends TransportController {
 
         const resultItems = (
             await this.client.getTokens({
-                tokens: tokens.map((t) => {
-                    return { id: t.id.toString(), password: t.password };
-                })
+                tokens: await Promise.all(
+                    tokens.map(async (t) => {
+                        const hashedPassword = t.passwordProtection
+                            ? (await CoreCrypto.deriveHashOutOfPassword(t.passwordProtection.password, t.passwordProtection.salt)).toBase64()
+                            : undefined;
+                        return { id: t.id.toString(), password: hashedPassword };
+                    })
+                )
             })
         ).value;
+
         const promises = [];
         for await (const resultItem of resultItems) {
             promises.push(this.updateCacheOfExistingTokenInDb(resultItem.id, resultItem));
@@ -120,29 +138,20 @@ export class TokenController extends TransportController {
         return (await Promise.all(promises)).filter(isToken);
     }
 
-    private async readTokens(ids: string[]): Promise<Token[]> {
-        const tokenPromises = ids.map(async (id) => {
-            const tokenDoc = await this.tokens.read(id);
-            if (!tokenDoc) {
-                this._log.error(
-                    `Token '${id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
-                );
-                return;
-            }
-            return Token.from(tokenDoc);
-        });
-        return (await Promise.all(tokenPromises)).filter((t) => t !== undefined);
-    }
-
     public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedToken }[]> {
         if (ids.length === 0) return [];
         const tokens = await this.readTokens(ids.map((id) => id.toString()));
 
         const backboneTokens = await (
             await this.client.getTokens({
-                tokens: tokens.map((t) => {
-                    return { id: t.id.toString(), password: t.password };
-                })
+                tokens: await Promise.all(
+                    tokens.map(async (t) => {
+                        const hashedPassword = t.passwordProtection
+                            ? (await CoreCrypto.deriveHashOutOfPassword(t.passwordProtection.password, t.passwordProtection.salt)).toBase64()
+                            : undefined;
+                        return { id: t.id.toString(), password: hashedPassword };
+                    })
+                )
             })
         ).value.collect();
 
@@ -154,6 +163,18 @@ export class TokenController extends TransportController {
 
         const caches = await Promise.all(decryptionPromises);
         return caches.filter((c) => c !== undefined);
+    }
+
+    private async readTokens(ids: string[]): Promise<Token[]> {
+        const tokenPromises = ids.map(async (id) => {
+            const tokenDoc = await this.tokens.read(id);
+            if (!tokenDoc) {
+                this._log.error(`Token '${id}' not found in local database. This should not happen and might be a bug in the application logic.`);
+                return;
+            }
+            return Token.from(tokenDoc);
+        });
+        return (await Promise.all(tokenPromises)).filter((t) => t !== undefined);
     }
 
     @log()
@@ -172,10 +193,11 @@ export class TokenController extends TransportController {
     }
 
     private async updateCacheOfToken(token: Token, response?: BackboneGetTokensResponse): Promise<void> {
-        const tokenId = token.id.toString();
-
         if (!response) {
-            response = (await this.client.getToken(tokenId, token.password)).value;
+            const hashedPassword = token.passwordProtection
+                ? (await CoreCrypto.deriveHashOutOfPassword(token.passwordProtection.password, token.passwordProtection.salt)).toBase64()
+                : undefined;
+            response = (await this.client.getToken(token.id.toString(), hashedPassword)).value;
         }
 
         const cachedToken = await this.decryptToken(response, token.secretKey);
@@ -208,10 +230,26 @@ export class TokenController extends TransportController {
 
     public async loadPeerTokenByTruncated(truncated: string, ephemeral: boolean, password?: string): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerToken(reference.id, reference.key, ephemeral, reference.forIdentityTruncated, password);
+
+        if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
+        const passwordProtection = reference.passwordProtection
+            ? PasswordProtection.from({
+                  salt: reference.passwordProtection.salt,
+                  passwordType: reference.passwordProtection.passwordType,
+                  password: password!
+              })
+            : undefined;
+
+        return await this.loadPeerToken(reference.id, reference.key, ephemeral, reference.forIdentityTruncated, passwordProtection);
     }
 
-    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentityTruncated?: string, password?: string): Promise<Token> {
+    private async loadPeerToken(
+        id: CoreId,
+        secretKey: CryptoSecretKey,
+        ephemeral: boolean,
+        forIdentityTruncated?: string,
+        passwordProtection?: PasswordProtection
+    ): Promise<Token> {
         const tokenDoc = await this.tokens.read(id.toString());
         if (!tokenDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
@@ -236,7 +274,7 @@ export class TokenController extends TransportController {
             id: id,
             secretKey: secretKey,
             isOwn: false,
-            password
+            passwordProtection
         });
 
         await this.updateCacheOfToken(token);

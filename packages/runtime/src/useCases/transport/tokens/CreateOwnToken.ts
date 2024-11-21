@@ -14,7 +14,7 @@ export interface CreateOwnTokenRequest {
     expiresAt: ISO8601DateTimeString;
     ephemeral: boolean;
     forIdentity?: AddressString;
-    password?: string;
+    passwordProtection?: { password: string; passwordIsPin?: true };
 }
 
 class Validator extends SchemaValidator<CreateOwnTokenRequest> {

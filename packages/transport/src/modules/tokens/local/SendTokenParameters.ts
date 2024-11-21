@@ -6,7 +6,7 @@ export interface ISendTokenParameters extends ISerializable {
     expiresAt: ICoreDate;
     ephemeral: boolean;
     forIdentity?: ICoreAddress;
-    password?: string;
+    passwordProtection?: IPasswordProtectionCreationParameters;
 }
 
 @type("SendTokenParameters")
@@ -27,17 +27,9 @@ export class SendTokenParameters extends Serializable implements ISendTokenParam
     @serialize()
     public forIdentity?: CoreAddress;
 
-    @validate({
-        nullable: true,
-        customValidator: (input) => {
-            if (/^\d+$/.test(input) && (input.length > 12 || input.length < 2)) {
-                return "PINs must be at least 2 and at most 12 digits long";
-            }
-            return undefined;
-        }
-    })
+    @validate({ nullable: true })
     @serialize()
-    public password?: string;
+    public passwordProtection?: PasswordProtectionCreationParameters;
 
     public static from(value: ISendTokenParameters): SendTokenParameters {
         return this.fromAny(value);

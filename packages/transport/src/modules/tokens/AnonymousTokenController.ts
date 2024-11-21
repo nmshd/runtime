@@ -15,15 +15,26 @@ export class AnonymousTokenController {
 
     public async loadPeerTokenByTruncated(truncated: string, password?: string): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerToken(reference.id, reference.key, reference.forIdentityTruncated, password);
+
+        if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
+        const passwordProtection = reference.passwordProtection
+            ? PasswordProtection.from({
+                  salt: reference.passwordProtection.salt,
+                  passwordType: reference.passwordProtection.passwordType,
+                  password: password!
+              })
+            : undefined;
+
+        return await this.loadPeerToken(reference.id, reference.key, reference.forIdentityTruncated, passwordProtection);
     }
 
-    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, password?: string): Promise<Token> {
+    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, passwordProtection?: PasswordProtection): Promise<Token> {
         if (forIdentityTruncated) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
 
-        const response = (await this.client.getToken(id.toString(), password)).value;
+        const hashedPassword = passwordProtection ? (await CoreCrypto.deriveHashOutOfPassword(passwordProtection.password, passwordProtection.salt)).toBase64() : undefined;
+        const response = (await this.client.getToken(id.toString(), hashedPassword)).value; // refactor: password, salt an getToken übergeben
 
         const cipher = CryptoCipher.fromBase64(response.content);
         const plaintextTokenBuffer = await CoreCrypto.decrypt(cipher, secretKey);
@@ -36,7 +47,7 @@ export class AnonymousTokenController {
             id: id,
             secretKey: secretKey,
             isOwn: false,
-            password
+            passwordProtection
         });
 
         const cachedToken = CachedToken.from({

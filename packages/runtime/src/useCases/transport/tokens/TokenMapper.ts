@@ -19,7 +19,12 @@ export class TokenMapper {
             truncatedReference: reference.truncate(),
             isEphemeral: ephemeral,
             forIdentity: token.cache.forIdentity?.toString(),
-            password: token.password
+            passwordProtection: token.passwordProtection
+                ? {
+                      password: token.passwordProtection.password,
+                      passwordIsPin: token.passwordProtection.passwordType.startsWith("pin") ? true : undefined
+                  }
+                : undefined
         };
     }
 

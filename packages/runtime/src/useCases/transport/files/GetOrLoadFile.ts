@@ -12,6 +12,7 @@ import { FileMapper } from "./FileMapper";
  */
 export interface GetOrLoadFileRequest {
     reference: TokenReferenceString | FileReferenceString;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<GetOrLoadFileRequest> {
@@ -31,20 +32,20 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
     }
 
     protected async executeInternal(request: GetOrLoadFileRequest): Promise<Result<FileDTO>> {
-        const result = await this.loadFileFromReference(request.reference);
+        const result = await this.loadFileFromReference(request.reference, request.password);
 
         await this.accountController.syncDatawallet();
 
         return result;
     }
 
-    private async loadFileFromReference(reference: string): Promise<Result<FileDTO>> {
+    private async loadFileFromReference(reference: string, password: string): Promise<Result<FileDTO>> {
         if (reference.startsWith(Base64ForIdPrefix.File)) {
             return await this.loadFileFromFileReference(reference);
         }
 
         if (reference.startsWith(Base64ForIdPrefix.Token)) {
-            return await this.loadFileFromTokenReference(reference);
+            return await this.loadFileFromTokenReference(reference, password);
         }
 
         throw RuntimeErrors.files.invalidReference(reference);
@@ -55,8 +56,8 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         return Result.ok(FileMapper.toFileDTO(file));
     }
 
-    private async loadFileFromTokenReference(truncatedReference: string): Promise<Result<FileDTO>> {
-        const token = await this.tokenController.loadPeerTokenByTruncated(truncatedReference, true);
+    private async loadFileFromTokenReference(truncatedReference: string, password?: string): Promise<Result<FileDTO>> {
+        const token = await this.tokenController.loadPeerTokenByTruncated(truncatedReference, true, password);
 
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
