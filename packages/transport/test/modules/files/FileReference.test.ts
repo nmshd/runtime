@@ -186,7 +186,7 @@ describe("FileReference", function () {
                     salt: await CoreCrypto.random(16)
                 }
             });
-        }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
+        }).rejects.toThrow("SharedPasswordProtection.passwordType");
     });
 
     test("should not create a reference with non-integer passwordType", async function () {
@@ -199,7 +199,7 @@ describe("FileReference", function () {
                     salt: await CoreCrypto.random(16)
                 }
             });
-        }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
+        }).rejects.toThrow("SharedPasswordProtection.passwordType");
     });
 
     test("should not create a reference with passwordType starting with neither pw nor pin", async function () {
@@ -212,7 +212,7 @@ describe("FileReference", function () {
                     salt: await CoreCrypto.random(16)
                 }
             });
-        }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
+        }).rejects.toThrow("SharedPasswordProtection.passwordType");
     });
 
     test("should not load a reference with a non-base64 salt", async function () {

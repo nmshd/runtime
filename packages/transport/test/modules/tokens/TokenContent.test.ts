@@ -176,7 +176,7 @@ describe("TokenContent", function () {
                         salt: await CoreCrypto.random(16)
                     }
                 });
-            }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
+            }).rejects.toThrow("SharedPasswordProtection.passwordType");
         });
 
         test("should not create a tokenContent with non-integer passwordType", async function () {
@@ -189,7 +189,7 @@ describe("TokenContent", function () {
                         salt: await CoreCrypto.random(16)
                     }
                 });
-            }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
+            }).rejects.toThrow("SharedPasswordProtection.passwordType");
         });
 
         test("should not create a tokenContent with passwordType starting with neither pw nor pin", async function () {
@@ -202,7 +202,7 @@ describe("TokenContent", function () {
                         salt: await CoreCrypto.random(16)
                     }
                 });
-            }).rejects.toThrow("PasswordInfoMinusPassword.passwordType");
+            }).rejects.toThrow("SharedPasswordProtection.passwordType");
         });
 
         test("should not create a tokenContent with a salt of wrong length", async function () {
