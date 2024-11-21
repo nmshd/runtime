@@ -20,7 +20,7 @@ export class RelationshipTemplateMapper {
             passwordProtection: template.passwordProtection
                 ? {
                       password: template.passwordProtection.password,
-                      passwordIsPin: this.isPasswordTypeAPin(template.passwordProtection.passwordType)
+                      passwordIsPin: template.passwordProtection.passwordType.startsWith("pin")
                   }
                 : undefined,
             content: this.toTemplateContent(template.cache.content),
@@ -32,11 +32,6 @@ export class RelationshipTemplateMapper {
 
     public static toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {
         return responseItems.map((i) => this.toRelationshipTemplateDTO(i));
-    }
-
-    public static isPasswordTypeAPin(passwordType: string): boolean {
-        if (passwordType === "pw") return false;
-        return true;
     }
 
     private static toTemplateContent(content: Serializable) {

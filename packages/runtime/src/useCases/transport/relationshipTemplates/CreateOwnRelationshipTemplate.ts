@@ -75,19 +75,13 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         if (Serializable.fromUnknown(content) instanceof RelationshipTemplateContent && !content.onNewRelationship.expiresAt) {
             content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
         }
-        const passwordProtection = request.passwordProtection
-            ? PasswordProtectionCreationParameters.from({
-                  password: request.passwordProtection.password,
-                  passwordType: this.computePasswordType(request.passwordProtection.password, request.passwordProtection.passwordIsPin)
-              })
-            : undefined;
 
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
             content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         await this.accountController.syncDatawallet();

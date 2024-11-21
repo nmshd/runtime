@@ -17,4 +17,13 @@ export class PasswordProtectionCreationParameters extends Serializable implement
     public static from(value: IPasswordProtectionCreationParameters): PasswordProtectionCreationParameters {
         return this.fromAny(value);
     }
+
+    public static create(params: { password: string; passwordIsPin: boolean } | undefined): PasswordProtectionCreationParameters | undefined {
+        if (!params) return;
+
+        return PasswordProtectionCreationParameters.from({
+            password: params.password,
+            passwordType: params.passwordIsPin ? `pin${params.password.length}` : "pw"
+        });
+    }
 }
