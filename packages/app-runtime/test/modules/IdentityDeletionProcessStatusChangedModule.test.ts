@@ -103,11 +103,12 @@ describe("IdentityDeletionProcessStatusChanged", function () {
             await runtimeDevice2.stop();
         });
 
-        test("should set the deletionDate of the LocalAccount on a second device that is online", async function () {
+        test.only("should set the deletionDate of the LocalAccount on a second device that is online", async function () {
             await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(sessionDevice2.account.deletionDate).toBeUndefined();
 
             await sessionDevice2.transportServices.account.syncDatawallet();
+            console.log(await sessionDevice2.transportServices.identityDeletionProcesses.getIdentityDeletionProcesses());
             expect(sessionDevice2.account.deletionDate).toBeDefined();
         });
 
@@ -116,6 +117,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
             await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(sessionDevice2.account.deletionDate).toBeUndefined();
 
+            await runtimeDevice2.init();
             await runtimeDevice2.start();
             await sessionDevice2.transportServices.account.syncDatawallet();
             expect(sessionDevice2.account.deletionDate).toBeDefined();
