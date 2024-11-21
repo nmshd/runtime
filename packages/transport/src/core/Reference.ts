@@ -58,7 +58,7 @@ export class Reference extends Serializable implements IReference {
         const secretKey = this.parseSecretKey(splitted[1], splitted[2]);
         const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
 
-        const passwordProtection = this.parsePasswordPart(splitted[4]);
+        const passwordProtection = SharedPasswordProtection.fromTruncated(splitted[4]);
 
         return this.from({
             id: CoreId.from(id),
@@ -67,22 +67,6 @@ export class Reference extends Serializable implements IReference {
             forIdentityTruncated,
             passwordProtection
         });
-    }
-
-    private static parsePasswordPart(value?: string): ISharedPasswordProtection | undefined {
-        if (!value) return;
-        const splittedPasswordParts = value.split("&");
-        if (splittedPasswordParts.length !== 2) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("The password part of a TruncatedReference must consist of exactly 2 components.");
-        }
-
-        const passwordType = splittedPasswordParts[0];
-        try {
-            const salt = CoreBuffer.fromBase64(splittedPasswordParts[1]);
-            return { passwordType, salt };
-        } catch (_) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("The salt needs to be a Base64 value.");
-        }
     }
 
     private static parseSecretKey(alg: string, secretKey: string): CryptoSecretKey {

@@ -1,5 +1,6 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
+import { TransportCoreErrors } from "../TransportCoreErrors";
 
 export interface ISharedPasswordProtection extends ISerializable {
     passwordType: string;
@@ -17,6 +18,23 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
 
     public static from(value: ISharedPasswordProtection): SharedPasswordProtection {
         return this.fromAny(value);
+    }
+
+    public static fromTruncated(value?: string): SharedPasswordProtection | undefined {
+        if (value === undefined || value === "") return undefined;
+
+        const splittedPasswordParts = value.split("&");
+        if (splittedPasswordParts.length !== 2) {
+            throw TransportCoreErrors.general.invalidTruncatedReference("The password part of a TruncatedReference must consist of exactly 2 components.");
+        }
+
+        const passwordType = splittedPasswordParts[0];
+        try {
+            const salt = CoreBuffer.fromBase64(splittedPasswordParts[1]);
+            return SharedPasswordProtection.from({ passwordType, salt });
+        } catch (_) {
+            throw TransportCoreErrors.general.invalidTruncatedReference("The salt needs to be a Base64 value.");
+        }
     }
 
     public truncate(): string {
