@@ -11,9 +11,8 @@ export class GetPublicRelationshipTemplateReferencesUseCase extends UseCase<void
     }
 
     protected async executeInternal(): Promise<Result<PublicRelationshipTemplateReferenceDTO[]>> {
-        const templateReferences = (await this.publicRelationshipTemplateReferencesController.getPublicRelationshipTemplateReferences()).map((reference) => {
-            return PublicRelationshipTemplateReferenceMapper.toPublicRelationshipTemplateReferenceDTO(reference);
-        });
+        const publicRelationshipTemplateReferences = await this.publicRelationshipTemplateReferencesController.getPublicRelationshipTemplateReferences();
+        const templateReferences = PublicRelationshipTemplateReferenceMapper.toPublicRelationshipTemplateReferenceDTOList(publicRelationshipTemplateReferences);
 
         return Result.ok(templateReferences);
     }

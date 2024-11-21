@@ -1,11 +1,13 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController, ClientResult, PublicRelationshipTemplateReferenceClient, RequestError, Transport } from "../../../src";
+import { RestClientMocker } from "../../testHelpers/RestClientMocker";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 let connection: IDatabaseConnection;
 
 let transport: Transport;
 let account: AccountController;
+let clientMocker: RestClientMocker<PublicRelationshipTemplateReferenceClient>;
 
 beforeAll(async function () {
     connection = await TestUtil.createDatabaseConnection();
@@ -16,6 +18,9 @@ beforeAll(async function () {
     const accounts = await TestUtil.provideAccounts(transport, 3);
 
     account = accounts[0];
+
+    const client = (account.publicRelationshipTemplateReferences as any).client as PublicRelationshipTemplateReferenceClient;
+    clientMocker = new RestClientMocker(client);
 });
 
 afterAll(async () => {
@@ -24,31 +29,46 @@ afterAll(async () => {
     await connection.close();
 });
 
+afterEach(() => {
+    clientMocker.restore();
+});
+
 describe("PublicRelationshipTemplateReferencesController", () => {
     test("should return the backbone defined PublicRelationshipTemplateReferences", async () => {
+        const mockResponse = [
+            {
+                title: "a",
+                description: "Description",
+                truncatedReference: "Reference"
+            },
+            {
+                title: "b",
+                description: "Description",
+                truncatedReference: "Reference"
+            },
+            {
+                title: "c",
+                description: "Description",
+                truncatedReference: "Reference"
+            }
+        ];
+
+        clientMocker.mockMethod("getPublicRelationshipTemplateReferences", () => {
+            return ClientResult.ok(mockResponse);
+        });
+
         const publicRelationshipTemplates = await account.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
-        expect(publicRelationshipTemplates).toBeDefined();
-        expect(publicRelationshipTemplates.length).toBeGreaterThan(0);
+
+        expect(publicRelationshipTemplates.map((references) => references.toJSON())).toEqual(mockResponse);
     });
 
     test("should return an empty array if the backbone endpoint is not available", async () => {
-        const client: PublicRelationshipTemplateReferenceClient = (account.publicRelationshipTemplateReferences as any).client;
-
-        const mockGetPublicRelationshipTemplateReferences = jest.fn().mockImplementation(() => {
-            return Promise.resolve(ClientResult.fail(new RequestError("some method", "some path", undefined, undefined, undefined, undefined, 404)));
+        clientMocker.mockMethod("getPublicRelationshipTemplateReferences", () => {
+            return ClientResult.fail(new RequestError("some method", "some path", undefined, undefined, undefined, undefined, 404));
         });
-        const originalFn = client.getPublicRelationshipTemplateReferences;
-        client.getPublicRelationshipTemplateReferences = mockGetPublicRelationshipTemplateReferences.bind(client);
 
         const publicRelationshipTemplates = await account.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
+
         expect(publicRelationshipTemplates).toHaveLength(0);
-
-        client.getPublicRelationshipTemplateReferences = originalFn;
-    });
-
-    test("should return the backbone defined PublicRelationshipTemplateReferences2", async () => {
-        const publicRelationshipTemplates = await account.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
-        expect(publicRelationshipTemplates).toBeDefined();
-        expect(publicRelationshipTemplates.length).toBeGreaterThan(0);
     });
 });
