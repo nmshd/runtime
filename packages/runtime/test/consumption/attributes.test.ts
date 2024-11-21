@@ -125,7 +125,7 @@ describe("get attribute(s)", () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "AGivenName"
+                        value: "aGivenName"
                     }
                 }
             },
@@ -133,7 +133,7 @@ describe("get attribute(s)", () => {
                 content: {
                     value: {
                         "@type": "Surname",
-                        value: "ASurname"
+                        value: "aSurname"
                     }
                 }
             },
@@ -155,12 +155,12 @@ describe("get attribute(s)", () => {
 
         const relationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
-                key: "AKey",
+                key: "aKey",
                 confidentiality: RelationshipAttributeConfidentiality.Public,
                 value: {
                     "@type": "ProprietaryString",
-                    value: "AString",
-                    title: "ATitle"
+                    value: "aString",
+                    title: "aTitle"
                 },
                 isTechnical: true
             }
@@ -293,8 +293,8 @@ describe("attribute queries", () => {
             content: {
                 value: {
                     "@type": "ProprietaryString",
-                    title: "ATitle",
-                    value: "AProprietaryStringValue"
+                    title: "aTitle",
+                    value: "aProprietaryStringValue"
                 },
                 key: "website",
                 confidentiality: RelationshipAttributeConfidentiality.Protected
@@ -426,12 +426,12 @@ describe("get repository, own shared and peer shared attributes", () => {
         // own shared succeeded relationship attribute
         services1SharedRelationshipAttributeV0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
-                key: "AKey",
+                key: "aKey",
                 confidentiality: RelationshipAttributeConfidentiality.Public,
                 value: {
                     "@type": "ProprietaryString",
-                    value: "AString",
-                    title: "ATitle"
+                    value: "aString",
+                    title: "aTitle"
                 },
                 isTechnical: false
             }
@@ -518,7 +518,7 @@ describe("get repository, own shared and peer shared attributes", () => {
                     content: {
                         value: {
                             "@type": "GivenName",
-                            value: "AGivenName"
+                            value: "aGivenName"
                         }
                     }
                 })
@@ -529,7 +529,7 @@ describe("get repository, own shared and peer shared attributes", () => {
                     content: {
                         value: {
                             "@type": "Surname",
-                            value: "ASurname"
+                            value: "aSurname"
                         }
                     }
                 })
@@ -676,11 +676,11 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "StreetAddress",
-                    recipient: "ARecipient",
-                    street: "AStreet",
-                    houseNo: "AHouseNo",
-                    zipCode: "AZipCode",
-                    city: "ACity",
+                    recipient: "aRecipient",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
                     country: "DE"
                 }
             }
@@ -699,13 +699,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
 
         expect(childAttributes).toHaveLength(5);
         expect(childAttributes[0].content.value["@type"]).toBe("Street");
-        expect((childAttributes[0].content.value as StreetJSON).value).toBe("AStreet");
+        expect((childAttributes[0].content.value as StreetJSON).value).toBe("aStreet");
         expect(childAttributes[1].content.value["@type"]).toBe("HouseNumber");
-        expect((childAttributes[1].content.value as HouseNumberJSON).value).toBe("AHouseNo");
+        expect((childAttributes[1].content.value as HouseNumberJSON).value).toBe("aHouseNo");
         expect(childAttributes[2].content.value["@type"]).toBe("ZipCode");
-        expect((childAttributes[2].content.value as ZipCodeJSON).value).toBe("AZipCode");
+        expect((childAttributes[2].content.value as ZipCodeJSON).value).toBe("aZipCode");
         expect(childAttributes[3].content.value["@type"]).toBe("City");
-        expect((childAttributes[3].content.value as CityJSON).value).toBe("ACity");
+        expect((childAttributes[3].content.value as CityJSON).value).toBe("aCity");
         expect(childAttributes[4].content.value["@type"]).toBe("Country");
         expect((childAttributes[4].content.value as CountryJSON).value).toBe("DE");
 
@@ -957,8 +957,8 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
                 key: "test",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "AString",
-                    title: "ATitle"
+                    value: "aString",
+                    title: "aTitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             },
@@ -1245,8 +1245,8 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
                 key: "test",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "AString",
-                    title: "ATitle"
+                    value: "aString",
+                    title: "aTitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             },
@@ -1270,8 +1270,8 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
                 key: "test",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "AString",
-                    title: "ATitle"
+                    value: "aString",
+                    title: "aTitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             },
@@ -1314,8 +1314,8 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
                 key: "test",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "AString",
-                    title: "ATitle"
+                    value: "aString",
+                    title: "aTitle"
                 },
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }
@@ -1629,7 +1629,7 @@ describe("Get (shared) versions of attribute", () => {
     async function createAndShareRelationshipAttributeVersion0(): Promise<void> {
         sOwnSharedRelationshipAttributeVersion0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
-                key: "AKey",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryInteger",
                     title: "Version",
@@ -1834,7 +1834,7 @@ describe("Get (shared) versions of attribute", () => {
                     items: [
                         ReadAttributeRequestItem.from({
                             query: ThirdPartyRelationshipAttributeQuery.from({
-                                key: "AKey",
+                                key: "aKey",
                                 owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                                 thirdParty: [services2.address]
                             }),
@@ -1990,11 +1990,11 @@ describe("DeleteAttributeUseCases", () => {
                     content: {
                         value: {
                             "@type": "StreetAddress",
-                            recipient: "ARecipient",
-                            street: "AStreet",
-                            houseNo: "AHouseNo",
-                            zipCode: "AZipCode",
-                            city: "ACity",
+                            recipient: "aRecipient",
+                            street: "aStreet",
+                            houseNo: "aHouseNo",
+                            zipCode: "aZipCode",
+                            city: "aCity",
                             country: "DE"
                         }
                     }
@@ -2044,10 +2044,10 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
+                        value: "aStringValue",
+                        title: "aTitle"
                     },
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             });
@@ -2058,7 +2058,7 @@ describe("DeleteAttributeUseCases", () => {
                     items: [
                         ReadAttributeRequestItem.from({
                             query: ThirdPartyRelationshipAttributeQuery.from({
-                                key: "AKey",
+                                key: "aKey",
                                 owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
                                 thirdParty: [services3.address]
                             }),
@@ -2152,10 +2152,10 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "ProprietaryString",
-                        value: "AStringValue",
-                        title: "ATitle"
+                        value: "aStringValue",
+                        title: "aTitle"
                     },
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             });
@@ -2166,7 +2166,7 @@ describe("DeleteAttributeUseCases", () => {
                     items: [
                         ReadAttributeRequestItem.from({
                             query: ThirdPartyRelationshipAttributeQuery.from({
-                                key: "AKey",
+                                key: "aKey",
                                 owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
                                 thirdParty: [services3.address]
                             }),
@@ -2247,10 +2247,10 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "ProprietaryString",
-                        value: "AString",
-                        title: "ATitle"
+                        value: "aString",
+                        title: "aTitle"
                     },
-                    key: "AKey",
+                    key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }
             });
@@ -2261,7 +2261,7 @@ describe("DeleteAttributeUseCases", () => {
                     items: [
                         ReadAttributeRequestItem.from({
                             query: ThirdPartyRelationshipAttributeQuery.from({
-                                key: "AKey",
+                                key: "aKey",
                                 owner: ThirdPartyRelationshipAttributeQueryOwner.ThirdParty,
                                 thirdParty: [services3.address]
                             }),
