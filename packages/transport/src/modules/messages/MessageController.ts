@@ -434,7 +434,6 @@ export class MessageController extends TransportController {
 
             if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
                 deletedPeers.push(recipient.address);
-                continue;
             }
         }
 

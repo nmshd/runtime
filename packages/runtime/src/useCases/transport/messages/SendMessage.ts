@@ -110,6 +110,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
             if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
                 peersInDeletion.push(recipient);
+                continue;
             }
 
             if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {

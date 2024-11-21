@@ -274,7 +274,7 @@ describe("Message errors", () => {
     });
 
     describe("Message errors for Relationships that are not active", () => {
-        test("should throw correct error for trying to send a Message if the Relationship is terminated", async () => {
+        test("should throw correct error for trying to send a Message if its content is not a Notification and the Relationship is terminated", async () => {
             const getRelationshipResult = (await client1.transport.relationships.getRelationshipByAddress({ address: client3.address })).value;
             expect(getRelationshipResult.status).toBe(RelationshipStatus.Active);
 
@@ -383,7 +383,7 @@ describe("Message errors", () => {
             }
         });
 
-        test("should throw correct error for Messages with multiple recipients if all recipients are in deletion", async () => {
+        test("should throw correct error for Messages with multiple recipients if its content is not a Notification and all recipients are in deletion", async () => {
             await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
             await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
             await client1.eventBus.waitForRunningEventHandlers();
@@ -399,7 +399,7 @@ describe("Message errors", () => {
             );
         });
 
-        test("should throw correct error for Messages with multiple recipients if some of the recipients are in deletion", async () => {
+        test("should throw correct error for Messages with multiple recipients if its content is not a Notification and some of the recipients are in deletion", async () => {
             await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
             await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
             await client1.eventBus.waitForRunningEventHandlers();

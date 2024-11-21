@@ -298,7 +298,7 @@ describe("MessageController", function () {
         });
     });
 
-    describe("Deletion of the potential recipient of the Message", function () {
+    describe("Recipient of the Message is in deletion", function () {
         let identityDeletionProcessOfRecipient: IdentityDeletionProcess;
 
         beforeEach(async function () {
