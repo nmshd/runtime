@@ -61,7 +61,7 @@ describe("MessageController", function () {
         await connection.close();
     });
 
-    describe("Sending Messages requires existing of active or terminated Relationship", function () {
+    describe("Sending Messages requires existence of active or terminated Relationship", function () {
         beforeEach(async () => {
             const relationshipBetweenSenderAndRecipient3 = await sender.relationships.getRelationshipToIdentity(recipient3.identity.address);
 
@@ -70,7 +70,7 @@ describe("MessageController", function () {
             }
         });
 
-        test("cannot send Message for missing Relationship", async function () {
+        test("cannot send Message for non-existent Relationship", async function () {
             await expect(TestUtil.sendMessage(sender, recipient3)).rejects.toThrow("error.transport.messages.hasNeitherActiveNorTerminatedRelationship");
         });
 
@@ -277,33 +277,30 @@ describe("MessageController", function () {
             await TestUtil.terminateRelationship(sender, recipient);
         });
 
+        test("should be able to send a Message on a terminated Relationship", async function () {
+            await expect(TestUtil.sendMessage(sender, recipient)).resolves.not.toThrow();
+        });
+
         test("should decrypt a Message on a terminated Relationship", async function () {
             const messageId = (await TestUtil.sendMessage(sender, recipient)).id;
             await expect(sender.messages.fetchCaches([messageId])).resolves.not.toThrow();
             await expect(recipient.messages.fetchCaches([messageId])).resolves.not.toThrow();
         });
 
-        test("should be able to send a Message on a terminated Relationship and to receive it when the Relationship is reactivated", async function () {
-            let idOfSentMessageDuringTerminatedRelationship;
-            await expect(async () => {
-                idOfSentMessageDuringTerminatedRelationship = (await TestUtil.sendMessage(sender, recipient)).id;
-            }).resolves.not.toThrow();
+        test("should be able to receive a Message sent on a terminated Relationship when it is reactivated", async function () {
+            const idOfSentMessageDuringTerminatedRelationship = (await TestUtil.sendMessage(sender, recipient)).id;
 
             await TestUtil.reactivateRelationship(sender, recipient);
 
-            const idOfReceivedMessageAfterReactivation = (await TestUtil.syncUntilHasMessages(recipient, 1))[0].id;
+            const receivedMessages = await TestUtil.syncUntilHasMessages(recipient);
+            const idOfReceivedMessageAfterReactivation = receivedMessages[receivedMessages.length - 1].id;
             expect(idOfReceivedMessageAfterReactivation).toStrictEqual(idOfSentMessageDuringTerminatedRelationship);
         });
     });
 
     describe("Deletion of recipients of Messages", function () {
-        let identityDeletionProcessId: CoreId;
-
-        beforeAll(async function () {
-            identityDeletionProcessId = (await recipient.identityDeletionProcess.initiateIdentityDeletionProcess()).id;
-        });
-
         test("should be able to send a Message if the recipient is in deletion and to receive it if the peer is not in deletion anymore", async function () {
+            const identityDeletionProcessId = (await recipient.identityDeletionProcess.initiateIdentityDeletionProcess()).id;
             const syncedRelationships = await TestUtil.syncUntilHasRelationships(sender);
             expect(syncedRelationships).toHaveLength(1);
             expect(syncedRelationships[0].peerDeletionInfo?.deletionStatus).toStrictEqual(PeerDeletionStatus.ToBeDeleted);
