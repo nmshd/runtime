@@ -650,6 +650,120 @@ describe("get repository, own shared and peer shared attributes", () => {
     });
 });
 
+describe.only("How does serval validate bad inputs?", () => {
+    test("number as GivenName", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: 5
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result.error.message).toBe("GivenName.value :: Value is not a string");
+        expect(result.error.code).toBe("error.runtime.requestDeserialization");
+    });
+
+    test("string as BirthDate", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "BirthDate",
+                    day: 5,
+                    month: 5,
+                    year: "a-string"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result.error.message).toBe("BirthYear.from() :: Parameter must be an object - is 'a-string'");
+        expect(result.error.code).toBe("error.runtime.requestDeserialization");
+    });
+
+    test("string as BirthMonth", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "BirthMonth",
+                    value: "string"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result.error.message).toBe("BirthMonth.value :: Value is not a number.");
+        expect(result.error.code).toBe("error.runtime.requestDeserialization");
+    });
+
+    test("missing property in BirthDate", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "BirthDate",
+                    day: 5,
+                    month: 5
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result.error.message).toBe("BirthDate.year :: Value is not defined");
+        expect(result.error.code).toBe("error.runtime.requestDeserialization");
+    });
+
+    test("too large BirthMonth", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "BirthMonth",
+                    value: 14
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result.error.message).toBe("BirthMonth.value:Number :: must be an integer value between 1 and 12");
+        expect(result.error.code).toBe("error.runtime.requestDeserialization");
+    });
+
+    test("number as Street", async function () {
+        const createRepositoryAttributeParams: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "StreetAddress",
+                    recipient: "aRecipient",
+                    street: 5,
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE"
+                }
+            }
+        };
+        const createRepositoryAttributeResult = await services1.consumption.attributes.createRepositoryAttribute(createRepositoryAttributeParams);
+        expect(createRepositoryAttributeResult.error.message).toBe("Street.from() :: Parameter must be an object - is '5'");
+        expect(createRepositoryAttributeResult.error.code).toBe("error.runtime.requestDeserialization");
+    });
+
+    test("no complaints about additional properties", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "Petra Pan",
+                    additionalProperty: 1
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result).toBeSuccessful();
+    });
+});
+
 describe(CreateRepositoryAttributeUseCase.name, () => {
     test("should create a repository attribute", async () => {
         const request: CreateRepositoryAttributeRequest = {
