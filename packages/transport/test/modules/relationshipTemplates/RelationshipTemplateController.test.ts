@@ -159,30 +159,30 @@ describe("RelationshipTemplateController", function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            passwordInfo: {
+            passwordProtection: {
                 password: "password",
                 passwordType: "pw"
             }
         });
         expect(ownTemplate).toBeDefined();
-        expect(ownTemplate.passwordInfo!.password).toBe("password");
-        expect(ownTemplate.passwordInfo!.salt).toBeDefined();
-        expect(ownTemplate.passwordInfo!.salt).toHaveLength(16);
+        expect(ownTemplate.passwordProtection!.password).toBe("password");
+        expect(ownTemplate.passwordProtection!.salt).toBeDefined();
+        expect(ownTemplate.passwordProtection!.salt).toHaveLength(16);
         const reference = ownTemplate.toRelationshipTemplateReference();
-        expect(reference.passwordInfo!.passwordType).toBe("pw");
-        expect(reference.passwordInfo!.salt).toStrictEqual(ownTemplate.passwordInfo!.salt);
+        expect(reference.passwordProtection!.passwordType).toBe("pw");
+        expect(reference.passwordProtection!.salt).toStrictEqual(ownTemplate.passwordProtection!.salt);
 
         const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference.truncate(), "password");
         expect(peerTemplate).toBeDefined();
-        expect(peerTemplate.passwordInfo!.password).toBe("password");
-        expect(peerTemplate.passwordInfo!.salt).toStrictEqual(ownTemplate.passwordInfo!.salt);
+        expect(peerTemplate.passwordProtection!.password).toBe("password");
+        expect(peerTemplate.passwordProtection!.salt).toStrictEqual(ownTemplate.passwordProtection!.salt);
     });
 
     test("should throw an error if loaded with a wrong or missing password", async function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            passwordInfo: {
+            passwordProtection: {
                 password: "1234",
                 passwordType: "pin4"
             }
@@ -201,7 +201,7 @@ describe("RelationshipTemplateController", function () {
         const ownTemplate1 = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            passwordInfo: {
+            passwordProtection: {
                 password: "password",
                 passwordType: "pw"
             }
@@ -209,7 +209,7 @@ describe("RelationshipTemplateController", function () {
         const ownTemplate2 = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            passwordInfo: {
+            passwordProtection: {
                 password: "1234",
                 passwordType: "pin4"
             }

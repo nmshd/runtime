@@ -13,7 +13,7 @@ export interface RelationshipTemplateDVO extends DataViewObject {
     expiresAt?: string;
     maxNumberOfAllocations?: number;
     forIdentity?: string;
-    passwordInfo?: {
+    passwordProtection?: {
         password: string;
         passwordIsPin: boolean;
     };

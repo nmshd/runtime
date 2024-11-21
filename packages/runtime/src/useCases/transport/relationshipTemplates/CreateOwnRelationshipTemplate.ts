@@ -19,7 +19,7 @@ export interface CreateOwnRelationshipTemplateRequest {
      */
     maxNumberOfAllocations?: number;
     forIdentity?: AddressString;
-    passwordInfo?: {
+    passwordProtection?: {
         /**
          * @minLength 1
          */
@@ -46,8 +46,8 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
             );
         }
 
-        if (input.passwordInfo?.passwordIsPin) {
-            if (!/^[0-9]{4,16}$/.test(input.passwordInfo.password)) {
+        if (input.passwordProtection?.passwordIsPin) {
+            if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {
                 validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
             }
         }
@@ -75,10 +75,10 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         if (Serializable.fromUnknown(content) instanceof RelationshipTemplateContent && !content.onNewRelationship.expiresAt) {
             content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
         }
-        const passwordInfo = request.passwordInfo
+        const passwordProtection = request.passwordProtection
             ? PasswordInfoMinusSalt.from({
-                  password: request.passwordInfo.password,
-                  passwordType: this.computePasswordType(request.passwordInfo.password, request.passwordInfo.passwordIsPin)
+                  password: request.passwordProtection.password,
+                  passwordType: this.computePasswordType(request.passwordProtection.password, request.passwordProtection.passwordIsPin)
               })
             : undefined;
 
@@ -87,7 +87,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordInfo
+            passwordProtection
         });
 
         await this.accountController.syncDatawallet();

@@ -7,7 +7,7 @@ export interface ITokenContentRelationshipTemplate extends ISerializable {
     templateId: ICoreId;
     secretKey: ICryptoSecretKey;
     forIdentity?: ICoreAddress;
-    passwordInfo?: IPasswordInfoMinusPassword;
+    passwordProtection?: IPasswordInfoMinusPassword;
 }
 
 @type("TokenContentRelationshipTemplate")
@@ -26,7 +26,7 @@ export class TokenContentRelationshipTemplate extends Serializable implements IT
 
     @validate({ nullable: true })
     @serialize()
-    public passwordInfo?: PasswordInfoMinusPassword;
+    public passwordProtection?: PasswordInfoMinusPassword;
 
     public static from(value: ITokenContentRelationshipTemplate): TokenContentRelationshipTemplate {
         return this.fromAny(value);

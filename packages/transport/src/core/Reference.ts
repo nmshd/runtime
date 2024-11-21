@@ -10,7 +10,7 @@ export interface IReference extends ISerializable {
     backboneBaseUrl?: string;
     key: ICryptoSecretKey;
     forIdentityTruncated?: string;
-    passwordInfo?: IPasswordInfoMinusPassword;
+    passwordProtection?: IPasswordInfoMinusPassword;
 }
 
 @type("Reference")
@@ -33,11 +33,11 @@ export class Reference extends Serializable implements IReference {
 
     @validate({ nullable: true })
     @serialize()
-    public passwordInfo?: PasswordInfoMinusPassword;
+    public passwordProtection?: PasswordInfoMinusPassword;
 
     public truncate(): string {
         const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
-        const passwordPart = this.passwordInfo ? `${this.passwordInfo.passwordType}&${this.passwordInfo.salt.toBase64()}` : "";
+        const passwordPart = this.passwordProtection ? `${this.passwordProtection.passwordType}&${this.passwordProtection.salt.toBase64()}` : "";
 
         const truncatedReference = CoreBuffer.fromUtf8(
             `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ? this.forIdentityTruncated : ""}|${passwordPart}`
@@ -59,14 +59,14 @@ export class Reference extends Serializable implements IReference {
         const secretKey = this.parseSecretKey(splitted[1], splitted[2]);
         const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
 
-        const passwordInfo = this.parsePasswordPart(splitted[4]);
+        const passwordProtection = this.parsePasswordPart(splitted[4]);
 
         return this.from({
             id: CoreId.from(id),
             backboneBaseUrl,
             key: secretKey,
             forIdentityTruncated,
-            passwordInfo
+            passwordProtection
         });
     }
 

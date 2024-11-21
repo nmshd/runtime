@@ -8,7 +8,7 @@ export interface ISendRelationshipTemplateParameters extends ISerializable {
     expiresAt: ICoreDate;
     maxNumberOfAllocations?: number;
     forIdentity?: ICoreAddress;
-    passwordInfo?: IPasswordInfoMinusSalt;
+    passwordProtection?: IPasswordInfoMinusSalt;
 }
 
 @type("SendRelationshipTemplateParameters")
@@ -31,7 +31,7 @@ export class SendRelationshipTemplateParameters extends Serializable implements 
 
     @validate({ nullable: true })
     @serialize()
-    public passwordInfo?: PasswordInfoMinusSalt;
+    public passwordProtection?: PasswordInfoMinusSalt;
 
     public static from(value: ISendRelationshipTemplateParameters): SendRelationshipTemplateParameters {
         return this.fromAny(value);

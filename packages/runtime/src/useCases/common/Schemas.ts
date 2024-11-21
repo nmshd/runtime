@@ -22018,7 +22018,7 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
                 },
-                "passwordInfo": {
+                "passwordProtection": {
                     "type": "object",
                     "properties": {
                         "password": {

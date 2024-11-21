@@ -10,7 +10,7 @@ import { CachedRelationshipTemplate, ICachedRelationshipTemplate } from "./Cache
 export interface IRelationshipTemplate extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
-    passwordInfo?: IPasswordInfo;
+    passwordProtection?: IPasswordInfo;
     cache?: ICachedRelationshipTemplate;
     cachedAt?: ICoreDate;
     metadata?: any;
@@ -20,7 +20,7 @@ export interface IRelationshipTemplate extends ICoreSynchronizable {
 @type("RelationshipTemplate")
 export class RelationshipTemplate extends CoreSynchronizable implements IRelationshipTemplate {
     public override readonly technicalProperties = ["@type", "@context", nameof<RelationshipTemplate>((r) => r.secretKey), nameof<RelationshipTemplate>((r) => r.isOwn)];
-    public override readonly userdataProperties = [nameof<RelationshipTemplate>((r) => r.passwordInfo)];
+    public override readonly userdataProperties = [nameof<RelationshipTemplate>((r) => r.passwordProtection)];
     public override readonly metadataProperties = [nameof<RelationshipTemplate>((r) => r.metadata), nameof<RelationshipTemplate>((r) => r.metadataModifiedAt)];
 
     @validate()
@@ -33,7 +33,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
 
     @validate({ nullable: true })
     @serialize()
-    public passwordInfo?: PasswordInfo;
+    public passwordProtection?: PasswordInfo;
 
     @validate({ nullable: true })
     @serialize()
@@ -60,7 +60,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
             id: this.id,
             key: this.secretKey,
             forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
-            passwordInfo: this.passwordInfo ? PasswordInfoMinusPassword.from(this.passwordInfo) : undefined
+            passwordProtection: this.passwordProtection ? PasswordInfoMinusPassword.from(this.passwordProtection) : undefined
         });
     }
 

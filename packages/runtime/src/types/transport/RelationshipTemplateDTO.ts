@@ -9,7 +9,7 @@ export interface RelationshipTemplateDTO {
     createdByDevice: string;
     createdAt: string;
     forIdentity?: string;
-    passwordInfo?: {
+    passwordProtection?: {
         password: string;
         passwordIsPin: boolean;
     };

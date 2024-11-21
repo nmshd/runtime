@@ -17,10 +17,10 @@ export class RelationshipTemplateMapper {
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
             forIdentity: template.cache.forIdentity?.toString(),
-            passwordInfo: template.passwordInfo
+            passwordProtection: template.passwordProtection
                 ? {
-                      password: template.passwordInfo.password,
-                      passwordIsPin: this.isPasswordTypeAPin(template.passwordInfo.passwordType)
+                      password: template.passwordProtection.password,
+                      passwordIsPin: this.isPasswordTypeAPin(template.passwordProtection.passwordType)
                   }
                 : undefined,
             content: this.toTemplateContent(template.cache.content),
