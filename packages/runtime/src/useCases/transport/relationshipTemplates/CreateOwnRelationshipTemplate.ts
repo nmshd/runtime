@@ -3,7 +3,7 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, PasswordInfoMinusSalt, RelationshipTemplateController } from "@nmshd/transport";
+import { AccountController, PasswordProtectionCreationParameters, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -76,7 +76,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
         }
         const passwordProtection = request.passwordProtection
-            ? PasswordInfoMinusSalt.from({
+            ? PasswordProtectionCreationParameters.from({
                   password: request.passwordProtection.password,
                   passwordType: this.computePasswordType(request.passwordProtection.password, request.passwordProtection.passwordIsPin)
               })

@@ -2,10 +2,9 @@ import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreCrypto, TransportCoreErrors } from "../../core";
+import { CoreCrypto, PasswordProtection, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
-import { PasswordInfo } from "../../core/types/PasswordInfo";
 import { PeerRelationshipTemplateLoadedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { Relationship } from "../relationships/local/Relationship";
@@ -90,7 +89,7 @@ export class RelationshipTemplateController extends TransportController {
         });
 
         const passwordProtection = parameters.passwordProtection
-            ? PasswordInfo.from({
+            ? PasswordProtection.from({
                   password: parameters.passwordProtection.password,
                   passwordType: parameters.passwordProtection.passwordType,
                   salt: salt!
@@ -283,7 +282,7 @@ export class RelationshipTemplateController extends TransportController {
 
         if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordProtection = reference.passwordProtection
-            ? PasswordInfo.from({
+            ? PasswordProtection.from({
                   salt: reference.passwordProtection.salt,
                   passwordType: reference.passwordProtection.passwordType,
                   password: password!
@@ -296,7 +295,7 @@ export class RelationshipTemplateController extends TransportController {
     public async loadPeerRelationshipTemplateByTokenContent(tokenContent: TokenContentRelationshipTemplate, password?: string): Promise<RelationshipTemplate> {
         if (tokenContent.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordProtection = tokenContent.passwordProtection
-            ? PasswordInfo.from({
+            ? PasswordProtection.from({
                   salt: tokenContent.passwordProtection.salt,
                   passwordType: tokenContent.passwordProtection.passwordType,
                   password: password!
@@ -310,7 +309,7 @@ export class RelationshipTemplateController extends TransportController {
         id: CoreId,
         secretKey: CryptoSecretKey,
         forIdentityTruncated?: string,
-        passwordProtection?: PasswordInfo
+        passwordProtection?: PasswordProtection
     ): Promise<RelationshipTemplate> {
         const templateDoc = await this.templates.read(id.toString());
         if (!templateDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {

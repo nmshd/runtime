@@ -3,14 +3,14 @@ import { CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { CoreIdHelper } from "./CoreIdHelper";
 import { TransportCoreErrors } from "./TransportCoreErrors";
-import { IPasswordInfoMinusPassword, PasswordInfoMinusPassword } from "./types/PasswordInfo";
+import { ISharedPasswordProtection, SharedPasswordProtection } from "./types";
 
 export interface IReference extends ISerializable {
     id: ICoreId;
     backboneBaseUrl?: string;
     key: ICryptoSecretKey;
     forIdentityTruncated?: string;
-    passwordProtection?: IPasswordInfoMinusPassword;
+    passwordProtection?: ISharedPasswordProtection;
 }
 
 @type("Reference")
@@ -33,7 +33,7 @@ export class Reference extends Serializable implements IReference {
 
     @validate({ nullable: true })
     @serialize()
-    public passwordProtection?: PasswordInfoMinusPassword;
+    public passwordProtection?: SharedPasswordProtection;
 
     public truncate(): string {
         const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
@@ -70,7 +70,7 @@ export class Reference extends Serializable implements IReference {
         });
     }
 
-    private static parsePasswordPart(value?: string): IPasswordInfoMinusPassword | undefined {
+    private static parsePasswordPart(value?: string): ISharedPasswordProtection | undefined {
         if (!value) return;
         const splittedPasswordParts = value.split("&");
         if (splittedPasswordParts.length !== 2) {

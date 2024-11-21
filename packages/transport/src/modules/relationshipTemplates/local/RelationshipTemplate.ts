@@ -2,15 +2,14 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { IPasswordInfo, PasswordInfo, PasswordInfoMinusPassword } from "../../../core/types/PasswordInfo";
+import { CoreSynchronizable, ICoreSynchronizable, IPasswordProtection, PasswordProtection } from "../../../core";
 import { RelationshipTemplateReference } from "../transmission/RelationshipTemplateReference";
 import { CachedRelationshipTemplate, ICachedRelationshipTemplate } from "./CachedRelationshipTemplate";
 
 export interface IRelationshipTemplate extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
-    passwordProtection?: IPasswordInfo;
+    passwordProtection?: IPasswordProtection;
     cache?: ICachedRelationshipTemplate;
     cachedAt?: ICoreDate;
     metadata?: any;
@@ -33,7 +32,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
 
     @validate({ nullable: true })
     @serialize()
-    public passwordProtection?: PasswordInfo;
+    public passwordProtection?: PasswordProtection;
 
     @validate({ nullable: true })
     @serialize()
@@ -60,7 +59,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
             id: this.id,
             key: this.secretKey,
             forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
-            passwordProtection: this.passwordProtection ? PasswordInfoMinusPassword.from(this.passwordProtection) : undefined
+            passwordProtection: this.passwordProtection?.toSharedPasswordProtection()
         });
     }
 

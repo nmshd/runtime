@@ -2,9 +2,9 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import {
     AccountController,
-    PasswordInfoMinusPassword,
     RelationshipTemplate,
     RelationshipTemplateController,
+    SharedPasswordProtection,
     TokenContentRelationshipTemplate,
     TokenController
 } from "@nmshd/transport";
@@ -51,7 +51,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        const passwordProtection = template.passwordProtection ? PasswordInfoMinusPassword.from(template.passwordProtection) : undefined;
+        const passwordProtection = template.passwordProtection ? SharedPasswordProtection.from(template.passwordProtection) : undefined;
 
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
