@@ -89,11 +89,6 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(relationshipTemplate));
     }
 
-    private computePasswordType(password: string, passwordIsPin?: true): string {
-        if (passwordIsPin) return `pin${password.length}`;
-        return "pw";
-    }
-
     private async validateRelationshipTemplateContent(content: any, templateExpiresAt: CoreDate) {
         const transformedContent = Serializable.fromUnknown(content);
 
