@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Message, PeerDeletionStatus, Relationship, RelationshipStatus, Transport } from "../../../src";
+import { AccountController, IdentityDeletionProcess, IdentityDeletionProcessStatus, Message, Relationship, RelationshipStatus, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("MessageController", function () {
@@ -287,7 +287,7 @@ describe("MessageController", function () {
             await expect(recipient.messages.fetchCaches([messageId])).resolves.not.toThrow();
         });
 
-        test("should be able to receive a Message sent on a terminated Relationship when it is reactivated", async function () {
+        test("should be able to receive a Message sent on a terminated Relationship after the Relationship was reactivated", async function () {
             const idOfSentMessageDuringTerminatedRelationship = (await TestUtil.sendMessage(sender, recipient)).id;
 
             await TestUtil.reactivateRelationship(sender, recipient);
@@ -298,23 +298,29 @@ describe("MessageController", function () {
         });
     });
 
-    describe("Deletion of recipients of Messages", function () {
-        test("should be able to send a Message if the recipient is in deletion and to receive it if the peer is not in deletion anymore", async function () {
-            const identityDeletionProcessId = (await recipient.identityDeletionProcess.initiateIdentityDeletionProcess()).id;
-            const syncedRelationships = await TestUtil.syncUntilHasRelationships(sender);
-            expect(syncedRelationships).toHaveLength(1);
-            expect(syncedRelationships[0].peerDeletionInfo?.deletionStatus).toStrictEqual(PeerDeletionStatus.ToBeDeleted);
+    describe("Deletion of the potential recipient of the Message", function () {
+        let identityDeletionProcessOfRecipient: IdentityDeletionProcess;
 
-            const messageId = (await TestUtil.sendMessage(sender, recipient)).id;
-            expect(messageId).toBeDefined();
-
-            await recipient.identityDeletionProcess.cancelIdentityDeletionProcess(identityDeletionProcessId.toString());
-
-            const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
-            const receivedMessage = messages[0];
-            expect(receivedMessage.id).toStrictEqual(messageId);
+        beforeEach(async function () {
+            const approvedIdentityDeletionProcess = await recipient.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
+            if (!approvedIdentityDeletionProcess) {
+                identityDeletionProcessOfRecipient = await recipient.identityDeletionProcess.initiateIdentityDeletionProcess();
+                await TestUtil.syncUntilHasRelationships(sender);
+            }
         });
 
-        // TODO: Test for error with deleted peer (which corresponds to a Relationship whose deletion is proposed)
+        test("should be able to send a Message if the recipient is in deletion", async function () {
+            await expect(TestUtil.sendMessage(sender, recipient)).resolves.not.toThrow();
+        });
+
+        test("should be able to receive a Message sent during its recipient was in deletion after the recipient cancelled its deletion process", async function () {
+            const idOfSentMessageDuringRecipientInDeletion = (await TestUtil.sendMessage(sender, recipient)).id;
+
+            await recipient.identityDeletionProcess.cancelIdentityDeletionProcess(identityDeletionProcessOfRecipient.id.toString());
+
+            const receivedMessages = await TestUtil.syncUntilHasMessages(recipient);
+            const idOfReceivedMessageAfterCancellation = receivedMessages[receivedMessages.length - 1].id;
+            expect(idOfReceivedMessageAfterCancellation).toStrictEqual(idOfSentMessageDuringRecipientInDeletion);
+        });
     });
 });
