@@ -1,6 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/consumption";
-import { AttributeValues } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
@@ -9,7 +8,7 @@ import { AttributeMapper } from "./AttributeMapper";
 
 export interface CreateRepositoryAttributeRequest {
     content: {
-        value: AttributeValues.Identity.Json;
+        value: any;
         tags?: string[];
         validFrom?: ISO8601DateTimeString;
         validTo?: ISO8601DateTimeString;
