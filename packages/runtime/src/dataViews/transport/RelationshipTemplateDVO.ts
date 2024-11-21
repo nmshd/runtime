@@ -15,7 +15,7 @@ export interface RelationshipTemplateDVO extends DataViewObject {
     forIdentity?: string;
     passwordProtection?: {
         password: string;
-        passwordIsPin: boolean;
+        passwordIsPin?: true;
     };
 
     /**
