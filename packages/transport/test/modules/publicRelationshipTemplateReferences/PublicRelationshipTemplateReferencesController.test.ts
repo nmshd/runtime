@@ -59,7 +59,7 @@ describe("PublicRelationshipTemplateReferencesController", () => {
 
         const publicRelationshipTemplates = await account.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
 
-        expect(publicRelationshipTemplates.map((references) => references.toJSON())).toEqual(mockResponse);
+        expect(publicRelationshipTemplates.map((references) => references.toJSON())).toStrictEqual(mockResponse);
     });
 
     test("should return an empty array if the backbone endpoint is not available", async () => {
