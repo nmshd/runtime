@@ -384,7 +384,7 @@ describe("RelationshipTemplate Tests", () => {
             expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
         });
 
-        test("validation error when loading a template with no password", async () => {
+        test("error when loading a template with no password", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
                 expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
@@ -400,7 +400,7 @@ describe("RelationshipTemplate Tests", () => {
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
 
-        test("validation error when loading a template via token with no password", async () => {
+        test("error when loading a template via token with no password", async () => {
             const templateId = (
                 await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                     content: emptyRelationshipTemplateContent,
