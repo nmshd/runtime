@@ -274,28 +274,7 @@ describe("Message errors", () => {
     });
 
     describe("Message errors for Relationships that are not active", () => {
-        test("should throw correct error for trying to send a Message if its content is not a Notification and the Relationship is terminated", async () => {
-            const getRelationshipResult = (await client1.transport.relationships.getRelationshipByAddress({ address: client3.address })).value;
-            expect(getRelationshipResult.status).toBe(RelationshipStatus.Active);
-
-            await client1.transport.relationships.terminateRelationship({ relationshipId: getRelationshipResult.id });
-            const terminatedRelationship = (await syncUntilHasRelationships(client3.transport))[0];
-            expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
-
-            const result = await client1.transport.messages.sendMessage({
-                recipients: [client3.address],
-                content: {
-                    "@type": "Mail",
-                    body: "b",
-                    cc: [],
-                    subject: "a",
-                    to: [client3.address]
-                }
-            });
-            expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
-        });
-
-        test("should throw correct error for Messages with multiple recipients if there isn't a Relationship existing to any of the recipients", async () => {
+        test("should throw correct error for trying to send a Message if there are recipients to which no Relationship exists", async () => {
             const result = await client1.transport.messages.sendMessage({
                 recipients: [client4.address, client5.address],
                 content: {
@@ -312,24 +291,7 @@ describe("Message errors", () => {
             );
         });
 
-        test("should throw correct error for Messages with multiple recipients if there isn't a Relationship existing to only some of the recipients", async () => {
-            const result = await client1.transport.messages.sendMessage({
-                recipients: [client2.address, client5.address],
-                content: {
-                    "@type": "Mail",
-                    body: "b",
-                    cc: [client2.address],
-                    subject: "a",
-                    to: [client5.address]
-                }
-            });
-            expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
-            expect(result.error.message).toBe(
-                `The Message cannot be sent as there is no active Relationship to the recipient(s) with the following address(es): '${client5.address.toString()}'. However, please note that Messages whose content is a Notification can be sent on terminated Relationships as well.`
-            );
-        });
-
-        test("should throw correct error for Messages with multiple recipients if there is only a pending Relationship to some of the recipients", async () => {
+        test("should throw correct error for trying to send a Message if there are recipients to which only a pending Relationship exists", async () => {
             const templateId = (await exchangeTemplate(client1.transport, client4.transport)).id;
 
             await client4.transport.relationships.createRelationship({
@@ -353,6 +315,44 @@ describe("Message errors", () => {
             expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
             expect(result.error.message).toBe(
                 `The Message cannot be sent as there is no active Relationship to the recipient(s) with the following address(es): '${client4.address.toString()}'. However, please note that Messages whose content is a Notification can be sent on terminated Relationships as well.`
+            );
+        });
+
+        test("should throw correct error for trying to send a Message whose content is not a Notification if there are recipients to which only a terminated Relationship exists", async () => {
+            const getRelationshipResult = (await client1.transport.relationships.getRelationshipByAddress({ address: client3.address })).value;
+            expect(getRelationshipResult.status).toBe(RelationshipStatus.Active);
+
+            await client1.transport.relationships.terminateRelationship({ relationshipId: getRelationshipResult.id });
+            const terminatedRelationship = (await syncUntilHasRelationships(client3.transport))[0];
+            expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
+
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client3.address],
+                content: {
+                    "@type": "Mail",
+                    body: "b",
+                    cc: [],
+                    subject: "a",
+                    to: [client3.address]
+                }
+            });
+            expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
+            expect(result.error.message).toBe(
+                `The Message cannot be sent as there is no active Relationship to the recipient(s) with the following address(es): '${client3.address.toString()}'. However, please note that Messages whose content is a Notification can be sent on terminated Relationships as well.`
+            );
+        });
+
+        test("should throw less restrictive transport error for trying to send a Message whose content is a Notification if there are recipients to which neither an active nor a terminated Relationship exists", async () => {
+            const notificationId = await ConsumptionIds.notification.generate();
+            const notificationToBeSent = Notification.from({ id: notificationId, items: [TestNotificationItem.from({})] });
+
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client5.address],
+                content: notificationToBeSent.toJSON()
+            });
+            expect(result).toBeAnError(/.*/, "error.transport.messages.hasNeitherActiveNorTerminatedRelationship");
+            expect(result.error.message).toBe(
+                `The Message cannot be sent as there is neither an active nor a terminated Relationship to the recipient(s) with the following address(es): '${client5.address.toString()}'.`
             );
         });
     });
@@ -383,7 +383,7 @@ describe("Message errors", () => {
             }
         });
 
-        test("should throw correct error for Messages with multiple recipients if its content is not a Notification and all recipients are in deletion", async () => {
+        test("should throw correct error for Messages whose content is not a Notification if there are recipients in deletion", async () => {
             await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
             await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
             await client1.eventBus.waitForRunningEventHandlers();
@@ -399,19 +399,7 @@ describe("Message errors", () => {
             );
         });
 
-        test("should throw correct error for Messages with multiple recipients if its content is not a Notification and some of the recipients are in deletion", async () => {
-            await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-            await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
-            await client1.eventBus.waitForRunningEventHandlers();
-
-            const result = await sendMessageToMultipleRecipients(client1.transport, [client2.address, client5.address]);
-            expect(result).toBeAnError(/.*/, "error.runtime.messages.peerIsInDeletion");
-            expect(result.error.message).toBe(
-                `The Message cannot be sent as the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'. However, please note that Messages whose content is a Notification can be sent to recipients in deletion.`
-            );
-        });
-
-        test("returns error sending the Request when the peer has initiated its deletion after the Request has been created", async () => {
+        test("should throw correct error for Messages whose content is a Request if the recipient has initiated its deletion after the Request has been created", async () => {
             await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
             await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
             await client1.eventBus.waitForRunningEventHandlers();
