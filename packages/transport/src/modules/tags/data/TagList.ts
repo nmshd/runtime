@@ -1,5 +1,6 @@
-import { Serializable, serialize, validate } from "@js-soft/ts-serval";
+import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 
+@type("TagList")
 export class TagList extends Serializable {
     @serialize({ type: String })
     @validate()
@@ -10,6 +11,7 @@ export class TagList extends Serializable {
     public tagsForAttributeValueTypes: Record<string, Record<string, Tag>>;
 }
 
+@type("Tag")
 export class Tag extends Serializable {
     @serialize()
     @validate()
