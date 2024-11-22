@@ -330,20 +330,28 @@ describe("TokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            password: "password"
+            passwordProtection: { password: "password", passwordType: "pw" }
         });
-        const reference = sentToken.toTokenReference().truncate();
-        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false, "password");
+        const reference = sentToken.toTokenReference();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference.truncate(), false, "password");
         tempId1 = sentToken.id;
 
         testTokens(sentToken, receivedToken, tempDate);
         expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
         expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
-        expect(sentToken.password).toBe("password");
+        expect(sentToken.passwordProtection!.password).toBe("password");
+        expect(sentToken.passwordProtection!.salt).toBeDefined();
+        expect(sentToken.passwordProtection!.salt).toHaveLength(16);
+        expect(sentToken.passwordProtection!.passwordType).toBe("pw");
+
+        expect(reference.passwordProtection!.passwordType).toBe("pw");
+        expect(reference.passwordProtection!.salt).toStrictEqual(sentToken.passwordProtection!.salt);
+
         expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
-        expect((sentToken.cache?.content.toJSON() as any).content).toBe("TestToken");
         expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
-        expect(receivedToken.password).toBe("password");
+        expect(receivedToken.passwordProtection!.password).toBe("password");
+        expect(receivedToken.passwordProtection!.salt).toStrictEqual(sentToken.passwordProtection!.salt);
+        expect(receivedToken.passwordProtection!.passwordType).toBe("pw");
     });
 
     test("should throw an error if loaded with a wrong or missing password", async function () {
@@ -354,12 +362,12 @@ describe("TokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            password: "password"
+            passwordProtection: { password: "password", passwordType: "pw" }
         });
         const reference = sentToken.toTokenReference().truncate();
 
-        await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true, "wrongPassword")).rejects.toThrow("error.platform.inputCannotBeParsed");
-        await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true)).rejects.toThrow("error.platform.recordNotFound");
+        await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true, "wrongPassword")).rejects.toThrow("error.platform.recordNotFound");
+        await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true)).rejects.toThrow("error.transport.noPasswordProvided");
     });
 
     test("should fetch multiple password-protected tokens", async function () {
@@ -370,7 +378,7 @@ describe("TokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            password: "password"
+            passwordProtection: { password: "password", passwordType: "pw" }
         });
         const reference1 = sentToken1.toTokenReference().truncate();
 
@@ -378,12 +386,12 @@ describe("TokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            password: "password"
+            passwordProtection: { password: "1234", passwordType: "pin4" }
         });
         const reference2 = sentToken2.toTokenReference().truncate();
 
         const receivedToken1 = await recipient.tokens.loadPeerTokenByTruncated(reference1, false, "password");
-        const receivedToken2 = await recipient.tokens.loadPeerTokenByTruncated(reference2, false, "password");
+        const receivedToken2 = await recipient.tokens.loadPeerTokenByTruncated(reference2, false, "1234");
         const fetchCachesResult = await recipient.tokens.fetchCaches([receivedToken1.id, receivedToken2.id]);
         expect(fetchCachesResult).toHaveLength(2);
     });

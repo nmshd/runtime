@@ -104,7 +104,7 @@ describe("AnonymousTokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            password: "password"
+            passwordProtection: { password: "password", passwordType: "pw" }
         });
         const reference = sentToken.toTokenReference().truncate();
         const receivedToken = await anonymousTokenController.loadPeerTokenByTruncated(reference, "password");
@@ -115,7 +115,9 @@ describe("AnonymousTokenController", function () {
         expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
         expect((sentToken.cache?.content.toJSON() as any).content).toBe("TestToken");
         expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
-        expect(receivedToken.password).toBe("password");
+        expect(receivedToken.passwordProtection!.password).toBe("password");
+        expect(receivedToken.passwordProtection!.salt).toStrictEqual(sentToken.passwordProtection!.salt);
+        expect(receivedToken.passwordProtection!.passwordType).toBe("pw");
     });
 
     test("should throw an error if loaded with a wrong or missing password", async function () {
@@ -125,11 +127,11 @@ describe("AnonymousTokenController", function () {
             content,
             expiresAt,
             ephemeral: false,
-            password: "password"
+            passwordProtection: { password: "password", passwordType: "pw" }
         });
         const reference = sentToken.toTokenReference().truncate();
 
-        await expect(anonymousTokenController.loadPeerTokenByTruncated(reference, "wrong-password")).rejects.toThrow("error.platform.inputCannotBeParsed");
-        await expect(anonymousTokenController.loadPeerTokenByTruncated(reference)).rejects.toThrow("error.platform.recordNotFound");
+        await expect(anonymousTokenController.loadPeerTokenByTruncated(reference, "wrong-password")).rejects.toThrow("error.platform.recordNotFound");
+        await expect(anonymousTokenController.loadPeerTokenByTruncated(reference)).rejects.toThrow("error.transport.noPasswordProvided");
     });
 });
