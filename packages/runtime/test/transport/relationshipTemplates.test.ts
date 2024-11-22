@@ -355,7 +355,10 @@ describe("RelationshipTemplate Tests", () => {
                 reference: createResult.value.truncatedReference,
                 password: "wrong-password"
             });
-            expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+            expect(loadResult).toBeAnError(
+                "RelationshipTemplate not found. Make sure the ID exists, the record is not expired and the entered password is correct.",
+                "error.runtime.recordNotFound"
+            );
         });
 
         test("validation error when creating a template with empty string as the password", async () => {
