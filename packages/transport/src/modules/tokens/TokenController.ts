@@ -5,6 +5,7 @@ import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, TransportCoreErrors, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
+import { PasswordProtection } from "../../core/types/PasswordProtection";
 import { AccountController } from "../accounts/AccountController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetTokensResponse } from "./backbone/BackboneGetTokens";

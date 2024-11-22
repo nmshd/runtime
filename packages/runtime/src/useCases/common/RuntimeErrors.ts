@@ -88,6 +88,13 @@ class RelationshipTemplates {
         );
     }
 
+    public passwordProtectionMustBeInherited(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationshipTemplates.passwordProtectionMustBeInherited",
+            "If a RelationshipTemplate has password protection, Tokens created from it must have the same password protection."
+        );
+    }
+
     public cannotCreateTokenForPeerTemplate(): ApplicationError {
         return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateTokenForPeerTemplate", "You cannot create a Token for a peer RelationshipTemplate.");
     }

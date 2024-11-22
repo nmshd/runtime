@@ -1,8 +1,21 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { File, FileController, TokenContentFile, TokenController } from "@nmshd/transport";
+import { File, FileController, PasswordProtectionCreationParameters, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, FileIdString, ISO8601DateTimeString, QRCode, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { DateTime } from "luxon";
+import { nameof } from "ts-simple-nameof";
+import {
+    AddressString,
+    FileIdString,
+    ISO8601DateTimeString,
+    QRCode,
+    RuntimeErrors,
+    SchemaRepository,
+    SchemaValidator,
+    UseCase,
+    ValidationFailure,
+    ValidationResult
+} from "../../common";
 
 export interface CreateTokenQRCodeForFileRequest {
     fileId: FileIdString;
@@ -18,6 +31,28 @@ export interface CreateTokenQRCodeForFileResponse {
 class Validator extends SchemaValidator<CreateTokenQRCodeForFileRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenQRCodeForFileRequest"));
+    }
+
+    public override validate(input: CreateTokenQRCodeForFileRequest): ValidationResult {
+        const validationResult = super.validate(input);
+        if (!validationResult.isValid()) return validationResult;
+
+        if (input.expiresAt && DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateTokenQRCodeForFileRequest>((r) => r.expiresAt)}' must be in the future`),
+                    nameof<CreateTokenQRCodeForFileRequest>((r) => r.expiresAt)
+                )
+            );
+        }
+
+        if (input.passwordProtection?.passwordIsPin) {
+            if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {
+                validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
+            }
+        }
+
+        return validationResult;
     }
 }
 
@@ -49,7 +84,7 @@ export class CreateTokenQRCodeForFileUseCase extends UseCase<CreateTokenQRCodeFo
             expiresAt: tokenExpiry,
             ephemeral: true,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            password: request.password
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         const qrCode = await QRCode.forTruncateable(token);

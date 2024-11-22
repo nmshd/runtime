@@ -2,6 +2,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core";
+import { PasswordProtection } from "../../core/types/PasswordProtection";
 import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
 import { CachedToken } from "./local/CachedToken";
 import { Token } from "./local/Token";

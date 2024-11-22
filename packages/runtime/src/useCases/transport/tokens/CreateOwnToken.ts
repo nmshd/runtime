@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, TokenController } from "@nmshd/transport";
+import { AccountController, PasswordProtectionCreationParameters, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -35,15 +35,10 @@ class Validator extends SchemaValidator<CreateOwnTokenRequest> {
             );
         }
 
-        if (input.password && /^\d+$/.test(input.password) && (input.password.length > 12 || input.password.length < 2)) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(
-                        `Your chosen '${nameof<CreateOwnTokenRequest>((r) => r.password)}' is a PIN (consists of numbers only) and PINs must be at least 2 and at most 12 digits long`
-                    ),
-                    nameof<CreateOwnTokenRequest>((r) => r.password)
-                )
-            );
+        if (input.passwordProtection?.passwordIsPin) {
+            if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {
+                validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
+            }
         }
 
         return validationResult;
@@ -72,7 +67,7 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
             expiresAt: CoreDate.from(request.expiresAt),
             ephemeral: request.ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            password: request.password
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         if (!request.ephemeral) {

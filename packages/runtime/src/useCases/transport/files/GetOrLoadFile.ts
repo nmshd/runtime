@@ -39,7 +39,7 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         return result;
     }
 
-    private async loadFileFromReference(reference: string, password: string): Promise<Result<FileDTO>> {
+    private async loadFileFromReference(reference: string, password?: string): Promise<Result<FileDTO>> {
         if (reference.startsWith(Base64ForIdPrefix.File)) {
             return await this.loadFileFromFileReference(reference);
         }

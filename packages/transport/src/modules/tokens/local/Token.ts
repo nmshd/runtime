@@ -3,6 +3,7 @@ import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
+import { IPasswordProtection, PasswordProtection } from "../../../core/types/PasswordProtection";
 import { TokenReference } from "../transmission/TokenReference";
 import { CachedToken, ICachedToken } from "./CachedToken";
 
