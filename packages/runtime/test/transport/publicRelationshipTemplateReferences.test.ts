@@ -20,7 +20,7 @@ afterEach(() => {
 });
 
 describe("PublicRelationshipTemplateReferences", () => {
-    test("get PublicRelationshipTemplateReferences", async () => {
+    test("should read the PublicRelationshipTemplateReferences", async () => {
         const mockResponse = [
             {
                 title: "a",
@@ -43,8 +43,8 @@ describe("PublicRelationshipTemplateReferences", () => {
             return ClientResult.ok(mockResponse);
         });
 
-        const publicRelationshipTemplates = await runtimeServices.transport.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
+        const publicRelationshipTemplateReferences = await runtimeServices.transport.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
 
-        expect(publicRelationshipTemplates.value).toStrictEqual(mockResponse);
+        expect(publicRelationshipTemplateReferences.value).toStrictEqual(mockResponse);
     });
 });
