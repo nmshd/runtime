@@ -1,17 +1,26 @@
 import { CoreDate } from "@nmshd/core-types";
 import { DateTime } from "luxon";
-import { DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
-import { emptyRelationshipTemplateContent, RuntimeServiceProvider, uploadFile } from "../lib";
+import { DatawalletSynchronizedEvent, DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
+import { emptyRelationshipTemplateContent, MockEventBus, RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
 let rTransportServices: TransportServices;
 
+let sEventBus: MockEventBus;
+
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableDatawallet: true });
     sTransportServices = runtimeServices[0].transport;
     rTransportServices = runtimeServices[1].transport;
+
+    sEventBus = runtimeServices[0].eventBus;
 }, 30000);
+
+beforeEach(() => {
+    sEventBus.reset();
+});
+
 afterAll(async () => await serviceProvider.stop());
 
 describe("Sync", () => {
@@ -47,6 +56,12 @@ describe("Automatic Datawallet Sync", () => {
         const newSyncTime = await getSyncInfo();
 
         expect(oldSyncTime).not.toStrictEqual(newSyncTime);
+    });
+
+    test("should receive a DatawalletSynchronizedEvent", async () => {
+        await sTransportServices.account.syncDatawallet();
+
+        await expect(sEventBus).toHavePublished(DatawalletSynchronizedEvent);
     });
 
     test("should not run an automatic datawallet sync", async () => {
