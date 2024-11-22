@@ -11,7 +11,7 @@ export class GetTagsUseCase extends UseCase<void, TagListDTO> {
     }
 
     protected async executeInternal(): Promise<Result<TagListDTO>> {
-        const tagListDTO = TagMapper.toTagListDTO(await this.tagController.getTags());
-        return Result.ok(tagListDTO);
+        const tagList = await this.tagController.getTags();
+        return Result.ok(TagMapper.toTagListDTO(tagList));
     }
 }

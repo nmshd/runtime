@@ -3,7 +3,7 @@ export interface TagListDTO {
     tagsForAttributeValueTypes: Record<string, Record<string, TagDTO>>;
 }
 
-interface TagDTO {
+export interface TagDTO {
     displayNames: Record<string, string>;
     children?: Record<string, TagDTO>;
 }

@@ -1,7 +1,7 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 
 export class TagList extends Serializable {
-    @serialize()
+    @serialize({ type: String })
     @validate()
     public supportedLanguages: string[];
 
