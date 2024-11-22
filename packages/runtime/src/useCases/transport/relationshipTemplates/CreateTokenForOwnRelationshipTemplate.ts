@@ -88,7 +88,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
         }
 
         if (template.passwordProtection && request.passwordProtection !== template.passwordProtection) {
-            return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
+            return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited()); // TODO: testen
         }
 
         const templatePasswordProtection = template.passwordProtection ? SharedPasswordProtection.from(template.passwordProtection) : undefined;

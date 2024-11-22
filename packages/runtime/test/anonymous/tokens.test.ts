@@ -42,25 +42,35 @@ describe("Anonymous tokens", () => {
     });
 
     describe("Password-protected tokens", () => {
-        test("send and receive a password-protected token", async () => {
-            const uploadedTokenWithPassword = await uploadOwnToken(runtimeService.transport, undefined, "password");
+        let tokenReference: string;
 
+        beforeAll(async () => {
+            tokenReference = (await uploadOwnToken(runtimeService.transport, undefined, "password")).truncatedReference;
+        });
+
+        test("send and receive a password-protected token", async () => {
             const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
-                reference: uploadedTokenWithPassword.truncatedReference,
+                reference: tokenReference,
                 password: "password"
             });
             expect(result).toBeSuccessful();
-            expect(result.value.password).toBe("password");
+            expect(result.value.passwordProtection?.password).toBe("password");
+            expect(result.value.passwordProtection?.passwordIsPin).toBeUndefined();
         });
 
         test("error when loading a token with a wrong password", async () => {
-            const uploadedTokenWithPassword = await uploadOwnToken(runtimeService.transport, undefined, "password");
-
             const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
-                reference: uploadedTokenWithPassword.truncatedReference,
+                reference: tokenReference,
                 password: "wrong-password"
             });
-            expect(result).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
+            expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("error when loading a token with a missing password", async () => {
+            const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
+                reference: tokenReference
+            });
+            expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });
 });

@@ -1,6 +1,6 @@
 import { CoreDate } from "@nmshd/core-types";
 import { GetTokensQuery, OwnerRestriction } from "../../src";
-import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../lib";
+import { createTemplate, exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;
@@ -124,7 +124,7 @@ describe("Password-protected tokens", () => {
         expect(createResult.value.passwordProtection?.password).toBe("1234");
         expect(createResult.value.passwordProtection?.passwordIsPin).toBe(true);
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "password" });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "1234" });
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.passwordProtection?.password).toBe("1234");
         expect(loadResult.value.passwordProtection?.passwordIsPin).toBe(true);
@@ -140,7 +140,23 @@ describe("Password-protected tokens", () => {
         expect(createResult).toBeSuccessful();
 
         const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "wrong-password" });
-        expect(loadResult).toBeAnError(/.*/, "error.platform.recordNotFound");
+        expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("error when loading a token with no password", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password" }
+        });
+        expect(createResult).toBeSuccessful();
+
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({
+            reference: createResult.value.truncatedReference,
+            ephemeral: true
+        });
+        expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
     });
 
     test("validation error when creating a token with empty string as the password", async () => {
@@ -150,7 +166,7 @@ describe("Password-protected tokens", () => {
             ephemeral: true,
             passwordProtection: { password: "" }
         });
-        expect(createResult).toBeAnError("password must NOT have fewer than 1 characters", "error.runtime.validation.invalidPropertyValue");
+        expect(createResult).toBeAnError("PasswordProtectionCreationParameters.password :: Value is shorter than 1 characters", "error.runtime.requestDeserialization");
     });
 
     test("validation error when creating a token with an invalid PIN", async () => {
@@ -162,20 +178,154 @@ describe("Password-protected tokens", () => {
         });
         expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
     });
+});
 
-    test("error when loading a token with no password", async () => {
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-            content: emptyRelationshipTemplateContent,
-            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-            passwordProtection: {
-                password: "password"
-            }
+describe("Password-protected tokens for files", () => {
+    let fileId: string;
+
+    beforeAll(async () => {
+        fileId = (await uploadFile(runtimeServices1.transport)).id;
+    });
+
+    test("send and receive a file via password-protected token", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password" }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection?.password).toBe("password");
+        expect(createResult.value.passwordProtection?.passwordIsPin).toBeUndefined();
+
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference, password: "password" });
+        expect(loadResult).toBeSuccessful();
+    });
+
+    test("send and receive a file via PIN-protected token", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "1234", passwordIsPin: true }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection?.password).toBe("1234");
+        expect(createResult.value.passwordProtection?.passwordIsPin).toBe(true);
+
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference, password: "1234" });
+        expect(loadResult).toBeSuccessful();
+    });
+
+    test("error when loading the file with a wrong password", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password" }
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference, password: "wrong-password" });
+        expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("error when loading the file with no password", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password" }
         });
+        expect(createResult).toBeSuccessful();
+
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference });
         expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
+    });
+
+    test("validation error when creating a token with empty string as the password", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "" }
+        });
+        expect(createResult).toBeAnError("PasswordProtectionCreationParameters.password :: Value is shorter than 1 characters", "error.runtime.requestDeserialization");
+    });
+
+    test("validation error when creating a token with an invalid PIN", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "invalid-pin", passwordIsPin: true }
+        });
+        expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
+    });
+});
+
+describe("Password-protected tokens for unprotected templates", () => {
+    let templateId: string;
+
+    beforeAll(async () => {
+        templateId = (await createTemplate(runtimeServices1.transport)).id;
+    });
+
+    test("send and receive a template via password-protected token", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId,
+            passwordProtection: { password: "password" }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection?.password).toBe("password");
+        expect(createResult.value.passwordProtection?.passwordIsPin).toBeUndefined();
+
+        const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+            reference: createResult.value.truncatedReference,
+            password: "password"
+        });
+        expect(loadResult).toBeSuccessful();
+    });
+
+    test("send and receive a template via PIN-protected token", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId,
+            passwordProtection: { password: "1234", passwordIsPin: true }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection?.password).toBe("1234");
+        expect(createResult.value.passwordProtection?.passwordIsPin).toBe(true);
+
+        const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+            reference: createResult.value.truncatedReference,
+            password: "1234"
+        });
+        expect(loadResult).toBeSuccessful();
+    });
+
+    test("error when loading the template with a wrong password", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId,
+            passwordProtection: { password: "password" }
+        });
+        expect(createResult).toBeSuccessful();
+
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference, password: "wrong-password" });
+        expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+    });
+
+    test("error when loading the template with no password", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId,
+            passwordProtection: { password: "password" }
+        });
+        expect(createResult).toBeSuccessful();
+
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference });
+        expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
+    });
+
+    test("validation error when creating a token with empty string as the password", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId,
+            passwordProtection: { password: "" }
+        });
+        expect(createResult).toBeAnError("PasswordProtectionCreationParameters.password :: Value is shorter than 1 characters", "error.runtime.requestDeserialization");
+    });
+
+    test("validation error when creating a token with an invalid PIN", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId: templateId,
+            passwordProtection: { password: "invalid-pin", passwordIsPin: true }
+        });
+        expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
     });
 });
