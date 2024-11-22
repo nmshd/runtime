@@ -117,14 +117,14 @@ class Messages {
     public hasNoActiveRelationship(addresses: string[]) {
         return new ApplicationError(
             "error.runtime.messages.hasNoActiveRelationship",
-            `The Message cannot be sent as its content is not a Notification and there is no active Relationship to the recipient(s) with the following address(es): ${addresses.map((address) => `'${address}'`).join(", ")}.`
+            `The Message cannot be sent as there is no active Relationship to the recipient(s) with the following address(es): ${addresses.map((address) => `'${address}'`).join(", ")}. However, please note that Messages whose content is a Notification can be sent on terminated Relationships as well.`
         );
     }
 
     public peerIsInDeletion(addresses: string[]) {
         return new ApplicationError(
             "error.runtime.messages.peerIsInDeletion",
-            `The Message cannot be sent as its content is not a Notification and the recipient(s) with the following address(es) being in deletion: ${addresses.map((address) => `'${address}'`).join(", ")}.`
+            `The Message cannot be sent as the recipient(s) with the following address(es) being in deletion: ${addresses.map((address) => `'${address}'`).join(", ")}. However, please note that Messages whose content is a Notification can be sent to recipients in deletion.`
         );
     }
 
