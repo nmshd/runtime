@@ -15,6 +15,7 @@ import {
     AppLaunchModule,
     AppRuntimeModuleConfiguration,
     AppSyncModule,
+    DatawalletSynchronizedModule,
     IAppRuntimeModuleConstructor,
     IdentityDeletionProcessStatusChangedModule,
     MailReceivedModule,
@@ -299,10 +300,11 @@ export class AppRuntime extends Runtime<AppConfig> {
         pushNotification: PushNotificationModule,
         mailReceived: MailReceivedModule,
         onboardingChangeReceived: OnboardingChangeReceivedModule,
+        datawalletSynchronized: DatawalletSynchronizedModule,
+        identityDeletionProcessStatusChanged: IdentityDeletionProcessStatusChangedModule,
         messageReceived: MessageReceivedModule,
         relationshipChanged: RelationshipChangedModule,
-        relationshipTemplateProcessed: RelationshipTemplateProcessedModule,
-        identityDeletionProcessStatusChanged: IdentityDeletionProcessStatusChangedModule
+        relationshipTemplateProcessed: RelationshipTemplateProcessedModule
     };
 
     public static registerModule(moduleName: string, ctor: IAppRuntimeModuleConstructor): void {
