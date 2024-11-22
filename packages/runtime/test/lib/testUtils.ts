@@ -521,6 +521,24 @@ export async function ensurePendingRelationship(sTransportServices: TransportSer
     return (await sTransportServices.relationships.getRelationships({})).value[0];
 }
 
+export async function reactivateTerminatedRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<void> {
+    const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+
+    const terminatedRelationshipsToPeer = (
+        await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress, status: RelationshipStatus.Terminated } })
+    ).value;
+
+    if (terminatedRelationshipsToPeer.length !== 0) {
+        const terminatedRelationshipId = terminatedRelationshipsToPeer[0].id;
+        await rTransportServices.relationships.requestRelationshipReactivation({ relationshipId: terminatedRelationshipId });
+        await syncUntilHasRelationships(sTransportServices);
+        await sTransportServices.relationships.acceptRelationshipReactivation({ relationshipId: terminatedRelationshipId });
+        await syncUntilHasRelationships(rTransportServices);
+    }
+
+    return;
+}
+
 export async function mutualDecomposeIfActiveRelationshipExists(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<void> {
     const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
