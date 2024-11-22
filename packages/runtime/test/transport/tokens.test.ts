@@ -101,14 +101,33 @@ describe("Password-protected tokens", () => {
             content: { key: "value" },
             expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
             ephemeral: true,
-            password: "password"
+            passwordProtection: { password: "password" }
         });
         expect(createResult).toBeSuccessful();
-        expect(createResult.value.password).toBe("password");
+        expect(createResult.value.passwordProtection?.password).toBe("password");
+        expect(createResult.value.passwordProtection?.passwordIsPin).toBeUndefined();
 
         const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "password" });
         expect(loadResult).toBeSuccessful();
-        expect(loadResult.value.password).toBe("password");
+        expect(loadResult.value.passwordProtection?.password).toBe("password");
+        expect(loadResult.value.passwordProtection?.passwordIsPin).toBeUndefined();
+    });
+
+    test("send and receive a PIN-protected token", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "1234", passwordIsPin: true }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection?.password).toBe("1234");
+        expect(createResult.value.passwordProtection?.passwordIsPin).toBe(true);
+
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "password" });
+        expect(loadResult).toBeSuccessful();
+        expect(loadResult.value.passwordProtection?.password).toBe("1234");
+        expect(loadResult.value.passwordProtection?.passwordIsPin).toBe(true);
     });
 
     test("error when loading a token with a wrong password", async () => {
@@ -116,11 +135,47 @@ describe("Password-protected tokens", () => {
             content: { key: "value" },
             expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
             ephemeral: true,
-            password: "password"
+            passwordProtection: { password: "password" }
         });
         expect(createResult).toBeSuccessful();
 
         const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "wrong-password" });
-        expect(loadResult).toBeAnError(/.*/, "error.platform.inputCannotBeParsed");
+        expect(loadResult).toBeAnError(/.*/, "error.platform.recordNotFound");
+    });
+
+    test("validation error when creating a token with empty string as the password", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "" }
+        });
+        expect(createResult).toBeAnError("password must NOT have fewer than 1 characters", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("validation error when creating a token with an invalid PIN", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "invalid-pin", passwordIsPin: true }
+        });
+        expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
+    });
+
+    test("error when loading a token with no password", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+            passwordProtection: {
+                password: "password"
+            }
+        });
+        expect(createResult).toBeSuccessful();
+
+        const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+            reference: createResult.value.truncatedReference
+        });
+        expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
     });
 });

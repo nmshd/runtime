@@ -166,7 +166,7 @@ export async function uploadOwnToken(transportServices: TransportServices, forId
         expiresAt: DateTime.utc().plus({ days: 1 }).toString(),
         ephemeral: false,
         forIdentity,
-        password
+        passwordProtection: password ? { password } : undefined
     });
 
     expect(response).toBeSuccessful();
