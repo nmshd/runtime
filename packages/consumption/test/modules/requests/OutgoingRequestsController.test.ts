@@ -226,8 +226,8 @@ describe("OutgoingRequestsController", function () {
         });
     });
 
-    describe("CanCreate (on terminated relationship", function () {
-        test("returns 'error' when the relationship is terminated", async function () {
+    describe("CanCreate (on terminated relationship)", function () {
+        test("returns a validation result that contains an error if the relationship is terminated", async function () {
             await Given.aTerminatedRelationshipToIdentity();
             const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
                 content: {
@@ -279,6 +279,7 @@ describe("OutgoingRequestsController", function () {
                     ]
                 }
             });
+
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.wrongRelationshipStatus",
                 message: "You cannot create a request to 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
