@@ -51,6 +51,10 @@ class General {
     public cacheEmpty(entityName: string | Function, id: string) {
         return new ApplicationError("error.runtime.cacheEmpty", `The cache of ${entityName instanceof Function ? entityName.name : entityName} with id '${id}' is empty.`);
     }
+
+    public invalidPin(): ApplicationError {
+        return new ApplicationError("error.runtime.validation.invalidPin", "The PIN is invalid. It must consist of 4 to 16 digits from 0 to 9.");
+    }
 }
 
 class Serval {

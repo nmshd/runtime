@@ -22026,6 +22026,23 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -22316,6 +22333,9 @@ export const LoadPeerRelationshipTemplateRequest: any = {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
                         }
                     ]
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [

@@ -187,7 +187,8 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(templateFrom.id, templateFrom.secretKey);
+        const reference = templateFrom.toRelationshipTemplateReference().truncate();
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         await to.relationships.sendRelationship({
             template: templateTo,
@@ -241,7 +242,7 @@ export class TestUtil {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
 
         const relRequest = await to.relationships.sendRelationship({
             template: templateTo,
@@ -432,7 +433,7 @@ export class TestUtil {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const template = await account.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
+        const template = await account.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
         return template;
     }
 

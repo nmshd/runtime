@@ -56,7 +56,8 @@ describe("End2End Request/Response via Relationship Template", function () {
     });
 
     test("recipient: load Relationship Template", async function () {
-        rTemplate = await rAccountController.relationshipTemplates.loadPeerRelationshipTemplate(sTemplate.id, sTemplate.secretKey);
+        const reference = sTemplate.toRelationshipTemplateReference().truncate();
+        rTemplate = await rAccountController.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
     });
 
     test("recipient: create Local Request", async function () {
@@ -343,7 +344,8 @@ describe("End2End Request via Template and Response via Message", function () {
     });
 
     test("recipient: load Relationship Template", async function () {
-        rTemplate = await rAccountController.relationshipTemplates.loadPeerRelationshipTemplate(sTemplate.id, sTemplate.secretKey);
+        const reference = sTemplate.toRelationshipTemplateReference().truncate();
+        rTemplate = await rAccountController.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
     });
 
     test("recipient: create Local Request", async function () {
