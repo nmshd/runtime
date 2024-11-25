@@ -367,14 +367,15 @@ describe("RelationshipTemplate Tests", () => {
                     content: emptyRelationshipTemplateContent,
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
                     passwordProtection: {
-                        password: "wrong-password"
+                        password: "password"
                     }
                 })
             ).value.id;
             const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: createResult.value.truncatedReference
+                reference: createResult.value.truncatedReference,
+                password: "wrong-password"
             });
             expect(loadResult).toBeAnError(
                 "RelationshipTemplate not found. Make sure the ID exists, the record is not expired and the entered password is correct.",
