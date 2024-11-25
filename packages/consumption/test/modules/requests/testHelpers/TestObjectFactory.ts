@@ -335,6 +335,7 @@ export class TestObjectFactory {
     public static createIdentityAttribute(properties?: Partial<IIdentityAttribute>): IdentityAttribute {
         return IdentityAttribute.from({
             value: properties?.value ?? GivenName.fromAny({ value: "aGivenName" }),
+            tags: properties?.tags,
             owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }
@@ -342,9 +343,9 @@ export class TestObjectFactory {
     public static createRelationshipAttribute(properties?: Partial<IRelationshipAttribute>): RelationshipAttribute {
         return RelationshipAttribute.from({
             value: properties?.value ?? ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" }),
-            confidentiality: RelationshipAttributeConfidentiality.Public,
-            key: "aKey",
-            isTechnical: false,
+            confidentiality: properties?.confidentiality ?? RelationshipAttributeConfidentiality.Public,
+            key: properties?.key ?? "aKey",
+            isTechnical: properties?.isTechnical ?? false,
             owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }
