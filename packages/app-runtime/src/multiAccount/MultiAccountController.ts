@@ -82,16 +82,15 @@ export class MultiAccountController {
         return dbAccounts.map((account) => LocalAccount.from(account));
     }
 
-    // TODO: test
     public async getAccountsInDeletion(): Promise<LocalAccount[]> {
         const allAccounts = await this.getAccounts();
-        const accountsInDeletion = allAccounts.filter((item) => item.deletionDate === undefined);
+        const accountsInDeletion = allAccounts.filter((item) => item.deletionDate !== undefined);
         return accountsInDeletion;
     }
 
     public async getAccountsNotInDeletion(): Promise<LocalAccount[]> {
         const allAccounts = await this.getAccounts();
-        const accountsNotInDeletion = allAccounts.filter((item) => item.deletionDate !== undefined);
+        const accountsNotInDeletion = allAccounts.filter((item) => item.deletionDate === undefined);
         return accountsNotInDeletion;
     }
 
