@@ -336,7 +336,7 @@ export class RelationshipTemplateController extends TransportController {
         try {
             await this.updateCacheOfTemplate(relationshipTemplate);
         } catch (e) {
-            if (e instanceof RequestError && e.status === 404) {
+            if (passwordProtection && e instanceof RequestError && e.status === 404) {
                 throw new RequestError(
                     e.method,
                     e.path,
