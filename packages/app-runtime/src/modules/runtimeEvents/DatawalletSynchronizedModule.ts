@@ -1,4 +1,4 @@
-import { DatawalletSynchronizedEvent } from "@nmshd/runtime";
+import { DatawalletSynchronizedEvent, IdentityDeletionProcessStatus } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { LocalAccountDeletionDateChangedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
@@ -27,7 +27,19 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
             return;
         }
 
-        const newDeletionDate = identityDeletionProcessResult.value[0].gracePeriodEndsAt;
+        let newDeletionDate;
+        const mostRecentIdentityDeletionProcess = identityDeletionProcessResult.value[identityDeletionProcessResult.value.length - 1];
+
+        switch (mostRecentIdentityDeletionProcess.status) {
+            case IdentityDeletionProcessStatus.Approved:
+                newDeletionDate = mostRecentIdentityDeletionProcess.gracePeriodEndsAt;
+                break;
+            case IdentityDeletionProcessStatus.Cancelled:
+            case IdentityDeletionProcessStatus.Rejected:
+            case IdentityDeletionProcessStatus.WaitingForApproval:
+                newDeletionDate = undefined;
+                break;
+        }
 
         if (previousDeletionDate === newDeletionDate) return;
 

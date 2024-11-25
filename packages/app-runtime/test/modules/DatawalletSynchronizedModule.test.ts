@@ -38,6 +38,7 @@ describe("DatawalletSynchronized", function () {
         if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
             abortResult = await sessionDevice1.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
             await sessionDevice2.transportServices.account.syncDatawallet();
+            // await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
         }
         if (abortResult?.isError) throw abortResult.error;
     });
@@ -47,40 +48,111 @@ describe("DatawalletSynchronized", function () {
         await runtimeDevice2.stop();
     });
 
-    // TODO: add test for cancelling IdentityDeletionProcess
+    test("should set the deletionDate of the LocalAccount initiate an IdentityDeletionProcess on a second device that is online", async function () {
+        const initiateResult = await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        expect(sessionDevice2.account.deletionDate).toBeUndefined();
 
-    test("should publish a LocalAccountDeletionDateChangedEvent if the deletion date changed after a datawallet sync", async function () {
+        await sessionDevice2.transportServices.account.syncDatawallet();
+        await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
+
+        expect(sessionDevice2.account.deletionDate).toBeDefined();
+        expect(sessionDevice2.account.deletionDate).toBe(initiateResult.value.gracePeriodEndsAt);
+    });
+
+    test("should unset the deletionDate of the LocalAccount cancelling an IdentityDeletionProcess on a second device that is online", async function () {
         await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await sessionDevice2.transportServices.account.syncDatawallet();
+        await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
+
+        await sessionDevice1.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
+        expect(sessionDevice2.account.deletionDate).toBeDefined();
+
+        await sessionDevice2.transportServices.account.syncDatawallet();
+        await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
+
+        expect(sessionDevice2.account.deletionDate).toBeUndefined();
+    });
+
+    test.skip("should set the deletionDate of the LocalAccount initiating an IdentityDeletionProcess on a second device that was offline", async function () {
+        await runtimeDevice2.stop();
+
+        await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        expect(sessionDevice2.account.deletionDate).toBeUndefined();
+
+        await runtimeDevice2.init();
+        await runtimeDevice2.start();
+
+        await sessionDevice2.transportServices.account.syncDatawallet();
+        // await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
+
+        expect(sessionDevice2.account.deletionDate).toBeDefined();
+    });
+
+    test.skip("should unset the deletionDate of the LocalAccount cancelling an IdentityDeletionProcess on a second device that was offline", async function () {
+        await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await sessionDevice2.transportServices.account.syncDatawallet();
+        await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
+
+        await runtimeDevice2.stop();
+
+        await sessionDevice1.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
+        expect(sessionDevice2.account.deletionDate).toBeDefined();
+
+        await runtimeDevice2.init();
+        await runtimeDevice2.start();
+
+        await sessionDevice2.transportServices.account.syncDatawallet();
+        // await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
+
+        expect(sessionDevice2.account.deletionDate).toBeDefined();
+    });
+
+    test("should publish a LocalAccountDeletionDateChangedEvent if a deletion date is set after a datawallet sync", async function () {
+        const initiateDeletionResult = await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
         expect(sessionDevice2.account.deletionDate).toBeUndefined();
 
         const eventListener = new EventListener(runtimeDevice2, [DatawalletSynchronizedEvent, LocalAccountDeletionDateChangedEvent]);
         eventListener.start();
 
         await sessionDevice2.transportServices.account.syncDatawallet();
+        await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
 
         eventListener.stop();
         const events = eventListener.getReceivedEvents();
         expect(events).toHaveLength(2);
+
+        const identityDeletionProcessStatusChangedEvent = events[0].instance as DatawalletSynchronizedEvent;
+        expect(identityDeletionProcessStatusChangedEvent).toBeInstanceOf(DatawalletSynchronizedEvent);
+
+        const localAccountDeletionDateChangedEvent = events[1].instance as LocalAccountDeletionDateChangedEvent;
+        expect(localAccountDeletionDateChangedEvent).toBeInstanceOf(LocalAccountDeletionDateChangedEvent);
+        expect(localAccountDeletionDateChangedEvent.data).toBeDefined();
+        expect(localAccountDeletionDateChangedEvent.data).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
     });
 
-    test("should set the deletionDate of the LocalAccount on a second device that is online", async function () {
-        const initiateResult = await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
-        expect(sessionDevice2.account.deletionDate).toBeUndefined();
-
-        await sessionDevice2.transportServices.account.syncDatawallet();
-
-        expect(sessionDevice2.account.deletionDate).toBeDefined();
-        expect(sessionDevice2.account.deletionDate).toBe(initiateResult.value.gracePeriodEndsAt);
-    });
-
-    test("should set the deletionDate of the LocalAccount on a second device that was offline", async function () {
-        await runtimeDevice2.stop();
+    test("should publish a LocalAccountDeletionDateChangedEvent if a deletion date is unset after a datawallet sync", async function () {
         await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
-        expect(sessionDevice2.account.deletionDate).toBeUndefined();
-
-        await runtimeDevice2.init();
-        await runtimeDevice2.start();
         await sessionDevice2.transportServices.account.syncDatawallet();
+        await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
+
+        await sessionDevice1.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
         expect(sessionDevice2.account.deletionDate).toBeDefined();
+
+        const eventListener = new EventListener(runtimeDevice2, [DatawalletSynchronizedEvent, LocalAccountDeletionDateChangedEvent]);
+        eventListener.start();
+
+        await sessionDevice2.transportServices.account.syncDatawallet();
+        await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
+
+        eventListener.stop();
+        const events = eventListener.getReceivedEvents();
+        expect(events).toHaveLength(2);
+
+        const identityDeletionProcessStatusChangedEvent = events[0].instance as DatawalletSynchronizedEvent;
+        expect(identityDeletionProcessStatusChangedEvent).toBeInstanceOf(DatawalletSynchronizedEvent);
+
+        const localAccountDeletionDateChangedEvent = events[1].instance as LocalAccountDeletionDateChangedEvent;
+        expect(localAccountDeletionDateChangedEvent).toBeInstanceOf(LocalAccountDeletionDateChangedEvent);
+        expect(localAccountDeletionDateChangedEvent.data).toBeUndefined();
     });
 });
