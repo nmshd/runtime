@@ -1898,7 +1898,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 predecessorId: predecessorPeerSharedIdentityAttribute.id,
                 successorId: successorId,
                 successorContent: TestObjectFactory.createIdentityAttribute({
-                    owner: recipient
+                    owner: recipient,
+                    tags: ["aNewTag"]
                 })
             });
 
@@ -1958,7 +1959,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 predecessorId: predecessorPeerSharedRelationshipAttribute.id,
                 successorId: successorId,
                 successorContent: TestObjectFactory.createRelationshipAttribute({
-                    owner: thirdPartyAddress
+                    owner: thirdPartyAddress,
+                    isTechnical: true
                 })
             });
 
