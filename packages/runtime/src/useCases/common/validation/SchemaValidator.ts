@@ -18,6 +18,16 @@ export class SchemaValidator<T extends object> implements IValidator<T> {
             }
         }
 
+        if ("passwordProtection" in input) {
+            const passwordProtection = input.passwordProtection as { password: string; passwordIsPin?: true };
+
+            if (passwordProtection.passwordIsPin) {
+                if (!/^[0-9]{4,16}$/.test(passwordProtection.password)) {
+                    validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
+                }
+            }
+        }
+
         return validationResult;
     }
 

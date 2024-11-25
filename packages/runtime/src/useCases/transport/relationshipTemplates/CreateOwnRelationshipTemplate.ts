@@ -6,7 +6,7 @@ import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { AccountController, PasswordProtectionCreationParameters, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
-import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
@@ -29,19 +29,6 @@ export interface CreateOwnRelationshipTemplateRequest {
 class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateOwnRelationshipTemplateRequest"));
-    }
-
-    public override validate(input: CreateOwnRelationshipTemplateRequest): ValidationResult {
-        const validationResult = super.validate(input);
-        if (!validationResult.isValid()) return validationResult;
-
-        if (input.passwordProtection?.passwordIsPin) {
-            if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {
-                validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
-            }
-        }
-
-        return validationResult;
     }
 }
 

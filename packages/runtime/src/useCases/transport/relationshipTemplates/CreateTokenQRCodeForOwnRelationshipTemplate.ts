@@ -9,18 +9,7 @@ import {
     TokenController
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import {
-    AddressString,
-    ISO8601DateTimeString,
-    QRCode,
-    RelationshipTemplateIdString,
-    RuntimeErrors,
-    SchemaRepository,
-    SchemaValidator,
-    UseCase,
-    ValidationFailure,
-    ValidationResult
-} from "../../common";
+import { AddressString, ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface CreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
@@ -32,19 +21,6 @@ export interface CreateTokenQRCodeForOwnTemplateRequest {
 class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenQRCodeForOwnTemplateRequest"));
-    }
-
-    public override validate(input: CreateTokenQRCodeForOwnTemplateRequest): ValidationResult {
-        const validationResult = super.validate(input);
-        if (!validationResult.isValid()) return validationResult;
-
-        if (input.passwordProtection?.passwordIsPin) {
-            if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {
-                validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
-            }
-        }
-
-        return validationResult;
     }
 }
 

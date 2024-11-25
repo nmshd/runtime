@@ -12,17 +12,7 @@ import {
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
 import { TokenDTO } from "../../../types";
-import {
-    AddressString,
-    ISO8601DateTimeString,
-    RelationshipTemplateIdString,
-    RuntimeErrors,
-    SchemaRepository,
-    SchemaValidator,
-    UseCase,
-    ValidationFailure,
-    ValidationResult
-} from "../../common";
+import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateTokenForOwnTemplateRequest {
@@ -36,19 +26,6 @@ export interface CreateTokenForOwnTemplateRequest {
 class Validator extends SchemaValidator<CreateTokenForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenForOwnTemplateRequest"));
-    }
-
-    public override validate(input: CreateTokenForOwnTemplateRequest): ValidationResult {
-        const validationResult = super.validate(input);
-        if (!validationResult.isValid()) return validationResult;
-
-        if (input.passwordProtection?.passwordIsPin) {
-            if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {
-                validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
-            }
-        }
-
-        return validationResult;
     }
 }
 
