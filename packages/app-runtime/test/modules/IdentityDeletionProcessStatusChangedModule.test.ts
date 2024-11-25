@@ -31,10 +31,24 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         await runtime.stop();
     });
 
-    // TODO: split test
-    test("should fire an event and set the deletionDate of the LocalAccount initiating an IdentityDeletionProcess", async function () {
+    test("should set the deletionDate of the LocalAccount initiating an IdentityDeletionProcess", async function () {
         expect(session.account.deletionDate).toBeUndefined();
 
+        const initiateDeletionResult = await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+
+        expect(session.account.deletionDate).toBeDefined();
+        expect(session.account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
+    });
+
+    test("should unset the deletionDate of the LocalAccount cancelling an IdentityDeletionProcess", async function () {
+        await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        expect(session.account.deletionDate).toBeDefined();
+
+        await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
+        expect(session.account.deletionDate).toBeUndefined();
+    });
+
+    test("should fire a LocalAccountDeletionDateChangedEvent initiating an IdentityDeletionProcess", async function () {
         const eventListener = new EventListener(runtime, [LocalAccountDeletionDateChangedEvent, IdentityDeletionProcessStatusChangedEvent]);
         eventListener.start();
 
@@ -53,13 +67,11 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         expect(localAccountDeletionDateChangedEvent).toBeInstanceOf(LocalAccountDeletionDateChangedEvent);
         expect(localAccountDeletionDateChangedEvent.data).toBeDefined();
         expect(localAccountDeletionDateChangedEvent.data).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
-
-        expect(session.account.deletionDate).toBeDefined();
-        expect(session.account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
     });
 
-    test("should fire an event and set the deletionDate of the LocalAccount cancelling an IdentityDeletionProcess", async function () {
+    test("should fire a LocalAccountDeletionDateChangedEvent cancelling an IdentityDeletionProcess", async function () {
         await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
+        await TestUtil.awaitEvent(runtime, LocalAccountDeletionDateChangedEvent);
 
         const eventListener = new EventListener(runtime, [LocalAccountDeletionDateChangedEvent, IdentityDeletionProcessStatusChangedEvent]);
         eventListener.start();
@@ -78,7 +90,5 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         const localAccountDeletionDateChangedEvent = events[1].instance as LocalAccountDeletionDateChangedEvent;
         expect(localAccountDeletionDateChangedEvent).toBeInstanceOf(LocalAccountDeletionDateChangedEvent);
         expect(localAccountDeletionDateChangedEvent.data).toBeUndefined();
-
-        expect(session.account.deletionDate).toBeUndefined();
     });
 });
