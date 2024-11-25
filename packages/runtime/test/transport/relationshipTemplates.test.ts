@@ -307,7 +307,10 @@ describe("RelationshipTemplate Tests", () => {
                     }
                 })
             ).value.id;
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId,
+                passwordProtection: { password: "password" }
+            });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -330,7 +333,13 @@ describe("RelationshipTemplate Tests", () => {
                 })
             ).value.id;
 
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId,
+                passwordProtection: {
+                    password: "1234",
+                    passwordIsPin: true
+                }
+            });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
@@ -410,12 +419,34 @@ describe("RelationshipTemplate Tests", () => {
                     }
                 })
             ).value.id;
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId,
+                passwordProtection: {
+                    password: "password"
+                }
+            });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference
             });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
+        });
+
+        test("validation error when token password protection doesn't inherit template password protection", async () => {
+            const templateId = (
+                await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: emptyRelationshipTemplateContent,
+                    expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                    passwordProtection: {
+                        password: "password"
+                    }
+                })
+            ).value.id;
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId
+            });
+
+            expect(createResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.passwordProtectionMustBeInherited");
         });
     });
 });

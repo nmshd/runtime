@@ -10,6 +10,7 @@ import {
     TokenController
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import _ from "lodash";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";
@@ -87,8 +88,8 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        if (template.passwordProtection && request.passwordProtection !== template.passwordProtection) {
-            return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited()); // TODO: testen
+        if (template.passwordProtection && !_.isEqual(request.passwordProtection, template.passwordProtection)) {
+            return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 
         const templatePasswordProtection = template.passwordProtection ? SharedPasswordProtection.from(template.passwordProtection) : undefined;
