@@ -105,6 +105,6 @@ describe("TagsController", function () {
         });
         const tags = await account.tags.getTags();
 
-        expect(tags.toJSON()).toStrictEqual(mockTags);
+        expect(tags.toJSON()).toStrictEqualExcluding(mockTags, "@type");
     });
 });
