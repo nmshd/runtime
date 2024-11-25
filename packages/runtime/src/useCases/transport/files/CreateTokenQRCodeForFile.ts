@@ -2,8 +2,6 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { File, FileController, PasswordProtectionCreationParameters, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DateTime } from "luxon";
-import { nameof } from "ts-simple-nameof";
 import {
     AddressString,
     FileIdString,
@@ -36,15 +34,6 @@ class Validator extends SchemaValidator<CreateTokenQRCodeForFileRequest> {
     public override validate(input: CreateTokenQRCodeForFileRequest): ValidationResult {
         const validationResult = super.validate(input);
         if (!validationResult.isValid()) return validationResult;
-
-        if (input.expiresAt && DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateTokenQRCodeForFileRequest>((r) => r.expiresAt)}' must be in the future`),
-                    nameof<CreateTokenQRCodeForFileRequest>((r) => r.expiresAt)
-                )
-            );
-        }
 
         if (input.passwordProtection?.passwordIsPin) {
             if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {

@@ -11,8 +11,6 @@ import {
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
-import { DateTime } from "luxon";
-import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";
 import {
     AddressString,
@@ -43,15 +41,6 @@ class Validator extends SchemaValidator<CreateTokenForOwnTemplateRequest> {
     public override validate(input: CreateTokenForOwnTemplateRequest): ValidationResult {
         const validationResult = super.validate(input);
         if (!validationResult.isValid()) return validationResult;
-
-        if (input.expiresAt && DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateTokenForOwnTemplateRequest>((r) => r.expiresAt)}' must be in the future`),
-                    nameof<CreateTokenForOwnTemplateRequest>((r) => r.expiresAt)
-                )
-            );
-        }
 
         if (input.passwordProtection?.passwordIsPin) {
             if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {

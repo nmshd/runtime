@@ -9,8 +9,6 @@ import {
     TokenController
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DateTime } from "luxon";
-import { nameof } from "ts-simple-nameof";
 import {
     AddressString,
     ISO8601DateTimeString,
@@ -39,15 +37,6 @@ class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> 
     public override validate(input: CreateTokenQRCodeForOwnTemplateRequest): ValidationResult {
         const validationResult = super.validate(input);
         if (!validationResult.isValid()) return validationResult;
-
-        if (input.expiresAt && DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateTokenQRCodeForOwnTemplateRequest>((r) => r.expiresAt)}' must be in the future`),
-                    nameof<CreateTokenQRCodeForOwnTemplateRequest>((r) => r.expiresAt)
-                )
-            );
-        }
 
         if (input.passwordProtection?.passwordIsPin) {
             if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {
