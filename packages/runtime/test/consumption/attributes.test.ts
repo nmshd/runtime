@@ -797,39 +797,34 @@ describe.only("How does serval validate bad inputs?", () => {
         expect(result.error.code).toBe("error.runtime.requestDeserialization");
     });
 
-    test("Mail as content", async () => {
-        const request: CreateRepositoryAttributeRequest = {
-            content: {
-                "@type": "Mail",
-                body: "b",
-                cc: [],
-                subject: "a",
-                to: [services2.address]
-            }
-        } as any;
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-        expect(result.error.message).toBe("content must have required property 'value'");
-        expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
-    });
-
-    test("Mail as value", async () => {
+    test("wrong @type", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
                     "@type": "Mail",
-                    body: "b",
-                    cc: [],
-                    subject: "a",
-                    to: [services2.address]
-                }
+                    value: 5
+                },
+                tags: ["tag1", "tag2"]
             }
-        } as any;
-
+        };
         const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-        expect(result.error.message).toBe(
-            "IdentityAttribute.value :: Parsed object is not an instance of any allowed types (Affiliation|BirthDate|BirthName|BirthPlace|Citizenship|CommunicationLanguage|DeliveryBoxAddress|DisplayName|EMailAddress|FaxNumber|IdentityFileReference|SchematizedXML|JobTitle|Nationality|PersonName|PhoneNumber|PostOfficeBoxAddress|Pseudonym|Sex|StreetAddress|Website|AffiliationOrganization|AffiliationRole|AffiliationUnit|BirthCity|BirthCountry|BirthDay|BirthMonth|BirthState|BirthYear|City|Country|GivenName|HonorificPrefix|HonorificSuffix|HouseNumber|MiddleName|SchematizedXML|State|Street|Surname|ZipCode)."
-        );
+        expect(result.error.message).toBe("Mail.to :: Value is not defined");
         expect(result.error.code).toBe("error.runtime.requestDeserialization");
+    });
+
+    test("wrong @type with nonexistent value", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "fake-type",
+                    value: 5
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result.error.message).toBe("Type 'fake-type' with version 1 was not found within reflection classes. You might have to install a module first.");
+        expect(result.error.code).toBe("error.runtime.unknownType");
     });
 
     test("no @type", async () => {
