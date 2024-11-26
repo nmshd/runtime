@@ -25,10 +25,8 @@ describe("RelationshipSync", function () {
             maxNumberOfAllocations: 1
         });
 
-        const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplate(
-            templateOnTemplatorDevice.id,
-            templateOnTemplatorDevice.secretKey
-        );
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
+        const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         const createdRelationship = await requestorDevice1.relationships.sendRelationship({
             template: templateOnRequestorDevice1,
@@ -80,10 +78,8 @@ describe("RelationshipSync", function () {
             maxNumberOfAllocations: 1
         });
 
-        const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplate(
-            templateOnTemplatorDevice.id,
-            templateOnTemplatorDevice.secretKey
-        );
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
+        const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         const createdRelationship = await requestorDevice1.relationships.sendRelationship({
             template: templateOnRequestorDevice1,
@@ -129,10 +125,8 @@ describe("RelationshipSync", function () {
         });
         await templatorDevice1.syncDatawallet();
 
-        const templateOnRequestorDevice1 = await requestorDevice.relationshipTemplates.loadPeerRelationshipTemplate(
-            templateOnTemplatorDevice.id,
-            templateOnTemplatorDevice.secretKey
-        );
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
+        const templateOnRequestorDevice1 = await requestorDevice.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         const createdRelationship = await requestorDevice.relationships.sendRelationship({
             template: templateOnRequestorDevice1,
