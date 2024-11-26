@@ -734,7 +734,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
         }
 
-        if (!_.isEqual(successorSource.content, successor.content)) {
+        if (!_.isEqual(successorSource.content.toJSON(), successor.content.toJSON())) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceContentIsNotEqualToCopyContent());
         }
 
@@ -751,7 +751,7 @@ export class AttributesController extends ConsumptionBaseController {
                 return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
             }
 
-            if (!_.isEqual(predecessorSource.content, predecessor.content)) {
+            if (!_.isEqual(predecessorSource.content.toJSON(), predecessor.content.toJSON())) {
                 return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorSourceContentIsNotEqualToCopyContent());
             }
         }
@@ -983,7 +983,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
-        if (_.isEqual(successor.content, predecessor.content)) {
+        if (_.isEqual(successor.content.toJSON(), predecessor.content.toJSON())) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustChangeContent());
         }
 
