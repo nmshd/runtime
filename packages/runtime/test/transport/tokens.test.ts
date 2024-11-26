@@ -173,7 +173,7 @@ describe("Password-protected tokens", () => {
             ephemeral: true,
             passwordProtection: { password: "" }
         });
-        expect(createResult).toBeAnError("PasswordProtectionCreationParameters.password :: Value is shorter than 1 characters", "error.runtime.requestDeserialization");
+        expect(createResult).toBeAnError("password must NOT have fewer than 1 characters", "error.runtime.requestDeserialization");
     });
 
     test("validation error when creating a token with an invalid PIN", async () => {
@@ -247,7 +247,7 @@ describe("Password-protected tokens for files", () => {
             fileId,
             passwordProtection: { password: "" }
         });
-        expect(createResult).toBeAnError("PasswordProtectionCreationParameters.password :: Value is shorter than 1 characters", "error.runtime.requestDeserialization");
+        expect(createResult).toBeAnError("password must NOT have fewer than 1 characters", "error.runtime.requestDeserialization");
     });
 
     test("validation error when creating a token with an invalid PIN", async () => {
@@ -325,7 +325,7 @@ describe("Password-protected tokens for unprotected templates", () => {
             templateId,
             passwordProtection: { password: "" }
         });
-        expect(createResult).toBeAnError("PasswordProtectionCreationParameters.password :: Value is shorter than 1 characters", "error.runtime.requestDeserialization");
+        expect(createResult).toBeAnError("password must NOT have fewer than 1 characters", "error.runtime.requestDeserialization");
     });
 
     test("validation error when creating a token with an invalid PIN", async () => {
