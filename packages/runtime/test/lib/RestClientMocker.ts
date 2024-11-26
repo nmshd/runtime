@@ -12,7 +12,7 @@ export class RestClientMocker<T extends RESTClient> {
         this.client[fnName] = mockFn.bind(this.client);
     }
 
-    public restore(): void {
+    public reset(): void {
         for (const { fnName, originalProperty } of this.mockedMethods) {
             this.client[fnName] = originalProperty;
         }

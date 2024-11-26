@@ -30,26 +30,26 @@ afterAll(async () => {
 });
 
 afterEach(() => {
-    clientMocker.restore();
+    clientMocker.reset();
 });
 
 describe("PublicRelationshipTemplateReferencesController", () => {
     test("should return the backbone defined PublicRelationshipTemplateReferences", async () => {
         const mockResponse = [
             {
-                title: "a",
-                description: "Description",
-                truncatedReference: "Reference"
+                title: "aTitle",
+                description: "aDescription",
+                truncatedReference: "aReference"
             },
             {
-                title: "b",
-                description: "Description",
-                truncatedReference: "Reference"
+                title: "aTitle",
+                description: "aDescription",
+                truncatedReference: "aReference"
             },
             {
-                title: "c",
-                description: "Description",
-                truncatedReference: "Reference"
+                title: "aTitle",
+                description: "aDescription",
+                truncatedReference: "aReference"
             }
         ];
 

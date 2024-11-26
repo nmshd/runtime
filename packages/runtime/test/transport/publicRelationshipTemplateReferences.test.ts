@@ -16,26 +16,26 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 afterEach(() => {
-    clientMocker.restore();
+    clientMocker.reset();
 });
 
 describe("PublicRelationshipTemplateReferences", () => {
     test("should read the PublicRelationshipTemplateReferences", async () => {
         const mockResponse = [
             {
-                title: "a",
-                description: "Description",
-                truncatedReference: "Reference"
+                title: "aTitle",
+                description: "aDescription",
+                truncatedReference: "aReference"
             },
             {
-                title: "b",
-                description: "Description",
-                truncatedReference: "Reference"
+                title: "aTitle",
+                description: "aDescription",
+                truncatedReference: "aReference"
             },
             {
-                title: "c",
-                description: "Description",
-                truncatedReference: "Reference"
+                title: "aTitle",
+                description: "aDescription",
+                truncatedReference: "aReference"
             }
         ];
 
