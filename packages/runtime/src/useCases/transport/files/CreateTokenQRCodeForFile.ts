@@ -8,7 +8,13 @@ export interface CreateTokenQRCodeForFileRequest {
     fileId: FileIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
-    passwordProtection?: { password: string; passwordIsPin?: true };
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
 export interface CreateTokenQRCodeForFileResponse {

@@ -35,7 +35,7 @@ export class AnonymousTokenController {
         }
 
         const hashedPassword = passwordProtection ? (await CoreCrypto.deriveHashOutOfPassword(passwordProtection.password, passwordProtection.salt)).toBase64() : undefined;
-        const response = (await this.client.getToken(id.toString(), hashedPassword)).value; // refactor: password, salt an getToken übergeben
+        const response = (await this.client.getToken(id.toString(), hashedPassword)).value;
 
         const cipher = CryptoCipher.fromBase64(response.content);
         const plaintextTokenBuffer = await CoreCrypto.decrypt(cipher, secretKey);

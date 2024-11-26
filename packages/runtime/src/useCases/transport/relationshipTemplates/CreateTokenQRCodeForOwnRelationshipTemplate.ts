@@ -9,14 +9,19 @@ import {
     TokenController
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import _ from "lodash";
 import { AddressString, ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface CreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
-    passwordProtection?: { password: string; passwordIsPin?: true };
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
 class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> {
@@ -53,7 +58,7 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        if (template.passwordProtection && !_.isEqual(request.passwordProtection, template.passwordProtection)) {
+        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPassword(request.passwordProtection)) {
             return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 

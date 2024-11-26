@@ -10,7 +10,6 @@ import {
     TokenController
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import _ from "lodash";
 import { TokenDTO } from "../../../types";
 import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
@@ -20,7 +19,13 @@ export interface CreateTokenForOwnTemplateRequest {
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
     forIdentity?: AddressString;
-    passwordProtection?: { password: string; passwordIsPin?: true };
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
 class Validator extends SchemaValidator<CreateTokenForOwnTemplateRequest> {
@@ -54,7 +59,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        if (template.passwordProtection && !_.isEqual(request.passwordProtection, template.passwordProtection)) {
+        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPassword(request.passwordProtection)) {
             return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 

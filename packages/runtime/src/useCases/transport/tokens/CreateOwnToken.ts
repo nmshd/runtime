@@ -12,7 +12,13 @@ export interface CreateOwnTokenRequest {
     expiresAt: ISO8601DateTimeString;
     ephemeral: boolean;
     forIdentity?: AddressString;
-    passwordProtection?: { password: string; passwordIsPin?: true };
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
 class Validator extends SchemaValidator<CreateOwnTokenRequest> {

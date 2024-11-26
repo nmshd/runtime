@@ -10,9 +10,7 @@ export class TokenClient extends RESTClientAuthenticate {
     }
 
     public async getTokens(request: BackboneGetTokensRequest): Promise<ClientResult<Paginator<BackboneGetTokensResponse>>> {
-        return await this.getPaged<BackboneGetTokensResponse>("/api/v1/Tokens", {
-            tokens: JSON.stringify(request.tokens)
-        });
+        return await this.getPaged<BackboneGetTokensResponse>("/api/v1/Tokens", request);
     }
 
     public async getToken(id: string, password?: string): Promise<ClientResult<BackboneGetTokensResponse>> {
