@@ -76,8 +76,11 @@ export class AppStringProcessor {
         const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
 
         let password: string | undefined;
-        if (reference.passwordType) {
-            const passwordResult = await uiBridge.enterPassword(reference.passwordType);
+        if (reference.passwordProtection) {
+            const passwordResult = await uiBridge.enterPassword(
+                reference.passwordProtection!.passwordType === "pw" ? "pw" : "pin",
+                reference.passwordProtection!.passwordType === "pw" ? undefined : parseInt(reference.passwordProtection!.passwordType)
+            );
             if (passwordResult.isError) {
                 return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
             }
@@ -125,8 +128,11 @@ export class AppStringProcessor {
         const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
 
         let password: string | undefined;
-        if (reference.passwordType) {
-            const passwordResult = await uiBridge.enterPassword(reference.passwordType);
+        if (reference.passwordProtection) {
+            const passwordResult = await uiBridge.enterPassword(
+                reference.passwordProtection!.passwordType === "pw" ? "pw" : "pin",
+                reference.passwordProtection!.passwordType === "pw" ? undefined : parseInt(reference.passwordProtection!.passwordType)
+            );
             if (passwordResult.isError) {
                 return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
             }

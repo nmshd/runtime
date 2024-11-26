@@ -2,19 +2,19 @@ import { ArbitraryRelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
-import { anyNumber, instance, mock, reset, verify, when } from "ts-mockito";
+import { anyNumber, anyString, instance, mock, reset, verify, when } from "ts-mockito";
 import { AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession } from "../../src";
 import { MockEventBus, TestUtil } from "../lib";
 
 describe("AppStringProcessor", function () {
     const mockUiBridge: IUIBridge = mock<IUIBridge>();
 
-    when(mockUiBridge.enterPassword(anyNumber())).thenCall((passwordType: number) => {
+    when(mockUiBridge.enterPassword(anyString(), anyNumber())).thenCall((passwordType: "pw" | "pin", pinLength: number | undefined) => {
         switch (passwordType) {
-            case 1:
+            case "pw":
                 return "password";
-            default:
-                return "0".repeat(passwordType);
+            case "pin":
+                return "0".repeat(pinLength!);
         }
     });
 
@@ -74,7 +74,7 @@ describe("AppStringProcessor", function () {
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
         expect(result.isSuccess).toBeTruthy();
 
-        verify(mockUiBridge.enterPassword(anyNumber())).never();
+        verify(mockUiBridge.enterPassword(anyString(), anyNumber())).never();
         eventBus.expectLastPublishedEvent(PeerRelationshipTemplateLoadedEvent);
     });
 
