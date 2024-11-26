@@ -66,7 +66,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("takes the expiration date from the Template if the Request has no expiration date", async function () {
-            const timestamp = CoreDate.utc();
+            const timestamp = CoreDate.utc().subtract({ second: 1 });
             const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
             await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
             await Then.theRequestHasExpirationDate(timestamp);

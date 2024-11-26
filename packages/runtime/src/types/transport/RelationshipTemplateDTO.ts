@@ -9,6 +9,10 @@ export interface RelationshipTemplateDTO {
     createdByDevice: string;
     createdAt: string;
     forIdentity?: string;
+    passwordProtection?: {
+        password: string;
+        passwordIsPin?: true;
+    };
     content: RelationshipTemplateContentDerivation;
     expiresAt?: string;
     maxNumberOfAllocations?: number;
