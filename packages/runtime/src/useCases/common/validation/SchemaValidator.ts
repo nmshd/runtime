@@ -12,13 +12,13 @@ export class SchemaValidator<T extends object> implements IValidator<T> {
     public validate(input: T): ValidationResult {
         const validationResult = this.convertValidationResult(this.schema.validate(input));
 
-        if ("expiresAt" in input) {
-            if (input.expiresAt && DateTime.fromISO(input.expiresAt as string) <= DateTime.utc()) {
+        if ("expiresAt" in input && input.expiresAt) {
+            if (DateTime.fromISO(input.expiresAt as string) <= DateTime.utc()) {
                 validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPropertyValue(`'expiresAt' must be in the future`), "expiresAt"));
             }
         }
 
-        if ("passwordProtection" in input) {
+        if ("passwordProtection" in input && input.passwordProtection) {
             const passwordProtection = input.passwordProtection as { password: string; passwordIsPin?: true };
 
             if (passwordProtection.passwordIsPin) {
