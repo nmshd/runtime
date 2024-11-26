@@ -9,8 +9,9 @@ export class RelationshipTemplateClient extends RESTClientAuthenticate {
         return await this.getPaged<BackboneGetRelationshipTemplatesResponse>("/api/v1/RelationshipTemplates", request);
     }
 
-    public async getRelationshipTemplate(id: string): Promise<ClientResult<BackboneGetRelationshipTemplatesResponse>> {
-        return await this.get<BackboneGetRelationshipTemplatesResponse>(`/api/v1/RelationshipTemplates/${id}`);
+    public async getRelationshipTemplate(id: string, password?: string): Promise<ClientResult<BackboneGetRelationshipTemplatesResponse>> {
+        const request = password ? { password } : undefined;
+        return await this.get<BackboneGetRelationshipTemplatesResponse>(`/api/v1/RelationshipTemplates/${id}`, request);
     }
 
     public async deleteRelationshipTemplate(id: string): Promise<ClientResult<void>> {
