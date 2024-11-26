@@ -347,38 +347,6 @@ describe("Relationship status validations on active relationship", () => {
     });
 });
 
-describe.only("Templator with active IdentityDeletionProcess", () => {
-    const serviceProvider = new RuntimeServiceProvider();
-    let services1: TestRuntimeServices;
-    let services2: TestRuntimeServices;
-
-    beforeAll(async () => {
-        const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
-        services1 = runtimeServices[0];
-        services2 = runtimeServices[1];
-    }, 30000);
-
-    afterAll(() => serviceProvider.stop());
-
-    test.only("returns error if templator has active IdentityDeletionProcess", async () => {
-        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
-
-        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
-            templateId: templateId,
-            creationContent: emptyRelationshipCreationContent
-        });
-        await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-
-        const response = await services2.transport.relationships.getRelationships({});
-
-        console.log(response);
-        // expect(createRelationshipResponse).toBeAnError(
-        //     "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
-        //     "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
-        // );
-    });
-});
-
 describe("Relationships query", () => {
     test("query own relationship", async () => {
         await ensureActiveRelationship(services1.transport, services2.transport);
