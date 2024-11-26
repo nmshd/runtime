@@ -2,7 +2,7 @@ import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreCrypto, PasswordProtection, RequestError, TransportCoreErrors } from "../../core";
+import { CoreCrypto, PasswordProtection, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { PeerRelationshipTemplateLoadedEvent } from "../../events";
@@ -332,25 +332,7 @@ export class RelationshipTemplateController extends TransportController {
             isOwn: false,
             passwordProtection
         });
-
-        try {
-            await this.updateCacheOfTemplate(relationshipTemplate);
-        } catch (e) {
-            if (e instanceof RequestError && e.status === 404) {
-                throw new RequestError(
-                    e.method,
-                    e.path,
-                    e.platformParameters,
-                    e.code,
-                    "RelationshipTemplate not found. Make sure the ID exists, the record is not expired and the entered password is correct.",
-                    e.requestId,
-                    e.status,
-                    e.time,
-                    e.object
-                );
-            }
-            throw e;
-        }
+        await this.updateCacheOfTemplate(relationshipTemplate);
 
         await this.templates.create(relationshipTemplate);
 

@@ -168,6 +168,8 @@ describe("RelationshipTemplateController", function () {
         expect(ownTemplate.passwordProtection!.password).toBe("password");
         expect(ownTemplate.passwordProtection!.salt).toBeDefined();
         expect(ownTemplate.passwordProtection!.salt).toHaveLength(16);
+        expect(ownTemplate.passwordProtection!.passwordType).toBe("pw");
+
         const reference = ownTemplate.toRelationshipTemplateReference();
         expect(reference.passwordProtection!.passwordType).toBe("pw");
         expect(reference.passwordProtection!.salt).toStrictEqual(ownTemplate.passwordProtection!.salt);
@@ -176,6 +178,7 @@ describe("RelationshipTemplateController", function () {
         expect(peerTemplate).toBeDefined();
         expect(peerTemplate.passwordProtection!.password).toBe("password");
         expect(peerTemplate.passwordProtection!.salt).toStrictEqual(ownTemplate.passwordProtection!.salt);
+        expect(peerTemplate.passwordProtection!.passwordType).toBe("pw");
     });
 
     test("should throw an error if loaded with a wrong or missing password", async function () {
@@ -191,9 +194,7 @@ describe("RelationshipTemplateController", function () {
 
         await expect(
             recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate(), "wrongPassword")
-        ).rejects.toThrow(
-            "error.platform.recordNotFound (404): 'RelationshipTemplate not found. Make sure the ID exists, the record is not expired and the entered password is correct.' "
-        );
+        ).rejects.toThrow("error.platform.recordNotFound (404): 'RelationshipTemplate not found. Make sure the ID exists and the record is not expired.'");
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
             "error.transport.noPasswordProvided"
         );
