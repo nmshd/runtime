@@ -3,7 +3,7 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, RelationshipTemplateController } from "@nmshd/transport";
+import { AccountController, PasswordProtectionCreationParameters, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -19,6 +19,13 @@ export interface CreateOwnRelationshipTemplateRequest {
      */
     maxNumberOfAllocations?: number;
     forIdentity?: AddressString;
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
 class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
@@ -37,6 +44,12 @@ class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
                     nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)
                 )
             );
+        }
+
+        if (input.passwordProtection?.passwordIsPin) {
+            if (!/^[0-9]{4,16}$/.test(input.passwordProtection.password)) {
+                validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
+            }
         }
 
         return validationResult;
@@ -67,7 +80,8 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         await this.accountController.syncDatawallet();

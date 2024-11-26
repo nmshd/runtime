@@ -10,6 +10,7 @@ import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
  */
 export interface LoadPeerRelationshipTemplateRequest {
     reference: TokenReferenceString | RelationshipTemplateReferenceString;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<LoadPeerRelationshipTemplateRequest> {
@@ -29,31 +30,31 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
     }
 
     protected async executeInternal(request: LoadPeerRelationshipTemplateRequest): Promise<Result<RelationshipTemplateDTO>> {
-        const result = await this.loadRelationshipTemplateFromReference(request.reference);
+        const result = await this.loadRelationshipTemplateFromReference(request.reference, request.password);
 
         await this.accountController.syncDatawallet();
 
         return result;
     }
 
-    private async loadRelationshipTemplateFromReference(reference: string): Promise<Result<RelationshipTemplateDTO>> {
+    private async loadRelationshipTemplateFromReference(reference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
         if (reference.startsWith(Base64ForIdPrefix.RelationshipTemplate)) {
-            return await this.loadRelationshipTemplateFromRelationshipTemplateReference(reference);
+            return await this.loadRelationshipTemplateFromRelationshipTemplateReference(reference, password);
         }
 
         if (reference.startsWith(Base64ForIdPrefix.Token)) {
-            return await this.loadRelationshipTemplateFromTokenReference(reference);
+            return await this.loadRelationshipTemplateFromTokenReference(reference, password);
         }
 
         throw RuntimeErrors.relationshipTemplates.invalidReference(reference);
     }
 
-    private async loadRelationshipTemplateFromRelationshipTemplateReference(relationshipTemplateReference: string) {
-        const template = await this.templateController.loadPeerRelationshipTemplateByTruncated(relationshipTemplateReference);
+    private async loadRelationshipTemplateFromRelationshipTemplateReference(relationshipTemplateReference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
+        const template = await this.templateController.loadPeerRelationshipTemplateByTruncated(relationshipTemplateReference, password);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
 
-    private async loadRelationshipTemplateFromTokenReference(tokenReference: string): Promise<Result<RelationshipTemplateDTO>> {
+    private async loadRelationshipTemplateFromTokenReference(tokenReference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
         const token = await this.tokenController.loadPeerTokenByTruncated(tokenReference, true);
 
         if (!token.cache) {
@@ -65,7 +66,7 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         }
 
         const content = token.cache.content;
-        const template = await this.templateController.loadPeerRelationshipTemplate(content.templateId, content.secretKey, content.forIdentity?.toString());
+        const template = await this.templateController.loadPeerRelationshipTemplateByTokenContent(content, password);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
 }
