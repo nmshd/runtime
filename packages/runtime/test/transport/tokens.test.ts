@@ -1,4 +1,5 @@
 import { CoreDate } from "@nmshd/core-types";
+import { TokenReference } from "@nmshd/transport";
 import { GetTokensQuery, OwnerRestriction } from "../../src";
 import { createTemplate, exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile, uploadOwnToken } from "../lib";
 
@@ -107,6 +108,9 @@ describe("Password-protected tokens", () => {
         expect(createResult.value.passwordProtection?.password).toBe("password");
         expect(createResult.value.passwordProtection?.passwordIsPin).toBeUndefined();
 
+        const reference = TokenReference.from(createResult.value.truncatedReference);
+        expect(reference.passwordProtection!.passwordType).toBe("pw");
+
         const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "password" });
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.passwordProtection?.password).toBe("password");
@@ -123,6 +127,9 @@ describe("Password-protected tokens", () => {
         expect(createResult).toBeSuccessful();
         expect(createResult.value.passwordProtection?.password).toBe("1234");
         expect(createResult.value.passwordProtection?.passwordIsPin).toBe(true);
+
+        const reference = TokenReference.from(createResult.value.truncatedReference);
+        expect(reference.passwordProtection!.passwordType).toBe("pin4");
 
         const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true, password: "1234" });
         expect(loadResult).toBeSuccessful();
