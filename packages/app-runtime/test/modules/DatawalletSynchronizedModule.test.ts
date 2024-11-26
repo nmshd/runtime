@@ -73,13 +73,13 @@ describe("DatawalletSynchronized", function () {
         expect(sessionDevice2.account.deletionDate).toBeUndefined();
     });
 
-    test.skip("should set the deletionDate of the LocalAccount initiating an IdentityDeletionProcess on a second device that was offline", async function () {
+    test("should set the deletionDate of the LocalAccount initiating an IdentityDeletionProcess on a second device that was offline", async function () {
         await runtimeDevice2.stop();
 
         await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
         expect(sessionDevice2.account.deletionDate).toBeUndefined();
 
-        await runtimeDevice2.init();
+        await runtimeDevice2.init(); // TODO: do the modules need to be turned on?
         await runtimeDevice2.start();
 
         await sessionDevice2.transportServices.account.syncDatawallet();
@@ -88,7 +88,7 @@ describe("DatawalletSynchronized", function () {
         expect(sessionDevice2.account.deletionDate).toBeDefined();
     });
 
-    test.skip("should unset the deletionDate of the LocalAccount cancelling an IdentityDeletionProcess on a second device that was offline", async function () {
+    test("should unset the deletionDate of the LocalAccount cancelling an IdentityDeletionProcess on a second device that was offline", async function () {
         await sessionDevice1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
         await sessionDevice2.transportServices.account.syncDatawallet();
         await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
