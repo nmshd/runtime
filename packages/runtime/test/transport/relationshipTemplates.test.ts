@@ -309,7 +309,9 @@ describe("RelationshipTemplate Tests", () => {
             ).value.id;
             const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
                 templateId,
-                passwordProtection: { password: "password" }
+                passwordProtection: {
+                    password: "password"
+                }
             });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
@@ -377,13 +379,18 @@ describe("RelationshipTemplate Tests", () => {
                     }
                 })
             ).value.id;
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId,
+                passwordProtection: {
+                    password: "password"
+                }
+            });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference,
                 password: "wrong-password"
             });
-            expect(loadResult).toBeAnError("RelationshipTemplate not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+            expect(loadResult).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });
 
         test("error when loading a password-protected template with no password", async () => {
@@ -412,7 +419,12 @@ describe("RelationshipTemplate Tests", () => {
                     }
                 })
             ).value.id;
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({ templateId });
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId,
+                passwordProtection: {
+                    password: "password"
+                }
+            });
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
                 reference: createResult.value.truncatedReference
