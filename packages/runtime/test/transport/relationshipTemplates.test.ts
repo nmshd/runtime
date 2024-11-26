@@ -355,10 +355,7 @@ describe("RelationshipTemplate Tests", () => {
                 reference: createResult.value.truncatedReference,
                 password: "wrong-password"
             });
-            expect(loadResult).toBeAnError(
-                "RelationshipTemplate not found. Make sure the ID exists, the record is not expired and the entered password is correct.",
-                "error.runtime.recordNotFound"
-            );
+            expect(loadResult).toBeAnError("RelationshipTemplate not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });
 
         test("error when loading a password-protected template via token with wrong password", async () => {
@@ -377,10 +374,7 @@ describe("RelationshipTemplate Tests", () => {
                 reference: createResult.value.truncatedReference,
                 password: "wrong-password"
             });
-            expect(loadResult).toBeAnError(
-                "RelationshipTemplate not found. Make sure the ID exists, the record is not expired and the entered password is correct.",
-                "error.runtime.recordNotFound"
-            );
+            expect(loadResult).toBeAnError("RelationshipTemplate not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });
 
         test("error when loading a password-protected template with no password", async () => {
