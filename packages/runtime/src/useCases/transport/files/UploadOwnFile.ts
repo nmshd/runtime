@@ -13,7 +13,7 @@ export interface UploadOwnFileRequest {
     filename: string;
     mimetype: string;
     expiresAt?: ISO8601DateTimeString;
-    title: string;
+    title?: string;
     description?: string;
 }
 
@@ -77,16 +77,13 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
     }
 
     protected async executeInternal(request: UploadOwnFileRequest): Promise<Result<FileDTO>> {
-        const maxDate = "9999-12-31T00:00:00.000Z";
-        const expiresAt = request.expiresAt ?? maxDate;
-
         const file = await this.fileController.sendFile({
             buffer: CoreBuffer.from(request.content),
             title: request.title,
-            description: request.description ?? "",
+            description: request.description,
             filename: request.filename,
             mimetype: request.mimetype,
-            expiresAt: CoreDate.from(expiresAt)
+            expiresAt: CoreDate.from(request.expiresAt ?? "9999-12-31T00:00:00.000Z")
         });
 
         await this.accountController.syncDatawallet();
