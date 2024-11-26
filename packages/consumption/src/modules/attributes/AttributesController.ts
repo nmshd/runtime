@@ -734,13 +734,11 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
         }
 
-        if (!_.isEqual(successorSource.content, successor.content)) {
+        if (!_.isEqual(successorSource.content.toJSON(), successor.content.toJSON())) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceContentIsNotEqualToCopyContent());
         }
 
-        let predecessorSource: any = undefined;
-        if (predecessor.shareInfo.sourceAttribute) predecessorSource = await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute);
-
+        const predecessorSource = predecessor.shareInfo.sourceAttribute ? await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute) : undefined;
         if (predecessorSource) {
             if (!predecessorSource.isRepositoryAttribute(this.identity.address)) {
                 return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
@@ -751,7 +749,7 @@ export class AttributesController extends ConsumptionBaseController {
                 return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
             }
 
-            if (!_.isEqual(predecessorSource.content, predecessor.content)) {
+            if (!_.isEqual(predecessorSource.content.toJSON(), predecessor.content.toJSON())) {
                 return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorSourceContentIsNotEqualToCopyContent());
             }
         }
@@ -983,7 +981,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
-        if (_.isEqual(successor.content, predecessor.content)) {
+        if (_.isEqual(successor.content.toJSON(), predecessor.content.toJSON())) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustChangeContent());
         }
 
