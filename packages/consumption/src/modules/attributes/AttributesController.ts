@@ -738,9 +738,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceContentIsNotEqualToCopyContent());
         }
 
-        let predecessorSource: any = undefined;
-        if (predecessor.shareInfo.sourceAttribute) predecessorSource = await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute);
-
+        const predecessorSource = predecessor.shareInfo.sourceAttribute ? await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute) : undefined;
         if (predecessorSource) {
             if (!predecessorSource.isRepositoryAttribute(this.identity.address)) {
                 return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
