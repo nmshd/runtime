@@ -21306,7 +21306,8 @@ export const CreateTokenForFileRequest: any = {
                     "type": "object",
                     "properties": {
                         "password": {
-                            "type": "string"
+                            "type": "string",
+                            "minLength": 1
                         },
                         "passwordIsPin": {
                             "type": "boolean",
@@ -21360,7 +21361,8 @@ export const CreateTokenQRCodeForFileRequest: any = {
                     "type": "object",
                     "properties": {
                         "password": {
-                            "type": "string"
+                            "type": "string",
+                            "minLength": 1
                         },
                         "passwordIsPin": {
                             "type": "boolean",
@@ -22141,7 +22143,8 @@ export const CreateTokenForOwnTemplateRequest: any = {
                     "type": "object",
                     "properties": {
                         "password": {
-                            "type": "string"
+                            "type": "string",
+                            "minLength": 1
                         },
                         "passwordIsPin": {
                             "type": "boolean",
@@ -22195,7 +22198,8 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
                     "type": "object",
                     "properties": {
                         "password": {
-                            "type": "string"
+                            "type": "string",
+                            "minLength": 1
                         },
                         "passwordIsPin": {
                             "type": "boolean",
@@ -22827,7 +22831,8 @@ export const CreateOwnTokenRequest: any = {
                     "type": "object",
                     "properties": {
                         "password": {
-                            "type": "string"
+                            "type": "string",
+                            "minLength": 1
                         },
                         "passwordIsPin": {
                             "type": "boolean",
