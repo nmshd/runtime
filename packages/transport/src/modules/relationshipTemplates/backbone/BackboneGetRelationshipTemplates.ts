@@ -1,5 +1,5 @@
 export interface BackboneGetRelationshipTemplatesRequest {
-    ids: string[];
+    templates: { id: string; password?: string }[];
 }
 
 export interface BackboneGetRelationshipTemplatesResponse {

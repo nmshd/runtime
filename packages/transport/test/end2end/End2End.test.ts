@@ -77,7 +77,7 @@ describe("RelationshipTest: Accept", function () {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
 
         expect(templateTo.cache!.content).toBeInstanceOf(JSONWrapper);
         const templateContent = templateTo.cache!.content as JSONWrapper;
@@ -178,7 +178,7 @@ describe("RelationshipTest: Reject", function () {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
 
         expect(templateTo.cache!.content).toBeInstanceOf(JSONWrapper);
         const templateContent = templateTo.cache!.content as JSONWrapper;
@@ -275,10 +275,7 @@ describe("RelationshipTest: Revoke", function () {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateRequestor = await requestor.relationshipTemplates.loadPeerRelationshipTemplate(
-            receivedToken.cache!.content.templateId,
-            receivedToken.cache!.content.secretKey
-        );
+        const templateRequestor = await requestor.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
 
         expect(templateRequestor.cache!.content).toBeInstanceOf(JSONWrapper);
         const templateContent = templateRequestor.cache!.content as JSONWrapper;
@@ -348,7 +345,7 @@ describe("RelationshipTest: Revoke", function () {
 
         const receivedTemplateToken = TokenContentRelationshipTemplate.from(receivedToken.cache!.content as TokenContentRelationshipTemplate);
 
-        const templateRequestor = await requestor.relationshipTemplates.loadPeerRelationshipTemplate(receivedTemplateToken.templateId, receivedTemplateToken.secretKey);
+        const templateRequestor = await requestor.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedTemplateToken);
 
         expect(templateRequestor.cache!.content).toBeInstanceOf(JSONWrapper);
         const templateContent = templateRequestor.cache!.content as JSONWrapper;
@@ -831,7 +828,7 @@ describe("RelationshipTest: operation executioner validation (on pending relatio
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
         const request = await to.relationships.sendRelationship({
             template: templateTo,
             creationContent: {

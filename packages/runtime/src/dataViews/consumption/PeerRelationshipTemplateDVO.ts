@@ -12,6 +12,10 @@ export interface PeerRelationshipTemplateDVO extends DataViewObject {
     expiresAt?: string;
     maxNumberOfAllocations?: number;
     forIdentity?: string;
+    passwordProtection?: {
+        password: string;
+        passwordIsPin?: true;
+    };
 
     /**
      * Is optional, as there can be RelationshipTemplates without actual requests in it
