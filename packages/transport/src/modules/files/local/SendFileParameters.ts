@@ -3,8 +3,8 @@ import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
 
 export interface ISendFileParameters extends ISerializable {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     filename: string;
     mimetype: string;
     expiresAt: ICoreDate;
@@ -14,18 +14,22 @@ export interface ISendFileParameters extends ISerializable {
 
 @type("SendFileParameters")
 export class SendFileParameters extends Serializable implements ISendFileParameters {
-    @validate()
+    @validate({ nullable: true })
     @serialize()
-    public title: string;
-    @validate()
+    public title?: string;
+
+    @validate({ nullable: true })
     @serialize()
-    public description: string;
+    public description?: string;
+
     @validate()
     @serialize()
     public filename: string;
+
     @validate()
     @serialize()
     public mimetype: string;
+
     @validate()
     @serialize()
     public expiresAt: CoreDate;
