@@ -1,3 +1,4 @@
+import { CoreDate } from "@nmshd/core-types";
 import { DatawalletSynchronizedEvent, IdentityDeletionProcessStatus } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { LocalAccountDeletionDateChangedEvent } from "../../events";
@@ -33,7 +34,7 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
 
         switch (mostRecentIdentityDeletionProcess.status) {
             case IdentityDeletionProcessStatus.Approved:
-                newDeletionDate = mostRecentIdentityDeletionProcess.gracePeriodEndsAt;
+                newDeletionDate = CoreDate.from(mostRecentIdentityDeletionProcess.gracePeriodEndsAt!);
                 break;
             case IdentityDeletionProcessStatus.Cancelled:
             case IdentityDeletionProcessStatus.Rejected:
@@ -46,7 +47,7 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
 
         await this.runtime.multiAccountController.updateLocalAccountDeletionDate(event.eventTargetAddress, newDeletionDate);
 
-        this.runtime.eventBus.publish(new LocalAccountDeletionDateChangedEvent(event.eventTargetAddress, newDeletionDate));
+        this.runtime.eventBus.publish(new LocalAccountDeletionDateChangedEvent(event.eventTargetAddress, newDeletionDate?.toString()));
     }
 
     public override stop(): Promise<void> | void {

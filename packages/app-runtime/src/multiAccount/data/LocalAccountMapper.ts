@@ -11,7 +11,7 @@ export class LocalAccountMapper {
             order: localAccount.order,
             lastAccessedAt: localAccount.lastAccessedAt?.toString(),
             devicePushIdentifier: localAccount.devicePushIdentifier,
-            deletionDate: localAccount.deletionDate
+            deletionDate: localAccount.deletionDate?.toString()
         };
     }
 }
