@@ -28,9 +28,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         if (abortResult?.isError) throw abortResult.error;
     });
 
-    afterAll(async function () {
-        await runtime.stop();
-    });
+    afterAll(async () => await runtime.stop());
 
     test("should set the deletionDate of the LocalAccount initiating an IdentityDeletionProcess", async function () {
         expect(session.account.deletionDate).toBeUndefined();
