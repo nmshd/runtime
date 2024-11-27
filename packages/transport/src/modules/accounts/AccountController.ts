@@ -8,7 +8,6 @@ import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
-import { DatawalletSynchronizedEvent } from "../../events";
 import { PasswordGenerator } from "../../util";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
@@ -231,13 +230,9 @@ export class AccountController {
     }
 
     public async syncDatawallet(force = false): Promise<void> {
-        if (!force && !this.autoSync) {
-            return;
-        }
+        if (!force && !this.autoSync) return;
 
         await this.synchronization.sync("OnlyDatawallet");
-        this.transport.eventBus.publish(new DatawalletSynchronizedEvent(this.identity.address.toString()));
-        return;
     }
 
     public async syncEverything(): Promise<ChangedItems> {

@@ -3,6 +3,7 @@ import { log } from "@js-soft/ts-utils";
 import { CoreDate, CoreError, CoreId } from "@nmshd/core-types";
 import { ControllerName, RequestError, TransportController, TransportCoreErrors, TransportError, TransportLoggerFactory } from "../../core";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
+import { DatawalletSynchronizedEvent } from "../../events/DatawalletSynchronizedEvent";
 import { AccountController } from "../accounts/AccountController";
 import { ChangedItems } from "./ChangedItems";
 import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
@@ -98,6 +99,8 @@ export class SyncController extends TransportController {
         } finally {
             if (this.datawalletEnabled && (await this.unpushedDatawalletModifications.exists())) {
                 await this.syncDatawallet().catch((e) => this.log.error(e));
+
+                this.transport.eventBus.publish(new DatawalletSynchronizedEvent(this.parent.identity.address.toString()));
             }
         }
     }
