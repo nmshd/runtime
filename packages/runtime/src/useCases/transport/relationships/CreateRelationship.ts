@@ -1,6 +1,5 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { IncomingRequestsController } from "@nmshd/consumption";
 import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
@@ -24,7 +23,6 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
-        @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
