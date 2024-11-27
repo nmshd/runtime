@@ -99,9 +99,9 @@ export class SyncController extends TransportController {
         } finally {
             if (this.datawalletEnabled && (await this.unpushedDatawalletModifications.exists())) {
                 await this.syncDatawallet().catch((e) => this.log.error(e));
-
-                this.transport.eventBus.publish(new DatawalletSynchronizedEvent(this.parent.identity.address.toString()));
             }
+
+            this.transport.eventBus.publish(new DatawalletSynchronizedEvent(this.parent.identity.address.toString()));
         }
     }
 
