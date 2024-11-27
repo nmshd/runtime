@@ -30,7 +30,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
 
     afterAll(async () => await runtime.stop());
 
-    test("should set the deletionDate of the LocalAccount initiating an IdentityDeletionProcess", async function () {
+    test("should set the deletionDate on the LocalAccount initiating an IdentityDeletionProcess", async function () {
         expect(session.account.deletionDate).toBeUndefined();
 
         const initiateDeletionResult = await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
@@ -41,7 +41,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         expect(account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
     });
 
-    test("should unset the deletionDate of the LocalAccount cancelling an IdentityDeletionProcess", async function () {
+    test("should unset the deletionDate on the LocalAccount cancelling an IdentityDeletionProcess", async function () {
         await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
         expect(session.account.deletionDate).toBeDefined();
 
