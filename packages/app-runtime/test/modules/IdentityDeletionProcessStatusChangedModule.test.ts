@@ -38,7 +38,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         expect(session.account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
 
         const account = await runtime.multiAccountController.getAccount(CoreId.from(session.account.id));
-        expect(account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
+        expect(account.deletionDate!.toString()).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
     });
 
     test("should unset the deletionDate on the LocalAccount cancelling an IdentityDeletionProcess", async function () {

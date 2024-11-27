@@ -60,7 +60,7 @@ describe("DatawalletSynchronized", function () {
         expect(sessionDevice2.account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
 
         const account = await runtimeDevice2.multiAccountController.getAccount(CoreId.from(sessionDevice2.account.id));
-        expect(account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
+        expect(account.deletionDate!.toString()).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
     });
 
     test("should unset the deletionDate on the LocalAccount on a second device when an IdentityDeletionProcess is cancelled", async function () {
