@@ -21684,8 +21684,7 @@ export const UploadOwnFileRequest: any = {
             "required": [
                 "content",
                 "filename",
-                "mimetype",
-                "title"
+                "mimetype"
             ],
             "additionalProperties": false
         },
@@ -21726,8 +21725,7 @@ export const UploadOwnFileValidatableRequest: any = {
             "required": [
                 "content",
                 "filename",
-                "mimetype",
-                "title"
+                "mimetype"
             ],
             "additionalProperties": false
         },
