@@ -1,3 +1,4 @@
+import { CoreId } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus } from "@nmshd/runtime";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { TestUtil } from "../lib";
@@ -36,8 +37,10 @@ describe("IdentityDeletionProcessStatusChanged", function () {
 
         const initiateDeletionResult = await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
 
-        expect(session.account.deletionDate).toBeDefined();
         expect(session.account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
+
+        const account = await runtime.multiAccountController.getAccount(CoreId.from(session.account.id));
+        expect(account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
     });
 
     test("should unset the deletionDate of the LocalAccount cancelling an IdentityDeletionProcess", async function () {
@@ -46,5 +49,8 @@ describe("IdentityDeletionProcessStatusChanged", function () {
 
         await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
         expect(session.account.deletionDate).toBeUndefined();
+
+        const account = await runtime.multiAccountController.getAccount(CoreId.from(session.account.id));
+        expect(account.deletionDate).toBeUndefined();
     });
 });
