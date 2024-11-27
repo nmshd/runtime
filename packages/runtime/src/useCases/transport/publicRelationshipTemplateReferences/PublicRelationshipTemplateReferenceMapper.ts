@@ -9,6 +9,7 @@ export class PublicRelationshipTemplateReferenceMapper {
             truncatedReference: publicRelationshipTemplateReference.truncatedReference
         };
     }
+
     public static toPublicRelationshipTemplateReferenceDTOList(
         publicRelationshipTemplateReferences: PublicRelationshipTemplateReference[]
     ): PublicRelationshipTemplateReferenceDTO[] {
