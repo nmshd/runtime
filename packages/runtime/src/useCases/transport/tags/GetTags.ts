@@ -6,12 +6,12 @@ import { UseCase } from "../../common";
 import { TagMapper } from "./TagMapper";
 
 export class GetTagsUseCase extends UseCase<void, TagListDTO> {
-    public constructor(@Inject private readonly tagController: TagsController) {
+    public constructor(@Inject private readonly tagsController: TagsController) {
         super();
     }
 
     protected async executeInternal(): Promise<Result<TagListDTO>> {
-        const tagList = await this.tagController.getTags();
+        const tagList = await this.tagsController.getTags();
         return Result.ok(TagMapper.toTagListDTO(tagList));
     }
 }
