@@ -17,9 +17,7 @@ beforeAll(async () => {
     sEventBus = runtimeServices[0].eventBus;
 }, 30000);
 
-beforeEach(() => {
-    sEventBus.reset();
-});
+beforeEach(() => sEventBus.reset());
 
 afterAll(async () => await serviceProvider.stop());
 
