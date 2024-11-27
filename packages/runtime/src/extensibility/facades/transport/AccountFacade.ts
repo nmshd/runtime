@@ -2,6 +2,9 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DeviceDTO } from "../../../types";
 import {
+    CheckIdentityDeletionForUsernameRequest,
+    CheckIdentityDeletionForUsernameResponse,
+    CheckIdentityDeletionForUsernameUseCase,
     DisableAutoSyncUseCase,
     EnableAutoSyncUseCase,
     GetDeviceInfoUseCase,
@@ -32,7 +35,8 @@ export class AccountFacade {
         @Inject private readonly getSyncInfoUseCase: GetSyncInfoUseCase,
         @Inject private readonly disableAutoSyncUseCase: DisableAutoSyncUseCase,
         @Inject private readonly enableAutoSyncUseCase: EnableAutoSyncUseCase,
-        @Inject private readonly loadItemFromTruncatedReferenceUseCase: LoadItemFromTruncatedReferenceUseCase
+        @Inject private readonly loadItemFromTruncatedReferenceUseCase: LoadItemFromTruncatedReferenceUseCase,
+        @Inject private readonly checkIdentityDeletionForUsernameUseCase: CheckIdentityDeletionForUsernameUseCase
     ) {}
 
     public async getIdentityInfo(): Promise<Result<GetIdentityInfoResponse, ApplicationError>> {
@@ -73,5 +77,9 @@ export class AccountFacade {
 
     public async loadItemFromTruncatedReference(request: LoadItemFromTruncatedReferenceRequest): Promise<Result<LoadItemFromTruncatedReferenceResponse, ApplicationError>> {
         return await this.loadItemFromTruncatedReferenceUseCase.execute(request);
+    }
+
+    public async checkIdentityDeletionForUsername(request: CheckIdentityDeletionForUsernameRequest): Promise<Result<CheckIdentityDeletionForUsernameResponse, ApplicationError>> {
+        return await this.checkIdentityDeletionForUsernameUseCase.execute(request);
     }
 }
