@@ -22,11 +22,13 @@ export class PublicRelationshipTemplateReferencesController extends TransportCon
     public async getPublicRelationshipTemplateReferences(): Promise<PublicRelationshipTemplateReference[]> {
         try {
             const backbonePublicRelationshipTemplateReferencesResult = await this.client.getPublicRelationshipTemplateReferences();
-            return backbonePublicRelationshipTemplateReferencesResult.value.map((reference) => PublicRelationshipTemplateReference.fromAny(reference));
+            const backbonePublicRelationshipTemplateReferences = backbonePublicRelationshipTemplateReferencesResult.value.map((reference) =>
+                PublicRelationshipTemplateReference.fromAny(reference)
+            );
+            return backbonePublicRelationshipTemplateReferences;
         } catch (e) {
-            if (e instanceof RequestError && e.status === 404) {
-                return [];
-            }
+            if (e instanceof RequestError && e.status === 404) return [];
+
             throw e;
         }
     }

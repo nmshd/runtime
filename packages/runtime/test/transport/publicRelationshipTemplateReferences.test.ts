@@ -1,23 +1,23 @@
 import { ClientResult, PublicRelationshipTemplateReferenceClient } from "@nmshd/transport";
+import { reset, spy, when } from "ts-mockito";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
-import { RestClientMocker } from "../lib/RestClientMocker";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices: TestRuntimeServices;
-let clientMocker: RestClientMocker<PublicRelationshipTemplateReferenceClient>;
+let mockClient: PublicRelationshipTemplateReferenceClient;
 
 beforeAll(async () => {
     runtimeServices = (await serviceProvider.launch(1))[0];
-    const client = (runtimeServices.transport.publicRelationshipTemplateReferences as any).getPublicRelationshipTemplateReferencesUseCase
-        .publicRelationshipTemplateReferencesController.client as PublicRelationshipTemplateReferenceClient;
-    clientMocker = new RestClientMocker(client);
+    const client = runtimeServices.transport.publicRelationshipTemplateReferences["getPublicRelationshipTemplateReferencesUseCase"][
+        "publicRelationshipTemplateReferencesController"
+    ]["client"] as PublicRelationshipTemplateReferenceClient;
+
+    mockClient = spy(client);
 }, 30000);
 
 afterAll(() => serviceProvider.stop());
 
-afterEach(() => {
-    clientMocker.reset();
-});
+afterEach(() => reset(mockClient));
 
 describe("PublicRelationshipTemplateReferences", () => {
     test("should read the PublicRelationshipTemplateReferences", async () => {
@@ -26,22 +26,10 @@ describe("PublicRelationshipTemplateReferences", () => {
                 title: "aTitle",
                 description: "aDescription",
                 truncatedReference: "aReference"
-            },
-            {
-                title: "aTitle",
-                description: "aDescription",
-                truncatedReference: "aReference"
-            },
-            {
-                title: "aTitle",
-                description: "aDescription",
-                truncatedReference: "aReference"
             }
         ];
 
-        clientMocker.mockMethod("getPublicRelationshipTemplateReferences", () => {
-            return ClientResult.ok(mockResponse);
-        });
+        when(mockClient.getPublicRelationshipTemplateReferences()).thenResolve(ClientResult.ok(mockResponse));
 
         const publicRelationshipTemplateReferences = await runtimeServices.transport.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
 
