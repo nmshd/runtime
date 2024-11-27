@@ -9,7 +9,7 @@ let mockedRestClient: TagClient;
 
 beforeAll(async () => {
     runtimeService = (await serviceProvider.launch(1))[0];
-    const client = runtimeService.transport.tags["getTagsUseCase"]["tagController"]["client"] as TagClient;
+    const client = runtimeService.transport.tags["getTagsUseCase"]["tagsController"]["client"] as TagClient;
     mockedRestClient = spy(client);
 }, 30000);
 
