@@ -20,16 +20,16 @@ export class IdentityDeletionProcessStatusChangedModule extends AppRuntimeModule
 
         switch (identityDeletionProcess.status) {
             case IdentityDeletionProcessStatus.Approved:
-                this.runtime.currentSession.account.deletionDate = identityDeletionProcess.gracePeriodEndsAt;
                 await this.runtime.multiAccountController.updateLocalAccountDeletionDate(event.eventTargetAddress, identityDeletionProcess.gracePeriodEndsAt);
                 break;
 
             case IdentityDeletionProcessStatus.Cancelled:
-                const previousDeletionDate = this.runtime.currentSession.account.deletionDate;
+                const account = await this.runtime.multiAccountController.getAccountByAddress(event.eventTargetAddress);
+                const previousDeletionDate = account.deletionDate;
+
                 if (!previousDeletionDate) break;
 
-                this.runtime.currentSession.account.deletionDate = undefined;
-                await this.runtime.multiAccountController.updateLocalAccountDeletionDate(event.eventTargetAddress);
+                await this.runtime.multiAccountController.updateLocalAccountDeletionDate(event.eventTargetAddress, undefined);
                 break;
 
             default:

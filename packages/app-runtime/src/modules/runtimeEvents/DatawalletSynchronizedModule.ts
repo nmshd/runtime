@@ -17,7 +17,8 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
     }
 
     private async handleDatawalletSynchronized(event: DatawalletSynchronizedEvent) {
-        const previousDeletionDate = this.runtime.currentSession.account.deletionDate;
+        const account = await this.runtime.multiAccountController.getAccountByAddress(event.eventTargetAddress);
+        const previousDeletionDate = account.deletionDate;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const identityDeletionProcessResult = await services.transportServices.identityDeletionProcesses.getIdentityDeletionProcesses();
@@ -43,7 +44,6 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
 
         if (previousDeletionDate === newDeletionDate) return;
 
-        this.runtime.currentSession.account.deletionDate = newDeletionDate;
         await this.runtime.multiAccountController.updateLocalAccountDeletionDate(event.eventTargetAddress, newDeletionDate);
 
         this.runtime.eventBus.publish(new LocalAccountDeletionDateChangedEvent(event.eventTargetAddress, newDeletionDate));
