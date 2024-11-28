@@ -50,12 +50,13 @@ describe("Tokens errors", () => {
 
 describe("Tokens query", () => {
     test("query own tokens", async () => {
-        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address);
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, "password");
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
             .addDateSet("expiresAt")
             .addDateSet("createdAt")
             .addStringSet("createdByDevice")
-            .addStringSet("forIdentity");
+            .addStringSet("forIdentity")
+            .addStringSet("passwordProtection.password");
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
 
@@ -63,6 +64,39 @@ describe("Tokens query", () => {
         const token = await exchangeToken(runtimeServices1.transport, runtimeServices2.transport);
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices2.transport).addDateSet("expiresAt").addDateSet("createdAt").addStringSet("createdBy");
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Peer }));
+    });
+
+    test("password- vs. PIN-protected tokens", async () => {
+        const passwordProtectedToken = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, "password");
+
+        const pinProtectedToken = (
+            await runtimeServices1.transport.tokens.createOwnToken({
+                content: { key: "value" },
+                expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+                ephemeral: true,
+                passwordProtection: { password: "1234", passwordIsPin: true }
+            })
+        ).value;
+
+        const passwordProtectedTokens = (
+            await runtimeServices1.transport.tokens.getTokens({
+                query: {
+                    "passwordProtection.passwordIsPin": "!true"
+                }
+            })
+        ).value;
+        expect(passwordProtectedTokens).toHaveLength(1);
+        expect(passwordProtectedTokens[0].id).toBe(passwordProtectedToken.id);
+
+        const pinProtectedTokens = (
+            await runtimeServices1.transport.tokens.getTokens({
+                query: {
+                    "passwordProtection.passwordIsPin": "true"
+                }
+            })
+        ).value;
+        expect(pinProtectedTokens).toHaveLength(1);
+        expect(pinProtectedTokens[0].id).toBe(pinProtectedToken.id);
     });
 });
 
