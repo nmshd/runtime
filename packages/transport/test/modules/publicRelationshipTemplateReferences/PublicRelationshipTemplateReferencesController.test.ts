@@ -33,19 +33,20 @@ afterEach(() => reset(mockedClient));
 
 describe("PublicRelationshipTemplateReferencesController", () => {
     test("should return the backbone defined PublicRelationshipTemplateReferences", async () => {
-        const mockResponse = [
-            {
-                title: "aTitle",
-                description: "aDescription",
-                truncatedReference: "aReference"
-            }
-        ];
-
+        const mockResponse = [{ title: "aTitle", description: "aDescription", truncatedReference: "aReference" }];
         when(mockedClient.getPublicRelationshipTemplateReferences()).thenResolve(ClientResult.ok(mockResponse));
 
         const publicRelationshipTemplates = await account.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
 
-        expect(publicRelationshipTemplates.map((references) => references.toJSON())).toStrictEqual(mockResponse);
+        expect(publicRelationshipTemplates.map((reference) => reference.toJSON())).toStrictEqual(mockResponse);
+    });
+
+    test("should return an empty array if the backbone endpoint returns an empty array", async () => {
+        when(mockedClient.getPublicRelationshipTemplateReferences()).thenResolve(ClientResult.ok([]));
+
+        const publicRelationshipTemplates = await account.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
+
+        expect(publicRelationshipTemplates).toStrictEqual([]);
     });
 
     test("should return an empty array if the backbone endpoint is not available", async () => {
@@ -56,13 +57,5 @@ describe("PublicRelationshipTemplateReferencesController", () => {
         const publicRelationshipTemplates = await account.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
 
         expect(publicRelationshipTemplates).toHaveLength(0);
-    });
-
-    test("should return an empty array if the backbone endpoint returns an empty array", async () => {
-        when(mockedClient.getPublicRelationshipTemplateReferences()).thenResolve(ClientResult.ok([]));
-
-        const publicRelationshipTemplates = await account.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
-
-        expect(publicRelationshipTemplates).toStrictEqual([]);
     });
 });
