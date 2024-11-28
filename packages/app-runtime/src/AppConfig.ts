@@ -52,6 +52,18 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
                 location: "onboardingChangeReceived",
                 enabled: true
             },
+            datawalletSynchronized: {
+                name: "datawalletSynchronized",
+                displayName: "Datawallet Synchronized Module",
+                location: "datawalletSynchronized",
+                enabled: true
+            },
+            identityDeletionProcessStatusChanged: {
+                name: "identityDeletionProcessStatusChanged",
+                displayName: "Identity Deletion Process Status Changed Module",
+                location: "identityDeletionProcessStatusChanged",
+                enabled: true
+            },
             messageReceived: {
                 name: "messageReceived",
                 displayName: "Message Received Module",
