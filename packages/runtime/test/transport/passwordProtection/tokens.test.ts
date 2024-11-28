@@ -78,4 +78,28 @@ describe("Password-protected tokens", () => {
         });
         expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
     });
+
+    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+        test("loads the Token with the truncated Token reference", async () => {
+            const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
+
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.truncatedReference, password: "password" });
+            expect(loadResult).toBeSuccessful();
+            expect(loadResult.value.type).toBe("Token");
+        });
+
+        test("doesn't load the Token with the truncated Token reference if password is wrong", async () => {
+            const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
+
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.truncatedReference, password: "wrong-password" });
+            expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("doesn't load the Token with the truncated Token reference if password is missing", async () => {
+            const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
+
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.truncatedReference });
+            expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
+        });
+    });
 });

@@ -14,16 +14,9 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 describe("Password-protected templates via tokens", () => {
-    test("send and receive a password-protected template via a token", async () => {
-        const templateId = (
-            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                passwordProtection: {
-                    password: "password"
-                }
-            })
-        ).value.id;
+    test("send and receive a password-protected template", async () => {
+        const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password" })).id;
+
         const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
             templateId,
             passwordProtection: {
@@ -40,17 +33,8 @@ describe("Password-protected templates via tokens", () => {
         expect(loadResult.value.passwordProtection!.passwordIsPin).toBeUndefined();
     });
 
-    test("send and receive a PIN-protected template via a token", async () => {
-        const templateId = (
-            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                passwordProtection: {
-                    password: "1234",
-                    passwordIsPin: true
-                }
-            })
-        ).value.id;
+    test("send and receive a PIN-protected template", async () => {
+        const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "1234", passwordIsPin: true })).id;
 
         const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
             templateId,
@@ -69,16 +53,9 @@ describe("Password-protected templates via tokens", () => {
         expect(loadResult.value.passwordProtection!.passwordIsPin).toBe(true);
     });
 
-    test("error when loading a password-protected template via token with wrong password", async () => {
-        const templateId = (
-            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                passwordProtection: {
-                    password: "password"
-                }
-            })
-        ).value.id;
+    test("error when loading a password-protected template with wrong password", async () => {
+        const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password" })).id;
+
         const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
             templateId,
             passwordProtection: {
@@ -93,16 +70,9 @@ describe("Password-protected templates via tokens", () => {
         expect(loadResult).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 
-    test("error when loading a password-protected template via token with no password", async () => {
-        const templateId = (
-            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                passwordProtection: {
-                    password: "password"
-                }
-            })
-        ).value.id;
+    test("error when loading a password-protected template with no password", async () => {
+        const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password" })).id;
+
         const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
             templateId,
             passwordProtection: {
@@ -117,20 +87,45 @@ describe("Password-protected templates via tokens", () => {
     });
 
     test("validation error when token password protection doesn't inherit template password protection", async () => {
-        const templateId = (
-            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                passwordProtection: {
-                    password: "password"
-                }
-            })
-        ).value.id;
+        const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password" })).id;
+
         const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
             templateId
         });
 
         expect(createResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.passwordProtectionMustBeInherited");
+    });
+
+    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+        test("send and receive a password-protected template", async () => {
+            const template = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
+
+            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+                reference: template.truncatedReference,
+                password: "password"
+            });
+            expect(result).toBeSuccessful();
+            expect(result.value.type).toBe("RelationshipTemplate");
+        });
+
+        test("doesn't load the RelationshipTemplate with the truncated Token reference if password is wrong", async () => {
+            const template = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
+
+            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+                reference: template.truncatedReference,
+                password: "wrong-password"
+            });
+            expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("doesn't load the RelationshipTemplate with the truncated Token reference if password is missing", async () => {
+            const template = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
+
+            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+                reference: template.truncatedReference
+            });
+            expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
+        });
     });
 });
 
@@ -237,6 +232,56 @@ describe("Password-protected templates", () => {
         });
         expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
     });
+
+    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+        test("loads the RelationshipTemplate", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                passwordProtection: {
+                    password: "password"
+                }
+            });
+
+            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+                reference: createResult.value.truncatedReference,
+                password: "password"
+            });
+            expect(result).toBeSuccessful();
+            expect(result.value.type).toBe("RelationshipTemplate");
+        });
+
+        test("doesn't load the RelationshipTemplate if password is wrong", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                passwordProtection: {
+                    password: "password"
+                }
+            });
+
+            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+                reference: createResult.value.truncatedReference,
+                password: "wrong-password"
+            });
+            expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("doesn't load the RelationshipTemplate if password is missing", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content: emptyRelationshipTemplateContent,
+                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+                passwordProtection: {
+                    password: "password"
+                }
+            });
+
+            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+                reference: createResult.value.truncatedReference
+            });
+            expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
+        });
+    });
 });
 
 describe("Password-protected tokens for unprotected templates", () => {
@@ -314,5 +359,46 @@ describe("Password-protected tokens for unprotected templates", () => {
             passwordProtection: { password: "invalid-pin", passwordIsPin: true }
         });
         expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
+    });
+
+    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+        test("loads the RelationshipTemplate with the truncated Token reference", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId,
+                passwordProtection: { password: "password" }
+            });
+
+            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+                reference: createResult.value.truncatedReference,
+                password: "password"
+            });
+            expect(result).toBeSuccessful();
+            expect(result.value.type).toBe("RelationshipTemplate");
+        });
+
+        test("doesn't load the RelationshipTemplate with the truncated Token reference if password is wrong", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId,
+                passwordProtection: { password: "password" }
+            });
+
+            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+                reference: createResult.value.truncatedReference,
+                password: "wrong-password"
+            });
+            expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("doesn't load the RelationshipTemplate with the truncated Token reference if password is missing", async () => {
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+                templateId,
+                passwordProtection: { password: "password" }
+            });
+
+            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+                reference: createResult.value.truncatedReference
+            });
+            expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
+        });
     });
 });

@@ -101,37 +101,6 @@ describe("LoadItemFromTruncatedReference", () => {
         });
     });
 
-    describe("Password-protected Tokens for Files", () => {
-        let fileTokenReference: string;
-
-        beforeAll(async () => {
-            const file = await uploadFile(sTransportServices);
-            fileTokenReference = (await sTransportServices.files.createTokenForFile({ fileId: file.id })).value.truncatedReference;
-            fileTokenReference = (
-                await sTransportServices.files.createTokenForFile({
-                    fileId: file.id,
-                    passwordProtection: { password: "password" }
-                })
-            ).value.truncatedReference;
-        });
-
-        test("loads the File with the truncated Token reference", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: fileTokenReference, password: "password" });
-            expect(result).toBeSuccessful();
-            expect(result.value.type).toBe("File");
-        });
-
-        test("doesn't load the File with the truncated Token reference if password is wrong", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: fileTokenReference, password: "wrong-password" });
-            expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
-        });
-
-        test("doesn't load the File with the truncated Token reference if password is missing", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: fileTokenReference });
-            expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
-        });
-    });
-
     describe("RelationshipTemplate", () => {
         let relationshipTemplateReference: string;
         let relationshipTemplateTokenReference: string;
@@ -161,79 +130,6 @@ describe("LoadItemFromTruncatedReference", () => {
         });
     });
 
-    describe("Password-protected RelationshipTemplates", () => {
-        let relationshipTemplateReference: string;
-        let relationshipTemplateTokenReference: string;
-
-        beforeAll(async () => {
-            const relationshipTemplate = (
-                await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                    content: emptyRelationshipTemplateContent,
-                    expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
-                    passwordProtection: {
-                        password: "password"
-                    }
-                })
-            ).value;
-            relationshipTemplateTokenReference = (await sTransportServices.relationshipTemplates.createTokenForOwnTemplate({ templateId: relationshipTemplate.id })).value
-                .truncatedReference;
-            relationshipTemplateTokenReference = (
-                await sTransportServices.relationshipTemplates.createTokenForOwnTemplate({
-                    templateId: relationshipTemplate.id,
-                    passwordProtection: { password: "password" }
-                })
-            ).value.truncatedReference;
-        });
-
-        test("loads the RelationshipTemplate", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({
-                reference: relationshipTemplateReference,
-                password: "password"
-            });
-            expect(result).toBeSuccessful();
-            expect(result.value.type).toBe("RelationshipTemplate");
-        });
-
-        test("doesn't load the RelationshipTemplate if password is wrong", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({
-                reference: relationshipTemplateReference,
-                password: "wrong-password"
-            });
-            expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
-        });
-
-        test("doesn't load the RelationshipTemplate if password is missing", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({
-                reference: relationshipTemplateReference
-            });
-            expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
-        });
-
-        test("loads the RelationshipTemplate with the truncated Token reference", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({
-                reference: relationshipTemplateTokenReference,
-                password: "password"
-            });
-            expect(result).toBeSuccessful();
-            expect(result.value.type).toBe("RelationshipTemplate");
-        });
-
-        test("doesn't load the RelationshipTemplate with the truncated Token reference if password is wrong", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({
-                reference: relationshipTemplateTokenReference,
-                password: "wrong-password"
-            });
-            expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
-        });
-
-        test("doesn't load the RelationshipTemplate with the truncated Token reference if password is missing", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({
-                reference: relationshipTemplateTokenReference
-            });
-            expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
-        });
-    });
-
     describe("Token", () => {
         let tokenReference: string;
 
@@ -246,41 +142,6 @@ describe("LoadItemFromTruncatedReference", () => {
             const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: tokenReference });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("Token");
-        });
-    });
-
-    describe("Password-protected Tokens", () => {
-        let tokenReference: string;
-
-        beforeAll(async () => {
-            const token = (await sTransportServices.tokens.createOwnToken({ content: {}, expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(), ephemeral: true })).value;
-            tokenReference = token.truncatedReference;
-
-            const passwordProtectedToken = (
-                await sTransportServices.tokens.createOwnToken({
-                    content: {},
-                    expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
-                    ephemeral: true,
-                    passwordProtection: { password: "password" }
-                })
-            ).value;
-            tokenReference = passwordProtectedToken.truncatedReference;
-        });
-
-        test("loads the Token with the truncated Token reference", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: tokenReference, password: "password" });
-            expect(result).toBeSuccessful();
-            expect(result.value.type).toBe("Token");
-        });
-
-        test("doesn't load the Token with the truncated Token reference if password is wrong", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: tokenReference, password: "wrong-password" });
-            expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
-        });
-
-        test("doesn't load the Token with the truncated Token reference if password is missing", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: tokenReference });
-            expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });
 
