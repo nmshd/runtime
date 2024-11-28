@@ -33,14 +33,14 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
         });
     }
 
-    private matchesCreationParameters(compare: PasswordProtectionCreationParameters): boolean {
-        return this.passwordType === compare.passwordType && this.password === compare.password;
+    public matchesInputForNewPasswordProtection(newPasswordProtection: { password: string; passwordIsPin?: true } | undefined): boolean {
+        const newCreationParameters = PasswordProtectionCreationParameters.create(newPasswordProtection);
+        if (!newCreationParameters) return false;
+
+        return this.matchesCreationParameters(newCreationParameters);
     }
 
-    public matchesInputForNewPassword(compare: { password: string; passwordIsPin?: true } | undefined): boolean {
-        const compareCreationParameters = PasswordProtectionCreationParameters.create(compare);
-        if (!compareCreationParameters) return false;
-
-        return this.matchesCreationParameters(compareCreationParameters);
+    private matchesCreationParameters(creationParameters: PasswordProtectionCreationParameters): boolean {
+        return this.passwordType === creationParameters.passwordType && this.password === creationParameters.password;
     }
 }
