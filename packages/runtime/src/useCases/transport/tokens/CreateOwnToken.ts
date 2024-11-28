@@ -6,7 +6,16 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";
-import { AddressString, GenericInputValidator, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import {
+    AddressString,
+    ISO8601DateTimeString,
+    RuntimeErrors,
+    SchemaRepository,
+    TokenAndTemplateCreationValidator,
+    UseCase,
+    ValidationFailure,
+    ValidationResult
+} from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
 export interface CreateOwnTokenRequest {
@@ -23,7 +32,7 @@ export interface CreateOwnTokenRequest {
     };
 }
 
-class Validator extends GenericInputValidator<CreateOwnTokenRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateOwnTokenRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateOwnTokenRequest"));
     }

@@ -2,20 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { File, FileController, PasswordProtectionCreationParameters, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DateTime } from "luxon";
-import { nameof } from "ts-simple-nameof";
-import {
-    AddressString,
-    FileIdString,
-    GenericInputValidator,
-    ISO8601DateTimeString,
-    QRCode,
-    RuntimeErrors,
-    SchemaRepository,
-    UseCase,
-    ValidationFailure,
-    ValidationResult
-} from "../../common";
+import { AddressString, FileIdString, ISO8601DateTimeString, QRCode, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 
 export interface CreateTokenQRCodeForFileRequest {
     fileId: FileIdString;
@@ -34,25 +21,9 @@ export interface CreateTokenQRCodeForFileResponse {
     qrCodeBytes: string;
 }
 
-class Validator extends GenericInputValidator<CreateTokenQRCodeForFileRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateTokenQRCodeForFileRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenQRCodeForFileRequest"));
-    }
-
-    public override validate(input: CreateTokenQRCodeForFileRequest): ValidationResult {
-        const validationResult = super.validate(input);
-        if (!validationResult.isValid()) return validationResult;
-
-        if (input.expiresAt && DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateTokenQRCodeForFileRequest>((r) => r.expiresAt)}' must be in the future`),
-                    nameof<CreateTokenQRCodeForFileRequest>((r) => r.expiresAt)
-                )
-            );
-        }
-
-        return validationResult;
     }
 }
 

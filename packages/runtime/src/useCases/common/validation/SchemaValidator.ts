@@ -5,7 +5,7 @@ import { IValidator } from "./IValidator";
 import { ValidationFailure } from "./ValidationFailure";
 import { ValidationResult } from "./ValidationResult";
 
-export class SchemaValidator<T extends object> implements IValidator<T> {
+export class SchemaValidator<T> implements IValidator<T> {
     public constructor(protected readonly schema: JsonSchema) {}
 
     public validate(input: T): ValidationResult {

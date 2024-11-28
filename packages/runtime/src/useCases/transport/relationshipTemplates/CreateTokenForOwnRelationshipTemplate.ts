@@ -10,20 +10,8 @@ import {
     TokenController
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DateTime } from "luxon";
-import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";
-import {
-    AddressString,
-    GenericInputValidator,
-    ISO8601DateTimeString,
-    RelationshipTemplateIdString,
-    RuntimeErrors,
-    SchemaRepository,
-    UseCase,
-    ValidationFailure,
-    ValidationResult
-} from "../../common";
+import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateTokenForOwnTemplateRequest {
@@ -40,25 +28,9 @@ export interface CreateTokenForOwnTemplateRequest {
     };
 }
 
-class Validator extends GenericInputValidator<CreateTokenForOwnTemplateRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateTokenForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenForOwnTemplateRequest"));
-    }
-
-    public override validate(input: CreateTokenForOwnTemplateRequest): ValidationResult {
-        const validationResult = super.validate(input);
-        if (!validationResult.isValid()) return validationResult;
-
-        if (input.expiresAt && DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateTokenForOwnTemplateRequest>((r) => r.expiresAt)}' must be in the future`),
-                    nameof<CreateTokenForOwnTemplateRequest>((r) => r.expiresAt)
-                )
-            );
-        }
-
-        return validationResult;
     }
 }
 
