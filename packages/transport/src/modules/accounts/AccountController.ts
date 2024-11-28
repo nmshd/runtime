@@ -253,6 +253,7 @@ export class AccountController {
                 continue;
             }
 
+            // TODO: should we really trigger this event or would a IdentityDeletionProcessStatusChangedDuringDatawalletSyncEvent better?
             this.transport.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.identity.address.toString(), changedIdentityDeletionProcesses));
         }
     }

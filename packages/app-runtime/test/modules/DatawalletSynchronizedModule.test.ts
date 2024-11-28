@@ -3,7 +3,8 @@ import { IdentityDeletionProcessStatus } from "@nmshd/runtime";
 import { AppRuntime, LocalAccountDeletionDateChangedEvent, LocalAccountSession } from "../../src";
 import { TestUtil } from "../lib";
 
-describe("DatawalletSynchronized", function () {
+// eslint-disable-next-line jest/no-disabled-tests
+describe.skip("DatawalletSynchronized", function () {
     let runtimeDevice1: AppRuntime;
     let sessionDevice1: LocalAccountSession;
 

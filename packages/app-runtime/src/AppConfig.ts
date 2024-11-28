@@ -56,7 +56,7 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
                 name: "datawalletSynchronized",
                 displayName: "Datawallet Synchronized Module",
                 location: "datawalletSynchronized",
-                enabled: true
+                enabled: false
             },
             identityDeletionProcessStatusChanged: {
                 name: "identityDeletionProcessStatusChanged",
