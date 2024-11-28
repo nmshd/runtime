@@ -27,9 +27,10 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
             return;
         }
 
-        let newDeletionDate;
-        const mostRecentIdentityDeletionProcess = identityDeletionProcessResult.value[identityDeletionProcessResult.value.length - 1];
+        if (identityDeletionProcessResult.value.length === 0) return;
 
+        const mostRecentIdentityDeletionProcess = identityDeletionProcessResult.value.at(-1)!;
+        let newDeletionDate;
         switch (mostRecentIdentityDeletionProcess.status) {
             case IdentityDeletionProcessStatus.Approved:
                 newDeletionDate = CoreDate.from(mostRecentIdentityDeletionProcess.gracePeriodEndsAt!);
