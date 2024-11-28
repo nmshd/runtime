@@ -57,6 +57,7 @@ describe("PublicRelationshipTemplateReferencesController", () => {
 
         expect(publicRelationshipTemplates).toHaveLength(0);
     });
+
     test("should return an empty array if the backbone endpoint returns an empty array", async () => {
         when(mockedClient.getPublicRelationshipTemplateReferences()).thenResolve(ClientResult.ok([]));
 
