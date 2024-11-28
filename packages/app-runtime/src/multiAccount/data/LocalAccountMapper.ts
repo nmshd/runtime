@@ -10,7 +10,8 @@ export class LocalAccountMapper {
             directory: localAccount.directory.toString(),
             order: localAccount.order,
             lastAccessedAt: localAccount.lastAccessedAt?.toString(),
-            devicePushIdentifier: localAccount.devicePushIdentifier
+            devicePushIdentifier: localAccount.devicePushIdentifier,
+            deletionDate: localAccount.deletionDate?.toString()
         };
     }
 }
