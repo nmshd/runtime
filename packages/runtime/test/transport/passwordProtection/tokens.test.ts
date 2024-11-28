@@ -76,7 +76,10 @@ describe("Password-protected tokens", () => {
             ephemeral: true,
             passwordProtection: { password: "invalid-pin", passwordIsPin: true }
         });
-        expect(createResult).toBeAnError(/.*/, "error.runtime.validation.invalidPin");
+        expect(createResult).toBeAnError(
+            "'passwordProtection.passwordIsPin' is true, hence 'passwordProtection.password' must consist of 4 to 16 digits from 0 to 9.",
+            "error.runtime.validation.invalidPropertyValue"
+        );
     });
 
     describe("LoadItemFromTruncatedReferenceUseCase", () => {
