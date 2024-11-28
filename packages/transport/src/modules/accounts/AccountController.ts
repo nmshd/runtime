@@ -8,6 +8,7 @@ import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
+import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
@@ -232,11 +233,28 @@ export class AccountController {
     public async syncDatawallet(force = false): Promise<void> {
         if (!force && !this.autoSync) return;
 
-        await this.synchronization.sync("OnlyDatawallet");
+        const changedItems = await this.synchronization.sync("OnlyDatawallet");
+        await this.triggerEventsForChangedItems(changedItems);
     }
 
     public async syncEverything(): Promise<ChangedItems> {
-        return await this.synchronization.sync("Everything");
+        const changedItems = await this.synchronization.sync("Everything");
+        await this.triggerEventsForChangedItems(changedItems);
+
+        return changedItems;
+    }
+
+    private async triggerEventsForChangedItems(changedItems: ChangedItems) {
+        const changedIdentityDeletionProcessIds = changedItems.changedObjectIdentifiersDuringDatawalletSync.filter((x) => x.startsWith("IDP"));
+        for (const id in changedIdentityDeletionProcessIds) {
+            const changedIdentityDeletionProcesses = await this.identityDeletionProcess.getIdentityDeletionProcess(id);
+            if (!changedIdentityDeletionProcesses) {
+                this.log.error(`IdentityDeletionProcess with id ${id} not found for re-triggering event. Skipping.`);
+                continue;
+            }
+
+            this.transport.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.identity.address.toString(), changedIdentityDeletionProcesses));
+        }
     }
 
     public async getLastCompletedSyncTime(): Promise<CoreDate | undefined> {
