@@ -3,8 +3,10 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { AccountController, PasswordProtectionCreationParameters, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import { DateTime } from "luxon";
+import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";
-import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AddressString, GenericInputValidator, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
 export interface CreateOwnTokenRequest {
@@ -21,9 +23,25 @@ export interface CreateOwnTokenRequest {
     };
 }
 
-class Validator extends SchemaValidator<CreateOwnTokenRequest> {
+class Validator extends GenericInputValidator<CreateOwnTokenRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateOwnTokenRequest"));
+    }
+
+    public override validate(input: CreateOwnTokenRequest): ValidationResult {
+        const validationResult = super.validate(input);
+        if (!validationResult.isValid()) return validationResult;
+
+        if (DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateOwnTokenRequest>((r) => r.expiresAt)}' must be in the future`),
+                    nameof<CreateOwnTokenRequest>((r) => r.expiresAt)
+                )
+            );
+        }
+
+        return validationResult;
     }
 }
 

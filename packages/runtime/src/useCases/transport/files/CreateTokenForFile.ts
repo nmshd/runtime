@@ -2,8 +2,20 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, File, FileController, PasswordProtectionCreationParameters, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import { DateTime } from "luxon";
+import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";
-import { AddressString, FileIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import {
+    AddressString,
+    FileIdString,
+    GenericInputValidator,
+    ISO8601DateTimeString,
+    RuntimeErrors,
+    SchemaRepository,
+    UseCase,
+    ValidationFailure,
+    ValidationResult
+} from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateTokenForFileRequest {
@@ -20,9 +32,25 @@ export interface CreateTokenForFileRequest {
     };
 }
 
-class Validator extends SchemaValidator<CreateTokenForFileRequest> {
+class Validator extends GenericInputValidator<CreateTokenForFileRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenForFileRequest"));
+    }
+
+    public override validate(input: CreateTokenForFileRequest): ValidationResult {
+        const validationResult = super.validate(input);
+        if (!validationResult.isValid()) return validationResult;
+
+        if (input.expiresAt && DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateTokenForFileRequest>((r) => r.expiresAt)}' must be in the future`),
+                    nameof<CreateTokenForFileRequest>((r) => r.expiresAt)
+                )
+            );
+        }
+
+        return validationResult;
     }
 }
 

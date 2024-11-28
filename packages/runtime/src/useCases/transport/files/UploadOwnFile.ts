@@ -53,6 +53,15 @@ class Validator extends SchemaValidator<UploadOwnFileValidatableRequest> {
             );
         }
 
+        if (input.expiresAt && CoreDate.from(input.expiresAt).isSameOrBefore(CoreDate.utc())) {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<UploadOwnFileValidatableRequest>((r) => r.expiresAt)}' must be in the future`),
+                    nameof<UploadOwnFileValidatableRequest>((r) => r.expiresAt)
+                )
+            );
+        }
+
         return validationResult;
     }
 }

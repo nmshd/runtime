@@ -9,7 +9,20 @@ import {
     TokenController
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { DateTime } from "luxon";
+import { nameof } from "ts-simple-nameof";
+import {
+    AddressString,
+    GenericInputValidator,
+    ISO8601DateTimeString,
+    QRCode,
+    RelationshipTemplateIdString,
+    RuntimeErrors,
+    SchemaRepository,
+    UseCase,
+    ValidationFailure,
+    ValidationResult
+} from "../../common";
 
 export interface CreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
@@ -24,9 +37,25 @@ export interface CreateTokenQRCodeForOwnTemplateRequest {
     };
 }
 
-class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> {
+class Validator extends GenericInputValidator<CreateTokenQRCodeForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenQRCodeForOwnTemplateRequest"));
+    }
+
+    public override validate(input: CreateTokenQRCodeForOwnTemplateRequest): ValidationResult {
+        const validationResult = super.validate(input);
+        if (!validationResult.isValid()) return validationResult;
+
+        if (input.expiresAt && DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateTokenQRCodeForOwnTemplateRequest>((r) => r.expiresAt)}' must be in the future`),
+                    nameof<CreateTokenQRCodeForOwnTemplateRequest>((r) => r.expiresAt)
+                )
+            );
+        }
+
+        return validationResult;
     }
 }
 
