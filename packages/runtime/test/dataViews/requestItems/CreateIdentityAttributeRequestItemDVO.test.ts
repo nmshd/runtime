@@ -275,13 +275,13 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
-        expect(attributeResult.value.at(-1).id).toBeDefined();
-        expect((attributeResult.value.at(-1).content.value as DisplayNameJSON).value).toBe("Richard Receiver");
+        expect(attributeResult.value.at(-1)!.id).toBeDefined();
+        expect((attributeResult.value.at(-1)!.content.value as DisplayNameJSON).value).toBe("Richard Receiver");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1).id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1)!.id);
         expect(responseItem.attribute).toBeDefined();
         expect(responseItem.attribute.valueType).toBe("DisplayName");
-        expect((attributeResult.value.at(-1).content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
+        expect((attributeResult.value.at(-1)!.content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
     });
 

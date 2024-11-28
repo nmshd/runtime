@@ -1171,8 +1171,8 @@ export class AttributesController extends ConsumptionBaseController {
         const defaultCandidates = await this.getLocalAttributes(query);
         if (defaultCandidates.length === 0) return;
 
-        defaultCandidates.at(-1).isDefault = true;
-        await this.updateAttributeUnsafe(defaultCandidates.at(-1));
+        defaultCandidates.at(-1)!.isDefault = true;
+        await this.updateAttributeUnsafe(defaultCandidates.at(-1)!);
     }
 
     public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {

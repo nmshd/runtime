@@ -85,7 +85,7 @@ describe("Messaging", () => {
         const numberOfMessages = response.value.length;
         expect(numberOfMessages - baselineNumberOfMessages).toBe(1);
 
-        const message = response.value.at(-1);
+        const message = response.value.at(-1)!;
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",

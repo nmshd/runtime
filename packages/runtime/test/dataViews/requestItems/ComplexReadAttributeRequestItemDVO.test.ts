@@ -245,9 +245,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value.at(-1).id).toBeDefined();
+        expect(attributeResult.value.at(-1)!.id).toBeDefined();
 
-        const returnedValue = attributeResult.value.at(-1).content.value as PersonNameJSON;
+        const returnedValue = attributeResult.value.at(-1)!.content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
         expect(returnedValue.givenName).toBe("Heinz");
         expect(returnedValue.surname).toBe("Ranzig");
@@ -255,7 +255,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(returnedValue.honorificPrefix).toBe("Dr.");
         expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1).id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1)!.id);
         expect(returnedValue).toStrictEqual(attributeValue);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
@@ -313,9 +313,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value.at(-1).id).toBeDefined();
+        expect(attributeResult.value.at(-1)!.id).toBeDefined();
 
-        const returnedValue = attributeResult.value.at(-1).content.value as PersonNameJSON;
+        const returnedValue = attributeResult.value.at(-1)!.content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
         expect(returnedValue.givenName).toBe("Heinz");
         expect(returnedValue.surname).toBe("Ranzig");
@@ -323,7 +323,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(returnedValue.honorificPrefix).toBe("Dr.");
         expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1).id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1)!.id);
         expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);
     });
 });
@@ -561,9 +561,9 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value.at(-1).id).toBeDefined();
+        expect(attributeResult.value.at(-1)!.id).toBeDefined();
 
-        const returnedValue = attributeResult.value.at(-1).content.value as PersonNameJSON;
+        const returnedValue = attributeResult.value.at(-1)!.content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
         expect(returnedValue.givenName).toBe("Heinz");
         expect(returnedValue.surname).toBe("Ranzig");
@@ -571,7 +571,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(returnedValue.honorificPrefix).toBe("Dr.");
         expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1).id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1)!.id);
         expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);
     });
 });

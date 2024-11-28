@@ -287,12 +287,12 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value.at(-1).id).toBeDefined();
+        expect(attributeResult.value.at(-1)!.id).toBeDefined();
 
-        const givenName = attributeResult.value.at(-1).content.value as GivenNameJSON;
+        const givenName = attributeResult.value.at(-1)!.content.value as GivenNameJSON;
         expect(givenName.value).toBe("Theodor");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1).id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1)!.id);
         expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
     });
 });
@@ -510,12 +510,12 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value.at(-1).id).toBeDefined();
+        expect(attributeResult.value.at(-1)!.id).toBeDefined();
 
-        const givenName = attributeResult.value.at(-1).content.value as GivenNameJSON;
+        const givenName = attributeResult.value.at(-1)!.content.value as GivenNameJSON;
         expect(givenName.value).toBe("Theodor");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1).id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1)!.id);
         expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
     });
 });
@@ -740,12 +740,12 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value.at(-1).id).toBeDefined();
+        expect(attributeResult.value.at(-1)!.id).toBeDefined();
 
-        const givenName = attributeResult.value.at(-1).content.value as SurnameJSON;
+        const givenName = attributeResult.value.at(-1)!.content.value as SurnameJSON;
         expect(givenName.value).toBe("Heuss");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1).id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1)!.id);
         expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as SurnameJSON).value);
     });
 });

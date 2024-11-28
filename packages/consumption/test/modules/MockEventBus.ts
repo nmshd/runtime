@@ -42,7 +42,7 @@ export class MockEventBus extends EventBus {
         eventConstructor: (new (...args: any[]) => TEvent) & { namespace: string },
         data?: Partial<TEvent extends DataEvent<infer X> ? X : never>
     ): void {
-        const lastEvent = this.publishedEvents.at(-1);
+        const lastEvent = this.publishedEvents.at(-1)!;
         expect(lastEvent.namespace).toStrictEqual(eventConstructor.namespace);
 
         if (data) expect(lastEvent.data).toStrictEqual(expect.objectContaining(data));

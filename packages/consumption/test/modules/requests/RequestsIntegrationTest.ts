@@ -1141,7 +1141,7 @@ export class RequestsThen {
 
         expect(modifiedRequest.status).toStrictEqual(status);
 
-        const statusLogEntry = modifiedRequest.statusLog.at(-1);
+        const statusLogEntry = modifiedRequest.statusLog.at(-1)!;
         expect(statusLogEntry.newStatus).toStrictEqual(status);
 
         return Promise.resolve();
