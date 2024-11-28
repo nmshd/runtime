@@ -31,7 +31,14 @@ export class TokenAndTemplateCreationValidator<
 
             if (passwordProtection.passwordIsPin) {
                 if (!/^[0-9]{4,16}$/.test(passwordProtection.password)) {
-                    validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPin()));
+                    validationResult.addFailure(
+                        new ValidationFailure(
+                            RuntimeErrors.general.invalidPropertyValue(
+                                `'passwordProtection.passwordIsPin' is true, hence 'passwordProtection.password' must consist of 4 to 16 digits from 0 to 9.`
+                            ),
+                            "passwordProtection"
+                        )
+                    );
                 }
             }
         }
