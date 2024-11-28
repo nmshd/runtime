@@ -233,11 +233,9 @@ export class AccountController {
     }
 
     public async syncDatawallet(force = false): Promise<void> {
-        if (!force && !this.autoSync) {
-            return;
-        }
+        if (!force && !this.autoSync) return;
 
-        return await this.synchronization.sync("OnlyDatawallet");
+        await this.synchronization.sync("OnlyDatawallet");
     }
 
     public async syncEverything(): Promise<ChangedItems> {
