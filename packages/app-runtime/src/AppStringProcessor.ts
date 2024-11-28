@@ -78,8 +78,8 @@ export class AppStringProcessor {
         let password: string | undefined;
         if (reference.passwordProtection) {
             const passwordResult = await uiBridge.enterPassword(
-                reference.passwordProtection!.passwordType === "pw" ? "pw" : "pin",
-                reference.passwordProtection!.passwordType === "pw" ? undefined : parseInt(reference.passwordProtection!.passwordType)
+                reference.passwordProtection.passwordType === "pw" ? "pw" : "pin",
+                reference.passwordProtection.passwordType === "pw" ? undefined : parseInt(reference.passwordProtection.passwordType.substring(3))
             );
             if (passwordResult.isError) {
                 return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
@@ -130,8 +130,8 @@ export class AppStringProcessor {
         let password: string | undefined;
         if (reference.passwordProtection) {
             const passwordResult = await uiBridge.enterPassword(
-                reference.passwordProtection!.passwordType === "pw" ? "pw" : "pin",
-                reference.passwordProtection!.passwordType === "pw" ? undefined : parseInt(reference.passwordProtection!.passwordType)
+                reference.passwordProtection.passwordType === "pw" ? "pw" : "pin",
+                reference.passwordProtection.passwordType === "pw" ? undefined : parseInt(reference.passwordProtection.passwordType)
             );
             if (passwordResult.isError) {
                 return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
