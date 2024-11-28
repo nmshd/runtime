@@ -32,6 +32,11 @@ export class DatawalletModificationsProcessor {
     private readonly cacheChanges: DatawalletModification[];
     private readonly deletedObjectIdentifiers: string[] = [];
 
+    private readonly _changedObjectIdentifiers: Set<string> = new Set();
+    public get changedObjectIdentifiers(): string[] {
+        return Array.from(this._changedObjectIdentifiers);
+    }
+
     public get log(): ILogger {
         return this.logger;
     }
@@ -64,6 +69,8 @@ export class DatawalletModificationsProcessor {
         const modificationsGroupedByObjectIdentifier = _.groupBy(this.modificationsWithoutCacheChanges, (m) => m.objectIdentifier);
 
         for (const objectIdentifier in modificationsGroupedByObjectIdentifier) {
+            this._changedObjectIdentifiers.add(objectIdentifier);
+
             const currentModifications = modificationsGroupedByObjectIdentifier[objectIdentifier];
 
             const targetCollectionName = currentModifications[0].collection;
@@ -137,6 +144,8 @@ export class DatawalletModificationsProcessor {
         this.ensureAllItemsAreCacheable();
 
         const cacheChangesWithoutDeletes = this.cacheChanges.filter((c) => !this.deletedObjectIdentifiers.some((d) => c.objectIdentifier.equals(d)));
+        cacheChangesWithoutDeletes.map((c) => c.objectIdentifier.toString()).forEach((objectIdentifier) => this._changedObjectIdentifiers.add(objectIdentifier));
+
         const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(cacheChangesWithoutDeletes);
 
         const caches = await this.cacheFetcher.fetchCacheFor({
