@@ -194,7 +194,9 @@ describe("RelationshipTemplateController", function () {
 
         await expect(
             recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate(), "wrongPassword")
-        ).rejects.toThrow("error.platform.recordNotFound (404): 'RelationshipTemplate not found. Make sure the ID exists and the record is not expired.'");
+        ).rejects.toThrow(
+            "error.platform.recordNotFound (404): 'RelationshipTemplate not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.'"
+        );
         await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
             "error.transport.noPasswordProvided"
         );
