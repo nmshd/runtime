@@ -83,34 +83,34 @@ describe("Password-protected tokens for files", () => {
     });
 
     describe("LoadItemFromTruncatedReferenceUseCase", () => {
-        test("loads the File with the truncated Token reference", async () => {
+        test("send and receive a file via password-protected token", async () => {
             const createResult = await runtimeServices1.transport.files.createTokenForFile({
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices1.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference, password: "password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference, password: "password" });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.type).toBe("File");
         });
 
-        test("doesn't load the File with the truncated Token reference if password is wrong", async () => {
+        test("error when loading the file with a wrong password", async () => {
             const createResult = await runtimeServices1.transport.files.createTokenForFile({
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices1.transport.account.loadItemFromTruncatedReference({
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
                 reference: createResult.value.truncatedReference,
                 password: "wrong-password"
             });
             expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
-        test("doesn't load the File with the truncated Token reference if password is missing", async () => {
+        test("error when loading the file with no password", async () => {
             const createResult = await runtimeServices1.transport.files.createTokenForFile({
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices1.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });
