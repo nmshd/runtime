@@ -9,13 +9,15 @@ import { AppConfig, AppConfigOverwrite, createAppConfig } from "./AppConfig";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
 import { AppStringProcessor } from "./AppStringProcessor";
-import { AccountSelectedEvent, RelationshipSelectedEvent } from "./events";
+import { AccountSelectedEvent } from "./events";
 import { AppServices, IUIBridge } from "./extensibility";
 import {
     AppLaunchModule,
     AppRuntimeModuleConfiguration,
     AppSyncModule,
+    DatawalletSynchronizedModule,
     IAppRuntimeModuleConstructor,
+    IdentityDeletionProcessStatusChangedModule,
     MailReceivedModule,
     MessageReceivedModule,
     OnboardingChangeReceivedModule,
@@ -85,14 +87,6 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     private readonly sessionStorage = new SessionStorage();
-
-    public get currentAccount(): LocalAccountDTO {
-        return this.sessionStorage.currentSession.account;
-    }
-
-    public get currentSession(): LocalAccountSession {
-        return this.sessionStorage.currentSession;
-    }
 
     public getSessions(): LocalAccountSession[] {
         return this.sessionStorage.getSessions();
@@ -209,20 +203,6 @@ export class AppRuntime extends Runtime<AppConfig> {
         return UserfriendlyResult.ok(accountSelectionResult.value);
     }
 
-    public async selectRelationship(id?: string): Promise<void> {
-        if (!id) {
-            this.currentSession.selectedRelationship = undefined;
-            return;
-        }
-
-        const result = await this.currentSession.appServices.relationships.renderRelationship(id);
-        if (result.isError) throw result.error;
-
-        const relationship = result.value;
-        this.currentSession.selectedRelationship = relationship;
-        this.eventBus.publish(new RelationshipSelectedEvent(this.currentSession.address, relationship));
-    }
-
     public getHealth(): Promise<RuntimeHealth> {
         const health = {
             isHealthy: true,
@@ -298,6 +278,8 @@ export class AppRuntime extends Runtime<AppConfig> {
         pushNotification: PushNotificationModule,
         mailReceived: MailReceivedModule,
         onboardingChangeReceived: OnboardingChangeReceivedModule,
+        datawalletSynchronized: DatawalletSynchronizedModule,
+        identityDeletionProcessStatusChanged: IdentityDeletionProcessStatusChangedModule,
         messageReceived: MessageReceivedModule,
         relationshipChanged: RelationshipChangedModule,
         relationshipTemplateProcessed: RelationshipTemplateProcessedModule
