@@ -15,7 +15,7 @@ beforeAll(async function () {
 
     await transport.init();
 
-    const accounts = await TestUtil.provideAccounts(transport, 3);
+    const accounts = await TestUtil.provideAccounts(transport, 1);
 
     account = accounts[0];
 
