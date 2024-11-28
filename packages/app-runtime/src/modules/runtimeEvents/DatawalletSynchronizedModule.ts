@@ -1,6 +1,8 @@
+import { CoreDate } from "@nmshd/core-types";
 import { DatawalletSynchronizedEvent, IdentityDeletionProcessStatus } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { LocalAccountDeletionDateChangedEvent } from "../../events";
+import { LocalAccountMapper } from "../../multiAccount";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface DatawalletSynchronizedModuleConfig extends AppRuntimeModuleConfiguration {}
@@ -17,9 +19,6 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
     }
 
     private async handleDatawalletSynchronized(event: DatawalletSynchronizedEvent) {
-        const account = await this.runtime.multiAccountController.getAccountByAddress(event.eventTargetAddress);
-        const previousDeletionDate = account.deletionDate;
-
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const identityDeletionProcessResult = await services.transportServices.identityDeletionProcesses.getIdentityDeletionProcesses();
 
@@ -28,12 +27,13 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
             return;
         }
 
-        let newDeletionDate;
-        const mostRecentIdentityDeletionProcess = identityDeletionProcessResult.value[identityDeletionProcessResult.value.length - 1];
+        if (identityDeletionProcessResult.value.length === 0) return;
 
+        const mostRecentIdentityDeletionProcess = identityDeletionProcessResult.value.at(-1)!;
+        let newDeletionDate;
         switch (mostRecentIdentityDeletionProcess.status) {
             case IdentityDeletionProcessStatus.Approved:
-                newDeletionDate = mostRecentIdentityDeletionProcess.gracePeriodEndsAt;
+                newDeletionDate = CoreDate.from(mostRecentIdentityDeletionProcess.gracePeriodEndsAt!);
                 break;
             case IdentityDeletionProcessStatus.Cancelled:
             case IdentityDeletionProcessStatus.Rejected:
@@ -42,11 +42,15 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
                 break;
         }
 
+        const account = await this.runtime.multiAccountController.getAccountByAddress(event.eventTargetAddress);
+        const previousDeletionDate = account.deletionDate;
+
         if (previousDeletionDate === newDeletionDate) return;
 
         await this.runtime.multiAccountController.updateLocalAccountDeletionDate(event.eventTargetAddress, newDeletionDate);
 
-        this.runtime.eventBus.publish(new LocalAccountDeletionDateChangedEvent(event.eventTargetAddress, newDeletionDate));
+        const updatedAccount = await this.runtime.multiAccountController.getAccountByAddress(event.eventTargetAddress);
+        this.runtime.eventBus.publish(new LocalAccountDeletionDateChangedEvent(event.eventTargetAddress, LocalAccountMapper.toLocalAccountDTO(updatedAccount)));
     }
 
     public override stop(): Promise<void> | void {

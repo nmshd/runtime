@@ -1,3 +1,4 @@
+import { CoreDate } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus, IdentityDeletionProcessStatusChangedEvent } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
@@ -20,7 +21,7 @@ export class IdentityDeletionProcessStatusChangedModule extends AppRuntimeModule
 
         switch (identityDeletionProcess.status) {
             case IdentityDeletionProcessStatus.Approved:
-                await this.runtime.multiAccountController.updateLocalAccountDeletionDate(event.eventTargetAddress, identityDeletionProcess.gracePeriodEndsAt);
+                await this.runtime.multiAccountController.updateLocalAccountDeletionDate(event.eventTargetAddress, CoreDate.from(identityDeletionProcess.gracePeriodEndsAt!));
                 break;
 
             case IdentityDeletionProcessStatus.Cancelled:

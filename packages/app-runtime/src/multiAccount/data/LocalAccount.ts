@@ -1,15 +1,15 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId, ICoreDate } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 
 export interface ILocalAccount extends ISerializable {
-    id: CoreId;
-    address?: CoreAddress;
+    id: ICoreId;
+    address?: ICoreAddress;
     name: string;
     directory: string;
     order: number;
     lastAccessedAt?: ICoreDate;
     devicePushIdentifier?: string;
-    deletionDate?: string;
+    deletionDate?: ICoreDate;
 }
 
 @type("LocalAccount")
@@ -44,7 +44,7 @@ export class LocalAccount extends Serializable implements ILocalAccount {
 
     @validate({ nullable: true })
     @serialize()
-    public deletionDate?: string;
+    public deletionDate?: CoreDate;
 
     public static from(value: ILocalAccount): LocalAccount {
         return this.fromAny(value);

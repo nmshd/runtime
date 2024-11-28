@@ -21,9 +21,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
 
     afterEach(async () => {
         const activeIdentityDeletionProcess = await session.transportServices.identityDeletionProcesses.getActiveIdentityDeletionProcess();
-        if (!activeIdentityDeletionProcess.isSuccess) {
-            return;
-        }
+        if (!activeIdentityDeletionProcess.isSuccess) return;
 
         if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
             const abortResult = await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();

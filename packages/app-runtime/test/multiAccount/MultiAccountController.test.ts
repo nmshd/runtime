@@ -39,9 +39,7 @@ describe("MultiAccountController", function () {
         }
     });
 
-    afterAll(async function () {
-        await runtime.stop();
-    });
+    afterAll(async () => await runtime.stop());
 
     test("should get all accounts in deletion", async function () {
         await session1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
