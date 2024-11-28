@@ -208,7 +208,7 @@ describe("RelationshipTemplateReference", function () {
                 key: await CryptoEncryption.generateKey(),
                 id: await BackboneIds.relationshipTemplate.generateUnsafe(),
                 passwordProtection: {
-                    passwordType: "pc",
+                    passwordType: "pc" as any,
                     salt: await CoreCrypto.random(16)
                 }
             });
