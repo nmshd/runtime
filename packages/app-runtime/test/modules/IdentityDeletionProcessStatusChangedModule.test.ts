@@ -17,15 +17,12 @@ describe("IdentityDeletionProcessStatusChanged", function () {
 
     afterEach(async () => {
         const activeIdentityDeletionProcess = await session.transportServices.identityDeletionProcesses.getActiveIdentityDeletionProcess();
-        if (!activeIdentityDeletionProcess.isSuccess) {
-            return;
-        }
+        if (!activeIdentityDeletionProcess.isSuccess) return;
 
-        let abortResult;
         if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
-            abortResult = await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
+            const abortResult = await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
+            if (abortResult.isError) throw abortResult.error;
         }
-        if (abortResult?.isError) throw abortResult.error;
     });
 
     afterAll(async () => await runtime.stop());
