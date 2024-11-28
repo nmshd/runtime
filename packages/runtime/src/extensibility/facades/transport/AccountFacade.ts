@@ -35,7 +35,7 @@ export class AccountFacade {
         @Inject private readonly disableAutoSyncUseCase: DisableAutoSyncUseCase,
         @Inject private readonly enableAutoSyncUseCase: EnableAutoSyncUseCase,
         @Inject private readonly loadItemFromTruncatedReferenceUseCase: LoadItemFromTruncatedReferenceUseCase,
-        @Inject private readonly checkIdentityDeletionForUsernameUseCase: CheckDeletionOfIdentityUseCase
+        @Inject private readonly checkDeletionOfIdentityUseCase: CheckDeletionOfIdentityUseCase
     ) {}
 
     public async getIdentityInfo(): Promise<Result<GetIdentityInfoResponse, ApplicationError>> {
@@ -78,7 +78,7 @@ export class AccountFacade {
         return await this.loadItemFromTruncatedReferenceUseCase.execute(request);
     }
 
-    public async checkIdentityDeletionForUsername(): Promise<Result<CheckDeletionOfIdentityResponse, ApplicationError>> {
-        return await this.checkIdentityDeletionForUsernameUseCase.execute();
+    public async checkDeletionOfIdentity(): Promise<Result<CheckDeletionOfIdentityResponse, ApplicationError>> {
+        return await this.checkDeletionOfIdentityUseCase.execute();
     }
 }
