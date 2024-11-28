@@ -245,7 +245,7 @@ export class RelationshipsController extends TransportController {
         const relationship = await this.getRelationshipWithCache(relationshipId);
         this.assertRelationshipStatus(relationship, RelationshipStatus.Pending);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.cache.auditLog.at(-1);
         if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
             throw TransportCoreErrors.relationships.operationOnlyAllowedForPeer(`Only your peer can accept the relationship ${relationshipId.toString()}`);
         }
@@ -256,7 +256,7 @@ export class RelationshipsController extends TransportController {
         const relationship = await this.getRelationshipWithCache(relationshipId);
         this.assertRelationshipStatus(relationship, RelationshipStatus.Pending);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.cache.auditLog.at(-1);
         if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
             throw TransportCoreErrors.relationships.operationOnlyAllowedForPeer(
                 `Only your peer can reject the relationship ${relationshipId.toString()}. Revoke the relationship instead.`
@@ -269,7 +269,7 @@ export class RelationshipsController extends TransportController {
         const relationship = await this.getRelationshipWithCache(relationshipId);
         this.assertRelationshipStatus(relationship, RelationshipStatus.Pending);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.cache.auditLog.at(-1);
         if (lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
             throw TransportCoreErrors.relationships.operationOnlyAllowedForPeer(
                 `Only your peer can revoke the relationship ${relationshipId.toString()}. Reject the relationship instead.`
@@ -289,7 +289,7 @@ export class RelationshipsController extends TransportController {
         const relationship = await this.getRelationshipWithCache(relationshipId);
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.cache.auditLog.at(-1);
         if (lastAuditLogEntry.reason === RelationshipAuditLogEntryReason.ReactivationRequested) {
             if (lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
                 throw TransportCoreErrors.relationships.reactivationAlreadyRequested(
@@ -306,7 +306,7 @@ export class RelationshipsController extends TransportController {
         const relationship = await this.getRelationshipWithCache(relationshipId);
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.cache.auditLog.at(-1);
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
             throw TransportCoreErrors.relationships.reactivationNotRequested(relationshipId.toString());
         }
@@ -323,7 +323,7 @@ export class RelationshipsController extends TransportController {
         const relationship = await this.getRelationshipWithCache(relationshipId);
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.cache.auditLog.at(-1);
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
             throw TransportCoreErrors.relationships.reactivationNotRequested(relationshipId.toString());
         }
@@ -339,7 +339,7 @@ export class RelationshipsController extends TransportController {
         const relationship = await this.getRelationshipWithCache(relationshipId);
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.cache.auditLog.at(-1);
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
             throw TransportCoreErrors.relationships.reactivationNotRequested(relationshipId.toString());
         }
