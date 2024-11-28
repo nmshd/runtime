@@ -10,7 +10,7 @@ export class IdentityClient extends RESTClient {
         return await this.post<BackbonePostIdentityResponse>("/api/v1/Identities", value, {});
     }
 
-    public async checkIdentityDeletionForUsername(username: string): Promise<ClientResult<BackboneIsDeletedIdentityResponse>> {
+    public async checkDeletionOfIdentity(username: string): Promise<ClientResult<BackboneIsDeletedIdentityResponse>> {
         return await this.get<BackboneIsDeletedIdentityResponse>(`/api/v1/Identities/IsDeleted?username=${username}`);
     }
 }

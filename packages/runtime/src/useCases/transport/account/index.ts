@@ -1,4 +1,4 @@
-export * from "./CheckIdentityDeletionForUsername";
+export * from "./CheckDeletionOfIdentity";
 export * from "./DisableAutoSync";
 export * from "./EnableAutoSync";
 export * from "./GetDeviceInfo";
