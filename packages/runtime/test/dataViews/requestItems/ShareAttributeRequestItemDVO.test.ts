@@ -298,8 +298,8 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect(attributeResult.value.at(-1).id).toBeDefined();
+        expect((attributeResult.value.at(-1).content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
     });
 
     test("check the attributes for the sender", async () => {
@@ -313,8 +313,8 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect(attributeResult.value.at(-1).id).toBeDefined();
+        expect((attributeResult.value.at(-1).content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
     });
 
     test("check the recipient's dvo for the sender", async () => {

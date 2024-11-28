@@ -286,12 +286,12 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
+        expect(attributeResult.value.at(-1).id).toBeDefined();
 
-        const proprietaryString = attributeResult.value[numberOfAttributes - 1].content.value as ProprietaryStringJSON;
+        const proprietaryString = attributeResult.value.at(-1).content.value as ProprietaryStringJSON;
         expect(proprietaryString.value).toBe("0815");
 
-        expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
+        expect(responseItem.attributeId).toStrictEqual(attributeResult.value.at(-1).id);
         expect(responseItem.attribute).toBeDefined();
         expect(responseItem.attribute.valueType).toBe("ProprietaryString");
         expect(proprietaryString.value).toStrictEqual((responseItem.attribute.content.value as ProprietaryStringJSON).value);
@@ -317,8 +317,8 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as ProprietaryStringJSON).value).toBe("0815");
+        expect(attributeResult.value.at(-1).id).toBeDefined();
+        expect((attributeResult.value.at(-1).content.value as ProprietaryStringJSON).value).toBe("0815");
 
         const relationshipAttributeResult = await sConsumptionServices.attributes.getAttributes({
             query: { "shareInfo.peer": dvo.request.peer.id, "content.@type": "RelationshipAttribute" }

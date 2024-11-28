@@ -49,7 +49,7 @@ describe("Drafts", () => {
         const numberOfDrafts = drafts.length;
         expect(numberOfDrafts - baselineNumberOfDrafts).toBe(1);
 
-        expect(drafts[numberOfDrafts - 1].id).toStrictEqual(draftId);
+        expect(drafts.at(-1).id).toStrictEqual(draftId);
     });
 
     test("should edit the draft", async () => {

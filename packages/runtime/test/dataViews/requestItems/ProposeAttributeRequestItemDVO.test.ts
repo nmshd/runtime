@@ -457,11 +457,11 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(givenNameResult).toBeSuccessful();
         const numberOfGivenNames = givenNameResult.value.length;
         expect(numberOfGivenNames - baselineNumberOfGivenNames).toBe(1);
-        expect(givenNameResult.value[numberOfGivenNames - 1].id).toBeDefined();
-        const givenName = givenNameResult.value[numberOfGivenNames - 1].content.value as GivenNameJSON;
+        expect(givenNameResult.value.at(-1).id).toBeDefined();
+        const givenName = givenNameResult.value.at(-1).content.value as GivenNameJSON;
         expect(givenName.value).toBe("Marlene");
 
-        expect(responseItem.attributeId).toStrictEqual(givenNameResult.value[numberOfGivenNames - 1].id);
+        expect(responseItem.attributeId).toStrictEqual(givenNameResult.value.at(-1).id);
         expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
 
         const surnameResult = await consumptionServices1.attributes.getAttributes({
@@ -470,12 +470,12 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(surnameResult).toBeSuccessful();
         const numberOfSurnames = surnameResult.value.length;
         expect(numberOfSurnames - baselineNumberOfSurnames).toBe(1);
-        expect(surnameResult.value[numberOfSurnames - 1].id).toBeDefined();
+        expect(surnameResult.value.at(-1).id).toBeDefined();
 
-        const surname = surnameResult.value[numberOfSurnames - 1].content.value as SurnameJSON;
+        const surname = surnameResult.value.at(-1).content.value as SurnameJSON;
         expect(surname.value).toBe("Weigl-Rostock");
 
-        expect(responseItem2.attributeId).toStrictEqual(surnameResult.value[numberOfSurnames - 1].id);
+        expect(responseItem2.attributeId).toStrictEqual(surnameResult.value.at(-1).id);
         expect(surname.value).toStrictEqual((responseItem2.attribute.content.value as SurnameJSON).value);
     });
 });

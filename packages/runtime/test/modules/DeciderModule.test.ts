@@ -47,7 +47,7 @@ describe("DeciderModule", () => {
 
     afterEach(async () => {
         const testRuntimes = runtimeServiceProvider["runtimes"];
-        await testRuntimes[testRuntimes.length - 1].stop();
+        await testRuntimes.at(-1).stop();
     });
 
     describe("no automationConfig", () => {
