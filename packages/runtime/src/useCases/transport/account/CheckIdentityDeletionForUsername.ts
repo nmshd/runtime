@@ -1,33 +1,21 @@
 import { Result } from "@js-soft/ts-utils";
 import { IdentityController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-
-export interface CheckIdentityDeletionForUsernameRequest {
-    username: string; // device username
-}
-
-class Validator extends SchemaValidator<CheckIdentityDeletionForUsernameRequest> {
-    public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("CheckIdentityDeletionForUsernameRequest"));
-    }
-}
+import { UseCase } from "../../common";
 
 export interface CheckIdentityDeletionForUsernameResponse {
     isDeleted: boolean;
     deletionDate?: string;
 }
 
-export class CheckIdentityDeletionForUsernameUseCase extends UseCase<CheckIdentityDeletionForUsernameRequest, CheckIdentityDeletionForUsernameResponse> {
-    public constructor(
-        @Inject private readonly identityController: IdentityController,
-        @Inject validator: Validator
-    ) {
-        super(validator);
+export class CheckIdentityDeletionForUsernameUseCase extends UseCase<void, CheckIdentityDeletionForUsernameResponse> {
+    public constructor(@Inject private readonly identityController: IdentityController) {
+        super();
     }
 
-    protected async executeInternal(request: CheckIdentityDeletionForUsernameRequest): Promise<Result<CheckIdentityDeletionForUsernameResponse>> {
-        const result = await this.identityController.checkIdentityDeletionForUsername(request.username);
+    protected async executeInternal(): Promise<Result<CheckIdentityDeletionForUsernameResponse>> {
+        const result = await this.identityController.checkIdentityDeletionForUsername();
+
         if (result.isError) return Result.fail(result.error);
 
         return Result.ok(result.value);

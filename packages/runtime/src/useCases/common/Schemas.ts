@@ -22938,22 +22938,3 @@ export const LoadPeerTokenRequest: any = {
         }
     }
 }
-
-export const CheckIdentityDeletionForUsernameRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CheckIdentityDeletionForUsernameRequest",
-    "definitions": {
-        "CheckIdentityDeletionForUsernameRequest": {
-            "type": "object",
-            "properties": {
-                "username": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "username"
-            ],
-            "additionalProperties": false
-        }
-    }
-}

@@ -68,8 +68,9 @@ export class IdentityController extends TransportController {
         return valid;
     }
 
-    public async checkIdentityDeletionForUsername(username: string): Promise<Result<CheckIdentityDeletionForUsername>> {
-        const identityDeletionResult = await this.identityClient.checkIdentityDeletionForUsername(username);
+    public async checkIdentityDeletionForUsername(): Promise<Result<CheckIdentityDeletionForUsername>> {
+        const currentDeviceCredentials = await this.parent.activeDevice.getCredentials();
+        const identityDeletionResult = await this.identityClient.checkIdentityDeletionForUsername(currentDeviceCredentials.username);
 
         if (identityDeletionResult.isError) return Result.fail(identityDeletionResult.error);
 
