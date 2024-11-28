@@ -19,7 +19,7 @@ export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChan
     private async handleRelationshipChanged(event: RelationshipChangedEvent) {
         const relationship = event.data;
 
-        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.auditLog.at(-1);
 
         // Do not process changes that were created by the current user
         if (lastAuditLogEntry.createdBy === event.eventTargetAddress) return;
