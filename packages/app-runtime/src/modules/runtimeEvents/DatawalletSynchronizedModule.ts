@@ -2,6 +2,7 @@ import { CoreDate } from "@nmshd/core-types";
 import { DatawalletSynchronizedEvent, IdentityDeletionProcessStatus } from "@nmshd/runtime";
 import { AppRuntimeError } from "../../AppRuntimeError";
 import { LocalAccountDeletionDateChangedEvent } from "../../events";
+import { LocalAccountMapper } from "../../multiAccount";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface DatawalletSynchronizedModuleConfig extends AppRuntimeModuleConfiguration {}
@@ -47,7 +48,8 @@ export class DatawalletSynchronizedModule extends AppRuntimeModule<DatawalletSyn
 
         await this.runtime.multiAccountController.updateLocalAccountDeletionDate(event.eventTargetAddress, newDeletionDate);
 
-        this.runtime.eventBus.publish(new LocalAccountDeletionDateChangedEvent(event.eventTargetAddress, newDeletionDate?.toString()));
+        const updatedAccount = await this.runtime.multiAccountController.getAccountByAddress(event.eventTargetAddress);
+        this.runtime.eventBus.publish(new LocalAccountDeletionDateChangedEvent(event.eventTargetAddress, LocalAccountMapper.toLocalAccountDTO(updatedAccount)));
     }
 
     public override stop(): Promise<void> | void {

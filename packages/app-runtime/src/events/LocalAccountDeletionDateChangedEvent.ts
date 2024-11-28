@@ -1,9 +1,10 @@
 import { DataEvent } from "@nmshd/runtime";
+import { LocalAccountDTO } from "../multiAccount";
 
-export class LocalAccountDeletionDateChangedEvent extends DataEvent<string | undefined> {
+export class LocalAccountDeletionDateChangedEvent extends DataEvent<LocalAccountDTO> {
     public static readonly namespace: string = "app.localAccountDeletionDateChanged";
 
-    public constructor(address: string, data?: string) {
-        super(LocalAccountDeletionDateChangedEvent.namespace, address, data);
+    public constructor(address: string, localAccount: LocalAccountDTO) {
+        super(LocalAccountDeletionDateChangedEvent.namespace, address, localAccount);
     }
 }

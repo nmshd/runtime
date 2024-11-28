@@ -1,6 +1,6 @@
 import { CoreId } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus } from "@nmshd/runtime";
-import { AppRuntime, LocalAccountDeletionDateChangedEvent, LocalAccountSession } from "../../src";
+import { AppRuntime, LocalAccountDeletionDateChangedEvent, LocalAccountMapper, LocalAccountSession } from "../../src";
 import { TestUtil } from "../lib";
 
 describe("DatawalletSynchronized", function () {
@@ -53,9 +53,10 @@ describe("DatawalletSynchronized", function () {
 
         await sessionDevice2.transportServices.account.syncDatawallet();
         const event = await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
-        expect(event.data).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
+        const updatedAccount = await runtimeDevice2.multiAccountController.getAccountByAddress(sessionDevice2.account.address!);
 
-        expect(sessionDevice2.account.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
+        expect(event.data).toStrictEqual(LocalAccountMapper.toLocalAccountDTO(updatedAccount));
+        expect(event.data.deletionDate).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
 
         const account = await runtimeDevice2.multiAccountController.getAccount(CoreId.from(sessionDevice2.account.id));
         expect(account.deletionDate!.toString()).toBe(initiateDeletionResult.value.gracePeriodEndsAt);
@@ -71,9 +72,10 @@ describe("DatawalletSynchronized", function () {
 
         await sessionDevice2.transportServices.account.syncDatawallet();
         const event = await TestUtil.awaitEvent(runtimeDevice2, LocalAccountDeletionDateChangedEvent);
-        expect(event.data).toBeUndefined();
+        const updatedAccount = await runtimeDevice2.multiAccountController.getAccountByAddress(sessionDevice2.account.address!);
 
-        expect(sessionDevice2.account.deletionDate).toBeUndefined();
+        expect(event.data).toStrictEqual(LocalAccountMapper.toLocalAccountDTO(updatedAccount));
+        expect(event.data.deletionDate).toBeUndefined();
 
         const account = await runtimeDevice2.multiAccountController.getAccount(CoreId.from(sessionDevice2.account.id));
         expect(account.deletionDate).toBeUndefined();
