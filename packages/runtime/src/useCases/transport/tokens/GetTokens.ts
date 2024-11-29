@@ -49,7 +49,9 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
         custom: {
             [`${nameof<TokenDTO>((t) => t.passwordProtection)}.passwordIsPin`]: (query: any, input: string) => {
                 if (input === "true") {
-                    query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = /^pin/;
+                    query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = {
+                        $regex: "^pin"
+                    };
                 }
                 if (input === "!true") {
                     query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
