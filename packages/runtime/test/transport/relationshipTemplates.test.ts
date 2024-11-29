@@ -464,8 +464,7 @@ describe("RelationshipTemplates query", () => {
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
                 content: emptyRelationshipTemplateContent,
-                forIdentity: runtimeServices1.address,
-                passwordProtection: { password: "1234", passwordIsPin: true }
+                forIdentity: runtimeServices1.address
             })
         ).value;
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
@@ -475,9 +474,7 @@ describe("RelationshipTemplates query", () => {
             .addStringSet("createdBy")
             .addStringSet("createdByDevice")
             .addNumberSet("maxNumberOfAllocations")
-            .addStringSet("forIdentity")
-            .addStringSet("passwordProtection.password")
-            .addBooleanSet("passwordProtection.passwordIsPin");
+            .addStringSet("forIdentity");
 
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q }));
     });
