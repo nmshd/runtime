@@ -218,3 +218,24 @@ describe("Un-/RegisterPushNotificationToken", () => {
         expect(result).toBeSuccessful();
     });
 });
+
+describe.skip("CheckDeletionOfIdentity", () => {
+    test("check deletion of Identity that is not deleted", async () => {
+        const result = await sTransportServices.account.checkDeletionOfIdentity();
+        expect(result.isSuccess).toBe(true);
+        expect(result.value.isDeleted).toBe(false);
+        expect(result.value.deletionDate).toBeUndefined();
+    });
+
+    // TODO: make sure grace period has passed or Identity was deleted
+    test("check deletion of Identity that is deleted", async () => {
+        const [runtimeService] = await serviceProvider.launch(1);
+
+        await runtimeService.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
+
+        const result = await runtimeService.transport.account.checkDeletionOfIdentity();
+        expect(result.isSuccess).toBe(true);
+        expect(result.value.isDeleted).toBe(true);
+        expect(result.value.deletionDate).toBeDefined();
+    });
+});
