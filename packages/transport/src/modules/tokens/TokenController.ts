@@ -5,6 +5,7 @@ import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, TransportCoreErrors, TransportError } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
+import { PasswordProtection } from "../../core/types/PasswordProtection";
 import { AccountController } from "../accounts/AccountController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetTokensResponse } from "./backbone/BackboneGetTokens";
@@ -44,11 +45,16 @@ export class TokenController extends TransportController {
 
         const cipher = await CoreCrypto.encrypt(serializedTokenBuffer, secretKey);
 
+        const password = parameters.passwordProtection?.password;
+        const salt = password ? await CoreCrypto.random(16) : undefined;
+        const hashedPassword = password ? (await CoreCrypto.deriveHashOutOfPassword(password, salt!)).toBase64() : undefined;
+
         const response = (
             await this.client.createToken({
                 content: cipher.toBase64(),
                 expiresAt: input.expiresAt.toString(),
-                forIdentity: input.forIdentity?.toString()
+                forIdentity: input.forIdentity?.toString(),
+                password: hashedPassword
             })
         ).value;
 
@@ -61,10 +67,19 @@ export class TokenController extends TransportController {
             forIdentity: input.forIdentity
         });
 
+        const passwordProtection = parameters.passwordProtection
+            ? PasswordProtection.from({
+                  password: parameters.passwordProtection.password,
+                  passwordType: parameters.passwordProtection.passwordType,
+                  salt: salt!
+              })
+            : undefined;
+
         const token = Token.from({
             id: CoreId.from(response.id),
             secretKey: secretKey,
             isOwn: true,
+            passwordProtection,
             cache: cachedToken,
             cachedAt: CoreDate.utc()
         });
@@ -100,8 +115,21 @@ export class TokenController extends TransportController {
         if (ids.length < 1) {
             return [];
         }
+        const tokens = await this.readTokens(ids);
 
-        const resultItems = (await this.client.getTokens({ ids })).value;
+        const resultItems = (
+            await this.client.getTokens({
+                tokens: await Promise.all(
+                    tokens.map(async (t) => {
+                        const hashedPassword = t.passwordProtection
+                            ? (await CoreCrypto.deriveHashOutOfPassword(t.passwordProtection.password, t.passwordProtection.salt)).toBase64()
+                            : undefined;
+                        return { id: t.id.toString(), password: hashedPassword };
+                    })
+                )
+            })
+        ).value;
+
         const promises = [];
         for await (const resultItem of resultItems) {
             promises.push(this.updateCacheOfExistingTokenInDb(resultItem.id, resultItem));
@@ -113,25 +141,41 @@ export class TokenController extends TransportController {
 
     public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedToken }[]> {
         if (ids.length === 0) return [];
+        const tokens = await this.readTokens(ids.map((id) => id.toString()));
 
-        const backboneTokens = await (await this.client.getTokens({ ids: ids.map((id) => id.id) })).value.collect();
+        const backboneTokens = await (
+            await this.client.getTokens({
+                tokens: await Promise.all(
+                    tokens.map(async (t) => {
+                        const hashedPassword = t.passwordProtection
+                            ? (await CoreCrypto.deriveHashOutOfPassword(t.passwordProtection.password, t.passwordProtection.salt)).toBase64()
+                            : undefined;
+                        return { id: t.id.toString(), password: hashedPassword };
+                    })
+                )
+            })
+        ).value.collect();
 
         const decryptionPromises = backboneTokens.map(async (t) => {
-            const tokenDoc = await this.tokens.read(t.id);
-            if (!tokenDoc) {
-                this._log.error(
-                    `Token '${t.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
-                );
-                return;
-            }
-
-            const token = Token.from(tokenDoc);
-
-            return { id: CoreId.from(t), cache: await this.decryptToken(t, token.secretKey) };
+            const token = tokens.find((token) => token.id.toString() === t.id);
+            if (!token) return;
+            return { id: CoreId.from(t.id), cache: await this.decryptToken(t, token.secretKey) };
         });
 
         const caches = await Promise.all(decryptionPromises);
         return caches.filter((c) => c !== undefined);
+    }
+
+    private async readTokens(ids: string[]): Promise<Token[]> {
+        const tokenPromises = ids.map(async (id) => {
+            const tokenDoc = await this.tokens.read(id);
+            if (!tokenDoc) {
+                this._log.error(`Token '${id}' not found in local database. This should not happen and might be a bug in the application logic.`);
+                return;
+            }
+            return Token.from(tokenDoc);
+        });
+        return (await Promise.all(tokenPromises)).filter((t) => t !== undefined);
     }
 
     @log()
@@ -150,10 +194,11 @@ export class TokenController extends TransportController {
     }
 
     private async updateCacheOfToken(token: Token, response?: BackboneGetTokensResponse): Promise<void> {
-        const tokenId = token.id.toString();
-
         if (!response) {
-            response = (await this.client.getToken(tokenId)).value;
+            const hashedPassword = token.passwordProtection
+                ? (await CoreCrypto.deriveHashOutOfPassword(token.passwordProtection.password, token.passwordProtection.salt)).toBase64()
+                : undefined;
+            response = (await this.client.getToken(token.id.toString(), hashedPassword)).value;
         }
 
         const cachedToken = await this.decryptToken(response, token.secretKey);
@@ -184,12 +229,28 @@ export class TokenController extends TransportController {
         return cachedToken;
     }
 
-    public async loadPeerTokenByTruncated(truncated: string, ephemeral: boolean): Promise<Token> {
+    public async loadPeerTokenByTruncated(truncated: string, ephemeral: boolean, password?: string): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerToken(reference.id, reference.key, ephemeral, reference.forIdentityTruncated);
+
+        if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
+        const passwordProtection = reference.passwordProtection
+            ? PasswordProtection.from({
+                  salt: reference.passwordProtection.salt,
+                  passwordType: reference.passwordProtection.passwordType,
+                  password: password!
+              })
+            : undefined;
+
+        return await this.loadPeerToken(reference.id, reference.key, ephemeral, reference.forIdentityTruncated, passwordProtection);
     }
 
-    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, ephemeral: boolean, forIdentityTruncated?: string): Promise<Token> {
+    private async loadPeerToken(
+        id: CoreId,
+        secretKey: CryptoSecretKey,
+        ephemeral: boolean,
+        forIdentityTruncated?: string,
+        passwordProtection?: PasswordProtection
+    ): Promise<Token> {
         const tokenDoc = await this.tokens.read(id.toString());
         if (!tokenDoc && forIdentityTruncated && !this.parent.identity.address.toString().endsWith(forIdentityTruncated)) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
@@ -213,7 +274,8 @@ export class TokenController extends TransportController {
         const token = Token.from({
             id: id,
             secretKey: secretKey,
-            isOwn: false
+            isOwn: false,
+            passwordProtection
         });
 
         await this.updateCacheOfToken(token);
