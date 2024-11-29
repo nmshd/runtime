@@ -302,6 +302,7 @@ describe("TokenController", function () {
             await recipient.tokens.loadPeerTokenByTruncated(sentToken.toTokenReference().truncate(), true);
         }).rejects.toThrow("transport.general.notIntendedForYou");
     });
+
     test("should throw if a personalized token is not loaded by the right identity and it's uncaught before reaching the Backbone", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = Serializable.fromAny({ content: "TestToken" });
@@ -319,6 +320,80 @@ describe("TokenController", function () {
         await expect(async () => {
             await recipient.tokens.loadPeerTokenByTruncated(truncatedReference, true);
         }).rejects.toThrow("error.platform.recordNotFound");
+    });
+
+    test("should create and load a password-protected token", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "password", passwordType: "pw" }
+        });
+        const reference = sentToken.toTokenReference();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference.truncate(), false, "password");
+        tempId1 = sentToken.id;
+
+        testTokens(sentToken, receivedToken, tempDate);
+        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
+        expect(sentToken.passwordProtection!.password).toBe("password");
+        expect(sentToken.passwordProtection!.salt).toBeDefined();
+        expect(sentToken.passwordProtection!.salt).toHaveLength(16);
+        expect(sentToken.passwordProtection!.passwordType).toBe("pw");
+
+        expect(reference.passwordProtection!.passwordType).toBe("pw");
+        expect(reference.passwordProtection!.salt).toStrictEqual(sentToken.passwordProtection!.salt);
+
+        expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
+        expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
+        expect(receivedToken.passwordProtection!.password).toBe("password");
+        expect(receivedToken.passwordProtection!.salt).toStrictEqual(sentToken.passwordProtection!.salt);
+        expect(receivedToken.passwordProtection!.passwordType).toBe("pw");
+    });
+
+    test("should throw an error if loaded with a wrong or missing password", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "password", passwordType: "pw" }
+        });
+        const reference = sentToken.toTokenReference().truncate();
+
+        await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true, "wrongPassword")).rejects.toThrow("error.platform.recordNotFound");
+        await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true)).rejects.toThrow("error.transport.noPasswordProvided");
+    });
+
+    test("should fetch multiple password-protected tokens", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken1 = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "password", passwordType: "pw" }
+        });
+        const reference1 = sentToken1.toTokenReference().truncate();
+
+        const sentToken2 = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "1234", passwordType: "pin4" }
+        });
+        const reference2 = sentToken2.toTokenReference().truncate();
+
+        const receivedToken1 = await recipient.tokens.loadPeerTokenByTruncated(reference1, false, "password");
+        const receivedToken2 = await recipient.tokens.loadPeerTokenByTruncated(reference2, false, "1234");
+        const fetchCachesResult = await recipient.tokens.fetchCaches([receivedToken1.id, receivedToken2.id]);
+        expect(fetchCachesResult).toHaveLength(2);
     });
 
     test("should delete a token", async function () {

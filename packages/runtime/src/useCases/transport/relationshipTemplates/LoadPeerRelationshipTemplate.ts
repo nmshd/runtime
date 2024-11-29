@@ -55,7 +55,7 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
     }
 
     private async loadRelationshipTemplateFromTokenReference(tokenReference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
-        const token = await this.tokenController.loadPeerTokenByTruncated(tokenReference, true);
+        const token = await this.tokenController.loadPeerTokenByTruncated(tokenReference, true, password);
 
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
