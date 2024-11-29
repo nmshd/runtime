@@ -365,30 +365,30 @@ describe("RelationshipTemplates query", () => {
 
         const unprotectedTemplate = await createTemplate(runtimeServices1.transport);
 
-        const passwordProtectedTemplates = (
+        const templatesWithoutPin = (
             await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
                 query: {
                     "passwordProtection.passwordIsPin": "!true"
                 }
             })
         ).value;
-        const passwordProtectedTemplateIds = passwordProtectedTemplates.map((t) => t.id);
+        const templateIdsWithoutPin = templatesWithoutPin.map((t) => t.id);
 
-        expect(passwordProtectedTemplateIds).toContain(passwordProtectedTemplate.id);
-        expect(passwordProtectedTemplateIds).not.toContain(pinProtectedTemplate.id);
-        expect(passwordProtectedTemplateIds).toContain(unprotectedTemplate.id);
+        expect(templateIdsWithoutPin).toContain(passwordProtectedTemplate.id);
+        expect(templateIdsWithoutPin).not.toContain(pinProtectedTemplate.id);
+        expect(templateIdsWithoutPin).toContain(unprotectedTemplate.id);
 
-        const pinProtectedTemplates = (
+        const templatesWithPin = (
             await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
                 query: {
                     "passwordProtection.passwordIsPin": "true"
                 }
             })
         ).value;
-        const pinProtectedTemplateIds = pinProtectedTemplates.map((t) => t.id);
+        const templateIdsWithPin = templatesWithPin.map((t) => t.id);
 
-        expect(pinProtectedTemplateIds).not.toContain(passwordProtectedTemplate.id);
-        expect(pinProtectedTemplateIds).toContain(pinProtectedTemplate.id);
-        expect(pinProtectedTemplateIds).not.toContain(unprotectedTemplate.id);
+        expect(templateIdsWithPin).not.toContain(passwordProtectedTemplate.id);
+        expect(templateIdsWithPin).toContain(pinProtectedTemplate.id);
+        expect(templateIdsWithPin).not.toContain(unprotectedTemplate.id);
     });
 });
