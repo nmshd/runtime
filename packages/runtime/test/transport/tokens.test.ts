@@ -50,7 +50,7 @@ describe("Tokens errors", () => {
 
 describe("Tokens query", () => {
     test("query own tokens", async () => {
-        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, "password");
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, { password: "password" });
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
             .addDateSet("expiresAt")
             .addDateSet("createdAt")
@@ -67,16 +67,9 @@ describe("Tokens query", () => {
     });
 
     test("password- vs. PIN-protected tokens", async () => {
-        const passwordProtectedToken = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, "password");
+        const passwordProtectedToken = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, { password: "password" });
 
-        const pinProtectedToken = (
-            await runtimeServices1.transport.tokens.createOwnToken({
-                content: { key: "value" },
-                expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
-                ephemeral: true,
-                passwordProtection: { password: "1234", passwordIsPin: true }
-            })
-        ).value;
+        const pinProtectedToken = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, { password: "1234", passwordIsPin: true });
 
         const passwordProtectedTokens = (
             await runtimeServices1.transport.tokens.getTokens({
