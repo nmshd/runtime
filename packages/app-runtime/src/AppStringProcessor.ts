@@ -88,11 +88,9 @@ export class AppStringProcessor {
             password = passwordResult.value;
         }
 
-        // TODO: use password to load the item from the truncated reference
-        this.logger.error(`user entered password: ${password}`);
-
-        const tokenResult = await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference });
+        const tokenResult = await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference, password: password });
         if (tokenResult.isError) {
+            // TODO: should it be possible to ask for the password again when it was wrong?
             return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(tokenResult.error));
         }
 
@@ -140,10 +138,7 @@ export class AppStringProcessor {
             password = passwordResult.value;
         }
 
-        // TODO: use password to load the item from the truncated reference
-        this.logger.error(`user entered password: ${password}`);
-
-        const result = await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate() });
+        const result = await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: password });
         if (result.isError) {
             if (result.error.code === "error.runtime.validation.invalidPropertyValue") {
                 return UserfriendlyResult.fail(
@@ -151,6 +146,7 @@ export class AppStringProcessor {
                 );
             }
 
+            // TODO: should it be possible to ask for the password again when it was wrong?
             return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(result.error));
         }
 
