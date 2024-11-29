@@ -54,10 +54,12 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>(
                 (t) => t.maxNumberOfAllocations
             )}`,
-            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.forIdentity)}`,
-            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.password`]: `${nameof<RelationshipTemplate>((r) => r.passwordProtection)}.${nameof<PasswordProtection>((t) => t.password)}`
+            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.forIdentity)}`
         },
         custom: {
+            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string) => {
+                query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.password)}`] = input;
+            },
             [`${nameof<RelationshipTemplateDTO>((t) => t.passwordProtection)}.passwordIsPin`]: (query: any, input: string) => {
                 if (input === "true") {
                     query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = {
@@ -68,9 +70,6 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
                     query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
                 }
             }
-        },
-        string: {
-            toNumber: false
         }
     });
 
