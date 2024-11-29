@@ -208,8 +208,10 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     private async selectAccountViaBridge(accounts: LocalAccountDTO[], title: string, description: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
-        const bridge = await this.uiBridge();
-        const accountSelectionResult = await bridge.requestAccountSelection(accounts, title, description);
+        const promiseOrUiBridge = this.uiBridge();
+        const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
+
+        const accountSelectionResult = await uiBridge.requestAccountSelection(accounts, title, description);
         if (accountSelectionResult.isError) {
             return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailable(accountSelectionResult.error));
         }

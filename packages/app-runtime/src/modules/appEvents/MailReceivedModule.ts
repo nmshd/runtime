@@ -23,7 +23,10 @@ export class MailReceivedModule extends AppRuntimeModule<MailReceivedModuleConfi
 
         await this.runtime.nativeEnvironment.notificationAccess.schedule(mail.name, mail.createdBy.name, {
             callback: async () => {
-                await (await this.runtime.uiBridge()).showMessage(session.account, sender, mail);
+                const promiseOrUiBridge = this.runtime.uiBridge();
+                const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
+
+                await uiBridge.showMessage(session.account, sender, mail);
             }
         });
     }

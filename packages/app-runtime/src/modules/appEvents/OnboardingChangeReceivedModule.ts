@@ -49,7 +49,9 @@ export class OnboardingChangeReceivedModule extends AppRuntimeModule<OnboardingC
         }
         await this.runtime.nativeEnvironment.notificationAccess.schedule(title, text, {
             callback: async () => {
-                const uiBridge = await this.runtime.uiBridge();
+                const promiseOrUiBridge = this.runtime.uiBridge();
+                const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
+
                 await uiBridge.showRelationship(session.account, identity);
             }
         });
