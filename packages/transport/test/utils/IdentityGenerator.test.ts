@@ -120,7 +120,7 @@ describe("IdentityGeneratorTest", function () {
 
         test("should negatively check an incorrect address object (wrong checksum)", async function () {
             const address = await IdentityUtil.createAddress(kp.publicKey, "example.com");
-            const index = 5;
+            const index = 32;
             let replaceWith = "b";
             const currentString = address.address.substr(index, replaceWith.length);
             if (currentString === replaceWith) {

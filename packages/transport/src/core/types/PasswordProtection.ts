@@ -1,5 +1,6 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
+import { PasswordProtectionCreationParameters } from "./PasswordProtectionCreationParameters";
 import { SharedPasswordProtection } from "./SharedPasswordProtection";
 
 export interface IPasswordProtection extends ISerializable {
@@ -30,5 +31,16 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
             passwordType: this.passwordType,
             salt: this.salt
         });
+    }
+
+    public matchesInputForNewPasswordProtection(newPasswordProtection: { password: string; passwordIsPin?: true } | undefined): boolean {
+        const newCreationParameters = PasswordProtectionCreationParameters.create(newPasswordProtection);
+        if (!newCreationParameters) return false;
+
+        return this.matchesCreationParameters(newCreationParameters);
+    }
+
+    private matchesCreationParameters(creationParameters: PasswordProtectionCreationParameters): boolean {
+        return this.passwordType === creationParameters.passwordType && this.password === creationParameters.password;
     }
 }

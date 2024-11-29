@@ -160,12 +160,17 @@ export async function syncUntilHasEvent<TEvent extends Event>(
     return event;
 }
 
-export async function uploadOwnToken(transportServices: TransportServices, forIdentity?: string): Promise<TokenDTO> {
+export async function uploadOwnToken(
+    transportServices: TransportServices,
+    forIdentity?: string,
+    passwordProtection?: { password: string; passwordIsPin?: true }
+): Promise<TokenDTO> {
     const response = await transportServices.tokens.createOwnToken({
         content: { aKey: "aValue" },
         expiresAt: DateTime.utc().plus({ days: 1 }).toString(),
         ephemeral: false,
-        forIdentity
+        forIdentity,
+        passwordProtection
     });
 
     expect(response).toBeSuccessful();
