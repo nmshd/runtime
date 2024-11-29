@@ -67,7 +67,9 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
                     };
                 }
                 if (input === "!true") {
-                    query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
+                    query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = {
+                        $in: ["pw", undefined]
+                    };
                 }
             }
         }

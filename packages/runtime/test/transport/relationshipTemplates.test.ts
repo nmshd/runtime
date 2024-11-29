@@ -363,6 +363,8 @@ describe("RelationshipTemplates query", () => {
 
         const pinProtectedTemplate = await createTemplate(runtimeServices1.transport, undefined, { password: "1234", passwordIsPin: true });
 
+        const unprotectedTemplate = await createTemplate(runtimeServices1.transport);
+
         const passwordProtectedTemplates = (
             await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
                 query: {
@@ -374,6 +376,7 @@ describe("RelationshipTemplates query", () => {
 
         expect(passwordProtectedTemplateIds).toContain(passwordProtectedTemplate.id);
         expect(passwordProtectedTemplateIds).not.toContain(pinProtectedTemplate.id);
+        expect(passwordProtectedTemplateIds).toContain(unprotectedTemplate.id);
 
         const pinProtectedTemplates = (
             await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
@@ -386,5 +389,6 @@ describe("RelationshipTemplates query", () => {
 
         expect(pinProtectedTemplateIds).not.toContain(passwordProtectedTemplate.id);
         expect(pinProtectedTemplateIds).toContain(pinProtectedTemplate.id);
+        expect(pinProtectedTemplateIds).not.toContain(unprotectedTemplate.id);
     });
 });
