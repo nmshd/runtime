@@ -324,7 +324,17 @@ export class AppRuntime extends Runtime<AppConfig> {
             const syncResult = await session.transportServices.account.syncDatawallet();
 
             if (syncResult.isSuccess) continue;
-            // TODO: call isDeleted, if isDeleted delete all local data
+            // TODO: can I check whether the error is a 400?
+
+            const checkDeletionResult = await session.transportServices.account.checkDeletionOfIdentity();
+
+            // TODO: throw adequate error
+            if (checkDeletionResult.isError) throw AppRuntimeErrors.startup.bootstrapError(checkDeletionResult.error);
+
+            // TODO: throw adequate error
+            if (!checkDeletionResult.value.isDeleted) throw AppRuntimeErrors.startup.bootstrapError(checkDeletionResult.error);
+
+            // TODO: delete all local data
         }
 
         return;
