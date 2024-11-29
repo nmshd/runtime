@@ -100,8 +100,7 @@ describe("AppStringProcessor", function () {
         const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
             content: templateContent,
             expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
-            passwordProtection: { password: "000000", passwordIsPin: true },
-            forIdentity: runtime2SessionA.account.address!
+            passwordProtection: { password: "000000", passwordIsPin: true }
         });
 
         mockUiBridge.passwordToReturn = "000000";
