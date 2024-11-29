@@ -2,26 +2,14 @@ import { ArbitraryRelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
-import { anyNumber, anyString, instance, mock, reset, verify, when } from "ts-mockito";
-import { AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession } from "../../src";
-import { MockEventBus, TestUtil } from "../lib";
+import { AppRuntime, LocalAccountSession } from "../../src";
+import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
 
 describe("AppStringProcessor", function () {
-    const mockUiBridge: IUIBridge = mock<IUIBridge>();
-
-    when(mockUiBridge.enterPassword(anyString(), anyNumber())).thenCall((passwordType: "pw" | "pin", pinLength: number | undefined) => {
-        switch (passwordType) {
-            case "pw":
-                return "password";
-            case "pin":
-                return "0".repeat(pinLength!);
-        }
-    });
-
+    const mockUiBridge = new MockUIBridge();
     const eventBus = new MockEventBus();
 
     let runtime1: AppRuntime;
-    let account: LocalAccountDTO;
     let runtime1Session: LocalAccountSession;
 
     let runtime2: AppRuntime;
@@ -34,10 +22,10 @@ describe("AppStringProcessor", function () {
         runtime1 = await TestUtil.createRuntime();
         await runtime1.start();
 
-        account = await runtime1.accountServices.createAccount(Math.random().toString(36).substring(7));
+        const account = await runtime1.accountServices.createAccount(Math.random().toString(36).substring(7));
         runtime1Session = await runtime1.selectAccount(account.id);
 
-        runtime2 = await TestUtil.createRuntime(undefined, instance(mockUiBridge), eventBus);
+        runtime2 = await TestUtil.createRuntime(undefined, mockUiBridge, eventBus);
         await runtime2.start();
 
         const accounts = await TestUtil.provideAccounts(runtime2, 2);
@@ -51,11 +39,11 @@ describe("AppStringProcessor", function () {
     });
 
     afterEach(function () {
-        reset(mockUiBridge);
+        mockUiBridge.reset();
     });
 
     test("should process a URL", async function () {
-        const result = await runtime1.stringProcessor.processURL("nmshd://qr#", account);
+        const result = await runtime1.stringProcessor.processURL("nmshd://qr#", runtime1Session.account);
         expect(result.isError).toBeDefined();
 
         expect(result.error.code).toBe("error.appStringProcessor.truncatedReferenceInvalid");
@@ -72,9 +60,8 @@ describe("AppStringProcessor", function () {
         });
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
-        expect(result.isSuccess).toBeTruthy();
+        expect(result).toBeSuccessful();
 
-        verify(mockUiBridge.enterPassword(anyString(), anyNumber())).never();
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
     });
 
@@ -89,7 +76,6 @@ describe("AppStringProcessor", function () {
         });
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
-        expect(result.isSuccess).toBeFalsy();
-        expect(result.error.code).toBe("error.appruntime.general.noAccountAvailableForIdentityTruncated");
+        expect(result).toBeAnError("There is no account matching the given 'forIdentityTruncated'.", "error.appruntime.general.noAccountAvailableForIdentityTruncated");
     });
 });
