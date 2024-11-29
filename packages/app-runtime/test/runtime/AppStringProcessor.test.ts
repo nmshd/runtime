@@ -75,7 +75,7 @@ describe("AppStringProcessor", function () {
         expect(result.isSuccess).toBeTruthy();
 
         verify(mockUiBridge.enterPassword(anyString(), anyNumber())).never();
-        eventBus.expectLastPublishedEvent(PeerRelationshipTemplateLoadedEvent);
+        await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
     });
 
     test("should properly handle a personalized RelationshipTemplate with the correct Identity not available", async function () {
