@@ -78,4 +78,39 @@ describe("AppStringProcessor", function () {
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
         expect(result).toBeAnError("There is no account matching the given 'forIdentityTruncated'.", "error.appruntime.general.noAccountAvailableForIdentityTruncated");
     });
+
+    test("should properly handle a password protected RelationshipTemplate", async function () {
+        const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+            content: templateContent,
+            expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+            passwordProtection: { password: "password" }
+        });
+
+        mockUiBridge.passwordToReturn = "password";
+        mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
+
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        expect(result).toBeSuccessful();
+        expect(result.value).toBeUndefined();
+
+        await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
+    });
+
+    test("should properly handle a pin protected RelationshipTemplate", async function () {
+        const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+            content: templateContent,
+            expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+            passwordProtection: { password: "000000", passwordIsPin: true },
+            forIdentity: runtime2SessionA.account.address!
+        });
+
+        mockUiBridge.passwordToReturn = "000000";
+        mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
+
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        expect(result).toBeSuccessful();
+        expect(result.value).toBeUndefined();
+
+        await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
+    });
 });
