@@ -51,10 +51,6 @@ class General {
     public cacheEmpty(entityName: string | Function, id: string) {
         return new ApplicationError("error.runtime.cacheEmpty", `The cache of ${entityName instanceof Function ? entityName.name : entityName} with id '${id}' is empty.`);
     }
-
-    public invalidPin(): ApplicationError {
-        return new ApplicationError("error.runtime.validation.invalidPin", "The PIN is invalid. It must consist of 4 to 16 digits from 0 to 9.");
-    }
 }
 
 class Serval {
@@ -85,6 +81,13 @@ class RelationshipTemplates {
         return new ApplicationError(
             "error.runtime.relationshipTemplates.personalizationMustBeInherited",
             "If a RelationshipTemplate is personalized, Tokens created from it must have the same personalization."
+        );
+    }
+
+    public passwordProtectionMustBeInherited(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationshipTemplates.passwordProtectionMustBeInherited",
+            "If a RelationshipTemplate has password protection, Tokens created from it must have the same password protection."
         );
     }
 

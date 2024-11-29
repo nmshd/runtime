@@ -41,6 +41,16 @@ describe("MultiAccountController", function () {
 
     afterAll(async () => await runtime.stop());
 
+    test("should get all accounts", async function () {
+        const accounts = await runtime.multiAccountController.getAccounts();
+        expect(accounts).toHaveLength(3);
+
+        const addresses = accounts.map((account) => account.address!.toString());
+        expect(addresses).toContain(account1.address);
+        expect(addresses).toContain(account2.address);
+        expect(addresses).toContain(account3.address);
+    });
+
     test("should get all accounts in deletion", async function () {
         await session1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
         await session2.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();

@@ -78,20 +78,20 @@ export class MultiAccountController {
     }
 
     public async getAccounts(): Promise<LocalAccount[]> {
-        const dbAccounts = await this._localAccounts.list();
-        return dbAccounts.map((account) => LocalAccount.from(account));
+        return await this._findAccounts();
     }
 
     public async getAccountsInDeletion(): Promise<LocalAccount[]> {
-        const allAccounts = await this.getAccounts();
-        const accountsInDeletion = allAccounts.filter((item) => item.deletionDate !== undefined);
-        return accountsInDeletion;
+        return await this._findAccounts({ deletionDate: { $exists: true } });
     }
 
     public async getAccountsNotInDeletion(): Promise<LocalAccount[]> {
-        const allAccounts = await this.getAccounts();
-        const accountsNotInDeletion = allAccounts.filter((item) => item.deletionDate === undefined);
-        return accountsNotInDeletion;
+        return await this._findAccounts({ deletionDate: { $exists: false } });
+    }
+
+    private async _findAccounts(query?: any) {
+        const accounts = await this._localAccounts.find(query);
+        return accounts.map((account) => LocalAccount.from(account));
     }
 
     public async selectAccount(id: CoreId): Promise<[LocalAccount, AccountController]> {

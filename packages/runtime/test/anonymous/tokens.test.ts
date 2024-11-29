@@ -40,4 +40,37 @@ describe("Anonymous tokens", () => {
         });
         expect(result).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
+
+    describe("Password-protected tokens", () => {
+        let tokenReference: string;
+
+        beforeAll(async () => {
+            tokenReference = (await uploadOwnToken(runtimeService.transport, undefined, { password: "password" })).truncatedReference;
+        });
+
+        test("send and receive a password-protected token", async () => {
+            const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
+                reference: tokenReference,
+                password: "password"
+            });
+            expect(result).toBeSuccessful();
+            expect(result.value.passwordProtection?.password).toBe("password");
+            expect(result.value.passwordProtection?.passwordIsPin).toBeUndefined();
+        });
+
+        test("error when loading a token with a wrong password", async () => {
+            const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
+                reference: tokenReference,
+                password: "wrong-password"
+            });
+            expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("error when loading a token with a missing password", async () => {
+            const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
+                reference: tokenReference
+            });
+            expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
+        });
+    });
 });
