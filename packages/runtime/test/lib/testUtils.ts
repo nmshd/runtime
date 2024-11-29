@@ -211,13 +211,19 @@ export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateCont
 
 export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON();
 
-export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON, templateExpiresAt?: DateTime): Promise<RelationshipTemplateDTO> {
+export async function createTemplate(
+    transportServices: TransportServices,
+    body?: RelationshipTemplateContentJSON,
+    passwordProtection?: { password: string; passwordIsPin?: true },
+    templateExpiresAt?: DateTime
+): Promise<RelationshipTemplateDTO> {
     const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
 
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
         expiresAt: templateExpiresAt ? templateExpiresAt.toString() : defaultExpirationDateTime,
-        content: _.cloneDeep(body) ?? emptyRelationshipTemplateContent
+        content: _.cloneDeep(body) ?? emptyRelationshipTemplateContent,
+        passwordProtection
     });
 
     expect(response).toBeSuccessful();
@@ -240,7 +246,7 @@ export async function exchangeTemplate(
     content?: RelationshipTemplateContentJSON,
     templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
-    const template = await createTemplate(transportServicesCreator, content, templateExpiresAt);
+    const template = await createTemplate(transportServicesCreator, content, undefined, templateExpiresAt);
 
     const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
     expect(response).toBeSuccessful();

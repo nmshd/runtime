@@ -2,7 +2,7 @@ import { RelationshipTemplateContent, RelationshipTemplateContentJSON } from "@n
 import { RelationshipTemplateReference } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction } from "../../src";
-import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { createTemplate, emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;
@@ -464,7 +464,8 @@ describe("RelationshipTemplates query", () => {
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
                 content: emptyRelationshipTemplateContent,
-                forIdentity: runtimeServices1.address
+                forIdentity: runtimeServices1.address,
+                passwordProtection: { password: "1234", passwordIsPin: true }
             })
         ).value;
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
@@ -474,7 +475,9 @@ describe("RelationshipTemplates query", () => {
             .addStringSet("createdBy")
             .addStringSet("createdByDevice")
             .addNumberSet("maxNumberOfAllocations")
-            .addStringSet("forIdentity");
+            .addStringSet("forIdentity")
+            .addStringSet("passwordProtection.password")
+            .addBooleanSet("passwordProtection.passwordIsPin");
 
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q }));
     });
@@ -513,5 +516,65 @@ describe("RelationshipTemplates query", () => {
             .addNumberSet("maxNumberOfAllocations");
 
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Peer }));
+    });
+
+    test("password query", async () => {
+        const passwordProtectedTemplate = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
+
+        const pinProtectedTemplate = await createTemplate(runtimeServices1.transport, undefined, { password: "1234", passwordIsPin: true });
+
+        const passwordProtectedTemplates = (
+            await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
+                query: {
+                    "passwordProtection.password": "password"
+                }
+            })
+        ).value;
+        const passwordProtectedTemplateIds = passwordProtectedTemplates.map((t) => t.id);
+
+        expect(passwordProtectedTemplateIds).toContain(passwordProtectedTemplate.id);
+        expect(passwordProtectedTemplateIds).not.toContain(pinProtectedTemplate.id);
+
+        const pinProtectedTemplates = (
+            await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
+                query: {
+                    "passwordProtection.password": "1234"
+                }
+            })
+        ).value;
+        const pinProtectedTemplateIds = pinProtectedTemplates.map((t) => t.id);
+
+        expect(pinProtectedTemplateIds).not.toContain(passwordProtectedTemplate.id);
+        expect(pinProtectedTemplateIds).toContain(pinProtectedTemplate.id);
+    });
+
+    test("passwordIsPin query", async () => {
+        const passwordProtectedTemplate = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
+
+        const pinProtectedTemplate = await createTemplate(runtimeServices1.transport, undefined, { password: "1234", passwordIsPin: true });
+
+        const passwordProtectedTemplates = (
+            await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
+                query: {
+                    "passwordProtection.passwordIsPin": "!true"
+                }
+            })
+        ).value;
+        const passwordProtectedTemplateIds = passwordProtectedTemplates.map((t) => t.id);
+
+        expect(passwordProtectedTemplateIds).toContain(passwordProtectedTemplate.id);
+        expect(passwordProtectedTemplateIds).not.toContain(pinProtectedTemplate.id);
+
+        const pinProtectedTemplates = (
+            await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
+                query: {
+                    "passwordProtection.passwordIsPin": "true"
+                }
+            })
+        ).value;
+        const pinProtectedTemplateIds = pinProtectedTemplates.map((t) => t.id);
+
+        expect(pinProtectedTemplateIds).not.toContain(passwordProtectedTemplate.id);
+        expect(pinProtectedTemplateIds).toContain(pinProtectedTemplate.id);
     });
 });
