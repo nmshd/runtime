@@ -15,8 +15,7 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
 
     private async handleUrlOpen(event: RelationshipTemplateProcessedEvent) {
         const services = await this.runtime.getServices(event.eventTargetAddress);
-        const promiseOrUiBridge = this.runtime.uiBridge();
-        const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
+        const uiBridge = await this.runtime.uiBridge();
 
         const account = await this.runtime.accountServices.getAccountByAddress(event.eventTargetAddress);
 

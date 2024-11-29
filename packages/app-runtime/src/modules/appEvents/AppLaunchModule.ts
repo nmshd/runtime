@@ -19,9 +19,7 @@ export class AppLaunchModule extends AppRuntimeModule<AppLaunchModuleConfig> {
         const result = await this.runtime.stringProcessor.processURL(event.url);
         if (result.isSuccess) return;
 
-        const promiseOrUiBridge = this.runtime.uiBridge();
-        const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
-
+        const uiBridge = await this.runtime.uiBridge();
         await uiBridge.showError(result.error);
     }
 

@@ -72,8 +72,7 @@ export class AppStringProcessor {
             return UserfriendlyResult.fail(error);
         }
 
-        const promiseOrUiBridge = this.runtime.uiBridge();
-        const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
+        const uiBridge = await this.runtime.uiBridge();
 
         let password: string | undefined;
         if (reference.passwordProtection) {
@@ -122,8 +121,7 @@ export class AppStringProcessor {
 
     private async _handleReference(reference: Reference, account: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         const services = await this.runtime.getServices(account.id);
-        const promiseOrUiBridge = this.runtime.uiBridge();
-        const uiBridge = promiseOrUiBridge instanceof Promise ? await promiseOrUiBridge : promiseOrUiBridge;
+        const uiBridge = await this.runtime.uiBridge();
 
         let password: string | undefined;
         if (reference.passwordProtection) {
