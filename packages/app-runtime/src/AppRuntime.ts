@@ -328,16 +328,12 @@ export class AppRuntime extends Runtime<AppConfig> {
 
             const checkDeletionResult = await session.transportServices.account.checkDeletionOfIdentity();
 
-            // TODO: throw adequate error
-            if (checkDeletionResult.isError) throw AppRuntimeErrors.startup.bootstrapError(checkDeletionResult.error);
+            if (checkDeletionResult.isError) throw AppRuntimeErrors.general.backboneError(checkDeletionResult.error);
 
-            // TODO: throw adequate error
-            if (!checkDeletionResult.value.isDeleted) throw AppRuntimeErrors.startup.bootstrapError(checkDeletionResult.error);
+            if (!checkDeletionResult.value.isDeleted) throw AppRuntimeErrors.general.backboneError(syncResult.error);
 
-            // TODO: delete all local data
+            await this._multiAccountController.deleteAccount(account.id);
         }
-
-        return;
     }
 
     private translationProvider: INativeTranslationProvider = {

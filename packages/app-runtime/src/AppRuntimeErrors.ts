@@ -30,6 +30,10 @@ class General {
             error
         );
     }
+
+    public backboneError(error?: Error): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError("error.appruntime.general.backboneError", "The Backbone returned an error.", "The Backbone returned an error.", error);
+    }
 }
 
 class Startup {
