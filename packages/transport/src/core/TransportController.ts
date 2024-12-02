@@ -20,6 +20,7 @@ export enum ControllerName {
     File = "File",
     Identity = "Identity",
     Message = "Message",
+    PublicRelationshipTemplateReferences = "PublicRelationshipTemplateReferences",
     Relationship = "Relationship",
     Relationships = "Relationships",
     RelationshipTemplate = "RelationshipTemplate",

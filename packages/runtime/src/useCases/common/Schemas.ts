@@ -7,6 +7,9 @@ export const LoadPeerTokenAnonymousRequest: any = {
             "properties": {
                 "reference": {
                     "$ref": "#/definitions/TokenReferenceString"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -20553,6 +20556,9 @@ export const LoadItemFromTruncatedReferenceRequest: any = {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
                         }
                     ]
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -21295,6 +21301,23 @@ export const CreateTokenForFileRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -21333,6 +21356,23 @@ export const CreateTokenQRCodeForFileRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -21557,6 +21597,9 @@ export const GetOrLoadFileRequest: any = {
                             "$ref": "#/definitions/FileReferenceString"
                         }
                     ]
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -22486,6 +22529,23 @@ export const CreateTokenForOwnTemplateRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -22524,6 +22584,23 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -22747,6 +22824,23 @@ export const CreateOwnTokenRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -22923,6 +23017,9 @@ export const LoadPeerTokenRequest: any = {
                 },
                 "ephemeral": {
                     "type": "boolean"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [

@@ -4,6 +4,7 @@ export * from "./devices";
 export * from "./files";
 export * from "./identityDeletionProcesses";
 export * from "./messages";
+export * from "./publicRelationshipTemplateReferences";
 export * from "./relationships";
 export * from "./relationshipTemplates";
 export * from "./tags";

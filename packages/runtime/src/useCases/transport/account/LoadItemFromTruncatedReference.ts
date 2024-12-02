@@ -28,6 +28,7 @@ import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface LoadItemFromTruncatedReferenceRequest {
     reference: TokenReferenceString | FileReferenceString | RelationshipTemplateReferenceString;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<LoadItemFromTruncatedReferenceRequest> {
@@ -65,7 +66,7 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
         const reference = request.reference;
 
         if (reference.startsWith(Base64ForIdPrefix.RelationshipTemplate)) {
-            const template = await this.templateController.loadPeerRelationshipTemplateByTruncated(reference);
+            const template = await this.templateController.loadPeerRelationshipTemplateByTruncated(reference, request.password);
             return Result.ok({
                 type: "RelationshipTemplate",
                 value: RelationshipTemplateMapper.toRelationshipTemplateDTO(template)
@@ -80,11 +81,11 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
             });
         }
 
-        return await this.handleTokenReference(reference);
+        return await this.handleTokenReference(reference, request.password);
     }
 
-    private async handleTokenReference(tokenReference: string): Promise<Result<LoadItemFromTruncatedReferenceResponse>> {
-        const token = await this.tokenController.loadPeerTokenByTruncated(tokenReference, true);
+    private async handleTokenReference(tokenReference: string, password?: string): Promise<Result<LoadItemFromTruncatedReferenceResponse>> {
+        const token = await this.tokenController.loadPeerTokenByTruncated(tokenReference, true, password);
 
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
@@ -93,7 +94,7 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
         const tokenContent = token.cache.content;
 
         if (tokenContent instanceof TokenContentRelationshipTemplate) {
-            const template = await this.templateController.loadPeerRelationshipTemplateByTokenContent(tokenContent);
+            const template = await this.templateController.loadPeerRelationshipTemplateByTokenContent(tokenContent, password);
             return Result.ok({
                 type: "RelationshipTemplate",
                 value: RelationshipTemplateMapper.toRelationshipTemplateDTO(template)
