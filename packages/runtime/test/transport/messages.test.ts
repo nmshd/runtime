@@ -156,16 +156,15 @@ describe("Messaging", () => {
 });
 
 describe("Message errors", () => {
-    let requestItem: ConsentRequestItemJSON;
-    let requestId: string;
+    const requestItem: ConsentRequestItemJSON = {
+        "@type": "ConsentRequestItem",
+        consent: "I consent to this RequestItem",
+        mustBeAccepted: true
+    };
     let createRequestResult: LocalRequestDTO;
+    let requestId: string;
 
     beforeAll(async () => {
-        requestItem = {
-            "@type": "ConsentRequestItem",
-            consent: "I consent to this RequestItem",
-            mustBeAccepted: true
-        };
         createRequestResult = (
             await client1.consumption.outgoingRequests.create({
                 content: {
