@@ -168,7 +168,7 @@ export class AppStringProcessor {
         const uiBridge = await this.runtime.uiBridge();
         const passwordResult = await uiBridge.enterPassword(
             passwordProtection.passwordType === "pw" ? "pw" : "pin",
-            passwordProtection.passwordType === "pw" ? undefined : parseInt(passwordProtection.passwordType.substring(3))
+            passwordProtection.passwordType.startsWith("pin") ? parseInt(passwordProtection.passwordType.substring(3)) : undefined
         );
 
         return passwordResult;
