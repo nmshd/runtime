@@ -328,7 +328,7 @@ describe("RelationshipTemplates query", () => {
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Peer }));
     });
 
-    test("password query with password", async () => {
+    test("password query for a template protected with a password that's not a PIN", async () => {
         const passwordProtectedTemplate = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
 
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(passwordProtectedTemplate, runtimeServices1.transport).addStringSet(
@@ -337,7 +337,7 @@ describe("RelationshipTemplates query", () => {
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q }));
     });
 
-    test("password query with pin", async () => {
+    test("password query for a template protected with a PIN", async () => {
         const pinProtectedTemplate = await createTemplate(runtimeServices1.transport, undefined, { password: "1234", passwordIsPin: true });
 
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(pinProtectedTemplate, runtimeServices1.transport).addStringSet("passwordProtection.password");
@@ -358,11 +358,11 @@ describe("RelationshipTemplates query", () => {
                 }
             })
         ).value;
-        const templateIdsWithoutPin = templatesWithoutPin.map((t) => t.id);
+        const idsOfTemplatesWithoutPin = templatesWithoutPin.map((t) => t.id);
 
-        expect(templateIdsWithoutPin).toContain(passwordProtectedTemplate.id);
-        expect(templateIdsWithoutPin).not.toContain(pinProtectedTemplate.id);
-        expect(templateIdsWithoutPin).toContain(unprotectedTemplate.id);
+        expect(idsOfTemplatesWithoutPin).toContain(passwordProtectedTemplate.id);
+        expect(idsOfTemplatesWithoutPin).not.toContain(pinProtectedTemplate.id);
+        expect(idsOfTemplatesWithoutPin).toContain(unprotectedTemplate.id);
 
         const templatesWithPin = (
             await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
@@ -371,10 +371,10 @@ describe("RelationshipTemplates query", () => {
                 }
             })
         ).value;
-        const templateIdsWithPin = templatesWithPin.map((t) => t.id);
+        const idsOfTemplatesWithPin = templatesWithPin.map((t) => t.id);
 
-        expect(templateIdsWithPin).not.toContain(passwordProtectedTemplate.id);
-        expect(templateIdsWithPin).toContain(pinProtectedTemplate.id);
-        expect(templateIdsWithPin).not.toContain(unprotectedTemplate.id);
+        expect(idsOfTemplatesWithPin).not.toContain(passwordProtectedTemplate.id);
+        expect(idsOfTemplatesWithPin).toContain(pinProtectedTemplate.id);
+        expect(idsOfTemplatesWithPin).not.toContain(unprotectedTemplate.id);
     });
 });
