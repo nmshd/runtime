@@ -68,9 +68,6 @@ export class SyncController extends TransportController {
     private currentSync?: LocalSyncRun;
     private currentSyncRun?: BackboneSyncRun;
 
-    public async sync(whatToSync: "OnlyDatawallet"): Promise<ChangedItems>;
-    public async sync(whatToSync: "Everything"): Promise<ChangedItems>;
-    public async sync(whatToSync: WhatToSync): Promise<ChangedItems>;
     public async sync(whatToSync: WhatToSync = "Everything"): Promise<ChangedItems> {
         if (this.currentSync?.includes(whatToSync)) {
             return await this.currentSync.promise;
