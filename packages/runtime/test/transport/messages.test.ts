@@ -446,8 +446,8 @@ describe("Postponed Notifications via Messages", () => {
 
             await reactivateTerminatedRelationship(client5.transport, client1.transport);
 
-            const postponedMessages = await client5.transport.messages.getMessages({});
-            expect(postponedMessages.value).toHaveLength(1);
+            const postponedMessages = await syncUntilHasMessages(client5.transport);
+            expect(postponedMessages).toHaveLength(1);
             const postponedNotification = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
             expect(postponedNotification).toBeSuccessful();
         });
@@ -501,7 +501,7 @@ describe("Postponed Notifications via Messages", () => {
             expect(reactivatedRelationship[reactivatedRelationship.length - 1].status).toBe(RelationshipStatus.Active);
 
             const postponedMessages = await syncUntilHasMessages(client5.transport);
-            expect(postponedMessages.length === 2).toBe(true);
+            expect(postponedMessages).toHaveLength(2);
 
             const postponedSuccessionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
             expect(postponedSuccessionNotification).toBeSuccessful();
