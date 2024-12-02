@@ -16,6 +16,10 @@ export class MockUIBridge implements IUIBridge {
     public reset(): void {
         this._passwordToReturn = undefined;
         this._accountIdToReturn = undefined;
+
+        this._showDeviceOnboardingCalls = [];
+        this._requestAccountSelectionCalls = [];
+        this._enterPasswordCalls = [];
     }
 
     public showMessage(_account: LocalAccountDTO, _relationship: IdentityDVO, _message: MessageDVO | MailDVO | RequestMessageDVO): Promise<Result<void>> {
@@ -30,8 +34,19 @@ export class MockUIBridge implements IUIBridge {
         throw new Error("Method not implemented.");
     }
 
-    public showDeviceOnboarding(_deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>> {
-        throw new Error("Method not implemented.");
+    public showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>> {
+        this._showDeviceOnboardingCalls.push(deviceOnboardingInfo);
+
+        return Promise.resolve(Result.ok(undefined));
+    }
+
+    private _showDeviceOnboardingCalls: DeviceOnboardingInfoDTO[] = [];
+    public showDeviceOnboardingCalled(deviceId: string): boolean {
+        return this._showDeviceOnboardingCalls.some((x) => x.id === deviceId);
+    }
+
+    public showDeviceOnboardingNotCalled(): boolean {
+        return this._showDeviceOnboardingCalls.length === 0;
     }
 
     public showRequest(_account: LocalAccountDTO, _request: LocalRequestDVO): Promise<Result<void>> {
@@ -42,7 +57,9 @@ export class MockUIBridge implements IUIBridge {
         throw new Error("Method not implemented.");
     }
 
-    public requestAccountSelection(possibleAccounts: LocalAccountDTO[], _title?: string, _description?: string): Promise<Result<LocalAccountDTO | undefined>> {
+    public requestAccountSelection(possibleAccounts: LocalAccountDTO[], title?: string, description?: string): Promise<Result<LocalAccountDTO | undefined>> {
+        this._requestAccountSelectionCalls.push({ possibleAccounts: possibleAccounts, title: title, description: description });
+
         if (!this._accountIdToReturn) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));
 
         const foundAccount = possibleAccounts.find((x) => x.id === this._accountIdToReturn);
@@ -51,9 +68,29 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(foundAccount));
     }
 
-    public enterPassword(_passwordType: "pw" | "pin", _pinLength?: number): Promise<Result<string>> {
+    private _requestAccountSelectionCalls: { possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }[] = [];
+    public requestAccountSelectionCalled(possibleAccountsLength: number): boolean {
+        return this._requestAccountSelectionCalls.some((x) => x.possibleAccounts.length === possibleAccountsLength);
+    }
+
+    public requestAccountSelectionNotCalled(): boolean {
+        return this._requestAccountSelectionCalls.length === 0;
+    }
+
+    public enterPassword(passwordType: "pw" | "pin", pinLength?: number): Promise<Result<string>> {
+        this._enterPasswordCalls.push({ passwordType: passwordType, pinLength: pinLength });
+
         if (!this._passwordToReturn) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));
 
         return Promise.resolve(Result.ok(this._passwordToReturn));
+    }
+
+    private _enterPasswordCalls: { passwordType: "pw" | "pin"; pinLength?: number }[] = [];
+    public enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number): boolean {
+        return this._enterPasswordCalls.some((x) => x.passwordType === passwordType && x.pinLength === pinLength);
+    }
+
+    public enterPasswordNotCalled(): boolean {
+        return this._enterPasswordCalls.length === 0;
     }
 }

@@ -47,6 +47,9 @@ describe("AppStringProcessor", function () {
         expect(result.isError).toBeDefined();
 
         expect(result.error.code).toBe("error.appStringProcessor.truncatedReferenceInvalid");
+
+        expect(mockUiBridge.enterPasswordNotCalled()).toBeTruthy();
+        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
     });
 
     test("should properly handle a personalized RelationshipTemplate with the correct Identity available", async function () {
@@ -63,6 +66,9 @@ describe("AppStringProcessor", function () {
         expect(result).toBeSuccessful();
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
+
+        expect(mockUiBridge.enterPasswordNotCalled()).toBeTruthy();
+        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
     });
 
     test("should properly handle a personalized RelationshipTemplate with the correct Identity not available", async function () {
@@ -77,6 +83,9 @@ describe("AppStringProcessor", function () {
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
         expect(result).toBeAnError("There is no account matching the given 'forIdentityTruncated'.", "error.appruntime.general.noAccountAvailableForIdentityTruncated");
+
+        expect(mockUiBridge.enterPasswordNotCalled()).toBeTruthy();
+        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
     });
 
     test("should properly handle a password protected RelationshipTemplate", async function () {
@@ -94,6 +103,9 @@ describe("AppStringProcessor", function () {
         expect(result.value).toBeUndefined();
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
+
+        expect(mockUiBridge.enterPasswordCalled("pw")).toBeTruthy();
+        expect(mockUiBridge.requestAccountSelectionCalled(2)).toBeTruthy();
     });
 
     test("should properly handle a pin protected RelationshipTemplate", async function () {
@@ -111,6 +123,9 @@ describe("AppStringProcessor", function () {
         expect(result.value).toBeUndefined();
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
+
+        expect(mockUiBridge.enterPasswordCalled("pin", 6)).toBeTruthy();
+        expect(mockUiBridge.requestAccountSelectionCalled(2)).toBeTruthy();
     });
 
     test("should properly handle a password protected personalized RelationshipTemplate", async function () {
@@ -128,6 +143,9 @@ describe("AppStringProcessor", function () {
         expect(result.value).toBeUndefined();
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
+
+        expect(mockUiBridge.enterPasswordCalled("pw")).toBeTruthy();
+        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
     });
 
     test("should properly handle a pin protected personalized RelationshipTemplate", async function () {
@@ -145,5 +163,36 @@ describe("AppStringProcessor", function () {
         expect(result.value).toBeUndefined();
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
+
+        expect(mockUiBridge.enterPasswordCalled("pin", 6)).toBeTruthy();
+        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
+    });
+
+    describe("onboarding", function () {
+        let runtime3: AppRuntime;
+        const runtime3MockUiBridge = new MockUIBridge();
+
+        beforeAll(async function () {
+            runtime3 = await TestUtil.createRuntime(undefined, runtime3MockUiBridge, eventBus);
+            await runtime3.start();
+        });
+
+        afterAll(async () => await runtime3.stop());
+
+        test("device onboarding with a password protected Token", async function () {
+            const deviceResult = await runtime1Session.transportServices.devices.createDevice({});
+            const tokenResult = await runtime1Session.transportServices.devices.getDeviceOnboardingToken({
+                id: deviceResult.value.id,
+                passwordProtection: { password: "password" }
+            });
+
+            mockUiBridge.passwordToReturn = "password";
+
+            const result = await runtime2.stringProcessor.processTruncatedReference(tokenResult.value.truncatedReference);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            expect(mockUiBridge.showDeviceOnboardingCalled(deviceResult.value.id)).toBeTruthy();
+        });
     });
 });
