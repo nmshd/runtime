@@ -4,7 +4,7 @@ import { PasswordProtectionCreationParameters } from "./PasswordProtectionCreati
 import { SharedPasswordProtection } from "./SharedPasswordProtection";
 
 export interface IPasswordProtection extends ISerializable {
-    passwordType: string;
+    passwordType: "pw" | `pin${number}`;
     salt: ICoreBuffer;
     password: string;
 }
@@ -12,7 +12,7 @@ export interface IPasswordProtection extends ISerializable {
 export class PasswordProtection extends Serializable implements IPasswordProtection {
     @validate({ regExp: /^(pw|pin(4|5|6|7|8|9|10|11|12|13|14|15|16))$/ })
     @serialize()
-    public passwordType: string;
+    public passwordType: "pw" | `pin${number}`;
 
     @validate({ customValidator: (v: ICoreBuffer) => (v.buffer.byteLength === 16 ? undefined : "must be 16 bytes long") })
     @serialize()
