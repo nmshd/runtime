@@ -198,7 +198,7 @@ describe("TokenContent", function () {
                     secretKey: await CryptoEncryption.generateKey(),
                     templateId: await CoreIdHelper.notPrefixed.generate(),
                     passwordProtection: {
-                        passwordType: "pc",
+                        passwordType: "pc" as any,
                         salt: await CoreCrypto.random(16)
                     }
                 });
