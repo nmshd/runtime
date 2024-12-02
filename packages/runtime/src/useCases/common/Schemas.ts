@@ -20933,6 +20933,22 @@ export const CreateDeviceOnboardingTokenRequest: any = {
                 },
                 "profileName": {
                     "type": "string"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string"
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
