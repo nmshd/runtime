@@ -1,6 +1,8 @@
 import { ApplicationError, EventConstructor, Result } from "@js-soft/ts-utils";
 import { MockEventBus } from "./lib";
 
+import "./lib/MockUIBridge.matchers";
+
 expect.extend({
     toBeSuccessful(actual: Result<unknown, ApplicationError>) {
         if (!(actual instanceof Result)) {

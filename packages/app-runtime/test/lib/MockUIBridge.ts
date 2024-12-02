@@ -24,6 +24,9 @@ export class MockUIBridge implements IUIBridge {
     }
 
     private _calls: MockUIBridgeCall[] = [];
+    public get calls(): MockUIBridgeCall[] {
+        return this._calls;
+    }
 
     public reset(): void {
         this._passwordToReturn = undefined;
@@ -85,35 +88,5 @@ export class MockUIBridge implements IUIBridge {
         if (!this._passwordToReturn) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));
 
         return Promise.resolve(Result.ok(this._passwordToReturn));
-    }
-
-    public showDeviceOnboardingCalled(deviceId: string): boolean {
-        const showDeviceOnboardingCalls = this._calls.filter((x) => x.method === "showDeviceOnboarding").map((e) => e.deviceOnboardingInfo);
-        return showDeviceOnboardingCalls.some((x) => x.id === deviceId);
-    }
-
-    public showDeviceOnboardingNotCalled(): boolean {
-        const showDeviceOnboardingCalls = this._calls.filter((x) => x.method === "showDeviceOnboarding");
-        return showDeviceOnboardingCalls.length === 0;
-    }
-
-    public requestAccountSelectionCalled(possibleAccountsLength: number): boolean {
-        const requestAccountSelectionCalls = this._calls.filter((x) => x.method === "requestAccountSelection");
-        return requestAccountSelectionCalls.some((x) => x.possibleAccounts.length === possibleAccountsLength);
-    }
-
-    public requestAccountSelectionNotCalled(): boolean {
-        const requestAccountSelectionCalls = this._calls.filter((x) => x.method === "requestAccountSelection");
-        return requestAccountSelectionCalls.length === 0;
-    }
-
-    public enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number): boolean {
-        const enterPasswordCalls = this._calls.filter((x) => x.method === "enterPassword");
-        return enterPasswordCalls.some((x) => x.passwordType === passwordType && x.pinLength === pinLength);
-    }
-
-    public enterPasswordNotCalled(): boolean {
-        const enterPasswordCalls = this._calls.filter((x) => x.method === "enterPassword");
-        return enterPasswordCalls.length === 0;
     }
 }

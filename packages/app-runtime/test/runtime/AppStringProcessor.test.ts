@@ -48,8 +48,8 @@ describe("AppStringProcessor", function () {
 
         expect(result.error.code).toBe("error.appStringProcessor.truncatedReferenceInvalid");
 
-        expect(mockUiBridge.enterPasswordNotCalled()).toBeTruthy();
-        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
+        expect(mockUiBridge).enterPasswordNotCalled();
+        expect(mockUiBridge).requestAccountSelectionNotCalled();
     });
 
     test("should properly handle a personalized RelationshipTemplate with the correct Identity available", async function () {
@@ -67,8 +67,8 @@ describe("AppStringProcessor", function () {
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
 
-        expect(mockUiBridge.enterPasswordNotCalled()).toBeTruthy();
-        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
+        expect(mockUiBridge).enterPasswordNotCalled();
+        expect(mockUiBridge).requestAccountSelectionNotCalled();
     });
 
     test("should properly handle a personalized RelationshipTemplate with the correct Identity not available", async function () {
@@ -84,8 +84,8 @@ describe("AppStringProcessor", function () {
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
         expect(result).toBeAnError("There is no account matching the given 'forIdentityTruncated'.", "error.appruntime.general.noAccountAvailableForIdentityTruncated");
 
-        expect(mockUiBridge.enterPasswordNotCalled()).toBeTruthy();
-        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
+        expect(mockUiBridge).enterPasswordNotCalled();
+        expect(mockUiBridge).requestAccountSelectionNotCalled();
     });
 
     test("should properly handle a password protected RelationshipTemplate", async function () {
@@ -104,8 +104,8 @@ describe("AppStringProcessor", function () {
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
 
-        expect(mockUiBridge.enterPasswordCalled("pw")).toBeTruthy();
-        expect(mockUiBridge.requestAccountSelectionCalled(2)).toBeTruthy();
+        expect(mockUiBridge).enterPasswordCalled("pw");
+        expect(mockUiBridge).requestAccountSelectionCalled(2);
     });
 
     test("should properly handle a pin protected RelationshipTemplate", async function () {
@@ -124,8 +124,8 @@ describe("AppStringProcessor", function () {
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
 
-        expect(mockUiBridge.enterPasswordCalled("pin", 6)).toBeTruthy();
-        expect(mockUiBridge.requestAccountSelectionCalled(2)).toBeTruthy();
+        expect(mockUiBridge).enterPasswordCalled("pin", 6);
+        expect(mockUiBridge).requestAccountSelectionCalled(2);
     });
 
     test("should properly handle a password protected personalized RelationshipTemplate", async function () {
@@ -144,8 +144,8 @@ describe("AppStringProcessor", function () {
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
 
-        expect(mockUiBridge.enterPasswordCalled("pw")).toBeTruthy();
-        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
+        expect(mockUiBridge).enterPasswordCalled("pw");
+        expect(mockUiBridge).requestAccountSelectionNotCalled();
     });
 
     test("should properly handle a pin protected personalized RelationshipTemplate", async function () {
@@ -164,8 +164,8 @@ describe("AppStringProcessor", function () {
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
 
-        expect(mockUiBridge.enterPasswordCalled("pin", 6)).toBeTruthy();
-        expect(mockUiBridge.requestAccountSelectionNotCalled()).toBeTruthy();
+        expect(mockUiBridge).enterPasswordCalled("pin", 6);
+        expect(mockUiBridge).requestAccountSelectionNotCalled();
     });
 
     describe("onboarding", function () {
@@ -192,7 +192,7 @@ describe("AppStringProcessor", function () {
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
-            expect(mockUiBridge.showDeviceOnboardingCalled(deviceResult.value.id)).toBeTruthy();
+            expect(mockUiBridge).showDeviceOnboardingCalled(deviceResult.value.id);
         });
     });
 });
