@@ -1337,7 +1337,8 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 predecessorId: predecessorPeerSharedIdentityAttribute.id,
                 successorId: successorId,
                 successorContent: TestObjectFactory.createIdentityAttribute({
-                    owner: sender
+                    owner: sender,
+                    tags: ["aNewTag"]
                 })
             });
 

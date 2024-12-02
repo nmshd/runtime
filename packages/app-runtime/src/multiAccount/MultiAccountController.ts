@@ -42,6 +42,7 @@ export class MultiAccountController {
 
         this._dbClosed = false;
         this._localAccounts = await this._db.getCollection("LocalAccounts");
+
         return this;
     }
 
@@ -77,8 +78,20 @@ export class MultiAccountController {
     }
 
     public async getAccounts(): Promise<LocalAccount[]> {
-        const dbAccounts = await this._localAccounts.list();
-        return dbAccounts.map((account) => LocalAccount.from(account));
+        return await this._findAccounts();
+    }
+
+    public async getAccountsInDeletion(): Promise<LocalAccount[]> {
+        return await this._findAccounts({ deletionDate: { $exists: true } });
+    }
+
+    public async getAccountsNotInDeletion(): Promise<LocalAccount[]> {
+        return await this._findAccounts({ deletionDate: { $exists: false } });
+    }
+
+    private async _findAccounts(query?: any) {
+        const accounts = await this._localAccounts.find(query);
+        return accounts.map((account) => LocalAccount.from(account));
     }
 
     public async selectAccount(id: CoreId): Promise<[LocalAccount, AccountController]> {
@@ -236,6 +249,22 @@ export class MultiAccountController {
         renamedAccount.name = name;
 
         await this._localAccounts.update(oldAccount, renamedAccount);
+    }
+
+    public async updateLocalAccountDeletionDate(address: string, deletionDate?: CoreDate): Promise<void> {
+        const oldAccount = await this._localAccounts.findOne({ address });
+
+        if (!oldAccount) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAccount, address).logWith(this._log);
+        }
+
+        const account = LocalAccount.from(oldAccount);
+
+        account.deletionDate = deletionDate ?? undefined;
+        await this._localAccounts.update(oldAccount, account);
+
+        const cachedAccount = this.sessionStorage.findSession(address)?.account;
+        if (cachedAccount) cachedAccount.deletionDate = deletionDate?.toString();
     }
 
     public async updateLastAccessedAt(accountId: string): Promise<void> {

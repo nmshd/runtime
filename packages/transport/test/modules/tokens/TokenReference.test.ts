@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { BackboneIds, TokenReference } from "../../../src";
+import { BackboneIds, CoreCrypto, TokenReference } from "../../../src";
 
 describe("TokenReference", function () {
     test("should serialize and deserialize correctly (verbose)", async function () {
@@ -46,13 +46,16 @@ describe("TokenReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
     });
 
-    test("should serialize and deserialize correctly (verbose, with backbone, identity, password)", async function () {
+    test("should serialize and deserialize correctly (verbose, with backbone, identity, passwordProtection)", async function () {
         const reference = TokenReference.from({
             key: await CryptoEncryption.generateKey(),
             id: await BackboneIds.token.generateUnsafe(),
             backboneBaseUrl: "localhost",
             forIdentityTruncated: "1234",
-            passwordType: 10
+            passwordProtection: {
+                passwordType: "pin10",
+                salt: await CoreCrypto.random(16)
+            }
         });
         expect(reference).toBeInstanceOf(Serializable);
         expect(reference).toBeInstanceOf(TokenReference);
@@ -61,27 +64,32 @@ describe("TokenReference", function () {
         const serialized = reference.serialize();
         expect(typeof serialized).toBe("string");
         expect(serialized).toBe(
-            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":10}`
+            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordProtection":{"passwordType":"pin10","salt":"${reference.passwordProtection!.salt.toBase64URL()}"}}`
         );
         const deserialized = TokenReference.deserialize(serialized);
         expect(deserialized).toBeInstanceOf(Serializable);
         expect(deserialized).toBeInstanceOf(TokenReference);
         expect(deserialized.key).toBeInstanceOf(CryptoSecretKey);
         expect(deserialized.id).toBeInstanceOf(CoreId);
+        expect(deserialized.passwordProtection!.salt).toBeInstanceOf(CoreBuffer);
         expect(deserialized.key.toBase64()).toStrictEqual(reference.key.toBase64());
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
         expect(deserialized.backboneBaseUrl).toBe("localhost");
         expect(deserialized.forIdentityTruncated).toBe("1234");
-        expect(deserialized.passwordType).toBe(10);
+        expect(deserialized.passwordProtection!.passwordType).toBe("pin10");
+        expect(deserialized.passwordProtection!.salt.toBase64URL()).toBe(reference.passwordProtection!.salt.toBase64URL());
     });
 
-    test("should serialize and deserialize correctly (from unknown type, with backbone, identity, password)", async function () {
+    test("should serialize and deserialize correctly (from unknown type, with backbone, identity, passwordProtection)", async function () {
         const reference = TokenReference.from({
             key: await CryptoEncryption.generateKey(),
             id: await BackboneIds.token.generateUnsafe(),
             backboneBaseUrl: "localhost",
             forIdentityTruncated: "1234",
-            passwordType: 10
+            passwordProtection: {
+                passwordType: "pw",
+                salt: await CoreCrypto.random(16)
+            }
         });
         expect(reference).toBeInstanceOf(Serializable);
         expect(reference).toBeInstanceOf(TokenReference);
@@ -90,18 +98,20 @@ describe("TokenReference", function () {
         const serialized = reference.serialize();
         expect(typeof serialized).toBe("string");
         expect(serialized).toBe(
-            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordType":10}`
+            `{"@type":"TokenReference","backboneBaseUrl":"localhost","forIdentityTruncated":"1234","id":"${reference.id.toString()}","key":${reference.key.serialize(false)},"passwordProtection":{"passwordType":"pw","salt":"${reference.passwordProtection!.salt.toBase64URL()}"}}`
         );
         const deserialized = Serializable.deserializeUnknown(serialized) as TokenReference;
         expect(deserialized).toBeInstanceOf(Serializable);
         expect(deserialized).toBeInstanceOf(TokenReference);
         expect(deserialized.key).toBeInstanceOf(CryptoSecretKey);
         expect(deserialized.id).toBeInstanceOf(CoreId);
+        expect(deserialized.passwordProtection!.salt).toBeInstanceOf(CoreBuffer);
         expect(deserialized.key.toBase64()).toStrictEqual(reference.key.toBase64());
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
         expect(deserialized.backboneBaseUrl).toBe("localhost");
         expect(deserialized.forIdentityTruncated).toBe("1234");
-        expect(deserialized.passwordType).toBe(10);
+        expect(deserialized.passwordProtection!.passwordType).toBe("pw");
+        expect(deserialized.passwordProtection!.salt.toBase64URL()).toBe(reference.passwordProtection!.salt.toBase64URL());
     });
 
     test("should truncate and read in correctly", async function () {
@@ -110,7 +120,7 @@ describe("TokenReference", function () {
             id: await BackboneIds.token.generateUnsafe()
         });
         const truncated = reference.truncate();
-        expect(truncated.length).toBeLessThan(115);
+        expect(truncated.length).toBeLessThan(155);
         expect(truncated.length).toBeGreaterThan(80);
         const deserialized = TokenReference.fromTruncated(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -121,27 +131,32 @@ describe("TokenReference", function () {
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
     });
 
-    test("should truncate and read in correctly with backbone, identity, password", async function () {
+    test("should truncate and read in correctly with backbone, identity, passwordProtection", async function () {
         const reference = TokenReference.from({
             key: await CryptoEncryption.generateKey(),
             id: await BackboneIds.token.generateUnsafe(),
             backboneBaseUrl: "localhost",
             forIdentityTruncated: "1234",
-            passwordType: 10
+            passwordProtection: {
+                passwordType: "pin10",
+                salt: await CoreCrypto.random(16)
+            }
         });
         const truncated = reference.truncate();
-        expect(truncated.length).toBeLessThan(115);
+        expect(truncated.length).toBeLessThan(155);
         expect(truncated.length).toBeGreaterThan(80);
         const deserialized = TokenReference.fromTruncated(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
         expect(deserialized).toBeInstanceOf(TokenReference);
         expect(deserialized.key).toBeInstanceOf(CryptoSecretKey);
         expect(deserialized.id).toBeInstanceOf(CoreId);
+        expect(deserialized.passwordProtection!.salt).toBeInstanceOf(CoreBuffer);
         expect(deserialized.key.toBase64()).toStrictEqual(reference.key.toBase64());
         expect(deserialized.id.toString()).toStrictEqual(reference.id.toString());
         expect(deserialized.backboneBaseUrl).toBe("localhost");
         expect(deserialized.forIdentityTruncated).toBe("1234");
-        expect(deserialized.passwordType).toBe(10);
+        expect(deserialized.passwordProtection!.passwordType).toBe("pin10");
+        expect(deserialized.passwordProtection!.salt.toBase64URL()).toBe(reference.passwordProtection!.salt.toBase64URL());
     });
 
     test("should read a reference in the old format", async function () {
@@ -150,7 +165,7 @@ describe("TokenReference", function () {
             id: await BackboneIds.token.generateUnsafe()
         });
         const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}`).toBase64URL();
-        expect(truncated.length).toBeLessThan(115);
+        expect(truncated.length).toBeLessThan(155);
         expect(truncated.length).toBeGreaterThan(80);
         const deserialized = TokenReference.fromTruncated(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
@@ -166,9 +181,12 @@ describe("TokenReference", function () {
             TokenReference.from({
                 key: await CryptoEncryption.generateKey(),
                 id: await BackboneIds.token.generateUnsafe(),
-                passwordType: 20
+                passwordProtection: {
+                    passwordType: "pin20",
+                    salt: await CoreCrypto.random(16)
+                }
             });
-        }).rejects.toThrow("TokenReference.passwordType");
+        }).rejects.toThrow("SharedPasswordProtection.passwordType");
     });
 
     test("should not create a reference with non-integer passwordType", async function () {
@@ -176,9 +194,48 @@ describe("TokenReference", function () {
             TokenReference.from({
                 key: await CryptoEncryption.generateKey(),
                 id: await BackboneIds.token.generateUnsafe(),
-                passwordType: 2.4
+                passwordProtection: {
+                    passwordType: "pin2.4",
+                    salt: await CoreCrypto.random(16)
+                }
             });
-        }).rejects.toThrow("TokenReference.passwordType");
+        }).rejects.toThrow("SharedPasswordProtection.passwordType");
+    });
+
+    test("should not create a reference with passwordType starting with neither pw nor pin", async function () {
+        await expect(async () => {
+            TokenReference.from({
+                key: await CryptoEncryption.generateKey(),
+                id: await BackboneIds.token.generateUnsafe(),
+                passwordProtection: {
+                    passwordType: "pc" as any,
+                    salt: await CoreCrypto.random(16)
+                }
+            });
+        }).rejects.toThrow("SharedPasswordProtection.passwordType");
+    });
+
+    test("should not load a reference with a non-base64 salt", async function () {
+        const reference = TokenReference.from({
+            key: await CryptoEncryption.generateKey(),
+            id: await BackboneIds.token.generateUnsafe()
+        });
+
+        const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}||wrong-salt&pw`).toBase64URL();
+        expect(() => TokenReference.fromTruncated(truncated)).toThrow("The salt needs to be a Base64 value.");
+    });
+
+    test("should not create a reference with a salt of wrong length", async function () {
+        await expect(async () => {
+            TokenReference.from({
+                key: await CryptoEncryption.generateKey(),
+                id: await BackboneIds.token.generateUnsafe(),
+                passwordProtection: {
+                    passwordType: "pw",
+                    salt: await CoreCrypto.random(8)
+                }
+            });
+        }).rejects.toThrow("must be 16 bytes long");
     });
 
     test("should not create a reference with too long personalization", async function () {

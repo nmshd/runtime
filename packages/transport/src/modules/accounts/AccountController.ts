@@ -23,6 +23,7 @@ import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredential
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
+import { PublicRelationshipTemplateReferencesController } from "../publicRelationshipTemplateReferences/PublicRelationshipTemplateReferencesController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
@@ -59,6 +60,7 @@ export class AccountController {
     public devices: DevicesController;
     public files: FileController;
     public messages: MessageController;
+    public publicRelationshipTemplateReferences: PublicRelationshipTemplateReferencesController;
     public relationships: RelationshipsController;
     public relationshipTemplates: RelationshipTemplateController;
     private synchronization: SyncController;
@@ -213,6 +215,7 @@ export class AccountController {
         this.relationshipTemplates = await new RelationshipTemplateController(this, this.relationshipSecrets).init();
         this.messages = await new MessageController(this).init();
         this.tokens = await new TokenController(this).init();
+        this.publicRelationshipTemplateReferences = await new PublicRelationshipTemplateReferencesController(this).init();
 
         this.synchronization = await new SyncController(this, this.dependencyOverrides, this.unpushedDatawalletModifications, this.config.datawalletEnabled).init();
 
@@ -230,11 +233,9 @@ export class AccountController {
     }
 
     public async syncDatawallet(force = false): Promise<void> {
-        if (!force && !this.autoSync) {
-            return;
-        }
+        if (!force && !this.autoSync) return;
 
-        return await this.synchronization.sync("OnlyDatawallet");
+        await this.synchronization.sync("OnlyDatawallet");
     }
 
     public async syncEverything(): Promise<ChangedItems> {

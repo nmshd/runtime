@@ -23,6 +23,16 @@ export class AccountServices {
         return localAccounts.map((account) => LocalAccountMapper.toLocalAccountDTO(account));
     }
 
+    public async getAccountsInDeletion(): Promise<LocalAccountDTO[]> {
+        const localAccounts = await this.multiAccountController.getAccountsInDeletion();
+        return localAccounts.map((account) => LocalAccountMapper.toLocalAccountDTO(account));
+    }
+
+    public async getAccountsNotInDeletion(): Promise<LocalAccountDTO[]> {
+        const localAccounts = await this.multiAccountController.getAccountsNotInDeletion();
+        return localAccounts.map((account) => LocalAccountMapper.toLocalAccountDTO(account));
+    }
+
     public async getAccount(id: string): Promise<LocalAccountDTO> {
         const localAccount = await this.multiAccountController.getAccount(CoreId.from(id));
         return LocalAccountMapper.toLocalAccountDTO(localAccount);

@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
-import { Result } from "@js-soft/ts-utils";
+import { EventBus, Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
 import { CoreId, ICoreAddress } from "@nmshd/core-types";
 import { ModuleConfiguration, Runtime, RuntimeHealth } from "@nmshd/runtime";
@@ -9,13 +9,15 @@ import { AppConfig, AppConfigOverwrite, createAppConfig } from "./AppConfig";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
 import { AppStringProcessor } from "./AppStringProcessor";
-import { AccountSelectedEvent, RelationshipSelectedEvent } from "./events";
+import { AccountSelectedEvent } from "./events";
 import { AppServices, IUIBridge } from "./extensibility";
 import {
     AppLaunchModule,
     AppRuntimeModuleConfiguration,
     AppSyncModule,
+    DatawalletSynchronizedModule,
     IAppRuntimeModuleConstructor,
+    IdentityDeletionProcessStatusChangedModule,
     MailReceivedModule,
     MessageReceivedModule,
     OnboardingChangeReceivedModule,
@@ -23,7 +25,7 @@ import {
     RelationshipChangedModule,
     RelationshipTemplateProcessedModule
 } from "./modules";
-import { AccountServices, LocalAccountDTO, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
+import { AccountServices, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
 import { INativeBootstrapper, INativeEnvironment, INativeTranslationProvider } from "./natives";
 import { SessionStorage } from "./SessionStorage";
 import { UserfriendlyResult } from "./UserfriendlyResult";
@@ -31,9 +33,10 @@ import { UserfriendlyResult } from "./UserfriendlyResult";
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(
         private readonly _nativeEnvironment: INativeEnvironment,
-        appConfig: AppConfig
+        appConfig: AppConfig,
+        eventBus?: EventBus
     ) {
-        super(appConfig, _nativeEnvironment.loggerFactory);
+        super(appConfig, _nativeEnvironment.loggerFactory, eventBus);
 
         this._stringProcessor = new AppStringProcessor(this, this.loggerFactory);
     }
@@ -45,16 +48,17 @@ export class AppRuntime extends Runtime<AppConfig> {
     private _uiBridge: IUIBridge | undefined;
     private _uiBridgeResolver?: { promise: Promise<IUIBridge>; resolve(uiBridge: IUIBridge): void };
 
-    public async uiBridge(): Promise<IUIBridge> {
+    public uiBridge(): Promise<IUIBridge> | IUIBridge {
         if (this._uiBridge) return this._uiBridge;
-        if (this._uiBridgeResolver) return await this._uiBridgeResolver.promise;
+
+        if (this._uiBridgeResolver) return this._uiBridgeResolver.promise;
 
         let resolve: (uiBridge: IUIBridge) => void = () => "";
         const promise = new Promise<IUIBridge>((r) => (resolve = r));
         this._uiBridgeResolver = { promise, resolve };
 
         try {
-            return await this._uiBridgeResolver.promise;
+            return this._uiBridgeResolver.promise;
         } finally {
             this._uiBridgeResolver = undefined;
         }
@@ -85,14 +89,6 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     private readonly sessionStorage = new SessionStorage();
-
-    public get currentAccount(): LocalAccountDTO {
-        return this.sessionStorage.currentSession.account;
-    }
-
-    public get currentSession(): LocalAccountSession {
-        return this.sessionStorage.currentSession;
-    }
 
     public getSessions(): LocalAccountSession[] {
         return this.sessionStorage.getSessions();
@@ -193,36 +189,6 @@ export class AppRuntime extends Runtime<AppConfig> {
         return session;
     }
 
-    public async requestAccountSelection(
-        title = "i18n://uibridge.accountSelection.title",
-        description = "i18n://uibridge.accountSelection.description"
-    ): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
-        const accounts = await this.accountServices.getAccounts();
-
-        const bridge = await this.uiBridge();
-        const accountSelectionResult = await bridge.requestAccountSelection(accounts, title, description);
-        if (accountSelectionResult.isError) {
-            return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailable(accountSelectionResult.error));
-        }
-
-        if (accountSelectionResult.value) await this.selectAccount(accountSelectionResult.value.id);
-        return UserfriendlyResult.ok(accountSelectionResult.value);
-    }
-
-    public async selectRelationship(id?: string): Promise<void> {
-        if (!id) {
-            this.currentSession.selectedRelationship = undefined;
-            return;
-        }
-
-        const result = await this.currentSession.appServices.relationships.renderRelationship(id);
-        if (result.isError) throw result.error;
-
-        const relationship = result.value;
-        this.currentSession.selectedRelationship = relationship;
-        this.eventBus.publish(new RelationshipSelectedEvent(this.currentSession.address, relationship));
-    }
-
     public getHealth(): Promise<RuntimeHealth> {
         const health = {
             isHealthy: true,
@@ -237,7 +203,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         this._accountServices = new AccountServices(this._multiAccountController);
     }
 
-    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
+    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite, eventBus?: EventBus): Promise<AppRuntime> {
         // TODO: JSSNMSHDD-2524 (validate app config)
 
         if (!nativeBootstrapper.isInitialized) {
@@ -270,7 +236,7 @@ export class AppRuntime extends Runtime<AppConfig> {
                   databaseFolder: databaseFolder
               });
 
-        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig);
+        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig, eventBus);
         await runtime.init();
         runtime.logger.trace("Runtime initialized");
 
@@ -298,6 +264,8 @@ export class AppRuntime extends Runtime<AppConfig> {
         pushNotification: PushNotificationModule,
         mailReceived: MailReceivedModule,
         onboardingChangeReceived: OnboardingChangeReceivedModule,
+        datawalletSynchronized: DatawalletSynchronizedModule,
+        identityDeletionProcessStatusChanged: IdentityDeletionProcessStatusChangedModule,
         messageReceived: MessageReceivedModule,
         relationshipChanged: RelationshipChangedModule,
         relationshipTemplateProcessed: RelationshipTemplateProcessedModule

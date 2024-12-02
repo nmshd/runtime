@@ -118,7 +118,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSomeoneElse });
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
-                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address, the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
+                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the address of the sender, recipient or an empty string. The latter will default to the address of the recipient."
             });
         });
 
@@ -130,7 +130,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeOfSomeoneElse }, TestIdentity.UNDEFINED);
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
-                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
+                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the address of the sender, recipient or an empty string. The latter will default to the address of the recipient."
             });
         });
 

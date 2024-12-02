@@ -29,4 +29,8 @@ export class FakeUIBridge implements IUIBridge {
     public requestAccountSelection(): Promise<Result<LocalAccountDTO | undefined, ApplicationError>> {
         throw new Error("Method not implemented.");
     }
+
+    public enterPassword(_passwordType: "pw" | "pin", _pinLength?: number): Promise<Result<string>> {
+        throw new Error("Method not implemented.");
+    }
 }

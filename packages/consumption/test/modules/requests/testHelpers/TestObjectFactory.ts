@@ -227,6 +227,7 @@ export class TestObjectFactory {
     public static createIdentityAttribute(properties?: Partial<IIdentityAttribute>): IdentityAttribute {
         return IdentityAttribute.from({
             value: properties?.value ?? GivenName.fromAny({ value: "aGivenName" }),
+            tags: properties?.tags,
             owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }

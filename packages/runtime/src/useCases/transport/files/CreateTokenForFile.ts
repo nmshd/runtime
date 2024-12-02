@@ -1,9 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, File, FileController, TokenContentFile, TokenController } from "@nmshd/transport";
+import { AccountController, File, FileController, PasswordProtectionCreationParameters, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { AddressString, FileIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AddressString, FileIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateTokenForFileRequest {
@@ -11,9 +11,16 @@ export interface CreateTokenForFileRequest {
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
     forIdentity?: AddressString;
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
-class Validator extends SchemaValidator<CreateTokenForFileRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateTokenForFileRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenForFileRequest"));
     }
@@ -48,7 +55,8 @@ export class CreateTokenForFileUseCase extends UseCase<CreateTokenForFileRequest
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         if (!ephemeral) {

@@ -11,6 +11,7 @@ import { TokenMapper } from "./TokenMapper";
 export interface LoadPeerTokenRequest {
     reference: TokenReferenceString;
     ephemeral: boolean;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<LoadPeerTokenRequest> {
@@ -29,7 +30,7 @@ export class LoadPeerTokenUseCase extends UseCase<LoadPeerTokenRequest, TokenDTO
     }
 
     protected async executeInternal(request: LoadPeerTokenRequest): Promise<Result<TokenDTO>> {
-        const result = await this.tokenController.loadPeerTokenByTruncated(request.reference, request.ephemeral);
+        const result = await this.tokenController.loadPeerTokenByTruncated(request.reference, request.ephemeral, request.password);
 
         if (!request.ephemeral) {
             await this.accountController.syncDatawallet();
