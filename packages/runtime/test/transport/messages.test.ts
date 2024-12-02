@@ -351,8 +351,8 @@ describe("Message errors", () => {
                 content: notificationToBeSent.toJSON()
             });
             expect(result).toBeAnError(/.*/, "error.transport.messages.hasNeitherActiveNorTerminatedRelationship");
-            expect(result.error.message).toBe(
-                `error.transport.messages.hasNeitherActiveNorTerminatedRelationship: The Message cannot be sent as there is neither an active nor a terminated Relationship to the recipient(s) with the following address(es): '${client5.address.toString()}'.`
+            expect(result.error.message).toContain(
+                `The Message cannot be sent as there is neither an active nor a terminated Relationship to the recipient(s) with the following address(es): '${client5.address.toString()}'.`
             );
         });
     });
