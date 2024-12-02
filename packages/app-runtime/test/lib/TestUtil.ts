@@ -24,7 +24,7 @@ export class TestUtil {
     public static async createRuntime(configOverride?: any, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapper = new FakeNativeBootstrapper();
+        const nativeBootstrapper = new FakeNativeBootstrapper(eventBus);
         await nativeBootstrapper.init();
         const runtime = await AppRuntime.create(nativeBootstrapper, config, eventBus);
         runtime.registerUIBridge(uiBridge);
