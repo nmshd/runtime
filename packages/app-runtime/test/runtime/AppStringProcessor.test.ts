@@ -43,7 +43,7 @@ describe("AppStringProcessor", function () {
         mockUiBridge.reset();
     });
 
-    test("should process an URL", async function () {
+    test("should process a URL", async function () {
         const result = await runtime1.stringProcessor.processURL("nmshd://qr#", runtime1Session.account);
         expect(result.isError).toBeDefined();
 
