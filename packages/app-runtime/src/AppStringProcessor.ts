@@ -88,10 +88,7 @@ export class AppStringProcessor {
         }
 
         const tokenResult = await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference, password: password });
-        if (tokenResult.isError) {
-            // TODO: should it be possible to ask for the password again when it was wrong?
-            return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(tokenResult.error));
-        }
+        if (tokenResult.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(tokenResult.error));
 
         const tokenDTO = tokenResult.value;
         const tokenContent = this.parseTokenContent(tokenDTO.content);
@@ -144,7 +141,6 @@ export class AppStringProcessor {
                 );
             }
 
-            // TODO: should it be possible to ask for the password again when it was wrong?
             return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(result.error));
         }
 
