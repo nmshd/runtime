@@ -78,7 +78,7 @@ export class AppStringProcessor {
         if (reference.passwordProtection) {
             const passwordResult = await this.enterPassword(reference.passwordProtection);
             if (passwordResult.isError) {
-                return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
+                return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided."));
             }
 
             password = passwordResult.value;
@@ -121,7 +121,7 @@ export class AppStringProcessor {
         if (reference.passwordProtection) {
             const passwordResult = await this.enterPassword(reference.passwordProtection);
             if (passwordResult.isError) {
-                return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
+                return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided."));
             }
 
             password = passwordResult.value;

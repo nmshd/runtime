@@ -13,7 +13,6 @@ describe("AppStringProcessor", function () {
     let runtime1Session: LocalAccountSession;
 
     let runtime2: AppRuntime;
-
     let runtime2SessionA: LocalAccountSession;
 
     const templateContent: ArbitraryRelationshipTemplateContentJSON = { "@type": "ArbitraryRelationshipTemplateContent", value: "value" };
@@ -22,14 +21,16 @@ describe("AppStringProcessor", function () {
         runtime1 = await TestUtil.createRuntime();
         await runtime1.start();
 
-        const account = await runtime1.accountServices.createAccount(Math.random().toString(36).substring(7));
-        runtime1Session = await runtime1.selectAccount(account.id);
+        const account = await TestUtil.provideAccounts(runtime1, 1);
+        runtime1Session = await runtime1.selectAccount(account[0].id);
 
         runtime2 = await TestUtil.createRuntime(undefined, mockUiBridge, eventBus);
         await runtime2.start();
 
         const accounts = await TestUtil.provideAccounts(runtime2, 2);
         runtime2SessionA = await runtime2.selectAccount(accounts[0].id);
+
+        // second account to make sure everything works with multiple accounts
         await runtime2.selectAccount(accounts[1].id);
     });
 
@@ -72,13 +73,13 @@ describe("AppStringProcessor", function () {
     });
 
     test("should properly handle a personalized RelationshipTemplate with the correct Identity not available", async function () {
-        const runtime2SessionAAddress = runtime1Session.account.address!;
-        assert(runtime2SessionAAddress);
+        const runtime1SessionAddress = runtime1Session.account.address!;
+        assert(runtime1SessionAddress);
 
         const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
             content: templateContent,
             expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
-            forIdentity: runtime2SessionAAddress
+            forIdentity: runtime1SessionAddress
         });
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);

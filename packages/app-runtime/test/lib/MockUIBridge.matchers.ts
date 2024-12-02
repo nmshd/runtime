@@ -8,10 +8,7 @@ expect.extend({
 
         const calls = mockUIBridge.calls.filter((x) => x.method === "showDeviceOnboarding");
         if (calls.length === 0) {
-            return {
-                pass: false,
-                message: () => "The method showDeviceOnboarding was not called."
-            };
+            return { pass: false, message: () => "The method showDeviceOnboarding was not called." };
         }
 
         const matchingCalls = calls.filter((x) => x.deviceOnboardingInfo.id === deviceId);
@@ -32,10 +29,7 @@ expect.extend({
 
         const calls = mockUIBridge.calls.filter((x) => x.method === "showDeviceOnboarding");
         if (calls.length > 0) {
-            return {
-                pass: false,
-                message: () => "The method showDeviceOnboarding was called."
-            };
+            return { pass: false, message: () => "The method showDeviceOnboarding was called." };
         }
 
         return { pass: true, message: () => "" };
@@ -47,10 +41,7 @@ expect.extend({
 
         const calls = mockUIBridge.calls.filter((x) => x.method === "requestAccountSelection");
         if (calls.length === 0) {
-            return {
-                pass: false,
-                message: () => "The method requestAccountSelection was not called."
-            };
+            return { pass: false, message: () => "The method requestAccountSelection was not called." };
         }
 
         const matchingCalls = calls.filter((x) => x.possibleAccounts.length === possibleAccountsLength);
@@ -71,10 +62,7 @@ expect.extend({
 
         const calls = mockUIBridge.calls.filter((x) => x.method === "requestAccountSelection");
         if (calls.length > 0) {
-            return {
-                pass: false,
-                message: () => "The method requestAccountSelection was called."
-            };
+            return { pass: false, message: () => "The method requestAccountSelection was called." };
         }
 
         return { pass: true, message: () => "" };
@@ -86,10 +74,7 @@ expect.extend({
 
         const calls = mockUIBridge.calls.filter((x) => x.method === "enterPassword");
         if (calls.length === 0) {
-            return {
-                pass: false,
-                message: () => "The method enterPassword was not called."
-            };
+            return { pass: false, message: () => "The method enterPassword was not called." };
         }
 
         const matchingCalls = calls.filter((x) => x.passwordType === passwordType && x.pinLength === pinLength);
@@ -116,10 +101,7 @@ expect.extend({
 
         const calls = mockUIBridge.calls.filter((x) => x.method === "enterPassword");
         if (calls.length > 0) {
-            return {
-                pass: false,
-                message: () => "The method enterPassword was called."
-            };
+            return { pass: false, message: () => "The method enterPassword was called." };
         }
 
         return { pass: true, message: () => "" };
