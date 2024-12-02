@@ -16,7 +16,7 @@ export interface GetRelationshipTemplatesQuery {
     maxNumberOfAllocations?: string | string[];
     forIdentity?: string | string[];
     "passwordProtection.password"?: string | string[];
-    "passwordProtection.passwordIsPin"?: "true" | "!true";
+    "passwordProtection.passwordIsPin"?: "true" | "!";
 }
 
 export interface GetRelationshipTemplatesRequest {
@@ -66,7 +66,7 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
                         $regex: "^pin"
                     };
                 }
-                if (input === "!true") {
+                if (input === "!") {
                     query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = {
                         $in: ["pw", undefined]
                     };

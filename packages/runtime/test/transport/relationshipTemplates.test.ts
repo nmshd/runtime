@@ -368,7 +368,7 @@ describe("RelationshipTemplates query", () => {
         const templatesWithoutPin = (
             await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
                 query: {
-                    "passwordProtection.passwordIsPin": "!true"
+                    "passwordProtection.passwordIsPin": "!"
                 }
             })
         ).value;
