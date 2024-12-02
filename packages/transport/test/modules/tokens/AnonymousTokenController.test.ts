@@ -95,4 +95,43 @@ describe("AnonymousTokenController", function () {
 
         await expect(anonymousTokenController.loadPeerTokenByTruncated(truncatedReference)).rejects.toThrow("error.platform.recordNotFound");
     });
+
+    test("should load a password-protected token", async function () {
+        const tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "password", passwordType: "pw" }
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        const receivedToken = await anonymousTokenController.loadPeerTokenByTruncated(reference, "password");
+
+        testTokens(sentToken, receivedToken, tempDate);
+        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
+        expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
+        expect((sentToken.cache?.content.toJSON() as any).content).toBe("TestToken");
+        expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
+        expect(receivedToken.passwordProtection!.password).toBe("password");
+        expect(receivedToken.passwordProtection!.salt).toStrictEqual(sentToken.passwordProtection!.salt);
+        expect(receivedToken.passwordProtection!.passwordType).toBe("pw");
+    });
+
+    test("should throw an error if loaded with a wrong or missing password", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "password", passwordType: "pw" }
+        });
+        const reference = sentToken.toTokenReference().truncate();
+
+        await expect(anonymousTokenController.loadPeerTokenByTruncated(reference, "wrong-password")).rejects.toThrow("error.platform.recordNotFound");
+        await expect(anonymousTokenController.loadPeerTokenByTruncated(reference)).rejects.toThrow("error.transport.noPasswordProvided");
+    });
 });

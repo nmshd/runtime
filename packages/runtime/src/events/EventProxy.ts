@@ -23,6 +23,7 @@ import {
     ThirdPartyRelationshipAttributeSucceededEvent
 } from "./consumption";
 import {
+    DatawalletSynchronizedEvent,
     IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
@@ -107,6 +108,10 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(transport.PeerDeletionCancelledEvent, (event) => {
             this.targetEventBus.publish(new PeerDeletionCancelledEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.DatawalletSynchronizedEvent, (event) => {
+            this.targetEventBus.publish(new DatawalletSynchronizedEvent(event.eventTargetAddress));
         });
     }
 
