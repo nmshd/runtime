@@ -7,7 +7,7 @@ import { Reference, SharedPasswordProtection, TokenContentDeviceSharedSecret } f
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
 import { IUIBridge } from "./extensibility";
-import { LocalAccountDTO } from "./multiAccount";
+import { AccountServices, LocalAccountDTO, LocalAccountSession } from "./multiAccount";
 import { UserfriendlyApplicationError } from "./UserfriendlyApplicationError";
 import { UserfriendlyResult } from "./UserfriendlyResult";
 
@@ -17,11 +17,12 @@ export class AppStringProcessor {
     public constructor(
         protected readonly runtime: {
             get anonymousServices(): AnonymousServices;
-            requestAccountSelection(title?: string, description?: string, forIdentityTruncated?: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>>;
+            get accountServices(): AccountServices;
             uiBridge(): Promise<IUIBridge> | IUIBridge;
             getServices(accountReference: string | ICoreAddress): Promise<AppRuntimeServices>;
             translate(key: string, ...values: any[]): Promise<Result<string>>;
             get eventBus(): EventBus;
+            selectAccount(accountReference: string): Promise<LocalAccountSession>;
         },
         loggerFactory: ILoggerFactory
     ) {
@@ -53,7 +54,7 @@ export class AppStringProcessor {
 
         // process Files and RelationshipTemplates and ask for an account
         if (truncatedReference.startsWith(Base64ForIdPrefix.File) || truncatedReference.startsWith(Base64ForIdPrefix.RelationshipTemplate)) {
-            const result = await this.runtime.requestAccountSelection(undefined, undefined, reference.forIdentityTruncated);
+            const result = await this.selectAccount(reference.forIdentityTruncated);
             if (result.isError) {
                 this.logger.error("Could not query account", result.error);
                 return UserfriendlyResult.fail(result.error);
@@ -99,7 +100,7 @@ export class AppStringProcessor {
             return UserfriendlyResult.ok(undefined);
         }
 
-        const accountSelectionResult = await this.runtime.requestAccountSelection();
+        const accountSelectionResult = await this.selectAccount(reference.forIdentityTruncated);
         if (accountSelectionResult.isError) {
             return UserfriendlyResult.fail(accountSelectionResult.error);
         }
@@ -110,15 +111,15 @@ export class AppStringProcessor {
             return UserfriendlyResult.ok(undefined);
         }
 
-        return await this._handleReference(reference, selectedAccount);
+        return await this._handleReference(reference, selectedAccount, password);
     }
 
-    private async _handleReference(reference: Reference, account: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
+    private async _handleReference(reference: Reference, account: LocalAccountDTO, existingPassword?: string): Promise<UserfriendlyResult<void>> {
         const services = await this.runtime.getServices(account.id);
         const uiBridge = await this.runtime.uiBridge();
 
-        let password: string | undefined;
-        if (reference.passwordProtection) {
+        let password: string | undefined = existingPassword;
+        if (reference.passwordProtection && !password) {
             const passwordResult = await this.enterPassword(reference.passwordProtection);
             if (passwordResult.isError) {
                 return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided."));
@@ -171,5 +172,32 @@ export class AppStringProcessor {
         );
 
         return passwordResult;
+    }
+
+    private async selectAccount(forIdentityTruncated?: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
+        const accounts = await this.runtime.accountServices.getAccounts();
+
+        const title = "i18n://uibridge.accountSelection.title";
+        const description = "i18n://uibridge.accountSelection.description";
+        if (!forIdentityTruncated) return await this.requestManualAccountSelection(accounts, title, description);
+
+        const accountsWithPostfix = accounts.filter((account) => account.address?.endsWith(forIdentityTruncated));
+        if (accountsWithPostfix.length === 0) return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailableForIdentityTruncated());
+        if (accountsWithPostfix.length === 1) return UserfriendlyResult.ok(accountsWithPostfix[0]);
+
+        // This catches the extremely rare case where two accounts are available that have the same last 4 characters in their address. In that case
+        // the user will have to decide which account to use, which could not work because it is not the exactly same address specified when personalizing the object.
+        return await this.requestManualAccountSelection(accountsWithPostfix, title, description);
+    }
+
+    private async requestManualAccountSelection(accounts: LocalAccountDTO[], title: string, description: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
+        const uiBridge = await this.runtime.uiBridge();
+        const accountSelectionResult = await uiBridge.requestAccountSelection(accounts, title, description);
+        if (accountSelectionResult.isError) {
+            return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailable(accountSelectionResult.error));
+        }
+
+        if (accountSelectionResult.value) await this.runtime.selectAccount(accountSelectionResult.value.id);
+        return UserfriendlyResult.ok(accountSelectionResult.value);
     }
 }

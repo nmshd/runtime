@@ -25,7 +25,7 @@ import {
     RelationshipChangedModule,
     RelationshipTemplateProcessedModule
 } from "./modules";
-import { AccountServices, LocalAccountDTO, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
+import { AccountServices, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
 import { INativeBootstrapper, INativeEnvironment, INativeTranslationProvider } from "./natives";
 import { SessionStorage } from "./SessionStorage";
 import { UserfriendlyResult } from "./UserfriendlyResult";
@@ -187,36 +187,6 @@ export class AppRuntime extends Runtime<AppConfig> {
         this.sessionStorage.addSession(session);
 
         return session;
-    }
-
-    public async requestAccountSelection(
-        title = "i18n://uibridge.accountSelection.title",
-        description = "i18n://uibridge.accountSelection.description",
-        forIdentityTruncated?: string
-    ): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
-        const accounts = await this.accountServices.getAccounts();
-
-        if (!forIdentityTruncated) return await this.selectAccountViaBridge(accounts, title, description);
-
-        const accountsWithPostfix = accounts.filter((account) => account.address?.endsWith(forIdentityTruncated));
-        if (accountsWithPostfix.length === 0) return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailableForIdentityTruncated());
-        if (accountsWithPostfix.length === 1) return UserfriendlyResult.ok(accountsWithPostfix[0]);
-
-        // This catches the extremely rare case where two accounts are available that have the same last 4 characters in their address. In that case
-        // the user will have to decide which account to use, which could not work because it is not the exactly same address specified when personalizing the object.
-        return await this.selectAccountViaBridge(accountsWithPostfix, title, description);
-    }
-
-    private async selectAccountViaBridge(accounts: LocalAccountDTO[], title: string, description: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
-        const uiBridge = await this.uiBridge();
-
-        const accountSelectionResult = await uiBridge.requestAccountSelection(accounts, title, description);
-        if (accountSelectionResult.isError) {
-            return UserfriendlyResult.fail(AppRuntimeErrors.general.noAccountAvailable(accountSelectionResult.error));
-        }
-
-        if (accountSelectionResult.value) await this.selectAccount(accountSelectionResult.value.id);
-        return UserfriendlyResult.ok(accountSelectionResult.value);
     }
 
     public getHealth(): Promise<RuntimeHealth> {
