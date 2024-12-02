@@ -3,7 +3,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress } from "@nmshd/core-types";
 import { AnonymousServices, Base64ForIdPrefix, DeviceMapper } from "@nmshd/runtime";
-import { Reference, TokenContentDeviceSharedSecret } from "@nmshd/transport";
+import { Reference, SharedPasswordProtection, TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
 import { IUIBridge } from "./extensibility";
@@ -76,10 +76,7 @@ export class AppStringProcessor {
 
         let password: string | undefined;
         if (reference.passwordProtection) {
-            const passwordResult = await uiBridge.enterPassword(
-                reference.passwordProtection.passwordType === "pw" ? "pw" : "pin",
-                reference.passwordProtection.passwordType === "pw" ? undefined : parseInt(reference.passwordProtection.passwordType.substring(3))
-            );
+            const passwordResult = await this.enterPassword(reference.passwordProtection);
             if (passwordResult.isError) {
                 return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
             }
@@ -122,10 +119,7 @@ export class AppStringProcessor {
 
         let password: string | undefined;
         if (reference.passwordProtection) {
-            const passwordResult = await uiBridge.enterPassword(
-                reference.passwordProtection.passwordType === "pw" ? "pw" : "pin",
-                reference.passwordProtection.passwordType === "pw" ? undefined : parseInt(reference.passwordProtection.passwordType.substring(3))
-            );
+            const passwordResult = await this.enterPassword(reference.passwordProtection);
             if (passwordResult.isError) {
                 return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided"));
             }
@@ -134,15 +128,7 @@ export class AppStringProcessor {
         }
 
         const result = await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: password });
-        if (result.isError) {
-            if (result.error.code === "error.runtime.validation.invalidPropertyValue") {
-                return UserfriendlyResult.fail(
-                    new UserfriendlyApplicationError("error.appStringProcessor.truncatedReferenceInvalid", "The given code does not contain a valid truncated reference.")
-                );
-            }
-
-            return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(result.error));
-        }
+        if (result.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(result.error));
 
         switch (result.value.type) {
             case "File":
@@ -175,5 +161,15 @@ export class AppStringProcessor {
             this.logger.info("Could not parse token content", e);
             return undefined;
         }
+    }
+
+    private async enterPassword(passwordProtection: SharedPasswordProtection): Promise<Result<string>> {
+        const uiBridge = await this.runtime.uiBridge();
+        const passwordResult = await uiBridge.enterPassword(
+            passwordProtection.passwordType === "pw" ? "pw" : "pin",
+            passwordProtection.passwordType === "pw" ? undefined : parseInt(passwordProtection.passwordType.substring(3))
+        );
+
+        return passwordResult;
     }
 }
