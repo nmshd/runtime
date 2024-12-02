@@ -1,5 +1,5 @@
 export interface BackboneGetTokensRequest {
-    ids: string[];
+    tokens: { id: string; password?: string }[];
 }
 
 export interface BackboneGetTokensResponse {
