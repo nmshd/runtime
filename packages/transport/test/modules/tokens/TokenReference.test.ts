@@ -208,7 +208,7 @@ describe("TokenReference", function () {
                 key: await CryptoEncryption.generateKey(),
                 id: await BackboneIds.token.generateUnsafe(),
                 passwordProtection: {
-                    passwordType: "pc",
+                    passwordType: "pc" as any,
                     salt: await CoreCrypto.random(16)
                 }
             });

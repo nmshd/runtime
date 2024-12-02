@@ -208,7 +208,7 @@ describe("FileReference", function () {
                 key: await CryptoEncryption.generateKey(),
                 id: await BackboneIds.file.generateUnsafe(),
                 passwordProtection: {
-                    passwordType: "pc",
+                    passwordType: "pc" as any,
                     salt: await CoreCrypto.random(16)
                 }
             });

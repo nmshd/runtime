@@ -37,6 +37,7 @@
         "maxWorkers": 5,
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
+            "./test/customMatchers.ts",
             "jest-expect-message"
         ],
         "testEnvironment": "node",
