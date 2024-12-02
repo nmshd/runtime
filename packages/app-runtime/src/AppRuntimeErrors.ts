@@ -30,6 +30,14 @@ class General {
             error
         );
     }
+
+    public noAccountAvailableForIdentityTruncated(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError(
+            "error.appruntime.general.noAccountAvailableForIdentityTruncated",
+            "There is no account matching the given 'forIdentityTruncated'.",
+            "It seems no eligible account is available for this action, because the scanned code is intended for a specific Identity that is not available on this device."
+        );
+    }
 }
 
 class Startup {
