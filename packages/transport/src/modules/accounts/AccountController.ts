@@ -246,7 +246,7 @@ export class AccountController {
 
     private async triggerEventsForChangedItems(changedItems: ChangedItems) {
         const changedIdentityDeletionProcessIds = changedItems.changedObjectIdentifiersDuringDatawalletSync.filter((x) => x.startsWith("IDP"));
-        for (const id in changedIdentityDeletionProcessIds) {
+        for (const id of changedIdentityDeletionProcessIds) {
             const changedIdentityDeletionProcesses = await this.identityDeletionProcess.getIdentityDeletionProcess(id);
             if (!changedIdentityDeletionProcesses) {
                 this.log.error(`IdentityDeletionProcess with id ${id} not found for re-triggering event. Skipping.`);
