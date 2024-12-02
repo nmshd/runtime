@@ -16,7 +16,7 @@ expect.extend({
             return {
                 pass: false,
                 message: () =>
-                    `The method showDeviceOnboarding was called, but not with the specified device id '${deviceId}', instead with ids '${calls.map((e) => e.deviceOnboardingInfo.id).join(", ")}}'.`
+                    `The method showDeviceOnboarding was called, but not with the specified device id '${deviceId}', instead with ids '${calls.map((e) => e.deviceOnboardingInfo.id).join(", ")}'.`
             };
         }
 
@@ -49,7 +49,7 @@ expect.extend({
             return {
                 pass: false,
                 message: () =>
-                    `The method requestAccountSelection was called, but not with the specified possible accounts length '${possibleAccountsLength}', instead with lengths '${calls.map((e) => e.possibleAccounts.length).join(", ")}}'.`
+                    `The method requestAccountSelection was called, but not with the specified possible accounts length '${possibleAccountsLength}', instead with lengths '${calls.map((e) => e.possibleAccounts.length).join(", ")}'.`
             };
         }
 
