@@ -22774,7 +22774,7 @@ export const GetRelationshipTemplatesRequest: any = {
                     "type": "string",
                     "enum": [
                         "true",
-                        "!true"
+                        "!"
                     ]
                 }
             },
