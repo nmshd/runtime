@@ -2,6 +2,16 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO } from "@nmshd/runtime";
 import { IUIBridge, LocalAccountDTO, UserfriendlyApplicationError } from "../../src";
 
+export type MockUIBridgeCall =
+    | { method: "showMessage"; account: LocalAccountDTO; relationship: IdentityDVO; message: MessageDVO | MailDVO | RequestMessageDVO }
+    | { method: "showRelationship"; account: LocalAccountDTO; relationship: IdentityDVO }
+    | { method: "showFile"; account: LocalAccountDTO; file: FileDVO }
+    | { method: "showDeviceOnboarding"; deviceOnboardingInfo: DeviceOnboardingInfoDTO }
+    | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
+    | { method: "showError"; error: UserfriendlyApplicationError; account?: LocalAccountDTO }
+    | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
+    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number };
+
 export class MockUIBridge implements IUIBridge {
     private _accountIdToReturn: string | undefined;
     public set accountIdToReturn(value: string | undefined) {
@@ -13,52 +23,53 @@ export class MockUIBridge implements IUIBridge {
         this._passwordToReturn = value;
     }
 
+    private _calls: MockUIBridgeCall[] = [];
+
     public reset(): void {
         this._passwordToReturn = undefined;
         this._accountIdToReturn = undefined;
 
-        this._showDeviceOnboardingCalls = [];
-        this._requestAccountSelectionCalls = [];
-        this._enterPasswordCalls = [];
+        this._calls = [];
     }
 
     public showMessage(_account: LocalAccountDTO, _relationship: IdentityDVO, _message: MessageDVO | MailDVO | RequestMessageDVO): Promise<Result<void>> {
-        throw new Error("Method not implemented.");
-    }
-
-    public showRelationship(_account: LocalAccountDTO, _relationship: IdentityDVO): Promise<Result<void>> {
-        throw new Error("Method not implemented.");
-    }
-
-    public showFile(_account: LocalAccountDTO, _file: FileDVO): Promise<Result<void>> {
-        throw new Error("Method not implemented.");
-    }
-
-    public showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>> {
-        this._showDeviceOnboardingCalls.push(deviceOnboardingInfo);
+        this._calls.push({ method: "showMessage", account: _account, relationship: _relationship, message: _message });
 
         return Promise.resolve(Result.ok(undefined));
     }
 
-    private _showDeviceOnboardingCalls: DeviceOnboardingInfoDTO[] = [];
-    public showDeviceOnboardingCalled(deviceId: string): boolean {
-        return this._showDeviceOnboardingCalls.some((x) => x.id === deviceId);
+    public showRelationship(account: LocalAccountDTO, relationship: IdentityDVO): Promise<Result<void>> {
+        this._calls.push({ method: "showRelationship", account, relationship });
+
+        return Promise.resolve(Result.ok(undefined));
     }
 
-    public showDeviceOnboardingNotCalled(): boolean {
-        return this._showDeviceOnboardingCalls.length === 0;
+    public showFile(account: LocalAccountDTO, file: FileDVO): Promise<Result<void>> {
+        this._calls.push({ method: "showFile", account, file });
+
+        return Promise.resolve(Result.ok(undefined));
     }
 
-    public showRequest(_account: LocalAccountDTO, _request: LocalRequestDVO): Promise<Result<void>> {
-        throw new Error("Method not implemented.");
+    public showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>> {
+        this._calls.push({ method: "showDeviceOnboarding", deviceOnboardingInfo });
+
+        return Promise.resolve(Result.ok(undefined));
     }
 
-    public showError(_error: UserfriendlyApplicationError, _account?: LocalAccountDTO): Promise<Result<void>> {
-        throw new Error("Method not implemented.");
+    public showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>> {
+        this._calls.push({ method: "showRequest", account, request });
+
+        return Promise.resolve(Result.ok(undefined));
+    }
+
+    public showError(error: UserfriendlyApplicationError, account?: LocalAccountDTO): Promise<Result<void>> {
+        this._calls.push({ method: "showError", error, account });
+
+        return Promise.resolve(Result.ok(undefined));
     }
 
     public requestAccountSelection(possibleAccounts: LocalAccountDTO[], title?: string, description?: string): Promise<Result<LocalAccountDTO | undefined>> {
-        this._requestAccountSelectionCalls.push({ possibleAccounts: possibleAccounts, title: title, description: description });
+        this._calls.push({ method: "requestAccountSelection", possibleAccounts, title, description });
 
         if (!this._accountIdToReturn) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));
 
@@ -68,29 +79,41 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(foundAccount));
     }
 
-    private _requestAccountSelectionCalls: { possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }[] = [];
-    public requestAccountSelectionCalled(possibleAccountsLength: number): boolean {
-        return this._requestAccountSelectionCalls.some((x) => x.possibleAccounts.length === possibleAccountsLength);
-    }
-
-    public requestAccountSelectionNotCalled(): boolean {
-        return this._requestAccountSelectionCalls.length === 0;
-    }
-
     public enterPassword(passwordType: "pw" | "pin", pinLength?: number): Promise<Result<string>> {
-        this._enterPasswordCalls.push({ passwordType: passwordType, pinLength: pinLength });
+        this._calls.push({ method: "enterPassword", passwordType, pinLength });
 
         if (!this._passwordToReturn) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));
 
         return Promise.resolve(Result.ok(this._passwordToReturn));
     }
 
-    private _enterPasswordCalls: { passwordType: "pw" | "pin"; pinLength?: number }[] = [];
+    public showDeviceOnboardingCalled(deviceId: string): boolean {
+        const showDeviceOnboardingCalls = this._calls.filter((x) => x.method === "showDeviceOnboarding").map((e) => e.deviceOnboardingInfo);
+        return showDeviceOnboardingCalls.some((x) => x.id === deviceId);
+    }
+
+    public showDeviceOnboardingNotCalled(): boolean {
+        const showDeviceOnboardingCalls = this._calls.filter((x) => x.method === "showDeviceOnboarding");
+        return showDeviceOnboardingCalls.length === 0;
+    }
+
+    public requestAccountSelectionCalled(possibleAccountsLength: number): boolean {
+        const requestAccountSelectionCalls = this._calls.filter((x) => x.method === "requestAccountSelection");
+        return requestAccountSelectionCalls.some((x) => x.possibleAccounts.length === possibleAccountsLength);
+    }
+
+    public requestAccountSelectionNotCalled(): boolean {
+        const requestAccountSelectionCalls = this._calls.filter((x) => x.method === "requestAccountSelection");
+        return requestAccountSelectionCalls.length === 0;
+    }
+
     public enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number): boolean {
-        return this._enterPasswordCalls.some((x) => x.passwordType === passwordType && x.pinLength === pinLength);
+        const enterPasswordCalls = this._calls.filter((x) => x.method === "enterPassword");
+        return enterPasswordCalls.some((x) => x.passwordType === passwordType && x.pinLength === pinLength);
     }
 
     public enterPasswordNotCalled(): boolean {
-        return this._enterPasswordCalls.length === 0;
+        const enterPasswordCalls = this._calls.filter((x) => x.method === "enterPassword");
+        return enterPasswordCalls.length === 0;
     }
 }
