@@ -335,7 +335,6 @@ export class TestUtil {
                 maxNumberOfAllocations: 1
             }));
 
-      
         const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
         const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
 
