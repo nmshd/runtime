@@ -328,34 +328,20 @@ describe("RelationshipTemplates query", () => {
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Peer }));
     });
 
-    test("password query", async () => {
+    test("password query with password", async () => {
         const passwordProtectedTemplate = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
 
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(passwordProtectedTemplate, runtimeServices1.transport).addStringSet(
+            "passwordProtection.password"
+        );
+        await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q }));
+    });
+
+    test("password query with pin", async () => {
         const pinProtectedTemplate = await createTemplate(runtimeServices1.transport, undefined, { password: "1234", passwordIsPin: true });
 
-        const passwordProtectedTemplates = (
-            await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
-                query: {
-                    "passwordProtection.password": "password"
-                }
-            })
-        ).value;
-        const passwordProtectedTemplateIds = passwordProtectedTemplates.map((t) => t.id);
-
-        expect(passwordProtectedTemplateIds).toContain(passwordProtectedTemplate.id);
-        expect(passwordProtectedTemplateIds).not.toContain(pinProtectedTemplate.id);
-
-        const pinProtectedTemplates = (
-            await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplates({
-                query: {
-                    "passwordProtection.password": "1234"
-                }
-            })
-        ).value;
-        const pinProtectedTemplateIds = pinProtectedTemplates.map((t) => t.id);
-
-        expect(pinProtectedTemplateIds).not.toContain(passwordProtectedTemplate.id);
-        expect(pinProtectedTemplateIds).toContain(pinProtectedTemplate.id);
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(pinProtectedTemplate, runtimeServices1.transport).addStringSet("passwordProtection.password");
+        await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q }));
     });
 
     test("passwordIsPin query", async () => {
