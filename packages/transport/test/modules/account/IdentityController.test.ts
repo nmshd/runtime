@@ -28,8 +28,7 @@ describe("IdentityController", function () {
         if (approvedIdentityDeletionProcess) await account.identityDeletionProcess.cancelIdentityDeletionProcess(approvedIdentityDeletionProcess.id.toString());
     });
 
-    // TODO: add as soon as backbone route is available
-    test.skip("should get a successful result without deletionDate if the Identity is not deleted", async function () {
+    test("should get a successful result without deletionDate if the Identity is not deleted", async function () {
         const result = await account.identity.checkDeletionOfIdentity();
         expect(result.value.isDeleted).toBe(false);
         expect(result.value.deletionDate).toBeUndefined();
