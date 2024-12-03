@@ -1295,7 +1295,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
-        const backboneTagList = (await this.attributeTagClient.getBackboneAttributeTagCollection()).value;
-        return AttributeTagCollection.fromAny(backboneTagList);
+        const backboneAttributeTagCollection = (await this.attributeTagClient.getBackboneAttributeTagCollection()).value;
+        return AttributeTagCollection.fromAny(backboneAttributeTagCollection);
     }
 }
