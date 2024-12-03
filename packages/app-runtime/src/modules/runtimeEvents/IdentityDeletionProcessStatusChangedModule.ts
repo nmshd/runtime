@@ -21,6 +21,17 @@ export class IdentityDeletionProcessStatusChangedModule extends AppRuntimeModule
     private async handleIdentityDeletionProcessStatusChanged(event: IdentityDeletionProcessStatusChangedEvent) {
         const identityDeletionProcess = event.data;
 
+        if (!identityDeletionProcess) {
+            const services = await this.runtime.getServices(event.eventTargetAddress);
+            const identityDeletionProcesses = await services.transportServices.identityDeletionProcesses.getIdentityDeletionProcesses();
+
+            const approvedIdentityDeletionProcess = identityDeletionProcesses.value.filter((idp) => idp.status === IdentityDeletionProcessStatus.Approved).at(0);
+            const deletionDate = approvedIdentityDeletionProcess?.gracePeriodEndsAt ? CoreDate.from(approvedIdentityDeletionProcess.gracePeriodEndsAt) : undefined;
+
+            await this.updateLocalAccountDeletionDate(event.eventTargetAddress, deletionDate, true);
+            return;
+        }
+
         switch (identityDeletionProcess.status) {
             case IdentityDeletionProcessStatus.Approved:
                 await this.updateLocalAccountDeletionDate(event.eventTargetAddress, CoreDate.from(identityDeletionProcess.gracePeriodEndsAt!));
@@ -35,7 +46,7 @@ export class IdentityDeletionProcessStatusChangedModule extends AppRuntimeModule
         }
     }
 
-    private async updateLocalAccountDeletionDate(eventTargetAddress: string, deletionDate: CoreDate | undefined) {
+    private async updateLocalAccountDeletionDate(eventTargetAddress: string, deletionDate: CoreDate | undefined, publishEvent = false) {
         const account = await this.runtime.multiAccountController.getAccountByAddress(eventTargetAddress);
         const previousDeletionDate = account.deletionDate;
 
@@ -43,6 +54,8 @@ export class IdentityDeletionProcessStatusChangedModule extends AppRuntimeModule
         if (deletionDate && previousDeletionDate && deletionDate.equals(previousDeletionDate)) return;
 
         const localAccount = await this.runtime.multiAccountController.updateLocalAccountDeletionDate(eventTargetAddress, deletionDate);
+
+        if (!publishEvent) return;
         this.runtime.eventBus.publish(new LocalAccountDeletionDateChangedEvent(eventTargetAddress, LocalAccountMapper.toLocalAccountDTO(localAccount)));
     }
 
