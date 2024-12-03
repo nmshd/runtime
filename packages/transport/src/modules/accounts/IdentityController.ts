@@ -6,7 +6,11 @@ import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { IdentityClient } from "./backbone/IdentityClient";
 import { Identity } from "./data/Identity";
-import { IdentityDeletionInfo } from "./data/IdentityDeletionInfo";
+
+export interface CheckDeletionOfIdentity {
+    isDeleted: boolean;
+    deletionDate?: string;
+}
 
 export class IdentityController extends TransportController {
     public identityClient: IdentityClient;
@@ -64,16 +68,15 @@ export class IdentityController extends TransportController {
         return valid;
     }
 
-    public async checkDeletionOfIdentity(): Promise<Result<IdentityDeletionInfo>> {
+    public async checkDeletionOfIdentity(): Promise<Result<CheckDeletionOfIdentity>> {
         const currentDeviceCredentials = await this.parent.activeDevice.getCredentials();
         const identityDeletionResult = await this.identityClient.checkDeletionOfIdentity(currentDeviceCredentials.username);
 
         if (identityDeletionResult.isError) return Result.fail(identityDeletionResult.error);
 
-        const identityDeletionInfo = IdentityDeletionInfo.from({
+        return Result.ok({
             isDeleted: identityDeletionResult.value.isDeleted,
             deletionDate: identityDeletionResult.value.deletionDate ?? undefined
         });
-        return Result.ok(identityDeletionInfo);
     }
 }
