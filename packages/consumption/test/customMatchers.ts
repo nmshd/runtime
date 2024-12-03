@@ -1,6 +1,6 @@
 import { SerializableBase } from "@js-soft/ts-serval";
-import { ErrorValidationResult, SuccessfulValidationResult, ValidationResult } from "../src";
 import { set } from "lodash";
+import { ErrorValidationResult, SuccessfulValidationResult, ValidationResult } from "../src";
 
 expect.extend({
     successfulValidationResult(actual: ValidationResult) {
@@ -41,7 +41,7 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
-    
+
     toStrictEqualExcluding(received: unknown, expected: unknown, ...excludes: string[]) {
         if (received instanceof SerializableBase) {
             received = received.toJSON();
