@@ -3,7 +3,7 @@ import { AttributesController } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeTagCollectionDTO } from "../../../types";
 import { UseCase } from "../../common";
-import { AttributeMapper } from "./AttributeMapper";
+import { AttributeTagCollectionMapper } from "./AttributeTagCollectionMapper";
 
 export class GetAttributeTagCollectionUseCase extends UseCase<void, AttributeTagCollectionDTO> {
     public constructor(@Inject private readonly attributesController: AttributesController) {
@@ -12,6 +12,6 @@ export class GetAttributeTagCollectionUseCase extends UseCase<void, AttributeTag
 
     protected async executeInternal(): Promise<Result<AttributeTagCollectionDTO>> {
         const tagList = await this.attributesController.getAttributeTagCollection();
-        return Result.ok(AttributeMapper.toAttributeTagCollectionDTO(tagList));
+        return Result.ok(AttributeTagCollectionMapper.toAttributeTagCollectionDTO(tagList));
     }
 }

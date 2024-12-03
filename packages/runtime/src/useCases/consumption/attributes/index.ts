@@ -1,4 +1,5 @@
 export * from "./AttributeMapper";
+export * from "./AttributeTagCollectionMapper";
 export * from "./ChangeDefaultRepositoryAttribute";
 export * from "./CreateAndShareRelationshipAttribute";
 export * from "./CreateRepositoryAttribute";
