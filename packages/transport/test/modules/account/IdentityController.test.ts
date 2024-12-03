@@ -29,20 +29,20 @@ describe("IdentityController", function () {
         if (approvedIdentityDeletionProcess) await account.identityDeletionProcess.cancelIdentityDeletionProcess(approvedIdentityDeletionProcess.id.toString());
     });
 
-    test("should get a successful result without deletionDate if the Identity is not deleted", async function () {
+    test("check deletion of Identity that is not deleted", async function () {
         const result = await account.identity.checkDeletionOfIdentity();
         expect(result.value.isDeleted).toBe(false);
         expect(result.value.deletionDate).toBeUndefined();
     });
 
-    test("should get a successful result with deletionDate if grace period of IdentityDeletionProcess has passed", async function () {
+    test("check deletion of Identity having IdentityDeletionProcess with expired grace period", async function () {
         const identityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
 
         await sleep(10000);
 
         const result = await account.identity.checkDeletionOfIdentity();
         expect(result.value.isDeleted).toBe(true);
-        expect(result.value.deletionDate).toStrictEqual(identityDeletionProcess.cache!.gracePeriodEndsAt);
+        expect(result.value.deletionDate).toBe(identityDeletionProcess.cache!.gracePeriodEndsAt!.toString());
     });
 
     // TODO: test for deleted Identity
