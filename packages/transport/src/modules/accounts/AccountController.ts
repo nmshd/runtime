@@ -237,27 +237,19 @@ export class AccountController {
         if (!force && !this.autoSync) return;
 
         const changedItems = await this.synchronization.sync("OnlyDatawallet");
-        await this.triggerEventsForChangedItems(changedItems);
+        this.triggerEventsForChangedItems(changedItems);
     }
 
     public async syncEverything(): Promise<ChangedItems> {
         const changedItems = await this.synchronization.sync("Everything");
-        await this.triggerEventsForChangedItems(changedItems);
+        this.triggerEventsForChangedItems(changedItems);
 
         return changedItems;
     }
 
-    private async triggerEventsForChangedItems(changedItems: ChangedItems) {
-        const changedIdentityDeletionProcessIds = changedItems.changedObjectIdentifiersDuringDatawalletSync.filter((x) => x.startsWith("IDP"));
-        for (const id of changedIdentityDeletionProcessIds) {
-            const changedIdentityDeletionProcesses = await this.identityDeletionProcess.getIdentityDeletionProcess(id);
-            if (!changedIdentityDeletionProcesses) {
-                this.log.error(`IdentityDeletionProcess with id ${id} not found for re-triggering event. Skipping.`);
-                continue;
-            }
-
-            // TODO: should we really trigger this event or would a IdentityDeletionProcessStatusChangedDuringDatawalletSyncEvent better?
-            this.transport.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.identity.address.toString(), changedIdentityDeletionProcesses));
+    private triggerEventsForChangedItems(changedItems: ChangedItems) {
+        if (changedItems.changedObjectIdentifiersDuringDatawalletSync.some((x) => x.startsWith("IDP"))) {
+            this.transport.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.identity.address.toString()));
         }
     }
 
