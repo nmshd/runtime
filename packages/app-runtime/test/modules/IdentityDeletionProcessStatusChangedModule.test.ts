@@ -9,8 +9,8 @@ describe("IdentityDeletionProcessStatusChanged", function () {
     let session: LocalAccountSession;
 
     const eventBus = new MockEventBus();
-    let runtimeDevice2: AppRuntime | undefined;
-    let sessionDevice2: LocalAccountSession | undefined;
+    let runtime2: AppRuntime | undefined;
+    let session2: LocalAccountSession | undefined;
 
     beforeAll(async function () {
         runtime = await TestUtil.createRuntime();
@@ -28,8 +28,8 @@ describe("IdentityDeletionProcessStatusChanged", function () {
             const abortResult = await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
             if (abortResult.isError) throw abortResult.error;
 
-            if (sessionDevice2 && runtimeDevice2 && sessionDevice2.account.deletionDate) {
-                await sessionDevice2.transportServices.account.syncDatawallet();
+            if (session2 && runtime2 && session2.account.deletionDate) {
+                await session2.transportServices.account.syncDatawallet();
                 await eventBus.waitForRunningEventHandlers();
             }
         }
@@ -37,9 +37,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
 
     afterAll(async function () {
         await runtime.stop();
-        await runtimeDevice2?.stop();
-
-        // this eventbus is not defenitely cleaned up with runtime2, so it needs to be closed manually
+        await runtime2?.stop();
         await eventBus.close();
     });
 
@@ -67,47 +65,47 @@ describe("IdentityDeletionProcessStatusChanged", function () {
 
     describe("multi device", function () {
         beforeAll(async function () {
-            runtimeDevice2 = await TestUtil.createRuntime(undefined, undefined, eventBus);
-            await runtimeDevice2.start();
+            runtime2 = await TestUtil.createRuntime(undefined, undefined, eventBus);
+            await runtime2.start();
 
-            const createDeviceResult = await session.transportServices.devices.createDevice({ name: "test", isAdmin: true });
-            const onboardingInfoResult = await session.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id, profileName: "Test" });
-            const localAccountDevice2 = await runtimeDevice2.accountServices.onboardAccount(onboardingInfoResult.value);
-            sessionDevice2 = await runtimeDevice2.selectAccount(localAccountDevice2.id.toString());
+            const createDeviceResult = await session.transportServices.devices.createDevice({ name: "aName", isAdmin: true });
+            const onboardingInfoResult = await session.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id, profileName: "aProfileName" });
+            const localAccountDevice2 = await runtime2.accountServices.onboardAccount(onboardingInfoResult.value);
+            session2 = await runtime2.selectAccount(localAccountDevice2.id.toString());
 
             await session.transportServices.account.syncDatawallet();
-            await sessionDevice2.transportServices.account.syncDatawallet();
+            await session2.transportServices.account.syncDatawallet();
         });
 
-        test("should set the deletionDate on the LocalAccount on a second device when an IdentityDeletionProcess is initiated", async function () {
+        test("should set the deletionDate of the LocalAccount on a second device when an IdentityDeletionProcess is initiated", async function () {
             const initiateDeletionResult = await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
-            expect(sessionDevice2!.account.deletionDate).toBeUndefined();
+            expect(session2!.account.deletionDate).toBeUndefined();
 
-            await sessionDevice2!.transportServices.account.syncDatawallet();
+            await session2!.transportServices.account.syncDatawallet();
 
             await expect(eventBus).toHavePublished(LocalAccountDeletionDateChangedEvent, (e) => e.data.deletionDate! === initiateDeletionResult.value.gracePeriodEndsAt!);
 
-            expect(sessionDevice2!.account.deletionDate!.toString()).toStrictEqual(initiateDeletionResult.value.gracePeriodEndsAt);
+            expect(session2!.account.deletionDate!.toString()).toStrictEqual(initiateDeletionResult.value.gracePeriodEndsAt);
 
-            const account = await runtimeDevice2!.multiAccountController.getAccount(CoreId.from(sessionDevice2!.account.id));
+            const account = await runtime2!.multiAccountController.getAccount(CoreId.from(session2!.account.id));
             expect(account.deletionDate!.toString()).toBe(initiateDeletionResult.value.gracePeriodEndsAt!.toString());
         });
 
-        test("should unset the deletionDate on the LocalAccount on a second device when an IdentityDeletionProcess is cancelled", async function () {
+        test("should unset the deletionDate of the LocalAccount on a second device when an IdentityDeletionProcess is cancelled", async function () {
             await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
-            await sessionDevice2!.transportServices.account.syncDatawallet();
+            await session2!.transportServices.account.syncDatawallet();
             await expect(eventBus).toHavePublished(LocalAccountDeletionDateChangedEvent);
 
             await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            expect(sessionDevice2!.account.deletionDate).toBeDefined();
+            expect(session2!.account.deletionDate).toBeDefined();
 
-            await sessionDevice2!.transportServices.account.syncDatawallet();
+            await session2!.transportServices.account.syncDatawallet();
 
             await expect(eventBus).toHavePublished(LocalAccountDeletionDateChangedEvent, (e) => e.data.deletionDate === undefined);
 
-            expect(sessionDevice2!.account.deletionDate).toBeUndefined();
+            expect(session2!.account.deletionDate).toBeUndefined();
 
-            const account = await runtimeDevice2!.multiAccountController.getAccount(CoreId.from(sessionDevice2!.account.id));
+            const account = await runtime2!.multiAccountController.getAccount(CoreId.from(session2!.account.id));
             expect(account.deletionDate).toBeUndefined();
         });
     });

@@ -37,7 +37,7 @@ describe("TranslationProvider", function () {
     });
 
     test("should translate 'test' to the default message", async function () {
-        const translation = await runtime.translate("test");
+        const translation = await runtime.translate("aKeyWithoutAvailableTranslation");
         expect(translation).toBeInstanceOf(Result);
         expect(translation.isSuccess).toBe(true);
         expect(translation.value).toBe(noTranslationAvailable);

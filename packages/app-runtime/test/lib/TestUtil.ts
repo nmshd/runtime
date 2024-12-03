@@ -252,7 +252,7 @@ export class TestUtil {
             expiresAt: CoreDate.utc().add({ minutes: 5 }).toString(),
             filename: "Test.bin",
             mimetype: "application/json",
-            title: "Test",
+            title: "aFileName",
             content: fileContent
         });
         return file.value;

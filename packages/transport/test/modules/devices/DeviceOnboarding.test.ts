@@ -35,10 +35,10 @@ describe("Device Onboarding", function () {
     });
 
     test("should create correct device", async function () {
-        newDevice = await device1Account.devices.sendDevice({ name: "Test", isAdmin: true });
+        newDevice = await device1Account.devices.sendDevice({ name: "aDeviceName", isAdmin: true });
         await device1Account.syncDatawallet();
         expect(newDevice).toBeInstanceOf(Device);
-        expect(newDevice.name).toBe("Test");
+        expect(newDevice.name).toBe("aDeviceName");
         expect(newDevice.publicKey).toBeUndefined();
         expect(newDevice.operatingSystem).toBeUndefined();
         expect(newDevice.lastLoginAt).toBeUndefined();
