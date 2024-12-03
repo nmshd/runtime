@@ -70,7 +70,10 @@ export class IdentityController extends TransportController {
 
         if (identityDeletionResult.isError) return Result.fail(identityDeletionResult.error);
 
-        const identityDeletionInfo = IdentityDeletionInfo.from(identityDeletionResult.value);
+        const identityDeletionInfo = IdentityDeletionInfo.from({
+            isDeleted: identityDeletionResult.value.isDeleted,
+            deletionDate: identityDeletionResult.value.deletionDate ?? undefined
+        });
         return Result.ok(identityDeletionInfo);
     }
 }
