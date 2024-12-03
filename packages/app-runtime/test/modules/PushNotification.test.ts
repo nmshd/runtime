@@ -1,15 +1,16 @@
-import { sleep } from "@js-soft/ts-utils";
 import { DatawalletSynchronizedEvent } from "@nmshd/runtime";
 import { AppRuntime, ExternalEventReceivedEvent, LocalAccountSession, RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../../src";
-import { TestUtil } from "../lib";
+import { MockEventBus, TestUtil } from "../lib";
 
 describe("PushNotificationModuleTest", function () {
+    const eventBus = new MockEventBus();
+
     let runtime: AppRuntime;
     let session: LocalAccountSession;
     let devicePushIdentifier = "dummy value";
 
     beforeAll(async function () {
-        runtime = await TestUtil.createRuntime();
+        runtime = await TestUtil.createRuntime(undefined, undefined, eventBus);
         await runtime.start();
 
         const accounts = await TestUtil.provideAccounts(runtime, 1);
@@ -20,12 +21,12 @@ describe("PushNotificationModuleTest", function () {
         await runtime.stop();
     });
 
+    afterEach(() => eventBus.reset());
+
     test("should persist push identifier", async function () {
         runtime.nativeEnvironment.eventBus.publish(new RemoteNotificationRegistrationEvent("handleLongerThan10Characters"));
 
-        // wait for the registration to finish
-        // there is no event to wait for, so we just wait for a second
-        await sleep(1000);
+        await eventBus.waitForRunningEventHandlers();
 
         const account = await runtime.accountServices.getAccount(session.account.id);
         expect(account.devicePushIdentifier).toBeDefined();
@@ -45,8 +46,7 @@ describe("PushNotificationModuleTest", function () {
             })
         );
 
-        const event = await TestUtil.awaitEvent(runtime, DatawalletSynchronizedEvent);
-        expect(event).toBeDefined();
+        await expect(eventBus).toHavePublished(DatawalletSynchronizedEvent);
     });
 
     test("should do a sync everything when ExternalEventCreated is received", async function () {
@@ -61,7 +61,6 @@ describe("PushNotificationModuleTest", function () {
             })
         );
 
-        const event = await TestUtil.awaitEvent(runtime, ExternalEventReceivedEvent);
-        expect(event).toBeDefined();
+        await expect(eventBus).toHavePublished(ExternalEventReceivedEvent);
     });
 });
