@@ -28,6 +28,7 @@ import {
 import { AccountServices, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
 import { INativeBootstrapper, INativeEnvironment, INativeTranslationProvider } from "./natives";
 import { SessionStorage } from "./SessionStorage";
+import { UserfriendlyApplicationError } from "./UserfriendlyApplicationError";
 import { UserfriendlyResult } from "./UserfriendlyResult";
 
 export class AppRuntime extends Runtime<AppConfig> {
@@ -314,9 +315,9 @@ export class AppRuntime extends Runtime<AppConfig> {
 
             const checkDeletionResult = await session.transportServices.account.checkDeletionOfIdentity();
 
-            if (checkDeletionResult.isError) throw AppRuntimeErrors.general.backboneError(checkDeletionResult.error);
+            if (checkDeletionResult.isError) throw UserfriendlyApplicationError.fromError(checkDeletionResult.error);
 
-            if (!checkDeletionResult.value.isDeleted) throw AppRuntimeErrors.general.backboneError(syncResult.error);
+            if (!checkDeletionResult.value.isDeleted) throw UserfriendlyApplicationError.fromError(syncResult.error);
 
             await this._multiAccountController.deleteAccount(account.id);
         }

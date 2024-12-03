@@ -31,10 +31,6 @@ class General {
         );
     }
 
-    public backboneError(error?: Error): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.general.backboneError", "The Backbone returned an error.", "The Backbone returned an error.", error);
-    }
-
     public noAccountAvailableForIdentityTruncated(): UserfriendlyApplicationError {
         return new UserfriendlyApplicationError(
             "error.appruntime.general.noAccountAvailableForIdentityTruncated",
