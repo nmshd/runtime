@@ -316,6 +316,14 @@ class Requests {
         return new CoreError("error.consumption.requests.missingRelationship", message);
     }
 
+    public peerIsDeleted(message: string) {
+        return new CoreError("error.consumption.requests.peerIsDeleted", message);
+    }
+
+    public peerIsInDeletion(message: string) {
+        return new CoreError("error.consumption.requests.peerIsInDeletion", message);
+    }
+
     public inheritedFromItem(message: string) {
         return new ApplicationError("error.consumption.requests.validation.inheritedFromItem", message);
     }

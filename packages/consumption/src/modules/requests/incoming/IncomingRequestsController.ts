@@ -2,7 +2,7 @@ import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
 import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
-import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
+import { Message, PeerDeletionStatus, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
@@ -192,6 +192,18 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
 
         this.assertRequestStatus(request, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired);
+
+        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.peerIsInDeletion(`You cannot decide a Request from peer '${request.peer.toString()}' since the peer is in deletion.`)
+            );
+        }
+
+        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot decide a Request from peer '${request.peer.toString()}' since the peer is deleted.`)
+            );
+        }
 
         const validationResult = this.decideRequestParamsValidator.validate(params, request);
         if (validationResult.isError()) return validationResult;
