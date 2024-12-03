@@ -1,4 +1,4 @@
-import { Event, EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     ConsumptionIds,
@@ -297,7 +297,12 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
-export async function sendMessageToMultipleRecipients(transportServices: TransportServices, recipients: string[], content?: any, attachments?: string[]): Promise<MessageDTO> {
+export async function sendMessageToMultipleRecipients(
+    transportServices: TransportServices,
+    recipients: string[],
+    content?: any,
+    attachments?: string[]
+): Promise<Result<MessageDTO>> {
     const response = await transportServices.messages.sendMessage({
         recipients,
         content: content ?? {
@@ -309,9 +314,8 @@ export async function sendMessageToMultipleRecipients(transportServices: Transpo
         },
         attachments
     });
-    expect(response).toBeSuccessful();
 
-    return response.value;
+    return response;
 }
 
 export async function sendMessageWithRequest(
@@ -526,6 +530,24 @@ export async function ensurePendingRelationship(sTransportServices: TransportSer
     }
 
     return (await sTransportServices.relationships.getRelationships({})).value[0];
+}
+
+export async function reactivateTerminatedRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<void> {
+    const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+
+    const terminatedRelationshipsToPeer = (
+        await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress, status: RelationshipStatus.Terminated } })
+    ).value;
+
+    if (terminatedRelationshipsToPeer.length !== 0) {
+        const terminatedRelationshipId = terminatedRelationshipsToPeer[0].id;
+        await rTransportServices.relationships.requestRelationshipReactivation({ relationshipId: terminatedRelationshipId });
+        await syncUntilHasRelationships(sTransportServices);
+        await sTransportServices.relationships.acceptRelationshipReactivation({ relationshipId: terminatedRelationshipId });
+        await syncUntilHasRelationships(rTransportServices);
+    }
+
+    return;
 }
 
 export async function mutualDecomposeIfActiveRelationshipExists(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<void> {

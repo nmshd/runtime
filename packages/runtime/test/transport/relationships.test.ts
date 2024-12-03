@@ -559,6 +559,7 @@ describe("Attributes for the relationship", () => {
 describe("RelationshipTermination", () => {
     let relationshipId: string;
     let terminationResult: Result<RelationshipDTO, ApplicationError>;
+
     beforeAll(async () => {
         relationshipId = (await ensureActiveRelationship(services1.transport, services2.transport)).id;
 
@@ -594,7 +595,7 @@ describe("RelationshipTermination", () => {
         );
     });
 
-    test("should not send a message", async () => {
+    test("should not send a message whose content is not a notification", async () => {
         const result = await services1.transport.messages.sendMessage({
             recipients: [services2.address],
             content: {
@@ -605,7 +606,7 @@ describe("RelationshipTermination", () => {
                 to: [services2.address]
             }
         });
-        expect(result).toBeAnError(/.*/, "error.transport.messages.missingOrInactiveRelationship");
+        expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
     });
 
     test("should not decide a request", async () => {
@@ -860,7 +861,7 @@ describe("RelationshipDecomposition", () => {
         templateId2 = relationship2.template.id;
 
         await createRelationshipData(services1, services3);
-        multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).id;
+        multipleRecipientsMessageId = (await sendMessageToMultipleRecipients(services1.transport, [services2.address, services3.address])).value.id;
 
         await services1.transport.relationships.terminateRelationship({ relationshipId });
         await services1.transport.relationships.decomposeRelationship({ relationshipId });
