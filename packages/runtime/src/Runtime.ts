@@ -409,7 +409,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         await this.startInfrastructure();
         await this.startModules();
-        await this.startApp();
+        await this.startAccounts();
 
         this._isStarted = true;
     }
@@ -479,8 +479,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this.logger.info("Started all modules.");
     }
 
-    // TODO: naming
-    protected startApp(): void | Promise<void> {
+    protected startAccounts(): void | Promise<void> {
         return;
     }
 

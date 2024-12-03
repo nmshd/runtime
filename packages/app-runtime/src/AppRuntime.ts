@@ -303,7 +303,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         await this.lokiConnection.close().catch(logError);
     }
 
-    protected override async startApp(): Promise<void> {
+    protected override async startAccounts(): Promise<void> {
         const accounts = await this._multiAccountController.getAccounts();
 
         for (const account of accounts) {
