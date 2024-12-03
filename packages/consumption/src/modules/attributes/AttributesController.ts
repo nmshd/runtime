@@ -46,7 +46,7 @@ import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator,
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
-    private tagsClient: AttributeTagClient;
+    private attributeTagClient: AttributeTagClient;
 
     public constructor(
         parent: ConsumptionController,
@@ -61,7 +61,7 @@ export class AttributesController extends ConsumptionBaseController {
         await super.init();
 
         this.attributes = await this.parent.accountController.getSynchronizedCollection("Attributes");
-        this.tagsClient = new AttributeTagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
+        this.attributeTagClient = new AttributeTagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
 
         return this;
     }
@@ -1295,7 +1295,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
-        const backboneTagList = (await this.tagsClient.getBackboneAttributeTagCollection()).value;
+        const backboneTagList = (await this.attributeTagClient.getBackboneAttributeTagCollection()).value;
         return AttributeTagCollection.fromAny(backboneTagList);
     }
 }

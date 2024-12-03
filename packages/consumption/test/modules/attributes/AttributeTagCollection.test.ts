@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
+import { AccountController, AttributeTagClient, ClientResult, Transport } from "@nmshd/transport";
 import { spy, when } from "ts-mockito";
 import { ConsumptionController } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
@@ -12,7 +12,7 @@ describe("AttributeTagCollection", function () {
     let consumptionController: ConsumptionController;
     let accountController: AccountController;
 
-    let mockedClient: TagClient;
+    let mockedClient: AttributeTagClient;
 
     /* eslint-disable @typescript-eslint/naming-convention */
     const mockTags = {
@@ -59,7 +59,7 @@ describe("AttributeTagCollection", function () {
         const accounts = await TestUtil.provideAccounts(transport, 1);
         ({ consumptionController, accountController } = accounts[0]);
 
-        const client = consumptionController.attributes["tagsClient"];
+        const client = consumptionController.attributes["attributeTagClient"];
         mockedClient = spy(client);
     });
 
@@ -70,7 +70,7 @@ describe("AttributeTagCollection", function () {
     });
 
     test("should receive the legal tags from the Backbone", async function () {
-        when(mockedClient.getTags()).thenResolve(ClientResult.ok(mockTags));
+        when(mockedClient.getBackboneAttributeTagCollection()).thenResolve(ClientResult.ok(mockTags));
         const tags = await consumptionController.attributes.getAttributeTagCollection();
 
         expect(tags.toJSON()).toStrictEqualExcluding(mockTags, "@type");
