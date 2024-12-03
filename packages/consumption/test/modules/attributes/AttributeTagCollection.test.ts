@@ -56,8 +56,7 @@ describe("AttributeTagCollection", function () {
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
-        ({ consumptionController, accountController } = accounts[0]);
+        ({ consumptionController, accountController } = (await TestUtil.provideAccounts(transport, 1))[0]);
 
         const client = consumptionController.attributes["attributeTagClient"];
         mockedClient = spy(client);
