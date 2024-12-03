@@ -144,7 +144,10 @@ export class DatawalletModificationsProcessor {
         this.ensureAllItemsAreCacheable();
 
         const cacheChangesWithoutDeletes = this.cacheChanges.filter((c) => !this.deletedObjectIdentifiers.some((d) => c.objectIdentifier.equals(d)));
-        cacheChangesWithoutDeletes.map((c) => c.objectIdentifier.toString()).forEach((objectIdentifier) => this._changedObjectIdentifiers.add(objectIdentifier));
+
+        for (const objectIdentifier of cacheChangesWithoutDeletes.map((c) => c.objectIdentifier.toString())) {
+            this._changedObjectIdentifiers.add(objectIdentifier);
+        }
 
         const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(cacheChangesWithoutDeletes);
 
