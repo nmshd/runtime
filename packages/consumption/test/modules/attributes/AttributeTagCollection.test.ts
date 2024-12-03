@@ -1,14 +1,16 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
 import { spy, when } from "ts-mockito";
-import { AccountController, ClientResult, TagClient, Transport } from "../../../src";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { ConsumptionController } from "../../../src";
+import { TestUtil } from "../../core/TestUtil";
 
-describe("TagsController", function () {
+describe("AttributeTagCollection", function () {
     let connection: IDatabaseConnection;
 
     let transport: Transport;
 
-    let account: AccountController;
+    let consumptionController: ConsumptionController;
+    let accountController: AccountController;
 
     let mockedClient: TagClient;
 
@@ -49,27 +51,27 @@ describe("TagsController", function () {
     /* eslint-enable @typescript-eslint/naming-convention */
 
     beforeAll(async function () {
-        connection = await TestUtil.createDatabaseConnection();
+        connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection);
 
         await transport.init();
 
         const accounts = await TestUtil.provideAccounts(transport, 1);
-        account = accounts[0];
+        ({ consumptionController, accountController } = accounts[0]);
 
-        const client = account.tags["client"];
+        const client = consumptionController.attributes["tagsClient"];
         mockedClient = spy(client);
     });
 
     afterAll(async function () {
-        await account.close();
+        await accountController.close();
 
         await connection.close();
     });
 
     test("should receive the legal tags from the Backbone", async function () {
         when(mockedClient.getTags()).thenResolve(ClientResult.ok(mockTags));
-        const tags = await account.tags.getTags();
+        const tags = await consumptionController.attributes.getAttributeTagCollection();
 
         expect(tags.toJSON()).toStrictEqualExcluding(mockTags, "@type");
     });

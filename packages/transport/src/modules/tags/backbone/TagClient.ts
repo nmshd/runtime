@@ -1,9 +1,9 @@
 import { ClientResult } from "../../../core/backbone/ClientResult";
 import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
-import { BackboneTagList } from "./BackboneGetTag";
+import { BackboneDefinedTags } from "./BackboneGetTag";
 
 export class TagClient extends RESTClientAuthenticate {
-    public async getTags(): Promise<ClientResult<BackboneTagList>> {
-        return await this.get<BackboneTagList>("/api/v1/Tags");
+    public async getTags(): Promise<ClientResult<BackboneDefinedTags>> {
+        return await this.get<BackboneDefinedTags>("/api/v1/Tags");
     }
 }

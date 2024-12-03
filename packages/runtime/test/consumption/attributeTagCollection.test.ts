@@ -9,7 +9,7 @@ let mockedRestClient: TagClient;
 
 beforeAll(async () => {
     runtimeService = (await serviceProvider.launch(1))[0];
-    const client = runtimeService.transport.tags["getTagsUseCase"]["tagsController"]["client"] as TagClient;
+    const client = runtimeService.consumption.attributes["getAttributeTagCollectionUseCase"]["attributesController"]["tagsClient"] as TagClient;
     mockedRestClient = spy(client);
 }, 30000);
 
@@ -19,7 +19,7 @@ afterEach(() => {
     reset(mockedRestClient);
 });
 
-describe("Tags", function () {
+describe("get attributeTagCollection", function () {
     /* eslint-disable @typescript-eslint/naming-convention */
     const mockTags = {
         supportedLanguages: ["de", "en"],
@@ -58,7 +58,7 @@ describe("Tags", function () {
 
     test("should receive the legal tags from the Backbone", async function () {
         when(mockedRestClient.getTags()).thenResolve(ClientResult.ok(mockTags));
-        const tags = await runtimeService.transport.tags.getTags();
+        const tags = await runtimeService.consumption.attributes.getAttributeTagCollection();
 
         expect(tags.value).toStrictEqual(mockTags);
     });

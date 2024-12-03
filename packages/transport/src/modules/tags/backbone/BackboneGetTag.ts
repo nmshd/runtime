@@ -1,4 +1,4 @@
-export interface BackboneTagList {
+export interface BackboneDefinedTags {
     supportedLanguages: string[];
     tagsForAttributeValueTypes: Record<string, Record<string, BackboneTag>>;
 }

@@ -7,5 +7,4 @@ export * from "./MessagesFacade";
 export * from "./PublicRelationshipTemplateReferencesFacade";
 export * from "./RelationshipsFacade";
 export * from "./RelationshipTemplatesFacade";
-export * from "./TagsFacade";
 export * from "./TokensFacade";

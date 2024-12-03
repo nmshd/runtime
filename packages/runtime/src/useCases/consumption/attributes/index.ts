@@ -13,6 +13,7 @@ export * from "./ExecuteRelationshipAttributeQuery";
 export * from "./ExecuteThirdPartyRelationshipAttributeQuery";
 export * from "./GetAttribute";
 export * from "./GetAttributes";
+export * from "./GetAttributeTagCollection";
 export * from "./GetOwnSharedAttributes";
 export * from "./GetPeerSharedAttributes";
 export * from "./GetRepositoryAttributes";

@@ -10,5 +10,4 @@ export * from "./PublicRelationshipTemplateReferenceDTO";
 export * from "./RecipientDTO";
 export * from "./RelationshipDTO";
 export * from "./RelationshipTemplateDTO";
-export * from "./TagDTO";
 export * from "./TokenDTO";

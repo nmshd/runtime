@@ -9,7 +9,6 @@ import {
     PublicRelationshipTemplateReferencesFacade,
     RelationshipsFacade,
     RelationshipTemplatesFacade,
-    TagsFacade,
     TokensFacade
 } from "./facades/transport";
 
@@ -24,7 +23,6 @@ export class TransportServices {
         @Inject public readonly publicRelationshipTemplateReferences: PublicRelationshipTemplateReferencesFacade,
         @Inject public readonly relationships: RelationshipsFacade,
         @Inject public readonly relationshipTemplates: RelationshipTemplatesFacade,
-        @Inject public readonly tags: TagsFacade,
         @Inject public readonly tokens: TokensFacade
     ) {}
 }

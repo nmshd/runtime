@@ -7,5 +7,4 @@ export * from "./messages";
 export * from "./publicRelationshipTemplateReferences";
 export * from "./relationships";
 export * from "./relationshipTemplates";
-export * from "./tags";
 export * from "./tokens";

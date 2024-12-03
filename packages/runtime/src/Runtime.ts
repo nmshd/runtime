@@ -28,7 +28,6 @@ import {
     PublicRelationshipTemplateReferencesController,
     RelationshipsController,
     RelationshipTemplateController,
-    TagsController,
     TokenController,
     Transport
 } from "@nmshd/transport";
@@ -258,10 +257,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(TokenController)
             .factory(() => this.getAccountController().tokens)
-            .scope(Scope.Request);
-
-        Container.bind(TagsController)
-            .factory(() => this.getAccountController().tags)
             .scope(Scope.Request);
 
         Container.bind(PublicRelationshipTemplateReferencesController)
