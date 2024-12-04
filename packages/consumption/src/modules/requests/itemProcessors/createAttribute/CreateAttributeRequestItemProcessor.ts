@@ -34,33 +34,17 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 );
             }
 
-            if (typeof recipient !== "undefined") {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The owner of the provided IdentityAttribute for the `attribute` property can only be the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
-                    )
-                );
-            }
-
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
-                    "The owner of the provided IdentityAttribute for the `attribute` property can only be an empty string. It will default to the Recipient's Address."
+                    "The owner of the provided IdentityAttribute for the `attribute` property can only be the address of the recipient or an empty string. The latter will default to the address of the recipient."
                 )
             );
         }
 
         if (!(recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString)) {
-            if (typeof recipient !== "undefined") {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address, the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
-                    )
-                );
-            }
-
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
-                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the Sender's Address or an empty string. The latter will default to the Recipient's Address."
+                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the address of the sender, the address of the recipient or an empty string. The latter will default to the address of the recipient."
                 )
             );
         }
