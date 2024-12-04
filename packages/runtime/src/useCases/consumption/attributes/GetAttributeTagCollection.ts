@@ -11,7 +11,7 @@ export class GetAttributeTagCollectionUseCase extends UseCase<void, AttributeTag
     }
 
     protected async executeInternal(): Promise<Result<AttributeTagCollectionDTO>> {
-        const tagList = await this.attributesController.getAttributeTagCollection();
-        return Result.ok(AttributeTagCollectionMapper.toAttributeTagCollectionDTO(tagList));
+        const attributeTagCollection = await this.attributesController.getAttributeTagCollection();
+        return Result.ok(AttributeTagCollectionMapper.toAttributeTagCollectionDTO(attributeTagCollection));
     }
 }
