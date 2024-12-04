@@ -8,6 +8,7 @@ import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
+import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
@@ -235,11 +236,21 @@ export class AccountController {
     public async syncDatawallet(force = false): Promise<void> {
         if (!force && !this.autoSync) return;
 
-        await this.synchronization.sync("OnlyDatawallet");
+        const changedItems = await this.synchronization.sync("OnlyDatawallet");
+        this.triggerEventsForChangedItems(changedItems);
     }
 
     public async syncEverything(): Promise<ChangedItems> {
-        return await this.synchronization.sync("Everything");
+        const changedItems = await this.synchronization.sync("Everything");
+        this.triggerEventsForChangedItems(changedItems);
+
+        return changedItems;
+    }
+
+    private triggerEventsForChangedItems(changedItems: ChangedItems) {
+        if (changedItems.changedObjectIdentifiersDuringDatawalletSync.some((x) => x.startsWith("IDP"))) {
+            this.transport.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.identity.address.toString()));
+        }
     }
 
     public async getLastCompletedSyncTime(): Promise<CoreDate | undefined> {
