@@ -8,6 +8,7 @@ import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
+import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
@@ -23,6 +24,7 @@ import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredential
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
+import { PublicRelationshipTemplateReferencesController } from "../publicRelationshipTemplateReferences/PublicRelationshipTemplateReferencesController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
@@ -59,6 +61,7 @@ export class AccountController {
     public devices: DevicesController;
     public files: FileController;
     public messages: MessageController;
+    public publicRelationshipTemplateReferences: PublicRelationshipTemplateReferencesController;
     public relationships: RelationshipsController;
     public relationshipTemplates: RelationshipTemplateController;
     private synchronization: SyncController;
@@ -213,6 +216,7 @@ export class AccountController {
         this.relationshipTemplates = await new RelationshipTemplateController(this, this.relationshipSecrets).init();
         this.messages = await new MessageController(this).init();
         this.tokens = await new TokenController(this).init();
+        this.publicRelationshipTemplateReferences = await new PublicRelationshipTemplateReferencesController(this).init();
 
         this.synchronization = await new SyncController(this, this.dependencyOverrides, this.unpushedDatawalletModifications, this.config.datawalletEnabled).init();
 
@@ -230,15 +234,23 @@ export class AccountController {
     }
 
     public async syncDatawallet(force = false): Promise<void> {
-        if (!force && !this.autoSync) {
-            return;
-        }
+        if (!force && !this.autoSync) return;
 
-        return await this.synchronization.sync("OnlyDatawallet");
+        const changedItems = await this.synchronization.sync("OnlyDatawallet");
+        this.triggerEventsForChangedItems(changedItems);
     }
 
     public async syncEverything(): Promise<ChangedItems> {
-        return await this.synchronization.sync("Everything");
+        const changedItems = await this.synchronization.sync("Everything");
+        this.triggerEventsForChangedItems(changedItems);
+
+        return changedItems;
+    }
+
+    private triggerEventsForChangedItems(changedItems: ChangedItems) {
+        if (changedItems.changedObjectIdentifiersDuringDatawalletSync.some((x) => x.startsWith("IDP"))) {
+            this.transport.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.identity.address.toString()));
+        }
     }
 
     public async getLastCompletedSyncTime(): Promise<CoreDate | undefined> {

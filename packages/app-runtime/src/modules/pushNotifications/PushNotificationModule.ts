@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AppRuntimeErrors } from "../../AppRuntimeErrors";
-import { AccountSelectedEvent, DatawalletSynchronizedEvent, ExternalEventReceivedEvent } from "../../events";
+import { AccountSelectedEvent, ExternalEventReceivedEvent } from "../../events";
 import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../../natives";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 import { BackboneEventName, IBackboneEventContent } from "./IBackboneEventContent";
@@ -35,7 +35,6 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
                         this.logger.error(walletResult);
                         return;
                     }
-                    this.runtime.eventBus.publish(new DatawalletSynchronizedEvent(accRef));
                     break;
                 case BackboneEventName.ExternalEventCreated:
                     const syncResult = await services.transportServices.account.syncEverything();

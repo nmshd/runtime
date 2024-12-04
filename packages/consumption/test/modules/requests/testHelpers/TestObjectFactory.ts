@@ -28,6 +28,8 @@ import {
     IRelationship,
     IRelationshipTemplate,
     Message,
+    PeerDeletionInfo,
+    PeerDeletionStatus,
     Relationship,
     RelationshipAuditLogEntryReason,
     RelationshipStatus,
@@ -164,6 +166,112 @@ export class TestObjectFactory {
         });
     }
 
+    public static createRelationshipToPeerInDeletion(properties?: Partial<IRelationship>): Relationship {
+        return Relationship.from({
+            id: properties?.id ?? CoreId.from("REL1"),
+            peer:
+                properties?.peer ??
+                Identity.from({
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    publicKey: CryptoSignaturePublicKey.from({
+                        algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
+                        publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
+                    })
+                }),
+            peerDeletionInfo:
+                properties?.peerDeletionInfo ??
+                PeerDeletionInfo.from({
+                    deletionStatus: PeerDeletionStatus.ToBeDeleted,
+                    deletionDate: CoreDate.from("2100-01-03T00:00:00.000Z")
+                }),
+            status: properties?.status ?? RelationshipStatus.Active,
+            relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-03T00:00:00.000Z"),
+            cache:
+                properties?.cache ??
+                CachedRelationship.from({
+                    creationContent: {},
+                    auditLog: [
+                        {
+                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.Creation,
+                            newStatus: RelationshipStatus.Pending
+                        },
+
+                        {
+                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
+                            oldStatus: RelationshipStatus.Pending,
+                            newStatus: RelationshipStatus.Active
+                        }
+                    ],
+                    template: this.createIncomingRelationshipTemplate()
+                })
+        });
+    }
+
+    public static createRelationshipToDeletedPeer(properties?: Partial<IRelationship>): Relationship {
+        return Relationship.from({
+            id: properties?.id ?? CoreId.from("REL1"),
+            peer:
+                properties?.peer ??
+                Identity.from({
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    publicKey: CryptoSignaturePublicKey.from({
+                        algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
+                        publicKey: CoreBuffer.from("L1sPFQgS5CxgGs1ejBcWCQLCpeFXbRc1TQnSpuHQqDQ")
+                    })
+                }),
+            peerDeletionInfo:
+                properties?.peerDeletionInfo ??
+                PeerDeletionInfo.from({
+                    deletionStatus: PeerDeletionStatus.Deleted,
+                    deletionDate: CoreDate.from("2022-01-03T00:00:00.000Z")
+                }),
+            status: properties?.status ?? RelationshipStatus.DeletionProposed,
+            relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
+            cachedAt: properties?.cachedAt ?? CoreDate.from("2022-01-03T00:00:00.000Z"),
+            cache:
+                properties?.cache ??
+                CachedRelationship.from({
+                    creationContent: {},
+                    auditLog: [
+                        {
+                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.Creation,
+                            newStatus: RelationshipStatus.Pending
+                        },
+
+                        {
+                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
+                            oldStatus: RelationshipStatus.Pending,
+                            newStatus: RelationshipStatus.Active
+                        },
+
+                        {
+                            createdAt: CoreDate.from("2022-01-03T00:00:00.000Z"),
+                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                            createdByDevice: CoreId.from("DVC1"),
+                            // must be DecompositionDueToIdentityDeletion in the future
+                            reason: RelationshipAuditLogEntryReason.Decomposition,
+                            oldStatus: RelationshipStatus.Active,
+                            newStatus: RelationshipStatus.DeletionProposed
+                        }
+                    ],
+                    template: this.createIncomingRelationshipTemplate()
+                })
+        });
+    }
+
     public static createDeletionProposedRelationship(properties?: Partial<IRelationship>): Relationship {
         return Relationship.from({
             id: properties?.id ?? CoreId.from("REL1"),
@@ -227,6 +335,7 @@ export class TestObjectFactory {
     public static createIdentityAttribute(properties?: Partial<IIdentityAttribute>): IdentityAttribute {
         return IdentityAttribute.from({
             value: properties?.value ?? GivenName.fromAny({ value: "aGivenName" }),
+            tags: properties?.tags,
             owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }
@@ -234,9 +343,9 @@ export class TestObjectFactory {
     public static createRelationshipAttribute(properties?: Partial<IRelationshipAttribute>): RelationshipAttribute {
         return RelationshipAttribute.from({
             value: properties?.value ?? ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" }),
-            confidentiality: RelationshipAttributeConfidentiality.Public,
-            key: "aKey",
-            isTechnical: false,
+            confidentiality: properties?.confidentiality ?? RelationshipAttributeConfidentiality.Public,
+            key: properties?.key ?? "aKey",
+            isTechnical: properties?.isTechnical ?? false,
             owner: properties?.owner ?? CoreAddress.from("did:e:a-domain:dids:anidentity")
         });
     }

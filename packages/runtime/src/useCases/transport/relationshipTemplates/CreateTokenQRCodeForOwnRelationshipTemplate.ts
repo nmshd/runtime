@@ -1,16 +1,39 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
+import {
+    PasswordProtectionCreationParameters,
+    RelationshipTemplate,
+    RelationshipTemplateController,
+    SharedPasswordProtection,
+    TokenContentRelationshipTemplate,
+    TokenController
+} from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, ISO8601DateTimeString, QRCode, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import {
+    AddressString,
+    ISO8601DateTimeString,
+    QRCode,
+    RelationshipTemplateIdString,
+    RuntimeErrors,
+    SchemaRepository,
+    TokenAndTemplateCreationValidator,
+    UseCase
+} from "../../common";
 
 export interface CreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
-class Validator extends SchemaValidator<CreateTokenQRCodeForOwnTemplateRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateTokenQRCodeForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenQRCodeForOwnTemplateRequest"));
     }
@@ -44,10 +67,17 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
+        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(request.passwordProtection)) {
+            return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
+        }
+
+        const passwordProtection = template.passwordProtection ? SharedPasswordProtection.from(template.passwordProtection) : undefined;
+
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
             secretKey: template.secretKey,
-            forIdentity: template.cache!.forIdentity
+            forIdentity: template.cache!.forIdentity,
+            passwordProtection
         });
 
         const defaultTokenExpiry = template.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
@@ -56,7 +86,8 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral: true,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         const qrCode = await QRCode.forTruncateable(token);

@@ -13,6 +13,7 @@ import { File } from "../files/local/File";
 import { FileReference } from "../files/transmission/FileReference";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
+import { PeerDeletionStatus } from "../relationships/local/PeerDeletionInfo";
 import { Relationship } from "../relationships/local/Relationship";
 import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
@@ -103,9 +104,11 @@ export class MessageController extends TransportController {
 
     @log()
     public async getMessagesByAddress(address: CoreAddress): Promise<Message[]> {
-        const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(address);
-        if (!relationship) {
-            throw TransportCoreErrors.messages.missingOrInactiveRelationship(address.toString());
+        const relationship = await this.parent.relationships.getExistingRelationshipToIdentity(address);
+        if (!relationship || relationship.status === RelationshipStatus.Pending) {
+            throw new TransportError(
+                `Due to the non-existence of a Relationship with 'Active', 'Terminated' or 'DeletionProposed' as status, there are no Messages to the peer with address '${address.toString()}' that could be displayed.`
+            );
         }
         return await this.getMessagesByRelationshipId(relationship.id);
     }
@@ -289,14 +292,19 @@ export class MessageController extends TransportController {
         const parsedParams = SendMessageParameters.from(parameters);
         if (!parsedParams.attachments) parsedParams.attachments = [];
 
+        const validationError = await this.validateMessageRecipients(parsedParams.recipients);
+        if (validationError) throw validationError;
+
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
         const addressArray: ICoreAddress[] = [];
         const envelopeRecipients: MessageEnvelopeRecipient[] = [];
+
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(recipient);
+            const relationship = await this.relationships.getRelationshipToIdentity(recipient);
+
             if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+                throw new TransportError(`Due to the non-existence of a Relationship to the recipient with address '${recipient.toString()}', the Message cannot be sent.`);
             }
 
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
@@ -333,9 +341,10 @@ export class MessageController extends TransportController {
         const addressToRelationshipId: Record<string, ICoreId> = {};
 
         for (const recipient of parsedParams.recipients) {
-            const relationship = await this.relationships.getActiveRelationshipToIdentity(CoreAddress.from(recipient));
+            const relationship = await this.relationships.getRelationshipToIdentity(CoreAddress.from(recipient));
+
             if (!relationship) {
-                throw TransportCoreErrors.messages.missingOrInactiveRelationship(recipient.toString());
+                throw new TransportError(`Due to the non-existence of a Relationship to the recipient with address '${recipient.toString()}', the Message cannot be sent.`);
             }
 
             const signature = await this.secrets.sign(relationship.relationshipSecretId, plaintextBuffer);
@@ -409,6 +418,32 @@ export class MessageController extends TransportController {
         this.eventBus.publish(new MessageSentEvent(this.parent.identity.address.toString(), message));
 
         return message;
+    }
+
+    private async validateMessageRecipients(recipients: CoreAddress[]) {
+        const peersWithNeitherActiveNorTerminatedRelationship: string[] = [];
+        const deletedPeers: string[] = [];
+
+        for (const recipient of recipients) {
+            const relationship = await this.relationships.getRelationshipToIdentity(recipient);
+
+            if (!relationship || !(relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active)) {
+                peersWithNeitherActiveNorTerminatedRelationship.push(recipient.address);
+                continue;
+            }
+
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+                deletedPeers.push(recipient.address);
+            }
+        }
+
+        if (peersWithNeitherActiveNorTerminatedRelationship.length > 0) {
+            return TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship(peersWithNeitherActiveNorTerminatedRelationship);
+        }
+
+        if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
+
+        return;
     }
 
     private async decryptOwnEnvelope(envelope: MessageEnvelope, secretKey: CryptoSecretKey): Promise<MessageContentWrapper> {
