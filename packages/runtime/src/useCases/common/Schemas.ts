@@ -7,6 +7,9 @@ export const LoadPeerTokenAnonymousRequest: any = {
             "properties": {
                 "reference": {
                     "$ref": "#/definitions/TokenReferenceString"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -19347,6 +19350,9 @@ export const LoadItemFromTruncatedReferenceRequest: any = {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
                         }
                     ]
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -19721,6 +19727,22 @@ export const CreateDeviceOnboardingTokenRequest: any = {
                 },
                 "profileName": {
                     "type": "string"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string"
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -20089,6 +20111,23 @@ export const CreateTokenForFileRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -20127,6 +20166,23 @@ export const CreateTokenQRCodeForFileRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -20351,6 +20407,9 @@ export const GetOrLoadFileRequest: any = {
                             "$ref": "#/definitions/FileReferenceString"
                         }
                     ]
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -20435,8 +20494,7 @@ export const UploadOwnFileRequest: any = {
             "required": [
                 "content",
                 "filename",
-                "mimetype",
-                "title"
+                "mimetype"
             ],
             "additionalProperties": false
         },
@@ -20477,8 +20535,7 @@ export const UploadOwnFileValidatableRequest: any = {
             "required": [
                 "content",
                 "filename",
-                "mimetype",
-                "title"
+                "mimetype"
             ],
             "additionalProperties": false
         },
@@ -20790,326 +20847,6 @@ export const SendMessageRequest: any = {
         "FileIdString": {
             "type": "string",
             "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CreateOwnRelationshipTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateOwnRelationshipTemplateRequest",
-    "definitions": {
-        "CreateOwnRelationshipTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "content": {},
-                "maxNumberOfAllocations": {
-                    "type": "number",
-                    "minimum": 1
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                }
-            },
-            "required": [
-                "expiresAt",
-                "content"
-            ],
-            "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const CreateQRCodeForOwnTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateQRCodeForOwnTemplateRequest",
-    "definitions": {
-        "CreateQRCodeForOwnTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                }
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CreateTokenForOwnTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenForOwnTemplateRequest",
-    "definitions": {
-        "CreateTokenForOwnTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                }
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const CreateTokenQRCodeForOwnTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenQRCodeForOwnTemplateRequest",
-    "definitions": {
-        "CreateTokenQRCodeForOwnTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                }
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const GetRelationshipTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipTemplateRequest",
-    "definitions": {
-        "GetRelationshipTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetRelationshipTemplatesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipTemplatesRequest",
-    "definitions": {
-        "GetRelationshipTemplatesRequest": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetRelationshipTemplatesQuery"
-                },
-                "ownerRestriction": {
-                    "$ref": "#/definitions/OwnerRestriction"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetRelationshipTemplatesQuery": {
-            "type": "object",
-            "properties": {
-                "isOwn": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "expiresAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdByDevice": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "maxNumberOfAllocations": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forIdentity": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        },
-        "OwnerRestriction": {
-            "type": "string",
-            "enum": [
-                "o",
-                "p"
-            ]
-        }
-    }
-}
-
-export const LoadPeerRelationshipTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadPeerRelationshipTemplateRequest",
-    "definitions": {
-        "LoadPeerRelationshipTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/TokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/RelationshipTemplateReferenceString"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "reference"
-            ],
-            "additionalProperties": false,
-            "errorMessage": "token / relationship template reference invalid"
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        },
-        "RelationshipTemplateReferenceString": {
-            "type": "string",
-            "pattern": "UkxU.{84}"
         }
     }
 }
@@ -21507,6 +21244,380 @@ export const TerminateRelationshipRequest: any = {
     }
 }
 
+export const CreateOwnRelationshipTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateOwnRelationshipTemplateRequest",
+    "definitions": {
+        "CreateOwnRelationshipTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "content": {},
+                "maxNumberOfAllocations": {
+                    "type": "number",
+                    "minimum": 1
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "expiresAt",
+                "content"
+            ],
+            "additionalProperties": false
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const CreateQRCodeForOwnTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateQRCodeForOwnTemplateRequest",
+    "definitions": {
+        "CreateQRCodeForOwnTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                }
+            },
+            "required": [
+                "templateId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const CreateTokenForOwnTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateTokenForOwnTemplateRequest",
+    "definitions": {
+        "CreateTokenForOwnTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "templateId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const CreateTokenQRCodeForOwnTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateTokenQRCodeForOwnTemplateRequest",
+    "definitions": {
+        "CreateTokenQRCodeForOwnTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "templateId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const GetRelationshipTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipTemplateRequest",
+    "definitions": {
+        "GetRelationshipTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetRelationshipTemplatesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipTemplatesRequest",
+    "definitions": {
+        "GetRelationshipTemplatesRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetRelationshipTemplatesQuery"
+                },
+                "ownerRestriction": {
+                    "$ref": "#/definitions/OwnerRestriction"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetRelationshipTemplatesQuery": {
+            "type": "object",
+            "properties": {
+                "isOwn": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdByDevice": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "maxNumberOfAllocations": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forIdentity": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "OwnerRestriction": {
+            "type": "string",
+            "enum": [
+                "o",
+                "p"
+            ]
+        }
+    }
+}
+
+export const LoadPeerRelationshipTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/LoadPeerRelationshipTemplateRequest",
+    "definitions": {
+        "LoadPeerRelationshipTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipTemplateReferenceString"
+                        }
+                    ]
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "reference"
+            ],
+            "additionalProperties": false,
+            "errorMessage": "token / relationship template reference invalid"
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        },
+        "RelationshipTemplateReferenceString": {
+            "type": "string",
+            "pattern": "UkxU.{84}"
+        }
+    }
+}
+
 export const CreateOwnTokenRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateOwnTokenRequest",
@@ -21523,6 +21634,23 @@ export const CreateOwnTokenRequest: any = {
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -21699,6 +21827,9 @@ export const LoadPeerTokenRequest: any = {
                 },
                 "ephemeral": {
                     "type": "boolean"
+                },
+                "password": {
+                    "type": "string"
                 }
             },
             "required": [

@@ -1,18 +1,22 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { DevicesController, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
+import { DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { DeviceIdString, ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { DeviceIdString, ISO8601DateTimeString, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateDeviceOnboardingTokenRequest {
     id: DeviceIdString;
     expiresAt?: ISO8601DateTimeString;
     profileName?: string;
+    passwordProtection?: {
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
-class Validator extends SchemaValidator<CreateDeviceOnboardingTokenRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateDeviceOnboardingTokenRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateDeviceOnboardingTokenRequest"));
     }
@@ -35,7 +39,8 @@ export class CreateDeviceOnboardingTokenUseCase extends UseCase<CreateDeviceOnbo
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: expiresAt,
-            ephemeral: true
+            ephemeral: true,
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         return Result.ok(TokenMapper.toTokenDTO(token, true));

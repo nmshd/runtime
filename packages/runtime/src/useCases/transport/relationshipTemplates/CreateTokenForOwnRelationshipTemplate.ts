@@ -1,9 +1,17 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
+import {
+    AccountController,
+    PasswordProtectionCreationParameters,
+    RelationshipTemplate,
+    RelationshipTemplateController,
+    SharedPasswordProtection,
+    TokenContentRelationshipTemplate,
+    TokenController
+} from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateTokenForOwnTemplateRequest {
@@ -11,9 +19,16 @@ export interface CreateTokenForOwnTemplateRequest {
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
     forIdentity?: AddressString;
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
-class Validator extends SchemaValidator<CreateTokenForOwnTemplateRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateTokenForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenForOwnTemplateRequest"));
     }
@@ -44,10 +59,17 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
+        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(request.passwordProtection)) {
+            return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
+        }
+
+        const passwordProtection = template.passwordProtection ? SharedPasswordProtection.from(template.passwordProtection) : undefined;
+
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
             secretKey: template.secretKey,
-            forIdentity: template.cache?.forIdentity
+            forIdentity: template.cache?.forIdentity,
+            passwordProtection
         });
 
         const ephemeral = request.ephemeral ?? true;
@@ -57,7 +79,8 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         if (!ephemeral) {

@@ -3,12 +3,10 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, RelationshipTemplateController } from "@nmshd/transport";
+import { AccountController, PasswordProtectionCreationParameters, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DateTime } from "luxon";
-import { nameof } from "ts-simple-nameof";
 import { RelationshipTemplateDTO } from "../../../types";
-import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
@@ -19,27 +17,18 @@ export interface CreateOwnRelationshipTemplateRequest {
      */
     maxNumberOfAllocations?: number;
     forIdentity?: AddressString;
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
-class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateOwnRelationshipTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateOwnRelationshipTemplateRequest"));
-    }
-
-    public override validate(input: CreateOwnRelationshipTemplateRequest): ValidationResult {
-        const validationResult = super.validate(input);
-        if (!validationResult.isValid()) return validationResult;
-
-        if (DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)}' must be in the future`),
-                    nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)
-                )
-            );
-        }
-
-        return validationResult;
     }
 }
 
@@ -67,7 +56,8 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
-            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         await this.accountController.syncDatawallet();

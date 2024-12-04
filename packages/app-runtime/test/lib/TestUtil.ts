@@ -1,7 +1,7 @@
 /* eslint-disable jest/no-standalone-expect */
 import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
-import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { EventBus, Result, sleep } from "@js-soft/ts-utils";
 import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import {
@@ -16,18 +16,18 @@ import {
 } from "@nmshd/runtime";
 import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
-import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
+import { AppConfig, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
 import { FakeNativeBootstrapper } from "./natives/FakeNativeBootstrapper";
 
 export class TestUtil {
-    public static async createRuntime(configOverride?: any): Promise<AppRuntime> {
+    public static async createRuntime(configOverride?: any, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapper = new FakeNativeBootstrapper();
+        const nativeBootstrapper = new FakeNativeBootstrapper(eventBus);
         await nativeBootstrapper.init();
-        const runtime = await AppRuntime.create(nativeBootstrapper, config);
-        runtime.registerUIBridge(new FakeUIBridge());
+        const runtime = await AppRuntime.create(nativeBootstrapper, config, eventBus);
+        runtime.registerUIBridge(uiBridge);
 
         return runtime;
     }
@@ -79,46 +79,6 @@ export class TestUtil {
 
     public static useTestLoggerFactory(): void {
         TransportLoggerFactory.init(this.oldLogger);
-    }
-
-    public static async awaitEvent<TEvent>(
-        runtime: AppRuntime,
-        subscriptionTarget: SubscriptionTarget<TEvent>,
-        timeout?: number,
-        assertionFunction?: (t: TEvent) => boolean
-    ): Promise<TEvent> {
-        const eventBus = runtime.eventBus;
-        let subscriptionId: number;
-
-        const eventPromise = new Promise<TEvent>((resolve) => {
-            subscriptionId = eventBus.subscribe(subscriptionTarget, (event: TEvent) => {
-                if (assertionFunction && !assertionFunction(event)) return;
-
-                resolve(event);
-            });
-        });
-        if (!timeout) {
-            return await eventPromise.finally(() => eventBus.unsubscribe(subscriptionId));
-        }
-
-        let timeoutId: NodeJS.Timeout;
-        const timeoutPromise = new Promise<TEvent>((_resolve, reject) => {
-            timeoutId = setTimeout(
-                () => reject(new Error(`timeout exceeded for waiting for event ${typeof subscriptionTarget === "string" ? subscriptionTarget : subscriptionTarget.name}`)),
-                timeout
-            );
-        });
-
-        return await Promise.race([eventPromise, timeoutPromise]).finally(() => {
-            eventBus.unsubscribe(subscriptionId);
-            clearTimeout(timeoutId);
-        });
-    }
-
-    public static async expectEvent<T>(runtime: AppRuntime, subscriptionTarget: SubscriptionTarget<T>, timeoutInMS = 1000): Promise<T> {
-        const eventInstance: T = await this.awaitEvent(runtime, subscriptionTarget, timeoutInMS);
-        expect(eventInstance, "Event received").toBeDefined();
-        return eventInstance;
     }
 
     public static expectThrows(method: Function | Promise<any>, errorMessageRegexp: RegExp | string): void {
@@ -292,7 +252,7 @@ export class TestUtil {
             expiresAt: CoreDate.utc().add({ minutes: 5 }).toString(),
             filename: "Test.bin",
             mimetype: "application/json",
-            title: "Test",
+            title: "aFileName",
             content: fileContent
         });
         return file.value;

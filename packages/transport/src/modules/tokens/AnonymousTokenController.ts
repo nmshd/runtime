@@ -2,6 +2,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core";
+import { PasswordProtection } from "../../core/types/PasswordProtection";
 import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
 import { CachedToken } from "./local/CachedToken";
 import { Token } from "./local/Token";
@@ -13,17 +14,28 @@ export class AnonymousTokenController {
         this.client = new AnonymousTokenClient(config, correlator);
     }
 
-    public async loadPeerTokenByTruncated(truncated: string): Promise<Token> {
+    public async loadPeerTokenByTruncated(truncated: string, password?: string): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerToken(reference.id, reference.key, reference.forIdentityTruncated);
+
+        if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
+        const passwordProtection = reference.passwordProtection
+            ? PasswordProtection.from({
+                  salt: reference.passwordProtection.salt,
+                  passwordType: reference.passwordProtection.passwordType,
+                  password: password!
+              })
+            : undefined;
+
+        return await this.loadPeerToken(reference.id, reference.key, reference.forIdentityTruncated, passwordProtection);
     }
 
-    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string): Promise<Token> {
+    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, passwordProtection?: PasswordProtection): Promise<Token> {
         if (forIdentityTruncated) {
             throw TransportCoreErrors.general.notIntendedForYou(id.toString());
         }
 
-        const response = (await this.client.getToken(id.toString())).value;
+        const hashedPassword = passwordProtection ? (await CoreCrypto.deriveHashOutOfPassword(passwordProtection.password, passwordProtection.salt)).toBase64() : undefined;
+        const response = (await this.client.getToken(id.toString(), hashedPassword)).value;
 
         const cipher = CryptoCipher.fromBase64(response.content);
         const plaintextTokenBuffer = await CoreCrypto.decrypt(cipher, secretKey);
@@ -35,7 +47,8 @@ export class AnonymousTokenController {
         const token = Token.from({
             id: id,
             secretKey: secretKey,
-            isOwn: false
+            isOwn: false,
+            passwordProtection
         });
 
         const cachedToken = CachedToken.from({

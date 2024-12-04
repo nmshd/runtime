@@ -86,8 +86,18 @@ class Messages {
         );
     }
 
-    public missingOrInactiveRelationship(address: string) {
-        return new CoreError("error.transport.messages.missingOrInactiveRelationship", `An active Relationship with the given address '${address}' does not exist.`);
+    public hasNeitherActiveNorTerminatedRelationship(addresses: string[]) {
+        return new CoreError(
+            "error.transport.messages.hasNeitherActiveNorTerminatedRelationship",
+            `The Message cannot be sent as there is neither an active nor a terminated Relationship to the recipient(s) with the following address(es): ${addresses.map((address) => `'${address}'`).join(", ")}.`
+        );
+    }
+
+    public peerIsDeleted(addresses: string[]) {
+        return new CoreError(
+            "error.transport.messages.peerIsDeleted",
+            `The Message cannot be sent due to the deletion of the recipient(s) with the following address(es): ${addresses.map((address) => `'${address}'`).join(", ")}`
+        );
     }
 }
 
@@ -205,6 +215,10 @@ class General {
 
     public accountControllerInitialSyncFailed() {
         return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
+    }
+
+    public noPasswordProvided() {
+        return new CoreError("error.transport.noPasswordProvided", "You need to provide a password to perform this operation.");
     }
 }
 
