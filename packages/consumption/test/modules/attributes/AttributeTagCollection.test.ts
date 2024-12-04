@@ -69,7 +69,7 @@ describe("AttributeTagCollection", function () {
     });
 
     test("should receive the legal tags from the Backbone", async function () {
-        when(mockedClient.getBackboneAttributeTagCollection()).thenResolve(ClientResult.ok(mockTags));
+        when(mockedClient.getAttributeTagCollection()).thenResolve(ClientResult.ok(mockTags));
         const tags = await consumptionController.attributes.getAttributeTagCollection();
 
         expect(tags.toJSON()).toStrictEqualExcluding(mockTags, "@type");

@@ -57,7 +57,7 @@ describe("get attributeTagCollection", function () {
     /* eslint-enable @typescript-eslint/naming-convention */
 
     test("should receive the legal tags from the Backbone", async function () {
-        when(mockedRestClient.getBackboneAttributeTagCollection()).thenResolve(ClientResult.ok(mockTags));
+        when(mockedRestClient.getAttributeTagCollection()).thenResolve(ClientResult.ok(mockTags));
         const tags = await runtimeService.consumption.attributes.getAttributeTagCollection();
 
         expect(tags.value).toStrictEqual(mockTags);

@@ -3,7 +3,7 @@ import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthent
 import { BackboneGetAttributeTagCollection } from "./BackboneGetAttributeTagCollection";
 
 export class AttributeTagClient extends RESTClientAuthenticate {
-    public async getBackboneAttributeTagCollection(): Promise<ClientResult<BackboneGetAttributeTagCollection>> {
+    public async getAttributeTagCollection(): Promise<ClientResult<BackboneGetAttributeTagCollection>> {
         return await this.get<BackboneGetAttributeTagCollection>("/api/v1/Tags");
     }
 }
