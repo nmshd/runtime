@@ -186,14 +186,13 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     public async canAccept(params: DecideRequestParametersJSON): Promise<ValidationResult> {
         const canDecideResult = await this.canDecide({ ...params, accept: true });
 
-        const request = await this.getOrThrow(params.requestId);
-
-        const keyUniquenessValidationResult = this.validateKeyUniquenessOfRelationshipAttributesWithinRequest(request.content.items, params.items);
-        if (keyUniquenessValidationResult.isError() && canDecideResult.isSuccess()) {
-            return keyUniquenessValidationResult;
+        if (canDecideResult.isError()) {
+            return canDecideResult;
         }
 
-        return canDecideResult;
+        const request = await this.getOrThrow(params.requestId);
+        const keyUniquenessValidationResult = this.validateKeyUniquenessOfRelationshipAttributesWithinRequest(request.content.items, params.items);
+        return keyUniquenessValidationResult;
     }
 
     public async canReject(params: DecideRequestParametersJSON): Promise<ValidationResult> {
@@ -323,12 +322,12 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest)) {
             throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-                "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+                "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
             );
         } else if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfAcceptedItemsOfRequest)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                    "The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+                    "The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
                 )
             );
         }

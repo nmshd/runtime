@@ -1292,7 +1292,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
-        const queryForRelationshipAttributesWithSameKey = {
+        return await this.getLocalAttributes({
             "content.@type": "RelationshipAttribute",
             "content.owner": owner.toString(),
             "content.key": key,
@@ -1307,8 +1307,6 @@ export class AttributesController extends ConsumptionBaseController {
                     LocalAttributeDeletionStatus.DeletedByOwner
                 ]
             }
-        };
-
-        return await this.getLocalAttributes(queryForRelationshipAttributesWithSameKey);
+        });
     }
 }

@@ -60,7 +60,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             if (relationshipAttributesWithSameKey.length !== 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The provided RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                        "The provided RelationshipAttribute could not be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
                     )
                 );
             }
@@ -82,12 +82,12 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
             if (relationshipAttributesWithSameKey.length !== 0 && requestItem.mustBeAccepted) {
                 throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-                    "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
                 );
             } else if (relationshipAttributesWithSameKey.length !== 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                        "This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                        "This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
                     )
                 );
             }

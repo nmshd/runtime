@@ -156,7 +156,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         if (OutgoingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-                    "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key."
+                    "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
                 )
             );
         }

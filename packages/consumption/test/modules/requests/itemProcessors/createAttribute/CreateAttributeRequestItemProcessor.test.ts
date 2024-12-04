@@ -80,7 +80,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSomeoneElse }, TestIdentity.UNDEFINED);
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
-                    "The owner of the provided IdentityAttribute for the `attribute` property can only be address of the recipient or an empty string. The latter will default to the address of the recipient."
+                    "The owner of the provided IdentityAttribute for the `attribute` property can only be the address of the recipient or an empty string. The latter will default to the address of the recipient."
             });
         });
 
@@ -151,7 +151,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKey }, TestIdentity.RECIPIENT);
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
-                    "The provided RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    "The provided RelationshipAttribute could not be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
             });
         });
 
@@ -171,7 +171,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKeyAndEmptyOwner }, TestIdentity.RECIPIENT);
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
-                    "The provided RelationshipAttribute could not be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    "The provided RelationshipAttribute could not be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
             });
         });
 
@@ -269,7 +269,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await expect(When.iCallCanAccept()).rejects.toThrow(
-                "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
             );
         });
 
@@ -285,7 +285,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await expect(When.iCallCanAccept()).rejects.toThrow(
-                "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
             );
         });
 
@@ -306,7 +306,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidAcceptParameters",
                 message:
-                    "This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute with the same key in the context of this Relationship."
+                    "This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
             });
         });
     });
