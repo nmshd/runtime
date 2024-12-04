@@ -449,6 +449,7 @@ describe("Postponed Notifications via Messages", () => {
 
             const postponedMessages = await syncUntilHasMessages(client5.transport);
             expect(postponedMessages).toHaveLength(1);
+            await client5.eventBus.waitForRunningEventHandlers();
             const postponedNotification = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
             expect(postponedNotification).toBeSuccessful();
         });
