@@ -15,7 +15,7 @@ import {
     ResponseItemGroup
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
-import { Message, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
+import { Message, PeerDeletionStatus, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
@@ -80,6 +80,18 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
                     ConsumptionCoreErrors.requests.wrongRelationshipStatus(
                         `You cannot create a request to '${parsedParams.peer.toString()}' since the relationship is in status '${relationship.status}'.`
                     )
+                );
+            }
+
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.peerIsInDeletion(`You cannot create a Request to peer '${parsedParams.peer.toString()}' since the peer is in deletion.`)
+                );
+            }
+
+            if (relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot create a Request to peer '${parsedParams.peer.toString()}' since the peer is deleted.`)
                 );
             }
         }

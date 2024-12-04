@@ -185,6 +185,18 @@ export class RequestsGiven {
         return Promise.resolve();
     }
 
+    public aRelationshipToPeerInDeletion(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationshipToPeerInDeletion();
+
+        return Promise.resolve();
+    }
+
+    public aRelationshipToDeletedPeer(): Promise<void> {
+        this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createRelationshipToDeletedPeer();
+
+        return Promise.resolve();
+    }
+
     public aDeletionProposedRelationshipToIdentity(): Promise<void> {
         this.context.relationshipToReturnFromGetRelationshipToIdentity = TestObjectFactory.createDeletionProposedRelationship();
 
