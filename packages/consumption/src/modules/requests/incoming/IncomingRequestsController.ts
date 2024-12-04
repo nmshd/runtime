@@ -192,7 +192,11 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const request = await this.getOrThrow(params.requestId);
         const keyUniquenessValidationResult = this.validateKeyUniquenessOfRelationshipAttributesWithinRequest(request.content.items, params.items);
-        return keyUniquenessValidationResult;
+        if (keyUniquenessValidationResult.isError()) {
+            return keyUniquenessValidationResult;
+        }
+
+        return canDecideResult;
     }
 
     public async canReject(params: DecideRequestParametersJSON): Promise<ValidationResult> {
