@@ -251,7 +251,7 @@ export class MultiAccountController {
         await this._localAccounts.update(oldAccount, renamedAccount);
     }
 
-    public async updateLocalAccountDeletionDate(address: string, deletionDate?: CoreDate): Promise<void> {
+    public async updateLocalAccountDeletionDate(address: string, deletionDate?: CoreDate): Promise<LocalAccount> {
         const oldAccount = await this._localAccounts.findOne({ address });
 
         if (!oldAccount) {
@@ -265,6 +265,8 @@ export class MultiAccountController {
 
         const cachedAccount = this.sessionStorage.findSession(address)?.account;
         if (cachedAccount) cachedAccount.deletionDate = deletionDate?.toString();
+
+        return account;
     }
 
     public async updateLastAccessedAt(accountId: string): Promise<void> {

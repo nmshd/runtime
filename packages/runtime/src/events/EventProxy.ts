@@ -94,7 +94,10 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {
             this.targetEventBus.publish(
-                new IdentityDeletionProcessStatusChangedEvent(event.eventTargetAddress, IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(event.data))
+                new IdentityDeletionProcessStatusChangedEvent(
+                    event.eventTargetAddress,
+                    event.data ? IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(event.data) : undefined
+                )
             );
         });
 
