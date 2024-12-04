@@ -29,7 +29,12 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
         if (!AttributeValues.Identity.TYPE_NAMES.includes(valueType)) {
             const validationResult = new ValidationResult();
 
-            validationResult.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPropertyValue("@type must be one of the IdentityAttribute content types"), "@type"));
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue("content.value.@type must match one of the allowed attribute value types for IdentityAttributes"),
+                    "@type"
+                )
+            );
             return validationResult;
         }
 

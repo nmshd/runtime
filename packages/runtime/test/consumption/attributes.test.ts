@@ -834,14 +834,12 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             const request: CreateRepositoryAttributeRequest = {
                 content: {
                     value: {
-                        "@type": "ProprietaryString",
-                        value: "aString",
-                        title: "aTitle"
+                        "@type": "invalid-type"
                     }
                 }
             } as any;
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-            expect(result.error.message).toBe("@type must be one of the IdentityAttribute content types");
+            expect(result.error.message).toBe("content.value.@type must match one of the allowed attribute value types for IdentityAttributes");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
     });

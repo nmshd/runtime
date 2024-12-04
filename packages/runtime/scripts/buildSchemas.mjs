@@ -17,7 +17,7 @@ const attributeValues = content.AttributeValues.TYPE_NAMES.map((x) => x + "JSON"
 const contentSchemaDeclarations = getSchemaDeclarations(contentConfig, (x) => attributeValues.includes(x));
 
 const outputPath = new URL("../src/useCases/common/Schemas.ts", import.meta.url).pathname;
-fs.writeFile(outputPath, runtimeSchemaDeclarations + "\n\n" + contentSchemaDeclarations, (err) => {
+fs.writeFile(outputPath, `${runtimeSchemaDeclarations}\n\n${contentSchemaDeclarations}`, (err) => {
     if (err) throw err;
 });
 
