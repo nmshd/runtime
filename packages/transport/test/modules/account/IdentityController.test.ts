@@ -36,9 +36,9 @@ describe("IdentityController", function () {
     });
 
     test("check deletion of Identity having IdentityDeletionProcess with expired grace period", async function () {
-        const identityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
+        const identityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess(0.000001);
 
-        await sleep(10000);
+        await sleep(1000);
 
         const result = await account.identity.checkDeletionOfIdentity();
         expect(result.value.isDeleted).toBe(true);
