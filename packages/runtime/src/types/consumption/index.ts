@@ -1,3 +1,4 @@
+export * from "./AttributeTagCollectionDTO";
 export * from "./DraftDTO";
 export * from "./IdentityMetadataDTO";
 export * from "./LocalAttributeDTO";
