@@ -30,7 +30,6 @@ export enum ControllerName {
     RelationshipTemplator = "RelationshipTemplator",
     Secret = "Secret",
     Sync = "Sync",
-    Tag = "Tag",
     Token = "Token"
 }
 
