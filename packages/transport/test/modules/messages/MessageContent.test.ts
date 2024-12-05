@@ -97,7 +97,7 @@ describe("MessageContent", function () {
             expect(message).toBeDefined();
         });
 
-        test("should correctly store the me4ssage (sender)", async function () {
+        test("should correctly store the message (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(2);
             const message = messages[1];

@@ -1,4 +1,4 @@
-import { Event, EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
+import { Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     ConsumptionIds,
@@ -160,12 +160,17 @@ export async function syncUntilHasEvent<TEvent extends Event>(
     return event;
 }
 
-export async function uploadOwnToken(transportServices: TransportServices, forIdentity?: string): Promise<TokenDTO> {
+export async function uploadOwnToken(
+    transportServices: TransportServices,
+    forIdentity?: string,
+    passwordProtection?: { password: string; passwordIsPin?: true }
+): Promise<TokenDTO> {
     const response = await transportServices.tokens.createOwnToken({
         content: { aKey: "aValue" },
         expiresAt: DateTime.utc().plus({ days: 1 }).toString(),
         ephemeral: false,
-        forIdentity
+        forIdentity,
+        passwordProtection
     });
 
     expect(response).toBeSuccessful();
@@ -211,13 +216,19 @@ export const emptyRelationshipTemplateContent: ArbitraryRelationshipTemplateCont
 
 export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationContentJSON = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON();
 
-export async function createTemplate(transportServices: TransportServices, body?: RelationshipTemplateContentJSON, templateExpiresAt?: DateTime): Promise<RelationshipTemplateDTO> {
+export async function createTemplate(
+    transportServices: TransportServices,
+    body?: RelationshipTemplateContentJSON,
+    passwordProtection?: { password: string; passwordIsPin?: true },
+    templateExpiresAt?: DateTime
+): Promise<RelationshipTemplateDTO> {
     const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
 
     const response = await transportServices.relationshipTemplates.createOwnRelationshipTemplate({
         maxNumberOfAllocations: 1,
         expiresAt: templateExpiresAt ? templateExpiresAt.toString() : defaultExpirationDateTime,
-        content: _.cloneDeep(body) ?? emptyRelationshipTemplateContent
+        content: _.cloneDeep(body) ?? emptyRelationshipTemplateContent,
+        passwordProtection
     });
 
     expect(response).toBeSuccessful();
@@ -240,7 +251,7 @@ export async function exchangeTemplate(
     content?: RelationshipTemplateContentJSON,
     templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
-    const template = await createTemplate(transportServicesCreator, content, templateExpiresAt);
+    const template = await createTemplate(transportServicesCreator, content, undefined, templateExpiresAt);
 
     const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
     expect(response).toBeSuccessful();
@@ -286,7 +297,12 @@ export async function sendMessage(transportServices: TransportServices, recipien
     return response.value;
 }
 
-export async function sendMessageToMultipleRecipients(transportServices: TransportServices, recipients: string[], content?: any, attachments?: string[]): Promise<MessageDTO> {
+export async function sendMessageToMultipleRecipients(
+    transportServices: TransportServices,
+    recipients: string[],
+    content?: any,
+    attachments?: string[]
+): Promise<Result<MessageDTO>> {
     const response = await transportServices.messages.sendMessage({
         recipients,
         content: content ?? {
@@ -298,9 +314,8 @@ export async function sendMessageToMultipleRecipients(transportServices: Transpo
         },
         attachments
     });
-    expect(response).toBeSuccessful();
 
-    return response.value;
+    return response;
 }
 
 export async function sendMessageWithRequest(
@@ -516,6 +531,24 @@ export async function ensurePendingRelationship(sTransportServices: TransportSer
     }
 
     return (await sTransportServices.relationships.getRelationships({})).value[0];
+}
+
+export async function reactivateTerminatedRelationship(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<void> {
+    const rTransportServicesAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+
+    const terminatedRelationshipsToPeer = (
+        await sTransportServices.relationships.getRelationships({ query: { peer: rTransportServicesAddress, status: RelationshipStatus.Terminated } })
+    ).value;
+
+    if (terminatedRelationshipsToPeer.length !== 0) {
+        const terminatedRelationshipId = terminatedRelationshipsToPeer[0].id;
+        await rTransportServices.relationships.requestRelationshipReactivation({ relationshipId: terminatedRelationshipId });
+        await syncUntilHasRelationships(sTransportServices);
+        await sTransportServices.relationships.acceptRelationshipReactivation({ relationshipId: terminatedRelationshipId });
+        await syncUntilHasRelationships(rTransportServices);
+    }
+
+    return;
 }
 
 export async function mutualDecomposeIfActiveRelationshipExists(sTransportServices: TransportServices, rTransportServices: TransportServices): Promise<void> {

@@ -287,7 +287,7 @@ export class TestUtil {
         return accountController;
     }
 
-    public static async addRejectedRelationship(from: AccountController, to: AccountController): Promise<void> {
+    public static async addRejectedRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
         const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
             content: {
                 mycontent: "template"
@@ -315,11 +315,42 @@ export class TestUtil {
         const rejectedRelationshipFromSelf = await from.relationships.reject(pendingRelationship.id);
         expect(rejectedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Rejected);
 
-        // Get accepted relationship
+        // Get rejected relationship
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
-        const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
-        expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
+        const rejectedRelationshipPeer = syncedRelationshipsPeer[0];
+        expect(rejectedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
+
+        return rejectedRelationshipFromSelf;
+    }
+
+    public static async addPendingRelationship(from: AccountController, to: AccountController, template?: RelationshipTemplate): Promise<Relationship> {
+        const templateFrom =
+            template ??
+            (await from.relationshipTemplates.sendRelationshipTemplate({
+                content: {
+                    mycontent: "template"
+                },
+                expiresAt: CoreDate.utc().add({ minutes: 5 }),
+                maxNumberOfAllocations: 1
+            }));
+
+        const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
+
+        await to.relationships.sendRelationship({
+            template: templateTo,
+            creationContent: {
+                mycontent: "request"
+            }
+        });
+
+        const syncedRelationshipsFromSelf = await TestUtil.syncUntilHasRelationships(from);
+        expect(syncedRelationshipsFromSelf).toHaveLength(1);
+        const pendingRelationshipFromSelf = syncedRelationshipsFromSelf[0];
+        expect(pendingRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Pending);
+
+        return pendingRelationshipFromSelf;
     }
 
     public static async addRelationship(
@@ -342,23 +373,9 @@ export class TestUtil {
         to: AccountController,
         template: RelationshipTemplate
     ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
-        const reference = template.toRelationshipTemplateReference().truncate();
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+        const pendingRelationshipFromSelf = await TestUtil.addPendingRelationship(from, to, template);
 
-        const relRequest = await to.relationships.sendRelationship({
-            template: templateTo,
-            creationContent: {
-                mycontent: "request"
-            }
-        });
-
-        // Accept relationship
-        const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
-        expect(syncedRelationships).toHaveLength(1);
-        const pendingRelationship = syncedRelationships[0];
-        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
-
-        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
+        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationshipFromSelf.id);
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         // Get accepted relationship
@@ -370,10 +387,20 @@ export class TestUtil {
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
         expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
-        expect(relRequest.id.toString()).toBe(acceptedRelationshipFromSelf.id.toString());
-        expect(relRequest.id.toString()).toBe(acceptedRelationshipPeer.id.toString());
+        expect(acceptedRelationshipFromSelf.id.toString()).toBe(acceptedRelationshipPeer.id.toString());
 
         return { acceptedRelationshipFromSelf, acceptedRelationshipPeer };
+    }
+
+    public static async revokeRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ revokedRelationshipFromSelf: Relationship; revokedRelationshipPeer: Relationship }> {
+        const relationshipId = (await to.relationships.getRelationshipToIdentity(from.identity.address))!.id;
+        const revokedRelationshipPeer = await to.relationships.revoke(relationshipId);
+        const revokedRelationshipFromSelf = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { revokedRelationshipFromSelf, revokedRelationshipPeer };
     }
 
     public static async terminateRelationship(
@@ -385,6 +412,19 @@ export class TestUtil {
         const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
 
         return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
+    }
+
+    public static async reactivateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ reactivatedRelationshipFromSelf: Relationship; reactivatedRelationshipPeer: Relationship }> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
+        await from.relationships.requestReactivation(relationshipId);
+        await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
+        const reactivatedRelationshipFromSelf = await to.relationships.acceptReactivation(relationshipId);
+        const reactivatedRelationshipPeer = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { reactivatedRelationshipFromSelf, reactivatedRelationshipPeer };
     }
 
     public static async decomposeRelationship(from: AccountController, to: AccountController): Promise<Relationship> {

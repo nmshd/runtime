@@ -3,14 +3,14 @@ import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
 import { TransportCoreErrors } from "../TransportCoreErrors";
 
 export interface ISharedPasswordProtection extends ISerializable {
-    passwordType: string;
+    passwordType: "pw" | `pin${number}`;
     salt: ICoreBuffer;
 }
 
 export class SharedPasswordProtection extends Serializable implements ISharedPasswordProtection {
     @validate({ regExp: /^(pw|pin(4|5|6|7|8|9|10|11|12|13|14|15|16))$/ })
     @serialize()
-    public passwordType: string;
+    public passwordType: "pw" | `pin${number}`;
 
     @validate({ customValidator: (v: ICoreBuffer) => (v.buffer.byteLength === 16 ? undefined : "must be 16 bytes long") })
     @serialize()
@@ -28,7 +28,7 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
             throw TransportCoreErrors.general.invalidTruncatedReference("The password part of a TruncatedReference must consist of exactly 2 components.");
         }
 
-        const passwordType = splittedPasswordParts[0];
+        const passwordType = splittedPasswordParts[0] as "pw" | `pin${number}`;
         try {
             const salt = CoreBuffer.fromBase64(splittedPasswordParts[1]);
             return SharedPasswordProtection.from({ passwordType, salt });

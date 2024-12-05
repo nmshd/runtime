@@ -465,7 +465,7 @@ export class TestUtil {
     public static async uploadFile(from: AccountController, fileContent: CoreBuffer): Promise<File> {
         const params: ISendFileParameters = {
             buffer: fileContent,
-            title: "Test",
+            title: "aFileName",
             description: "Dies ist eine Beschreibung",
             filename: "Test.bin",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
