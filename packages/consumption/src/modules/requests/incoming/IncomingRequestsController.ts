@@ -292,34 +292,19 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         params: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
     ) {
         const fragmentsOfMustBeAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
-        const fragmentsOfAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
 
         for (let i = 0; i < params.length; i++) {
             const item = items[i];
-            const decideItemParams = params[i];
 
             if (item instanceof RequestItemGroup) {
                 const fragmentsOfMustBeAcceptedItemsOfGroup = this.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item);
                 if (fragmentsOfMustBeAcceptedItemsOfGroup) {
                     fragmentsOfMustBeAcceptedItemsOfRequest.push(...fragmentsOfMustBeAcceptedItemsOfGroup);
                 }
-
-                const fragmentsOfAcceptedItemsOfGroup = this.extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(
-                    item,
-                    decideItemParams as DecideRequestItemGroupParametersJSON
-                );
-                if (fragmentsOfAcceptedItemsOfGroup) {
-                    fragmentsOfAcceptedItemsOfRequest.push(...fragmentsOfAcceptedItemsOfGroup);
-                }
             } else {
                 const fragmentOfMustBeAcceptedRequestItem = this.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item);
                 if (fragmentOfMustBeAcceptedRequestItem) {
                     fragmentsOfMustBeAcceptedItemsOfRequest.push(fragmentOfMustBeAcceptedRequestItem);
-                }
-
-                const fragmentOfAcceptedRequestItem = this.extractRelationshipAttributeFragmentFromAcceptedRequestItem(item, decideItemParams as DecideRequestItemParametersJSON);
-                if (fragmentOfAcceptedRequestItem) {
-                    fragmentsOfAcceptedItemsOfRequest.push(fragmentOfAcceptedRequestItem);
                 }
             }
         }
@@ -328,7 +313,31 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
                 "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
             );
-        } else if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfAcceptedItemsOfRequest)) {
+        }
+
+        const fragmentsOfAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
+
+        for (let i = 0; i < params.length; i++) {
+            const item = items[i];
+            const decideItemParams = params[i];
+
+            if (item instanceof RequestItemGroup) {
+                const fragmentsOfAcceptedItemsOfGroup = this.extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(
+                    item,
+                    decideItemParams as DecideRequestItemGroupParametersJSON
+                );
+                if (fragmentsOfAcceptedItemsOfGroup) {
+                    fragmentsOfAcceptedItemsOfRequest.push(...fragmentsOfAcceptedItemsOfGroup);
+                }
+            } else {
+                const fragmentOfAcceptedRequestItem = this.extractRelationshipAttributeFragmentFromAcceptedRequestItem(item, decideItemParams as DecideRequestItemParametersJSON);
+                if (fragmentOfAcceptedRequestItem) {
+                    fragmentsOfAcceptedItemsOfRequest.push(fragmentOfAcceptedRequestItem);
+                }
+            }
+        }
+
+        if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfAcceptedItemsOfRequest)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
                     "The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
