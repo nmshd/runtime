@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController, AttributeTagClient, ClientResult, Transport } from "@nmshd/transport";
 import { spy, when } from "ts-mockito";
-import { ConsumptionController } from "../../../src";
+import { AttributeTagCollection, ConsumptionController } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 
 describe("AttributeTagCollection", function () {
@@ -72,6 +72,6 @@ describe("AttributeTagCollection", function () {
         when(mockedClient.getAttributeTagCollection()).thenResolve(ClientResult.ok(mockTags));
         const tags = await consumptionController.attributes.getAttributeTagCollection();
 
-        expect(tags.toJSON()).toStrictEqualExcluding(mockTags, "@type");
+        expect(tags).toStrictEqual(AttributeTagCollection.from(mockTags));
     });
 });
