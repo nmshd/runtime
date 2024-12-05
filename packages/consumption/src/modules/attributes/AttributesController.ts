@@ -16,7 +16,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import * as iql from "@nmshd/iql";
-import { AttributeTagClient, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
+import { SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -46,7 +46,7 @@ import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator,
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
-    private attributeTagClient: AttributeTagClient;
+    private attributeTagClient: TagClient;
 
     public constructor(
         parent: ConsumptionController,
@@ -61,7 +61,7 @@ export class AttributesController extends ConsumptionBaseController {
         await super.init();
 
         this.attributes = await this.parent.accountController.getSynchronizedCollection("Attributes");
-        this.attributeTagClient = new AttributeTagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
+        this.attributeTagClient = new TagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
 
         return this;
     }
@@ -1295,7 +1295,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
-        const backboneAttributeTagCollection = (await this.attributeTagClient.getAttributeTagCollection()).value;
-        return AttributeTagCollection.from(backboneAttributeTagCollection);
+        const backboneTagCollection = (await this.attributeTagClient.getTagCollection()).value;
+        return AttributeTagCollection.from(backboneTagCollection);
     }
 }
