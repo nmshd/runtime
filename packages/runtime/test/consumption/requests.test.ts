@@ -581,7 +581,7 @@ describe("Requests", () => {
             const completionResult = await sConsumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
                 responseSourceId: sRelationship.id,
                 response: (sRelationship.creationContent as RelationshipCreationContentJSON).response,
-                templateId: relationship!.template.id
+                templateId: relationship!.templateId
             });
 
             expect(completionResult).toBeSuccessful();
