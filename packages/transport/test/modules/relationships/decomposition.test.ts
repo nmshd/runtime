@@ -149,7 +149,7 @@ describe("Relationship decomposition due to Identity deletion", function () {
         const activeRelationship = await sender.relationships.getActiveRelationshipToIdentity(recipient.identity.address);
         expect(activeRelationship?.status).toBe(RelationshipStatus.Active);
 
-        await recipient.identityDeletionProcess.initiateIdentityDeletionProcess();
+        await recipient.identityDeletionProcess.initiateIdentityDeletionProcess(0);
         await TestUtil.runDeletionJob();
 
         await sender.syncEverything();
