@@ -141,8 +141,8 @@ describe("Relationship decomposition due to Identity deletion", function () {
     });
 
     afterAll(async function () {
-        await sender?.close();
-        await recipient?.close();
+        await sender.close();
+        await recipient.close();
         await connection.close();
     });
 
@@ -150,12 +150,13 @@ describe("Relationship decomposition due to Identity deletion", function () {
         const activeRelationship = await sender.relationships.getActiveRelationshipToIdentity(recipient.identity.address);
         expect(activeRelationship?.status).toBe(RelationshipStatus.Active);
 
-        await recipient.identityDeletionProcess.initiateIdentityDeletionProcess(0.000001);
+        await recipient.identityDeletionProcess.initiateIdentityDeletionProcess();
         await sleep(1000);
         await TestUtil.runDeletionJob();
 
         await sender.syncEverything();
         const deletionProposedRelationship = await sender.relationships.getRelationshipToIdentity(recipient.identity.address);
+        expect(deletionProposedRelationship?.peerDeletionInfo?.deletionStatus).toBe("Deleted");
         expect(deletionProposedRelationship?.status).toBe(RelationshipStatus.DeletionProposed);
     });
 });
