@@ -261,8 +261,7 @@ export class TestObjectFactory {
                             createdAt: CoreDate.from("2022-01-03T00:00:00.000Z"),
                             createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
                             createdByDevice: CoreId.from("DVC1"),
-                            // must be DecompositionDueToIdentityDeletion in the future
-                            reason: RelationshipAuditLogEntryReason.Decomposition,
+                            reason: RelationshipAuditLogEntryReason.DecompositionDueToIdentityDeletion,
                             oldStatus: RelationshipStatus.Active,
                             newStatus: RelationshipStatus.DeletionProposed
                         }
