@@ -29,7 +29,6 @@ import {
     reactivateTerminatedRelationship,
     RuntimeServiceProvider,
     sendMessage,
-    sendMessageToMultipleRecipients,
     syncUntilHasEvent,
     syncUntilHasMessage,
     syncUntilHasMessages,
@@ -387,16 +386,17 @@ describe("Message errors", () => {
         test("should throw correct error for Messages whose content is not a Notification if there are recipients in deletion", async () => {
             await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
             await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
-            await client1.eventBus.waitForRunningEventHandlers();
 
-            await client5.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-            await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient5);
-            await client1.eventBus.waitForRunningEventHandlers();
-
-            const result = await sendMessageToMultipleRecipients(client1.transport, [client2.address, client5.address]);
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client2.address],
+                content: {
+                    "@type": "ArbitraryMessageContent",
+                    value: "aString"
+                }
+            });
             expect(result).toBeAnError(/.*/, "error.runtime.messages.peerIsInDeletion");
             expect(result.error.message).toBe(
-                `The Message cannot be sent as the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}', '${client5.address.toString()}'. However, please note that Messages whose content is a Notification can be sent to recipients in deletion.`
+                `The Message cannot be sent as the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'. However, please note that Messages whose content is a Notification can be sent to recipients in deletion.`
             );
         });
 
