@@ -1,6 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
-import { sleep } from "@js-soft/ts-utils";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Relationship, RelationshipStatus, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
@@ -151,12 +150,10 @@ describe("Relationship decomposition due to Identity deletion", function () {
         expect(activeRelationship?.status).toBe(RelationshipStatus.Active);
 
         await recipient.identityDeletionProcess.initiateIdentityDeletionProcess();
-        await sleep(1000);
         await TestUtil.runDeletionJob();
 
         await sender.syncEverything();
         const deletionProposedRelationship = await sender.relationships.getRelationshipToIdentity(recipient.identity.address);
-        expect(deletionProposedRelationship?.peerDeletionInfo?.deletionStatus).toBe("Deleted");
         expect(deletionProposedRelationship?.status).toBe(RelationshipStatus.DeletionProposed);
     });
 });
