@@ -359,28 +359,25 @@ describe("Message errors", () => {
 
     describe("Message errors for peers that are in deletion", () => {
         let relationshipIdToClient2: string;
-        let relationshipIdToClient5: string;
 
         beforeAll(async () => {
             relationshipIdToClient2 = (await client1.transport.relationships.getRelationshipByAddress({ address: client2.address })).value.id;
-            relationshipIdToClient5 = (await ensureActiveRelationship(client1.transport, client5.transport)).id;
+            await ensureActiveRelationship(client1.transport, client5.transport);
         });
 
         afterEach(async () => {
-            for (const client of [client2, client5]) {
-                const activeIdentityDeletionProcess = await client.transport.identityDeletionProcesses.getActiveIdentityDeletionProcess();
-                if (!activeIdentityDeletionProcess.isSuccess) {
-                    return;
-                }
-                let abortResult;
-                if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
-                    abortResult = await client.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
-                } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-                    abortResult = await client.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
-                }
-                await syncUntilHasEvent(client1, PeerDeletionCancelledEvent);
-                if (abortResult?.isError) throw abortResult.error;
+            const activeIdentityDeletionProcess = await client2.transport.identityDeletionProcesses.getActiveIdentityDeletionProcess();
+            if (!activeIdentityDeletionProcess.isSuccess) {
+                return;
             }
+            let abortResult;
+            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+                abortResult = await client2.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
+            } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
+                abortResult = await client2.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
+            }
+            await syncUntilHasEvent(client1, PeerDeletionCancelledEvent);
+            if (abortResult?.isError) throw abortResult.error;
         });
 
         test("should throw correct error for Messages whose content is not a Notification if there are recipients in deletion", async () => {
