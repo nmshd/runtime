@@ -300,6 +300,31 @@ export class AppRuntime extends Runtime<AppConfig> {
         await this.lokiConnection.close().catch(logError);
     }
 
+    protected override async startAccounts(): Promise<void> {
+        const accounts = await this._multiAccountController.getAccounts();
+
+        for (const account of accounts) {
+            const session = await this.selectAccount(account.id.toString());
+            const syncResult = await session.transportServices.account.syncDatawallet();
+
+            if (syncResult.isSuccess) continue;
+            // TODO: can I check whether the error is a 400?
+
+            const checkDeletionResult = await session.transportServices.account.checkDeletionOfIdentity();
+
+            if (checkDeletionResult.isError) {
+                this.logger.error(checkDeletionResult.error);
+                continue;
+            }
+
+            if (!checkDeletionResult.value.isDeleted) {
+                this.logger.error(syncResult.error);
+            }
+
+            await this._multiAccountController.deleteAccount(account.id);
+        }
+    }
+
     private translationProvider: INativeTranslationProvider = {
         translate: (key: string) => Promise.resolve(Result.ok(key))
     };
