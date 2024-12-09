@@ -28,7 +28,6 @@ import {
     reactivateTerminatedRelationship,
     RuntimeServiceProvider,
     sendMessage,
-    sendMessageToMultipleRecipients,
     syncUntilHasEvent,
     syncUntilHasMessage,
     syncUntilHasMessages,
@@ -359,43 +358,41 @@ describe("Message errors", () => {
 
     describe("Message errors for peers that are in deletion", () => {
         let relationshipIdToClient2: string;
-        let relationshipIdToClient5: string;
 
         beforeAll(async () => {
             relationshipIdToClient2 = (await client1.transport.relationships.getRelationshipByAddress({ address: client2.address })).value.id;
-            relationshipIdToClient5 = (await ensureActiveRelationship(client1.transport, client5.transport)).id;
+            await ensureActiveRelationship(client1.transport, client5.transport);
         });
 
         afterEach(async () => {
-            for (const client of [client2, client5]) {
-                const activeIdentityDeletionProcess = await client.transport.identityDeletionProcesses.getActiveIdentityDeletionProcess();
-                if (!activeIdentityDeletionProcess.isSuccess) {
-                    return;
-                }
-                let abortResult;
-                if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
-                    abortResult = await client.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
-                } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-                    abortResult = await client.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
-                }
-                await syncUntilHasEvent(client1, PeerDeletionCancelledEvent);
-                if (abortResult?.isError) throw abortResult.error;
+            const activeIdentityDeletionProcess = await client2.transport.identityDeletionProcesses.getActiveIdentityDeletionProcess();
+            if (!activeIdentityDeletionProcess.isSuccess) {
+                return;
             }
+            let abortResult;
+            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+                abortResult = await client2.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
+            } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
+                abortResult = await client2.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
+            }
+            await syncUntilHasEvent(client1, PeerDeletionCancelledEvent);
+            if (abortResult?.isError) throw abortResult.error;
         });
 
         test("should throw correct error for Messages whose content is not a Notification if there are recipients in deletion", async () => {
             await client2.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
             await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient2);
-            await client1.eventBus.waitForRunningEventHandlers();
 
-            await client5.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-            await syncUntilHasEvent(client1, PeerToBeDeletedEvent, (e) => e.data.id === relationshipIdToClient5);
-            await client1.eventBus.waitForRunningEventHandlers();
-
-            const result = await sendMessageToMultipleRecipients(client1.transport, [client2.address, client5.address]);
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client2.address],
+                content: {
+                    "@type": "ArbitraryMessageContent",
+                    value: "aString"
+                }
+            });
             expect(result).toBeAnError(/.*/, "error.runtime.messages.peerIsInDeletion");
             expect(result.error.message).toBe(
-                `The Message cannot be sent as the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}', '${client5.address.toString()}'. However, please note that Messages whose content is a Notification can be sent to recipients in deletion.`
+                `The Message cannot be sent as the recipient(s) with the following address(es) being in deletion: '${client2.address.toString()}'. However, please note that Messages whose content is a Notification can be sent to recipients in deletion.`
             );
         });
 
