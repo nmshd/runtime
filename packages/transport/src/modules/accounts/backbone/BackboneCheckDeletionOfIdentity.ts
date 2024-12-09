@@ -1,4 +1,4 @@
 export interface BackboneCheckDeletionOfIdentityResponse {
     isDeleted: boolean;
-    deletionDate?: string;
+    deletionDate: string | null;
 }
