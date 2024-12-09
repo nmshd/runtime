@@ -15,6 +15,7 @@ export interface GetRelationshipTemplatesQuery {
     createdByDevice?: string | string[];
     maxNumberOfAllocations?: string | string[];
     forIdentity?: string | string[];
+    passwordProtection?: string | string[];
     "passwordProtection.password"?: string | string[];
     "passwordProtection.passwordIsPin"?: "true" | "!";
 }
@@ -40,6 +41,7 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             [nameof<RelationshipTemplateDTO>((r) => r.createdByDevice)]: true,
             [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: true,
             [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: true,
+            [nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)]: true,
             [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.password`]: true,
             [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordIsPin`]: true
         },
@@ -54,7 +56,8 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>(
                 (t) => t.maxNumberOfAllocations
             )}`,
-            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.forIdentity)}`
+            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.forIdentity)}`,
+            [nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)]: nameof<RelationshipTemplate>((r) => r.passwordProtection)
         },
         custom: {
             [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string) => {
@@ -68,7 +71,7 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
                 }
                 if (input === "!") {
                     query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = {
-                        $in: ["pw", undefined]
+                        $or: [{ $exists: false }, { $eq: "pw" }]
                     };
                 }
             }

@@ -292,6 +292,11 @@ describe("RelationshipTemplates query", () => {
             .addStringSet("createdByDevice")
             .addNumberSet("maxNumberOfAllocations")
             .addStringSet("forIdentity")
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection",
+                value: ""
+            })
             .addStringSet("passwordProtection.password")
             .addSingleCondition({
                 expectedResult: true,
