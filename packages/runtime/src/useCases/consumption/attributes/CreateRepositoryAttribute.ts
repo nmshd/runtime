@@ -4,7 +4,8 @@ import { AttributeValues } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
-import { ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { IValidator } from "../../common/validation/IValidator";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface CreateRepositoryAttributeRequest {
@@ -16,9 +17,29 @@ export interface CreateRepositoryAttributeRequest {
     };
 }
 
-class Validator extends SchemaValidator<CreateRepositoryAttributeRequest> {
-    public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("CreateRepositoryAttributeRequest"));
+class Validator implements IValidator<CreateRepositoryAttributeRequest> {
+    public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
+
+    public validate(value: CreateRepositoryAttributeRequest): Promise<ValidationResult> | ValidationResult {
+        const requestSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema("CreateRepositoryAttributeRequest"));
+        const requestValidationResult = requestSchemaValidator.validate(value);
+        if (requestValidationResult.isInvalid()) return requestValidationResult;
+
+        const valueType = value.content.value["@type"];
+        if (!AttributeValues.Identity.TYPE_NAMES.includes(valueType)) {
+            const validationResult = new ValidationResult();
+
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue("content.value.@type must match one of the allowed attribute value types for IdentityAttributes"),
+                    "@type"
+                )
+            );
+            return validationResult;
+        }
+
+        const contentSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema(`${valueType}JSON`));
+        return contentSchemaValidator.validate(value.content.value);
     }
 }
 
