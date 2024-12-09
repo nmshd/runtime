@@ -7,7 +7,7 @@ export class IdentityDeletionProcessClient extends RESTClientAuthenticate {
     protected override _logDirective = RESTClientLogDirective.LogResponse;
 
     public async initiateIdentityDeletionProcess(value: BackbonePostIdentityDeletionProcessRequest): Promise<ClientResult<BackboneIdentityDeletionProcess>> {
-        return await this.post<BackboneIdentityDeletionProcess>("/api/v1/Identities/Self/DeletionProcesses", value, {});
+        return await this.post<BackboneIdentityDeletionProcess>("/api/v1/Identities/Self/DeletionProcesses", value);
     }
 
     public async getIdentityDeletionProcess(identityDeletionProcessId: string): Promise<ClientResult<BackboneIdentityDeletionProcess>> {

@@ -145,7 +145,7 @@ describe("Relationship decomposition due to Identity deletion", function () {
         await connection.close();
     });
 
-    test("deletion of a previously active Relationship should be proposed after the peer is deleted", async function () {
+    test("status of a previously active Relationship should be set to 'DeletionProposed' after the peer is deleted", async function () {
         const activeRelationship = await sender.relationships.getActiveRelationshipToIdentity(recipient.identity.address);
         expect(activeRelationship?.status).toBe(RelationshipStatus.Active);
 
