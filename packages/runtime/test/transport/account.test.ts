@@ -1,4 +1,3 @@
-import { sleep } from "@js-soft/ts-utils";
 import { CoreDate } from "@nmshd/core-types";
 import { DateTime } from "luxon";
 import { DatawalletSynchronizedEvent, DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
@@ -229,15 +228,12 @@ describe("CheckDeletionOfIdentity", () => {
     });
 
     test("check deletion of Identity that has IdentityDeletionProcess with expired grace period", async () => {
-        const identityDeletionProcess = (await sTransportServices.identityDeletionProcesses.initiateIdentityDeletionProcess()).value;
-
-        await sleep(10000);
+        const identityDeletionProcess =
+            await sTransportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(0);
 
         const result = await sTransportServices.account.checkDeletionOfIdentity();
         expect(result.isSuccess).toBe(true);
         expect(result.value.isDeleted).toBe(true);
-        expect(result.value.deletionDate).toBe(identityDeletionProcess.gracePeriodEndsAt);
+        expect(result.value.deletionDate).toBe(identityDeletionProcess.cache!.gracePeriodEndsAt!.toString());
     });
-
-    // TODO: test for deleted Identity
 });

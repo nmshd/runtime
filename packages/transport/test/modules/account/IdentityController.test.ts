@@ -1,12 +1,12 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { sleep } from "@js-soft/ts-utils";
 import { AccountController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("IdentityController", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
-    let account: AccountController;
+    let account1: AccountController;
+    let account2: AccountController;
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
@@ -14,38 +14,36 @@ describe("IdentityController", function () {
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
-        account = accounts[0];
-        await account.init();
+        [account1, account2] = await TestUtil.provideAccounts(transport, 2);
+        await account1.init();
+        await account2.init();
     });
 
     afterAll(async function () {
-        await account.close();
+        await account1.close();
+        await account2.close();
         await connection.close();
     });
 
-    test("check deletion of Identity that is not deleted", async function () {
-        const result = await account.identity.checkDeletionOfIdentity();
+    test("should return Identity is not deleted for active Identity", async function () {
+        const result = await account1.identity.checkDeletionOfIdentity();
         expect(result.value.isDeleted).toBe(false);
         expect(result.value.deletionDate).toBeUndefined();
     });
 
-    test("check deletion of Identity having IdentityDeletionProcess with expired grace period", async function () {
-        const identityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess(0.000001);
-        await sleep(1000);
+    test("should return gracePeriodEndsAt for Identity having IdentityDeletionProcess with expired grace period", async function () {
+        const identityDeletionProcess = await account1.identityDeletionProcess.initiateIdentityDeletionProcess(0);
 
-        const result = await account.identity.checkDeletionOfIdentity();
+        const result = await account1.identity.checkDeletionOfIdentity();
         expect(result.value.isDeleted).toBe(true);
         expect(result.value.deletionDate).toBe(identityDeletionProcess.cache!.gracePeriodEndsAt!.toString());
     });
 
-    test.skip("check deletion of Identity that is deleted", async function () {
-        const identityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess(0.000001);
-        await sleep(1000);
-
+    test("should return actual deletionDate for Identity that is deleted", async function () {
+        const identityDeletionProcess = await account2.identityDeletionProcess.initiateIdentityDeletionProcess(0);
         await TestUtil.runDeletionJob();
 
-        const result = await account.identity.checkDeletionOfIdentity();
+        const result = await account2.identity.checkDeletionOfIdentity();
         expect(result.value.isDeleted).toBe(true);
         expect(result.value.deletionDate).toBeDefined();
         expect(result.value.deletionDate).not.toBe(identityDeletionProcess.cache!.gracePeriodEndsAt!.toString());
