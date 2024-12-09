@@ -15,7 +15,7 @@ export interface GetRelationshipTemplatesQuery {
     createdByDevice?: string | string[];
     maxNumberOfAllocations?: string | string[];
     forIdentity?: string | string[];
-    passwordProtection?: string | string[];
+    passwordProtection?: "" | "!";
     "passwordProtection.password"?: string | string[];
     "passwordProtection.passwordIsPin"?: "true" | "!";
 }

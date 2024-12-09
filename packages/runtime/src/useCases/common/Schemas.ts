@@ -22773,6 +22773,13 @@ export const GetRelationshipTemplatesRequest: any = {
                         }
                     ]
                 },
+                "passwordProtection": {
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "!"
+                    ]
+                },
                 "passwordProtection.password": {
                     "anyOf": [
                         {
