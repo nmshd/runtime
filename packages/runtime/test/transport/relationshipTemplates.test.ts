@@ -297,6 +297,11 @@ describe("RelationshipTemplates query", () => {
                 key: "passwordProtection",
                 value: ""
             })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection",
+                value: "!"
+            })
             .addStringSet("passwordProtection.password")
             .addSingleCondition({
                 expectedResult: true,
@@ -357,7 +362,17 @@ describe("RelationshipTemplates query", () => {
             .addDateSet("expiresAt")
             .addStringSet("createdBy")
             .addStringSet("createdByDevice")
-            .addNumberSet("maxNumberOfAllocations");
+            .addNumberSet("maxNumberOfAllocations")
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection",
+                value: ""
+            })
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection",
+                value: "!"
+            });
 
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Peer }));
     });
