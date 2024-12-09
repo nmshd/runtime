@@ -1,6 +1,6 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { CachedRelationshipTemplate, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { CachedRelationshipTemplate, PasswordProtection, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { RelationshipTemplateDTO } from "../../../types";
@@ -15,6 +15,9 @@ export interface GetRelationshipTemplatesQuery {
     createdByDevice?: string | string[];
     maxNumberOfAllocations?: string | string[];
     forIdentity?: string | string[];
+    passwordProtection?: "" | "!";
+    "passwordProtection.password"?: string | string[];
+    "passwordProtection.passwordIsPin"?: "true" | "!";
 }
 
 export interface GetRelationshipTemplatesRequest {
@@ -37,7 +40,10 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             [nameof<RelationshipTemplateDTO>((r) => r.createdBy)]: true,
             [nameof<RelationshipTemplateDTO>((r) => r.createdByDevice)]: true,
             [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: true,
-            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: true
+            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: true,
+            [nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)]: true,
+            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.password`]: true,
+            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordIsPin`]: true
         },
         alias: {
             [nameof<RelationshipTemplateDTO>((r) => r.isOwn)]: nameof<RelationshipTemplate>((r) => r.isOwn),
@@ -50,7 +56,23 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>(
                 (t) => t.maxNumberOfAllocations
             )}`,
-            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.forIdentity)}`
+            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.forIdentity)}`,
+            [nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)]: nameof<RelationshipTemplate>((r) => r.passwordProtection)
+        },
+        custom: {
+            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string) => {
+                query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.password)}`] = input;
+            },
+            [`${nameof<RelationshipTemplateDTO>((t) => t.passwordProtection)}.passwordIsPin`]: (query: any, input: string) => {
+                if (input === "true") {
+                    query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = {
+                        $regex: "^pin"
+                    };
+                }
+                if (input === "!") {
+                    query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
+                }
+            }
         }
     });
 
