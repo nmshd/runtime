@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO, LocalRequestDTO } from "../../../types";
+import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
     ChangeDefaultRepositoryAttributeRequest,
     ChangeDefaultRepositoryAttributeUseCase,
@@ -30,6 +30,7 @@ import {
     ExecuteThirdPartyRelationshipAttributeQueryRequest,
     ExecuteThirdPartyRelationshipAttributeQueryUseCase,
     GetAttributeRequest,
+    GetAttributeTagCollectionUseCase,
     GetAttributeUseCase,
     GetAttributesRequest,
     GetAttributesUseCase,
@@ -84,7 +85,8 @@ export class AttributesFacade {
         @Inject private readonly deletePeerSharedAttributeAndNotifyOwnerUseCase: DeletePeerSharedAttributeAndNotifyOwnerUseCase,
         @Inject private readonly deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
-        @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase
+        @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
+        @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase
     ) {}
 
     public async createRepositoryAttribute(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
@@ -198,5 +200,9 @@ export class AttributesFacade {
 
     public async deleteSharedAttributesForRejectedOrRevokedRelationship(request: DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest): Promise<Result<void>> {
         return await this.deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase.execute(request);
+    }
+
+    public async getAttributeTagCollection(): Promise<Result<AttributeTagCollectionDTO>> {
+        return await this.getAttributeTagCollectionUseCase.execute();
     }
 }

@@ -115,6 +115,8 @@ export * from "./sync/DatawalletModificationsProcessor";
 export * from "./sync/local/DatawalletModification";
 export * from "./sync/SyncController";
 export * from "./sync/SynchronizedCollection";
+export * from "./tags/backbone/BackboneGetTagCollection";
+export * from "./tags/backbone/TagClient";
 export * from "./tokens/AnonymousTokenController";
 export * from "./tokens/backbone/BackboneGetTokens";
 export * from "./tokens/backbone/BackbonePostTokens";
