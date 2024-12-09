@@ -3,10 +3,13 @@ import { IDatabaseCollection, IDatabaseConnection } from "@js-soft/docdb-access-
 import { DataEvent, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
     AcceptResponseItem,
+    CreateAttributeRequestItem,
     DeleteAttributeRequestItem,
     IRequest,
     IResponse,
     IdentityAttribute,
+    ProposeAttributeRequestItem,
+    ReadAttributeRequestItem,
     RelationshipTemplateContent,
     Request,
     RequestItemGroup,
@@ -19,6 +22,7 @@ import { CoreIdHelper, IConfigOverwrite, IMessage, IRelationshipTemplate, Messag
 import {
     ConsumptionController,
     ConsumptionIds,
+    CreateAttributeRequestItemProcessor,
     DecideRequestParametersJSON,
     DeleteAttributeRequestItemProcessor,
     ICheckPrerequisitesOfIncomingRequestParameters,
@@ -37,6 +41,8 @@ import {
     LocalRequestStatus,
     LocalResponse,
     OutgoingRequestsController,
+    ProposeAttributeRequestItemProcessor,
+    ReadAttributeRequestItemProcessor,
     ReceivedIncomingRequestParameters,
     RequestItemConstructor,
     RequestItemProcessorConstructor,
@@ -86,6 +92,9 @@ export class RequestsTestsContext {
             context.consumptionController,
             new Map<RequestItemConstructor, RequestItemProcessorConstructor>([
                 [TestRequestItem, TestRequestItemProcessor],
+                [CreateAttributeRequestItem, CreateAttributeRequestItemProcessor],
+                [ReadAttributeRequestItem, ReadAttributeRequestItemProcessor],
+                [ProposeAttributeRequestItem, ProposeAttributeRequestItemProcessor],
                 [DeleteAttributeRequestItem, DeleteAttributeRequestItemProcessor]
             ])
         );
